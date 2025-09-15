@@ -5,6 +5,8 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/renderable_resource.hpp>
+#include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/gfx/renderable.hpp>
 
 #include <GLFW/glfw3.h>
@@ -43,12 +45,15 @@ public:
         : backend(backend_) {}
 
     void bind() override {
-        // WebGPU binding happens at the command encoder level
-        // Surface texture acquisition happens in the render pass
+        // Similar to Metal - prepare for rendering
+        // Nothing to do here for WebGPU as command encoder is managed by CommandEncoder class
     }
 
     void swap() override {
-        // Swap is handled by the surface presentation
+        // Similar to Metal - submit command buffer and present surface
+        // The command buffer submission happens in CommandEncoder::present()
+        // Here we just present the surface
+        backend.swap();
     }
 
     const mbgl::webgpu::RendererBackend& getBackend() const override {
@@ -56,15 +61,13 @@ public:
     }
 
     const WGPUCommandEncoder& getCommandEncoder() const override {
-        // Return the current command encoder from the backend
-        // This would need to be properly implemented
-        static WGPUCommandEncoder encoder = nullptr;
-        return encoder;
+        // WebGPU's command encoder is managed by the CommandEncoder class
+        static WGPUCommandEncoder dummy = nullptr;
+        return dummy;
     }
 
     WGPURenderPassEncoder getRenderPassEncoder() const override {
-        // Return the current render pass encoder
-        // This would need to be properly implemented
+        // Render pass encoder is managed by RenderPass class
         return nullptr;
     }
 

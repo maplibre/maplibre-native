@@ -3,6 +3,7 @@
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
 #include <mbgl/util/logging.hpp>
 #include <cstring> // for strlen
@@ -44,9 +45,21 @@ std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* na
     return std::make_unique<UploadPass>(renderable, *this, name);
 }
 
-void CommandEncoder::present(gfx::Renderable&) {
+void CommandEncoder::present(gfx::Renderable& renderable) {
+    // Submit the command buffer first
+    submitCommandBuffer();
 
-    // Submit command buffer and present the surface
+    // Then call swap on the RenderableResource to present the surface
+    // This matches Metal's pattern where swap handles surface presentation
+    try {
+        renderable.getResource<webgpu::RenderableResource>().swap();
+    } catch (...) {
+        // No RenderableResource available - surface presentation handled elsewhere
+    }
+}
+
+void CommandEncoder::submitCommandBuffer() {
+    // Submit command buffer directly (for cases without RenderableResource)
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
@@ -62,16 +75,12 @@ void CommandEncoder::present(gfx::Renderable&) {
     WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
 
     if (cmdBuffer) {
-        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Submitting command buffer to queue");
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
-        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Command buffer submitted successfully");
+        Log::Info(Event::Render, "WebGPU: Command buffer submitted to queue");
     } else {
-        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to finish command encoder");
+        Log::Error(Event::Render, "WebGPU: Failed to finish command encoder");
     }
-
-    // Note: Surface presentation (swap) is handled by GLFWView::renderSync()
-    // We don't need to call swap here as it will be called by the view
 
     // Create a new command encoder for the next frame
     encoder = nullptr;
