@@ -60,13 +60,17 @@ public:
         : db(db_) {
         const int error = sqlite3_extended_result_codes(db, true);
         if (error != SQLITE_OK) {
-
+            mbgl::Log::Warning(mbgl::Event::Database,
+                               error,
+                               std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db));
         }
     }
 
     ~DatabaseImpl() {
         const int error = sqlite3_close(db);
         if (error != SQLITE_OK) {
+            mbgl::Log::Error(
+                mbgl::Event::Database, error, std::string("Failed to close database: ") + sqlite3_errmsg(db));
         }
     }
 
@@ -105,6 +109,7 @@ public:
 
 #ifndef NDEBUG
 void logSqlMessage(void*, const int err, const char* msg) {
+    mbgl::Log::Record(mbgl::EventSeverity::Debug, mbgl::Event::Database, std::to_string(err) + msg);
 }
 #endif
 

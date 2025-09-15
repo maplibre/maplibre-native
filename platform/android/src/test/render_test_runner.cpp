@@ -44,8 +44,12 @@ void android_main(struct android_app* app) {
                     source->process(app, source);
                 }
 
+                mbgl::Log::Info(mbgl::Event::General,
+                                "Current finished tests number is '" + std::to_string(++finishedTestCount) + "'");
             };
+            mbgl::Log::Info(mbgl::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "'");
             bool result = mbgl::runRenderTests(argv.size() - 1, argv.data(), testStatus) == 0;
+            mbgl::Log::Info(mbgl::Event::General, "End running RenderTestRunner with manifest: '" + manifest + "'");
             return result;
         };
 
@@ -56,6 +60,7 @@ void android_main(struct android_app* app) {
         auto result = runTestWithManifest("/metrics/android-render-test-runner-metrics.json");
         result = runTestWithManifest("/metrics/android-render-test-runner-style.json") && result;
 #endif
+        mbgl::Log::Info(mbgl::Event::General, "All tests are finished!");
         changeState(env, app, result);
     }
     while (true) {
@@ -69,6 +74,7 @@ void android_main(struct android_app* app) {
         }
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
+            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
             return;
         }
     }

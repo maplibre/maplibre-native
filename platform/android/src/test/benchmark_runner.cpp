@@ -22,7 +22,9 @@ void runner() {
     }
     argv.push_back(nullptr);
 
+    mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
     int status = mbgl::runBenchmark(argv.size(), argv.data());
+    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '%d'", status);
     running = false;
     ALooper_wake(looper);
 }
@@ -63,6 +65,7 @@ void android_main(struct android_app* app) {
         }
 
         if (!running && !done) {
+            mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner done");
             done = true;
             benchmarkThread.join();
             changeState(env, app, true);
@@ -70,6 +73,7 @@ void android_main(struct android_app* app) {
 
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
+            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
             return;
         }
     }
