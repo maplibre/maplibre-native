@@ -12,9 +12,11 @@
       "generator": "Xcode",
       "description": "Create Xcode project for iOS",
       "binaryDir": "${sourceDir}/build-ios",
+      "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF"
       }
@@ -27,6 +29,7 @@
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.3",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF",
         "CMAKE_BUILD_TYPE": "Debug",

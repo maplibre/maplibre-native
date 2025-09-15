@@ -54,7 +54,8 @@ public:
     int32_t getGraphicsQueueIndex() const { return graphicsQueueIndex; }
     int32_t getPresentQueueIndex() const { return presentQueueIndex; }
 
-    template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
+    template <typename T>
+        requires vk::isVulkanHandleType<T>::value
     void setDebugName([[maybe_unused]] const T& object, [[maybe_unused]] const std::string& name) const {
 #ifdef ENABLE_VULKAN_VALIDATION
         if (!debugUtilsEnabled) return;

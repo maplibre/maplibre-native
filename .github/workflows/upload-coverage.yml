@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload coverage report
         if: '!cancelled()'
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
           override_commit: ${{ github.event.workflow_run.head_sha }}
           override_pr: ${{ github.event.workflow_run.pull_requests[0].number }}

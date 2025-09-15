@@ -135,10 +135,10 @@ void AnnotationManager::update(const AnnotationID& id, const FillAnnotation& ann
 
 void AnnotationManager::remove(const AnnotationID& id) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    if (symbolAnnotations.find(id) != symbolAnnotations.end()) {
+    if (symbolAnnotations.contains(id)) {
         symbolTree.remove(symbolAnnotations.at(id));
         symbolAnnotations.erase(id);
-    } else if (shapeAnnotations.find(id) != shapeAnnotations.end()) {
+    } else if (shapeAnnotations.contains(id)) {
         auto it = shapeAnnotations.find(id);
         (void)*style.get().impl->removeLayer(it->second->layerID);
         shapeAnnotations.erase(it);
