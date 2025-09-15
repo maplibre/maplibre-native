@@ -69,7 +69,9 @@ void runner(const std::string& gtestOutput) {
     }
     argv.push_back(nullptr);
 
+    mbgl::Log::Info(mbgl::Event::General, "Start TestRunner");
     int status = mbgl::runTests(argv.size(), argv.data());
+    mbgl::Log::Info(mbgl::Event::General, "TestRunner finished with status: '" + std::to_string(status) + "'");
     running = false;
     success = (status == 0);
     ALooper_wake(looper);
@@ -110,6 +112,7 @@ void android_main(struct android_app* app) {
 
         if (!running) {
             std::call_once(done, [&] {
+                mbgl::Log::Info(mbgl::Event::General, "TestRunner done");
                 runnerThread.join();
                 changeState(env, app, success);
             });
@@ -117,6 +120,7 @@ void android_main(struct android_app* app) {
 
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
+            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
             return;
         }
     }

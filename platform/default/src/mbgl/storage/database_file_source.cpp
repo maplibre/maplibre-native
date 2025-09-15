@@ -13,7 +13,6 @@
 #include <mbgl/util/thread.hpp>
 
 #include <map>
-#include <thread>
 #include <utility>
 
 namespace mbgl {
@@ -35,10 +34,7 @@ public:
         } else if (!offlineResponse->isUsable()) {
             offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
                                                                        "Cached resource is unusable");
-        } else {
-
         }
-
         req.invoke(&FileSourceRequest::setResponse, *offlineResponse);
     }
 

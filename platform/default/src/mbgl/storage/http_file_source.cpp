@@ -312,6 +312,7 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
 
 HTTPRequest::~HTTPRequest() {
     if (curl_multi_remove_handle(context->multi, handle) != CURLM_OK) {
+        mbgl::Log::Error(mbgl::Event::HttpRequest, "Error removing curl multi handle");
     }
 
     context->returnHandle(handle);
