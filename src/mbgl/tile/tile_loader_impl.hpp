@@ -5,12 +5,8 @@
 #include <mbgl/tile/tile_loader.hpp>
 #include <mbgl/util/async_request.hpp>
 #include <mbgl/util/tileset.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/actor/scheduler.hpp>
 
 #include <cassert>
-#include <thread>
 
 namespace mbgl {
 
@@ -41,8 +37,6 @@ TileLoader<T>::TileLoader(T& tile_,
         tile.setError(getCantLoadTileError());
         return;
     }
-
-
 
     if (fileSource->supportsCacheOnlyRequests()) {
         // When supported, the first request is always std::optional, even if
@@ -114,17 +108,7 @@ void TileLoader<T>::loadFromCache() {
     tile.onTileAction(TileOperation::RequestedFromCache);
 
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
-
-    // Check if scheduler is available
-    auto* scheduler = mbgl::Scheduler::GetCurrent();
-    if (!scheduler) {
-    } else {
-    }
-
-    // Store the URL in the lambda to avoid accessing 'this' if it's destroyed
-    auto capturedUrl = resource.url;
-    request = fileSource->request(resource, [this, shared_{shared}, capturedUrl](const Response& res) {
-
+    request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
         do {
             if (shared_->requestLock.try_lock_shared()) {
                 std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
@@ -145,14 +129,11 @@ void TileLoader<T>::loadFromCache() {
                     resource.priorEtag = res.etag;
                     resource.priorData = res.data;
                 } else {
-
                     loadedData(res, Resource::LoadingMethod::CacheOnly);
                 }
 
-
                 if (necessity == TileNecessity::Required) {
                     loadFromNetwork();
-                } else {
                 }
                 break;
             }
@@ -178,7 +159,6 @@ void TileLoader<T>::makeOptional() {
 
 template <typename T>
 void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod method) {
-
     if (res.error && res.error->reason != Response::Error::Reason::NotFound) {
         tile.setError(std::make_exception_ptr(std::runtime_error(res.error->message)));
         tile.onTileAction(TileOperation::Error);
@@ -222,7 +202,6 @@ void TileLoader<T>::loadFromNetwork() {
                                                          : Resource::StoragePolicy::Permanent;
 
     request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
-
         do {
             if (shared_->requestLock.try_lock_shared()) {
                 std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);

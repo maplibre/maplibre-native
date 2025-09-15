@@ -246,7 +246,6 @@ void GeometryTile::setError(std::exception_ptr err) {
 void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     MLN_TRACE_FUNC();
 
-
     if (obsolete) {
         return;
     }
@@ -334,7 +333,6 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
 
 void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t resultCorrelationID) {
     MLN_TRACE_FUNC();
-
 
     loaded = true;
     renderable = true;
@@ -533,8 +531,7 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
 
     // No source layers, specified, nothing to do
     if (!options.sourceLayers) {
-        // Log::Warning(Event::General, "At least one sourceLayer required");
-        // Logging disabled to prevent heap corruption in multi-threaded context
+        Log::Warning(Event::General, "At least one sourceLayer required");
         return;
     }
 
