@@ -209,9 +209,9 @@ void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
-    std::stringstream uploadCallMsg;
-    uploadCallMsg << "WebGPU Drawable::upload called for " << getName();
-    Log::Info(Event::Render, uploadCallMsg.str());
+    // std::stringstream uploadCallMsg;
+    // uploadCallMsg << "WebGPU Drawable::upload called for " << getName();
+    // Log::Info(Event::Render, uploadCallMsg.str());
 
     if (isCustom) {
         return;
@@ -329,7 +329,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
-    Log::Info(Event::Render, "WebGPU Drawable::draw called for " + getName());
+    // Log::Info(Event::Render, "WebGPU Drawable::draw called for " + getName());
 
     if (isCustom) {
         return;
@@ -484,14 +484,14 @@ void Drawable::draw(PaintParameters& parameters) const {
         // Get render pipeline similar to Metal's getRenderPipelineState
         // WebGPU doesn't have the same descriptor pattern as Metal
         // We'll use the simpler overload that doesn't need a renderable
-        Log::Info(Event::Render, "Creating render pipeline with " + std::to_string(vertexLayouts.size()) + " vertex layouts");
+        // Log::Info(Event::Render, "Creating render pipeline with " + std::to_string(vertexLayouts.size()) + " vertex layouts");
         impl->pipelineState = shaderWebGPU.getRenderPipeline(
             vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
             vertexLayouts.size());
         if (!impl->pipelineState) {
             Log::Error(Event::Render, "getRenderPipeline returned null");
         } else {
-            Log::Info(Event::Render, "Pipeline created successfully: " + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+            // Log::Info(Event::Render, "Pipeline created successfully: " + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
         }
     }
 
@@ -500,9 +500,9 @@ void Drawable::draw(PaintParameters& parameters) const {
             Log::Error(Event::Render, "renderPassEncoder is null!");
             return;
         }
-        Log::Info(Event::Render, "Setting pipeline state: encoder=" +
-            std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
-            ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+        // Log::Info(Event::Render, "Setting pipeline state: encoder=" +
+        //     std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
+        //     ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
     } else {
         Log::Error(Event::Render, "Failed to create render pipeline state");
