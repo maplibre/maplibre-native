@@ -162,11 +162,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
-
         removeAllDrawables();
         return;
-}
-
+    }
 
     std::unique_ptr<gfx::DrawableBuilder> fillBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
@@ -196,7 +194,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-
             removeTile(renderPass, tileID);
             continue;
         }
@@ -326,8 +323,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
 
-            auto drawables = builder.clearDrawables();
-            for (auto& drawable : drawables) {
+            for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<size_t>(type));
                 drawable->setLayerTweaker(layerTweaker);
