@@ -2,8 +2,6 @@
 
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/logging.hpp>
-#include <thread>
 
 namespace mbgl {
 
@@ -24,16 +22,11 @@ void FileSourceRequest::onCancel(std::function<void()>&& callback) {
 }
 
 void FileSourceRequest::setResponse(const Response& response) {
-
     // Copy, because calling the callback will sometimes self
     // destroy this object. We cannot move because this method
     // can be called more than once.
     auto callback = responseCallback;
-    if (callback) {
-
-        callback(response);
-    } else {
-    }
+    callback(response);
 }
 
 ActorRef<FileSourceRequest> FileSourceRequest::actor() {

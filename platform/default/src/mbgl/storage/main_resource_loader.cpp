@@ -7,13 +7,11 @@
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/client_options.hpp>
-#include <mbgl/util/logging.hpp>
 #include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread.hpp>
 
 #include <cassert>
 #include <map>
-#include <thread>
 
 namespace mbgl {
 
@@ -33,15 +31,13 @@ public:
           pmtilesFileSource(std::move(pmtilesFileSource_)) {}
 
     void request(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
-        auto callback = [ref, resource](const Response& res) {
-
+        auto callback = [ref](const Response& res) {
             ref.invoke(&FileSourceRequest::setResponse, res);
         };
 
         auto requestFromNetwork = [=, this](const Resource& res,
                                             std::unique_ptr<AsyncRequest> parent) -> std::unique_ptr<AsyncRequest> {
             if (!onlineFileSource || !onlineFileSource->canRequest(resource)) {
-
                 return parent;
             }
 
