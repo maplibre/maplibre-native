@@ -80,7 +80,9 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         const auto& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get(), dispatcher);
 
         if (std::find(presentModes.begin(), presentModes.end(), presentMode) == presentModes.end()) {
-
+            mbgl::Log::Error(
+                mbgl::Event::Render,
+                "Requested PresentModeKHR not available (" + std::to_string(static_cast<int>(presentMode)) + ")");
 
             presentMode = vk::PresentModeKHR::eFifo;
         }
@@ -181,6 +183,7 @@ void SurfaceRenderableResource::initDepthStencil() {
     });
 
     if (formatIt == formats.end()) {
+        mbgl::Log::Error(mbgl::Event::Render, "Depth/Stencil format not available");
         return;
     }
 
@@ -214,6 +217,7 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
     if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan depth texture allocation failed");
         return;
     }
 

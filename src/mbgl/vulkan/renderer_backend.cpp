@@ -44,6 +44,7 @@
     {                                                 \
         char buffer[4096];                            \
         sprintf(buffer, format, __VA_ARGS__);         \
+        mbgl::Log::Info(mbgl::Event::Render, buffer); \
     }
 
 #endif
@@ -158,6 +159,7 @@ std::vector<const char*> RendererBackend::getDebugExtensions() {
         if (debugReportAvailable) {
             extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
         } else {
+            mbgl::Log::Error(mbgl::Event::Render, "No debugging extension available");
         }
     }
 
@@ -257,9 +259,9 @@ void RendererBackend::triggerFrameCapture([[maybe_unused]] uint32_t frameCount, 
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                            VkDebugUtilsMessageTypeFlagsEXT,
-                                                           [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+                                                           const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
                                                            void*) {
-    [[maybe_unused]] EventSeverity mbglSeverity = EventSeverity::Debug;
+    EventSeverity mbglSeverity = EventSeverity::Debug;
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -282,6 +284,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSe
             return VK_FALSE;
     }
 
+    mbgl::Log::Record(mbglSeverity, mbgl::Event::Render, callbackData->pMessage);
 
     return VK_FALSE;
 }
@@ -294,7 +297,7 @@ static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
                                                  const char* pLayerPrefix,
                                                  const char* pMessage,
                                                  [[maybe_unused]] void* pUserData) {
-    [[maybe_unused]] EventSeverity mbglSeverity = EventSeverity::Debug;
+    EventSeverity mbglSeverity = EventSeverity::Debug;
 
     if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
         mbglSeverity = EventSeverity::Info;
@@ -311,6 +314,7 @@ static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
     const std::string message = "[" + vk::to_string(vk::DebugReportObjectTypeEXT(objectType)) + "]" + "[code - " +
                                 std::to_string(messageCode) + "]" + "[layer - " + pLayerPrefix + "]" + pMessage;
 
+    mbgl::Log::Record(mbglSeverity, mbgl::Event::Render, message);
 
     return VK_FALSE;
 }
@@ -338,6 +342,7 @@ void RendererBackend::initDebug() {
         debugUtilsCallback = instance->createDebugUtilsMessengerEXTUnique(createInfo, nullptr, dispatcher);
 
         if (!debugUtilsCallback) {
+            mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug utils callback");
         }
     } else {
         const vk::DebugReportFlagsEXT flags = vk::DebugReportFlagsEXT() | vk::DebugReportFlagBitsEXT::eDebug |
@@ -352,6 +357,7 @@ void RendererBackend::initDebug() {
         debugReportCallback = instance->createDebugReportCallbackEXTUnique(createInfo, nullptr, dispatcher);
 
         if (!debugReportCallback) {
+            mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug report callback");
         }
     }
 #endif
@@ -403,6 +409,7 @@ void RendererBackend::initInstance() {
     if (layersAvailable) {
         createInfo.setPEnabledLayerNames(layers);
     } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan layers not found");
     }
 
     auto extensions = getInstanceExtensions();
@@ -431,6 +438,7 @@ void RendererBackend::initInstance() {
     if (extensionsAvailable) {
         createInfo.setPEnabledExtensionNames(extensions);
     } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan extensions not found");
     }
 
     instance = vk::createInstanceUnique(createInfo, nullptr, dispatcher);
@@ -564,12 +572,14 @@ void RendererBackend::initDevice() {
         // physicalDeviceProperties.limits.lineWidthRange;
         // physicalDeviceProperties.limits.lineWidthGranularity;
     } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: wideLines");
     }
 #endif
 
     if (supportedDeviceFeatures.samplerAnisotropy) {
         physicalDeviceFeatures.setSamplerAnisotropy(true);
     } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: samplerAnisotropy");
     }
 
     auto createInfo = vk::DeviceCreateInfo()

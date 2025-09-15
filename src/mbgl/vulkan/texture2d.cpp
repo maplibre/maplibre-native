@@ -175,6 +175,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
         return;
     }
 
@@ -322,6 +323,7 @@ void Texture2D::createTexture() {
 
     imageAllocation = std::make_shared<ImageAllocation>(backend.getAllocator());
     if (!imageAllocation->create(allocCreateInfo, imageCreateInfo)) {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture allocation failed");
         return;
     }
 
@@ -546,6 +548,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
 
         SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
         if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
+            mbgl::Log::Error(mbgl::Event::Render, "Vulkan readImage staging buffer allocation failed");
             return nullptr;
         }
 
