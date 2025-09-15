@@ -3,13 +3,14 @@
 #include <memory>
 #include <cstdint>
 
-// When using Dawn, include its headers instead of defining our own types
-#ifdef MLN_WITH_DAWN
+// Always include Dawn headers since we're building with Dawn
 #include <webgpu/webgpu.h>
-#else
+
+// Only define additional types if needed for compatibility
+#ifndef MLN_WITH_DAWN
 
 // Check if WebGPU headers are already included (Dawn or wgpu)
-#if !defined(WEBGPU_H_) && !defined(DAWN_WEBGPU_H)
+#if !defined(WEBGPU_H_) && !defined(DAWN_WEBGPU_H) && !defined(WGPU_H)
 // WebGPU C API types
 // These are the standard WebGPU types that both Dawn and wgpu implement
 // Only define these if the actual WebGPU headers are not available

@@ -1,6 +1,8 @@
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/context_impl.hpp>
+#include <mbgl/webgpu/vertex_buffer_resource.hpp>
+#include <mbgl/util/geometry.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <array>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/drawable_builder.hpp>
@@ -9,26 +11,6 @@
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/shaders/webgpu/shader_program.hpp>
-#include <mbgl/shaders/webgpu/shader_group.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-// Include all WebGPU shader headers
-#include <mbgl/shaders/webgpu/background.hpp>
-#include <mbgl/shaders/webgpu/circle.hpp>
-#include <mbgl/shaders/webgpu/clipping_mask.hpp>
-#include <mbgl/shaders/webgpu/collision.hpp>
-#include <mbgl/shaders/webgpu/custom_geometry.hpp>
-#include <mbgl/shaders/webgpu/custom_symbol_icon.hpp>
-#include <mbgl/shaders/webgpu/debug.hpp>
-#include <mbgl/shaders/webgpu/fill.hpp>
-#include <mbgl/shaders/webgpu/fill_extrusion.hpp>
-#include <mbgl/shaders/webgpu/heatmap.hpp>
-#include <mbgl/shaders/webgpu/heatmap_texture.hpp>
-#include <mbgl/shaders/webgpu/hillshade.hpp>
-#include <mbgl/shaders/webgpu/hillshade_prepare.hpp>
-#include <mbgl/shaders/webgpu/line.hpp>
-#include <mbgl/shaders/webgpu/raster.hpp>
-#include <mbgl/shaders/webgpu/symbol.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/webgpu/tile_layer_group.hpp>
@@ -36,18 +18,17 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <mbgl/shaders/webgpu/clipping_mask.hpp>
+#include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
+
 namespace mbgl {
 namespace webgpu {
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(gfx::Context::minimumRequiredVertexBindingCount),
-      impl(std::make_unique<Impl>()),
       backend(backend_),
-      globalUniformBuffers(std::make_unique<UniformBufferArray>()) {
-
-    impl->device = backend.getDevice();
-
-}
+      globalUniformBuffers(std::make_unique<UniformBufferArray>()) {}
 
 Context::~Context() = default;
 
@@ -93,101 +74,10 @@ gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registry, const std::string& name) {
-    auto it = impl->shaderCache.find(name);
-    if (it != impl->shaderCache.end()) {
-        return it->second;
-    }
-
-    // Try getting shader group by name first (for layer-specific shader groups)
-    auto shaderGroup = registry.getShaderGroup(name);
-    if (shaderGroup) {
-        mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Found shader group for '" + name + "'");
-        auto shader = shaderGroup->getOrCreateShader(*this, {});
-        if (shader) {
-            mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Successfully created shader '" + name + "' from shader group");
-            // Convert gfx::Shader to ShaderProgramBase
-            auto shaderProgram = std::static_pointer_cast<gfx::ShaderProgramBase>(shader);
-            impl->shaderCache[name] = shaderProgram;
-            return shaderProgram;
-        } else {
-            mbgl::Log::Warning(mbgl::Event::Shader, "WebGPU: Failed to create shader '" + name + "' from shader group");
-        }
-    } else {
-        mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: No shader group found for '" + name + "', using fallback");
-    }
-
-    // Fallback: Use the built-in WGSL shaders based on name
-    std::string vertexSource;
-    std::string fragmentSource;
-
-    using namespace shaders;
-
-    // Map shader names to built-in shaders
-#define MAP_SHADER(ShaderType, ShaderName) \
-    if (name == ShaderName) { \
-        vertexSource = ShaderSource<BuiltIn::ShaderType, gfx::Backend::Type::WebGPU>::vertex; \
-        fragmentSource = ShaderSource<BuiltIn::ShaderType, gfx::Backend::Type::WebGPU>::fragment; \
-    } else
-
-    MAP_SHADER(BackgroundShader, "BackgroundShader")
-    MAP_SHADER(BackgroundPatternShader, "BackgroundPatternShader")
-    MAP_SHADER(CircleShader, "CircleShader")
-    MAP_SHADER(ClippingMaskProgram, "ClippingMaskProgram")
-    MAP_SHADER(CollisionBoxShader, "CollisionBoxShader")
-    MAP_SHADER(CollisionCircleShader, "CollisionCircleShader")
-    MAP_SHADER(CustomGeometryShader, "CustomGeometryShader")
-    MAP_SHADER(CustomSymbolIconShader, "CustomSymbolIconShader")
-    MAP_SHADER(DebugShader, "DebugShader")
-    MAP_SHADER(FillShader, "FillShader")
-    MAP_SHADER(FillOutlineShader, "FillOutlineShader")
-    MAP_SHADER(FillExtrusionShader, "FillExtrusionShader")
-    MAP_SHADER(FillExtrusionPatternShader, "FillExtrusionPatternShader")
-    MAP_SHADER(HeatmapShader, "HeatmapShader")
-    MAP_SHADER(HeatmapTextureShader, "HeatmapTextureShader")
-    MAP_SHADER(HillshadePrepareShader, "HillshadePrepareShader")
-    MAP_SHADER(HillshadeShader, "HillshadeShader")
-    MAP_SHADER(LineShader, "LineShader")
-    MAP_SHADER(RasterShader, "RasterShader")
-    MAP_SHADER(SymbolIconShader, "SymbolIconShader")
-    MAP_SHADER(SymbolSDFShader, "SymbolSDFShader")
-    {
-        // For now, use a basic WGSL shader that works for all types
-        // This is a temporary solution until proper shaders are implemented
-        vertexSource = R"(
-@vertex
-fn main(
-    @builtin(vertex_index) vertex_index: u32
-) -> @builtin(position) vec4<f32> {
-    // Generate a hardcoded triangle in NDC space for testing
-    // This doesn't use any vertex buffers or uniforms
-    var positions = array<vec2<f32>, 3>(
-        vec2<f32>(-0.8, -0.8),  // Bottom left
-        vec2<f32>(0.8, -0.8),   // Bottom right
-        vec2<f32>(0.0, 0.8)     // Top center
-    );
-    return vec4<f32>(positions[vertex_index], 0.0, 1.0);
-}
-)";
-
-        fragmentSource = R"(
-@fragment
-fn main() -> @location(0) vec4<f32> {
-    // Return a bright red color for debugging visibility
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0); // Bright red
-}
-)";
-
-    }
-
-#undef MAP_SHADER
-
-    // Create new shader program
-    auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
-    impl->shaderCache[name] = shader;
-
-    mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Created fallback shader for '" + name + "'");
-
-    return shader;
+    // Align with Metal - just get shader from registry without caching
+    const auto shaderGroup = registry.getShaderGroup(name);
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
@@ -268,6 +158,49 @@ std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(g
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
     return std::make_unique<DrawScopeResource>(*this);
 }
+
+// Buffer creation (aligned with Metal)
+BufferResource Context::createBuffer(const void* data,
+                                    std::size_t size,
+                                    uint32_t usage,
+                                    bool isIndexBuffer,
+                                    bool persistent) const {
+    return BufferResource(const_cast<Context&>(*this), data, size, usage, isIndexBuffer, persistent);
+}
+
+// Get reusable tile vertex buffer (aligned with Metal)
+const BufferResource& Context::getTileVertexBuffer() {
+    if (!tileVertexBuffer) {
+        // Create standard tile vertices (-EXTENT to +EXTENT)
+        const float extent = util::EXTENT;
+        const std::array<float, 8> vertices = {
+            -extent, -extent,
+             extent, -extent,
+            -extent,  extent,
+             extent,  extent
+        };
+
+        uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
+        tileVertexBuffer = createBuffer(vertices.data(), vertices.size() * sizeof(float), usage, false, true);
+    }
+    return *tileVertexBuffer;
+}
+
+// Get reusable tile index buffer (aligned with Metal)
+const BufferResource& Context::getTileIndexBuffer() {
+    if (!tileIndexBuffer) {
+        // Create standard tile indices
+        const std::array<uint16_t, 6> indices = {
+            0, 1, 2,
+            1, 3, 2
+        };
+
+        uint32_t usage = WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst;
+        tileIndexBuffer = createBuffer(indices.data(), indices.size() * sizeof(uint16_t), usage, true, true);
+    }
+    return *tileIndexBuffer;
+}
+
 
 } // namespace webgpu
 } // namespace mbgl
