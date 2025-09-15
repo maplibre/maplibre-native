@@ -12,6 +12,7 @@
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/drawable_impl.hpp>
+#include <sstream>
 #include <mbgl/webgpu/index_buffer_resource.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
@@ -208,6 +209,10 @@ void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
+    std::stringstream uploadCallMsg;
+    uploadCallMsg << "WebGPU Drawable::upload called for " << getName();
+    Log::Info(Event::Render, uploadCallMsg.str());
+
     if (isCustom) {
         return;
     }
@@ -249,6 +254,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     // Upload vertex attributes (like Metal does)
     const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
                               vertexAttributes->isModifiedAfter(*attributeUpdateTime);
+
+    std::stringstream uploadMsg;
+    uploadMsg << "WebGPU upload() buildAttribs=" << (buildAttribs ? "true" : "false")
+              << ", attributeUpdateTime=" << (attributeUpdateTime ? "set" : "null");
+    Log::Info(Event::Render, uploadMsg.str());
 
     if (buildAttribs) {
 #if !defined(NDEBUG)

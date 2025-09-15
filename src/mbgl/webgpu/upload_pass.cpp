@@ -7,6 +7,7 @@
 #include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/util/logging.hpp>
+#include <sstream>
 
 namespace mbgl {
 namespace webgpu {
@@ -81,26 +82,20 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         return nullBuffer;
     }
 
-    // Check if buffer already exists and doesn't need update
-    auto& buffer = vertexVector->getBuffer();
-    if (buffer && !forceUpdate) {
-        return buffer;
-    }
-
-    // Create or update the buffer
+    // VertexVectorBase stores VertexBufferBase*, but we need to work with resources
+    // For now, just create a new buffer each time (Metal might have a more sophisticated approach)
     const auto data = vertexVector->getRawData();
     const auto size = vertexVector->getRawSize() * vertexVector->getRawCount();
 
     if (size > 0) {
-        if (buffer && forceUpdate) {
-            updateVertexBufferResource(*buffer, data, size);
-        } else {
-            auto newBuffer = createVertexBufferResource(data, size, usage, false);
-            vertexVector->setBuffer(std::move(newBuffer));
-        }
+        // Create a new buffer resource
+        // Note: This is not optimal, but matches the pattern we need
+        static gfx::UniqueVertexBufferResource tempBuffer;
+        tempBuffer = createVertexBufferResource(data, size, usage, false);
+        return tempBuffer;
     }
 
-    return vertexVector->getBuffer();
+    return nullBuffer;
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
@@ -115,13 +110,19 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
 
     Log::Info(Event::Render, "WebGPU buildAttributeBindings called");
-    Log::Info(Event::Render, "  defaults.allocatedSize() = %zu", defaults.allocatedSize());
+
+    // Log input parameters
+    std::stringstream ss;
+    ss << "  defaults.allocatedSize()=" << defaults.allocatedSize();
+    Log::Info(Event::Render, ss.str());
 
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
     // For each attribute in the program, with the corresponding default and optional override...
+    int attrCount = 0;
     const auto resolveAttr = [&]([[maybe_unused]] const size_t id, auto& default_, auto& override_) -> void {
+        attrCount++;
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto index = static_cast<std::size_t>(defaultAttr.getIndex());
@@ -169,15 +170,32 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
+        Log::Error(Event::Render, "Failed to create buffer for attribute");
         assert(false);
     };
 
     // This version is called when the attribute is available, but isn't being used by the shader
-    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
-        missingAttr->setDirty(false);
+    const auto missingAttr = [&](const size_t, auto& attr) -> void {
+        attr->setDirty(false);
     };
 
     defaults.resolve(overrides, resolveAttr, missingAttr);
+
+    std::stringstream processed;
+    processed << "  Processed " << attrCount << " attributes";
+    Log::Info(Event::Render, processed.str());
+
+    // Count how many valid bindings we have
+    size_t validBindings = 0;
+    for (const auto& binding : bindings) {
+        if (binding && binding->vertexBufferResource) {
+            validBindings++;
+        }
+    }
+
+    std::stringstream result;
+    result << "  Created " << validBindings << " valid bindings out of " << bindings.size() << " total";
+    Log::Info(Event::Render, result.str());
 
     return bindings;
 }
