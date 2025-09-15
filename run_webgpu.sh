@@ -7,6 +7,17 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
+# Build the project first
+echo "Building WebGPU implementation..."
+if cmake --build ./build -- -j8 > /dev/null 2>&1; then
+    echo "✓ Build successful"
+else
+    echo "✗ Build failed. Running with verbose output:"
+    cmake --build ./build -- -j8
+    exit 1
+fi
+echo ""
+
 # Function to ensure clean state
 cleanup_processes() {
     if pgrep -f "mbgl-glfw" > /dev/null; then
