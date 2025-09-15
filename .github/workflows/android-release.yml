@@ -86,6 +86,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Free disk space
+        working-directory: .
+        run: .github/scripts/free_disk_space.sh
+
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
         with:
           node-version-file: ".nvmrc"
