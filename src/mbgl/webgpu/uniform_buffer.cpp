@@ -2,6 +2,8 @@
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
+#include <mbgl/webgpu/render_pass.hpp>
+#include <mbgl/util/logging.hpp>
 #include <cstring>
 
 namespace mbgl {
@@ -34,28 +36,13 @@ UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t si
     }
 }
 
-UniformBuffer::UniformBuffer(const UniformBuffer& other)
-    : gfx::UniformBuffer(other.getSize()),
-      context(other.context) {
-    
-    if (other.buffer && getSize() > 0) {
-        // Create a new buffer with the same size
-        auto& backend = static_cast<RendererBackend&>(context.getBackend());
-        WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
-        
-        if (device) {
-            WGPUBufferDescriptor bufferDesc = {};
-            WGPUStringView label = {"Uniform Buffer (Copy)", strlen("Uniform Buffer (Copy)")};
-            bufferDesc.label = label;
-            bufferDesc.size = getSize();
-            bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-            bufferDesc.mappedAtCreation = 0;
-            buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
-            
-            // Note: We can't directly copy buffer contents in WebGPU without a command encoder
-            // The data will need to be copied when updated
-        }
-    }
+UniformBuffer UniformBuffer::clone() const {
+    UniformBuffer newBuffer(context, nullptr, getSize());
+
+    // Note: We can't directly copy buffer contents in WebGPU without a command encoder
+    // The data will need to be copied when updated
+
+    return newBuffer;
 }
 
 UniformBuffer::UniformBuffer(UniformBuffer&& other) noexcept
@@ -89,13 +76,16 @@ void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
     // which are created at the drawable level with the pipeline.
     // This method primarily ensures buffers are ready for use.
     // The actual binding happens in Drawable::draw() via bind groups.
-    (void)renderPass;
+    bindWebgpu(static_cast<RenderPass&>(renderPass));
 }
 
-gfx::UniqueUniformBuffer UniformBufferArray::copy(const gfx::UniformBuffer& buffer) {
-    // Since we know this is a WebGPU context, we can safely cast
-    auto* webgpuBuffer = static_cast<const UniformBuffer*>(&buffer);
-    return std::make_unique<UniformBuffer>(*webgpuBuffer);
+// The copy() method is now implemented inline in the header file to match Metal
+
+void UniformBufferArray::bindWebgpu(RenderPass& renderPass) const noexcept {
+    // In WebGPU, uniform buffers are bound through bind groups per drawable,
+    // not globally to the render pass like in Metal.
+    // The actual binding happens in Drawable::draw when creating the bind group.
+    // This method is here for API compatibility with Metal.
 }
 
 } // namespace webgpu
