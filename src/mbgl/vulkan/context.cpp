@@ -192,6 +192,7 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
     const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
+        mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
     }
 }
 
@@ -218,6 +219,7 @@ void Context::waitFrame() const {
     const vk::Result waitFenceResult = device->waitForFences(
         1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
+        mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
     }
 }
 
@@ -334,6 +336,7 @@ void Context::submitFrame() {
 
     const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get(), dispatcher);
     if (resetFenceResult != vk::Result::eSuccess) {
+        mbgl::Log::Error(mbgl::Event::Render, "Reset fence failed");
     }
 
     graphicsQueue.submit(submitInfo, frame.flightFrameFence.get(), dispatcher);
