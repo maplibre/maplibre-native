@@ -68,35 +68,19 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
-        // In WebGPU, we need to copy layer group uniform buffers to each drawable
-        // since WebGPU uses bind groups per drawable rather than global binding
-        // Metal binds them globally to the render pass, but WebGPU needs them per-drawable
-        auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
+        // Call bindWebgpu to bind uniform buffers (similar to Metal's bindMtl)
+        auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(*parameters.renderPass);
+        static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(webgpuRenderPass);
 
-        // First log what the layer group has
-        static int logCount = 0;
-        if (logCount++ < 10) {
-            mbgl::Log::Info(mbgl::Event::Render, "Layer group has " +
-                           std::to_string(uniformBuffers.allocatedSize()) + " uniform buffer slots");
-        }
+        // In WebGPU, we also need to copy layer group uniform buffers to each drawable
+        // since WebGPU uses bind groups per drawable
+        auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
 
         // Copy uniform buffers from layer group to drawable
         for (size_t i = 0; i < uniformBuffers.allocatedSize(); ++i) {
             const auto& uniformBuffer = uniformBuffers.get(i);
             if (uniformBuffer) {
                 drawableWebGPU.mutableUniformBuffers().set(i, uniformBuffer);
-
-                static int copyCount = 0;
-                if (copyCount++ < 20) {
-                    mbgl::Log::Info(mbgl::Event::Render, "Copied uniform buffer " + std::to_string(i) +
-                                   " from layer group to drawable");
-                }
-            } else {
-                static int emptyCount = 0;
-                if (emptyCount++ < 20) {
-                    mbgl::Log::Info(mbgl::Event::Render, "Layer group uniform buffer slot " +
-                                   std::to_string(i) + " is empty");
-                }
             }
         }
 
