@@ -32,9 +32,6 @@ public:
     void invoke(Fn fn, Args&&... args) const {
         if (auto mailbox = weakMailbox.lock()) {
             mailbox->push(actor::makeMessage(*object, fn, std::forward<Args>(args)...));
-        } else {
-            // Log when mailbox is not available
-            // Note: Can't use Log here as it would create circular dependency
         }
     }
 
