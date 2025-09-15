@@ -354,7 +354,13 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
-    // Log::Info(Event::Render, "WebGPU Drawable::draw called for " + getName());
+    static int drawCallCount = 0;
+    drawCallCount++;
+    if (drawCallCount <= 20) {
+        Log::Info(Event::Render, "WebGPU Drawable::draw #" + std::to_string(drawCallCount) + " for " + getName() +
+                  " pass=" + std::to_string(mbgl::underlying_type(parameters.pass)) +
+                  " shader=" + (shader ? shader->typeName().data() : "null"));
+    }
 
     if (isCustom) {
         return;
@@ -437,12 +443,23 @@ void Drawable::draw(PaintParameters& parameters) const {
                 // Create bind group entries from UniformBufferArray
                 std::vector<WGPUBindGroupEntry> entries;
 
-                // WebGPU shaders now use the same binding indices as Metal/Vulkan
-                // No remapping needed - just use the buffer index directly as the binding index
-                for (size_t i = 0; i < impl->uniformBuffers.allocatedSize(); ++i) {
+                // First, get global uniform buffers from the render pass if available
+                const auto* globalBuffers = webgpuRenderPass.getGlobalUniformBuffers();
+
+                // Merge global and drawable-specific uniform buffers
+                // Use drawable's buffers first, fall back to global buffers
+                const size_t maxSize = std::max(
+                    impl->uniformBuffers.allocatedSize(),
+                    globalBuffers ? globalBuffers->allocatedSize() : 0);
+
+                for (size_t i = 0; i < maxSize; ++i) {
+                    // Priority: drawable's buffer > global buffer
                     const auto& uniformBuffer = impl->uniformBuffers.get(i);
-                    if (uniformBuffer) {
-                        const auto* webgpuUniformBuffer = static_cast<const webgpu::UniformBuffer*>(uniformBuffer.get());
+                    const auto& globalBuffer = globalBuffers ? globalBuffers->get(i) : nullptr;
+                    const auto& bufferToUse = uniformBuffer ? uniformBuffer : globalBuffer;
+
+                    if (bufferToUse) {
+                        const auto* webgpuUniformBuffer = static_cast<const webgpu::UniformBuffer*>(bufferToUse.get());
                         if (webgpuUniformBuffer && webgpuUniformBuffer->getBuffer()) {
                             WGPUBindGroupEntry entry = {};
                             entry.binding = static_cast<uint32_t>(i);
@@ -452,13 +469,23 @@ void Drawable::draw(PaintParameters& parameters) const {
                             entries.push_back(entry);
 
                             // Log::Info(Event::Render, "Adding uniform buffer to bind group: binding=" +
-                            //          std::to_string(i) + " size=" + std::to_string(entry.size));
+                            //          std::to_string(i) + " size=" + std::to_string(entry.size) +
+                            //          " source=" + (uniformBuffer ? "drawable" : "global"));
                         }
                     }
                 }
 
                 if (entries.empty()) {
                     Log::Warning(Event::Render, "No uniform buffers found for bind group!");
+                } else if (drawCallCount <= 20) {
+                    Log::Info(Event::Render, "Creating bind group with " + std::to_string(entries.size()) + " entries");
+                    // Log details of uniform buffer at index 2 (FillDrawableUBO)
+                    for (const auto& entry : entries) {
+                        if (entry.binding == 2) {
+                            Log::Info(Event::Render, "  Bind group entry[2]: buffer size=" +
+                                     std::to_string(entry.size) + " offset=" + std::to_string(entry.offset));
+                        }
+                    }
                 }
 
                 // Add texture bindings if any
@@ -561,9 +588,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             Log::Error(Event::Render, "renderPassEncoder is null!");
             return;
         }
-        // Log::Info(Event::Render, "Setting pipeline state: encoder=" +
-        //     std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
-        //     ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+        if (drawCallCount <= 20) {
+            Log::Info(Event::Render, "Setting pipeline state: encoder=" +
+                std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
+                ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+        }
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
     } else {
         Log::Error(Event::Render, "Failed to create render pipeline state");
@@ -580,6 +609,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             if (vertexBufferRes) {
                 const auto& buffer = vertexBufferRes->getBuffer();
                 if (buffer.getBuffer()) {
+                    if (drawCallCount <= 20 && getName().find("fill") != std::string::npos) {
+                        Log::Info(Event::Render, "  Binding vertex buffer[" + std::to_string(attributeIndex) +
+                                 "] size=" + std::to_string(buffer.getSizeInBytes()) +
+                                 " offset=" + std::to_string(binding->attribute.offset));
+                    }
                     wgpuRenderPassEncoderSetVertexBuffer(
                         renderPassEncoder,
                         attributeIndex,
@@ -616,6 +650,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Set bind group
     if (impl->bindGroup) {
+        if (drawCallCount <= 20) {
+            Log::Info(Event::Render, "Setting bind group: " +
+                     std::to_string(reinterpret_cast<uintptr_t>(impl->bindGroup)));
+        }
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
     } else {
         Log::Warning(Event::Render, "No bind group available!");
@@ -638,6 +676,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Draw indexed geometry - loop through segments (exactly like Metal does)
+    int segmentCount = 0;
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
@@ -646,6 +685,14 @@ void Drawable::draw(PaintParameters& parameters) const {
             const uint32_t indexOffset = mlSegment.indexOffset;
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
+
+            if (drawCallCount <= 20 && getName().find("fill") != std::string::npos) {
+                Log::Info(Event::Render, "  FILL Drawing segment " + std::to_string(++segmentCount) +
+                         " indices=" + std::to_string(mlSegment.indexLength) +
+                         " indexOffset=" + std::to_string(indexOffset) +
+                         " baseVertex=" + std::to_string(baseVertex) +
+                         " instances=" + std::to_string(instanceCount));
+            }
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
                                             mlSegment.indexLength,  // indexCount

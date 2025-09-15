@@ -77,9 +77,11 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
     passes = RenderPass::Translucent;
 
-    if (!(!unevaluated.get<style::FillPattern>().isUndefined() ||
-          evaluated.get<style::FillColor>().constantOr(Color()).a < 1.0f ||
-          evaluated.get<style::FillOpacity>().constantOr(0) < 1.0f)) {
+    bool hasPattern = !unevaluated.get<style::FillPattern>().isUndefined();
+    float colorAlpha = evaluated.get<style::FillColor>().constantOr(Color::black()).a;
+    float opacity = evaluated.get<style::FillOpacity>().constantOr(1);
+
+    if (!(hasPattern || colorAlpha < 1.0f || opacity < 1.0f)) {
         // Supply both - evaluated based on opaquePassCutoff in render().
         passes |= RenderPass::Opaque;
     }
@@ -123,6 +125,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              const std::shared_ptr<UpdateParameters>&,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
+    static int updateCount = 0;
+    if (updateCount++ < 5) {
+        mbgl::Log::Info(mbgl::Event::Render, "RenderFillLayer::update called for " + getID() +
+                       " with " + (renderTiles ? std::to_string(renderTiles->size()) : "null") + " tiles");
+    }
+
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -147,6 +155,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     if (!layerTweaker) {
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
+        mbgl::Log::Info(mbgl::Event::Render, "RenderFillLayer: Added FillLayerTweaker to " + getID());
     }
 
     if (!fillShaderGroup) {
@@ -172,7 +181,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    constexpr auto renderPass = RenderPass::Translucent;
+    // Use the layer's evaluated render passes instead of hardcoding
+    const auto renderPass = passes;
     constexpr auto lineWidth = 2.0f;
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
@@ -400,7 +410,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setLineWidth(lineWidth);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
-                    builder->setRenderPass(RenderPass::Translucent);
+                    builder->setRenderPass(renderPass);
                     outlineBuilder = std::move(builder);
                 }
             }
@@ -478,7 +488,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(RenderPass::Translucent);
+                    builder->setRenderPass(renderPass);
                     patternBuilder = std::move(builder);
                 }
             }
@@ -490,7 +500,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
-                    builder->setRenderPass(RenderPass::Translucent);
+                    builder->setRenderPass(renderPass);
                     outlinePatternBuilder = std::move(builder);
                 }
             }

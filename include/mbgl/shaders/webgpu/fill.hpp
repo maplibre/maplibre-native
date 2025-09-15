@@ -16,13 +16,15 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr const char* vertex = R"(
 struct VertexInput {
-    @location(4) position: vec2<i32>,
-    @location(5) color: vec4<f32>,
-    @location(6) opacity: vec2<f32>,
+    @location(0) position: vec2<i32>,
+    @location(1) color: vec4<f32>,
+    @location(2) opacity: vec2<f32>,
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
+    @location(0) color: vec4<f32>,
+    @location(1) opacity: f32,
 };
 
 struct FillDrawableUBO {
@@ -44,10 +46,9 @@ fn main(in: VertexInput) -> VertexOutput {
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
     out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
 
-    // Note: Color and opacity are handled as uniforms in fragment shader
-    // If we had vertex attributes, we'd use:
-    // let color = unpack_mix_color(in.color, drawable.color_t);
-    // let opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    // Pass color and opacity to fragment shader
+    out.color = unpack_mix_color(in.color, drawable.color_t);
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
 
     return out;
 }
@@ -55,29 +56,14 @@ fn main(in: VertexInput) -> VertexOutput {
     
     static constexpr const char* fragment = R"(
 struct FragmentInput {
-    // No inputs from vertex shader since we're using uniforms
+    @location(0) color: vec4<f32>,
+    @location(1) opacity: f32,
 };
-
-struct FillEvaluatedPropsUBO {
-    color: vec4<f32>,
-    outline_color: vec4<f32>,
-    opacity: f32,
-    fade: f32,
-    from_scale: f32,
-    to_scale: f32,
-};
-
-// Use the same binding index as Metal: idFillEvaluatedPropsUBO = 5 (Metal/WebGPU, not Vulkan)
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // For fill layers, color comes from uniform
-    let color = props.color;
-    let opacity = props.opacity;
-
-    // Return the final color
-    return color * opacity;
+    // Use color and opacity from vertex shader
+    return in.color * in.opacity;
 }
 )";
 };
@@ -91,14 +77,14 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr const char* vertex = R"(
 struct VertexInput {
-    @location(4) position: vec2<i32>,
-    @location(5) outline_color: vec4<f32>,
-    @location(6) opacity: vec2<f32>,
+    @location(0) position: vec2<i32>,
+    @location(1) outline_color: vec4<f32>,
+    @location(2) opacity: vec2<f32>,
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
-    @location(0) outline_color: vec4<f32>,
+    @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
 };
 
@@ -119,8 +105,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
     out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
 
-    // Use helper functions for unpacking if we have per-vertex attributes
-    out.outline_color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
+    // Pass color and opacity to fragment shader
+    out.color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
     out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
 
     return out;
@@ -129,13 +115,13 @@ fn main(in: VertexInput) -> VertexOutput {
     
     static constexpr const char* fragment = R"(
 struct FragmentInput {
-    @location(0) outline_color: vec4<f32>,
+    @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
 };
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    return in.outline_color * in.opacity;
+    return in.color * in.opacity;
 }
 )";
 };

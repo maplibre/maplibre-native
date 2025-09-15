@@ -2,6 +2,7 @@
 
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -110,8 +111,11 @@ public:
 
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroups(Func f) {
+        mbgl::Log::Info(mbgl::Event::Render, "RenderOrchestrator::visitLayerGroups called, group count: " +
+                        std::to_string(layerGroupsByLayerIndex.size()));
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
+                mbgl::Log::Info(mbgl::Event::Render, "Visiting layer group: " + pair.second->getName());
                 f(*pair.second);
             }
         }

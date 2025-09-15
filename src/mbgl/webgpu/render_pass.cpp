@@ -19,6 +19,7 @@ class RenderPass::Impl {
 public:
     WGPURenderPassEncoder encoder = nullptr;
     WGPUCommandEncoder commandEncoder = nullptr;
+    const gfx::UniformBufferArray* globalUniformBuffers = nullptr;
 };
 
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor_)
@@ -138,7 +139,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
 RenderPass::~RenderPass() {
     if (impl->encoder) {
-        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Ending render pass");
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Ending render pass (destructor called)");
         // End the render pass
         try {
             wgpuRenderPassEncoderEnd(impl->encoder);
@@ -182,6 +183,14 @@ void RenderPass::addDebugSignpost(const char* name) {
 
 WGPURenderPassEncoder RenderPass::getEncoder() const {
     return impl->encoder;
+}
+
+void RenderPass::setGlobalUniformBuffers(const gfx::UniformBufferArray* buffers) {
+    impl->globalUniformBuffers = buffers;
+}
+
+const gfx::UniformBufferArray* RenderPass::getGlobalUniformBuffers() const {
+    return impl->globalUniformBuffers;
 }
 
 } // namespace webgpu

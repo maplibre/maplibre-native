@@ -62,6 +62,15 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
+    static int updateCount = 0;
+    if (updateCount++ < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "TilePyramid::update called for " + sourceImpl.id +
+                       " needsRendering=" + std::to_string(needsRendering) +
+                       " needsRelayout=" + std::to_string(needsRelayout) +
+                       " zoomRange=[" + std::to_string(zoomRange.min) + "," + std::to_string(zoomRange.max) + "]" +
+                       " currentZoom=" + std::to_string(parameters.transformState.getZoom()));
+    }
+
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -140,6 +149,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         idealTiles = util::tileCover(tileCoverParameters, idealZoom, tileZoom);
+        if (updateCount < 10) {
+            mbgl::Log::Info(mbgl::Event::Render, "TilePyramid::update calculated " + std::to_string(idealTiles.size()) +
+                           " ideal tiles at zoom " + std::to_string(idealZoom) + "/" + std::to_string(tileZoom));
+            if (!idealTiles.empty()) {
+                mbgl::Log::Info(mbgl::Event::Render, "  First tile: " + util::toString(idealTiles[0]));
+            }
+        }
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
             mbgl::Log::Warning(mbgl::Event::General,
@@ -223,6 +239,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                                  tiles,
                                  zoomRange,
                                  maxParentTileOverscaleFactor);
+
+    if (updateCount < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "TilePyramid::update finished with " + std::to_string(renderedTiles.size()) +
+                       " rendered tiles, " + std::to_string(tiles.size()) + " total tiles");
+    }
 
     for (auto previouslyRenderedTile : previouslyRenderedTiles) {
         Tile& tile = previouslyRenderedTile.second;
