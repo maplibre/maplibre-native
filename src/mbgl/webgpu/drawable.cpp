@@ -22,6 +22,8 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/convert.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <memory>
@@ -31,6 +33,72 @@
 
 namespace mbgl {
 namespace webgpu {
+
+namespace {
+#if !defined(NDEBUG)
+std::string debugLabel(const Drawable& drawable) {
+    std::ostringstream ss;
+    ss << drawable.getName() << "#" << drawable.getID();
+    return ss.str();
+}
+#endif
+
+WGPUVertexFormat wgpuVertexFormatOf(gfx::AttributeDataType type) {
+    switch (type) {
+        case gfx::AttributeDataType::Byte:
+            return WGPUVertexFormat_Sint8;
+        case gfx::AttributeDataType::Byte2:
+            return WGPUVertexFormat_Sint8x2;
+        case gfx::AttributeDataType::Byte4:
+            return WGPUVertexFormat_Sint8x4;
+        case gfx::AttributeDataType::UByte:
+            return WGPUVertexFormat_Uint8;
+        case gfx::AttributeDataType::UByte2:
+            return WGPUVertexFormat_Uint8x2;
+        case gfx::AttributeDataType::UByte4:
+            return WGPUVertexFormat_Uint8x4;
+        case gfx::AttributeDataType::Short:
+            return WGPUVertexFormat_Sint16;
+        case gfx::AttributeDataType::Short2:
+            return WGPUVertexFormat_Sint16x2;
+        case gfx::AttributeDataType::Short4:
+            return WGPUVertexFormat_Sint16x4;
+        case gfx::AttributeDataType::UShort:
+            return WGPUVertexFormat_Uint16;
+        case gfx::AttributeDataType::UShort2:
+            return WGPUVertexFormat_Uint16x2;
+        case gfx::AttributeDataType::UShort4:
+            return WGPUVertexFormat_Uint16x4;
+        case gfx::AttributeDataType::Int:
+            return WGPUVertexFormat_Sint32;
+        case gfx::AttributeDataType::Int2:
+            return WGPUVertexFormat_Sint32x2;
+        case gfx::AttributeDataType::Int3:
+            return WGPUVertexFormat_Sint32x3;
+        case gfx::AttributeDataType::Int4:
+            return WGPUVertexFormat_Sint32x4;
+        case gfx::AttributeDataType::UInt:
+            return WGPUVertexFormat_Uint32;
+        case gfx::AttributeDataType::UInt2:
+            return WGPUVertexFormat_Uint32x2;
+        case gfx::AttributeDataType::UInt3:
+            return WGPUVertexFormat_Uint32x3;
+        case gfx::AttributeDataType::UInt4:
+            return WGPUVertexFormat_Uint32x4;
+        case gfx::AttributeDataType::Float:
+            return WGPUVertexFormat_Float32;
+        case gfx::AttributeDataType::Float2:
+            return WGPUVertexFormat_Float32x2;
+        case gfx::AttributeDataType::Float3:
+            return WGPUVertexFormat_Float32x3;
+        case gfx::AttributeDataType::Float4:
+            return WGPUVertexFormat_Float32x4;
+        default:
+            assert(!"Unsupported vertex attribute format");
+            return WGPUVertexFormat_Float32x2; // Default fallback
+    }
+}
+} // namespace
 
 // Simple wrapper to adapt gfx::IndexBuffer to IndexBufferBase
 struct IndexBuffer : public gfx::IndexBufferBase {
@@ -140,86 +208,118 @@ void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
-    auto& webgpuUploadPass = static_cast<webgpu::UploadPass&>(uploadPass);
-    auto& gfxContext = webgpuUploadPass.getContext();
-    auto& context = static_cast<webgpu::Context&>(gfxContext);
-    auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
-    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
-
-    if (!device) {
+    if (isCustom) {
+        return;
+    }
+    if (!shader) {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
         return;
     }
 
-    // Handle index buffer creation like Metal does
-    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->getDirty())) {
-        if (!impl->indexes->empty()) {
-            // Create index buffer resource
-            auto indexBufferResource = webgpuUploadPass.createIndexBufferResource(
-                impl->indexes->data(),
-                impl->indexes->bytes(),
-                gfx::BufferUsageType::StaticDraw,
-                /*persistent=*/false);
+    auto& webgpuUploadPass = static_cast<webgpu::UploadPass&>(uploadPass);
+    auto& gfxContext = webgpuUploadPass.getContext();
+    [[maybe_unused]] auto& context = static_cast<webgpu::Context&>(gfxContext);
+    constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
-            // Create gfx::IndexBuffer
-            auto gfxIndexBuffer = std::make_unique<gfx::IndexBuffer>(
-                impl->indexes->elements(),
-                std::move(indexBufferResource));
-
-            // Wrap it in local IndexBuffer wrapper
-            auto indexBuffer = std::make_unique<IndexBuffer>(std::move(gfxIndexBuffer));
-
-            impl->indexes->setBuffer(std::move(indexBuffer));
-            impl->indexes->setDirty(false);
-        }
+    // We need either raw index data or a buffer already created from them.
+    // We can have a buffer and no indexes, but only if it's not marked dirty.
+    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
+        assert(!"Missing index data");
+        return;
     }
 
-    // Store the bind group layout if available for later bind group creation
-    if (impl->bindGroupLayout && !impl->bindGroup && shader) {
-        auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
-        if (webgpuShader) {
-            impl->bindGroupLayout = webgpuShader->getBindGroupLayout();
-        }
-    }
-    // Bind group will be created during draw() using the UniformBufferArray
+    if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
+        // Create or update a buffer for the index data.  We don't update any
+        // existing buffer because it may still be in use by the previous frame.
+        auto indexBufferResource = webgpuUploadPass.createIndexBufferResource(
+            impl->indexes->data(),
+            impl->indexes->bytes(),
+            usage,
+            /*persistent=*/false);
+        auto gfxIndexBuffer = std::make_unique<gfx::IndexBuffer>(
+            impl->indexes->elements(),
+            std::move(indexBufferResource));
+        auto buffer = std::make_unique<IndexBuffer>(std::move(gfxIndexBuffer));
 
-    // Process vertex attributes like Metal does
-    if (vertexAttributes) {
-        // Build attribute bindings from the vertex attributes
+        impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
+    }
+
+    const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
+                              vertexAttributes->isModifiedAfter(*attributeUpdateTime);
+
+    if (buildAttribs) {
+#if !defined(NDEBUG)
+        const auto debugGroup = webgpuUploadPass.createDebugGroup(debugLabel(*this));
+#endif
+
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<gfx::VertexAttributeArray>();
         }
 
-        // Build vertex buffers from the vertex attributes
+        // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         auto attributeBindings_ = webgpuUploadPass.buildAttributeBindings(
             impl->vertexCount,
-            gfx::AttributeDataType::Invalid,  // vertexType
+            impl->vertexType,
             /*vertexAttributeIndex=*/-1,
             /*vertexData=*/{},
             shader->getVertexAttributes(),
             *vertexAttributes,
-            gfx::BufferUsageType::DynamicDraw,
-            std::nullopt,  // attributeUpdateTime
+            usage,
+            attributeUpdateTime,
             vertexBuffers);
 
-        // Mark attributes as clean
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
-        // Update attribute bindings if changed
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
-            // For now, we'll use the pre-existing vertex data setup
-            // Proper interleaving can be implemented later when we have access
+            // Reset pipeline state when attribute bindings change
+            impl->pipelineState = nullptr;
             // to the vertex buffer data
         }
     }
 
-    // Note: Vertex data is now handled through attributeBindings, similar to Metal.
-    // The vertex buffers are created in buildAttributeBindings and stored in impl->attributeBindings.
+    // Build instance buffer
+    const bool buildInstanceBuffer =
+        (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
 
-    // Note: Index data upload is handled separately when needed.
-    // The index buffer is part of the IndexVectorBase and will be uploaded
-    // through the upload pass mechanism.
+    if (buildInstanceBuffer) {
+        // Build instance attribute buffers
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
+        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(
+            instanceAttributes->getMaxCount(),
+            /*vertexType*/ gfx::AttributeDataType::Byte,
+            /*vertexAttributeIndex=*/-1,
+            /*vertexData=*/{},
+            shader->getInstanceAttributes(),
+            *instanceAttributes,
+            usage,
+            attributeUpdateTime,
+            instanceBuffers);
+
+        // Clear dirty flag
+        instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
+
+        if (impl->instanceBindings != instanceBindings_) {
+            impl->instanceBindings = std::move(instanceBindings_);
+        }
+    }
+
+    // Upload textures if needed
+    const bool texturesNeedUpload = std::any_of(
+        textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
+
+    if (texturesNeedUpload) {
+        for (auto& texture : textures) {
+            if (texture && texture->needsUpload()) {
+                texture->upload();
+            }
+        }
+    }
+
+    attributeUpdateTime = util::MonotonicTimer::now();
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -227,23 +327,18 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    // Get the render pass
-    if (!parameters.renderPass) {
-        return;
-    }
-
-    // Get the actual WebGPU render pass encoder
-    auto* webgpuRenderPass = static_cast<webgpu::RenderPass*>(parameters.renderPass.get());
-    if (!webgpuRenderPass) {
-        return;
-    }
-
-    WGPURenderPassEncoder renderPassEncoder = webgpuRenderPass->getEncoder();
+    // Get WebGPU context and render pass (following Metal's pattern)
+    auto& context = static_cast<webgpu::Context&>(parameters.context);
+    auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(*parameters.renderPass);
+    WGPURenderPassEncoder renderPassEncoder = webgpuRenderPass.getEncoder();
     if (!renderPassEncoder) {
+        assert(false);
         return;
     }
 
     if (!shader) {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
         return;
     }
 
@@ -251,8 +346,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    // Get WebGPU context and device
-    auto& context = static_cast<webgpu::Context&>(parameters.context);
+    // Get WebGPU backend and device
     auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
@@ -261,11 +355,24 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    // Cast to WebGPU shader
-    // const auto& shaderWebGPU = static_cast<const mbgl::webgpu::ShaderProgram&>(*shader);
+#if !defined(NDEBUG)
+    // Debug group creation would go here (Metal has this but we need to implement it for WebGPU)
+    // const auto debugGroup = parameters.encoder->createDebugGroup(getName());
+#endif
 
-    // Call bind on UniformBufferArray to ensure buffers are ready (like Metal does)
-    impl->uniformBuffers.bind(*parameters.renderPass);
+    // Handle uboIndex like Metal does
+    // In WebGPU, we'll need to handle this differently since we use bind groups
+    // Metal uses setVertexBytes/setFragmentBytes for the uboIndex
+    // For now, we'll store it for use in bind group creation
+
+    // Bind uniform buffers (like Metal does)
+    impl->uniformBuffers.bind(webgpuRenderPass);
+
+    // Check index buffer is valid (like Metal does)
+    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->getDirty())) {
+        assert(!"Index buffer not uploaded");
+        return;
+    }
 
     // Create bind group from UniformBufferArray if needed
     if (!impl->bindGroup && shader) {
@@ -315,69 +422,58 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    // Get pipeline from shader if we don't have it yet
+    // Get pipeline from shader if we don't have it yet (like Metal)
+    auto& shaderWebGPU = static_cast<mbgl::webgpu::ShaderProgram&>(*shader);
+
     if (!impl->pipelineState) {
-        // Use dynamic_pointer_cast for safer casting with RTTI
-        auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
-        if (webgpuShader) {
-            // Create vertex layout from attribute bindings
-            std::vector<WGPUVertexBufferLayout> vertexLayouts;
-            std::vector<std::vector<WGPUVertexAttribute>> vertexAttrs;
+        // Create vertex layout from attribute bindings
+        std::vector<WGPUVertexBufferLayout> vertexLayouts;
+        std::vector<std::vector<WGPUVertexAttribute>> vertexAttrs;
 
-            // Create vertex buffer layouts from attribute bindings
-            uint32_t bufferIndex = 0;
-            for (const auto& binding : impl->attributeBindings) {
-                if (!binding.has_value() || !binding->vertexBufferResource) {
-                    bufferIndex++;
-                    continue;
-                }
-
-                // Create vertex attribute for this buffer
-                vertexAttrs.push_back({});
-                auto& attrs = vertexAttrs.back();
-
-                WGPUVertexAttribute attr = {};
-                // TODO: Determine proper format from binding data type
-                attr.format = WGPUVertexFormat_Float32x2; // Default format
-                attr.offset = binding->vertexOffset;
-                attr.shaderLocation = bufferIndex;
-                attrs.push_back(attr);
-
-                // Create vertex buffer layout
-                WGPUVertexBufferLayout layout = {};
-                layout.arrayStride = binding->vertexStride;
-                layout.stepMode = WGPUVertexStepMode_Vertex;
-                layout.attributeCount = attrs.size();
-                layout.attributes = attrs.data();
-                vertexLayouts.push_back(layout);
-
+        // Create vertex buffer layouts from attribute bindings
+        uint32_t bufferIndex = 0;
+        for (const auto& binding : impl->attributeBindings) {
+            if (!binding.has_value() || !binding->vertexBufferResource) {
                 bufferIndex++;
+                continue;
             }
 
-            // Try to get or create pipeline with vertex layouts
-            impl->pipelineState = webgpuShader->getRenderPipeline(
-                vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
-                vertexLayouts.size());
+            // Create vertex attribute for this buffer
+            vertexAttrs.push_back({});
+            auto& attrs = vertexAttrs.back();
 
-            if (!impl->pipelineState) {
-                // Fallback to cached pipeline if custom creation fails
-                impl->pipelineState = webgpuShader->getPipeline();
-            }
+            WGPUVertexAttribute attr = {};
+            attr.format = wgpuVertexFormatOf(binding->attribute.dataType);
+            attr.offset = binding->attribute.offset;
+            attr.shaderLocation = bufferIndex;
+            attrs.push_back(attr);
 
-            if (!impl->pipelineState) {
-                return;
-            }
-        } else {
-            return;
+            // Create vertex buffer layout
+            WGPUVertexBufferLayout layout = {};
+            layout.arrayStride = binding->vertexStride;
+            layout.stepMode = WGPUVertexStepMode_Vertex;
+            layout.attributeCount = attrs.size();
+            layout.attributes = attrs.data();
+            vertexLayouts.push_back(layout);
+
+            bufferIndex++;
         }
+
+        // Get render pipeline similar to Metal's getRenderPipelineState
+        // WebGPU doesn't have the same descriptor pattern as Metal
+        // We'll use the simpler overload that doesn't need a renderable
+        impl->pipelineState = shaderWebGPU.getRenderPipeline(
+            vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
+            vertexLayouts.size());
     }
 
-    // Set the pipeline
     if (impl->pipelineState) {
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
     } else {
+        assert(!"Failed to create render pipeline state");
         return;
     }
+
 
     // Bind vertex buffers from attributeBindings (like Metal does)
     uint32_t attributeIndex = 0;
@@ -391,7 +487,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                         renderPassEncoder,
                         attributeIndex,
                         buffer.getBuffer(),
-                        binding->vertexOffset,
+                        binding->attribute.offset,
                         buffer.getSizeInBytes());
                 }
             }
@@ -426,24 +522,41 @@ void Drawable::draw(PaintParameters& parameters) const {
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
     }
 
-    // Draw
-    if (impl->indexes && impl->indexes->elements() > 0 && !impl->indexes->getDirty()) {
-        // Draw indexed geometry - loop through segments like Metal does
-        for (const auto& seg_ : impl->segments) {
-            const auto& segment = static_cast<DrawSegment&>(*seg_);
-            const auto& mlSegment = segment.getSegment();
-            if (mlSegment.indexLength > 0) {
-                uint32_t indexCount = mlSegment.indexLength;
-                uint32_t indexOffset = mlSegment.indexOffset;
-                uint32_t baseVertex = mlSegment.vertexOffset;
-
-                wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, indexOffset, baseVertex, 0);
-            }
+    // Handle depth and stencil states (like Metal does)
+    // For 3D mode, stenciling is handled by the layer group
+    if (!is3D) {
+        if (enableStencil) {
+            // WebGPU will need to handle stencil state here
+            // TODO: Implement stencil state handling similar to Metal
+            // const auto stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
         }
-    } else if (!impl->attributeBindings.empty() && impl->vertexCount > 0) {
-        // Draw non-indexed
-        uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
-        wgpuRenderPassEncoderDraw(renderPassEncoder, vertexCount, 1, 0, 0);
+
+        if (getEnableDepth()) {
+            // WebGPU will need to handle depth state here
+            // TODO: Implement depth state handling similar to Metal
+            // const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        }
+    }
+
+    // Draw indexed geometry - loop through segments (exactly like Metal does)
+    for (const auto& seg_ : impl->segments) {
+        const auto& segment = static_cast<DrawSegment&>(*seg_);
+        const auto& mlSegment = segment.getSegment();
+        if (mlSegment.indexLength > 0) {
+            const uint32_t instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+            const uint32_t indexOffset = mlSegment.indexOffset;
+            const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
+            const uint32_t baseInstance = 0;
+
+            wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
+                                            mlSegment.indexLength,  // indexCount
+                                            instanceCount,           // instanceCount
+                                            indexOffset,             // firstIndex
+                                            baseVertex,              // baseVertex
+                                            baseInstance);           // firstInstance
+
+            context.renderingStats().numDrawCalls++;
+        }
     }
 }
 
