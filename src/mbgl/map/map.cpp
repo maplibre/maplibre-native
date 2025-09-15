@@ -41,11 +41,6 @@ Map::Map(RendererFrontend& frontend,
                                             ResourceLoader, resourceOptions, clientOptions))
                                       : nullptr,
                                   mapOptions)) {
-    auto* fsManager = FileSourceManager::get();
-    if (fsManager) {
-        auto fileSource = fsManager->getFileSource(ResourceLoader, resourceOptions, clientOptions);
-    } else {
-    }
     if (actionJournalOptions.enabled()) {
         impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
     }
@@ -533,8 +528,13 @@ bool Map::isFullyLoaded() const {
 }
 
 void Map::dumpDebugLogs() const {
+    Log::Info(Event::General,
+              "----------------------------------------------------------------------"
+              "----------");
     impl->style->impl->dumpDebugLogs();
-
+    Log::Info(Event::General,
+              "----------------------------------------------------------------------"
+              "----------");
 }
 
 void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {

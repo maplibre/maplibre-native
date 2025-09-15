@@ -217,10 +217,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
-                // Copy layer uniform buffer at index 4 to drawable
-                if (layerUniforms.get(idLineEvaluatedPropsUBO)) {
-                    drawableUniforms.set(idLineEvaluatedPropsUBO, layerUniforms.get(idLineEvaluatedPropsUBO));
-                }
 #endif
 
             } break;
@@ -245,10 +241,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
-                // Copy layer uniform buffer at index 4 to drawable
-                if (layerUniforms.get(idLineEvaluatedPropsUBO)) {
-                    drawableUniforms.set(idLineEvaluatedPropsUBO, layerUniforms.get(idLineEvaluatedPropsUBO));
-                }
 #endif
             } break;
 

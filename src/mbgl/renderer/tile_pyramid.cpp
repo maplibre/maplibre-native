@@ -142,7 +142,9 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         idealTiles = util::tileCover(tileCoverParameters, idealZoom, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
-
+            mbgl::Log::Warning(mbgl::Event::General,
+                               "Provided camera options returned " + std::to_string(idealTiles.size()) +
+                                   " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
             idealTiles = {idealTiles[0]};
         }
     }
@@ -184,11 +186,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         std::unique_ptr<Tile> tile = cache.pop(tileID);
         if (!tile) {
             tile = createTile(tileID, observer);
-            if (!tile) {
-                return nullptr;
-            }
+            if (!tile) return nullptr;
             tile->setLayers(layers);
-        } else {
         }
 
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
