@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/types.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 
 namespace mbgl {
@@ -12,8 +13,13 @@ class UploadPass;
 
 class VertexAttribute final : public gfx::VertexAttribute {
 public:
-    using gfx::VertexAttribute::VertexAttribute;
-    
+    VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
+        : gfx::VertexAttribute(index_, dataType_, count_) {}
+    VertexAttribute(const VertexAttribute& other) = delete;
+    VertexAttribute(VertexAttribute&& other)
+        : gfx::VertexAttribute(std::move(other)) {}
+    ~VertexAttribute() override = default;
+
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
                                                             const gfx::BufferUsageType,
@@ -32,6 +38,9 @@ public:
         return *this;
     }
     VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
+
+    /// Indicates whether any values have changed
+    bool isModifiedAfter(std::chrono::duration<double> time) const;
 
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
