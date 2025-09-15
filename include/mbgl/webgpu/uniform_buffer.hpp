@@ -14,10 +14,12 @@ public:
     UniformBuffer(Context& context, const void* data, std::size_t size);
     ~UniformBuffer() override;
 
-    UniformBuffer(const UniformBuffer&);
+    UniformBuffer(const UniformBuffer&) = delete;
     UniformBuffer(UniformBuffer&& other) noexcept;
     UniformBuffer& operator=(const UniformBuffer&) = delete;
     UniformBuffer& operator=(UniformBuffer&&) = delete;
+
+    UniformBuffer clone() const;
 
     void update(const void* data, std::size_t dataSize) override;
 
@@ -45,10 +47,13 @@ public:
         return *this;
     }
 
+    void bindWebgpu(RenderPass&) const noexcept;
     void bind(gfx::RenderPass& renderPass) override;
 
 private:
-    gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override;
+    gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {
+        return std::make_unique<UniformBuffer>(static_cast<const UniformBuffer&>(buffer).clone());
+    }
 };
 
 } // namespace webgpu
