@@ -70,7 +70,8 @@ public:
                 context,
                 vertexSource,
                 fragmentSource,
-                ShaderSource::attributes
+                ShaderSource::attributes,
+                ShaderSource::textures
             );
 
             assert(shader);

@@ -436,8 +436,9 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     if (!impl->pipelineState) {
         // Create vertex layout from attribute bindings
-        std::vector<WGPUVertexBufferLayout> vertexLayouts;
+        // IMPORTANT: These must be kept alive until pipeline creation is done
         std::vector<std::vector<WGPUVertexAttribute>> vertexAttrs;
+        std::vector<WGPUVertexBufferLayout> vertexLayouts;
 
         // Create vertex buffer layouts from attribute bindings
         uint32_t bufferIndex = 0;
@@ -448,7 +449,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
 
             // Create vertex attribute for this buffer
-            vertexAttrs.push_back({});
+            vertexAttrs.emplace_back();
             auto& attrs = vertexAttrs.back();
 
             WGPUVertexAttribute attr = {};
@@ -457,27 +458,51 @@ void Drawable::draw(PaintParameters& parameters) const {
             attr.shaderLocation = bufferIndex;
             attrs.push_back(attr);
 
-            // Create vertex buffer layout
+            bufferIndex++;
+        }
+
+        // Now create the layouts with stable pointers to attributes
+        bufferIndex = 0;
+        size_t attrIndex = 0;
+        for (const auto& binding : impl->attributeBindings) {
+            if (!binding.has_value() || !binding->vertexBufferResource) {
+                bufferIndex++;
+                continue;
+            }
+
             WGPUVertexBufferLayout layout = {};
             layout.arrayStride = binding->vertexStride;
             layout.stepMode = WGPUVertexStepMode_Vertex;
-            layout.attributeCount = attrs.size();
-            layout.attributes = attrs.data();
+            layout.attributeCount = vertexAttrs[attrIndex].size();
+            layout.attributes = vertexAttrs[attrIndex].data();
             vertexLayouts.push_back(layout);
 
+            attrIndex++;
             bufferIndex++;
         }
 
         // Get render pipeline similar to Metal's getRenderPipelineState
         // WebGPU doesn't have the same descriptor pattern as Metal
         // We'll use the simpler overload that doesn't need a renderable
+        Log::Info(Event::Render, "Creating render pipeline with " + std::to_string(vertexLayouts.size()) + " vertex layouts");
         impl->pipelineState = shaderWebGPU.getRenderPipeline(
             vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
             vertexLayouts.size());
+        if (!impl->pipelineState) {
+            Log::Error(Event::Render, "getRenderPipeline returned null");
+        } else {
+            Log::Info(Event::Render, "Pipeline created successfully: " + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+        }
     }
 
     if (impl->pipelineState) {
-        Log::Info(Event::Render, "Setting pipeline state");
+        if (!renderPassEncoder) {
+            Log::Error(Event::Render, "renderPassEncoder is null!");
+            return;
+        }
+        Log::Info(Event::Render, "Setting pipeline state: encoder=" +
+            std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
+            ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
     } else {
         Log::Error(Event::Render, "Failed to create render pipeline state");

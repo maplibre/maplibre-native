@@ -40,8 +40,8 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
     return std::make_unique<RenderPass>(*this, name, descriptor);
 }
 
-std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable&) {
-    return std::make_unique<UploadPass>(*this, name);
+std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
+    return std::make_unique<UploadPass>(renderable, *this, name);
 }
 
 void CommandEncoder::present(gfx::Renderable&) {
@@ -95,6 +95,18 @@ void CommandEncoder::popDebugGroup() {
     if (encoder) {
         wgpuCommandEncoderPopDebugGroup(encoder);
     } else {
+    }
+}
+
+void CommandEncoder::trackUploadPass(UploadPass* uploadPass) {
+    // Track the upload pass for debug group management
+    currentUploadPass = uploadPass;
+}
+
+void CommandEncoder::forgetUploadPass(UploadPass* uploadPass) {
+    // Forget the upload pass when it's destroyed
+    if (currentUploadPass == uploadPass) {
+        currentUploadPass = nullptr;
     }
 }
 
