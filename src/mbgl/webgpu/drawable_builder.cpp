@@ -15,6 +15,7 @@ DrawableBuilder::DrawableBuilder(std::string name_)
 DrawableBuilder::~DrawableBuilder() = default;
 
 std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating drawable: " + name);
     return std::make_unique<Drawable>(name);
 }
 

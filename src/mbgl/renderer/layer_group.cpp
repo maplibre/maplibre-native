@@ -16,6 +16,12 @@ void LayerGroupBase::addDrawable(gfx::UniqueDrawable& drawable) {
 }
 
 void LayerGroupBase::runTweakers(const RenderTree&, PaintParameters& parameters) {
+    static int runCount = 0;
+    if (runCount++ < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "LayerGroupBase::runTweakers called for " + getName() +
+                       " with " + std::to_string(layerTweakers.size()) + " tweakers");
+    }
+
     for (auto it = layerTweakers.begin(); it != layerTweakers.end();) {
         if (auto tweaker = it->lock()) {
             tweaker->execute(*this, parameters);

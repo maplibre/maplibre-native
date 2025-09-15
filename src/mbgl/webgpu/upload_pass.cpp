@@ -16,6 +16,7 @@ namespace webgpu {
 
 UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
+    mbgl::Log::Info(mbgl::Event::Render, std::string("WebGPU: Creating upload pass: ") + (name ? name : "unnamed"));
     // Metal pattern: get resource from renderable and bind it
     // In WebGPU, this is optional as we may not always have a RenderableResource
     try {

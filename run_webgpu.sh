@@ -38,7 +38,7 @@ try_start() {
     fi
     
     # Start in background and check if it stays alive
-    ./build/platform/glfw/mbgl-glfw &
+    ./build/platform/glfw/mbgl-glfw --zoom 2 &
     local pid=$!
     
     # Wait a bit to see if it crashes immediately

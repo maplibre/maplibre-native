@@ -23,6 +23,12 @@ using namespace style;
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
+    static int executeCount = 0;
+    if (executeCount++ < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "FillLayerTweaker::execute called for " + layerGroup.getName() +
+                       " with " + std::to_string(layerGroup.getDrawableCount()) + " drawables");
+    }
+
     if (layerGroup.empty()) {
         return;
     }
@@ -122,6 +128,19 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+                // Log the matrix values for debugging
+                static int logCount = 0;
+                if (logCount++ < 5 && drawable.getName().find("fill") != std::string::npos) {
+                    mbgl::Log::Info(mbgl::Event::Render,
+                        "FillLayerTweaker created FillDrawableUBO for tile " + util::toString(tileID) +
+                        "\n  Matrix diagonal: [" + std::to_string(drawableUBO.matrix[0]) + ", " +
+                        std::to_string(drawableUBO.matrix[5]) + ", " +
+                        std::to_string(drawableUBO.matrix[10]) + ", " +
+                        std::to_string(drawableUBO.matrix[15]) + "]" +
+                        "\n  Translation: [" + std::to_string(drawableUBO.matrix[12]) + ", " +
+                        std::to_string(drawableUBO.matrix[13]) + ", " +
+                        std::to_string(drawableUBO.matrix[14]) + "]");
+                }
 #endif
                 break;
             }

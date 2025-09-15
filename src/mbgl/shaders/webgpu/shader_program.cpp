@@ -8,6 +8,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <fstream>
 
 namespace mbgl {
 namespace webgpu {
@@ -92,6 +93,9 @@ ShaderProgram::ShaderProgram(Context& context,
     std::string vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
     std::string fragmentWithPrelude = std::string(PreludeShader::prelude) + "\n" + fragmentSource;
 
+    // Don't log here since shaderName will be updated by the template constructor
+    // and the files would be misleading
+
     // Create vertex shader module
     WGPUShaderModuleWGSLDescriptor wgslDesc = {};
     wgslDesc.chain.sType = (WGPUSType)0x00040006;  // WGPUSType_ShaderModuleWGSLDescriptor
@@ -106,7 +110,10 @@ ShaderProgram::ShaderProgram(Context& context,
 
     vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
     if (!vertexShaderModule) {
-        Log::Error(Event::Render, "Failed to create vertex shader module");
+        Log::Error(Event::Render, "Failed to create vertex shader module for " + shaderName);
+        Log::Error(Event::Render, "Vertex shader source length: " + std::to_string(vertexWithPrelude.length()));
+    } else {
+        Log::Info(Event::Render, "Successfully created vertex shader module for " + shaderName);
     }
 
     // Create fragment shader module
@@ -120,7 +127,10 @@ ShaderProgram::ShaderProgram(Context& context,
 
     fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
     if (!fragmentShaderModule) {
-        Log::Error(Event::Render, "Failed to create fragment shader module");
+        Log::Error(Event::Render, "Failed to create fragment shader module for " + shaderName);
+        Log::Error(Event::Render, "Fragment shader source length: " + std::to_string(fragmentWithPrelude.length()));
+    } else {
+        Log::Info(Event::Render, "Successfully created fragment shader module for " + shaderName);
     }
 
     createPipelineLayout();
@@ -337,8 +347,9 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     // Set up depth stencil state
     WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
-    depthStencilState.depthCompare = WGPUCompareFunction_Always;
+    // Enable depth testing for fill layers - they need proper depth ordering
+    depthStencilState.depthWriteEnabled = WGPUOptionalBool_True;
+    depthStencilState.depthCompare = WGPUCompareFunction_LessEqual;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
     depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;

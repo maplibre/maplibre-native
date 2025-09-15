@@ -9,6 +9,7 @@ typedef struct WGPURenderPassEncoderImpl* WGPURenderPassEncoder;
 namespace mbgl {
 namespace gfx {
 class CommandEncoder;
+class UniformBufferArray;
 } // namespace gfx
 
 namespace webgpu {
@@ -27,6 +28,10 @@ public:
     // Get the WebGPU render pass encoder (similar to Metal's getMetalEncoder)
     WGPURenderPassEncoder getEncoder() const;
     const gfx::RenderPassDescriptor& getDescriptor() const { return descriptor; }
+
+    // Set/get global uniform buffers for drawables to access
+    void setGlobalUniformBuffers(const gfx::UniformBufferArray* buffers);
+    const gfx::UniformBufferArray* getGlobalUniformBuffers() const;
 
 private:
     void pushDebugGroup(const char* name) override;

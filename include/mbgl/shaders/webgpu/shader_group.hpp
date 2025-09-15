@@ -71,7 +71,8 @@ public:
                 vertexSource,
                 fragmentSource,
                 ShaderSource::attributes,
-                ShaderSource::textures
+                ShaderSource::textures,
+                std::string(name)  // Pass the shader name
             );
 
             assert(shader);
