@@ -313,6 +313,39 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         }
     }
 
+    // Upload uniform buffers to ensure they're ready for the GPU
+    // This is critical for making drawables visible
+    Log::Info(Event::Render, "Checking uniform buffers, allocated size: " +
+              std::to_string(impl->uniformBuffers.allocatedSize()));
+
+    for (size_t i = 0; i < impl->uniformBuffers.allocatedSize(); ++i) {
+        auto& uniformBuffer = impl->uniformBuffers.get(i);
+        if (uniformBuffer) {
+            // Make sure the uniform buffer has its data uploaded
+            // The uniform buffer should handle its own upload internally
+            // but we need to ensure it's marked as not dirty
+            auto* webgpuUniformBuffer = static_cast<webgpu::UniformBuffer*>(uniformBuffer.get());
+            if (webgpuUniformBuffer) {
+                // The uniform buffer's data should already be uploaded when it was created/updated
+                // Just ensure we have a valid buffer handle
+                if (!webgpuUniformBuffer->getBuffer()) {
+                    Log::Error(Event::Render, "Uniform buffer " + std::to_string(i) + " has no GPU buffer!");
+                } else {
+                    Log::Info(Event::Render, "Uniform buffer " + std::to_string(i) + " is ready, size: " +
+                             std::to_string(webgpuUniformBuffer->getSize()));
+                }
+            }
+        } else {
+            Log::Info(Event::Render, "Uniform buffer slot " + std::to_string(i) + " is empty");
+        }
+    }
+
+    // Clear any existing bind group to force recreation with updated buffers
+    if (impl->bindGroup) {
+        wgpuBindGroupRelease(impl->bindGroup);
+        impl->bindGroup = nullptr;
+    }
+
     // Upload textures if needed
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
@@ -405,8 +438,15 @@ void Drawable::draw(PaintParameters& parameters) const {
                             entry.offset = 0;
                             entry.size = webgpuUniformBuffer->getSize();
                             entries.push_back(entry);
+
+                            Log::Info(Event::Render, "Adding uniform buffer to bind group: binding=" +
+                                     std::to_string(i) + " size=" + std::to_string(entry.size));
                         }
                     }
+                }
+
+                if (entries.empty()) {
+                    Log::Warning(Event::Render, "No uniform buffers found for bind group!");
                 }
 
                 // Add texture bindings if any
@@ -514,6 +554,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     // Bind vertex buffers from attributeBindings (like Metal does)
     uint32_t attributeIndex = 0;
     int boundBuffers = 0;
+    Log::Info(Event::Render, "Binding vertex buffers, total bindings: " + std::to_string(impl->attributeBindings.size()));
     for (const auto& binding : impl->attributeBindings) {
         if (binding.has_value() && binding->vertexBufferResource) {
             const auto* vertexBufferRes = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
