@@ -46,8 +46,7 @@ const GeometryCollection& VectorTileFeature::getGeometries() const {
         try {
             lines = feature.getGeometries<GeometryCollection>(scale);
         } catch (const std::runtime_error& ex) {
-            // Log::Error(Event::ParseTile, "Could not get geometries: " + std::string(ex.what()));
-            // Logging disabled to prevent heap corruption from string concatenation in multi-threaded context
+            Log::Error(Event::ParseTile, "Could not get geometries: " + std::string(ex.what()));
             lines = GeometryCollection();
         }
 
