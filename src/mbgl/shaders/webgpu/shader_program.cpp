@@ -326,11 +326,9 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;
 
-    Log::Info(Event::Render, "Creating pipeline with " + std::to_string(vertexLayoutCount) + " vertex layouts");
+    // Log::Info(Event::Render, "Creating pipeline with " + std::to_string(vertexLayoutCount) + " vertex layouts");
     WGPURenderPipeline pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
-    if (pipeline) {
-        Log::Info(Event::Render, "Pipeline created: " + std::to_string(reinterpret_cast<uintptr_t>(pipeline)));
-    } else {
+    if (!pipeline) {
         Log::Error(Event::Render, "Failed to create pipeline");
     }
     return pipeline;

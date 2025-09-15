@@ -152,29 +152,27 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
 
-    Log::Info(Event::Render, "WebGPU buildAttributeBindings called");
+    // Log::Info(Event::Render, "WebGPU buildAttributeBindings called");
 
-    // Log input parameters
-    std::stringstream ss;
-    ss << "  defaults.allocatedSize()=" << defaults.allocatedSize();
-    Log::Info(Event::Render, ss.str());
+    // // Log input parameters
+    // std::stringstream ss;
+    // ss << "  defaults.allocatedSize()=" << defaults.allocatedSize();
+    // Log::Info(Event::Render, ss.str());
 
-    // Count how many defaults actually exist
-    int defaultCount = 0;
-    defaults.visitAttributes([&](const gfx::VertexAttribute&) {
-        defaultCount++;
-    });
-    std::stringstream defaultMsg;
-    defaultMsg << "  defaults has " << defaultCount << " attributes";
-    Log::Info(Event::Render, defaultMsg.str());
+    // // Count how many defaults actually exist
+    // int defaultCount = 0;
+    // defaults.visitAttributes([&](const gfx::VertexAttribute&) {
+    //     defaultCount++;
+    // });
+    // std::stringstream defaultMsg;
+    // defaultMsg << "  defaults has " << defaultCount << " attributes";
+    // Log::Info(Event::Render, defaultMsg.str());
 
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
     // For each attribute in the program, with the corresponding default and optional override...
-    int attrCount = 0;
     const auto resolveAttr = [&]([[maybe_unused]] const size_t id, auto& default_, auto& override_) -> void {
-        attrCount++;
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto index = static_cast<std::size_t>(defaultAttr.getIndex());
@@ -233,21 +231,21 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
     defaults.resolve(overrides, resolveAttr, missingAttr);
 
-    std::stringstream processed;
-    processed << "  Processed " << attrCount << " attributes";
-    Log::Info(Event::Render, processed.str());
+    // std::stringstream processed;
+    // processed << "  Processed " << attrCount << " attributes";
+    // Log::Info(Event::Render, processed.str());
 
-    // Count how many valid bindings we have
-    size_t validBindings = 0;
-    for (const auto& binding : bindings) {
-        if (binding && binding->vertexBufferResource) {
-            validBindings++;
-        }
-    }
+    // // Count how many valid bindings we have
+    // size_t validBindings = 0;
+    // for (const auto& binding : bindings) {
+    //     if (binding && binding->vertexBufferResource) {
+    //         validBindings++;
+    //     }
+    // }
 
-    std::stringstream result;
-    result << "  Created " << validBindings << " valid bindings out of " << bindings.size() << " total";
-    Log::Info(Event::Render, result.str());
+    // std::stringstream result;
+    // result << "  Created " << validBindings << " valid bindings out of " << bindings.size() << " total";
+    // Log::Info(Event::Render, result.str());
 
     return bindings;
 }
