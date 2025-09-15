@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <vector>
 
 namespace mbgl {
 namespace webgpu {
@@ -12,59 +13,51 @@ class Context;
 
 class BufferResource {
 public:
-    BufferResource() = default;
+    BufferResource() noexcept = delete;
     BufferResource(Context& context,
                    const void* data,
                    std::size_t size,
                    uint32_t usage,
+                   bool isIndexBuffer = false,
                    bool persistent = false);
-    ~BufferResource();
-    
-    Context& getContext() const { return *context; }
+    BufferResource(BufferResource&&) noexcept;
+    virtual ~BufferResource() noexcept;
 
-    // Disable copy
-    BufferResource(const BufferResource&) = delete;
-    BufferResource& operator=(const BufferResource&) = delete;
+    BufferResource& operator=(BufferResource&&) noexcept;
 
-    // Enable move
-    BufferResource(BufferResource&& other) noexcept
-        : context(other.context),
-          buffer(other.buffer),
-          size(other.size),
-          usage(other.usage),
-          persistent(other.persistent) {
-        other.buffer = nullptr;
-        other.size = 0;
-    }
+    BufferResource clone() const;
 
-    BufferResource& operator=(BufferResource&& other) noexcept {
-        if (this != &other) {
-            if (buffer) {
-                wgpuBufferRelease(buffer);
-            }
-            context = other.context;
-            buffer = other.buffer;
-            size = other.size;
-            usage = other.usage;
-            persistent = other.persistent;
-            other.buffer = nullptr;
-            other.size = 0;
-        }
-        return *this;
-    }
+    void update(const void* data, std::size_t size, std::size_t offset) noexcept;
 
-    WGPUBuffer getBuffer() const { return buffer; }
-    std::size_t getSize() const { return size; }
+    std::size_t getSizeInBytes() const noexcept { return size; }
+    const void* contents() const noexcept { return raw.empty() ? nullptr : raw.data(); }
+
+    Context& getContext() const noexcept { return context; }
+    WGPUBuffer getBuffer() const noexcept { return buffer; }
+
+    bool isValid() const noexcept { return buffer || !raw.empty(); }
+    operator bool() const noexcept { return isValid(); }
+    bool operator!() const noexcept { return !isValid(); }
+
+    using VersionType = std::uint16_t;
+
+    /// Used to detect whether buffer contents have changed
+    VersionType getVersion() const noexcept { return version; }
+
+    /// Indicates whether this buffer needs to be re-bound from a previous binding at the given version
+    bool needReBind(VersionType version) const noexcept;
+
     uint32_t getUsage() const { return usage; }
     bool isPersistent() const { return persistent; }
 
-    void update(const void* data, std::size_t updateSize, std::size_t offset = 0);
-
-private:
-    Context* context = nullptr;
+protected:
+    Context& context;
     WGPUBuffer buffer = nullptr;
+    std::vector<std::uint8_t> raw;
     std::size_t size = 0;
     uint32_t usage = 0;
+    std::uint16_t version = 0;
+    bool isIndexBuffer = false;
     bool persistent = false;
 };
 

@@ -9,7 +9,7 @@ VertexBufferResource::VertexBufferResource(BufferResource&& buffer_) noexcept
     if (buffer.getBuffer()) {
         auto& stats = buffer.getContext().renderingStats();
         stats.numVertexBuffers++;
-        stats.memVertexBuffers += buffer.getSize();
+        stats.memVertexBuffers += buffer.getSizeInBytes();
     }
 }
 
@@ -17,7 +17,7 @@ VertexBufferResource::~VertexBufferResource() noexcept {
     if (buffer.getBuffer()) {
         auto& stats = buffer.getContext().renderingStats();
         stats.numVertexBuffers--;
-        stats.memVertexBuffers -= buffer.getSize();
+        stats.memVertexBuffers -= buffer.getSizeInBytes();
     }
 }
 

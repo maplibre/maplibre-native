@@ -32,6 +32,7 @@
 namespace mbgl {
 namespace webgpu {
 
+// Simple wrapper to adapt gfx::IndexBuffer to IndexBufferBase
 struct IndexBuffer : public gfx::IndexBufferBase {
     IndexBuffer(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
         : buffer(std::move(buffer_)) {}
@@ -147,6 +148,29 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 
     if (!device) {
         return;
+    }
+
+    // Handle index buffer creation like Metal does
+    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->getDirty())) {
+        if (!impl->indexes->empty()) {
+            // Create index buffer resource
+            auto indexBufferResource = webgpuUploadPass.createIndexBufferResource(
+                impl->indexes->data(),
+                impl->indexes->bytes(),
+                gfx::BufferUsageType::StaticDraw,
+                /*persistent=*/false);
+
+            // Create gfx::IndexBuffer
+            auto gfxIndexBuffer = std::make_unique<gfx::IndexBuffer>(
+                impl->indexes->elements(),
+                std::move(indexBufferResource));
+
+            // Wrap it in local IndexBuffer wrapper
+            auto indexBuffer = std::make_unique<IndexBuffer>(std::move(gfxIndexBuffer));
+
+            impl->indexes->setBuffer(std::move(indexBuffer));
+            impl->indexes->setDirty(false);
+        }
     }
 
     // Store the bind group layout if available for later bind group creation
@@ -368,15 +392,34 @@ void Drawable::draw(PaintParameters& parameters) const {
                         attributeIndex,
                         buffer.getBuffer(),
                         binding->vertexOffset,
-                        buffer.getSize());
+                        buffer.getSizeInBytes());
                 }
             }
         }
         attributeIndex++;
     }
 
-    // Note: Index buffer binding will be handled differently in WebGPU.
-    // The index buffer is part of impl->indexes and needs to be bound during draw.
+    // Bind index buffer if present
+    if (impl->indexes && impl->indexes->elements() > 0 && !impl->indexes->getDirty()) {
+        // Get the buffer from indexes
+        if (const auto* indexBufferBase = impl->indexes->getBuffer()) {
+            if (const auto* webgpuIndexBuffer = static_cast<const IndexBuffer*>(indexBufferBase)) {
+                if (webgpuIndexBuffer->buffer) {
+                    const auto& indexBufferRes = webgpuIndexBuffer->buffer->getResource<IndexBufferResource>();
+                    const auto& bufferResource = indexBufferRes.getBuffer();
+                    if (bufferResource.getBuffer()) {
+                        // Always use Uint16 format for now
+                        WGPUIndexFormat indexFormat = WGPUIndexFormat_Uint16;
+                        wgpuRenderPassEncoderSetIndexBuffer(renderPassEncoder,
+                                                           bufferResource.getBuffer(),
+                                                           indexFormat,
+                                                           0,
+                                                           bufferResource.getSizeInBytes());
+                    }
+                }
+            }
+        }
+    }
 
     // Set bind group
     if (impl->bindGroup) {
