@@ -1,7 +1,12 @@
 #include <mbgl/webgpu/vertex_attribute.hpp>
+#include <mbgl/gfx/vertex_vector.hpp>
+#include <mbgl/webgpu/buffer_resource.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/webgpu/vertex_buffer_resource.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
+#include <mbgl/util/logging.hpp>
+#include <mbgl/util/convert.hpp>
+
+#include <cstring>
+#include <sstream>
 
 namespace mbgl {
 namespace webgpu {
@@ -10,37 +15,33 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
                                                                   UploadPass& uploadPass,
                                                                   const gfx::BufferUsageType usage,
                                                                   bool forceUpdate) {
-    if (!attrib_.getBuffer() || forceUpdate) {
+    if (!attrib_.getBuffer()) {
         auto& attrib = static_cast<VertexAttribute&>(attrib_);
-        
-        // Check if we have shared raw data
         if (attrib.sharedRawData) {
-            // WebGPU doesn't have a getBuffer method yet, need to create buffer
-            if (!attrib.rawData.empty()) {
-                auto buffer = uploadPass.createVertexBufferResource(
-                    attrib.rawData.data(), 
-                    attrib.rawData.size(),
-                    usage,
-                    false);
-                attrib.setBuffer(std::move(buffer));
-                attrib.setRawData({});
-                attrib_.setDirty(false);
-            }
+            return uploadPass.getBuffer(attrib.sharedRawData, usage, forceUpdate);
         } else {
-            // Check if we have raw data to upload
             if (!attrib.rawData.empty()) {
                 auto buffer = uploadPass.createVertexBufferResource(
-                    attrib.rawData.data(), 
-                    attrib.rawData.size(),
-                    usage,
-                    false);
+                    attrib.rawData.data(), attrib.rawData.size(), usage, false);
                 attrib.setBuffer(std::move(buffer));
                 attrib.setRawData({});
                 attrib_.setDirty(false);
+            } else {
+                assert(false);
             }
         }
     }
     return attrib_.getBuffer();
+}
+
+bool VertexAttributeArray::isModifiedAfter(std::chrono::duration<double> time) const {
+    bool modified = false;
+    visitAttributes([&](const gfx::VertexAttribute& attrib) {
+        if (attrib.getLastModified() > time) {
+            modified = true;
+        }
+    });
+    return modified;
 }
 
 } // namespace webgpu
