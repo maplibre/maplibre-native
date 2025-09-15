@@ -34,15 +34,6 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
     return attrib_.getBuffer();
 }
 
-bool VertexAttributeArray::isModifiedAfter(std::chrono::duration<double> time) const {
-    bool modified = false;
-    visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        if (attrib.getLastModified() > time) {
-            modified = true;
-        }
-    });
-    return modified;
-}
 
 } // namespace webgpu
 } // namespace mbgl
