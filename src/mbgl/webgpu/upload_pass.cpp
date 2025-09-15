@@ -1,20 +1,45 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/buffer_resource.hpp>
 #include <mbgl/webgpu/vertex_buffer_resource.hpp>
 #include <mbgl/webgpu/index_buffer_resource.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
+#include <mbgl/gfx/debug_group.hpp>
 #include <mbgl/util/logging.hpp>
 #include <sstream>
 
 namespace mbgl {
 namespace webgpu {
 
-UploadPass::UploadPass(CommandEncoder& commandEncoder_, const char* name)
+UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
-    pushDebugGroup(name);
+    // Metal pattern: get resource from renderable and bind it
+    // In WebGPU, this is optional as we may not always have a RenderableResource
+    try {
+        auto& resource = renderable.getResource<RenderableResource>();
+        resource.bind();
+    } catch (...) {
+        // No RenderableResource available, which is fine for WebGPU
+    }
+
+    // Push debug groups (Metal pattern)
+    commandEncoder.visitDebugGroups([this](const auto& group) {
+        debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, group.c_str()});
+    });
+
+    // Push the group for the name provided
+    debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, name});
+
+    // Let the encoder pass along any groups pushed to it after this
+    commandEncoder.trackUploadPass(this);
+}
+
+UploadPass::~UploadPass() {
+    commandEncoder.forgetUploadPass(this);
+    debugGroups.clear();
 }
 
 void UploadPass::pushDebugGroup(const char* /*name*/) {
@@ -73,29 +98,47 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource,
     buffer.update(data, size);
 }
 
-const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vertexVector,
-                                                             gfx::BufferUsageType usage,
+// Metal-like VertexBuffer struct
+struct VertexBuffer : public gfx::VertexBufferBase {
+    ~VertexBuffer() override = default;
+
+    std::unique_ptr<gfx::VertexBufferResource> resource;
+};
+
+namespace {
+const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
+}
+
+const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
+                                                             const gfx::BufferUsageType usage,
                                                              bool forceUpdate) {
-    static gfx::UniqueVertexBufferResource nullBuffer;
+    if (vec) {
+        const auto* rawBufPtr = vec->getRawData();
+        const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
 
-    if (!vertexVector) {
-        return nullBuffer;
+        // If we already have a buffer...
+        if (auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer()); rawData && rawData->resource) {
+            auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
+
+            // If the already-allocated buffer is large enough, we can re-use it
+            if (rawBufSize <= resource.getSizeInBytes()) {
+                // If the source changed, update the buffer contents
+                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
+                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                    resource.setLastUpdated(vec->getLastModified());
+                }
+                return rawData->resource;
+            }
+        }
+        // Otherwise, create a new one
+        if (rawBufSize > 0) {
+            auto buffer_ = std::make_unique<VertexBuffer>();
+            buffer_->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            vec->setBuffer(std::move(buffer_));
+            return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
+        }
     }
-
-    // VertexVectorBase stores VertexBufferBase*, but we need to work with resources
-    // For now, just create a new buffer each time (Metal might have a more sophisticated approach)
-    const auto data = vertexVector->getRawData();
-    const auto size = vertexVector->getRawSize() * vertexVector->getRawCount();
-
-    if (size > 0) {
-        // Create a new buffer resource
-        // Note: This is not optimal, but matches the pattern we need
-        static gfx::UniqueVertexBufferResource tempBuffer;
-        tempBuffer = createVertexBufferResource(data, size, usage, false);
-        return tempBuffer;
-    }
-
-    return nullBuffer;
+    return noBuffer;
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
@@ -115,6 +158,15 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     std::stringstream ss;
     ss << "  defaults.allocatedSize()=" << defaults.allocatedSize();
     Log::Info(Event::Render, ss.str());
+
+    // Count how many defaults actually exist
+    int defaultCount = 0;
+    defaults.visitAttributes([&](const gfx::VertexAttribute&) {
+        defaultCount++;
+    });
+    std::stringstream defaultMsg;
+    defaultMsg << "  defaults has " << defaultCount << " attributes";
+    Log::Info(Event::Render, defaultMsg.str());
 
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());

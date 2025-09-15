@@ -71,11 +71,11 @@ try_start() {
 cleanup_processes
 
 # Try up to 5 times
-for i in {1..5}; do
-    if try_start $i; then
-        exit 0
-    fi
-done
+# for i in {1..5}; do
+if try_start $i; then
+    exit 0
+fi
+# done
 
 echo ""
 echo "Failed to start after 5 attempts."

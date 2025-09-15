@@ -2,6 +2,9 @@
 #include <mbgl/shaders/webgpu/common.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mbgl/webgpu/uniform_buffer.hpp>
+#include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/gfx/color_mode.hpp>
@@ -233,6 +236,11 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     }
 
     if (!device || !vertexShaderModule || !fragmentShaderModule || !pipelineLayout) {
+        Log::Error(Event::Render, "createPipeline missing requirement: device=" +
+            std::to_string(device != nullptr) + ", vertexModule=" +
+            std::to_string(vertexShaderModule != nullptr) + ", fragmentModule=" +
+            std::to_string(fragmentShaderModule != nullptr) + ", pipelineLayout=" +
+            std::to_string(pipelineLayout != nullptr));
         return nullptr;
     }
 
@@ -318,7 +326,14 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;
 
-    return wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
+    Log::Info(Event::Render, "Creating pipeline with " + std::to_string(vertexLayoutCount) + " vertex layouts");
+    WGPURenderPipeline pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
+    if (pipeline) {
+        Log::Info(Event::Render, "Pipeline created: " + std::to_string(reinterpret_cast<uintptr_t>(pipeline)));
+    } else {
+        Log::Error(Event::Render, "Failed to create pipeline");
+    }
+    return pipeline;
 }
 
 // WebGPU blend operation conversion (similar to Metal's conversion functions)

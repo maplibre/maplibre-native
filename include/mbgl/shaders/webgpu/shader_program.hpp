@@ -76,6 +76,31 @@ public:
         attributeInfos.reserve(N);
         for (const auto& attr : attrs) {
             attributeInfos.push_back(attr);
+            // Initialize the vertex attribute (like Metal does)
+            initAttribute(attr);
+        }
+        createShaderModules(vertexSource, fragmentSource);
+        createPipelineLayout();
+    }
+
+    // Constructor that takes both attributes and textures (matching Metal's approach)
+    template<size_t N, size_t M>
+    ShaderProgram(Context& ctx,
+                  const std::string& vertexSource,
+                  const std::string& fragmentSource,
+                  const std::array<shaders::AttributeInfo, N>& attrs,
+                  const std::array<shaders::TextureInfo, M>& texts)
+        : context(&ctx) {
+        // Store attributes for pipeline creation
+        attributeInfos.reserve(N);
+        for (const auto& attr : attrs) {
+            attributeInfos.push_back(attr);
+            // Initialize the vertex attribute (like Metal does)
+            initAttribute(attr);
+        }
+        // Initialize textures
+        for (const auto& tex : texts) {
+            initTexture(tex);
         }
         createShaderModules(vertexSource, fragmentSource);
         createPipelineLayout();

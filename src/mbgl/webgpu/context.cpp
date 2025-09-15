@@ -6,9 +6,8 @@
 #include <mbgl/webgpu/drawable_builder.hpp>
 #include <mbgl/webgpu/draw_scope_resource.hpp>
 #include <mbgl/webgpu/offscreen_texture.hpp>
-#include <mbgl/webgpu/renderbuffer.hpp>
-#include <mbgl/webgpu/renderbuffer_resource.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
+#include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/webgpu/shader_group.hpp>
