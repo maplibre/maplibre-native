@@ -255,10 +255,10 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
                               vertexAttributes->isModifiedAfter(*attributeUpdateTime);
 
-    std::stringstream uploadMsg;
-    uploadMsg << "WebGPU upload() buildAttribs=" << (buildAttribs ? "true" : "false")
-              << ", attributeUpdateTime=" << (attributeUpdateTime ? "set" : "null");
-    Log::Info(Event::Render, uploadMsg.str());
+    // std::stringstream uploadMsg;
+    // uploadMsg << "WebGPU upload() buildAttribs=" << (buildAttribs ? "true" : "false")
+    //           << ", attributeUpdateTime=" << (attributeUpdateTime ? "set" : "null");
+    // Log::Info(Event::Render, uploadMsg.str());
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
@@ -315,9 +315,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 
     // Upload uniform buffers to ensure they're ready for the GPU
     // This is critical for making drawables visible
-    Log::Info(Event::Render, "Checking uniform buffers, allocated size: " +
-              std::to_string(impl->uniformBuffers.allocatedSize()));
-
     for (size_t i = 0; i < impl->uniformBuffers.allocatedSize(); ++i) {
         auto& uniformBuffer = impl->uniformBuffers.get(i);
         if (uniformBuffer) {
@@ -330,13 +327,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                 // Just ensure we have a valid buffer handle
                 if (!webgpuUniformBuffer->getBuffer()) {
                     Log::Error(Event::Render, "Uniform buffer " + std::to_string(i) + " has no GPU buffer!");
-                } else {
-                    Log::Info(Event::Render, "Uniform buffer " + std::to_string(i) + " is ready, size: " +
-                             std::to_string(webgpuUniformBuffer->getSize()));
                 }
             }
-        } else {
-            Log::Info(Event::Render, "Uniform buffer slot " + std::to_string(i) + " is empty");
         }
     }
 
@@ -459,8 +451,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                             entry.size = webgpuUniformBuffer->getSize();
                             entries.push_back(entry);
 
-                            Log::Info(Event::Render, "Adding uniform buffer to bind group: binding=" +
-                                     std::to_string(i) + " size=" + std::to_string(entry.size));
+                            // Log::Info(Event::Render, "Adding uniform buffer to bind group: binding=" +
+                            //          std::to_string(i) + " size=" + std::to_string(entry.size));
                         }
                     }
                 }
@@ -545,8 +537,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         // Get render pipeline similar to Metal's getRenderPipelineState
-        // Use the aligned API with proper parameters
-        gfx::ColorMode colorMode = gfx::ColorMode::alphaBlended();
+        // Use the actual color mode from the drawable (like Metal does)
+        const auto& colorMode = getColorMode();
 
         // Get the renderable from render pass descriptor like Metal does
         const auto& renderable = webgpuRenderPass.getDescriptor().renderable;
@@ -582,8 +574,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Bind vertex buffers from attributeBindings (like Metal does)
     uint32_t attributeIndex = 0;
-    int boundBuffers = 0;
-    Log::Info(Event::Render, "Binding vertex buffers, total bindings: " + std::to_string(impl->attributeBindings.size()));
     for (const auto& binding : impl->attributeBindings) {
         if (binding.has_value() && binding->vertexBufferResource) {
             const auto* vertexBufferRes = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
@@ -596,13 +586,11 @@ void Drawable::draw(PaintParameters& parameters) const {
                         buffer.getBuffer(),
                         binding->attribute.offset,
                         buffer.getSizeInBytes());
-                    boundBuffers++;
                 }
             }
         }
         attributeIndex++;
     }
-    Log::Info(Event::Render, "Bound " + std::to_string(boundBuffers) + " vertex buffers");
 
     // Bind index buffer if present
     if (impl->indexes && impl->indexes->elements() > 0 && !impl->indexes->getDirty()) {
@@ -628,7 +616,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Set bind group
     if (impl->bindGroup) {
-        Log::Info(Event::Render, "Setting bind group");
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
     } else {
         Log::Warning(Event::Render, "No bind group available!");
@@ -651,7 +638,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Draw indexed geometry - loop through segments (exactly like Metal does)
-    Log::Info(Event::Render, "Drawing " + std::to_string(impl->segments.size()) + " segments");
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
@@ -660,11 +646,6 @@ void Drawable::draw(PaintParameters& parameters) const {
             const uint32_t indexOffset = mlSegment.indexOffset;
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
-
-            Log::Info(Event::Render, "DrawIndexed: indices=" + std::to_string(mlSegment.indexLength) +
-                                    " instances=" + std::to_string(instanceCount) +
-                                    " offset=" + std::to_string(indexOffset) +
-                                    " baseVertex=" + std::to_string(baseVertex));
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
                                             mlSegment.indexLength,  // indexCount

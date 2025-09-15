@@ -1,8 +1,11 @@
 #pragma once
 
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/buffer_resource.hpp>
 #include <memory>
+#include <optional>
 
 namespace mbgl {
 namespace webgpu {
@@ -51,18 +54,28 @@ public:
     void visualizeDepthBuffer(float depthRangeSize) override;
 #endif
 
-    // WebGPU specific
-    class Impl;
-    Impl* getImpl() const { return impl.get(); }
+    // Buffer creation (aligned with Metal)
+    BufferResource createBuffer(const void* data,
+                                std::size_t size,
+                                uint32_t usage,
+                                bool isIndexBuffer,
+                                bool persistent) const;
+
+    // Get reusable buffers (aligned with Metal)
+    const BufferResource& getTileVertexBuffer();
+    const BufferResource& getTileIndexBuffer();
 
 protected:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size) override;
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
 
 private:
-    std::unique_ptr<Impl> impl;
     RendererBackend& backend;
     std::unique_ptr<gfx::UniformBufferArray> globalUniformBuffers;
+
+    // Cached buffers (aligned with Metal)
+    std::optional<BufferResource> tileVertexBuffer;
+    std::optional<BufferResource> tileIndexBuffer;
 };
 
 } // namespace webgpu
