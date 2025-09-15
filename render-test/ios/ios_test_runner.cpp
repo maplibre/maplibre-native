@@ -20,11 +20,16 @@ bool TestRunner::startTest(const std::string& manifestBasePath) {
 
         int finishedTestCount = 0;
         std::function<void()> testStatus = [&]() {
+            mbgl::Log::Info(mbgl::Event::General,
+                            "Current finished tests number is '" + std::to_string(++finishedTestCount) + "' ");
         };
+        mbgl::Log::Info(mbgl::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "' ");
 
         auto result = mbgl::runRenderTests(static_cast<int>(argv.size() - 1), argv.data(), testStatus);
 
-
+        mbgl::Log::Info(mbgl::Event::General,
+                        "End running RenderTestRunner with manifest: '" + manifest + "' with result value " +
+                            std::to_string(result));
         return result == 0;
     };
 
@@ -36,11 +41,14 @@ bool TestRunner::startTest(const std::string& manifestBasePath) {
 #else
         status = runTestWithManifest(manifestBasePath + "/ios-render-test-runner-style.json");
         status = runTestWithManifest(manifestBasePath + "/ios-render-test-runner-metrics.json") && status;
-if
+#endif
     } catch (...) {
+        mbgl::Log::Info(mbgl::Event::General, "Failed with exception");
     }
 
+    mbgl::Log::Info(mbgl::Event::General, "All tests are finished!");
     if (!status) {
+        mbgl::Log::Info(mbgl::Event::General, "There are failing test cases");
     }
     return status;
 }
