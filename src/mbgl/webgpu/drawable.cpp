@@ -246,6 +246,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         impl->indexes->setDirty(false);
     }
 
+    // Upload vertex attributes (like Metal does)
     const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
                               vertexAttributes->isModifiedAfter(*attributeUpdateTime);
 
@@ -258,52 +259,47 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             vertexAttributes = std::make_shared<gfx::VertexAttributeArray>();
         }
 
-        // Apply drawable values to shader defaults
+        // Apply drawable values to shader defaults (matching Metal's approach)
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
-        auto attributeBindings_ = webgpuUploadPass.buildAttributeBindings(
-            impl->vertexCount,
-            impl->vertexType,
-            /*vertexAttributeIndex=*/-1,
-            /*vertexData=*/{},
-            shader->getVertexAttributes(),
-            *vertexAttributes,
-            usage,
-            attributeUpdateTime,
-            vertexBuffers);
+        auto attributeBindings_ = webgpuUploadPass.buildAttributeBindings(impl->vertexCount,
+                                                                           impl->vertexType,
+                                                                           /*vertexAttributeIndex=*/-1,
+                                                                           /*vertexData=*/{},
+                                                                           shader->getVertexAttributes(),
+                                                                           *vertexAttributes,
+                                                                           usage,
+                                                                           attributeUpdateTime,
+                                                                           vertexBuffers);
 
-        vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
-            // Reset pipeline state when attribute bindings change
-            impl->pipelineState = nullptr;
-            // to the vertex buffer data
+            impl->vertexDescHash = 0; // Reset hash when bindings change
+            impl->pipelineState = nullptr; // Reset pipeline state when attribute bindings change
         }
     }
 
-    // Build instance buffer
+    // Build instance buffer (like Metal does)
     const bool buildInstanceBuffer =
         (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
 
     if (buildInstanceBuffer) {
-        // Build instance attribute buffers
+        // Apply instance values to shader defaults (matching Metal's approach)
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
-        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(
-            instanceAttributes->getMaxCount(),
-            /*vertexType*/ gfx::AttributeDataType::Byte,
-            /*vertexAttributeIndex=*/-1,
-            /*vertexData=*/{},
-            shader->getInstanceAttributes(),
-            *instanceAttributes,
-            usage,
-            attributeUpdateTime,
-            instanceBuffers);
+        auto instanceBindings_ = webgpuUploadPass.buildAttributeBindings(impl->vertexCount,
+                                                                         impl->vertexType,
+                                                                         /*vertexAttributeIndex=*/-1,
+                                                                         /*vertexData=*/{},
+                                                                         shader->getInstanceAttributes(),
+                                                                         *instanceAttributes,
+                                                                         usage,
+                                                                         attributeUpdateTime,
+                                                                         instanceBuffers);
 
-        // Clear dirty flag
-        instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
+            impl->pipelineState = nullptr; // Reset pipeline state when instance bindings change
         }
     }
 
@@ -323,6 +319,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    Log::Info(Event::Render, "WebGPU Drawable::draw called for " + getName());
+
     if (isCustom) {
         return;
     }
@@ -332,6 +330,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(*parameters.renderPass);
     WGPURenderPassEncoder renderPassEncoder = webgpuRenderPass.getEncoder();
     if (!renderPassEncoder) {
+        Log::Error(Event::Render, "No render pass encoder available");
         assert(false);
         return;
     }
@@ -468,8 +467,10 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     if (impl->pipelineState) {
+        Log::Info(Event::Render, "Setting pipeline state");
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
     } else {
+        Log::Error(Event::Render, "Failed to create render pipeline state");
         assert(!"Failed to create render pipeline state");
         return;
     }
@@ -477,6 +478,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Bind vertex buffers from attributeBindings (like Metal does)
     uint32_t attributeIndex = 0;
+    int boundBuffers = 0;
     for (const auto& binding : impl->attributeBindings) {
         if (binding.has_value() && binding->vertexBufferResource) {
             const auto* vertexBufferRes = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
@@ -489,11 +491,13 @@ void Drawable::draw(PaintParameters& parameters) const {
                         buffer.getBuffer(),
                         binding->attribute.offset,
                         buffer.getSizeInBytes());
+                    boundBuffers++;
                 }
             }
         }
         attributeIndex++;
     }
+    Log::Info(Event::Render, "Bound " + std::to_string(boundBuffers) + " vertex buffers");
 
     // Bind index buffer if present
     if (impl->indexes && impl->indexes->elements() > 0 && !impl->indexes->getDirty()) {
@@ -519,7 +523,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Set bind group
     if (impl->bindGroup) {
+        Log::Info(Event::Render, "Setting bind group");
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
+    } else {
+        Log::Warning(Event::Render, "No bind group available!");
     }
 
     // Handle depth and stencil states (like Metal does)
@@ -539,6 +546,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Draw indexed geometry - loop through segments (exactly like Metal does)
+    Log::Info(Event::Render, "Drawing " + std::to_string(impl->segments.size()) + " segments");
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
@@ -547,6 +555,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             const uint32_t indexOffset = mlSegment.indexOffset;
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
+
+            Log::Info(Event::Render, "DrawIndexed: indices=" + std::to_string(mlSegment.indexLength) +
+                                    " instances=" + std::to_string(instanceCount) +
+                                    " offset=" + std::to_string(indexOffset) +
+                                    " baseVertex=" + std::to_string(baseVertex));
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
                                             mlSegment.indexLength,  // indexCount
