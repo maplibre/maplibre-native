@@ -21,8 +21,10 @@ public:
     WGPUCommandEncoder commandEncoder = nullptr;
 };
 
-RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
-    : debugGroup(commandEncoder_.createDebugGroup(name)),
+RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor_)
+    : descriptor(descriptor_),
+      commandEncoder(commandEncoder_),
+      debugGroup(commandEncoder_.createDebugGroup(name)),
       impl(std::make_unique<Impl>()) {
     // Get the WebGPU command encoder from our CommandEncoder
     impl->commandEncoder = commandEncoder_.getEncoder();
