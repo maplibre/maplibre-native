@@ -6,6 +6,8 @@
 namespace mbgl {
 namespace shaders {
 
+// The enum values are already defined in layer_ubo.hpp
+// WebGPU uses the same indices as Metal
 
 template <>
 struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU> {
