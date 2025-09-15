@@ -81,6 +81,8 @@ std::optional<uint8_t> Source::getMaxOverscaleFactorForParentTiles() const noexc
 }
 
 void Source::dumpDebugLogs() const {
+    Log::Info(Event::General, "Source::id: " + getID());
+    Log::Info(Event::General, "Source::loaded: " + std::to_string(loaded));
 }
 
 } // namespace style

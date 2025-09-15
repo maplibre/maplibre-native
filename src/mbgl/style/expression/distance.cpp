@@ -36,6 +36,7 @@ inline std::size_t getRangeSize(const IndexRange& range) noexcept {
 bool isRangeSafe(const IndexRange& range, const std::size_t threshold) noexcept {
     auto ret = (range.second >= range.first && range.second < threshold);
     if (!ret) {
+        mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
     }
     return ret;
 }
@@ -100,6 +101,7 @@ DistanceBBox getBBox(const mapbox::geometry::polygon<double>& polygon) noexcept 
 
 bool isMultiPointValid(const mapbox::geometry::multi_point<double>& points) noexcept {
     if (points.empty()) {
+        mbgl::Log::Error(mbgl::Event::Style, "Invalid MultiPoint with empty geometry points");
         return false;
     }
     return true;
@@ -107,6 +109,7 @@ bool isMultiPointValid(const mapbox::geometry::multi_point<double>& points) noex
 
 bool isLineStringValid(const mapbox::geometry::line_string<double>& line) noexcept {
     if (line.size() < 2) {
+        mbgl::Log::Error(mbgl::Event::Style, "Invalid LineString with fewer than 2 geometry points");
         return false;
     }
     return true;
@@ -114,12 +117,14 @@ bool isLineStringValid(const mapbox::geometry::line_string<double>& line) noexce
 
 bool isPolygonValid(const mapbox::geometry::polygon<double>& polygon) noexcept {
     if (polygon.empty()) {
-
+        mbgl::Log::Error(mbgl::Event::Style, "Invalid Polygon with empty rings");
         return false;
     }
     for (const auto& ring : polygon) {
         if (ring.size() < 3) {
-
+            mbgl::Log::Error(mbgl::Event::Style,
+                             "Invalid Polygon with ring having fewer than 3 "
+                             "geometry points");
             return false;
         }
     }
@@ -367,6 +372,7 @@ double pointsToPolygonDistance(const mapbox::geometry::multi_point<double>& poin
         // In case the set size are relatively small, we could use brute-force directly
         if (getRangeSize(range) <= MinLinePointsSize) {
             if (!isRangeSafe(range, points.size())) {
+                mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
                 return InvalidDistance;
             }
             for (std::size_t i = range.first; i <= range.second; ++i) {
@@ -580,6 +586,7 @@ double pointsToLineDistance(const mapbox::geometry::multi_point<double>& points,
         // In case the set size are relatively small, we could use brute-force directly
         if (getRangeSize(rangeA) <= MinPointsSize && getRangeSize(rangeB) <= MinLinePointsSize) {
             if (!isRangeSafe(rangeA, points.size()) && isRangeSafe(rangeB, line.size())) {
+                mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
                 return InvalidDistance;
             }
             const auto subLine = mapbox::geometry::multi_point<double>(line.begin() + rangeB.first,
@@ -965,7 +972,9 @@ mbgl::Value Distance::serialize() const {
             serialized.emplace(m.name.GetString(), convertValue(m.value));
         }
     } else {
-
+        mbgl::Log::Error(mbgl::Event::Style,
+                         "Failed to serialize 'distance' expression, converted rapidJSON is "
+                         "not an object");
     }
     return std::vector<mbgl::Value>{{getOperator(), serialized}};
 }
