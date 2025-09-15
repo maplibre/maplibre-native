@@ -2,8 +2,6 @@
 #include <mbgl/tile/tile_loader_impl.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/tile/vector_tile_data.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
 #include <utility>
 
 namespace mbgl {
@@ -38,9 +36,6 @@ void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
 void VectorTile::setData(const std::shared_ptr<const std::string>& data_) {
     if (obsolete) {
         return;
-    }
-
-    if (!data_) {
     }
 
     GeometryTile::setData(data_ ? std::make_unique<VectorTileData>(data_) : nullptr);
