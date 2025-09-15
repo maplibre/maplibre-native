@@ -72,6 +72,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         glslShader.setEntryPoint("main");
 
         if (!glslShader.parse(defaultResources, defaultVersion, ENoProfile, false, true, messages)) {
+            mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
             observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
@@ -80,6 +81,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         glslProgram.addShader(&glslShader);
 
         if (!glslProgram.link(messages)) {
+            mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
             observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
