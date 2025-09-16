@@ -41,7 +41,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
 
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -63,14 +63,14 @@ jobs:
             rust: false
           - renderer: opengl
             rust: true
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        uses: github/codeql-action/init@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3.30.1
         with:
           languages: cpp
 
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload mbgl-render as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: mbgl-render
           path: |
@@ -158,7 +158,7 @@ jobs:
 
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: mbgl-benchmark-runner
           path: |
@@ -173,7 +173,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        uses: github/codeql-action/analyze@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3.30.1
         with:
           category: "/language:cpp"
 
@@ -200,7 +200,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: render-test-result-${{ matrix.variant.renderer }}
           path: |
@@ -227,7 +227,7 @@ jobs:
         run: .github/scripts/install-linux-deps
 
       - name: Cache Bazel
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -254,7 +254,7 @@ jobs:
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}

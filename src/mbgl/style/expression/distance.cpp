@@ -839,7 +839,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
             style::conversion::Error error;
             auto geojson = toGeoJSON(argument, error);
             if (geojson && error.message.empty()) {
-                return *geojson;
+                return geojson;
             }
             ctx.error(error.message);
         }

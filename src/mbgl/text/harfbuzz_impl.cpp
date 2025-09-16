@@ -4,12 +4,13 @@
 
 namespace mbgl {
 
-static hb_language_t getDefaultLanguage() {
+namespace {
+hb_language_t getDefaultLanguage() {
     static hb_language_t language = hb_language_get_default();
     return language;
 }
 
-static hb_script_t getUnicodeScript(hb_codepoint_t u) {
+hb_script_t getUnicodeScript(hb_codepoint_t u) {
     static hb_unicode_funcs_t *unicode_funcs;
 
     unicode_funcs = hb_unicode_funcs_get_default();
@@ -22,6 +23,8 @@ static hb_script_t getUnicodeScript(hb_codepoint_t u) {
 
     return hb_unicode_script(unicode_funcs, u);
 }
+
+} // namespace
 
 HBShaper::Impl::Impl(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib)
     : type(type_),

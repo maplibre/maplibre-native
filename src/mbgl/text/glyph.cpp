@@ -26,6 +26,8 @@ GlyphIDType genNewGlyphIDType() {
     static short glyphType = GlyphIDType::FontPBF;
     ++glyphType;
     if (glyphType == GlyphIDType::FontPBF) ++glyphType;
+    // Intentionally casting to extend the enum's value space for runtime-generated IDs.
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     return static_cast<GlyphIDType>(glyphType);
 }
 
