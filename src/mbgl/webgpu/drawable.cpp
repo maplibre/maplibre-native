@@ -151,7 +151,7 @@ namespace {
 }
 
 #if !defined(NDEBUG)
-std::string debugLabel(const gfx::Drawable& drawable) {
+[[maybe_unused]] std::string debugLabel(const gfx::Drawable& drawable) {
     std::ostringstream oss;
     oss << drawable.getID().id() << "/" << drawable.getName() << "/tile=";
     if (const auto& tileID = drawable.getTileID()) {

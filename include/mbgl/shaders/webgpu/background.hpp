@@ -37,7 +37,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let transformed = ubo.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
     // Convert to NDC coordinates and flip Y for WebGPU
     // WebGPU uses Z range [0, 1] instead of [-1, 1]
-    let ndc_z = (transformed.z / transformed.w) * 0.5 + 0.5;
+    // Background should be at the far plane (depth = 1.0)
+    let ndc_z = 0.999;
     out.position = vec4<f32>(
         transformed.x / transformed.w,
         -transformed.y / transformed.w,

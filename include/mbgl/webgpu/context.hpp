@@ -8,7 +8,16 @@
 #include <optional>
 
 namespace mbgl {
+namespace gfx {
+// Forward declaration
+struct AttributeBinding;
+using AttributeBindingArray = std::vector<std::optional<AttributeBinding>>;
+} // namespace gfx
+
 namespace webgpu {
+
+// Forward declaration
+class VertexBufferResource;
 
 class Context : public gfx::Context {
 public:
@@ -64,6 +73,18 @@ public:
     // Get reusable buffers (aligned with Metal)
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();
+
+    // Vertex binding creation - needed for drawable geometry
+    gfx::AttributeBindingArray getOrCreateVertexBindings(
+        gfx::Context&,
+        const gfx::AttributeDataType vertexType,
+        const size_t vertexAttributeIndex,
+        const std::vector<uint8_t>& vertexData,
+        const gfx::VertexAttributeArray& defaults,
+        const gfx::VertexAttributeArray& overrides,
+        gfx::BufferUsageType,
+        const std::optional<std::chrono::duration<double>>&,
+        std::shared_ptr<webgpu::VertexBufferResource>&) noexcept;
 
 protected:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size) override;
