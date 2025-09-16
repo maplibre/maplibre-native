@@ -272,9 +272,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
 
     private void destroySurfaceImp() {
       if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
-        mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
-          EGL10.EGL_NO_SURFACE,
-          EGL10.EGL_NO_CONTEXT);
+        mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, mEglContext);
         MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view != null) {
           view.eglWindowSurfaceFactory.destroySurface(mEgl, mEglDisplay, mEglSurface);
@@ -284,6 +282,13 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
     }
 
     public void finish() {
+      if (mEglDisplay != null) {
+        mEgl.eglMakeCurrent(mEglDisplay,
+                EGL10.EGL_NO_SURFACE,
+                EGL10.EGL_NO_SURFACE,
+                EGL10.EGL_NO_CONTEXT);
+      }
+
       if (mEglContext != null) {
         MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view != null) {

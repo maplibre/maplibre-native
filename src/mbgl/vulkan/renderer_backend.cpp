@@ -72,10 +72,12 @@ static struct {
 namespace mbgl {
 namespace vulkan {
 
+namespace {
+
 template <typename T, typename F>
-static bool checkAvailability(const std::vector<T>& availableValues,
-                              const std::vector<const char*>& requiredValues,
-                              const F& getter) {
+bool checkAvailability(const std::vector<T>& availableValues,
+                       const std::vector<const char*>& requiredValues,
+                       const F& getter) {
     for (const auto& requiredValue : requiredValues) {
         bool found = false;
         for (const auto& availableValue : availableValues) {
@@ -91,12 +93,14 @@ static bool checkAvailability(const std::vector<T>& availableValues,
     return true;
 }
 
+} // namespace
+
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
       allocator(nullptr) {}
 
 RendererBackend::~RendererBackend() {
-    destroyResources();
+    destroyResources(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {

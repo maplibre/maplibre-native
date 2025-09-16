@@ -8,9 +8,10 @@ option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
 option(MLN_WITH_GLFW "Set up targets for GLFW platform" ON)
 option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
-option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
+option(MLN_WITH_OPENGL "Build with OpenGL renderer" OFF)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
+option(MLN_WITH_METAL "Build with Metal renderer" OFF)
 option(MLN_WITH_PMTILES "Build with PMTiles support" ON)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
@@ -28,18 +29,7 @@ if (MLN_DRAWABLE_RENDERER)
     message(FATAL "Do not pass MLN_DRAWABLE_RENDERER, the drawable renderer is now the default")
 endif()
 
-if (MLN_WITH_CLANG_TIDY)
-    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
-    if(NOT CLANG_TIDY_COMMAND)
-        message(FATAL_ERROR "ENABLE_CLANG_TIDY is ON but clang-tidy is not found!")
-    else()
-        message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
-    endif()
-    # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized),
-    # that's why we need to disable this `unknown-warning-option` here.
-    # We could check if current compiler supports particular flag before enabling it.
-    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-unknown-warning-option;--extra-arg=-Wno-pragmas")
-endif()
+include(cmake/clang-tidy.cmake)
 
 if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
@@ -237,18 +227,25 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/color_mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/command_encoder.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/debug_group.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/depth_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/draw_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/draw_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/polyline_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_registry.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
@@ -486,26 +483,19 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/geometry/line_atlas.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/attribute.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/attribute.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/color_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/cull_face_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/polyline_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/render_pass.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/background_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/circle_layer_factory.cpp
@@ -991,8 +981,8 @@ if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
         PUBLIC
+            MLN_RENDER_BACKEND_OPENGL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND
@@ -1136,8 +1126,8 @@ if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
         PUBLIC
+            MLN_RENDER_BACKEND_METAL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND
@@ -1235,7 +1225,7 @@ if(MLN_WITH_VULKAN)
 
     target_compile_definitions(
         mbgl-core
-        PRIVATE
+        PUBLIC
             MLN_RENDER_BACKEND_VULKAN=1
     )
 

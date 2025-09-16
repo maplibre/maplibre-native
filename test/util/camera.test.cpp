@@ -122,7 +122,7 @@ static std::tuple<vec3, vec3, vec3> rotatedFrame(const std::array<double, 4>& qu
 TEST(FreeCameraOptions, LookAtPoint) {
     FreeCameraOptions options;
     vec3 right, up, forward;
-    const double cosPi4 = 1.0 / std::sqrt(2.0);
+    const double cosPi4 = 1.0 / std::numbers::sqrt2;
 
     // Pitch: 45, bearing: 0
     options.position = vec3{{0.5, 0.5, 0.5}};

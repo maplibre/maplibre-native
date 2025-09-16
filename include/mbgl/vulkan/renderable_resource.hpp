@@ -102,7 +102,7 @@ class Renderable : public gfx::Renderable {
 protected:
     Renderable(const Size size_, std::unique_ptr<gfx::RenderableResource> resource_)
         : gfx::Renderable(size_, std::move(resource_)) {}
-    virtual ~Renderable() override = default;
+    ~Renderable() override = default;
 
 public:
     void setSize(const Size& size_) { size = size_; }
