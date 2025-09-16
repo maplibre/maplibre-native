@@ -295,7 +295,7 @@ jobs:
           name: node-v${{ steps.package-version.outputs.current-version }}
           bodyFile: platform/node/changelog_for_version.md
           allowUpdates: true
-          draft: false
+          draft: true
           prerelease: ${{ steps.prepare_release.outputs.prerelease }}
 
       - name: Publish to NPM (release)

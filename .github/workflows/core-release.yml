@@ -33,7 +33,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           gh release create core-${{ github.sha }} \
-            --draft=false \
+            --draft=true \
             --prerelease=false \
             --latest=false \
             --title "core-${{ github.sha }}" \
