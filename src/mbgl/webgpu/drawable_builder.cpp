@@ -25,12 +25,17 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 
 void DrawableBuilder::init() {
     if (!currentDrawable) {
+        mbgl::Log::Warning(mbgl::Event::Render, "DrawableBuilder::init called with no current drawable");
         return;
     }
 
-
-
     auto& drawable = static_cast<Drawable&>(*currentDrawable);
+
+    mbgl::Log::Info(mbgl::Event::Render, "DrawableBuilder::init for " + drawable.getName() +
+                   " rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
+                   " rawVertices.size=" + std::to_string(impl->rawVertices.size()) +
+                   " segments.size=" + std::to_string(impl->segments.size()) +
+                   " sharedIndexes=" + (impl->sharedIndexes ? "yes" : "no"));
 
     // Set the vertex attribute ID so the drawable knows which shared vertex buffer to use
     drawable.setVertexAttrId(vertexAttrId);
@@ -78,8 +83,12 @@ void DrawableBuilder::init() {
     }
 
     if (impl->sharedIndexes && impl->sharedIndexes->elements()) {
+        mbgl::Log::Info(mbgl::Event::Render, "  Setting index data: " +
+                       std::to_string(impl->sharedIndexes->elements()) + " indices, " +
+                       std::to_string(impl->segments.size()) + " segments");
         drawable.setIndexData(impl->sharedIndexes, std::move(impl->segments));
     } else {
+        mbgl::Log::Warning(mbgl::Event::Render, "  No index data to set!");
     }
 
 }
