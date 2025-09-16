@@ -57,7 +57,7 @@ jobs:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           release_name: ${{steps.prepare_release.outputs.version_tag }}
           body_path: ${{ steps.prepare_release.outputs.release_notes }}
-          draft: false
+          draft: true
           prerelease: ${{ env.prerelease }}
 
   android-build-and-upload-release:
@@ -159,3 +159,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
         working-directory: .
+
+  finilize-release:
+    runs-on: ubuntu-latest
+    needs:
+      - android-create-release
+      - android-build-and-upload-release
+    steps:
+      - name: Remove draft status of release
+        id: create_release
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_name: ${{ needs.android-create-release.outputs.version_tag }}
+          tag_name: ${{ needs.android-create-release.outputs.version_tag }}
+          draft: false
