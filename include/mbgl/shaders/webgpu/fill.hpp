@@ -75,7 +75,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Convert to NDC coordinates by dividing by W, then flip Y for WebGPU
     // WebGPU uses Z range [0, 1] instead of [-1, 1]
-    let ndc_z = (transformed.z / transformed.w) * 0.5 + 0.5;
+    // Ensure fills render in front of background (lower Z = closer in WebGPU)
+    let ndc_z = clamp((transformed.z / transformed.w) * 0.5 + 0.5, 0.0, 0.98);
     out.position = vec4<f32>(
         transformed.x / transformed.w,
         -transformed.y / transformed.w,  // Flip Y after perspective divide
@@ -168,7 +169,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Convert to NDC coordinates by dividing by W, then flip Y for WebGPU
     // WebGPU uses Z range [0, 1] instead of [-1, 1]
-    let ndc_z = (transformed.z / transformed.w) * 0.5 + 0.5;
+    // Ensure fills render in front of background (lower Z = closer in WebGPU)
+    let ndc_z = clamp((transformed.z / transformed.w) * 0.5 + 0.5, 0.0, 0.98);
     out.position = vec4<f32>(
         transformed.x / transformed.w,
         -transformed.y / transformed.w,  // Flip Y after perspective divide
@@ -192,7 +194,9 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    return in.color * in.opacity;
+    // Debug: Always return a visible red color to test if fragments are rendering
+    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    // Original: return in.color * in.opacity;
 }
 )";
 };

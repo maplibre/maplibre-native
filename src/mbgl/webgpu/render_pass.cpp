@@ -77,6 +77,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         // Add depth/stencil attachment
         wgpu::RenderPassDepthStencilAttachment depthStencilAttachment = {};
         void* depthStencilViewPtr = backend.getDepthStencilView();
+        mbgl::Log::Info(mbgl::Event::Render, std::string("WebGPU: Depth stencil view: ") +
+                       (depthStencilViewPtr ? "present" : "null"));
         if (depthStencilViewPtr) {
             // Don't use Acquire - the backend owns the view
             wgpu::TextureView depthStencilView(reinterpret_cast<WGPUTextureView>(depthStencilViewPtr));
@@ -87,6 +89,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
             if (descriptor.clearDepth) {
                 depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Clear;
                 depthStencilAttachment.depthClearValue = descriptor.clearDepth.value();
+                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Clearing depth with value: " +
+                               std::to_string(descriptor.clearDepth.value()));
             } else {
                 depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
             }

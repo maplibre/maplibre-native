@@ -8,6 +8,7 @@
 #include <mbgl/webgpu/drawable_builder.hpp>
 #include <mbgl/webgpu/draw_scope_resource.hpp>
 #include <mbgl/webgpu/offscreen_texture.hpp>
+#include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
@@ -216,6 +217,63 @@ const BufferResource& Context::getTileIndexBuffer() {
         tileIndexBuffer = createBuffer(indices.data(), indices.size() * sizeof(uint16_t), usage, true, true);
     }
     return *tileIndexBuffer;
+}
+
+gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
+    gfx::Context&,
+    const gfx::AttributeDataType vertexType,
+    const size_t vertexAttributeIndex,
+    const std::vector<uint8_t>& vertexData,
+    const gfx::VertexAttributeArray& defaults,
+    const gfx::VertexAttributeArray& overrides,
+    gfx::BufferUsageType,
+    const std::optional<std::chrono::duration<double>>&,
+    std::shared_ptr<VertexBufferResource>&) noexcept {
+
+    gfx::AttributeBindingArray result;
+    result.resize(overrides.allocatedSize());
+
+    // Process each vertex attribute
+    overrides.visitAttributes([&](const gfx::VertexAttribute& attr) {
+        const auto index = static_cast<std::size_t>(attr.getIndex());
+        if (index >= result.size()) return;
+
+        // Get the shared raw data if available
+        gfx::VertexVectorBasePtr sharedRaw = attr.getSharedRawData();
+        if (!sharedRaw) {
+            // Try default attributes by ID
+            defaults.visitAttributes([&](const gfx::VertexAttribute& defaultAttr) {
+                if (!sharedRaw && defaultAttr.getIndex() == attr.getIndex()) {
+                    sharedRaw = defaultAttr.getSharedRawData();
+                }
+            });
+        }
+
+        if (sharedRaw) {
+            // Create vertex buffer from the shared data
+            const auto dataSize = sharedRaw->getRawSize() * sharedRaw->getRawCount();
+            if (dataSize > 0) {
+                // Create GPU buffer for this vertex attribute
+                uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
+                auto bufferResource = std::make_shared<VertexBufferResource>(
+                    createBuffer(sharedRaw->getRawData(), dataSize, usage, false, false)
+                );
+
+                // Create attribute binding
+                result[index] = {
+                    /*.attribute = */ {attr.getDataType(), /*offset=*/0},
+                    /*.vertexStride = */ static_cast<uint32_t>(attr.getStride()),
+                    /*.vertexBufferResource = */ bufferResource.get(),
+                    /*.vertexOffset = */ 0
+                };
+
+                mbgl::Log::Info(mbgl::Event::Render, "Created vertex buffer for attribute " +
+                               std::to_string(index) + " size=" + std::to_string(dataSize));
+            }
+        }
+    });
+
+    return result;
 }
 
 } // namespace webgpu
