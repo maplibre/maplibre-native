@@ -182,6 +182,9 @@ jobs:
       - name: Get vcpkg commit id
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
           $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
@@ -221,25 +224,11 @@ jobs:
         run: |
           cmake --build build
 
-      - name: Publish X64 Release to Github
-        if: matrix.arch == 'x86_64'
+      - name: Prebuild and upload
         working-directory: platform/node
+        run: npm run prebuild -- --upload-all --tag node-v${{ steps.package-version.outputs.current-version }}
         env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./scripts/publish.sh
-
-      - name: Publish ARM Release to Github
-        if: matrix.arch == 'arm64'
-        working-directory: platform/node
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./scripts/publish.sh --target_arch=arm64
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_npm:
     runs-on: ubuntu-latest

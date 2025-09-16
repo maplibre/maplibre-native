@@ -21,10 +21,9 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "2.0.1",
-    "@acalcutt/node-pre-gyp-github": "2.0.1",
     "minimatch": "^9.0.4",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "prebuild-install": "^7.1.3"
   },
   "devDependencies": {
     "@aws-sdk/client-device-farm": "^3.556.0",
@@ -46,6 +45,7 @@
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
+    "prebuild": "^13.0.1",
     "pretty-bytes": "^6.1.1",
     "semver": "^7.6.0",
     "shuffle-seed": "1.1.6",
@@ -58,19 +58,19 @@
     "node": ">=20"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
+    "install": "prebuild-install --force || echo 'pre-compiled binary not found, please build from source'",
+    "prebuild": "prebuild --all --no-embed-source",
     "test": "tape test/js/**/*.test.js",
     "test-memory": "node --expose-gc test/memory.test.js",
     "test-expressions": "node -r esm test/expression.test.js",
     "test-render": "node -r esm test/render.test.js",
     "test-query": "node -r esm test/query.test.js"
   },
-  "gypfile": true,
-  "binary": {
-    "module_name": "mbgl",
-    "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/maplibre/maplibre-native/releases/download/",
-    "remote_path": "node-v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
+  "prebuild": {
+    "targets": [
+      "18.0.0",
+      "20.0.0",
+      "22.0.0"
+    ]
   }
 }
