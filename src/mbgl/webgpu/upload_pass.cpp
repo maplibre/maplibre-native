@@ -69,8 +69,17 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     gfx::BufferUsageType /*usage*/,
     bool persistent) {
 
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating vertex buffer resource, size=" + std::to_string(size));
+
     auto& context = static_cast<Context&>(getContext());
     BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, /*isIndexBuffer=*/false, persistent);
+
+    if (buffer.getBuffer()) {
+        mbgl::Log::Info(mbgl::Event::Render, "  Vertex buffer created successfully");
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "  Failed to create vertex buffer!");
+    }
+
     return std::make_unique<VertexBufferResource>(std::move(buffer));
 }
 
@@ -153,21 +162,18 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
 
-    // Log::Info(Event::Render, "WebGPU buildAttributeBindings called");
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU buildAttributeBindings called with vertexCount=" +
+                    std::to_string(vertexCount) + " vertexData.size=" + std::to_string(vertexData.size()));
 
-    // // Log input parameters
-    // std::stringstream ss;
-    // ss << "  defaults.allocatedSize()=" << defaults.allocatedSize();
-    // Log::Info(Event::Render, ss.str());
-
-    // // Count how many defaults actually exist
-    // int defaultCount = 0;
-    // defaults.visitAttributes([&](const gfx::VertexAttribute&) {
-    //     defaultCount++;
-    // });
-    // std::stringstream defaultMsg;
-    // defaultMsg << "  defaults has " << defaultCount << " attributes";
-    // Log::Info(Event::Render, defaultMsg.str());
+    // Count how many overrides actually exist
+    int overrideCount = 0;
+    overrides.visitAttributes([&](const gfx::VertexAttribute& attr) {
+        overrideCount++;
+        mbgl::Log::Info(mbgl::Event::Render, "  Override attribute " + std::to_string(attr.getIndex()) +
+                        " has shared data: " + (attr.getSharedRawData() ? "yes" : "no") +
+                        " stride=" + std::to_string(attr.getStride()));
+    });
+    mbgl::Log::Info(mbgl::Event::Render, "  Total override attributes: " + std::to_string(overrideCount));
 
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
@@ -197,6 +203,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         if (const auto& buffer_ = getBuffer(effectiveAttr.getSharedRawData(), usage, !lastUpdate)) {
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
+
+            mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
+                           " from shared buffer");
 
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
