@@ -16,6 +16,32 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr const char* vertex = R"(
+// Include common functions
+const LINE_NORMAL_SCALE: f32 = 1.0 / (127.0 / 2.0);
+
+fn unpack_float(packedValue: f32) -> vec2<f32> {
+    let packedIntValue = i32(packedValue);
+    let v0 = packedIntValue / 256;
+    return vec2<f32>(f32(v0), f32(packedIntValue - v0 * 256));
+}
+
+fn decode_color(encodedColor: vec2<f32>) -> vec4<f32> {
+    return vec4<f32>(
+        unpack_float(encodedColor[0]) / 255.0,
+        unpack_float(encodedColor[1]) / 255.0
+    );
+}
+
+fn unpack_mix_float(packedValue: vec2<f32>, t: f32) -> f32 {
+    return mix(packedValue[0], packedValue[1], t);
+}
+
+fn unpack_mix_color(packedColors: vec4<f32>, t: f32) -> vec4<f32> {
+    let minColor = decode_color(vec2<f32>(packedColors[0], packedColors[1]));
+    let maxColor = decode_color(vec2<f32>(packedColors[2], packedColors[3]));
+    return mix(minColor, maxColor, t);
+}
+
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,  // packed position and normal
     @location(5) data: vec4<u32>,        // extrude, direction, linesofar
@@ -116,7 +142,15 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude_length_without_perspective = length(dist);
     let extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
-    out.position = position;
+    // Convert to NDC coordinates and flip Y for WebGPU
+    // WebGPU uses Z range [0, 1] instead of [-1, 1]
+    let ndc_z = (position.z / position.w) * 0.5 + 0.5;
+    out.position = vec4<f32>(
+        position.x / position.w,
+        -position.y / position.w,  // Flip Y after perspective divide
+        ndc_z,
+        1.0
+    );
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = v_normal;
     out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
