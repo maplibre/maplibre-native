@@ -8,6 +8,7 @@
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/segment.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
@@ -43,6 +44,11 @@ std::string debugLabel(const Drawable& drawable) {
     return ss.str();
 }
 #endif
+
+struct alignas(16) GlobalUBOIndexData {
+    uint32_t value = 0;
+    uint32_t pad[3] = {0, 0, 0};
+};
 
 WGPUVertexFormat wgpuVertexFormatOf(gfx::AttributeDataType type) {
     switch (type) {
@@ -120,16 +126,17 @@ Drawable::~Drawable() {
     // So we should NOT release it here
     impl->pipelineState = nullptr;
 
-    if (impl->bindGroup) {
-        wgpuBindGroupRelease(impl->bindGroup);
-        impl->bindGroup = nullptr;
+    for (auto bindGroup : impl->bindGroups) {
+        if (bindGroup) {
+            wgpuBindGroupRelease(bindGroup);
+        }
     }
+    impl->bindGroups.clear();
+    impl->bindGroupIndices.clear();
 
     // Uniform buffers are managed by UniformBufferArray
     // Vertex and index buffers are now managed through attributeBindings and indexes
 
-    // Clear the bind group layout reference (we don't own it)
-    impl->bindGroupLayout = nullptr;
 }
 
 namespace {
@@ -340,12 +347,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         }
     }
 
-    // Clear any existing bind group to force recreation with updated buffers
-    if (impl->bindGroup) {
-        wgpuBindGroupRelease(impl->bindGroup);
-        impl->bindGroup = nullptr;
-    }
-
     // Upload textures if needed
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
@@ -422,101 +423,161 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    // Create bind group from UniformBufferArray if needed
-    if (!impl->bindGroup && shader) {
+    // Build bind groups based on shader metadata
+    if (shader) {
         auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
         if (webgpuShader) {
-            WGPUDevice bindGroupDevice = static_cast<WGPUDevice>(backend.getDevice());
-            if (bindGroupDevice) {
-                // Create bind group layout inline like Metal does
-                // WebGPU requires explicit bind group layout creation
-                std::vector<WGPUBindGroupLayoutEntry> layoutEntries;
-                for (uint32_t binding = 0; binding <= 5; ++binding) {
-                    WGPUBindGroupLayoutEntry entry = {};
-                    entry.binding = binding;
-                    entry.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
-                    entry.buffer.type = WGPUBufferBindingType_Uniform;
-                    entry.buffer.hasDynamicOffset = 0;
-                    entry.buffer.minBindingSize = 0;
-                    layoutEntries.push_back(entry);
+            WGPUDevice deviceHandle = static_cast<WGPUDevice>(backend.getDevice());
+
+            for (auto bindGroup : impl->bindGroups) {
+                if (bindGroup) {
+                    wgpuBindGroupRelease(bindGroup);
                 }
+            }
+            impl->bindGroups.clear();
+            impl->bindGroupIndices.clear();
 
-                WGPUBindGroupLayoutDescriptor layoutDesc = {};
-                WGPUStringView layoutLabel = {"Bind Group Layout", strlen("Bind Group Layout")};
-                layoutDesc.label = layoutLabel;
-                layoutDesc.entryCount = layoutEntries.size();
-                layoutDesc.entries = layoutEntries.data();
-
-                WGPUBindGroupLayout layout = wgpuDeviceCreateBindGroupLayout(bindGroupDevice, &layoutDesc);
-                // Create bind group entries from UniformBufferArray
-                std::vector<WGPUBindGroupEntry> entries;
-
-                // First, get global uniform buffers from the render pass if available
+            if (deviceHandle) {
+                const auto& groupOrder = webgpuShader->getBindGroupOrder();
                 const auto* globalBuffers = webgpuRenderPass.getGlobalUniformBuffers();
 
-                // Merge global and drawable-specific uniform buffers
-                // Use drawable's buffers first, fall back to global buffers
-                const size_t maxSize = std::max(
-                    impl->uniformBuffers.allocatedSize(),
-                    globalBuffers ? globalBuffers->allocatedSize() : 0);
-
-                for (size_t i = 0; i < maxSize; ++i) {
-                    // Priority: drawable's buffer > global buffer
-                    const auto& uniformBuffer = impl->uniformBuffers.get(i);
-                    const auto& globalBuffer = globalBuffers ? globalBuffers->get(i) : nullptr;
-                    const auto& bufferToUse = uniformBuffer ? uniformBuffer : globalBuffer;
-
-                    if (bufferToUse) {
-                        const auto* webgpuUniformBuffer = static_cast<const webgpu::UniformBuffer*>(bufferToUse.get());
-                        if (webgpuUniformBuffer && webgpuUniformBuffer->getBuffer()) {
-                            WGPUBindGroupEntry entry = {};
-                            entry.binding = static_cast<uint32_t>(i);
-                            entry.buffer = webgpuUniformBuffer->getBuffer();
-                            entry.offset = 0;
-                            entry.size = webgpuUniformBuffer->getSize();
-                            entries.push_back(entry);
-
-                            // Log::Info(Event::Render, "Adding uniform buffer to bind group: binding=" +
-                            //          std::to_string(i) + " size=" + std::to_string(entry.size) +
-                            //          " source=" + (uniformBuffer ? "drawable" : "global"));
+                const auto findTextureForBinding = [&](uint32_t binding, bool samplerBinding) -> Texture2D* {
+                    for (size_t texIndex = 0; texIndex < textures.size(); ++texIndex) {
+                        if (!textures[texIndex]) {
+                            continue;
+                        }
+                        if (const auto location = webgpuShader->getSamplerLocation(texIndex)) {
+                            if ((samplerBinding && *location == binding) || (!samplerBinding && (*location == binding || *location + 1 == binding))) {
+                                return static_cast<Texture2D*>(textures[texIndex].get());
+                            }
                         }
                     }
-                }
+                    return nullptr;
+                };
 
-                if (entries.empty()) {
-                    Log::Warning(Event::Render, "No uniform buffers found for bind group!");
-                } else if (drawCallCount <= 200) {
-                    Log::Info(Event::Render, "Creating bind group with " + std::to_string(entries.size()) + " entries");
-                    // Log details of uniform buffer at index 2 (FillDrawableUBO)
-                    for (const auto& entry : entries) {
-                        if (entry.binding == 2) {
-                            Log::Info(Event::Render, "  Bind group entry[2]: buffer size=" +
-                                     std::to_string(entry.size) + " offset=" + std::to_string(entry.offset));
+                for (size_t slot = 0; slot < groupOrder.size(); ++slot) {
+                    const uint32_t group = groupOrder[slot];
+                    auto layout = webgpuShader->getBindGroupLayout(group);
+                    if (!layout) {
+                        impl->bindGroups.push_back(nullptr);
+                        impl->bindGroupIndices.push_back(group);
+                        continue;
+                    }
+
+                    const auto& bindingInfos = webgpuShader->getBindingInfosForGroup(group);
+                    std::vector<WGPUBindGroupEntry> entries;
+                    entries.reserve(bindingInfos.size());
+                    bool validBindings = true;
+
+                    for (const auto& bindingInfo : bindingInfos) {
+                        WGPUBindGroupEntry entry = {};
+                        entry.binding = bindingInfo.binding;
+
+                        switch (bindingInfo.type) {
+                            case ShaderProgram::BindingType::UniformBuffer:
+                            case ShaderProgram::BindingType::ReadOnlyStorageBuffer:
+                            case ShaderProgram::BindingType::StorageBuffer: {
+                                std::shared_ptr<gfx::UniformBuffer> buffer = impl->uniformBuffers.get(bindingInfo.binding);
+                                if (!buffer && globalBuffers) {
+                                    buffer = globalBuffers->get(bindingInfo.binding);
+                                }
+                                if (!buffer && bindingInfo.binding == shaders::idGlobalUBOIndex) {
+                                    GlobalUBOIndexData indexData;
+                                    indexData.value = getUBOIndex();
+                                    context.emplaceOrUpdateUniformBuffer(impl->uboIndexUniform,
+                                                                         &indexData,
+                                                                         sizeof(indexData),
+                                                                         false);
+                                    if (impl->uboIndexUniform) {
+                                        impl->uniformBuffers.set(bindingInfo.binding, impl->uboIndexUniform);
+                                        buffer = impl->uboIndexUniform;
+                                    }
+                                }
+
+                                if (!buffer) {
+                                    if (drawCallCount <= 200) {
+                                        Log::Warning(Event::Render,
+                                                     "No buffer found for binding " + std::to_string(bindingInfo.binding) +
+                                                         " type=" + std::to_string(static_cast<int>(bindingInfo.type)) +
+                                                         " group=" + std::to_string(group));
+                                    }
+                                    validBindings = false;
+                                    break;
+                                }
+
+                                const auto* webgpuUniform = static_cast<const webgpu::UniformBuffer*>(buffer.get());
+                                if (!webgpuUniform || !webgpuUniform->getBuffer()) {
+                                    if (drawCallCount <= 200) {
+                                        Log::Warning(Event::Render,
+                                                     "Uniform buffer missing GPU handle for binding " +
+                                                         std::to_string(bindingInfo.binding) + " group=" +
+                                                         std::to_string(group));
+                                    }
+                                    validBindings = false;
+                                    break;
+                                }
+
+                                entry.buffer = webgpuUniform->getBuffer();
+                                entry.offset = 0;
+                                entry.size = buffer->getSize();
+                                break;
+                            }
+                            case ShaderProgram::BindingType::Sampler: {
+                                Texture2D* texture = findTextureForBinding(bindingInfo.binding, true);
+                                if (!texture) {
+                                    validBindings = false;
+                                    break;
+                                }
+                                if (!texture->getSampler()) {
+                                    texture->setSamplerConfiguration(texture->getSamplerState());
+                                }
+                                entry.sampler = texture->getSampler();
+                                break;
+                            }
+                            case ShaderProgram::BindingType::Texture: {
+                                Texture2D* texture = findTextureForBinding(bindingInfo.binding, false);
+                                if (!texture) {
+                                    validBindings = false;
+                                    break;
+                                }
+                                if (!texture->getTexture() || !texture->getTextureView()) {
+                                    texture->create();
+                                }
+                                if (!texture->getTextureView()) {
+                                    validBindings = false;
+                                    break;
+                                }
+                                entry.textureView = texture->getTextureView();
+                                break;
+                            }
                         }
+
+                        if (!validBindings) {
+                            break;
+                        }
+
+                        entries.push_back(entry);
                     }
-                }
 
-                // Add texture bindings if any
-                for (size_t i = 0; i < textures.size(); ++i) {
-                    if (textures[i]) {
-                        // Texture binding logic would go here
-                        // This requires proper texture view creation
+                    if (!validBindings || entries.empty()) {
+                        impl->bindGroups.push_back(nullptr);
+                        impl->bindGroupIndices.push_back(group);
+                        continue;
                     }
+
+                    const std::string label = getName() + " bind-group " + std::to_string(group);
+                    WGPUStringView labelView = {label.c_str(), label.length()};
+
+                    WGPUBindGroupDescriptor descriptor = {};
+                    descriptor.label = labelView;
+                    descriptor.layout = layout;
+                    descriptor.entryCount = entries.size();
+                    descriptor.entries = entries.data();
+
+                    WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(deviceHandle, &descriptor);
+                    impl->bindGroups.push_back(bindGroup);
+                    impl->bindGroupIndices.push_back(group);
                 }
-
-                // Create bind group descriptor
-                WGPUBindGroupDescriptor bgDesc = {};
-                WGPUStringView bgLabel = {"Drawable Bind Group", strlen("Drawable Bind Group")};
-                bgDesc.label = bgLabel;
-                bgDesc.layout = layout;
-                bgDesc.entryCount = entries.size();
-                bgDesc.entries = entries.data();
-
-                // Create the bind group
-                impl->bindGroup = wgpuDeviceCreateBindGroup(bindGroupDevice, &bgDesc);
-
-                // Clean up the temporary layout
-                wgpuBindGroupLayoutRelease(layout);
             }
         }
     }
@@ -677,14 +738,21 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Set bind group
-    if (impl->bindGroup) {
-        if (drawCallCount <= 200) {
-            Log::Info(Event::Render, "Setting bind group: " +
-                     std::to_string(reinterpret_cast<uintptr_t>(impl->bindGroup)));
+    for (size_t slot = 0; slot < impl->bindGroups.size(); ++slot) {
+        const auto bindGroup = impl->bindGroups[slot];
+        const auto groupIndex = (slot < impl->bindGroupIndices.size()) ? impl->bindGroupIndices[slot]
+                                                                       : static_cast<uint32_t>(slot);
+        if (bindGroup) {
+            if (drawCallCount <= 200) {
+                Log::Info(Event::Render,
+                          "Setting bind group slot " + std::to_string(groupIndex) + " handle=" +
+                              std::to_string(reinterpret_cast<uintptr_t>(bindGroup)));
+            }
+            wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, groupIndex, bindGroup, 0, nullptr);
+        } else {
+            Log::Warning(Event::Render,
+                         "Missing bind group for slot " + std::to_string(groupIndex) + " in drawable " + getName());
         }
-        wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
-    } else {
-        Log::Warning(Event::Render, "No bind group available!");
     }
 
     // Handle depth and stencil states (like Metal does)

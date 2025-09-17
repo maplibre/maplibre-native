@@ -21,7 +21,7 @@ UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t si
         WGPUStringView label = {"Uniform Buffer", strlen("Uniform Buffer")};
         bufferDesc.label = label;
         bufferDesc.size = size;
-        bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
+        bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_Storage | WGPUBufferUsage_CopyDst;
         bufferDesc.mappedAtCreation = data ? 1 : 0;
         
         buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);

@@ -182,12 +182,14 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // These are typically global paint params and evaluated props
         auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
 
-        // Only copy specific shared buffers that aren't drawable-specific
-        // idGlobalPaintParamsUBO (index 0) and idFillEvaluatedPropsUBO (index 1) are shared
-        for (size_t i = 0; i < 2 && i < uniformBuffers.allocatedSize(); ++i) {
+        // Copy any layer-provided uniform buffers so drawables can build bind groups from them.
+        // This includes consolidated per-drawable data (e.g. idFillDrawableUBO) which lives in
+        // the layer UBO array and is selected via the UBO index each drawable writes later.
+        auto& drawableUniforms = drawableWebGPU.mutableUniformBuffers();
+        for (size_t i = 0; i < uniformBuffers.allocatedSize(); ++i) {
             const auto& uniformBuffer = uniformBuffers.get(i);
             if (uniformBuffer) {
-                drawableWebGPU.mutableUniformBuffers().set(i, uniformBuffer);
+                drawableUniforms.set(i, uniformBuffer);
             }
         }
 
@@ -198,7 +200,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         // Log uniform buffer status after tweakers
         if (drawCount <= 3) {
-            auto& drawableUniforms = drawableWebGPU.mutableUniformBuffers();
             for (size_t i = 0; i < 4; ++i) {
                 const auto& uniformBuffer = drawableUniforms.get(i);
                 if (uniformBuffer) {

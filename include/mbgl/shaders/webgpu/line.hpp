@@ -92,15 +92,20 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineDrawableUBO>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
-@group(0) @binding(5) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
+    let drawable = drawableVector[globalIndex.value];
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;  // Would use DEVICE_PIXEL_RATIO but simplified for WebGPU
@@ -243,15 +248,20 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineGradientDrawableUBO>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
-@group(0) @binding(5) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
+    let drawable = drawableVector[globalIndex.value];
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
@@ -406,17 +416,23 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LinePatternDrawableUBO>;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsUBO>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
-@group(0) @binding(5) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
-    let tileProps = tilePropsVector[uboIndex];
+    let index = globalIndex.value;
+    let drawable = drawableVector[index];
+    let tileProps = tilePropsVector[index];
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
@@ -495,14 +511,19 @@ struct LinePatternTilePropsUBO {
     pad2: f32,
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var pattern_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[uboIndex];
+    let tileProps = tilePropsVector[globalIndex.value];
 
     // Calculate the distance of the pixel from the line
     let dist = length(in.v_normal) * in.v_width2.x;
@@ -606,17 +627,23 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableUBO>;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsUBO>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
-@group(0) @binding(5) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
-    let tileProps = tilePropsVector[uboIndex];
+    let index = globalIndex.value;
+    let drawable = drawableVector[index];
+    let tileProps = tilePropsVector[index];
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
@@ -705,14 +732,19 @@ struct LineSDFTilePropsUBO {
     pad2: f32,
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsUBO>;
-@group(0) @binding(5) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var sdf_sampler: sampler;
 @group(1) @binding(1) var sdf_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[uboIndex];
+    let tileProps = tilePropsVector[globalIndex.value];
 
     // Calculate the distance of the pixel from the line
     let dist = length(in.v_normal) * in.v_width2.x;

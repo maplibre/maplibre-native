@@ -59,6 +59,21 @@ public:
     // Static name member required by is_shader_v trait
     static constexpr std::string_view Name = "WebGPUShader";
 
+    enum class BindingType {
+        UniformBuffer,
+        ReadOnlyStorageBuffer,
+        StorageBuffer,
+        Sampler,
+        Texture
+    };
+
+    struct BindingInfo {
+        uint32_t group = 0;
+        uint32_t binding = 0;
+        BindingType type = BindingType::UniformBuffer;
+        WGPUShaderStage visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
+    };
+
     // Metal-like constructor: takes pre-compiled shader modules
     ShaderProgram(std::string name,
                   RendererBackend& backend,
@@ -102,6 +117,12 @@ public:
                                         const gfx::ColorMode& colorMode,
                                         const std::optional<std::size_t> reuseHash = std::nullopt);
 
+    const std::vector<BindingInfo>& getBindingInfos() const { return bindingInfos; }
+    const std::vector<BindingInfo>& getBindingInfosForGroup(uint32_t group) const;
+    WGPUBindGroupLayout getBindGroupLayout(uint32_t group) const;
+    const std::vector<WGPUBindGroupLayout>& getBindGroupLayouts() const { return bindGroupLayouts; }
+    const std::vector<uint32_t>& getBindGroupOrder() const { return bindGroupOrder; }
+
     // gfx::Shader interface (required for is_shader_v trait)
     const std::string_view typeName() const noexcept override { return Name; }
     std::optional<size_t> getSamplerLocation(const size_t id) const override;
@@ -115,10 +136,13 @@ public:
 
 
 protected:
-    void createPipelineLayout();
+    void createPipelineLayout(const std::string& vertexSource, const std::string& fragmentSource);
     WGPURenderPipeline createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
                                      uint32_t vertexLayoutCount,
                                      const gfx::ColorMode& colorMode);
+
+    void analyzeShaderBindings(const std::string& source, WGPUShaderStage stage);
+    void rebuildBindGroupLayouts();
 
     std::string shaderName;
     RendererBackend& backend;
@@ -126,7 +150,8 @@ protected:
     // Metal-like resource management
     WGPUShaderModule vertexShaderModule = nullptr;
     WGPUShaderModule fragmentShaderModule = nullptr;
-    WGPUBindGroupLayout bindGroupLayout = nullptr;
+    std::vector<WGPUBindGroupLayout> bindGroupLayouts;
+    std::vector<uint32_t> bindGroupOrder;
     WGPUPipelineLayout pipelineLayout = nullptr;
 
     // Metal-like pipeline caching
@@ -136,6 +161,9 @@ protected:
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
+
+    std::vector<BindingInfo> bindingInfos;
+    std::vector<std::vector<BindingInfo>> bindingsPerGroup;
 };
 
 } // namespace webgpu
