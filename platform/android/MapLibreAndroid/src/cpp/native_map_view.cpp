@@ -1594,13 +1594,16 @@ void NativeMapView::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onSpriteLoaded = javaClass.GetMethod<void(jni::String, jni::String)>(*_env, "onSpriteLoaded");
     auto weakReference = javaPeer.get(*_env);
-    if (weakReference && sprite) {
-        weakReference.Call(*_env,
-                           onSpriteLoaded,
-                           jni::Make<jni::String>(*_env, sprite->id),
-                           jni::Make<jni::String>(*_env, sprite->spriteURL));
-    } else {
-        weakReference.Call(*_env, onSpriteLoaded, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+    if (weakReference) {
+        if (sprite) {
+            weakReference.Call(*_env,
+                               onSpriteLoaded,
+                               jni::Make<jni::String>(*_env, sprite->id),
+                               jni::Make<jni::String>(*_env, sprite->spriteURL));
+        } else {
+            weakReference.Call(
+                *_env, onSpriteLoaded, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+        }
     }
 }
 
@@ -1611,13 +1614,16 @@ void NativeMapView::onSpriteError(const std::optional<style::Sprite>& sprite, st
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onSpriteError = javaClass.GetMethod<void(jni::String, jni::String)>(*_env, "onSpriteError");
     auto weakReference = javaPeer.get(*_env);
-    if (weakReference && sprite) {
-        weakReference.Call(*_env,
-                           onSpriteError,
-                           jni::Make<jni::String>(*_env, sprite->id),
-                           jni::Make<jni::String>(*_env, sprite->spriteURL));
-    } else {
-        weakReference.Call(*_env, onSpriteError, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+    if (weakReference) {
+        if (sprite) {
+            weakReference.Call(*_env,
+                               onSpriteError,
+                               jni::Make<jni::String>(*_env, sprite->id),
+                               jni::Make<jni::String>(*_env, sprite->spriteURL));
+        } else {
+            weakReference.Call(
+                *_env, onSpriteError, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+        }
     }
 }
 
@@ -1628,14 +1634,16 @@ void NativeMapView::onSpriteRequested(const std::optional<style::Sprite>& sprite
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onSpriteRequested = javaClass.GetMethod<void(jni::String, jni::String)>(*_env, "onSpriteRequested");
     auto weakReference = javaPeer.get(*_env);
-    if (weakReference && sprite) {
-        weakReference.Call(*_env,
-                           onSpriteRequested,
-                           jni::Make<jni::String>(*_env, sprite->id),
-                           jni::Make<jni::String>(*_env, sprite->spriteURL));
-    } else {
-        weakReference.Call(
-            *_env, onSpriteRequested, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+    if (weakReference) {
+        if (sprite) {
+            weakReference.Call(*_env,
+                               onSpriteRequested,
+                               jni::Make<jni::String>(*_env, sprite->id),
+                               jni::Make<jni::String>(*_env, sprite->spriteURL));
+        } else {
+            weakReference.Call(
+                *_env, onSpriteRequested, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+        }
     }
 }
 
