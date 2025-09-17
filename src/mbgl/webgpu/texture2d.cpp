@@ -88,6 +88,7 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
     image = image_;
     if (image) {
         size = image->size;
+        dirty = true;
     }
     return *this;
 }

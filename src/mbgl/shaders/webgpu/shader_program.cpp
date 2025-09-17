@@ -8,12 +8,33 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
 #include <fstream>
+#include <map>
 
 namespace mbgl {
 namespace webgpu {
 
 namespace {
+std::string trimString(std::string_view value) {
+    auto begin = value.begin();
+    auto end = value.end();
+    while (begin != end && std::isspace(static_cast<unsigned char>(*begin))) {
+        ++begin;
+    }
+    while (begin != end) {
+        auto prev = end - 1;
+        if (!std::isspace(static_cast<unsigned char>(*prev))) {
+            break;
+        }
+        end = prev;
+    }
+    return std::string(begin, end);
+}
+
 WGPUBlendOperation webgpuBlendOperation(const gfx::ColorBlendEquationType& equation) {
     switch (equation) {
         case gfx::ColorBlendEquationType::Add:
@@ -74,7 +95,7 @@ ShaderProgram::ShaderProgram(std::string name,
       backend(backend_),
       vertexShaderModule(vertexModule),
       fragmentShaderModule(fragmentModule) {
-    createPipelineLayout();
+    createPipelineLayout({}, {});
 }
 
 // Minimal constructor for Context::createShader compatibility
@@ -97,8 +118,8 @@ ShaderProgram::ShaderProgram(Context& context,
     // and the files would be misleading
 
     // Create vertex shader module
-    WGPUShaderModuleWGSLDescriptor wgslDesc = {};
-    wgslDesc.chain.sType = (WGPUSType)0x00040006;  // WGPUSType_ShaderModuleWGSLDescriptor
+    WGPUShaderSourceWGSL wgslDesc = {};
+    wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
     wgslDesc.chain.next = nullptr;
     WGPUStringView vertexCode = {vertexWithPrelude.c_str(), vertexWithPrelude.length()};
     wgslDesc.code = vertexCode;
@@ -133,7 +154,7 @@ ShaderProgram::ShaderProgram(Context& context,
         Log::Info(Event::Render, "Successfully created fragment shader module for " + shaderName);
     }
 
-    createPipelineLayout();
+    createPipelineLayout(vertexWithPrelude, fragmentWithPrelude);
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -151,10 +172,14 @@ ShaderProgram::~ShaderProgram() {
         pipelineLayout = nullptr;
     }
 
-    if (bindGroupLayout) {
-        wgpuBindGroupLayoutRelease(bindGroupLayout);
-        bindGroupLayout = nullptr;
+    for (auto layout : bindGroupLayouts) {
+        if (layout) {
+            wgpuBindGroupLayoutRelease(layout);
+        }
     }
+    bindGroupLayouts.clear();
+    bindGroupOrder.clear();
+    bindingsPerGroup.clear();
 
     // Release shader modules if we created them
     if (vertexShaderModule) {
@@ -231,47 +256,265 @@ void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
     textureBindings[info.id] = info.index;
 }
 
-void ShaderProgram::createPipelineLayout() {
+const std::vector<ShaderProgram::BindingInfo>& ShaderProgram::getBindingInfosForGroup(uint32_t group) const {
+    for (size_t i = 0; i < bindGroupOrder.size(); ++i) {
+        if (bindGroupOrder[i] == group) {
+            return bindingsPerGroup[i];
+        }
+    }
+    static const std::vector<BindingInfo> empty;
+    return empty;
+}
+
+WGPUBindGroupLayout ShaderProgram::getBindGroupLayout(uint32_t group) const {
+    for (size_t i = 0; i < bindGroupOrder.size(); ++i) {
+        if (bindGroupOrder[i] == group) {
+            return bindGroupLayouts[i];
+        }
+    }
+    return nullptr;
+}
+
+void ShaderProgram::createPipelineLayout(const std::string& vertexSource, const std::string& fragmentSource) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
-    if (!device) return;
-
-    // Create bind group layout for uniforms
-    std::vector<WGPUBindGroupLayoutEntry> bindingEntries;
-
-    // Create bindings 0-5 for all possible uniform buffer indices
-    for (uint32_t binding = 0; binding <= 5; ++binding) {
-        WGPUBindGroupLayoutEntry entry = {};
-        entry.binding = binding;
-        entry.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
-        entry.buffer.type = WGPUBufferBindingType_Uniform;
-        entry.buffer.hasDynamicOffset = 0;
-        entry.buffer.minBindingSize = 0;
-        bindingEntries.push_back(entry);
+    if (!device) {
+        return;
     }
 
-    WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
-    WGPUStringView bindGroupLabel = {"Uniform Bind Group Layout", strlen("Uniform Bind Group Layout")};
-    bindGroupLayoutDesc.label = bindGroupLabel;
-    bindGroupLayoutDesc.entryCount = bindingEntries.size();
-    bindGroupLayoutDesc.entries = bindingEntries.data();
+    if (!vertexSource.empty() || !fragmentSource.empty()) {
+        bindingInfos.clear();
+        if (!vertexSource.empty()) {
+            analyzeShaderBindings(vertexSource, WGPUShaderStage_Vertex);
+        }
+        if (!fragmentSource.empty()) {
+            analyzeShaderBindings(fragmentSource, WGPUShaderStage_Fragment);
+        }
+    }
 
-    bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
+    rebuildBindGroupLayouts();
 
-    // Create pipeline layout
+    if (pipelineLayout) {
+        wgpuPipelineLayoutRelease(pipelineLayout);
+        pipelineLayout = nullptr;
+    }
+
+    std::vector<WGPUBindGroupLayout> layoutHandles;
+    layoutHandles.reserve(bindGroupLayouts.size());
+    for (const auto& layout : bindGroupLayouts) {
+        layoutHandles.push_back(layout);
+    }
+
     WGPUPipelineLayoutDescriptor pipelineLayoutDesc = {};
     WGPUStringView pipelineLayoutLabel = {"Pipeline Layout", strlen("Pipeline Layout")};
     pipelineLayoutDesc.label = pipelineLayoutLabel;
-
-    if (bindGroupLayout) {
-        pipelineLayoutDesc.bindGroupLayoutCount = 1;
-        pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
-    } else {
-        pipelineLayoutDesc.bindGroupLayoutCount = 0;
-        pipelineLayoutDesc.bindGroupLayouts = nullptr;
-    }
+    pipelineLayoutDesc.bindGroupLayoutCount = layoutHandles.size();
+    pipelineLayoutDesc.bindGroupLayouts = layoutHandles.empty() ? nullptr : layoutHandles.data();
 
     pipelineLayout = wgpuDeviceCreatePipelineLayout(device, &pipelineLayoutDesc);
+}
+
+void ShaderProgram::analyzeShaderBindings(const std::string& source, WGPUShaderStage stage) {
+    size_t searchPos = 0;
+    while (true) {
+        size_t groupToken = source.find("@group", searchPos);
+        if (groupToken == std::string::npos) {
+            break;
+        }
+        size_t groupParen = source.find('(', groupToken);
+        if (groupParen == std::string::npos) {
+            break;
+        }
+        size_t groupStart = groupParen + 1;
+        while (groupStart < source.size() && std::isspace(static_cast<unsigned char>(source[groupStart]))) {
+            ++groupStart;
+        }
+        size_t groupEnd = groupStart;
+        while (groupEnd < source.size() && std::isdigit(static_cast<unsigned char>(source[groupEnd]))) {
+            ++groupEnd;
+        }
+        if (groupEnd == groupStart) {
+            searchPos = groupEnd;
+            continue;
+        }
+        uint32_t group = static_cast<uint32_t>(std::strtoul(source.substr(groupStart, groupEnd - groupStart).c_str(), nullptr, 10));
+
+        size_t bindingToken = source.find("@binding", groupEnd);
+        if (bindingToken == std::string::npos) {
+            break;
+        }
+        size_t bindingParen = source.find('(', bindingToken);
+        if (bindingParen == std::string::npos) {
+            break;
+        }
+        size_t bindingStart = bindingParen + 1;
+        while (bindingStart < source.size() && std::isspace(static_cast<unsigned char>(source[bindingStart]))) {
+            ++bindingStart;
+        }
+        size_t bindingEnd = bindingStart;
+        while (bindingEnd < source.size() && std::isdigit(static_cast<unsigned char>(source[bindingEnd]))) {
+            ++bindingEnd;
+        }
+        if (bindingEnd == bindingStart) {
+            searchPos = bindingEnd;
+            continue;
+        }
+        uint32_t binding = static_cast<uint32_t>(std::strtoul(source.substr(bindingStart, bindingEnd - bindingStart).c_str(), nullptr, 10));
+
+        size_t varPos = source.find("var", bindingEnd);
+        if (varPos == std::string::npos) {
+            break;
+        }
+        if (varPos > bindingEnd && std::isalpha(static_cast<unsigned char>(source[varPos - 1]))) {
+            searchPos = varPos + 3;
+            continue;
+        }
+
+        size_t afterVar = varPos + 3;
+        while (afterVar < source.size() && std::isspace(static_cast<unsigned char>(source[afterVar]))) {
+            ++afterVar;
+        }
+
+        BindingType type = BindingType::UniformBuffer;
+        if (afterVar < source.size() && source[afterVar] == '<') {
+            size_t qualifierEnd = source.find('>', afterVar);
+            if (qualifierEnd == std::string::npos) {
+                break;
+            }
+            const auto qualifier = trimString(std::string_view(source.data() + afterVar + 1, qualifierEnd - afterVar - 1));
+            if (qualifier.find("storage") != std::string::npos) {
+                if (qualifier.find("read_write") != std::string::npos) {
+                    type = BindingType::StorageBuffer;
+                } else {
+                    type = BindingType::ReadOnlyStorageBuffer;
+                }
+            } else {
+                type = BindingType::UniformBuffer;
+            }
+            afterVar = qualifierEnd + 1;
+        }
+
+        size_t colonPos = source.find(':', afterVar);
+        if (colonPos == std::string::npos) {
+            break;
+        }
+        size_t typeStart = colonPos + 1;
+        size_t typeEnd = typeStart;
+        while (typeEnd < source.size()) {
+            char c = source[typeEnd];
+            if (c == ';' || c == '\n' || c == '\r') {
+                break;
+            }
+            ++typeEnd;
+        }
+        const auto typeName = trimString(std::string_view(source.data() + typeStart, typeEnd - typeStart));
+
+        if (type == BindingType::UniformBuffer) {
+            if (typeName.find("sampler") != std::string::npos) {
+                type = BindingType::Sampler;
+            } else if (typeName.find("texture") != std::string::npos) {
+                type = BindingType::Texture;
+            }
+        }
+
+        auto existing = std::find_if(bindingInfos.begin(), bindingInfos.end(), [&](const BindingInfo& info) {
+            return info.group == group && info.binding == binding;
+        });
+
+        if (existing == bindingInfos.end()) {
+            bindingInfos.push_back({group, binding, type, stage});
+        } else {
+            existing->visibility |= stage;
+            if (existing->type == BindingType::UniformBuffer && type != BindingType::UniformBuffer) {
+                existing->type = type;
+            }
+        }
+
+        searchPos = typeEnd;
+    }
+}
+
+void ShaderProgram::rebuildBindGroupLayouts() {
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+    if (!device) {
+        return;
+    }
+
+    for (auto layout : bindGroupLayouts) {
+        if (layout) {
+            wgpuBindGroupLayoutRelease(layout);
+        }
+    }
+    bindGroupLayouts.clear();
+    bindGroupOrder.clear();
+    bindingsPerGroup.clear();
+
+    if (bindingInfos.empty()) {
+        bindingInfos.push_back({0u, 0u, BindingType::UniformBuffer, WGPUShaderStage_Vertex | WGPUShaderStage_Fragment});
+    }
+
+    std::map<uint32_t, std::vector<BindingInfo>> grouped;
+    for (const auto& info : bindingInfos) {
+        grouped[info.group].push_back(info);
+    }
+
+    for (auto& entry : grouped) {
+        auto& infos = entry.second;
+        std::sort(infos.begin(), infos.end(), [](const BindingInfo& lhs, const BindingInfo& rhs) {
+            return lhs.binding < rhs.binding;
+        });
+
+        std::vector<WGPUBindGroupLayoutEntry> layoutEntries;
+        layoutEntries.reserve(infos.size());
+
+        for (const auto& info : infos) {
+            WGPUBindGroupLayoutEntry layoutEntry = {};
+            layoutEntry.binding = info.binding;
+            layoutEntry.visibility = info.visibility;
+
+            switch (info.type) {
+                case BindingType::UniformBuffer:
+                    layoutEntry.buffer.type = WGPUBufferBindingType_Uniform;
+                    layoutEntry.buffer.hasDynamicOffset = 0;
+                    layoutEntry.buffer.minBindingSize = 0;
+                    break;
+                case BindingType::ReadOnlyStorageBuffer:
+                    layoutEntry.buffer.type = WGPUBufferBindingType_ReadOnlyStorage;
+                    layoutEntry.buffer.hasDynamicOffset = 0;
+                    layoutEntry.buffer.minBindingSize = 0;
+                    break;
+                case BindingType::StorageBuffer:
+                    layoutEntry.buffer.type = WGPUBufferBindingType_Storage;
+                    layoutEntry.buffer.hasDynamicOffset = 0;
+                    layoutEntry.buffer.minBindingSize = 0;
+                    break;
+                case BindingType::Sampler:
+                    layoutEntry.sampler.type = WGPUSamplerBindingType_Filtering;
+                    break;
+                case BindingType::Texture:
+                    layoutEntry.texture.sampleType = WGPUTextureSampleType_Float;
+                    layoutEntry.texture.viewDimension = WGPUTextureViewDimension_2D;
+                    layoutEntry.texture.multisampled = false;
+                    break;
+            }
+
+            layoutEntries.push_back(layoutEntry);
+        }
+
+        WGPUBindGroupLayoutDescriptor desc = {};
+        const std::string labelStr = "Shader Bind Group " + std::to_string(entry.first);
+        WGPUStringView labelView = {labelStr.c_str(), labelStr.length()};
+        desc.label = labelView;
+        desc.entryCount = layoutEntries.size();
+        desc.entries = layoutEntries.data();
+
+        WGPUBindGroupLayout layout = wgpuDeviceCreateBindGroupLayout(device, &desc);
+        if (layout) {
+            bindGroupOrder.push_back(entry.first);
+            bindingsPerGroup.push_back(infos);
+            bindGroupLayouts.push_back(layout);
+        }
+    }
 }
 
 WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* vertexLayouts,

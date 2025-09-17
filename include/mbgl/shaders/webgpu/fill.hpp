@@ -232,17 +232,23 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
-@group(0) @binding(6) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
-    let tileProps = tilePropsVector[uboIndex];
+    let index = globalIndex.value;
+    let drawable = drawableVector[index];
+    let tileProps = tilePropsVector[index];
 
     let pattern_from = vec4<f32>(in.pattern_from);
     let pattern_to = vec4<f32>(in.pattern_to);
@@ -317,15 +323,20 @@ struct FillEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
-@group(0) @binding(6) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[uboIndex];
+    let tileProps = tilePropsVector[globalIndex.value];
 
     let pattern_tl_a = in.pattern_from.xy;
     let pattern_br_a = in.pattern_from.zw;
@@ -406,17 +417,23 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
-@group(0) @binding(6) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
-    let tileProps = tilePropsVector[uboIndex];
+    let index = globalIndex.value;
+    let drawable = drawableVector[index];
+    let tileProps = tilePropsVector[index];
 
     let pattern_from = vec4<f32>(in.pattern_from);
     let pattern_to = vec4<f32>(in.pattern_to);
@@ -494,15 +511,20 @@ struct FillEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
-@group(0) @binding(6) var<uniform> uboIndex: u32;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[uboIndex];
+    let tileProps = tilePropsVector[globalIndex.value];
 
     let pattern_tl_a = in.pattern_from.xy;
     let pattern_br_a = in.pattern_from.zw;

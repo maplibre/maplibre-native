@@ -44,6 +44,7 @@ public:
     std::vector<std::unique_ptr<gfx::VertexBufferResource>> dummyVertexBuffers;
 
     UniformBufferArray uniformBuffers;
+    gfx::UniformBufferPtr uboIndexUniform;
 
     // Render state (matching Metal)
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
@@ -61,8 +62,8 @@ public:
     gfx::StencilMode previousStencilMode;
 
     // WebGPU-specific resources needed for rendering
-    WGPUBindGroup bindGroup = nullptr;
-    WGPUBindGroupLayout bindGroupLayout = nullptr;
+    std::vector<WGPUBindGroup> bindGroups;
+    std::vector<uint32_t> bindGroupIndices;
 };
 
 // WebGPU-specific DrawSegment inheriting from the base gfx::Drawable::DrawSegment
