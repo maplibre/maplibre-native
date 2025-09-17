@@ -156,8 +156,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     bool bindUBOs = false;
     int visitCount = 0;
     int drawCount = 0;
+    mbgl::Log::Info(mbgl::Event::Render, "TileLayerGroup::render starting visitDrawables for " + getName());
     visitDrawables([&](gfx::Drawable& drawable) {
         visitCount++;
+        mbgl::Log::Info(mbgl::Event::Render, "  Visiting drawable " + std::to_string(visitCount) +
+                       " enabled=" + std::to_string(drawable.getEnabled()) +
+                       " hasRenderPass=" + std::to_string(drawable.hasRenderPass(parameters.pass)));
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
@@ -206,6 +210,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         drawable.draw(parameters);
     });
+
+    mbgl::Log::Info(mbgl::Event::Render, "TileLayerGroup::render finished for " + getName() +
+                   " visited=" + std::to_string(visitCount) + " drawn=" + std::to_string(drawCount));
 
     if (visitCount > 0 && drawCount == 0) {
         mbgl::Log::Warning(mbgl::Event::Render, getName() + " visited " + std::to_string(visitCount) +

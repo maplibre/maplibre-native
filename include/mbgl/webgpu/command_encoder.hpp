@@ -35,6 +35,9 @@ public:
 
     void present(gfx::Renderable&) override;
 
+    // WebGPU-specific: submit command buffer directly
+    void submitCommandBuffer();
+
     template <typename TFunc>
     void visitDebugGroups(TFunc f) {
         for (const auto& item : debugGroupNames) {
@@ -58,9 +61,6 @@ private:
 
     void pushDebugGroup(const char* name) override;
     void popDebugGroup() override;
-
-    // WebGPU-specific: submit command buffer directly
-    void submitCommandBuffer();
 
 protected:
     struct GroupEntry {

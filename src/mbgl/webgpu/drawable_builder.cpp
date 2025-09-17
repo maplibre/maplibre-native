@@ -24,6 +24,8 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 }
 
 void DrawableBuilder::init() {
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() called");
+
     if (!currentDrawable) {
         mbgl::Log::Warning(mbgl::Event::Render, "DrawableBuilder::init called with no current drawable");
         return;
@@ -35,7 +37,8 @@ void DrawableBuilder::init() {
                    " rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
                    " rawVertices.size=" + std::to_string(impl->rawVertices.size()) +
                    " segments.size=" + std::to_string(impl->segments.size()) +
-                   " sharedIndexes=" + (impl->sharedIndexes ? "yes" : "no"));
+                   " sharedIndexes=" + (impl->sharedIndexes ? "yes" : "no") +
+                   " vertexAttrs=" + (drawable.getVertexAttributes() ? "present" : "null"));
 
     // Set the vertex attribute ID so the drawable knows which shared vertex buffer to use
     drawable.setVertexAttrId(vertexAttrId);
@@ -91,7 +94,9 @@ void DrawableBuilder::init() {
         mbgl::Log::Warning(mbgl::Event::Render, "  No index data to set!");
     }
 
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() completed for " + drawable.getName());
 }
+
 
 } // namespace webgpu
 } // namespace mbgl

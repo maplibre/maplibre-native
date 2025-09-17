@@ -160,7 +160,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
     const std::optional<std::chrono::duration<double>> lastUpdate,
-    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
+    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& vertexBuffers) {
 
     mbgl::Log::Info(mbgl::Event::Render, "WebGPU buildAttributeBindings called with vertexCount=" +
                     std::to_string(vertexCount) + " vertexData.size=" + std::to_string(vertexData.size()));
@@ -187,15 +187,56 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         bindings.resize(std::max(bindings.size(), index + 1));
 
         if (!override_) {
-            // No attribute was provided, this value will be used from a uniform, but we have to set
-            // up a valid binding or the validation will complain when the shader code references the
-            // attribute at compile time, regardless of whether it's ever used at runtime.
+            // No attribute was provided. WebGPU requires all vertex attributes to have buffers bound,
+            // so we create a dummy buffer with default values.
+            const auto stride = VertexAttribute::getStrideOf(defaultAttr.getDataType());
+            const auto bufferSize = stride * vertexCount;
+
+            // Create a buffer with appropriate default values
+            std::vector<uint8_t> dummyData(bufferSize);
+
+            // Fill with appropriate default values based on the attribute type
+            const auto dataType = defaultAttr.getDataType();
+            if (dataType == gfx::AttributeDataType::Float4) {
+                // For color attribute - default to white (1,1,1,1)
+                float* floatData = reinterpret_cast<float*>(dummyData.data());
+                for (size_t i = 0; i < vertexCount; ++i) {
+                    floatData[i * 4 + 0] = 1.0f; // R
+                    floatData[i * 4 + 1] = 1.0f; // G
+                    floatData[i * 4 + 2] = 1.0f; // B
+                    floatData[i * 4 + 3] = 1.0f; // A
+                }
+            } else if (dataType == gfx::AttributeDataType::Float2) {
+                // For opacity attribute - default to full opacity (1,1)
+                float* floatData = reinterpret_cast<float*>(dummyData.data());
+                for (size_t i = 0; i < vertexCount; ++i) {
+                    floatData[i * 2 + 0] = 1.0f;
+                    floatData[i * 2 + 1] = 1.0f;
+                }
+            } else {
+                // For other types, fill with zeros
+                std::fill(dummyData.begin(), dummyData.end(), 0);
+            }
+
+            // Create vertex buffer resource for the dummy data
+            auto dummyBuffer = createVertexBufferResource(
+                dummyData.data(),
+                bufferSize,
+                usage,
+                /*persistent=*/false);
+
             bindings[index] = {
                 /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
-                /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
-                /*.vertexBufferResource = */ nullptr,
+                /*.vertexStride = */ static_cast<uint32_t>(stride),
+                /*.vertexBufferResource = */ dummyBuffer.get(),
                 /*.vertexOffset = */ 0,
             };
+
+            // Store the buffer so it doesn't get destroyed
+            vertexBuffers.push_back(std::move(dummyBuffer));
+
+            mbgl::Log::Info(mbgl::Event::Render, "Created dummy buffer for missing attribute " +
+                           std::to_string(index) + " size=" + std::to_string(bufferSize));
             return;
         }
 
@@ -204,8 +245,21 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
-            mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
-                           " from shared buffer");
+            // Log vertex data for debugging
+            if (effectiveAttr.getSharedRawData()) {
+                const int16_t* rawVerts = reinterpret_cast<const int16_t*>(effectiveAttr.getSharedRawData()->getRawData());
+                if (rawVerts) {
+                    mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
+                                   " from shared buffer. First verts: [" +
+                                   std::to_string(rawVerts[0]) + ", " + std::to_string(rawVerts[1]) + "]");
+                } else {
+                    mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
+                                   " from shared buffer");
+                }
+            } else {
+                mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
+                               " from shared buffer");
+            }
 
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},

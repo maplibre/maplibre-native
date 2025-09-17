@@ -57,7 +57,9 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
-    return std::make_unique<CommandEncoder>(*this);
+    auto encoder = std::make_unique<CommandEncoder>(*this);
+    currentCommandEncoder = encoder.get();
+    return encoder;
 }
 
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
@@ -253,6 +255,14 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
             // Create vertex buffer from the shared data
             const auto dataSize = sharedRaw->getRawSize() * sharedRaw->getRawCount();
             if (dataSize > 0) {
+                // Log first few vertices for debugging
+                const int16_t* rawVerts = reinterpret_cast<const int16_t*>(sharedRaw->getRawData());
+                if (rawVerts && dataSize >= 8) {
+                    mbgl::Log::Info(mbgl::Event::Render, "First vertex data: [" +
+                                   std::to_string(rawVerts[0]) + ", " + std::to_string(rawVerts[1]) +
+                                   ", " + std::to_string(rawVerts[2]) + ", " + std::to_string(rawVerts[3]) + "]");
+                }
+
                 // Create GPU buffer for this vertex attribute
                 uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
                 auto bufferResource = std::make_shared<VertexBufferResource>(
@@ -268,7 +278,8 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
                 };
 
                 mbgl::Log::Info(mbgl::Event::Render, "Created vertex buffer for attribute " +
-                               std::to_string(index) + " size=" + std::to_string(dataSize));
+                               std::to_string(index) + " size=" + std::to_string(dataSize) +
+                               " stride=" + std::to_string(attr.getStride()));
             }
         }
     });

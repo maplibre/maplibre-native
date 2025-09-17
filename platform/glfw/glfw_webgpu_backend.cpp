@@ -163,8 +163,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     wgpuDeviceTick(rawDevice);
 
     // Note: Dawn's error callback API is different from wgpu-native
-    // We can set callbacks on the raw device if needed
-    // For now, errors will be logged by Dawn's internal validation
+    // Errors will be logged by Dawn's internal validation for now
 
 #ifdef __APPLE__
     // Setup Metal surface on macOS
@@ -404,13 +403,16 @@ void GLFWWebGPUBackend::swap() {
     
     // Run periodic maintenance
     periodicMaintenance();
-    
+
+    // Note: Command buffer is already submitted in CommandEncoder::present()
+    // before swap() is called, so we don't need to submit it again here.
+
     // Wait for any previous frame to complete with longer timeout
     if (!waitForFrame(std::chrono::milliseconds(500))) {
         // Timeout - force frame completion
         signalFrameComplete();
     }
-    
+
     // Present the current frame
     if (wgpuSurface && surfaceConfigured) {
         // Check if surface needs reconfiguration

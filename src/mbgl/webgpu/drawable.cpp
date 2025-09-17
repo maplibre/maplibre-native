@@ -286,6 +286,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             impl->attributeBindings = std::move(attributeBindings_);
             impl->vertexDescHash = 0; // Reset hash when bindings change
             impl->pipelineState = nullptr; // Reset pipeline state when attribute bindings change
+            // Store the dummy vertex buffers to keep them alive
+            impl->dummyVertexBuffers = std::move(vertexBuffers);
         }
     }
 
@@ -310,6 +312,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
             impl->pipelineState = nullptr; // Reset pipeline state when instance bindings change
+            // Store the dummy instance buffers to keep them alive
+            if (!instanceBuffers.empty()) {
+                impl->dummyVertexBuffers.insert(impl->dummyVertexBuffers.end(),
+                                               std::make_move_iterator(instanceBuffers.begin()),
+                                               std::make_move_iterator(instanceBuffers.end()));
+            }
         }
     }
 
@@ -356,7 +364,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 void Drawable::draw(PaintParameters& parameters) const {
     static int drawCallCount = 0;
     drawCallCount++;
-    if (drawCallCount <= 20) {
+    if (drawCallCount <= 2000) {
         Log::Info(Event::Render, "WebGPU Drawable::draw #" + std::to_string(drawCallCount) + " for " + getName() +
                   " pass=" + std::to_string(mbgl::underlying_type(parameters.pass)) +
                   " shader=" + (shader ? shader->typeName().data() : "null"));
@@ -477,7 +485,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                 if (entries.empty()) {
                     Log::Warning(Event::Render, "No uniform buffers found for bind group!");
-                } else if (drawCallCount <= 20) {
+                } else if (drawCallCount <= 200) {
                     Log::Info(Event::Render, "Creating bind group with " + std::to_string(entries.size()) + " entries");
                     // Log details of uniform buffer at index 2 (FillDrawableUBO)
                     for (const auto& entry : entries) {
@@ -523,10 +531,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         std::vector<WGPUVertexBufferLayout> vertexLayouts;
 
         // Create vertex buffer layouts from attribute bindings
-        uint32_t bufferIndex = 0;
-        for (const auto& binding : impl->attributeBindings) {
+        for (size_t i = 0; i < impl->attributeBindings.size(); ++i) {
+            const auto& binding = impl->attributeBindings[i];
             if (!binding.has_value() || !binding->vertexBufferResource) {
-                bufferIndex++;
                 continue;
             }
 
@@ -537,18 +544,14 @@ void Drawable::draw(PaintParameters& parameters) const {
             WGPUVertexAttribute attr = {};
             attr.format = wgpuVertexFormatOf(binding->attribute.dataType);
             attr.offset = binding->attribute.offset;
-            attr.shaderLocation = bufferIndex;
+            attr.shaderLocation = static_cast<uint32_t>(i);  // Use the actual attribute index
             attrs.push_back(attr);
-
-            bufferIndex++;
         }
 
         // Now create the layouts with stable pointers to attributes
-        bufferIndex = 0;
         size_t attrIndex = 0;
         for (const auto& binding : impl->attributeBindings) {
             if (!binding.has_value() || !binding->vertexBufferResource) {
-                bufferIndex++;
                 continue;
             }
 
@@ -560,7 +563,6 @@ void Drawable::draw(PaintParameters& parameters) const {
             vertexLayouts.push_back(layout);
 
             attrIndex++;
-            bufferIndex++;
         }
 
         // Get render pipeline similar to Metal's getRenderPipelineState
@@ -588,7 +590,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             Log::Error(Event::Render, "renderPassEncoder is null!");
             return;
         }
-        if (drawCallCount <= 20) {
+        if (drawCallCount <= 200) {
             Log::Info(Event::Render, "Setting pipeline state: encoder=" +
                 std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
                 ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
@@ -601,29 +603,55 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
 
-    // Bind vertex buffers from attributeBindings (like Metal does)
-    uint32_t attributeIndex = 0;
-    for (const auto& binding : impl->attributeBindings) {
+    // Bind vertex buffers from attributeBindings
+    if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
+        Log::Info(Event::Render, "Total attribute bindings: " + std::to_string(impl->attributeBindings.size()));
+        // Debug: log all attribute bindings
+        for (size_t i = 0; i < impl->attributeBindings.size(); ++i) {
+            const auto& binding = impl->attributeBindings[i];
+            if (binding.has_value()) {
+                Log::Info(Event::Render, "  AttributeBinding[" + std::to_string(i) + "]: has_value=true, vertexBufferResource=" +
+                         (binding->vertexBufferResource ? "present" : "null") +
+                         ", dataType=" + std::to_string(static_cast<int>(binding->attribute.dataType)));
+            } else {
+                Log::Info(Event::Render, "  AttributeBinding[" + std::to_string(i) + "]: has_value=false");
+            }
+        }
+    }
+
+    uint32_t boundBufferCount = 0;
+    uint32_t bufferSlot = 0;
+    for (size_t i = 0; i < impl->attributeBindings.size(); ++i) {
+        const auto& binding = impl->attributeBindings[i];
         if (binding.has_value() && binding->vertexBufferResource) {
             const auto* vertexBufferRes = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
             if (vertexBufferRes) {
                 const auto& buffer = vertexBufferRes->getBuffer();
                 if (buffer.getBuffer()) {
-                    if (drawCallCount <= 20 && getName().find("fill") != std::string::npos) {
-                        Log::Info(Event::Render, "  Binding vertex buffer[" + std::to_string(attributeIndex) +
-                                 "] size=" + std::to_string(buffer.getSizeInBytes()) +
-                                 " offset=" + std::to_string(binding->attribute.offset));
+                    if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
+                        Log::Info(Event::Render, "  Binding vertex buffer slot " + std::to_string(bufferSlot) +
+                                 " for attribute " + std::to_string(i) +
+                                 " size=" + std::to_string(buffer.getSizeInBytes()) +
+                                 " offset=" + std::to_string(binding->attribute.offset) +
+                                 " stride=" + std::to_string(binding->vertexStride) +
+                                 " dataType=" + std::to_string(static_cast<int>(binding->attribute.dataType)) +
+                                 " bufferPtr=" + std::to_string(reinterpret_cast<uintptr_t>(buffer.getBuffer())));
                     }
                     wgpuRenderPassEncoderSetVertexBuffer(
                         renderPassEncoder,
-                        attributeIndex,
+                        bufferSlot,  // Use sequential buffer slot
                         buffer.getBuffer(),
                         binding->attribute.offset,
                         buffer.getSizeInBytes());
+                    bufferSlot++;
+                    boundBufferCount++;
                 }
             }
         }
-        attributeIndex++;
+    }
+
+    if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
+        Log::Info(Event::Render, "Actually bound " + std::to_string(boundBufferCount) + " vertex buffers");
     }
 
     // Bind index buffer if present
@@ -650,7 +678,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Set bind group
     if (impl->bindGroup) {
-        if (drawCallCount <= 20) {
+        if (drawCallCount <= 200) {
             Log::Info(Event::Render, "Setting bind group: " +
                      std::to_string(reinterpret_cast<uintptr_t>(impl->bindGroup)));
         }
@@ -686,12 +714,28 @@ void Drawable::draw(PaintParameters& parameters) const {
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
 
-            if (drawCallCount <= 20 && getName().find("fill") != std::string::npos) {
+            if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
                 Log::Info(Event::Render, "  FILL Drawing segment " + std::to_string(++segmentCount) +
                          " indices=" + std::to_string(mlSegment.indexLength) +
                          " indexOffset=" + std::to_string(indexOffset) +
                          " baseVertex=" + std::to_string(baseVertex) +
                          " instances=" + std::to_string(instanceCount));
+            }
+
+            // Check if encoder is valid before drawing
+            if (!renderPassEncoder) {
+                Log::Error(Event::Render, "Render pass encoder became null before draw!");
+                return;
+            }
+
+            Log::Info(Event::Render, "Calling wgpuRenderPassEncoderDrawIndexed with encoder=" +
+                     std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
+                     " indexCount=" + std::to_string(mlSegment.indexLength));
+
+            // Make sure we have valid indices
+            if (mlSegment.indexLength == 0) {
+                Log::Warning(Event::Render, "Skipping draw with 0 indices");
+                continue;
             }
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
@@ -700,6 +744,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                             indexOffset,             // firstIndex
                                             baseVertex,              // baseVertex
                                             baseInstance);           // firstInstance
+
+            Log::Info(Event::Render, "wgpuRenderPassEncoderDrawIndexed call completed");
 
             context.renderingStats().numDrawCalls++;
         }

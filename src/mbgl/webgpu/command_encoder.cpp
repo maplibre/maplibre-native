@@ -83,12 +83,11 @@ void CommandEncoder::submitCommandBuffer() {
         Log::Error(Event::Render, "WebGPU: Failed to finish command encoder");
     }
 
-    // Create a new command encoder for the next frame
+    // Don't create a new encoder here - it will be created when needed for the next frame
     encoder = nullptr;
-    WGPUCommandEncoderDescriptor newDesc = {};
-    WGPUStringView newLabel = {"MapLibre Command Encoder", strlen("MapLibre Command Encoder")};
-    newDesc.label = newLabel;
-    encoder = wgpuDeviceCreateCommandEncoder(device, &newDesc);
+
+    // Update the context to clear the current encoder
+    context.setCurrentCommandEncoder(nullptr);
 }
 
 
