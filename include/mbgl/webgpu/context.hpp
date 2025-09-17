@@ -74,6 +74,10 @@ public:
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();
 
+    // Command encoder tracking
+    class CommandEncoder* getCurrentCommandEncoder() const { return currentCommandEncoder; }
+    void setCurrentCommandEncoder(class CommandEncoder* encoder) { currentCommandEncoder = encoder; }
+
     // Vertex binding creation - needed for drawable geometry
     gfx::AttributeBindingArray getOrCreateVertexBindings(
         gfx::Context&,
@@ -93,6 +97,7 @@ protected:
 private:
     RendererBackend& backend;
     std::unique_ptr<gfx::UniformBufferArray> globalUniformBuffers;
+    class CommandEncoder* currentCommandEncoder = nullptr;
 
     // Cached buffers (aligned with Metal)
     std::optional<BufferResource> tileVertexBuffer;

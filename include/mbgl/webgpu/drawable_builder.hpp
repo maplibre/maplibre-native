@@ -15,6 +15,7 @@ public:
     explicit DrawableBuilder(std::string name);
     ~DrawableBuilder() override;
 
+
 protected:
     std::unique_ptr<gfx::Drawable> createDrawable() const override;
     std::unique_ptr<gfx::Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) override;

@@ -1175,16 +1175,17 @@ void GLFWView::render() {
         }
 
         // Swap buffers for the appropriate backend
-        // WebGPU backend handles its own swap
 #if MLN_RENDER_BACKEND_WEBGPU
-        if (mbgl::gfx::Backend::GetType() == mbgl::gfx::Backend::Type::WebGPU) {
-            static_cast<GLFWWebGPUBackend*>(backend.get())->swap();
-        } else
-#endif
-        {
-            // OpenGL or other backends
-            glfwSwapBuffers(window);
+        // For WebGPU backend, call swap() which submits command buffer and presents
+        // We can safely static_cast here since we know the backend type from compilation
+        if (backend) {
+            auto* webgpuBackend = static_cast<GLFWWebGPUBackend*>(backend.get());
+            webgpuBackend->swap();
         }
+#else
+        // OpenGL or other backends
+        glfwSwapBuffers(window);
+#endif
 
         report(static_cast<float>(1000 * (glfwGetTime() - started)));
         if (benchmark) {

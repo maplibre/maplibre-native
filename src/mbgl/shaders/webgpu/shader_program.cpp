@@ -347,9 +347,9 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     // Set up depth stencil state
     WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    // Enable depth testing for fill layers - they need proper depth ordering
-    depthStencilState.depthWriteEnabled = WGPUOptionalBool_True;
-    depthStencilState.depthCompare = WGPUCompareFunction_LessEqual;
+    // Temporarily disable depth testing to debug visibility
+    depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
+    depthStencilState.depthCompare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
     depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;

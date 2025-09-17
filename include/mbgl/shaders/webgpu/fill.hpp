@@ -63,28 +63,14 @@ struct FillDrawableUBO {
 @group(0) @binding(2) var<uniform> drawable: FillDrawableUBO;
 
 @vertex
-fn main(in: VertexInput) -> VertexOutput {
+fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
-    // Transform vertex position using the matrix
-    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let pos4 = vec4<f32>(pos, 0.0, 1.0);
+    // Transform position using the matrix
+    let worldPos = vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    out.position = drawable.matrix * worldPos;
 
-    // Apply transformation (same as Metal and Vulkan)
-    let transformed = drawable.matrix * pos4;
-
-    // Convert to NDC coordinates by dividing by W, then flip Y for WebGPU
-    // WebGPU uses Z range [0, 1] instead of [-1, 1]
-    // Ensure fills render in front of background (lower Z = closer in WebGPU)
-    let ndc_z = clamp((transformed.z / transformed.w) * 0.5 + 0.5, 0.0, 0.98);
-    out.position = vec4<f32>(
-        transformed.x / transformed.w,
-        -transformed.y / transformed.w,  // Flip Y after perspective divide
-        ndc_z,
-        1.0
-    );
-
-    // Pass color and opacity to fragment shader
+    // Interpolate color and opacity
     out.color = unpack_mix_color(in.color, drawable.color_t);
     out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
 
@@ -161,25 +147,15 @@ struct FillOutlineDrawableUBO {
 @group(0) @binding(2) var<uniform> drawable: FillOutlineDrawableUBO;
 
 @vertex
-fn main(in: VertexInput) -> VertexOutput {
+fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
-    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let transformed = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    // Transform position using the matrix
+    let worldPos = vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    out.position = drawable.matrix * worldPos;
 
-    // Convert to NDC coordinates by dividing by W, then flip Y for WebGPU
-    // WebGPU uses Z range [0, 1] instead of [-1, 1]
-    // Ensure fills render in front of background (lower Z = closer in WebGPU)
-    let ndc_z = clamp((transformed.z / transformed.w) * 0.5 + 0.5, 0.0, 0.98);
-    out.position = vec4<f32>(
-        transformed.x / transformed.w,
-        -transformed.y / transformed.w,  // Flip Y after perspective divide
-        ndc_z,
-        1.0
-    );
-
-    // Pass color and opacity to fragment shader
-    out.color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
+    // Interpolate color and opacity
+    out.color = unpack_mix_color(in.color, drawable.color_t);
     out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
 
     return out;
@@ -194,9 +170,8 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Debug: Always return a visible red color to test if fragments are rendering
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-    // Original: return in.color * in.opacity;
+    // Use color and opacity from vertex shader
+    return in.color * in.opacity;
 }
 )";
 };

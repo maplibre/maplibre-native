@@ -327,20 +327,26 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            mbgl::Log::Info(mbgl::Event::Render, "Updated existing drawables for tile " + util::toString(tileID));
             continue;
         }
+        mbgl::Log::Info(mbgl::Event::Render, "Creating new drawables for tile " + util::toString(tileID));
 
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
 
-            for (auto& drawable : builder.clearDrawables()) {
+            auto drawables = builder.clearDrawables();
+            mbgl::Log::Info(mbgl::Event::Render, "Got " + std::to_string(drawables.size()) + " drawables from builder");
+            for (auto& drawable : drawables) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<size_t>(type));
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData->bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
+                mbgl::Log::Info(mbgl::Event::Render, "  Adding drawable to layer group for tile " + util::toString(tileID));
                 fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
+                mbgl::Log::Info(mbgl::Event::Render, "  Total drawables added: " + std::to_string(stats.drawablesAdded));
             }
         };
 
