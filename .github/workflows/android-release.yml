@@ -149,16 +149,6 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
 
-      - run: npm install
-        working-directory: .
-
-      - name: Write release notifications
-        if: github.repository_owner == 'maplibre'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
-        working-directory: .
-
   finilize-release:
     runs-on: ubuntu-latest
     needs:
@@ -171,3 +161,15 @@ jobs:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           name: ${{ needs.android-create-release.outputs.version_tag }}
           draft: false
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+
+      - run: npm install
+        working-directory: .
+
+      - name: Write release notifications
+        if: github.repository_owner == 'maplibre'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
+        working-directory: .
