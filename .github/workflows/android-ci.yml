@@ -53,6 +53,8 @@ jobs:
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
@@ -181,6 +183,14 @@ jobs:
           ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug -Pmaplibre.abis=arm64-v8a
           cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug.apk InstrumentationTestApp${{ env.renderer }}.apk
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug-androidTest.apk InstrumentationTests${{ env.renderer }}.apk
+
+      - name: Install sentry-cli
+        if: env.SENTRY_DSN != ''
+        run: curl -sL https://sentry.io/get-cli/ | sh
+
+      - name: Upload debug symbols to sentry
+        if: env.SENTRY_DSN != ''
+        run: sentry-cli debug-files upload MapLibreAndroidTestApp
 
       - name: Upload android-ui-test-${{ matrix.renderer }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
