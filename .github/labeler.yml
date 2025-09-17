@@ -29,10 +29,6 @@ windows:
 - changed-files:
   - any-glob-to-any-file:
     - 'platform/windows/**/*'
-windows:
-- changed-files:
-  - any-glob-to-any-file:
-    - 'platform/windows/**/*'
 github_actions:
 - changed-files:
   - any-glob-to-any-file:
@@ -48,6 +44,7 @@ OpenGL:
   - any-glob-to-any-file:
     - '**/*opengl*'
     - '**/*opengl*/**'
+    - '**/gl/**'
 Vulkan:
   - any-glob-to-any-file:
     - '**/*vulkan*'
