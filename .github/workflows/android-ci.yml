@@ -336,6 +336,8 @@ jobs:
       - name: Create tag if it does not exist
         if: env.make_release == 'true'
         run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Trigger release
         if: env.make_release == 'true'
