@@ -58,7 +58,7 @@ struct PropertyVisitor {
 
     template <typename T>
     Value operator()(std::optional<T> value) const {
-        return value ? operator()(*value) : nullptr;
+        return value ? operator()(*value) : NullValue();
     }
 };
 } // namespace
