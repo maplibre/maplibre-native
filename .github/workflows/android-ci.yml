@@ -294,6 +294,9 @@ jobs:
 
   android-ci-result:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job
@@ -338,4 +341,4 @@ jobs:
         if: env.make_release == 'true'
         run: gh workflow run android-release.yml --ref android-v${{ env.version }}
         env:
-         GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
