@@ -57,14 +57,19 @@ struct FillExtrusionPropsUBO {
     pad2: f32,
 };
 
-@group(0) @binding(0) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
-@group(0) @binding(1) var<uniform> props: FillExtrusionPropsUBO;
-@group(0) @binding(2) var<uniform> uboIndex: u32;
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
+@group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
+    let drawable = drawableVector[globalIndex.value];
     
     let base = max(unpack_mix_float(vec2<f32>(in.base, in.base), drawable.base_t), 0.0);
     let height = max(unpack_mix_float(vec2<f32>(in.height, in.height), drawable.height_t), 0.0);
@@ -177,17 +182,23 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(1) var<storage, read> drawableVector: array<FillExtrusionPatternDrawableUBO>;
-@group(0) @binding(2) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
-@group(0) @binding(3) var<uniform> props: FillExtrusionPropsUBO;
-@group(0) @binding(4) var<uniform> uboIndex: u32;
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionPatternDrawableUBO>;
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[uboIndex];
-    let tileProps = tilePropsVector[uboIndex];
+    let index = globalIndex.value;
+    let drawable = drawableVector[index];
+    let tileProps = tilePropsVector[index];
 
     // Unpack base and height using helper functions
     let base = max(unpack_mix_float(vec2<f32>(in.base, in.base), drawable.base_t), 0.0);
@@ -307,15 +318,20 @@ struct FillExtrusionPropsUBO {
     pad2: f32,
 };
 
-@group(0) @binding(2) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
-@group(0) @binding(3) var<uniform> props: FillExtrusionPropsUBO;
-@group(0) @binding(4) var<uniform> uboIndex: u32;
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[uboIndex];
+    let tileProps = tilePropsVector[globalIndex.value];
 
     let pattern_tl_a = in.pattern_from.xy;
     let pattern_br_a = in.pattern_from.zw;

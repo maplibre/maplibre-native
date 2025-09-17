@@ -36,6 +36,8 @@ public:
 
     WGPUTexture getTexture() const { return texture; }
     WGPUTextureView getTextureView() const { return textureView; }
+    WGPUSampler getSampler() const { return sampler; }
+    const SamplerState& getSamplerState() const noexcept { return samplerState; }
 
 protected:
     Context& context;

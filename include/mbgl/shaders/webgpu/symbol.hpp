@@ -99,7 +99,7 @@ struct VertexOutput {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(1) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -186,7 +186,7 @@ struct FragmentInput {
     @location(2) opacity: f32,
 };
 
-@group(0) @binding(2) var<uniform> tileProps: SymbolTilePropsUBO;
+@group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
 @group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var image: texture_2d<f32>;
@@ -234,7 +234,7 @@ struct VertexOutput {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(1) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -331,7 +331,7 @@ struct FragmentInput {
     @location(8) halo_blur: f32,
 };
 
-@group(0) @binding(2) var<uniform> tileProps: SymbolTilePropsUBO;
+@group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
 @group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var glyph_atlas: texture_2d<f32>;
@@ -403,7 +403,7 @@ struct VertexOutput {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(1) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
 
 const SDF = 1.0;
 const ICON = 0.0;
@@ -507,7 +507,7 @@ struct FragmentInput {
     @location(9) halo_blur: f32,
 };
 
-@group(0) @binding(2) var<uniform> tileProps: SymbolTilePropsUBO;
+@group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
 @group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var glyph_sampler: sampler;
 @group(1) @binding(1) var glyph_image: texture_2d<f32>;
