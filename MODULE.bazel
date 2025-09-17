@@ -11,6 +11,7 @@ bazel_dep(name = "libuv", version = "1.48.0")
 bazel_dep(name = "apple_support", version = "1.23.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "rules_cc", version = "0.2.8")
 bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "googletest", version = "1.17.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "20.14.0")
