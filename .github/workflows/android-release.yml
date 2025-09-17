@@ -3,12 +3,14 @@ name: android-release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   android-create-release:
     runs-on: ubuntu-24.04
     outputs:
       version_tag: ${{ steps.prepare_release.outputs.version_tag }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     defaults:
       run:
         working-directory: platform/android
@@ -48,14 +50,12 @@ jobs:
         working-directory: .
         run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
 
-      - name: Create release
+      - name: Create release (draft)
         id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
-          release_name: ${{steps.prepare_release.outputs.version_tag }}
+          name: ${{ steps.prepare_release.outputs.version_tag }}
           body_path: ${{ steps.prepare_release.outputs.release_notes }}
           draft: true
           prerelease: ${{ env.prerelease }}
@@ -107,25 +107,25 @@ jobs:
           # lowercase
           echo buildtype=${buildtype,,} > "$GITHUB_ENV"
 
-      - name: Upload aar (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.android-create-release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar
-          asset_name: MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
-          asset_content_type: application/zip
+      - name: Prepare release asset filenames (include tag)
+        run: |
+          version_tag='${{ needs.android-create-release.outputs.version_tag }}'
+          # AAR
+          aar_dir='MapLibreAndroid/build/outputs/aar'
+          mv "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar" \
+             "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.aar"
+          # Debug symbols
+          mv "build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz" \
+             "build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.tar.gz"
 
-      - name: Upload debug symbols (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload release assets (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
-          upload_url: ${{ needs.android-create-release.outputs.upload_url }}
-          asset_path: platform/android/build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz
-          asset_name: debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
-          asset_content_type: application/gzip
+          tag_name: ${{ needs.android-create-release.outputs.version_tag }}
+          fail_on_unmatched_files: true
+          files: |
+            platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
+            platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
 
       - name: Prepare MavenCentral release
         env:
@@ -166,12 +166,9 @@ jobs:
       - android-create-release
       - android-build-and-upload-release
     steps:
-      - name: Remove draft status of release
-        id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish release (remove draft)
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
-          release_name: ${{ needs.android-create-release.outputs.version_tag }}
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
+          name: ${{ needs.android-create-release.outputs.version_tag }}
           draft: false
