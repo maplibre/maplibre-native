@@ -1,6 +1,6 @@
 # Changelog MapLibre Native for Android
 
-## 11.13.2
+## 11.13.3
 
 ### ✨ Features and improvements
 
