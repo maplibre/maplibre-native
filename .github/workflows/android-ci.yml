@@ -53,6 +53,8 @@ jobs:
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
+      SENTRY_ORG: maplibre
+      SENTRY_PROJECT: maplibre-android
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
     steps:

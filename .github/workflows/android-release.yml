@@ -122,6 +122,7 @@ jobs:
         with:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           fail_on_unmatched_files: true
+          draft: true
           files: |
             platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
             platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
