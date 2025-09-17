@@ -126,6 +126,7 @@ void RendererBackend::setSurface(void* nativeWindow) {
     // Platform-specific surface creation will be handled by subclasses
     // For now, just store the native window handle
     // The actual surface creation depends on the platform (X11, Wayland, etc.)
+    (void)nativeWindow;
 }
 
 void RendererBackend::setInstance(void* instance) {
