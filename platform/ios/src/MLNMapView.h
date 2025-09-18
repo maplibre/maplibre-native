@@ -534,7 +534,6 @@ MLN_EXPORT
 
 // MARK: Displaying the User’s Location
 
-
 /**
  A Boolean value indicating whether the map need create a default location manager.
 
