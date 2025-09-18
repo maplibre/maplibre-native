@@ -62,6 +62,7 @@ private:
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
     wgpu::TextureFormat swapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
+    wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     
     // Protect texture view access from multiple threads
     mutable std::mutex textureViewMutex;
@@ -69,6 +70,9 @@ private:
     wgpu::Texture currentTexture;  // Keep the texture alive as well
 
     // Depth/stencil texture and view
+    wgpu::Texture depthStencilTexture;
+    wgpu::TextureView depthStencilView;
+
     // Frame synchronization
     std::atomic<bool> frameInProgress{false};
     std::condition_variable frameCV;
@@ -95,6 +99,7 @@ private:
     
     // Helper methods
     void reconfigureSurface();
+    void createDepthStencilTexture(uint32_t width, uint32_t height);
     bool waitForFrame(std::chrono::milliseconds timeout = std::chrono::milliseconds(100));
     void signalFrameComplete();
     void periodicMaintenance();
