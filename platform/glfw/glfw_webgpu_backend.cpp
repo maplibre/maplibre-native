@@ -24,6 +24,10 @@
 #include <dawn/native/VulkanBackend.h>
 #endif
 
+#ifdef None
+#undef None
+#endif
+
 #include <dawn/native/DawnNative.h>
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_glfw.h>
@@ -32,6 +36,7 @@
 #include <cassert>
 #include <thread>
 #include <chrono>
+#include <limits>
 
 // Forward declaration
 class GLFWWebGPUBackend;
@@ -413,6 +418,19 @@ void GLFWWebGPUBackend::swap() {
         signalFrameComplete();
     }
 
+    // Capture current texture view for optional debug overlay
+    wgpu::TextureView viewForDebug;
+    {
+        std::lock_guard<std::mutex> lock(textureViewMutex);
+        if (currentTextureView && !framePresented) {
+            viewForDebug = currentTextureView;
+        }
+    }
+
+    if (viewForDebug) {
+        drawDebugTriangle(viewForDebug);
+    }
+
     // Present the current frame
     if (wgpuSurface && surfaceConfigured) {
         // Check if surface needs reconfiguration
@@ -423,19 +441,16 @@ void GLFWWebGPUBackend::swap() {
         // Lock for texture view manipulation
         {
             std::lock_guard<std::mutex> lock(textureViewMutex);
-            
+
             // Only present if we have a valid texture view and haven't presented yet
             if (currentTextureView && !framePresented) {
-                // Validate the texture view before presenting
-                // Present without pointer validation - Dawn handles this internally
                 wgpuSurface.Present();
                 framePresented = true;
-                
+
                 // Move current resources to previous (keep them alive)
-                // They will be released on the next swap
                 previousTextureView = std::move(currentTextureView);
                 previousTexture = std::move(currentTexture);
-                
+
                 // Clear current references
                 currentTextureView = nullptr;
                 currentTexture = nullptr;
@@ -825,4 +840,163 @@ void GLFWWebGPUBackend::periodicMaintenance() {
         
         lastMaintenanceTime = now;
     }
+}
+
+void GLFWWebGPUBackend::ensureDebugTriangleResources() {
+    if (debugTriangleInitialized || !wgpuDevice || !queue) {
+        return;
+    }
+
+    static constexpr char shaderSource[] = R"(
+struct VertexOut {
+    @builtin(position) position : vec4<f32>;
+    @location(0) color : vec3<f32>;
+};
+
+@vertex
+fn vs_main(@location(0) position : vec2<f32>,
+           @location(1) color : vec3<f32>) -> VertexOut {
+    var out : VertexOut;
+    out.position = vec4<f32>(position, 0.0, 1.0);
+    out.color = color;
+    return out;
+}
+
+@fragment
+fn fs_main(input : VertexOut) -> @location(0) vec4<f32> {
+    return vec4<f32>(input.color, 1.0);
+}
+)";
+
+    wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
+    wgslDesc.code = shaderSource;
+
+    wgpu::ShaderModuleDescriptor shaderDesc{};
+    shaderDesc.nextInChain = &wgslDesc;
+    shaderDesc.label = "DebugTriangleShader";
+
+    auto shaderModule = wgpuDevice.CreateShaderModule(&shaderDesc);
+    if (!shaderModule) {
+        return;
+    }
+
+    wgpu::VertexAttribute attributes[2];
+    attributes[0].format = wgpu::VertexFormat::Float32x2;
+    attributes[0].offset = 0;
+    attributes[0].shaderLocation = 0;
+    attributes[1].format = wgpu::VertexFormat::Float32x3;
+    attributes[1].offset = sizeof(float) * 2;
+    attributes[1].shaderLocation = 1;
+
+    wgpu::VertexBufferLayout vertexLayout{};
+    vertexLayout.arrayStride = sizeof(float) * 5;
+    vertexLayout.attributeCount = 2;
+    vertexLayout.attributes = attributes;
+    vertexLayout.stepMode = wgpu::VertexStepMode::Vertex;
+
+    wgpu::VertexState vertexState{};
+    vertexState.module = shaderModule;
+    vertexState.entryPoint = "vs_main";
+    vertexState.bufferCount = 1;
+    vertexState.buffers = &vertexLayout;
+
+    wgpu::ColorTargetState colorTarget{};
+    colorTarget.format = swapChainFormat;
+    colorTarget.writeMask = wgpu::ColorWriteMask::All;
+
+    wgpu::FragmentState fragmentState{};
+    fragmentState.module = shaderModule;
+    fragmentState.entryPoint = "fs_main";
+    fragmentState.targetCount = 1;
+    fragmentState.targets = &colorTarget;
+
+    wgpu::PrimitiveState primitiveState{};
+    primitiveState.topology = wgpu::PrimitiveTopology::TriangleList;
+    primitiveState.stripIndexFormat = wgpu::IndexFormat::Undefined;
+    primitiveState.frontFace = wgpu::FrontFace::CCW;
+    primitiveState.cullMode = wgpu::CullMode::None;
+
+    wgpu::MultisampleState multisample{};
+    multisample.count = 1;
+    multisample.mask = ~0u;
+    multisample.alphaToCoverageEnabled = false;
+
+    wgpu::RenderPipelineDescriptor pipelineDesc{};
+    pipelineDesc.label = "DebugTrianglePipeline";
+    pipelineDesc.vertex = vertexState;
+    pipelineDesc.fragment = &fragmentState;
+    pipelineDesc.primitive = primitiveState;
+    pipelineDesc.multisample = multisample;
+
+    debugTrianglePipeline = wgpuDevice.CreateRenderPipeline(&pipelineDesc);
+    if (!debugTrianglePipeline) {
+        return;
+    }
+
+    const float vertices[] = {
+         0.0f,  0.8f,  1.0f, 0.0f, 0.0f,
+        -0.8f, -0.8f,  0.0f, 1.0f, 0.0f,
+         0.8f, -0.8f,  0.0f, 0.0f, 1.0f,
+    };
+
+    debugTriangleVertexBufferSize = sizeof(vertices);
+
+    wgpu::BufferDescriptor bufferDesc{};
+    bufferDesc.label = "DebugTriangleVertexBuffer";
+    bufferDesc.size = debugTriangleVertexBufferSize;
+    bufferDesc.usage = wgpu::BufferUsage::Vertex | wgpu::BufferUsage::CopyDst;
+
+    debugTriangleVertexBuffer = wgpuDevice.CreateBuffer(&bufferDesc);
+    if (!debugTriangleVertexBuffer) {
+        debugTrianglePipeline = nullptr;
+        debugTriangleVertexBufferSize = 0;
+        return;
+    }
+
+    queue.WriteBuffer(debugTriangleVertexBuffer, 0, vertices, debugTriangleVertexBufferSize);
+
+    debugTriangleInitialized = true;
+}
+
+void GLFWWebGPUBackend::drawDebugTriangle(const wgpu::TextureView& targetView) {
+    if (!targetView) {
+        mbgl::Log::Info(mbgl::Event::Render, "Debug triangle: no target view");
+        return;
+    }
+
+    ensureDebugTriangleResources();
+    if (!debugTriangleInitialized || !debugTrianglePipeline || !debugTriangleVertexBuffer) {
+        mbgl::Log::Info(mbgl::Event::Render, "Debug triangle: resources not ready");
+        return;
+    }
+
+    wgpu::CommandEncoderDescriptor encoderDesc{};
+    encoderDesc.label = "DebugTriangleEncoder";
+    auto encoder = wgpuDevice.CreateCommandEncoder(&encoderDesc);
+    if (!encoder) {
+        return;
+    }
+
+    wgpu::RenderPassColorAttachment colorAttachment{};
+    colorAttachment.view = targetView;
+    colorAttachment.loadOp = wgpu::LoadOp::Load;
+    colorAttachment.storeOp = wgpu::StoreOp::Store;
+
+    wgpu::RenderPassDescriptor passDesc{};
+    passDesc.label = "DebugTrianglePass";
+    passDesc.colorAttachmentCount = 1;
+    passDesc.colorAttachments = &colorAttachment;
+
+    auto pass = encoder.BeginRenderPass(&passDesc);
+    pass.SetViewport(0.0f, 0.0f, static_cast<float>(lastConfiguredSize.width), static_cast<float>(lastConfiguredSize.height), 0.0f, 1.0f);
+    pass.SetScissorRect(0, 0, lastConfiguredSize.width, lastConfiguredSize.height);
+    pass.SetPipeline(debugTrianglePipeline);
+    pass.SetVertexBuffer(0, debugTriangleVertexBuffer, 0, debugTriangleVertexBufferSize);
+    pass.Draw(3);
+    pass.End();
+
+    auto commandBuffer = encoder.Finish();
+
+    queue.Submit(1, &commandBuffer);
+    mbgl::Log::Info(mbgl::Event::Render, "Debug triangle draw submitted");
 }
