@@ -455,6 +455,8 @@ public:
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
 
+@property (nonatomic) BOOL defaultLocationManagerDisabled;
+
 @end
 
 @implementation MLNMapView
@@ -6007,30 +6009,20 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: - User Location -
 
-- (void)setDisableDefaultLocationManager:(BOOL)disableDefaultLocationManager
+
+- (void)disableDefaultLocationManager
 {
-    _disableDefaultLocationManager = disableDefaultLocationManager;
-    if (disableDefaultLocationManager)
-    {
-        self.locationManager = nil;
-    }
+    self.defaultLocationManagerDisabled = YES;
+    [_locationManager stopUpdatingLocation];
+    [_locationManager stopUpdatingHeading];
+    _locationManager = nil;
 }
 
 - (void)setLocationManager:(nullable id<MLNLocationManager>)locationManager
 {
     MLNLogDebug(@"Setting locationManager: %@", locationManager);
-    if (_disableDefaultLocationManager && !locationManager)
-    {
-        if (_locationManager)
-        {
-            [_locationManager stopUpdatingLocation];
-            [_locationManager stopUpdatingHeading];
-            _locationManager = nil;
-        }
-        return;
-    }
 
-    if (!locationManager) {
+    if (!locationManager && !self.defaultLocationManagerDisabled) {
         locationManager = [[MLNCLLocationManager alloc] init];
     }
     [_locationManager stopUpdatingLocation];
