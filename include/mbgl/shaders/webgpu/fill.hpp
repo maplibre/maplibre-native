@@ -78,8 +78,13 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let worldPos = vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    out.position = drawable.matrix * worldPos;
+    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let invW = 1.0 / clip.w;
+    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
+    out.position = vec4<f32>(clip.x * invW,
+                             -clip.y * invW,
+                             ndcZ,
+                             1.0);
 
     // Interpolate color and opacity
     out.color = unpack_mix_color(in.color, drawable.color_t);
@@ -174,8 +179,13 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let worldPos = vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    out.position = drawable.matrix * worldPos;
+    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let invW = 1.0 / clip.w;
+    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
+    out.position = vec4<f32>(clip.x * invW,
+                             -clip.y * invW,
+                             ndcZ,
+                             1.0);
 
     // Interpolate color and opacity
     out.color = unpack_mix_color(in.color, drawable.color_t);
@@ -296,8 +306,13 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-
-    out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let invW = 1.0 / clip.w;
+    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
+    out.position = vec4<f32>(clip.x * invW,
+                             -clip.y * invW,
+                             ndcZ,
+                             1.0);
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
         drawable.pixel_coord_lower,
@@ -481,9 +496,15 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let invW = 1.0 / clip.w;
+    let ndcXY = clip.xy * invW;
+    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
 
-    out.position = position;
+    out.position = vec4<f32>(ndcXY.x,
+                             -ndcXY.y,
+                             ndcZ,
+                             1.0);
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
         drawable.pixel_coord_lower,
@@ -498,7 +519,7 @@ fn main(in: VertexInput) -> VertexOutput {
         tileZoomRatio,
         pos
     );
-    out.v_pos = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size;
+    out.v_pos = (ndcXY + vec2<f32>(1.0, 1.0)) * 0.5 * paintParams.world_size;
     out.pattern_from = pattern_from;
     out.pattern_to = pattern_to;
     out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
