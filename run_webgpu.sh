@@ -7,6 +7,8 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
+STYLE_URL="https://demotiles.maplibre.org/style.json"
+
 # Build the project first
 echo "Building WebGPU implementation..."
 if cmake --build ./build -- -j8 > /dev/null 2>&1; then
@@ -38,7 +40,7 @@ try_start() {
     fi
     
     # Start in background and check if it stays alive
-    ./build/platform/glfw/mbgl-glfw --zoom 2 &
+    ./build/platform/glfw/mbgl-glfw --style "$STYLE_URL" --zoom 2 &
     local pid=$!
     
     # Wait a bit to see if it crashes immediately
@@ -70,16 +72,14 @@ try_start() {
 # Main execution
 cleanup_processes
 
-# Try up to 5 times
-# for i in {1..5}; do
-if try_start $i; then
+# Single attempt (adjust attempts here if needed)
+if try_start 1; then
     exit 0
 fi
-# done
 
 echo ""
-echo "Failed to start after 5 attempts."
-echo "This is a known issue with Dawn/Metal initialization."
+echo "Failed to start the WebGPU demo."
+echo "This can happen if Dawn cannot initialize the adapter."
 echo ""
 echo "Troubleshooting:"
 echo "1. Wait a few seconds and try again"
