@@ -106,6 +106,8 @@ jobs:
         with:
           path: source
           submodules: recursive
+          persist-credentials: false
+          fetch-depth: 0
 
       - name: Install test dependencies
         if: runner.os == 'Linux'

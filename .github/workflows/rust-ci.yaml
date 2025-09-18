@@ -27,6 +27,9 @@ jobs:
       - uses: taiki-e/install-action@e5f8d33e7166e0491b2ab4ff0567cc6cd6772737 # v2.61.7
         with: { tool: just }
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
       - run: just -v ci-test
 
   msrv:
@@ -36,6 +39,9 @@ jobs:
       - uses: taiki-e/install-action@e5f8d33e7166e0491b2ab4ff0567cc6cd6772737 # v2.61.7
         with: { tool: just }
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
       - name: Read crate metadata
         id: metadata
         run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
