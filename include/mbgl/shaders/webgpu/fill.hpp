@@ -59,14 +59,25 @@ struct FillDrawableUBO {
     pad2: f32,
 };
 
-// Use the same binding index as Metal: idFillDrawableUBO = 2
-@group(0) @binding(2) var<uniform> drawable: FillDrawableUBO;
+struct FillDrawableUnionUBO {
+    fill: FillDrawableUBO;
+    padding: vec4<f32>;
+};
+
+struct GlobalIndexUBO {
+    value: u32;
+    pad0: vec3<u32>;
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
 
 @vertex
 fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     // Transform position using the matrix
+    let drawable = drawableVector[globalIndex.value].fill;
     let worldPos = vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
     out.position = drawable.matrix * worldPos;
 
@@ -144,13 +155,25 @@ struct FillOutlineDrawableUBO {
     pad2: f32,
 };
 
-@group(0) @binding(2) var<uniform> drawable: FillOutlineDrawableUBO;
+struct FillOutlineDrawableUnionUBO {
+    fill: FillOutlineDrawableUBO;
+    padding: vec4<f32>;
+};
+
+struct GlobalIndexUBO {
+    value: u32;
+    pad0: vec3<u32>;
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
 
 @vertex
 fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     // Transform position using the matrix
+    let drawable = drawableVector[globalIndex.value].fill;
     let worldPos = vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
     out.position = drawable.matrix * worldPos;
 
