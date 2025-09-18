@@ -1,0 +1,758 @@
+(lldb) target create "./build/platform/glfw/mbgl-glfw"
+Current executable set to '/Users/admin/repos/maplibre-native/build/platform/glfw/mbgl-glfw' (arm64).
+(lldb) settings set -- target.run-args  "--style" "https://demotiles.maplibre.org/style.json" "--zoom" "2"
+(lldb) run
+2025-09-19 00:29:32.461059+0200 mbgl-glfw[79418:751268] [WindowTab] Cannot index window tabs due to missing main bundle identifier
+2025-09-19 00:29:32.566685+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: GLFW window visible: 1
+2025-09-19 00:29:32.566727+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Initializing Dawn WebGPU backend...
+2025-09-19 00:29:32.568895+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Dawn instance created successfully
+2025-09-19 00:29:32.569814+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Found 2 Dawn adapters
+2025-09-19 00:29:32.569828+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Using Dawn WebGPU implementation with native backend
+2025-09-19 00:29:32.569836+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Selected Dawn adapter for WebGPU rendering
+2025-09-19 00:29:32.569844+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Creating Dawn WebGPU device...
+2025-09-19 00:29:32.571113+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Dawn WebGPU device created successfully
+
+================================================================================
+
+- Press `S` to cycle through bundled styles
+- Press `X` to reset the transform
+- Press `N` to reset north
+- Press `R` to enable the route demo
+- Press `E` to insert an example building extrusion layer
+- Press `O` to toggle online connectivity
+- Press `Z` to cycle through north orientations
+- Press `X` to cycle through the viewport modes
+- Press `I` to delete existing database and re-initialize
+- Press `A` to cycle through Mapbox offices in the world + dateline monument
+- Press `B` to cycle through the color, stencil, and depth buffer
+- Press `D` to cycle through camera bounds: inside, crossing IDL at left, crossing IDL at right, and disabled
+- Press `T` to add custom geometry source
+- Press `F` to enable feature-state demo
+- Press `U` to toggle pitch bounds
+- Press `H` to take a snapshot of a current map.
+- Press `J` to take a snapshot of a current map with an extrusions overlay.
+- Press `Y` to start a camera fly-by demo
+
+- Press `1` through `6` to add increasing numbers of point annotations for testing
+- Press `7` through `0` to add increasing numbers of shape annotations for testing
+
+- Press `Q` to query annotations
+- Press `C` to remove annotations
+- Press `K` to add a random custom runtime imagery annotation
+- Press `L` to add a random line annotation
+- Press `W` to pop the last-added annotation off
+- Press `V` to toggle custom drawable layer
+- Press `B` to toggle rendering stats
+- Press `P` to pause tile requests
+
+- Hold `Control` + mouse drag to rotate
+- Hold `Shift` + mouse drag to tilt
+
+- Press `F1` to generate a render test for the current view
+
+- Press `Tab` to cycle through the map debug options
+- Press `F6` to cycle through Tile LOD modes
+- Press `F7` to lower the zoom level without changing the camera
+- Press `F8` to higher the zoom level without changing the camera
+- Press `Esc` to quit
+
+================================================================================
+
+2025-09-19 00:29:32.640086+0200 mbgl-glfw[79418:751411] [DEBUG] {}[Database]: 283recovered 685 frames from WAL file /Users/admin/Library/HTTPStorages/mbgl-glfw/httpstorages.sqlite-wal
+2025-09-19 00:29:32.691687+0200 mbgl-glfw[79418:751296] [Common] Unable to obtain a task name port right for pid 420: (os/kern) failure (0x5)
+2025-09-19 00:29:32.715699+0200 mbgl-glfw[79418:751411] [INFO] {}[Style]: Style 'MapLibre' has 9 layers:
+  None: 7
+  Zoom: 2
+2025-09-19 00:29:32.719534+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TransformParameters: projMatrix[15]=1152.000000 projMatrix[11]=-0.000094 size=1024x768 scale=4.000000
+2025-09-19 00:29:32.719559+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=1 zoomRange=[0,18] currentZoom=2.000000
+2025-09-19 00:29:32.719582+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:32.719593+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:32.719842+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 6 total tiles
+2025-09-19 00:29:32.719857+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=null
+2025-09-19 00:29:32.719864+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=1 zoomRange=[0,6] currentZoom=2.000000
+2025-09-19 00:29:32.719897+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:32.719905+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:32.720207+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 8 total tiles
+2025-09-19 00:29:32.720221+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=1 zoomRange=[0,16] currentZoom=2.000000
+2025-09-19 00:29:32.720246+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:32.720256+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:32.720404+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 6 total tiles
+2025-09-19 00:29:32.720427+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+2025-09-19 00:29:32.720443+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+2025-09-19 00:29:32.720450+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+2025-09-19 00:29:32.720459+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+2025-09-19 00:29:32.720465+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for crimea-fill with 0 tiles
+2025-09-19 00:29:32.720505+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context: beginFrame()
+2025-09-19 00:29:32.720520+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'BackgroundShader'
+2025-09-19 00:29:32.720532+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'BackgroundPatternShader'
+2025-09-19 00:29:32.720545+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CircleShader'
+2025-09-19 00:29:32.720552+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'ClippingMaskProgram'
+2025-09-19 00:29:32.720558+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CollisionBoxShader'
+2025-09-19 00:29:32.720564+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CollisionCircleShader'
+2025-09-19 00:29:32.720576+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CustomGeometryShader'
+2025-09-19 00:29:32.720585+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CustomSymbolIconShader'
+2025-09-19 00:29:32.720590+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'DebugShader'
+2025-09-19 00:29:32.720595+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillShader'
+2025-09-19 00:29:32.720600+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillOutlineShader'
+2025-09-19 00:29:32.720606+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillPatternShader'
+2025-09-19 00:29:32.720611+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillOutlinePatternShader'
+2025-09-19 00:29:32.720618+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillOutlineTriangulatedShader'
+2025-09-19 00:29:32.720624+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillExtrusionShader'
+2025-09-19 00:29:32.720629+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillExtrusionPatternShader'
+2025-09-19 00:29:32.720635+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HeatmapShader'
+2025-09-19 00:29:32.720640+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HeatmapTextureShader'
+2025-09-19 00:29:32.720646+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HillshadeShader'
+2025-09-19 00:29:32.720650+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HillshadePrepareShader'
+2025-09-19 00:29:32.720655+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LineShader'
+2025-09-19 00:29:32.720659+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LineGradientShader'
+2025-09-19 00:29:32.720664+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LinePatternShader'
+2025-09-19 00:29:32.720669+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LineSDFShader'
+2025-09-19 00:29:32.720673+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LocationIndicatorShader'
+2025-09-19 00:29:32.720678+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LocationIndicatorTexturedShader'
+2025-09-19 00:29:32.720683+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'RasterShader'
+2025-09-19 00:29:32.720689+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'SymbolIconShader'
+2025-09-19 00:29:32.720699+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'SymbolSDFShader'
+2025-09-19 00:29:32.720704+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'SymbolTextAndIconShader'
+2025-09-19 00:29:32.720708+0200 mbgl-glfw[79418:751411] [INFO] {}[Shader]: WebGPU: Registered shader group for 'WideVectorShader'
+2025-09-19 00:29:32.720716+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+2025-09-19 00:29:32.720722+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating upload pass: upload
+2025-09-19 00:29:32.720728+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=16
+2025-09-19 00:29:32.721889+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:32.721932+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+2025-09-19 00:29:32.721947+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer::update called for crimea-fill with 0 tiles
+2025-09-19 00:29:32.721952+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+2025-09-19 00:29:32.721958+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+2025-09-19 00:29:32.721966+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:29:32.721970+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:29:32.721976+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableTargetsPass()
+2025-09-19 00:29:32.721984+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call commonClearPass()
+2025-09-19 00:29:32.721989+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Getting surface texture #1
+2025-09-19 00:29:32.722864+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Attempting to acquire swapchain view = 43809310912
+2025-09-19 00:29:32.722876+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Acquired swapchain view handle = 43809310912
+2025-09-19 00:29:32.722885+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Clearing default framebuffer to black
+2025-09-19 00:29:32.722892+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Attempting depth stencil view = 43806235360
+2025-09-19 00:29:32.722899+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Using depth stencil view handle = 43806235360
+2025-09-19 00:29:32.722905+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Beginning render pass
+2025-09-19 00:29:32.722914+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call bindGlobalUniformBuffers()
+2025-09-19 00:29:32.722920+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context::bindGlobalUniformBuffers called
+2025-09-19 00:29:32.722927+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableOpaquePass()
+2025-09-19 00:29:32.722934+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Starting drawableOpaquePass with 0 layer groups
+2025-09-19 00:29:32.722939+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Finished drawableOpaquePass
+2025-09-19 00:29:32.722945+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableTranslucentPass()
+2025-09-19 00:29:32.722952+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Starting drawableTranslucentPass with 0 layer groups
+2025-09-19 00:29:32.722959+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:29:32.722964+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Finished drawableTranslucentPass
+2025-09-19 00:29:32.722970+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Skipping drawableDebugOverlays for WebGPU backend
+2025-09-19 00:29:32.722976+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:29:32.722986+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context::unbindGlobalUniformBuffers called
+2025-09-19 00:29:32.722992+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Ending render pass (destructor called)
+2025-09-19 00:29:32.722997+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Render pass ended successfully
+2025-09-19 00:29:32.723527+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Command buffer submitted to queue
+2025-09-19 00:29:33.232741+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context: endFrame()
+2025-09-19 00:29:33.233695+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TransformParameters: projMatrix[15]=1152.000000 projMatrix[11]=-0.000094 size=1024x768 scale=4.000000
+2025-09-19 00:29:33.233739+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=0 zoomRange=[0,18] currentZoom=2.000000
+2025-09-19 00:29:33.233843+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:33.233871+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:33.233924+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:29:33.233950+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=present
+2025-09-19 00:29:33.233967+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=0 zoomRange=[0,6] currentZoom=2.000000
+2025-09-19 00:29:33.234091+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:33.234115+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:33.234372+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 10 total tiles
+2025-09-19 00:29:33.234395+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=0 zoomRange=[0,16] currentZoom=2.000000
+2025-09-19 00:29:33.234411+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:33.234423+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:33.234465+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:29:33.234544+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+2025-09-19 00:29:33.234577+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+2025-09-19 00:29:33.234594+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+2025-09-19 00:29:33.234607+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+2025-09-19 00:29:33.234621+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::prepare called for crimea-fill with 6 tiles
+2025-09-19 00:29:33.234852+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context: beginFrame()
+2025-09-19 00:29:33.234874+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+2025-09-19 00:29:33.234889+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating upload pass: upload
+2025-09-19 00:29:33.235337+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+2025-09-19 00:29:33.235356+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer::update called for crimea-fill with 6 tiles
+2025-09-19 00:29:33.235368+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: crimea-fill
+2025-09-19 00:29:33.235381+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: crimea-fill activate=1
+2025-09-19 00:29:33.235396+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer: Added FillLayerTweaker to crimea-fill
+2025-09-19 00:29:33.235407+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: org.maplibre.annotations.points
+2025-09-19 00:29:33.235420+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=1
+2025-09-19 00:29:33.235459+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: crimea-fill at index 7
+2025-09-19 00:29:33.235487+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: org.maplibre.annotations.points at index 8
+2025-09-19 00:29:33.235504+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+2025-09-19 00:29:33.235517+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+2025-09-19 00:29:33.235533+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:29:33.235544+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:29:33.235557+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for crimea-fill with 1 tweakers
+2025-09-19 00:29:33.235572+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: FillLayerTweaker::execute called for crimea-fill with 0 drawables
+2025-09-19 00:29:33.235584+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:29:33.235596+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for org.maplibre.annotations.points with 1 tweakers
+2025-09-19 00:29:33.235607+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:29:33.235620+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:29:33.235630+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:29:33.235643+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableTargetsPass()
+2025-09-19 00:29:33.235655+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call commonClearPass()
+2025-09-19 00:29:33.235667+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Getting surface texture #2
+2025-09-19 00:29:33.236857+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Attempting to acquire swapchain view = 43809312512
+2025-09-19 00:29:33.236876+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Acquired swapchain view handle = 43809312512
+2025-09-19 00:29:33.236884+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Clearing default framebuffer to black
+2025-09-19 00:29:33.236892+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Attempting depth stencil view = 43806235360
+2025-09-19 00:29:33.236898+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Using depth stencil view handle = 43806235360
+2025-09-19 00:29:33.236905+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Beginning render pass
+2025-09-19 00:29:33.236911+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call bindGlobalUniformBuffers()
+2025-09-19 00:29:33.236921+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context::bindGlobalUniformBuffers called
+2025-09-19 00:29:33.236927+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableOpaquePass()
+2025-09-19 00:29:33.236934+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Starting drawableOpaquePass with 2 layer groups
+2025-09-19 00:29:33.236940+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Calling render() on layer group: org.maplibre.annotations.points (opaque pass)
+2025-09-19 00:29:33.236947+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Calling render() on layer group: crimea-fill (opaque pass)
+2025-09-19 00:29:33.236954+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Finished drawableOpaquePass
+2025-09-19 00:29:33.236962+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableTranslucentPass()
+2025-09-19 00:29:33.236970+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Starting drawableTranslucentPass with 2 layer groups
+2025-09-19 00:29:33.236976+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:29:33.236981+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:29:33.236989+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Calling render() on layer group: crimea-fill (translucent pass)
+2025-09-19 00:29:33.237006+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:29:33.237020+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Calling render() on layer group: org.maplibre.annotations.points (translucent pass)
+2025-09-19 00:29:33.237030+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Finished drawableTranslucentPass
+2025-09-19 00:29:33.237043+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Skipping drawableDebugOverlays for WebGPU backend
+2025-09-19 00:29:33.237051+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:29:33.237064+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:29:33.237071+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:29:33.237079+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context::unbindGlobalUniformBuffers called
+2025-09-19 00:29:33.237091+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Ending render pass (destructor called)
+2025-09-19 00:29:33.237098+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Render pass ended successfully
+2025-09-19 00:29:33.237130+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Command buffer submitted to queue
+2025-09-19 00:29:33.746131+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context: endFrame()
+2025-09-19 00:29:33.746247+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TransformParameters: projMatrix[15]=1152.000000 projMatrix[11]=-0.000094 size=1024x768 scale=4.000000
+2025-09-19 00:29:33.746266+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=0 zoomRange=[0,18] currentZoom=2.000000
+2025-09-19 00:29:33.746338+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:33.746351+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:33.746386+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:29:33.746397+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=0
+2025-09-19 00:29:33.746427+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=present
+2025-09-19 00:29:33.746440+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=0 zoomRange=[0,6] currentZoom=2.000000
+2025-09-19 00:29:33.746501+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:33.746515+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:33.746523+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 2 rendered tiles, 10 total tiles
+2025-09-19 00:29:33.746614+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=0 zoomRange=[0,16] currentZoom=2.000000
+2025-09-19 00:29:33.746664+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:29:33.746679+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:29:33.746689+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:29:33.746706+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=1
+2025-09-19 00:29:33.747040+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU Context: beginFrame()
+2025-09-19 00:29:33.747056+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+2025-09-19 00:29:33.747065+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating upload pass: upload
+2025-09-19 00:29:33.747440+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: coastline
+2025-09-19 00:29:33.747453+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: coastline activate=1
+2025-09-19 00:29:33.747562+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WGSL vertex snippet for ContextShader
+
+// Constants
+const PI: f32 = 3.14159265358979323846;
+const LINE_NORMAL_SCALE: f32 = 1.0 / 63.5;  // 1.0 / (127 / 2)
+const MAX_LINE_DISTANCE: f32 = 32767.0;
+const SDF_PX: f32 = 8.0;
+
+// Helper functio
+2025-09-19 00:29:33.749105+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created vertex shader module for ContextShader
+2025-09-19 00:29:33.749521+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created fragment shader module for ContextShader
+2025-09-19 00:29:33.752626+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for line, curVertexCount=200101, impl->rawVerticesCount=200101, currentDrawable=null
+2025-09-19 00:29:33.752654+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.752663+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.752671+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: line
+2025-09-19 00:29:33.752677+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.752686+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.752693+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for line rawVerticesCount=200101 rawVertices.size=0 segments.size=4 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.752700+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 547458 indices, 4 segments
+2025-09-19 00:29:33.752708+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for line
+2025-09-19 00:29:33.752714+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.752720+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.755648+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for line, curVertexCount=200101, impl->rawVerticesCount=200101, currentDrawable=null
+2025-09-19 00:29:33.755679+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.755709+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.755737+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: line
+2025-09-19 00:29:33.755750+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.755758+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.755769+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for line rawVerticesCount=200101 rawVertices.size=0 segments.size=4 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.755777+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 547458 indices, 4 segments
+2025-09-19 00:29:33.755784+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for line
+2025-09-19 00:29:33.755794+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.755800+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.755807+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer::update called for countries-fill with 2 tiles
+2025-09-19 00:29:33.755817+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: countries-fill
+2025-09-19 00:29:33.755824+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: countries-fill activate=1
+2025-09-19 00:29:33.755833+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderFillLayer: Added FillLayerTweaker to countries-fill
+2025-09-19 00:29:33.755839+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Creating new drawables for tile 0/0/0=>0
+2025-09-19 00:29:33.755846+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WGSL vertex snippet for ContextShader
+
+// Constants
+const PI: f32 = 3.14159265358979323846;
+const LINE_NORMAL_SCALE: f32 = 1.0 / 63.5;  // 1.0 / (127 / 2)
+const MAX_LINE_DISTANCE: f32 = 32767.0;
+const SDF_PX: f32 = 8.0;
+
+// Helper functio
+2025-09-19 00:29:33.756369+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created vertex shader module for ContextShader
+2025-09-19 00:29:33.756745+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created fragment shader module for ContextShader
+2025-09-19 00:29:33.756814+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WGSL vertex snippet for ContextShader
+
+// Constants
+const PI: f32 = 3.14159265358979323846;
+const LINE_NORMAL_SCALE: f32 = 1.0 / 63.5;  // 1.0 / (127 / 2)
+const MAX_LINE_DISTANCE: f32 = 32767.0;
+const SDF_PX: f32 = 8.0;
+
+// Helper functio
+2025-09-19 00:29:33.757212+0200 mbgl-glfw[79418:751268] [ERROR] {}[Render]: Dawn validation error [2] Error while parsing WGSL: :128:52 error: struct member color_t not found
+    out.color = unpack_mix_color(in.outline_color, drawable.color_t);
+                                                   ^^^^^^^^^^^^^^^^
+
+
+ - While calling [Device "MapLibre WebGPU Device"].CreateShaderModule([ShaderModuleDescriptor ""Vertex Shader Module""]).
+2025-09-19 00:29:33.757245+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created vertex shader module for ContextShader
+2025-09-19 00:29:33.757258+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created fragment shader module for ContextShader
+2025-09-19 00:29:33.757699+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for countries-fill/fill, curVertexCount=33837, impl->rawVerticesCount=33837, currentDrawable=null
+2025-09-19 00:29:33.757710+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.757717+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.757724+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: countries-fill/fill
+2025-09-19 00:29:33.757732+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.757738+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.757746+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for countries-fill/fill rawVerticesCount=33837 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.757764+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 72453 indices, 1 segments
+2025-09-19 00:29:33.757772+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for countries-fill/fill
+2025-09-19 00:29:33.757778+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.757784+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.757790+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Got 1 drawables from builder
+2025-09-19 00:29:33.757798+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Adding drawable to layer group for tile 0/0/0=>0
+2025-09-19 00:29:33.757804+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total drawables added: 1
+2025-09-19 00:29:33.758109+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for countries-fill/fill-outline, curVertexCount=33837, impl->rawVerticesCount=33837, currentDrawable=null
+2025-09-19 00:29:33.758121+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.758127+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.758133+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: countries-fill/fill-outline
+2025-09-19 00:29:33.758138+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.758146+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.758152+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for countries-fill/fill-outline rawVerticesCount=33837 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.758177+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 67674 indices, 1 segments
+2025-09-19 00:29:33.758192+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for countries-fill/fill-outline
+2025-09-19 00:29:33.758202+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.758209+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.758216+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Got 1 drawables from builder
+2025-09-19 00:29:33.758224+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Adding drawable to layer group for tile 0/0/0=>0
+2025-09-19 00:29:33.758234+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total drawables added: 2
+2025-09-19 00:29:33.758240+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Creating new drawables for tile 0/0/0=>0
+2025-09-19 00:29:33.758563+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for countries-fill/fill, curVertexCount=33837, impl->rawVerticesCount=33837, currentDrawable=null
+2025-09-19 00:29:33.758580+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.758588+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.758598+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: countries-fill/fill
+2025-09-19 00:29:33.758606+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.758612+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.758619+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for countries-fill/fill rawVerticesCount=33837 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.758627+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 72453 indices, 1 segments
+2025-09-19 00:29:33.758634+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for countries-fill/fill
+2025-09-19 00:29:33.758642+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.758649+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.758664+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Got 1 drawables from builder
+2025-09-19 00:29:33.758672+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Adding drawable to layer group for tile 0/0/0=>0
+2025-09-19 00:29:33.758678+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total drawables added: 3
+2025-09-19 00:29:33.758959+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for countries-fill/fill-outline, curVertexCount=33837, impl->rawVerticesCount=33837, currentDrawable=null
+2025-09-19 00:29:33.758970+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.758978+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.758985+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: countries-fill/fill-outline
+2025-09-19 00:29:33.758992+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.758999+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.759005+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for countries-fill/fill-outline rawVerticesCount=33837 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.759011+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 67674 indices, 1 segments
+2025-09-19 00:29:33.759018+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for countries-fill/fill-outline
+2025-09-19 00:29:33.759025+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.759030+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.759036+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Got 1 drawables from builder
+2025-09-19 00:29:33.759042+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Adding drawable to layer group for tile 0/0/0=>0
+2025-09-19 00:29:33.759049+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total drawables added: 4
+2025-09-19 00:29:33.759055+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: countries-boundary
+2025-09-19 00:29:33.759061+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: countries-boundary activate=1
+2025-09-19 00:29:33.761963+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for line, curVertexCount=200101, impl->rawVerticesCount=200101, currentDrawable=null
+2025-09-19 00:29:33.761974+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.761981+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.761986+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: line
+2025-09-19 00:29:33.761992+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.761997+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.762003+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for line rawVerticesCount=200101 rawVertices.size=0 segments.size=4 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.762010+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 547458 indices, 4 segments
+2025-09-19 00:29:33.762016+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for line
+2025-09-19 00:29:33.762022+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.762027+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.764959+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for line, curVertexCount=200101, impl->rawVerticesCount=200101, currentDrawable=null
+2025-09-19 00:29:33.764970+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.764976+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.764987+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: line
+2025-09-19 00:29:33.765007+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.765020+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.765028+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for line rawVerticesCount=200101 rawVertices.size=0 segments.size=4 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.765035+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 547458 indices, 4 segments
+2025-09-19 00:29:33.765041+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for line
+2025-09-19 00:29:33.765047+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.765056+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.765063+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: geolines
+2025-09-19 00:29:33.765070+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: geolines activate=1
+2025-09-19 00:29:33.765077+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WGSL vertex snippet for ContextShader
+
+// Constants
+const PI: f32 = 3.14159265358979323846;
+const LINE_NORMAL_SCALE: f32 = 1.0 / 63.5;  // 1.0 / (127 / 2)
+const MAX_LINE_DISTANCE: f32 = 32767.0;
+const SDF_PX: f32 = 8.0;
+
+// Helper functio
+2025-09-19 00:29:33.765992+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created vertex shader module for ContextShader
+2025-09-19 00:29:33.766506+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Successfully created fragment shader module for ContextShader
+2025-09-19 00:29:33.766624+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for lineSDF, curVertexCount=3614, impl->rawVerticesCount=3614, currentDrawable=null
+2025-09-19 00:29:33.766634+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.766640+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.766645+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: lineSDF
+2025-09-19 00:29:33.766651+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.766656+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.766662+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for lineSDF rawVerticesCount=3614 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.766669+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 10812 indices, 1 segments
+2025-09-19 00:29:33.766676+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for lineSDF
+2025-09-19 00:29:33.766684+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.766689+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.766710+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::flush called for lineSDF, curVertexCount=3614, impl->rawVerticesCount=3614, currentDrawable=null
+2025-09-19 00:29:33.766717+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Entering vertex processing block
+2025-09-19 00:29:33.766723+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Getting drawable
+2025-09-19 00:29:33.766728+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating drawable: lineSDF
+2025-09-19 00:29:33.766733+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   About to call init()
+2025-09-19 00:29:33.766739+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() called
+2025-09-19 00:29:33.766752+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: DrawableBuilder::init for lineSDF rawVerticesCount=3614 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+2025-09-19 00:29:33.766760+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Setting index data: 10812 indices, 1 segments
+2025-09-19 00:29:33.766768+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU DrawableBuilder::init() completed for lineSDF
+2025-09-19 00:29:33.766775+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Returned from init()
+2025-09-19 00:29:33.766781+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Moving drawable to drawables vector
+2025-09-19 00:29:33.766787+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: geolines-label
+2025-09-19 00:29:33.766794+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: geolines-label activate=1
+2025-09-19 00:29:33.766800+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: countries-label
+2025-09-19 00:29:33.766806+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: countries-label activate=1
+2025-09-19 00:29:33.766812+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::removeLayerGroup called for: org.maplibre.annotations.points
+2025-09-19 00:29:33.766818+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: org.maplibre.annotations.points at index 8
+2025-09-19 00:29:33.766825+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: coastline at index 1
+2025-09-19 00:29:33.766831+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: countries-fill at index 2
+2025-09-19 00:29:33.766836+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: countries-boundary at index 3
+2025-09-19 00:29:33.766843+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: geolines at index 4
+2025-09-19 00:29:33.766848+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: geolines-label at index 5
+2025-09-19 00:29:33.766855+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: countries-label at index 6
+2025-09-19 00:29:33.766860+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+2025-09-19 00:29:33.766867+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+2025-09-19 00:29:33.766872+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 8
+2025-09-19 00:29:33.766877+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: coastline
+2025-09-19 00:29:33.766885+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for coastline with 1 tweakers
+2025-09-19 00:29:33.766892+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 48
+2025-09-19 00:29:33.766898+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 1568
+2025-09-19 00:29:33.766903+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: getTileMatrix: After matrixFor, matrix[15]=1.000000
+2025-09-19 00:29:33.766910+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: getTileMatrix: After projection multiply, matrix[15]=1152.000000
+2025-09-19 00:29:33.766916+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: getTileMatrix: After matrixFor, matrix[15]=1.000000
+2025-09-19 00:29:33.766922+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: getTileMatrix: After projection multiply, matrix[15]=1152.000000
+2025-09-19 00:29:33.766928+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: countries-fill
+2025-09-19 00:29:33.766934+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for countries-fill with 1 tweakers
+2025-09-19 00:29:33.766940+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: FillLayerTweaker::execute called for countries-fill with 4 drawables
+2025-09-19 00:29:33.766946+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 48
+2025-09-19 00:29:33.766959+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: getTileMatrix: After matrixFor, matrix[15]=1.000000
+2025-09-19 00:29:33.766964+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: getTileMatrix: After projection multiply, matrix[15]=1152.000000
+2025-09-19 00:29:33.766972+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: countries-boundary
+2025-09-19 00:29:33.766977+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for countries-boundary with 1 tweakers
+2025-09-19 00:29:33.766984+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 48
+2025-09-19 00:29:33.766989+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 1568
+2025-09-19 00:29:33.766996+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: geolines
+2025-09-19 00:29:33.767002+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for geolines with 1 tweakers
+2025-09-19 00:29:33.767008+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 48
+2025-09-19 00:29:33.767014+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating new uniform buffer, size: 1568
+2025-09-19 00:29:33.767062+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: geolines-label
+2025-09-19 00:29:33.767085+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for geolines-label with 1 tweakers
+2025-09-19 00:29:33.767094+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: countries-label
+2025-09-19 00:29:33.767100+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for countries-label with 1 tweakers
+2025-09-19 00:29:33.767106+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:29:33.767114+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for crimea-fill with 1 tweakers
+2025-09-19 00:29:33.767119+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: FillLayerTweaker::execute called for crimea-fill with 0 drawables
+2025-09-19 00:29:33.767125+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:29:33.767132+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: LayerGroupBase::runTweakers called for org.maplibre.annotations.points with 1 tweakers
+2025-09-19 00:29:33.767140+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 8
+2025-09-19 00:29:33.767145+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: coastline
+2025-09-19 00:29:33.773518+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=200101 vertexData.size=0
+2025-09-19 00:29:33.773543+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:33.773552+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:33.773560+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 2
+2025-09-19 00:29:33.773568+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.782952+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.782967+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:33.783461+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 7 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:33.799882+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=3201616
+2025-09-19 00:29:33.814577+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.814597+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 8 size=3201616
+2025-09-19 00:29:33.830653+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.836897+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.836905+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 9 size=1600808
+2025-09-19 00:29:33.847592+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.854280+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.854289+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 10 size=1600808
+2025-09-19 00:29:33.865001+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.871155+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.871165+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 11 size=1600808
+2025-09-19 00:29:33.881876+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.888558+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.888567+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 12 size=1600808
+2025-09-19 00:29:33.899240+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.905461+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.905469+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 13 size=1600808
+2025-09-19 00:29:33.914209+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=200101 vertexData.size=0
+2025-09-19 00:29:33.914217+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:33.914223+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:33.914227+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 2
+2025-09-19 00:29:33.914232+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.920838+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.920851+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:33.921053+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 7 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:33.933790+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=3201616
+2025-09-19 00:29:33.946502+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.946512+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 8 size=3201616
+2025-09-19 00:29:33.961838+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.968376+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.968384+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 9 size=1600808
+2025-09-19 00:29:33.979076+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:33.985323+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:33.985330+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 10 size=1600808
+2025-09-19 00:29:33.996077+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.002736+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.002749+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 11 size=1600808
+2025-09-19 00:29:34.013429+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.019709+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.019717+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 12 size=1600808
+2025-09-19 00:29:34.030404+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.037048+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.037056+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 13 size=1600808
+2025-09-19 00:29:34.041552+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: countries-fill
+2025-09-19 00:29:34.043094+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=33837 vertexData.size=0
+2025-09-19 00:29:34.043103+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.043108+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.043113+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.043118+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 3
+2025-09-19 00:29:34.043122+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=135348
+2025-09-19 00:29:34.043646+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.043654+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 0 from shared buffer. First verts: [6774, 4002]
+2025-09-19 00:29:34.043659+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.044717+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.044724+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 1 from shared buffer. First verts: [-6912, 18241]
+2025-09-19 00:29:34.045776+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.046831+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.046838+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 2 size=270696
+2025-09-19 00:29:34.048140+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=33837 vertexData.size=0
+2025-09-19 00:29:34.048147+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.048152+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.048156+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.048161+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 3
+2025-09-19 00:29:34.048165+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 5 from shared buffer. First verts: [6774, 4002]
+2025-09-19 00:29:34.049217+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.050300+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.050307+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 7 size=270696
+2025-09-19 00:29:34.051065+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.052125+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.052132+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [-6912, 18241]
+2025-09-19 00:29:34.053685+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=33837 vertexData.size=0
+2025-09-19 00:29:34.053692+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.053697+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.053701+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.053705+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 3
+2025-09-19 00:29:34.053710+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=135348
+2025-09-19 00:29:34.054238+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.054245+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 0 from shared buffer. First verts: [6774, 4002]
+2025-09-19 00:29:34.054250+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.055342+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.055349+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 1 from shared buffer. First verts: [-6912, 18241]
+2025-09-19 00:29:34.056413+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.057503+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.057518+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 2 size=270696
+2025-09-19 00:29:34.058855+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=33837 vertexData.size=0
+2025-09-19 00:29:34.058869+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.058874+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.058879+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.058883+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 3
+2025-09-19 00:29:34.058888+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 5 from shared buffer. First verts: [6774, 4002]
+2025-09-19 00:29:34.059989+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.061066+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.061073+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 7 size=270696
+2025-09-19 00:29:34.061843+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=270696
+2025-09-19 00:29:34.062910+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.062919+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [-6912, 18241]
+2025-09-19 00:29:34.062925+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: countries-boundary
+2025-09-19 00:29:34.067102+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=200101 vertexData.size=0
+2025-09-19 00:29:34.067112+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.067117+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.067124+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 2
+2025-09-19 00:29:34.067129+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.073649+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.073659+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:34.073709+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 7 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:34.086160+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=3201616
+2025-09-19 00:29:34.098846+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.098861+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 8 size=3201616
+2025-09-19 00:29:34.114186+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.120708+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.120716+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 9 size=1600808
+2025-09-19 00:29:34.131459+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.137674+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.137683+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 10 size=1600808
+2025-09-19 00:29:34.148412+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.155060+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.155074+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 11 size=1600808
+2025-09-19 00:29:34.165755+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.172044+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.172053+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 12 size=1600808
+2025-09-19 00:29:34.182761+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.189343+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.189351+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 13 size=1600808
+2025-09-19 00:29:34.198212+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=200101 vertexData.size=0
+2025-09-19 00:29:34.198226+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.198231+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.198236+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 2
+2025-09-19 00:29:34.198241+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.204314+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.204324+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:34.204826+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 7 from shared buffer. First verts: [13549, 8004]
+2025-09-19 00:29:34.217337+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=3201616
+2025-09-19 00:29:34.230106+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.230117+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 8 size=3201616
+2025-09-19 00:29:34.245413+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.251768+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.251775+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 9 size=1600808
+2025-09-19 00:29:34.262519+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.269116+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.269125+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 10 size=1600808
+2025-09-19 00:29:34.279818+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.285972+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.285980+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 11 size=1600808
+2025-09-19 00:29:34.296658+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.303332+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.303341+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 12 size=1600808
+2025-09-19 00:29:34.313996+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=1600808
+2025-09-19 00:29:34.320159+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.320167+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 13 size=1600808
+2025-09-19 00:29:34.324645+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: geolines
+2025-09-19 00:29:34.324755+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=3614 vertexData.size=0
+2025-09-19 00:29:34.324763+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.324768+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.324773+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 2
+2025-09-19 00:29:34.324777+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.324884+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.324891+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [0, 9296]
+2025-09-19 00:29:34.324896+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 7 from shared buffer. First verts: [0, 9296]
+2025-09-19 00:29:34.325117+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=57824
+2025-09-19 00:29:34.325347+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.325354+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 8 size=57824
+2025-09-19 00:29:34.325636+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.325759+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.325767+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 9 size=28912
+2025-09-19 00:29:34.325960+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.326087+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.326094+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 10 size=28912
+2025-09-19 00:29:34.326287+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.326419+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.326427+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 11 size=28912
+2025-09-19 00:29:34.326623+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.326746+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.326753+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 12 size=28912
+2025-09-19 00:29:34.326963+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.327082+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.327091+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 13 size=28912
+2025-09-19 00:29:34.327292+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.327415+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.327422+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 14 size=28912
+2025-09-19 00:29:34.327600+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU buildAttributeBindings called with vertexCount=3614 vertexData.size=0
+2025-09-19 00:29:34.327607+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.327612+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Override attribute -1 has shared data: yes stride=0
+2025-09-19 00:29:34.327617+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Total override attributes: 2
+2025-09-19 00:29:34.327627+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.327733+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.327740+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 6 from shared buffer. First verts: [0, 9296]
+2025-09-19 00:29:34.327745+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:     Created binding for attribute 7 from shared buffer. First verts: [0, 9296]
+2025-09-19 00:29:34.327963+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=57824
+2025-09-19 00:29:34.328203+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.328216+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 8 size=57824
+2025-09-19 00:29:34.328498+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.328628+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.328636+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 9 size=28912
+2025-09-19 00:29:34.328830+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.328943+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.328951+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 10 size=28912
+2025-09-19 00:29:34.329184+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.329299+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.329308+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 11 size=28912
+2025-09-19 00:29:34.329506+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.329632+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.329639+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 12 size=28912
+2025-09-19 00:29:34.329854+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.329979+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.329986+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 13 size=28912
+2025-09-19 00:29:34.330178+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=28912
+2025-09-19 00:29:34.330306+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:29:34.330313+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Created dummy buffer for missing attribute 14 size=28912
+2025-09-19 00:29:34.330396+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: geolines-label
+2025-09-19 00:29:34.330404+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: countries-label
+2025-09-19 00:29:34.330408+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:29:34.330413+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:29:34.330417+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call drawableTargetsPass()
+2025-09-19 00:29:34.330422+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: About to call commonClearPass()
+2025-09-19 00:29:34.330427+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: Getting surface texture #3
+2025-09-19 00:29:34.330464+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Attempting to acquire swapchain view = 43809312672
+2025-09-19 00:29:34.330472+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Acquired swapchain view handle = 43809312672
+2025-09-19 00:29:34.330477+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Clearing default framebuffer to black
+2025-09-19 00:29:34.330486+0200 mbgl-glfw[79418:751411] [INFO] {}[Render]: WebGPU: Attempting depth stencil view = 43806235360
+Process 79418 launched: '/Users/admin/repos/maplibre-native/build/platform/glfw/mbgl-glfw' (arm64)
+Process 79418 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS (code=1, address=0xbda5c291f76197e3)
+    frame #0: 0x000000010023d1b4 mbgl-glfw`dawn::native::AbslFormatConvert(dawn::native::ApiObjectBase const*, absl::FormatConversionSpec const&, absl::FormatSink*) + 412
+mbgl-glfw`dawn::native::AbslFormatConvert:
+->  0x10023d1b4 <+412>: ldr    x8, [x8, #0x28]
+    0x10023d1b8 <+416>: mov    x0, x20
+    0x10023d1bc <+420>: mov    x1, x19
+    0x10023d1c0 <+424>: blr    x8
+Target 0: (mbgl-glfw) stopped.
+(lldb) bt
+* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS (code=1, address=0xbda5c291f76197e3)
+  * frame #0: 0x000000010023d1b4 mbgl-glfw`dawn::native::AbslFormatConvert(dawn::native::ApiObjectBase const*, absl::FormatConversionSpec const&, absl::FormatSink*) + 412
+    frame #1: 0x0000000101184bb4 mbgl-glfw`bool absl::str_format_internal::FormatArgImpl::Dispatch<dawn::native::ApiObjectBase const*>(absl::str_format_internal::FormatArgImpl::Data, absl::str_format_internal::FormatConversionSpecImpl, void*) + 44
+    frame #2: 0x00000001000fef04 mbgl-glfw`absl::str_format_internal::(anonymous namespace)::ConverterConsumer<absl::str_format_internal::(anonymous namespace)::DefaultConverter>::ConvertOne(absl::str_format_internal::UnboundConversion const&, std::__1::basic_string_view<char, std::__1::char_traits<char>>) + 396
+    frame #3: 0x00000001000fe280 mbgl-glfw`absl::str_format_internal::FormatUntyped(absl::str_format_internal::FormatRawSinkImpl, absl::str_format_internal::UntypedFormatSpecImpl, absl::Span<absl::str_format_internal::FormatArgImpl const>) + 360
+    frame #4: 0x00000001000fe5e4 mbgl-glfw`absl::str_format_internal::FormatPack(absl::str_format_internal::UntypedFormatSpecImpl, absl::Span<absl::str_format_internal::FormatArgImpl const>) + 56
+    frame #5: 0x00000001001a274c mbgl-glfw`std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> absl::StrFormat<dawn::native::ApiObjectBase const*, dawn::native::DeviceBase*, dawn::native::DeviceBase const*>(absl::str_format_internal::FormatSpecTemplate<str_format_internal::ArgumentToConv<dawn::native::ApiObjectBase const*>(), str_format_internal::ArgumentToConv<dawn::native::DeviceBase*>(), str_format_internal::ArgumentToConv<dawn::native::DeviceBase const*>()> const&, dawn::native::ApiObjectBase const* const&, dawn::native::DeviceBase* const&, dawn::native::DeviceBase const* const&) + 100
+    frame #6: 0x00000001001a2624 mbgl-glfw`dawn::native::DeviceBase::ValidateObject(dawn::native::ApiObjectBase const*) const + 180
+    frame #7: 0x000000010018a47c mbgl-glfw`dawn::native::(anonymous namespace)::ValidateRenderPassDescriptor(dawn::native::DeviceBase*, dawn::native::UnpackedPtr<dawn::native::RenderPassDescriptor>, dawn::native::UsageValidationMode, dawn::native::(anonymous namespace)::RenderPassValidationState*) + 4772
+    frame #8: 0x0000000100183594 mbgl-glfw`dawn::native::CommandEncoder::BeginRenderPass(dawn::native::RenderPassDescriptor const*) + 464
+    frame #9: 0x0000000100183378 mbgl-glfw`dawn::native::CommandEncoder::APIBeginRenderPass(dawn::native::RenderPassDescriptor const*) + 68
+    frame #10: 0x0000000100ddd6d4 mbgl-glfw`mbgl::webgpu::RenderPass::RenderPass(this=0x0000000a32aee7b0, commandEncoder_=0x0000000a33126ae0, name="main buffer", descriptor_=0x000000016fdf9d88) at render_pass.cpp:122:21
+    frame #11: 0x0000000100ddd9ec mbgl-glfw`mbgl::webgpu::RenderPass::RenderPass(this=0x0000000a32aee7b0, commandEncoder_=0x0000000a33126ae0, name="main buffer", descriptor_=0x000000016fdf9d88) at render_pass.cpp:31:38
+    frame #12: 0x0000000100d8ba90 mbgl-glfw`std::__1::unique_ptr<mbgl::webgpu::RenderPass, std::__1::default_delete<mbgl::webgpu::RenderPass>> std::__1::make_unique[abi:ne200100]<mbgl::webgpu::RenderPass, mbgl::webgpu::CommandEncoder&, char const*&, mbgl::gfx::RenderPassDescriptor const&, 0>(__args=0x0000000a33126ae0, __args=0x000000016fdf9d28, __args=0x000000016fdf9d88) at unique_ptr.h:767:30
+    frame #13: 0x0000000100d8ba30 mbgl-glfw`mbgl::webgpu::CommandEncoder::createRenderPass(this=0x0000000a33126ae0, name="main buffer", descriptor=0x000000016fdf9d88) at command_encoder.cpp:41:12
+    frame #14: 0x0000000100869c94 mbgl-glfw`mbgl::Renderer::Impl::render(mbgl::RenderTree const&, std::__1::shared_ptr<mbgl::UpdateParameters> const&)::$_8::operator()(this=0x000000016fdfa048) const at renderer_impl.cpp:342:57
+    frame #15: 0x0000000100868d68 mbgl-glfw`mbgl::Renderer::Impl::render(this=0x0000000a32f44000, renderTree=0x0000000a32c15e00, updateParameters=std::__1::shared_ptr<mbgl::UpdateParameters>::element_type @ 0x0000000a333df218 strong=3 weak=0) at renderer_impl.cpp:421:5
+    frame #16: 0x0000000100863c20 mbgl-glfw`mbgl::Renderer::render(this=0x0000000a32d74950, updateParameters=std::__1::shared_ptr<mbgl::UpdateParameters>::element_type @ 0x0000000a333df218 strong=3 weak=0) at renderer.cpp:44:15
+    frame #17: 0x000000010007625c mbgl-glfw`GLFWRendererFrontend::render(this=0x000000016fdfc630) at glfw_renderer_frontend.cpp:49:15
+    frame #18: 0x000000010004c798 mbgl-glfw`GLFWView::render(this=0x000000016fdfd4f0) at glfw_view.cpp:1200:27
+    frame #19: 0x000000010006d700 mbgl-glfw`GLFWView::run()::$_0::operator()(this=0x0000000a32846018) const at glfw_view.cpp:1245:9
+    frame #26: 0x0000000100047544 mbgl-glfw`std::__1::function<void ()>::operator()(this= Lambda in File glfw_view.cpp at Line 1229) const at function.h:995:10
+    frame #27: 0x0000000100dfa638 mbgl-glfw`mbgl::util::Timer::Impl::perform((null)=0x0000000a330ea100, info=0x0000000a32846010) at timer.cpp:33:58
+    frame #28: 0x0000000190242290 CoreFoundation`__CFRUNLOOP_IS_CALLING_OUT_TO_A_TIMER_CALLBACK_FUNCTION__ + 32
+    frame #29: 0x0000000190241f50 CoreFoundation`__CFRunLoopDoTimer + 980
+    frame #30: 0x0000000190241ac8 CoreFoundation`__CFRunLoopDoTimers + 280
+    frame #31: 0x000000019023284c CoreFoundation`__CFRunLoopRun + 1816
+    frame #32: 0x00000001902f0898 CoreFoundation`_CFRunLoopRunSpecificWithOptions + 532
+    frame #33: 0x000000019cc2f730 HIToolbox`RunCurrentEventLoopInMode + 316
+    frame #34: 0x000000019cc329d0 HIToolbox`ReceiveNextEventCommon + 488
+    frame #35: 0x000000019cdbc1f4 HIToolbox`_BlockUntilNextEventMatchingListInMode + 48
+    frame #36: 0x0000000194b0a308 AppKit`_DPSBlockUntilNextEventMatchingListInMode + 236
+    frame #37: 0x0000000194620edc AppKit`_DPSNextEvent + 588
+    frame #38: 0x0000000195073a04 AppKit`-[NSApplication(NSEventRouting) _nextEventMatchingEventMask:untilDate:inMode:dequeue:] + 688
+    frame #39: 0x0000000195073710 AppKit`-[NSApplication(NSEventRouting) nextEventMatchingMask:untilDate:inMode:dequeue:] + 72
+    frame #40: 0x0000000103c5fab0 libglfw.3.dylib`_glfwPollEventsCocoa + 88
+    frame #41: 0x00000001000dbe2c mbgl-glfw`GLFWWebGPUBackend::swap(this=0x0000000a3312cb40) at glfw_webgpu_backend.cpp:488:5
+    frame #42: 0x000000010004c814 mbgl-glfw`GLFWView::render(this=0x000000016fdfd4f0) at glfw_view.cpp:1212:28
+    frame #43: 0x000000010004cf64 mbgl-glfw`GLFWView::run(this=0x000000016fdfd4f0) at glfw_view.cpp:1274:9
+    frame #44: 0x000000010000a0a0 mbgl-glfw`main(argc=5, argv=0x000000016fdfefa0) at main.cpp:214:11
+    frame #45: 0x000000018fdd5d54 dyld`start + 7184
+(lldb) quit

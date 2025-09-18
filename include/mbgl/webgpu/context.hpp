@@ -6,13 +6,22 @@
 #include <mbgl/webgpu/buffer_resource.hpp>
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace mbgl {
+class RenderStaticData;
 namespace gfx {
 // Forward declaration
-struct AttributeBinding;
+class AttributeBinding;
 using AttributeBindingArray = std::vector<std::optional<AttributeBinding>>;
+class RenderPass;
+class Renderable;
+class ShaderProgramBase;
 } // namespace gfx
+
+namespace shaders {
+struct ClipUBO;
+} // namespace shaders
 
 namespace webgpu {
 
@@ -74,6 +83,11 @@ public:
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();
 
+    // Tile clipping mask rendering
+    bool renderTileClippingMasks(gfx::RenderPass& renderPass,
+                                 RenderStaticData& staticData,
+                                 const std::vector<shaders::ClipUBO>& tileUBOs);
+
     // Command encoder tracking
     class CommandEncoder* getCurrentCommandEncoder() const { return currentCommandEncoder; }
     void setCurrentCommandEncoder(class CommandEncoder* encoder) { currentCommandEncoder = encoder; }
@@ -102,6 +116,13 @@ private:
     // Cached buffers (aligned with Metal)
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
+
+    // Cached clipping resources
+    gfx::ShaderProgramBasePtr clipMaskShader;
+    const gfx::Renderable* clipMaskRenderable = nullptr;
+    std::optional<std::size_t> clipMaskPipelineHash;
+    std::vector<BufferResource> clipMaskUniformBuffers;
+    std::vector<WGPUBindGroup> clipMaskActiveBindGroups;
 };
 
 } // namespace webgpu

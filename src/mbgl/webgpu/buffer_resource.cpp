@@ -41,19 +41,36 @@ BufferResource::BufferResource(Context& context_,
     WGPUBufferDescriptor bufferDesc{};
     WGPUStringView label = {"Buffer Resource", strlen("Buffer Resource")};
     bufferDesc.label = label;
+    const std::size_t paddedSize = (size + 3u) & ~std::size_t(3);
+
     bufferDesc.usage = usage | WGPUBufferUsage_CopyDst;
-    bufferDesc.size = size;
-    bufferDesc.mappedAtCreation = data ? 1 : 0;
+    bufferDesc.size = paddedSize;
+    bufferDesc.mappedAtCreation = 0;
 
     // Create buffer
     buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
 
     if (buffer && data) {
-        // Copy initial data if provided
-        void* mapped = wgpuBufferGetMappedRange(buffer, 0, size);
-        if (mapped) {
-            std::memcpy(mapped, data, size);
-            wgpuBufferUnmap(buffer);
+        // Upload initial data via queue write
+        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
+        if (queue) {
+            if (paddedSize == size) {
+                wgpuQueueWriteBuffer(queue, buffer, 0, data, size);
+            } else {
+                std::vector<std::uint8_t> padded(paddedSize, 0);
+                std::memcpy(padded.data(), data, size);
+                wgpuQueueWriteBuffer(queue, buffer, 0, padded.data(), paddedSize);
+            }
+        } else {
+            // Fallback to mapping when queue is unavailable (should be rare)
+            void* mapped = wgpuBufferGetMappedRange(buffer, 0, paddedSize);
+            if (mapped) {
+                std::memcpy(mapped, data, size);
+                if (paddedSize > size) {
+                    std::memset(static_cast<std::uint8_t*>(mapped) + size, 0, paddedSize - size);
+                }
+                wgpuBufferUnmap(buffer);
+            }
         }
     }
 }

@@ -37,6 +37,25 @@
 #include <thread>
 #include <chrono>
 #include <limits>
+#include <mutex>
+
+namespace {
+
+void logUncapturedError(const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
+    mbgl::Log::Error(mbgl::Event::Render,
+                     std::string("Dawn validation error [") +
+                         std::to_string(static_cast<int>(type)) + "] " +
+                         (message.data ? std::string(message.data, message.length) : std::string()));
+}
+
+void logDeviceLost(const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::StringView message) {
+    mbgl::Log::Error(mbgl::Event::Render,
+                     std::string("Dawn device lost [") +
+                         std::to_string(static_cast<int>(reason)) + "] " +
+                         (message.data ? std::string(message.data, message.length) : std::string()));
+}
+
+} // namespace
 
 // Forward declaration
 class GLFWWebGPUBackend;
@@ -87,6 +106,16 @@ std::unique_ptr<GLFWBackend> Backend::Create<mbgl::gfx::Backend::Type::WebGPU>(G
 }
 } // namespace gfx
 } // namespace mbgl
+
+void GLFWWebGPUBackend::SpinLock::lock() {
+    while (flag.test_and_set(std::memory_order_acquire)) {
+        std::this_thread::yield();
+    }
+}
+
+void GLFWWebGPUBackend::SpinLock::unlock() {
+    flag.clear(std::memory_order_release);
+}
 
 GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     : GLFWBackend(),
@@ -164,6 +193,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     deviceDesc.label = "MapLibre WebGPU Device";
     deviceDesc.requiredFeatures = requiredFeatures.data();
     deviceDesc.requiredFeatureCount = requiredFeatures.size();
+    deviceDesc.SetUncapturedErrorCallback(logUncapturedError);
+    deviceDesc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous, logDeviceLost);
 
     // Create device with descriptor
     mbgl::Log::Info(mbgl::Event::Render, "Creating Dawn WebGPU device...");
@@ -184,7 +215,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     setDepthStencilFormat(depthStencilFormat);
 
     // Process device events to ensure it's ready
-    wgpuDeviceTick(rawDevice);
+    processEvents();
 
     // Note: Dawn's error callback API is different from wgpu-native
     // Errors will be logged by Dawn's internal validation for now
@@ -206,11 +237,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     layer.drawableSize = CGSizeMake(width, height);
 
     [view setLayer:layer];
-    metalLayer = (__bridge_retained void*)layer;  // ARC will handle the retain
 
     // Create surface from metal layer
     wgpu::SurfaceDescriptorFromMetalLayer metalDesc;
-    metalDesc.layer = metalLayer;
+    metalDesc.layer = (__bridge void*)layer;
 
     wgpu::SurfaceDescriptor surfaceDesc;
     surfaceDesc.nextInChain = &metalDesc;
@@ -330,19 +360,11 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     // Set shutdown flag atomically with memory barrier
     isShuttingDown.store(true, std::memory_order_release);
     
-    // Signal any waiting threads to wake up
+    // Mark any in-flight frame as completed so tear-down logic can continue.
+    frameInProgress.store(false, std::memory_order_release);
+
     {
-        std::lock_guard<std::mutex> lock(frameMutex);
-        frameInProgress = false;
-    }
-    frameCV.notify_all();
-    
-    // Give threads time to exit their wait loops
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    
-    // Clear all Dawn/WebGPU resources in proper order
-    {
-        std::lock_guard<std::mutex> lock(textureViewMutex);
+        std::lock_guard<SpinLock> guard(textureStateLock);
 
         // Release texture views first (they reference textures)
         currentTextureView = nullptr;
@@ -354,13 +376,11 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
         previousTexture = nullptr;
         depthStencilTexture = nullptr;
     }
-    
+
     // Ensure all GPU work is complete
     if (queue) {
-        // Note: Dawn doesn't have a Finish() method, but tick processes pending work
-        if (wgpuDevice) {
-            wgpuDeviceTick(wgpuDevice.Get());
-        }
+        // Pump outstanding callbacks so pending GPU work can complete.
+        processEvents();
     }
 
     // Unconfigure surface before releasing device
@@ -373,14 +393,6 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     wgpuSurface = nullptr;  // Surface depends on device
     queue = nullptr;         // Queue is owned by device
     wgpuDevice = nullptr;    // Device depends on instance
-
-#ifdef __APPLE__
-    // Release Metal layer after all WebGPU resources
-    if (metalLayer) {
-        CFRelease(metalLayer);  // Release the bridged retain
-        metalLayer = nullptr;
-    }
-#endif
 
     // Release Dawn instance last (it owns the backend)
     instance.reset();
@@ -399,6 +411,9 @@ mbgl::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
 
 
 void GLFWWebGPUBackend::swap() {
+#if defined(__APPLE__)
+    @autoreleasepool {
+#endif
     // Don't do anything if we're shutting down
     if (isShuttingDown) {
         return;
@@ -413,9 +428,7 @@ void GLFWWebGPUBackend::swap() {
     // If it's been too long since last swap, tick the device to keep it alive
     if (timeSinceLastSwap > 1000) {  // 1 second
         // Keep Dawn device alive during idle periods
-        if (wgpuDevice) {
-            wgpuDeviceTick(wgpuDevice.Get());
-        }
+        processEvents();
         // Only reconfigure if really needed (> 10 seconds)
         if (timeSinceLastSwap > 10000 && surfaceConfigured) {
             surfaceNeedsReconfigure = true;
@@ -425,9 +438,7 @@ void GLFWWebGPUBackend::swap() {
     swapCount++;
     
     // Process any pending device work
-    if (wgpuDevice) {
-        wgpuDeviceTick(wgpuDevice.Get());
-    }
+    processEvents();
     
     // Run periodic maintenance
     periodicMaintenance();
@@ -441,20 +452,6 @@ void GLFWWebGPUBackend::swap() {
         signalFrameComplete();
     }
 
-    // Capture current texture view for optional debug overlay
-    wgpu::TextureView viewForDebug;
-    {
-        std::lock_guard<std::mutex> lock(textureViewMutex);
-        if (currentTextureView && !framePresented) {
-            viewForDebug = currentTextureView;
-        }
-    }
-
-    static const bool enableDebugTriangle = std::getenv("WEBGPU_ENABLE_DEBUG_TRIANGLE") != nullptr;
-    if (enableDebugTriangle && viewForDebug) {
-        drawDebugTriangle(viewForDebug);
-    }
-
     // Present the current frame
     if (wgpuSurface && surfaceConfigured) {
         // Check if surface needs reconfiguration
@@ -462,11 +459,10 @@ void GLFWWebGPUBackend::swap() {
             reconfigureSurface();
         }
         
-        // Lock for texture view manipulation
+        // Only present if we have a valid texture view and haven't presented yet
         {
-            std::lock_guard<std::mutex> lock(textureViewMutex);
+            std::lock_guard<SpinLock> guard(textureStateLock);
 
-            // Only present if we have a valid texture view and haven't presented yet
             if (currentTextureView && !framePresented) {
                 wgpuSurface.Present();
                 framePresented = true;
@@ -490,6 +486,9 @@ void GLFWWebGPUBackend::swap() {
 
     // Poll for window events to keep the window responsive
     glfwPollEvents();
+#if defined(__APPLE__)
+    }
+#endif
 }
 
 void GLFWWebGPUBackend::activate() {
@@ -514,9 +513,12 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
     if (static_cast<uint32_t>(width) != newSize.width ||
         static_cast<uint32_t>(height) != newSize.height) {
 #ifdef __APPLE__
-        if (metalLayer) {
-            CAMetalLayer* layer = (__bridge CAMetalLayer*)metalLayer;
-            layer.drawableSize = CGSizeMake(newSize.width, newSize.height);
+        NSWindow* nsWindow = glfwGetCocoaWindow(window);
+        if (nsWindow) {
+            CAMetalLayer* layer = (CAMetalLayer*)[[nsWindow contentView] layer];
+            if (layer) {
+                layer.drawableSize = CGSizeMake(newSize.width, newSize.height);
+            }
         }
 #endif
 
@@ -526,19 +528,20 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
 }
 
 void* GLFWWebGPUBackend::getCurrentTextureView() {
+#if defined(__APPLE__)
+    @autoreleasepool {
+#endif
     // Don't do anything if we're shutting down
     if (isShuttingDown) {
         return nullptr;
     }
-    
+
     if (!wgpuSurface || !surfaceConfigured) {
         return nullptr;
     }
-    
+
     // Process any pending device work before acquiring texture
-    if (wgpuDevice) {
-        wgpuDeviceTick(wgpuDevice.Get());
-    }
+    processEvents();
     
     // Run periodic maintenance
     periodicMaintenance();
@@ -551,34 +554,26 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         consecutiveErrors = 0;
     }
 
-    // Lock to protect texture view access
-    std::lock_guard<std::mutex> lock(textureViewMutex);
-    
-    // If we already have a current texture view for this frame, return it
-    // This ensures we use the same texture view for all render passes in a single frame
+    std::unique_lock<SpinLock> lock(textureStateLock);
+
     if (currentTextureView && !framePresented) {
-        // Return the existing texture view for this frame
         return reinterpret_cast<void*>(currentTextureView.Get());
     }
 
-    // If frame was already presented, we need a new texture for the next frame
     if (framePresented) {
-        // Clear old texture view since we're starting a new frame
         currentTextureView = nullptr;
         currentTexture = nullptr;
     }
-    
-    // Mark frame as in progress
+
     bool expected = false;
     if (!frameInProgress.compare_exchange_strong(expected, true)) {
-        // Another frame is already in progress, skip this request
         return nullptr;
     }
-    
-    // Mark that we haven't presented this frame yet
+
     framePresented = false;
-    
-    // Acquire new surface texture with additional safety
+
+    lock.unlock();
+
     wgpu::SurfaceTexture surfaceTexture;
 
     static int getTextureCount = 0;
@@ -617,6 +612,8 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         frameInProgress = false;
         return nullptr;
     }
+
+    lock.lock();
 
     // Create texture view with explicit descriptor
     wgpu::TextureViewDescriptor viewDesc = {};
@@ -666,6 +663,10 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     // Success - reset error counter
     consecutiveErrors = 0;
     
+#if defined(__APPLE__)
+    }
+#endif
+
     return reinterpret_cast<void*>(currentTextureView.Get());
 }
 
@@ -674,7 +675,7 @@ mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
 }
 
 void* GLFWWebGPUBackend::getDepthStencilView() {
-    std::lock_guard<std::mutex> lock(textureViewMutex);
+    std::lock_guard<SpinLock> guard(textureStateLock);
     if (!depthStencilView) {
         int width = 0;
         int height = 0;
@@ -699,15 +700,16 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     if (isShuttingDown) {
         return;
     }
-    
-    // Lock to ensure exclusive access
-    std::lock_guard<std::mutex> lock(textureViewMutex);
-    
-    // Clear all texture state
-    currentTextureView = nullptr;
-    currentTexture = nullptr;
-    previousTextureView = nullptr;
-    previousTexture = nullptr;
+
+    {
+        std::lock_guard<SpinLock> guard(textureStateLock);
+
+        // Clear all texture state
+        currentTextureView = nullptr;
+        currentTexture = nullptr;
+        previousTextureView = nullptr;
+        previousTexture = nullptr;
+    }
     
     // Get current size
     int width, height;
@@ -740,6 +742,12 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     surfaceNeedsReconfigure = false;
     lastConfiguredSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     consecutiveErrors = 0;
+}
+
+void GLFWWebGPUBackend::processEvents() {
+    // TODO(webgpu): hook Dawn event processing once the backend relies on it for
+    // resource lifecycle management. For now, MapLibre doesn't depend on these
+    // callbacks and invoking them triggers instability in the native backend.
 }
 
 void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t height) {
@@ -787,32 +795,27 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
 }
 
 bool GLFWWebGPUBackend::waitForFrame(std::chrono::milliseconds timeout) {
-    // Check shutdown flag with acquire ordering to see destructor's release
-    if (isShuttingDown.load(std::memory_order_acquire)) {
-        return true;
+    const auto start = std::chrono::steady_clock::now();
+
+    while (frameInProgress.load(std::memory_order_acquire)) {
+        if (isShuttingDown.load(std::memory_order_acquire)) {
+            return true;
+        }
+
+        processEvents();
+
+        if (std::chrono::steady_clock::now() - start >= timeout) {
+            return false;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-    
-    std::unique_lock<std::mutex> lock(frameMutex);
-    if (!frameInProgress.load(std::memory_order_acquire)) {
-        return true;  // No frame in progress
-    }
-    
-    // Wait for frame to complete with timeout
-    return frameCV.wait_for(lock, timeout, [this] { 
-        return !frameInProgress.load(std::memory_order_acquire) || 
-               isShuttingDown.load(std::memory_order_acquire); 
-    });
+
+    return true;
 }
 
 void GLFWWebGPUBackend::signalFrameComplete() {
-    // Don't use mutex if we're shutting down
-    if (isShuttingDown) {
-        frameInProgress = false;
-        return;
-    }
-    
-    frameInProgress = false;
-    frameCV.notify_all();
+    frameInProgress.store(false, std::memory_order_release);
 }
 
 void GLFWWebGPUBackend::periodicMaintenance() {
@@ -827,15 +830,11 @@ void GLFWWebGPUBackend::periodicMaintenance() {
     
     // Run maintenance every 100ms to keep Dawn alive during idle periods
     if (timeSinceLastMaintenance > 100) {
-        // Tick the device to process any pending work and keep connection alive
-        if (wgpuDevice) {
-            try {
-                wgpuDeviceTick(wgpuDevice.Get());
-            } catch (...) {
-                // Ignore exceptions during maintenance
-            }
-        }
-        
+        // Pump pending callbacks; we intentionally ignore errors here because
+        // ProcessEvents returns false on device loss and we let the main loop
+        // handle it on the next swap.
+        processEvents();
+
         lastMaintenanceTime = now;
     }
 }

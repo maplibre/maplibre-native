@@ -6,11 +6,9 @@
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <memory>
-#include <mutex>
 #include <webgpu/webgpu_cpp.h>
 #include <queue>
 #include <atomic>
-#include <condition_variable>
 
 struct GLFWwindow;
 struct WGPUDeviceImpl;
@@ -55,9 +53,19 @@ public:
     mbgl::Size getFramebufferSize() const override;
 
 private:
+    class SpinLock {
+    public:
+        void lock();
+        void unlock();
+
+    private:
+        std::atomic_flag flag = ATOMIC_FLAG_INIT;
+    };
+
+    mutable SpinLock textureStateLock;
+
     GLFWwindow* window;
     std::unique_ptr<dawn::native::Instance> instance;
-    void* metalLayer = nullptr; // CAMetalLayer on macOS
     wgpu::Device wgpuDevice;  // This owns the device
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
@@ -65,7 +73,6 @@ private:
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     
     // Protect texture view access from multiple threads
-    mutable std::mutex textureViewMutex;
     wgpu::TextureView currentTextureView;  // Keep the current texture view alive
     wgpu::Texture currentTexture;  // Keep the texture alive as well
 
@@ -75,9 +82,6 @@ private:
 
     // Frame synchronization
     std::atomic<bool> frameInProgress{false};
-    std::condition_variable frameCV;
-    std::mutex frameMutex;
-    
     // Track if we have presented the current frame
     std::atomic<bool> framePresented{true};
     
@@ -103,6 +107,7 @@ private:
     bool waitForFrame(std::chrono::milliseconds timeout = std::chrono::milliseconds(100));
     void signalFrameComplete();
     void periodicMaintenance();
+    void processEvents();
 
     // Debug triangle utilities
     void ensureDebugTriangleResources();

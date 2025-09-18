@@ -21,8 +21,9 @@ public:
 HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::ContextMode mode)
     : webgpu::RendererBackend(mode),
       gfx::HeadlessBackend(size_),
-      impl(std::make_unique<Impl>()),
-      swapBehaviour(swapBehaviour_) {
+      impl(std::make_unique<Impl>()) {
+
+    static_cast<void>(swapBehaviour_);
 
     impl->framebufferSize = size_;
 

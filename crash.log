@@ -1,0 +1,281 @@
+(lldb) target create "./build/platform/glfw/mbgl-glfw"
+Current executable set to '/Users/admin/repos/maplibre-native/build/platform/glfw/mbgl-glfw' (arm64).
+(lldb) settings set -- target.run-args  "--style" "https://demotiles.maplibre.org/style.json" "--zoom" "2"
+(lldb) run
+2025-09-19 00:17:22.020657+0200 mbgl-glfw[71824:719824] [WindowTab] Cannot index window tabs due to missing main bundle identifier
+2025-09-19 00:17:22.125691+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: GLFW window visible: 1
+2025-09-19 00:17:22.125728+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Initializing Dawn WebGPU backend...
+2025-09-19 00:17:22.127619+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Dawn instance created successfully
+2025-09-19 00:17:22.128538+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Found 2 Dawn adapters
+2025-09-19 00:17:22.128551+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Using Dawn WebGPU implementation with native backend
+2025-09-19 00:17:22.128558+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Selected Dawn adapter for WebGPU rendering
+2025-09-19 00:17:22.128564+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Creating Dawn WebGPU device...
+2025-09-19 00:17:22.129658+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Dawn WebGPU device created successfully
+
+================================================================================
+
+- Press `S` to cycle through bundled styles
+- Press `X` to reset the transform
+- Press `N` to reset north
+- Press `R` to enable the route demo
+- Press `E` to insert an example building extrusion layer
+- Press `O` to toggle online connectivity
+- Press `Z` to cycle through north orientations
+- Press `X` to cycle through the viewport modes
+- Press `I` to delete existing database and re-initialize
+- Press `A` to cycle through Mapbox offices in the world + dateline monument
+- Press `B` to cycle through the color, stencil, and depth buffer
+- Press `D` to cycle through camera bounds: inside, crossing IDL at left, crossing IDL at right, and disabled
+- Press `T` to add custom geometry source
+- Press `F` to enable feature-state demo
+- Press `U` to toggle pitch bounds
+- Press `H` to take a snapshot of a current map.
+- Press `J` to take a snapshot of a current map with an extrusions overlay.
+- Press `Y` to start a camera fly-by demo
+
+- Press `1` through `6` to add increasing numbers of point annotations for testing
+- Press `7` through `0` to add increasing numbers of shape annotations for testing
+
+- Press `Q` to query annotations
+- Press `C` to remove annotations
+- Press `K` to add a random custom runtime imagery annotation
+- Press `L` to add a random line annotation
+- Press `W` to pop the last-added annotation off
+- Press `V` to toggle custom drawable layer
+- Press `B` to toggle rendering stats
+- Press `P` to pause tile requests
+
+- Hold `Control` + mouse drag to rotate
+- Hold `Shift` + mouse drag to tilt
+
+- Press `F1` to generate a render test for the current view
+
+- Press `Tab` to cycle through the map debug options
+- Press `F6` to cycle through Tile LOD modes
+- Press `F7` to lower the zoom level without changing the camera
+- Press `F8` to higher the zoom level without changing the camera
+- Press `Esc` to quit
+
+================================================================================
+
+2025-09-19 00:17:22.200472+0200 mbgl-glfw[71824:720061] [DEBUG] {}[Database]: 283recovered 677 frames from WAL file /Users/admin/Library/HTTPStorages/mbgl-glfw/httpstorages.sqlite-wal
+2025-09-19 00:17:22.251930+0200 mbgl-glfw[71824:719927] [Common] Unable to obtain a task name port right for pid 420: (os/kern) failure (0x5)
+2025-09-19 00:17:22.283534+0200 mbgl-glfw[71824:720061] [INFO] {}[Style]: Style 'MapLibre' has 9 layers:
+  None: 7
+  Zoom: 2
+2025-09-19 00:17:22.286129+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TransformParameters: projMatrix[15]=1152.000000 projMatrix[11]=-0.000094 size=1024x768 scale=4.000000
+2025-09-19 00:17:22.286149+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=1 zoomRange=[0,18] currentZoom=2.000000
+2025-09-19 00:17:22.286190+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:22.286204+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:22.286363+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 6 total tiles
+2025-09-19 00:17:22.286373+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=null
+2025-09-19 00:17:22.286381+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=1 zoomRange=[0,6] currentZoom=2.000000
+2025-09-19 00:17:22.286418+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:22.286427+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:22.286700+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 8 total tiles
+2025-09-19 00:17:22.286710+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=1 zoomRange=[0,16] currentZoom=2.000000
+2025-09-19 00:17:22.286738+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:22.286747+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:22.286878+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 6 total tiles
+2025-09-19 00:17:22.286893+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+2025-09-19 00:17:22.286901+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+2025-09-19 00:17:22.286910+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+2025-09-19 00:17:22.286915+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+2025-09-19 00:17:22.286922+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for crimea-fill with 0 tiles
+2025-09-19 00:17:22.287017+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context: beginFrame()
+2025-09-19 00:17:22.287037+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'BackgroundShader'
+2025-09-19 00:17:22.287049+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'BackgroundPatternShader'
+2025-09-19 00:17:22.287061+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CircleShader'
+2025-09-19 00:17:22.287071+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'ClippingMaskProgram'
+2025-09-19 00:17:22.287077+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CollisionBoxShader'
+2025-09-19 00:17:22.287088+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CollisionCircleShader'
+2025-09-19 00:17:22.287101+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CustomGeometryShader'
+2025-09-19 00:17:22.287111+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'CustomSymbolIconShader'
+2025-09-19 00:17:22.287121+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'DebugShader'
+2025-09-19 00:17:22.287131+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillShader'
+2025-09-19 00:17:22.287137+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillOutlineShader'
+2025-09-19 00:17:22.287147+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillPatternShader'
+2025-09-19 00:17:22.287170+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillOutlinePatternShader'
+2025-09-19 00:17:22.287181+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillOutlineTriangulatedShader'
+2025-09-19 00:17:22.287188+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillExtrusionShader'
+2025-09-19 00:17:22.287194+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'FillExtrusionPatternShader'
+2025-09-19 00:17:22.287200+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HeatmapShader'
+2025-09-19 00:17:22.287205+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HeatmapTextureShader'
+2025-09-19 00:17:22.287210+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HillshadeShader'
+2025-09-19 00:17:22.287216+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'HillshadePrepareShader'
+2025-09-19 00:17:22.287222+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LineShader'
+2025-09-19 00:17:22.287227+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LineGradientShader'
+2025-09-19 00:17:22.287232+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LinePatternShader'
+2025-09-19 00:17:22.287236+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LineSDFShader'
+2025-09-19 00:17:22.287242+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LocationIndicatorShader'
+2025-09-19 00:17:22.287248+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'LocationIndicatorTexturedShader'
+2025-09-19 00:17:22.287253+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'RasterShader'
+2025-09-19 00:17:22.287258+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'SymbolIconShader'
+2025-09-19 00:17:22.287263+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'SymbolSDFShader'
+2025-09-19 00:17:22.287269+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'SymbolTextAndIconShader'
+2025-09-19 00:17:22.287273+0200 mbgl-glfw[71824:720061] [INFO] {}[Shader]: WebGPU: Registered shader group for 'WideVectorShader'
+2025-09-19 00:17:22.287278+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+2025-09-19 00:17:22.287283+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating upload pass: upload
+2025-09-19 00:17:22.287288+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating vertex buffer resource, size=16
+2025-09-19 00:17:22.288305+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   Vertex buffer created successfully
+2025-09-19 00:17:22.288338+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+2025-09-19 00:17:22.288348+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderFillLayer::update called for crimea-fill with 0 tiles
+2025-09-19 00:17:22.288353+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+2025-09-19 00:17:22.288364+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+2025-09-19 00:17:22.288371+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:17:22.288376+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:17:22.288382+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call drawableTargetsPass()
+2025-09-19 00:17:22.288387+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call commonClearPass()
+2025-09-19 00:17:22.288392+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Getting surface texture #1
+2025-09-19 00:17:22.289222+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Attempting to acquire swapchain view = 43223180832
+2025-09-19 00:17:22.289230+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Acquired swapchain view handle = 43223180832
+2025-09-19 00:17:22.289236+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Clearing default framebuffer to black
+2025-09-19 00:17:22.289241+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Attempting depth stencil view = 43231761728
+2025-09-19 00:17:22.289247+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Using depth stencil view handle = 43231761728
+2025-09-19 00:17:22.289260+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Beginning render pass
+2025-09-19 00:17:22.289269+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call bindGlobalUniformBuffers()
+2025-09-19 00:17:22.289274+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context::bindGlobalUniformBuffers called
+2025-09-19 00:17:22.289280+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call drawableOpaquePass()
+2025-09-19 00:17:22.289287+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Starting drawableOpaquePass with 0 layer groups
+2025-09-19 00:17:22.289292+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Finished drawableOpaquePass
+2025-09-19 00:17:22.289299+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call drawableTranslucentPass()
+2025-09-19 00:17:22.289304+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Starting drawableTranslucentPass with 0 layer groups
+2025-09-19 00:17:22.289309+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:17:22.289315+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Finished drawableTranslucentPass
+2025-09-19 00:17:22.289321+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Skipping drawableDebugOverlays for WebGPU backend
+2025-09-19 00:17:22.289328+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+2025-09-19 00:17:22.289333+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context::unbindGlobalUniformBuffers called
+2025-09-19 00:17:22.289337+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Ending render pass (destructor called)
+2025-09-19 00:17:22.289342+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Render pass ended successfully
+2025-09-19 00:17:22.289738+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Command buffer submitted to queue
+2025-09-19 00:17:22.798238+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context: endFrame()
+2025-09-19 00:17:22.798754+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TransformParameters: projMatrix[15]=1152.000000 projMatrix[11]=-0.000094 size=1024x768 scale=4.000000
+2025-09-19 00:17:22.798784+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=0 zoomRange=[0,18] currentZoom=2.000000
+2025-09-19 00:17:22.798793+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:22.798800+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:22.798815+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:17:22.798880+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=present
+2025-09-19 00:17:22.798890+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=0 zoomRange=[0,6] currentZoom=2.000000
+2025-09-19 00:17:22.798896+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:22.798902+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:22.799077+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 0 rendered tiles, 10 total tiles
+2025-09-19 00:17:22.799101+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=0 zoomRange=[0,16] currentZoom=2.000000
+2025-09-19 00:17:22.799113+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:22.799120+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:22.799128+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:17:22.799134+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+2025-09-19 00:17:22.799142+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+2025-09-19 00:17:22.799149+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+2025-09-19 00:17:22.799233+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+2025-09-19 00:17:22.799241+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::prepare called for crimea-fill with 6 tiles
+2025-09-19 00:17:22.799300+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context: beginFrame()
+2025-09-19 00:17:22.799338+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+2025-09-19 00:17:22.799351+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating upload pass: upload
+2025-09-19 00:17:22.799487+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+2025-09-19 00:17:22.799498+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderFillLayer::update called for crimea-fill with 6 tiles
+2025-09-19 00:17:22.799507+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: crimea-fill
+2025-09-19 00:17:22.799515+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: crimea-fill activate=1
+2025-09-19 00:17:22.799523+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderFillLayer: Added FillLayerTweaker to crimea-fill
+2025-09-19 00:17:22.799531+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: org.maplibre.annotations.points
+2025-09-19 00:17:22.799539+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=1
+2025-09-19 00:17:22.799547+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: crimea-fill at index 7
+2025-09-19 00:17:22.799608+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::addLayerGroup called for: org.maplibre.annotations.points at index 8
+2025-09-19 00:17:22.799617+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+2025-09-19 00:17:22.799623+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+2025-09-19 00:17:22.799630+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:17:22.799636+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:17:22.799643+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: LayerGroupBase::runTweakers called for crimea-fill with 1 tweakers
+2025-09-19 00:17:22.799649+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: FillLayerTweaker::execute called for crimea-fill with 0 drawables
+2025-09-19 00:17:22.799748+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:17:22.799756+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: LayerGroupBase::runTweakers called for org.maplibre.annotations.points with 1 tweakers
+2025-09-19 00:17:22.799762+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:17:22.799768+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:17:22.799774+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:17:22.799779+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call drawableTargetsPass()
+2025-09-19 00:17:22.799785+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call commonClearPass()
+2025-09-19 00:17:22.799790+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Getting surface texture #2
+2025-09-19 00:17:22.800125+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Attempting to acquire swapchain view = 43223182752
+2025-09-19 00:17:22.800137+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Acquired swapchain view handle = 43223182752
+2025-09-19 00:17:22.800144+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Clearing default framebuffer to black
+2025-09-19 00:17:22.800153+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Attempting depth stencil view = 43231761728
+2025-09-19 00:17:22.800172+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Using depth stencil view handle = 43231761728
+2025-09-19 00:17:22.800188+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Beginning render pass
+2025-09-19 00:17:22.800197+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call bindGlobalUniformBuffers()
+2025-09-19 00:17:22.800206+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context::bindGlobalUniformBuffers called
+2025-09-19 00:17:22.800213+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call drawableOpaquePass()
+2025-09-19 00:17:22.800219+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Starting drawableOpaquePass with 2 layer groups
+2025-09-19 00:17:22.800225+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Calling render() on layer group: org.maplibre.annotations.points (opaque pass)
+2025-09-19 00:17:22.800335+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Calling render() on layer group: crimea-fill (opaque pass)
+2025-09-19 00:17:22.800345+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Finished drawableOpaquePass
+2025-09-19 00:17:22.800351+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: About to call drawableTranslucentPass()
+2025-09-19 00:17:22.800357+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Starting drawableTranslucentPass with 2 layer groups
+2025-09-19 00:17:22.800364+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:17:22.800369+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:17:22.800375+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Calling render() on layer group: crimea-fill (translucent pass)
+2025-09-19 00:17:22.800382+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:17:22.800387+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Calling render() on layer group: org.maplibre.annotations.points (translucent pass)
+2025-09-19 00:17:22.800398+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Finished drawableTranslucentPass
+2025-09-19 00:17:22.800406+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Skipping drawableDebugOverlays for WebGPU backend
+2025-09-19 00:17:22.800412+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+2025-09-19 00:17:22.800418+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: crimea-fill
+2025-09-19 00:17:22.800424+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: Visiting layer group: org.maplibre.annotations.points
+2025-09-19 00:17:22.800430+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context::unbindGlobalUniformBuffers called
+2025-09-19 00:17:22.800437+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Ending render pass (destructor called)
+2025-09-19 00:17:22.800442+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Render pass ended successfully
+2025-09-19 00:17:22.800449+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Command buffer submitted to queue
+2025-09-19 00:17:23.307931+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TransformParameters: projMatrix[15]=1152.000000 projMatrix[11]=-0.000094 size=1024x768 scale=4.000000
+2025-09-19 00:17:23.308014+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=0 zoomRange=[0,18] currentZoom=2.000000
+2025-09-19 00:17:23.308046+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:23.308056+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:23.308066+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:17:23.308074+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=0
+2025-09-19 00:17:23.308084+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=present
+2025-09-19 00:17:23.308092+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=0 zoomRange=[0,6] currentZoom=2.000000
+2025-09-19 00:17:23.308166+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:23.308178+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:23.308245+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 2 rendered tiles, 10 total tiles
+2025-09-19 00:17:23.308276+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=0 zoomRange=[0,16] currentZoom=2.000000
+2025-09-19 00:17:23.308289+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update calculated 6 ideal tiles at zoom 2/2
+2025-09-19 00:17:23.308312+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]:   First tile: 2/0/1=>2
+2025-09-19 00:17:23.308334+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: TilePyramid::update finished with 6 rendered tiles, 6 total tiles
+2025-09-19 00:17:23.308349+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=1
+2025-09-19 00:17:23.308735+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU Context: beginFrame()
+2025-09-19 00:17:23.308764+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+2025-09-19 00:17:23.308774+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating upload pass: upload
+2025-09-19 00:17:23.309195+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WebGPU: Creating TileLayerGroup: coastline
+2025-09-19 00:17:23.309208+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: RenderLayer::activateLayerGroup called for: coastline activate=1
+2025-09-19 00:17:23.309364+0200 mbgl-glfw[71824:720061] [INFO] {}[Render]: WGSL vertex snippet for ContextShader
+
+// Constants
+const PI: f32 = 3.14159265358979323846;
+const LINE_NORMAL_SCALE: f32 = 1.0 / 63.5;  // 1.0 / (127 / 2)
+const MAX_LINE_DISTANCE: f32 = 32767.0;
+const SDF_PX: f32 = 8.0;
+
+// Helper functio
+Process 71824 launched: '/Users/admin/repos/maplibre-native/build/platform/glfw/mbgl-glfw' (arm64)
+Process 71824 stopped
+* thread #2, queue = 'com.apple.CFNetwork.LoaderQ', stop reason = EXC_BREAKPOINT (code=1, subcode=0x18ffbab1c)
+    frame #0: 0x000000018ffbab1c libsystem_malloc.dylib`_xzm_xzone_malloc_freelist_outlined + 864
+libsystem_malloc.dylib`_xzm_xzone_malloc_freelist_outlined:
+->  0x18ffbab1c <+864>: brk    #0x1
+    0x18ffbab20 <+868>: b.hi   0x18ffbaa50               ; <+660>
+    0x18ffbab24 <+872>: cmp    x8, #0x0
+    0x18ffbab28 <+876>: adrp   x8, 445322
+Target 0: (mbgl-glfw) stopped.
+(lldb) bt
+* thread #2, queue = 'com.apple.CFNetwork.LoaderQ', stop reason = EXC_BREAKPOINT (code=1, subcode=0x18ffbab1c)
+  * frame #0: 0x000000018ffbab1c libsystem_malloc.dylib`_xzm_xzone_malloc_freelist_outlined + 864
+    frame #1: 0x0000000196493c14 CFNetwork`HTTPProtocol::asynchronouslyCreateAndOpenStream_WithMessage_AfterCookiesAndAuthenticatorHeaders(__CFHTTPMessage*) + 1508
+    frame #2: 0x0000000196490adc CFNetwork`HTTPProtocol::asynchronouslyAddAuthenticatorHeadersAndContinue(__CFHTTPMessage*) + 132
+    frame #3: 0x00000001966063a0 CFNetwork`invocation function for block in HTTPProtocol::asynchronouslyAddCookiesAndContinue(__CFHTTPMessage*) + 32
+    frame #4: 0x00000001965012e4 CFNetwork`invocation function for block in QCoreSchedulingSet::performAsync(void () block_pointer) const + 52
+    frame #5: 0x000000018ffd8b5c libdispatch.dylib`_dispatch_call_block_and_release + 32
+    frame #6: 0x000000018fff2ac4 libdispatch.dylib`_dispatch_client_callout + 16
+    frame #7: 0x000000018ffe14e8 libdispatch.dylib`_dispatch_lane_serial_drain + 740
+    frame #8: 0x000000018ffe1ff8 libdispatch.dylib`_dispatch_lane_invoke + 440
+    frame #9: 0x000000018ffe3308 libdispatch.dylib`_dispatch_workloop_invoke + 1612
+    frame #10: 0x000000018ffec474 libdispatch.dylib`_dispatch_root_queue_drain_deferred_wlh + 292
+    frame #11: 0x000000018ffebd6c libdispatch.dylib`_dispatch_workloop_worker_thread + 692
+    frame #12: 0x0000000190190e4c libsystem_pthread.dylib`_pthread_wqthread + 292
+(lldb) quit

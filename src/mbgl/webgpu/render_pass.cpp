@@ -42,10 +42,15 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
 
     if (void* textureViewPtr = backend.getCurrentTextureView()) {
-        impl->colorView = wgpu::TextureView::Acquire(reinterpret_cast<WGPUTextureView>(textureViewPtr));
         mbgl::Log::Info(mbgl::Event::Render,
-                        "WebGPU: Acquired swapchain view = " +
+                        "WebGPU: Attempting to acquire swapchain view = " +
                             std::to_string(reinterpret_cast<uintptr_t>(textureViewPtr)));
+        auto* colorViewHandle = reinterpret_cast<WGPUTextureView>(textureViewPtr);
+        wgpuTextureViewAddRef(colorViewHandle);
+        impl->colorView = wgpu::TextureView::Acquire(colorViewHandle);
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "WebGPU: Acquired swapchain view handle = " +
+                            std::to_string(reinterpret_cast<uintptr_t>(impl->colorView.Get())));
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to acquire swapchain view");
         return;
@@ -89,14 +94,18 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     WGPURenderPassDepthStencilAttachment* depthAttachmentPtr = nullptr;
     if (void* depthStencilViewPtr = backend.getDepthStencilView()) {
-        impl->depthStencilView =
-            wgpu::TextureView::Acquire(reinterpret_cast<WGPUTextureView>(depthStencilViewPtr));
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "WebGPU: Attempting depth stencil view = " +
+                            std::to_string(reinterpret_cast<uintptr_t>(depthStencilViewPtr)));
+        auto* depthViewHandle = reinterpret_cast<WGPUTextureView>(depthStencilViewPtr);
+        wgpuTextureViewAddRef(depthViewHandle);
+        impl->depthStencilView = wgpu::TextureView::Acquire(depthViewHandle);
         if (impl->depthStencilView) {
             depthAttachment.view = impl->depthStencilView.Get();
             depthAttachmentPtr = &depthAttachment;
             mbgl::Log::Info(mbgl::Event::Render,
-                            "WebGPU: Using depth stencil view = " +
-                                std::to_string(reinterpret_cast<uintptr_t>(depthStencilViewPtr)));
+                            "WebGPU: Using depth stencil view handle = " +
+                                std::to_string(reinterpret_cast<uintptr_t>(depthAttachment.view)));
         } else {
             mbgl::Log::Warning(mbgl::Event::Render,
                                 "WebGPU: depth stencil view Acquire returned null");

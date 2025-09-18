@@ -71,7 +71,33 @@
 #include <sstream>
 #include <numbers>
 
+#if defined(__APPLE__)
+#include <objc/objc.h>
+#include <objc/runtime.h>
+#undef YES
+#undef NO
+extern "C" void* objc_autoreleasePoolPush(void);
+extern "C" void objc_autoreleasePoolPop(void* pool);
+#endif
+
 using namespace std::numbers;
+
+#if defined(__APPLE__)
+namespace {
+class AutoreleasePool {
+public:
+    AutoreleasePool()
+        : token(objc_autoreleasePoolPush()) {}
+
+    ~AutoreleasePool() {
+        objc_autoreleasePoolPop(token);
+    }
+
+private:
+    void* token;
+};
+} // namespace
+#endif
 
 #ifdef ENABLE_LOCATION_INDICATOR
 namespace {
@@ -1168,6 +1194,9 @@ void GLFWView::render() {
 
         mbgl::gfx::BackendScope scope{backend->getRendererBackend()};
 
+#if defined(__APPLE__)
+        AutoreleasePool pool;
+#endif
         rendererFrontend->render();
 
         if (freeCameraDemoPhase >= 0.0) {

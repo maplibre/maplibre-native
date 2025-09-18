@@ -399,7 +399,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         }
     };
 
-    const auto drawableDebugOverlays = [&] {
+    [[maybe_unused]] const auto drawableDebugOverlays = [&] {
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
@@ -425,8 +425,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     drawableOpaquePass();
     mbgl::Log::Info(mbgl::Event::Render, "About to call drawableTranslucentPass()");
     drawableTranslucentPass();
+#if !MLN_RENDER_BACKEND_WEBGPU
     mbgl::Log::Info(mbgl::Event::Render, "About to call drawableDebugOverlays()");
     drawableDebugOverlays();
+#else
+    mbgl::Log::Info(mbgl::Event::Render, "Skipping drawableDebugOverlays for WebGPU backend");
+#endif
 
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
