@@ -21,23 +21,23 @@ struct VertexInput {
     @location(5) extrude: vec2<i32>,
     @location(6) placed: vec2<u32>,
     @location(7) shift: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) placed: f32,
     @location(1) not_used: f32,
-};
+}
 
 struct CollisionDrawableUBO {
     matrix: mat4x4<f32>,
-};
+}
 
 struct CollisionTilePropsUBO {
     extrude_scale: vec2<f32>,
     overscale_factor: f32,
     pad1: f32,
-};
+}
 
 @group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
 @group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
@@ -68,7 +68,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) placed: f32,
     @location(1) not_used: f32,
-};
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -105,24 +105,24 @@ struct VertexInput {
     @location(4) anchor_position: vec2<i32>,
     @location(5) extrude: vec2<i32>,
     @location(6) placed: u32,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) placed: f32,
     @location(1) radius: f32,
     @location(2) extrude: vec2<f32>,
-};
+}
 
 struct CollisionDrawableUBO {
     matrix: mat4x4<f32>,
-};
+}
 
 struct CollisionTilePropsUBO {
     extrude_scale: vec2<f32>,
     overscale_factor: f32,
     pad1: f32,
-};
+}
 
 @group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
 @group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
@@ -160,7 +160,7 @@ struct FragmentInput {
     @location(0) placed: f32,
     @location(1) radius: f32,
     @location(2) extrude: vec2<f32>,
-};
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

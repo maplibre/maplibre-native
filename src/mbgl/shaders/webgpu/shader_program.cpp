@@ -112,6 +112,7 @@ ShaderProgram::ShaderProgram(Context& context,
     // Get the prelude from common.hpp
     using PreludeShader = shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::WebGPU>;
     std::string vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
+    mbgl::Log::Info(mbgl::Event::Render, std::string("WGSL vertex snippet for ") + shaderName + "\n" + vertexWithPrelude.substr(0, 200));
     std::string fragmentWithPrelude = std::string(PreludeShader::prelude) + "\n" + fragmentSource;
 
     // Don't log here since shaderName will be updated by the template constructor

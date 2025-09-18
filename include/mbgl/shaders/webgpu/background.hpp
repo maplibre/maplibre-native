@@ -17,15 +17,15 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::WebGPU> {
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
-};
+}
 
 struct BackgroundDrawableUBO {
     matrix: mat4x4<f32>,
-};
+}
 
 struct BackgroundDrawableUnionUBO {
     matrix_col0: vec4<f32>,
@@ -34,7 +34,7 @@ struct BackgroundDrawableUnionUBO {
     matrix_col3: vec4<f32>,
     extra0: vec4<f32>,
     extra1: vec4<f32>,
-};
+}
 
 struct BackgroundPropsUBO {
     color: vec4<f32>,
@@ -42,12 +42,12 @@ struct BackgroundPropsUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundDrawableUnionUBO>;
@@ -79,7 +79,7 @@ struct BackgroundPropsUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 @group(0) @binding(4) var<uniform> props: BackgroundPropsUBO;
 
@@ -100,13 +100,13 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::WebGPU
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) pos_a: vec2<f32>,
     @location(1) pos_b: vec2<f32>,
-};
+}
 
 struct BackgroundPatternDrawableUnionUBO {
     matrix_col0: vec4<f32>,
@@ -115,7 +115,7 @@ struct BackgroundPatternDrawableUnionUBO {
     matrix_col3: vec4<f32>,
     pixel_coords: vec4<f32>,
     params: vec4<f32>,
-};
+}
 
 struct BackgroundPatternPropsUBO {
     pattern_tl_a: vec2<f32>,
@@ -130,12 +130,12 @@ struct BackgroundPatternPropsUBO {
     opacity: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundPatternDrawableUnionUBO>;
@@ -185,7 +185,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) pos_a: vec2<f32>,
     @location(1) pos_b: vec2<f32>,
-};
+}
 
 struct BackgroundPatternPropsUBO {
     pattern_tl_a: vec2<f32>,
@@ -200,12 +200,12 @@ struct BackgroundPatternPropsUBO {
     opacity: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     pattern_atlas_texsize: vec2<f32>,
     // other fields...
-};
+}
 
 @group(0) @binding(4) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;

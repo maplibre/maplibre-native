@@ -43,13 +43,13 @@ struct VertexInput {
     @location(0) position: vec2<i32>,
     @location(1) color: vec4<f32>,
     @location(2) opacity: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
-};
+}
 
 struct FillDrawableUBO {
     matrix: mat4x4<f32>,
@@ -57,17 +57,17 @@ struct FillDrawableUBO {
     opacity_t: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct FillDrawableUnionUBO {
-    fill: FillDrawableUBO;
-    padding: vec4<f32>;
-};
+    fill: FillDrawableUBO,
+    padding: vec4<f32>,
+}
 
 struct GlobalIndexUBO {
-    value: u32;
-    pad0: vec3<u32>;
-};
+    value: u32,
+    pad0: vec3<u32>,
+}
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
@@ -98,7 +98,7 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
 struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
-};
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -144,13 +144,13 @@ struct VertexInput {
     @location(0) position: vec2<i32>,
     @location(1) outline_color: vec4<f32>,
     @location(2) opacity: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
-};
+}
 
 struct FillOutlineDrawableUBO {
     matrix: mat4x4<f32>,
@@ -158,17 +158,17 @@ struct FillOutlineDrawableUBO {
     opacity_t: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct FillOutlineDrawableUnionUBO {
-    fill: FillOutlineDrawableUBO;
-    padding: vec4<f32>;
-};
+    fill: FillOutlineDrawableUBO,
+    padding: vec4<f32>,
+}
 
 struct GlobalIndexUBO {
-    value: u32;
-    pad0: vec3<u32>;
-};
+    value: u32,
+    pad0: vec3<u32>,
+}
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
@@ -199,7 +199,7 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
 struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
-};
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -222,7 +222,7 @@ struct VertexInput {
     @location(5) pattern_from: vec4<u32>,
     @location(6) pattern_to: vec4<u32>,
     @location(7) opacity: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -231,7 +231,7 @@ struct VertexOutput {
     @location(2) pattern_from: vec4<f32>,
     @location(3) pattern_to: vec4<f32>,
     @location(4) opacity: f32,
-};
+}
 
 struct FillPatternDrawableUBO {
     matrix: mat4x4<f32>,
@@ -241,7 +241,7 @@ struct FillPatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     opacity_t: f32,
-};
+}
 
 struct FillPatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -249,7 +249,7 @@ struct FillPatternTilePropsUBO {
     texsize: vec2<f32>,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -258,17 +258,17 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     // other fields...
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
@@ -342,7 +342,7 @@ struct FragmentInput {
     @location(2) pattern_from: vec4<f32>,
     @location(3) pattern_to: vec4<f32>,
     @location(4) opacity: f32,
-};
+}
 
 struct FillPatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -350,7 +350,7 @@ struct FillPatternTilePropsUBO {
     texsize: vec2<f32>,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -359,12 +359,12 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
@@ -410,7 +410,7 @@ struct VertexInput {
     @location(5) pattern_from: vec4<u32>,
     @location(6) pattern_to: vec4<u32>,
     @location(7) opacity: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -420,7 +420,7 @@ struct VertexOutput {
     @location(3) pattern_from: vec4<f32>,
     @location(4) pattern_to: vec4<f32>,
     @location(5) opacity: f32,
-};
+}
 
 struct FillOutlinePatternDrawableUBO {
     matrix: mat4x4<f32>,
@@ -430,7 +430,7 @@ struct FillOutlinePatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     opacity_t: f32,
-};
+}
 
 struct FillOutlinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -438,7 +438,7 @@ struct FillOutlinePatternTilePropsUBO {
     texsize: vec2<f32>,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -447,18 +447,18 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     world_size: vec2<f32>,
     // other fields...
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
@@ -536,7 +536,7 @@ struct FragmentInput {
     @location(3) pattern_from: vec4<f32>,
     @location(4) pattern_to: vec4<f32>,
     @location(5) opacity: f32,
-};
+}
 
 struct FillOutlinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -544,7 +544,7 @@ struct FillOutlinePatternTilePropsUBO {
     texsize: vec2<f32>,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -553,12 +553,12 @@ struct FillEvaluatedPropsUBO {
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
