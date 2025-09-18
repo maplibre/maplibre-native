@@ -58,19 +58,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "install": "prebuild-install --force || echo 'pre-compiled binary not found, please build from source'",
-    "prebuild": "prebuild --all --no-embed-source",
+    "install": "prebuild-install --verbose --tag-prefix node-v|| echo 'pre-compiled binary not found, please build from source'",
+    "package-binaries": "node package-binaries.js",
     "test": "tape test/js/**/*.test.js",
     "test-memory": "node --expose-gc test/memory.test.js",
     "test-expressions": "node -r esm test/expression.test.js",
     "test-render": "node -r esm test/render.test.js",
     "test-query": "node -r esm test/query.test.js"
-  },
-  "prebuild": {
-    "targets": [
-      "18.0.0",
-      "20.0.0",
-      "22.0.0"
-    ]
   }
 }
