@@ -358,6 +358,14 @@ MLN_EXPORT
 @property (nonatomic, assign) CGPoint scaleBarMargins;
 
 /**
+ A Boolean value indicating whether the map may display Compass View.
+
+ The view controlled by this property is available at `compassView`. The default value
+ of this property is `NO`.
+ */
+@property (nonatomic, assign) BOOL showsCompassView;
+
+/**
  A control indicating the map’s direction and allowing the user to manipulate
  the direction, positioned in the upper-right corner.
  */
@@ -375,6 +383,14 @@ MLN_EXPORT
 @property (nonatomic, assign) CGPoint compassViewMargins;
 
 /**
+ A Boolean value indicating whether the map may display MapLibre logo.
+
+ The view controlled by this property is available at `logoView`. The default value
+ of this property is `NO`.
+ */
+@property (nonatomic, assign) BOOL showsLogoView;
+
+/**
  A logo, the MapLibre logo by default, positioned in the lower-left corner.
  You are not required to display this, but some vector-sources may require attribution.
  */
@@ -390,6 +406,14 @@ MLN_EXPORT
  A `CGPoint` indicating the position offset of the logo.
  */
 @property (nonatomic, assign) CGPoint logoViewMargins;
+
+/**
+ A Boolean value indicating whether the map may display Attribution Button.
+
+ The view controlled by this property is available at `attributionButton`. The default value
+ of this property is `NO`.
+ */
+@property (nonatomic, assign) BOOL showsAttributionButton;
 
 /**
  A view showing legally required copyright notices,
