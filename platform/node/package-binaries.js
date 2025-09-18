@@ -60,20 +60,20 @@ async function createTarballs() {
     console.error(`lib directory not found: ${libDir}`);
     process.exit(1);
   }
-  
+
   const abiDirs = fs.readdirSync(libDir)
     .filter(dir => dir.startsWith('node-v') && fs.statSync(path.join(libDir, dir)).isDirectory())
     .filter(dir => fs.existsSync(path.join(libDir, dir, 'mbgl.node')));
-  
+
   if (abiDirs.length === 0) {
     console.error('No ABI directories with mbgl.node found');
     process.exit(1);
   }
-  
+
   console.log(`Found ABI directories: ${abiDirs.join(', ')}`);
-  
+
   const createdTarballs = [];
-  
+
   for (const abiDir of abiDirs) {
     const abi = abiDir.replace('node-v', '');
     const tarballName = `${cleanName}-v${version}-node-v${abi}-${platform}-${arch}.tar.gz`;
@@ -103,13 +103,11 @@ async function createTarballs() {
       process.exit(1);
     }
   }
-  
   console.log(`\nSuccessfully created ${createdTarballs.length} tarballs:`);
   createdTarballs.forEach(tarball => {
     const stats = fs.statSync(tarball);
     console.log(`  ${tarball} (${stats.size} bytes)`);
   });
-  
   return createdTarballs;
 }
 
