@@ -18,17 +18,17 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::WebGPU>
 struct VertexInput {
     @location(4) position: vec3<f32>,
     @location(5) texcoord: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
-};
+}
 
 struct SymbolUBO {
     matrix: mat4x4<f32>,
     opacity: f32,
-};
+}
 
 @group(0) @binding(0) var<uniform> symbol_ubo: SymbolUBO;
 
@@ -44,12 +44,12 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) uv: vec2<f32>,
-};
+}
 
 struct SymbolUBO {
     matrix: mat4x4<f32>,
     opacity: f32,
-};
+}
 
 @group(0) @binding(0) var<uniform> symbol_ubo: SymbolUBO;
 @group(1) @binding(0) var texture_sampler: sampler;

@@ -51,7 +51,7 @@ struct VertexInput {
     @location(9) gapwidth: vec2<f32>,
     @location(10) offset: vec2<f32>,
     @location(11) width: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -61,7 +61,7 @@ struct VertexOutput {
     @location(3) v_color: vec4<f32>,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-};
+}
 
 struct LineDrawableUBO {
     matrix: mat4x4<f32>,
@@ -73,7 +73,7 @@ struct LineDrawableUBO {
     offset_t: f32,
     width_t: f32,
     pad1: f32,
-};
+}
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -85,17 +85,17 @@ struct LineEvaluatedPropsUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     units_to_pixels: vec2<f32>,
     // other fields...
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineDrawableUBO>;
@@ -175,7 +175,7 @@ struct FragmentInput {
     @location(3) v_color: vec4<f32>,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-};
+}
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -207,7 +207,7 @@ struct VertexInput {
     @location(8) gapwidth: vec2<f32>,
     @location(9) offset: vec2<f32>,
     @location(10) width: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -217,7 +217,7 @@ struct VertexOutput {
     @location(3) v_lineprogress: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-};
+}
 
 struct LineGradientDrawableUBO {
     matrix: mat4x4<f32>,
@@ -229,7 +229,7 @@ struct LineGradientDrawableUBO {
     width_t: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -241,17 +241,17 @@ struct LineEvaluatedPropsUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     units_to_pixels: vec2<f32>,
     // other fields...
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineGradientDrawableUBO>;
@@ -323,7 +323,7 @@ struct FragmentInput {
     @location(3) v_lineprogress: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
-};
+}
 
 @group(1) @binding(0) var gradient_sampler: sampler;
 @group(1) @binding(1) var gradient_texture: texture_2d<f32>;
@@ -363,7 +363,7 @@ struct VertexInput {
     @location(10) width: vec2<f32>,
     @location(11) pattern_from: vec4<u32>,
     @location(12) pattern_to: vec4<u32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -375,7 +375,7 @@ struct VertexOutput {
     @location(5) v_opacity: f32,
     @location(6) v_pattern_from: vec4<f32>,
     @location(7) v_pattern_to: vec4<f32>,
-};
+}
 
 struct LinePatternDrawableUBO {
     matrix: mat4x4<f32>,
@@ -387,7 +387,7 @@ struct LinePatternDrawableUBO {
     width_t: f32,
     pattern_from_t: f32,
     pattern_to_t: f32,
-};
+}
 
 struct LinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -396,7 +396,7 @@ struct LinePatternTilePropsUBO {
     texsize: vec2<f32>,
     fade: f32,
     pad2: f32,
-};
+}
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -408,18 +408,18 @@ struct LineEvaluatedPropsUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     units_to_pixels: vec2<f32>,
     pixel_ratio: f32,
     // other fields...
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LinePatternDrawableUBO>;
@@ -500,7 +500,7 @@ struct FragmentInput {
     @location(5) v_opacity: f32,
     @location(6) v_pattern_from: vec4<f32>,
     @location(7) v_pattern_to: vec4<f32>,
-};
+}
 
 struct LinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -509,12 +509,12 @@ struct LinePatternTilePropsUBO {
     texsize: vec2<f32>,
     fade: f32,
     pad2: f32,
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -570,7 +570,7 @@ struct VertexInput {
     @location(10) offset: vec2<f32>,
     @location(11) width: vec2<f32>,
     @location(12) floorwidth: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -583,7 +583,7 @@ struct VertexOutput {
     @location(6) v_blur: f32,
     @location(7) v_opacity: f32,
     @location(8) v_floorwidth: f32,
-};
+}
 
 struct LineSDFDrawableUBO {
     matrix: mat4x4<f32>,
@@ -601,14 +601,14 @@ struct LineSDFDrawableUBO {
     floorwidth_t: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct LineSDFTilePropsUBO {
     sdfgamma: f32,
     mix: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -620,17 +620,17 @@ struct LineEvaluatedPropsUBO {
     floorwidth: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct GlobalPaintParamsUBO {
     units_to_pixels: vec2<f32>,
     // other fields...
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableUBO>;
@@ -723,19 +723,19 @@ struct FragmentInput {
     @location(6) v_blur: f32,
     @location(7) v_opacity: f32,
     @location(8) v_floorwidth: f32,
-};
+}
 
 struct LineSDFTilePropsUBO {
     sdfgamma: f32,
     mix: f32,
     pad1: f32,
     pad2: f32,
-};
+}
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-};
+}
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;

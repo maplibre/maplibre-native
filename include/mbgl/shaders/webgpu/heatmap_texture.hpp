@@ -17,12 +17,12 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::WebGPU> {
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(5) position: vec2<i32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex_coord: vec2<f32>,
-};
+}
 
 struct HeatmapTextureUBO {
     matrix: mat4x4<f32>,
@@ -30,7 +30,7 @@ struct HeatmapTextureUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: HeatmapTextureUBO;
 
@@ -48,7 +48,7 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) tex_coord: vec2<f32>,
-};
+}
 
 struct HeatmapTextureUBO {
     matrix: mat4x4<f32>,
@@ -56,7 +56,7 @@ struct HeatmapTextureUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: HeatmapTextureUBO;
 @group(1) @binding(0) var texture_sampler: sampler;

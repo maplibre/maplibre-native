@@ -20,6 +20,8 @@ public:
     WGPURenderPassEncoder encoder = nullptr;
     WGPUCommandEncoder commandEncoder = nullptr;
     const gfx::UniformBufferArray* globalUniformBuffers = nullptr;
+    wgpu::TextureView colorView;
+    wgpu::TextureView depthStencilView;
 };
 
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor_)
@@ -31,6 +33,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     impl->commandEncoder = commandEncoder_.getEncoder();
 
     if (!impl->commandEncoder) {
+        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Command encoder unavailable");
         return;
     }
 
@@ -38,106 +41,94 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     auto& context = commandEncoder_.getContext();
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
 
-    // Try to get the current texture view from the surface
-    wgpu::TextureView textureView;
-
-    // Get the texture view through the virtual method
-    void* textureViewPtr = backend.getCurrentTextureView();
-    if (textureViewPtr) {
-        textureView = wgpu::TextureView::Acquire(reinterpret_cast<WGPUTextureView>(textureViewPtr));
+    if (void* textureViewPtr = backend.getCurrentTextureView()) {
+        impl->colorView = wgpu::TextureView::Acquire(reinterpret_cast<WGPUTextureView>(textureViewPtr));
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "WebGPU: Acquired swapchain view = " +
+                            std::to_string(reinterpret_cast<uintptr_t>(textureViewPtr)));
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to acquire swapchain view");
+        return;
     }
 
-    // Create a default render pass if we have a texture view
-    if (textureView) {
+    WGPURenderPassColorAttachment colorAttachment = {};
+    colorAttachment.view = impl->colorView.Get();
+    colorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
+    colorAttachment.resolveTarget = nullptr;
+    colorAttachment.storeOp = WGPUStoreOp_Store;
 
-        wgpu::RenderPassColorAttachment colorAttachment = {};
-        colorAttachment.view = wgpu::TextureView(textureView);
+    if (descriptor.clearColor) {
+        const bool isDefaultFramebuffer = &descriptor.renderable == &backend.getDefaultRenderable();
+        const auto& clearColor = descriptor.clearColor.value();
+        const WGPUColor value = isDefaultFramebuffer
+                                     ? WGPUColor{0.0, 0.0, 0.0, 1.0}
+                                     : WGPUColor{static_cast<double>(clearColor.r),
+                                                 static_cast<double>(clearColor.g),
+                                                 static_cast<double>(clearColor.b),
+                                                 static_cast<double>(clearColor.a)};
+        colorAttachment.loadOp = WGPULoadOp_Clear;
+        colorAttachment.clearValue = value;
+        mbgl::Log::Info(mbgl::Event::Render,
+                        isDefaultFramebuffer ? "WebGPU: Clearing default framebuffer to black"
+                                              : "WebGPU: Clearing with clearColor");
+    } else {
+        colorAttachment.loadOp = WGPULoadOp_Load;
+    }
 
-        // Use the descriptor to determine if we should clear
-        // MapLibre sets clearColor for the first pass that needs clearing
-        if (descriptor.clearColor) {
-            colorAttachment.loadOp = wgpu::LoadOp::Clear;
-            colorAttachment.clearValue = {static_cast<float>(descriptor.clearColor->r),
-                                          static_cast<float>(descriptor.clearColor->g),
-                                          static_cast<float>(descriptor.clearColor->b),
-                                          static_cast<float>(descriptor.clearColor->a)};
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Clearing with clearColor");
+    WGPURenderPassDepthStencilAttachment depthAttachment = {};
+    depthAttachment.depthLoadOp = descriptor.clearDepth ? WGPULoadOp_Clear : WGPULoadOp_Load;
+    depthAttachment.depthStoreOp = WGPUStoreOp_Store;
+    depthAttachment.depthClearValue = descriptor.clearDepth ? descriptor.clearDepth.value() : 1.0f;
+    depthAttachment.depthReadOnly = WGPU_FALSE;
+    depthAttachment.stencilLoadOp = descriptor.clearStencil ? WGPULoadOp_Clear : WGPULoadOp_Load;
+    depthAttachment.stencilStoreOp = WGPUStoreOp_Store;
+    depthAttachment.stencilClearValue =
+        descriptor.clearStencil ? static_cast<uint32_t>(descriptor.clearStencil.value()) : 0u;
+    depthAttachment.stencilReadOnly = WGPU_FALSE;
+    depthAttachment.view = nullptr;
 
+    WGPURenderPassDepthStencilAttachment* depthAttachmentPtr = nullptr;
+    if (void* depthStencilViewPtr = backend.getDepthStencilView()) {
+        impl->depthStencilView =
+            wgpu::TextureView::Acquire(reinterpret_cast<WGPUTextureView>(depthStencilViewPtr));
+        if (impl->depthStencilView) {
+            depthAttachment.view = impl->depthStencilView.Get();
+            depthAttachmentPtr = &depthAttachment;
+            mbgl::Log::Info(mbgl::Event::Render,
+                            "WebGPU: Using depth stencil view = " +
+                                std::to_string(reinterpret_cast<uintptr_t>(depthStencilViewPtr)));
         } else {
-            colorAttachment.loadOp = wgpu::LoadOp::Load;
-
-        }
-        colorAttachment.storeOp = wgpu::StoreOp::Store;
-
-        wgpu::RenderPassDescriptor renderPassDesc = {};
-        renderPassDesc.label = name;
-        renderPassDesc.colorAttachmentCount = 1;
-        renderPassDesc.colorAttachments = &colorAttachment;
-
-        // Add depth/stencil attachment
-        wgpu::RenderPassDepthStencilAttachment depthStencilAttachment = {};
-        void* depthStencilViewPtr = backend.getDepthStencilView();
-        mbgl::Log::Info(mbgl::Event::Render, std::string("WebGPU: Depth stencil view: ") +
-                       (depthStencilViewPtr ? "present" : "null"));
-        if (depthStencilViewPtr) {
-            // Don't use Acquire - the backend owns the view
-            wgpu::TextureView depthStencilView(reinterpret_cast<WGPUTextureView>(depthStencilViewPtr));
-
-            depthStencilAttachment.view = depthStencilView;
-
-            // Configure depth operations
-            if (descriptor.clearDepth) {
-                depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Clear;
-                depthStencilAttachment.depthClearValue = descriptor.clearDepth.value();
-                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Clearing depth with value: " +
-                               std::to_string(descriptor.clearDepth.value()));
-            } else {
-                depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
-            }
-            depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
-
-            // Configure stencil operations
-            if (descriptor.clearStencil) {
-                depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Clear;
-                depthStencilAttachment.stencilClearValue = descriptor.clearStencil.value();
-            } else {
-                depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
-            }
-            depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
-
-            renderPassDesc.depthStencilAttachment = &depthStencilAttachment;
-        }
-
-        // Create the render pass encoder
-        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Beginning render pass");
-        wgpu::CommandEncoder wgpuEncoder(impl->commandEncoder);
-        wgpu::RenderPassEncoder passEncoder = wgpuEncoder.BeginRenderPass(&renderPassDesc);
-        impl->encoder = passEncoder.MoveToCHandle();
-
-        if (impl->encoder) {
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Render pass created successfully");
-
-
-            // Set viewport to full framebuffer
-            // Get the framebuffer size from the backend
-            auto size = backend.getFramebufferSize();
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Setting viewport size");
-            wgpuRenderPassEncoderSetViewport(impl->encoder,
-                                             0,
-                                             0, // x, y
-                                             static_cast<float>(size.width),
-                                             static_cast<float>(size.height), // width, height
-                                             0.0f,
-                                             1.0f); // minDepth, maxDepth
-
-            // Also set scissor rect to full viewport
-            wgpuRenderPassEncoderSetScissorRect(impl->encoder,
-                                                0,
-                                                0, // x, y
-                                                size.width,
-                                                size.height); // width, height
+            mbgl::Log::Warning(mbgl::Event::Render,
+                                "WebGPU: depth stencil view Acquire returned null");
         }
     } else {
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: No depth stencil view provided by backend");
+    }
+
+    WGPURenderPassDescriptor renderPassDesc = {};
+    const WGPUStringView passLabel{name, name ? strlen(name) : 0};
+    renderPassDesc.label = passLabel;
+    renderPassDesc.colorAttachmentCount = 1;
+    renderPassDesc.colorAttachments = &colorAttachment;
+    renderPassDesc.depthStencilAttachment = depthAttachmentPtr;
+
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Beginning render pass");
+    impl->encoder = wgpuCommandEncoderBeginRenderPass(impl->commandEncoder, &renderPassDesc);
+
+    if (impl->encoder) {
+        auto size = backend.getFramebufferSize();
+        wgpuRenderPassEncoderSetViewport(impl->encoder,
+                                         0.0f,
+                                         0.0f,
+                                         static_cast<float>(size.width),
+                                         static_cast<float>(size.height),
+                                         0.0f,
+                                         1.0f);
+        wgpuRenderPassEncoderSetScissorRect(impl->encoder, 0, 0, size.width, size.height);
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to begin render pass");
+        impl->colorView = nullptr;
+        impl->depthStencilView = nullptr;
     }
 }
 

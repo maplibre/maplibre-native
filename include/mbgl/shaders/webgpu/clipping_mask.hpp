@@ -16,11 +16,11 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::WebGPU> {
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(2) position: vec2<i32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
-};
+}
 
 struct PushConstants {
     matrix: mat4x4<f32>,

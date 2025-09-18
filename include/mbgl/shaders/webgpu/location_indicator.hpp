@@ -17,16 +17,16 @@ struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::WebGPU
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(5) position: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
-};
+}
 
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
 
@@ -42,7 +42,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
 
@@ -64,17 +64,17 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
 struct VertexInput {
     @location(5) position: vec2<f32>,
     @location(6) uv: vec2<f32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
-};
+}
 
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
 
@@ -91,7 +91,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
 @group(0) @binding(1) var colorTexture: texture_2d<f32>;

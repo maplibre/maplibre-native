@@ -1,0 +1,281 @@
+MapLibre Native WebGPU Demo
+============================
+
+Building WebGPU implementation...
+✓ Build successful
+
+Starting attempt ...
+./run_webgpu.sh: line 36: [: -gt: unary operator expected
+[INFO] {mbgl-glfw}[Render]: GLFW window visible: 1
+[INFO] {mbgl-glfw}[Render]: Initializing Dawn WebGPU backend...
+[INFO] {mbgl-glfw}[Render]: Dawn instance created successfully
+Warning: maxDynamicUniformBuffersPerPipelineLayout artificially reduced from 32 to 16 to fit dynamic offset allocation limit.
+Warning: maxDynamicStorageBuffersPerPipelineLayout artificially reduced from 32 to 16 to fit dynamic offset allocation limit.
+Warning: maxDynamicUniformBuffersPerPipelineLayout artificially reduced from 500000 to 16 to fit dynamic offset allocation limit.
+Warning: maxDynamicStorageBuffersPerPipelineLayout artificially reduced from 500000 to 16 to fit dynamic offset allocation limit.
+[INFO] {mbgl-glfw}[Render]: Found 3 Dawn adapters
+[INFO] {mbgl-glfw}[Render]: Using Dawn WebGPU implementation with native backend
+[INFO] {mbgl-glfw}[Render]: Selected Dawn adapter for WebGPU rendering
+[INFO] {mbgl-glfw}[Render]: Creating Dawn WebGPU device...
+[INFO] {mbgl-glfw}[Render]: Dawn WebGPU device created successfully
+[INFO] {mbgl-glfw}[Render]: Window size: 1024x768
+[INFO] {mbgl-glfw}[Render]: Creating surface for WebGPU...
+[INFO] {mbgl-glfw}[Render]: Using X11 surface (may be through XWayland)
+[INFO] {mbgl-glfw}[Render]: Dawn WebGPU X11 surface created
+[INFO] {mbgl-glfw}[Render]: Dawn WebGPU surface configured successfully
+
+================================================================================
+
+- Press `S` to cycle through bundled styles
+- Press `X` to reset the transform
+- Press `N` to reset north
+- Press `R` to enable the route demo
+- Press `E` to insert an example building extrusion layer
+- Press `O` to toggle online connectivity
+- Press `Z` to cycle through north orientations
+- Press `X` to cycle through the viewport modes
+- Press `I` to delete existing database and re-initialize
+- Press `A` to cycle through Mapbox offices in the world + dateline monument
+- Press `B` to cycle through the color, stencil, and depth buffer
+- Press `D` to cycle through camera bounds: inside, crossing IDL at left, crossing IDL at right, and disabled
+- Press `T` to add custom geometry source
+- Press `F` to enable feature-state demo
+- Press `U` to toggle pitch bounds
+- Press `H` to take a snapshot of a current map.
+- Press `J` to take a snapshot of a current map with an extrusions overlay.
+- Press `Y` to start a camera fly-by demo
+
+- Press `1` through `6` to add increasing numbers of point annotations for testing
+- Press `7` through `0` to add increasing numbers of shape annotations for testing
+
+- Press `Q` to query annotations
+- Press `C` to remove annotations
+- Press `K` to add a random custom runtime imagery annotation
+- Press `L` to add a random line annotation
+- Press `W` to pop the last-added annotation off
+- Press `V` to toggle custom drawable layer
+- Press `B` to toggle rendering stats
+- Press `P` to pause tile requests
+
+- Hold `Control` + mouse drag to rotate
+- Hold `Shift` + mouse drag to tilt
+
+- Press `F1` to generate a render test for the current view
+
+- Press `Tab` to cycle through the map debug options
+- Press `F6` to cycle through Tile LOD modes
+- Press `F7` to lower the zoom level without changing the camera
+- Press `F8` to higher the zoom level without changing the camera
+- Press `Esc` to quit
+
+================================================================================
+
+[INFO] {mbgl-glfw}[Render]: TransformParameters: projMatrix[15]=-546.227610 projMatrix[11]=-0.000155 size=1024x768 scale=4.000000
+[INFO] {mbgl-glfw}[Render]: WebGPU Context: beginFrame()
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'BackgroundShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'BackgroundPatternShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'CircleShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'ClippingMaskProgram'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'CollisionBoxShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'CollisionCircleShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'CustomGeometryShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'CustomSymbolIconShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'DebugShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillOutlineShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillPatternShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillOutlinePatternShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillOutlineTriangulatedShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillExtrusionShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'FillExtrusionPatternShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'HeatmapShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'HeatmapTextureShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'HillshadeShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'HillshadePrepareShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'LineShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'LineGradientShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'LinePatternShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'LineSDFShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'LocationIndicatorShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'LocationIndicatorTexturedShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'RasterShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'SymbolIconShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'SymbolSDFShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'SymbolTextAndIconShader'
+[INFO] {mbgl-glfw}[Shader]: WebGPU: Registered shader group for 'WideVectorShader'
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating vertex buffer resource, size=16
+[INFO] {mbgl-glfw}[Render]:   Vertex buffer created successfully
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: About to call drawableTargetsPass()
+[INFO] {mbgl-glfw}[Render]: About to call commonClearPass()
+[INFO] {mbgl-glfw}[Render]: Getting surface texture #1
+[INFO] {mbgl-glfw}[Render]: WebGPU: Acquired swapchain view = 1081642112
+[INFO] {mbgl-glfw}[Render]: WebGPU: Clearing default framebuffer to black
+[INFO] {mbgl-glfw}[Render]: WebGPU: Using depth stencil view = 1081842960
+[INFO] {mbgl-glfw}[Render]: WebGPU: Beginning render pass
+[INFO] {mbgl-glfw}[Render]: About to call bindGlobalUniformBuffers()
+[INFO] {mbgl-glfw}[Render]: WebGPU Context::bindGlobalUniformBuffers called
+[INFO] {mbgl-glfw}[Render]: About to call drawableOpaquePass()
+[INFO] {mbgl-glfw}[Render]: Starting drawableOpaquePass with 0 layer groups
+[INFO] {mbgl-glfw}[Render]: Finished drawableOpaquePass
+[INFO] {mbgl-glfw}[Render]: About to call drawableTranslucentPass()
+[INFO] {mbgl-glfw}[Render]: Starting drawableTranslucentPass with 0 layer groups
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: Finished drawableTranslucentPass
+[INFO] {mbgl-glfw}[Render]: About to call drawableDebugOverlays()
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: WebGPU Context::unbindGlobalUniformBuffers called
+[INFO] {mbgl-glfw}[Render]: WebGPU: Ending render pass (destructor called)
+[INFO] {mbgl-glfw}[Render]: WebGPU: Render pass ended successfully
+[INFO] {mbgl-glfw}[Render]: WebGPU: Command buffer submitted to queue
+[INFO] {mbgl-glfw}[Render]: Debug triangle draw submitted
+[INFO] {mbgl-glfw}[Render]: WebGPU Context: endFrame()
+[INFO] {mbgl-glfw}[Render]: TransformParameters: projMatrix[15]=-546.227610 projMatrix[11]=-0.000155 size=1024x768 scale=4.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=1 zoomRange=[0,18] currentZoom=2.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
+[INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 0 rendered tiles, 16 total tiles
+[INFO] {mbgl-glfw}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=null cachedTileset=null
+[INFO] {mbgl-glfw}[Render]: RenderTileSetSource::update returning early - no cachedTileset
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=1 zoomRange=[0,16] currentZoom=2.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
+[INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 0 rendered tiles, 16 total tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for crimea-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: WebGPU Context: beginFrame()
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer::update called for crimea-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: About to call drawableTargetsPass()
+[INFO] {mbgl-glfw}[Render]: About to call commonClearPass()
+[INFO] {mbgl-glfw}[Render]: Getting surface texture #2
+[INFO] {mbgl-glfw}[Render]: WebGPU: Acquired swapchain view = 1082848944
+[INFO] {mbgl-glfw}[Render]: WebGPU: Clearing default framebuffer to black
+[INFO] {mbgl-glfw}[Render]: WebGPU: Using depth stencil view = 1081842960
+[INFO] {mbgl-glfw}[Render]: WebGPU: Beginning render pass
+[INFO] {mbgl-glfw}[Render]: About to call bindGlobalUniformBuffers()
+[INFO] {mbgl-glfw}[Render]: WebGPU Context::bindGlobalUniformBuffers called
+[INFO] {mbgl-glfw}[Render]: About to call drawableOpaquePass()
+[INFO] {mbgl-glfw}[Render]: Starting drawableOpaquePass with 0 layer groups
+[INFO] {mbgl-glfw}[Render]: Finished drawableOpaquePass
+[INFO] {mbgl-glfw}[Render]: About to call drawableTranslucentPass()
+[INFO] {mbgl-glfw}[Render]: Starting drawableTranslucentPass with 0 layer groups
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: Finished drawableTranslucentPass
+[INFO] {mbgl-glfw}[Render]: About to call drawableDebugOverlays()
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: WebGPU Context::unbindGlobalUniformBuffers called
+[INFO] {mbgl-glfw}[Render]: WebGPU: Ending render pass (destructor called)
+[INFO] {mbgl-glfw}[Render]: WebGPU: Render pass ended successfully
+[INFO] {mbgl-glfw}[Render]: WebGPU: Command buffer submitted to queue
+[INFO] {mbgl-glfw}[Render]: Debug triangle draw submitted
+[INFO] {mbgl-glfw}[Render]: WebGPU Context: endFrame()
+[INFO] {mbgl-glfw}[Render]: TransformParameters: projMatrix[15]=-546.227610 projMatrix[11]=-0.000155 size=1024x768 scale=4.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update called for crimea needsRendering=1 needsRelayout=0 zoomRange=[0,18] currentZoom=2.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
+[INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 16 rendered tiles, 16 total tiles
+[INFO] {mbgl-glfw}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=present cachedTileset=null
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update called for maplibre needsRendering=1 needsRelayout=0 zoomRange=[0,6] currentZoom=2.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
+[INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 0 rendered tiles, 18 total tiles
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=0 zoomRange=[0,16] currentZoom=2.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
+[INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 16 rendered tiles, 16 total tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for crimea-fill with 16 tiles
+[INFO] {mbgl-glfw}[Render]: WebGPU Context: beginFrame()
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer::update called for crimea-fill with 16 tiles
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating TileLayerGroup: crimea-fill
+[INFO] {mbgl-glfw}[Render]: RenderLayer::activateLayerGroup called for: crimea-fill activate=1
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer: Added FillLayerTweaker to crimea-fill
+[INFO] {mbgl-glfw}[Render]: Creating new drawables for tile 2/2/1=>2
+[INFO] {mbgl-glfw}[Render]: Successfully created vertex shader module for ContextShader
+[INFO] {mbgl-glfw}[Render]: Successfully created fragment shader module for ContextShader
+[INFO] {mbgl-glfw}[Render]: Successfully created vertex shader module for ContextShader
+[INFO] {mbgl-glfw}[Render]: Successfully created fragment shader module for ContextShader
+[INFO] {mbgl-glfw}[Render]: DrawableBuilder::flush called for crimea-fill/fill, curVertexCount=40, impl->rawVerticesCount=40, currentDrawable=null
+[INFO] {mbgl-glfw}[Render]:   Entering vertex processing block
+[INFO] {mbgl-glfw}[Render]:   Getting drawable
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating drawable: crimea-fill/fill
+[INFO] {mbgl-glfw}[Render]:   About to call init()
+[INFO] {mbgl-glfw}[Render]: WebGPU DrawableBuilder::init() called
+[INFO] {mbgl-glfw}[Render]: DrawableBuilder::init for crimea-fill/fill rawVerticesCount=40 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+[INFO] {mbgl-glfw}[Render]:   Setting index data: 111 indices, 1 segments
+[INFO] {mbgl-glfw}[Render]: WebGPU DrawableBuilder::init() completed for crimea-fill/fill
+[INFO] {mbgl-glfw}[Render]:   Returned from init()
+[INFO] {mbgl-glfw}[Render]:   Moving drawable to drawables vector
+[INFO] {mbgl-glfw}[Render]: Got 1 drawables from builder
+[INFO] {mbgl-glfw}[Render]:   Adding drawable to layer group for tile 2/2/1=>2
+[INFO] {mbgl-glfw}[Render]:   Total drawables added: 1
+[INFO] {mbgl-glfw}[Render]: DrawableBuilder::flush called for crimea-fill/fill-outline, curVertexCount=40, impl->rawVerticesCount=40, currentDrawable=null
+[INFO] {mbgl-glfw}[Render]:   Entering vertex processing block
+[INFO] {mbgl-glfw}[Render]:   Getting drawable
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating drawable: crimea-fill/fill-outline
+[INFO] {mbgl-glfw}[Render]:   About to call init()
+[INFO] {mbgl-glfw}[Render]: WebGPU DrawableBuilder::init() called
+[INFO] {mbgl-glfw}[Render]: DrawableBuilder::init for crimea-fill/fill-outline rawVerticesCount=40 rawVertices.size=0 segments.size=1 sharedIndexes=yes vertexAttrs=present
+[INFO] {mbgl-glfw}[Render]:   Setting index data: 80 indices, 1 segments
+[INFO] {mbgl-glfw}[Render]: WebGPU DrawableBuilder::init() completed for crimea-fill/fill-outline
+[INFO] {mbgl-glfw}[Render]:   Returned from init()
+[INFO] {mbgl-glfw}[Render]:   Moving drawable to drawables vector
+[INFO] {mbgl-glfw}[Render]: Got 1 drawables from builder
+[INFO] {mbgl-glfw}[Render]:   Adding drawable to layer group for tile 2/2/1=>2
+[INFO] {mbgl-glfw}[Render]:   Total drawables added: 2
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating TileLayerGroup: org.maplibre.annotations.points
+[INFO] {mbgl-glfw}[Render]: RenderLayer::activateLayerGroup called for: org.maplibre.annotations.points activate=1
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::addLayerGroup called for: crimea-fill at index 7
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::addLayerGroup called for: org.maplibre.annotations.points at index 8
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+[INFO] {mbgl-glfw}[Render]: Visiting layer group: crimea-fill
+[INFO] {mbgl-glfw}[Render]: LayerGroupBase::runTweakers called for crimea-fill with 1 tweakers
+[INFO] {mbgl-glfw}[Render]: FillLayerTweaker::execute called for crimea-fill with 2 drawables
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating new uniform buffer, size: 48
+[INFO] {mbgl-glfw}[Render]: getTileMatrix: After matrixFor, matrix[15]=1.000000
+[INFO] {mbgl-glfw}[Render]: getTileMatrix: After projection multiply, matrix[15]=300.081632
+[INFO] {mbgl-glfw}[Render]: getTileMatrix: After matrixFor, matrix[15]=1.000000
+[INFO] {mbgl-glfw}[Render]: getTileMatrix: After projection multiply, matrix[15]=300.081632
+[INFO] {mbgl-glfw}[Render]: Visiting layer group: org.maplibre.annotations.points
+[INFO] {mbgl-glfw}[Render]: LayerGroupBase::runTweakers called for org.maplibre.annotations.points with 1 tweakers
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 2
+[INFO] {mbgl-glfw}[Render]: Visiting layer group: crimea-fill
+[INFO] {mbgl-glfw}[Render]: WebGPU buildAttributeBindings called with vertexCount=40 vertexData.size=0
+terminate called after throwing an instance of 'std::bad_alloc'
+[INFO]   what():  std::bad_alloc
+{mbgl-glfw}[Render]:   Override attribute -1 has shared data: yes stride=0
+[INFO] {mbgl-glfw}[Render]:   Total override attributes: 1
+[INFO] ./run_webgpu.sh: line 31: 1158272 Aborted                 (core dumped) ./build/platform/glfw/mbgl-glfw --zoom 2
+  Attempt  failed
+
+Failed to start after 5 attempts.
+This is a known issue with Dawn/Metal initialization.
+
+Troubleshooting:
+1. Wait a few seconds and try again
+2. Check Activity Monitor for stuck mbgl-glfw processes
+3. Restart your terminal
+4. If persistent, reboot your Mac to reset Metal state
