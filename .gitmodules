@@ -103,3 +103,6 @@
 [submodule "vendor/kdbush.hpp"]
 	path = vendor/kdbush.hpp
 	url = https://github.com/mourner/kdbush.hpp.git
+[submodule "vendor/dawn"]
+	path = vendor/dawn
+	url = https://github.com/google/dawn.git
