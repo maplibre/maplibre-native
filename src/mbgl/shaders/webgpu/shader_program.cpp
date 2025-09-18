@@ -602,6 +602,11 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
         depthStencilState.stencilBack = depthStencilState.stencilFront;
         depthStencilState.stencilReadMask = 0xFF;
         depthStencilState.stencilWriteMask = 0xFF;
+
+        if (shaderName == "ClippingMaskProgram") {
+            depthStencilState.stencilFront.passOp = WGPUStencilOperation_Replace;
+            depthStencilState.stencilBack = depthStencilState.stencilFront;
+        }
     }
 
     // Create render pipeline

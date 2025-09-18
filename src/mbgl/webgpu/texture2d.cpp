@@ -28,7 +28,11 @@ Texture2D::~Texture2D() {
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::SamplerState& samplerState_) noexcept {
-    samplerState = samplerState_;
+    gfx::Texture2D::SamplerState safeState = samplerState_;
+    if (safeState.maxAnisotropy < 1) {
+        safeState.maxAnisotropy = 1;
+    }
+    samplerState = safeState;
     
     // Release old sampler if it exists
     if (sampler) {
@@ -64,7 +68,7 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
     samplerDesc.addressModeU = mapWrapMode(samplerState.wrapU);
     samplerDesc.addressModeV = mapWrapMode(samplerState.wrapV);
     samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
-    samplerDesc.maxAnisotropy = std::max<uint16_t>(1, static_cast<uint16_t>(samplerState.maxAnisotropy));
+    samplerDesc.maxAnisotropy = static_cast<uint16_t>(samplerState.maxAnisotropy);
     
     // Create the sampler
     auto& backend = static_cast<RendererBackend&>(context.getBackend());

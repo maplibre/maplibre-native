@@ -1,4 +1,7 @@
 #include <mbgl/webgpu/context.hpp>
+
+#include <webgpu/webgpu.h>
+
 #include <mbgl/webgpu/vertex_buffer_resource.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/gfx/color_mode.hpp>
@@ -13,13 +16,16 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/webgpu/tile_layer_group.hpp>
 #include <mbgl/webgpu/layer_group.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/util/hash.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <mbgl/shaders/attributes.hpp>
 #include <mbgl/shaders/webgpu/clipping_mask.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
@@ -191,17 +197,9 @@ BufferResource Context::createBuffer(const void* data,
 // Get reusable tile vertex buffer (aligned with Metal)
 const BufferResource& Context::getTileVertexBuffer() {
     if (!tileVertexBuffer) {
-        // Create standard tile vertices (-EXTENT to +EXTENT)
-        const float extent = util::EXTENT;
-        const std::array<float, 8> vertices = {
-            -extent, -extent,
-             extent, -extent,
-            -extent,  extent,
-             extent,  extent
-        };
-
-        uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
-        tileVertexBuffer = createBuffer(vertices.data(), vertices.size() * sizeof(float), usage, false, true);
+        const auto vertices = RenderStaticData::tileVertices();
+        const uint32_t usage = WGPUBufferUsage_Vertex;
+        tileVertexBuffer = createBuffer(vertices.data(), vertices.bytes(), usage, false, true);
     }
     return *tileVertexBuffer;
 }
@@ -209,16 +207,190 @@ const BufferResource& Context::getTileVertexBuffer() {
 // Get reusable tile index buffer (aligned with Metal)
 const BufferResource& Context::getTileIndexBuffer() {
     if (!tileIndexBuffer) {
-        // Create standard tile indices
-        const std::array<uint16_t, 6> indices = {
-            0, 1, 2,
-            1, 3, 2
-        };
-
-        uint32_t usage = WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst;
-        tileIndexBuffer = createBuffer(indices.data(), indices.size() * sizeof(uint16_t), usage, true, true);
+        const auto indices = RenderStaticData::quadTriangleIndices();
+        const uint32_t usage = WGPUBufferUsage_Index;
+        tileIndexBuffer = createBuffer(indices.data(), indices.bytes(), usage, true, true);
     }
     return *tileIndexBuffer;
+}
+
+bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<shaders::ClipUBO>& tileUBOs) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::WebGPU>;
+
+    if (tileUBOs.empty()) {
+        return false;
+    }
+
+    if (!clipMaskShader) {
+        if (auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
+            clipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+        }
+    }
+    if (!clipMaskShader) {
+        Log::Error(Event::Render, "WebGPU: Failed to acquire clipping mask shader");
+        return false;
+    }
+
+    auto& shader = static_cast<webgpu::ShaderProgram&>(*clipMaskShader);
+    auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(renderPass);
+    const auto encoder = webgpuRenderPass.getEncoder();
+    if (!encoder) {
+        Log::Error(Event::Render, "WebGPU: render pass encoder unavailable for clipping masks");
+        return false;
+    }
+
+    const auto& renderable = webgpuRenderPass.getDescriptor().renderable;
+    if (clipMaskRenderable != &renderable) {
+        clipMaskPipelineHash.reset();
+        clipMaskRenderable = &renderable;
+    }
+
+    const auto& vertexResource = getTileVertexBuffer();
+    const auto& indexResource = getTileIndexBuffer();
+    if (!vertexResource.getBuffer() || !indexResource.getBuffer()) {
+        Log::Error(Event::Render, "WebGPU: Missing tile geometry buffers for clipping masks");
+        return false;
+    }
+
+    const gfx::ColorMode colorMode = gfx::ColorMode::disabled();
+
+    WGPUVertexAttribute vertexAttribute{};
+    vertexAttribute.format = WGPUVertexFormat_Sint16x2;
+    vertexAttribute.offset = 0;
+    vertexAttribute.shaderLocation = static_cast<uint32_t>(ShaderClass::attributes[0].index);
+
+    WGPUVertexBufferLayout vertexLayout{};
+    vertexLayout.arrayStride = sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>);
+    vertexLayout.attributeCount = 1;
+    vertexLayout.attributes = &vertexAttribute;
+    vertexLayout.stepMode = WGPUVertexStepMode_Vertex;
+
+    if (!clipMaskPipelineHash) {
+        clipMaskPipelineHash = util::hash(colorMode.hash(),
+                                          vertexLayout.arrayStride,
+                                          static_cast<uint32_t>(vertexAttribute.format),
+                                          vertexAttribute.shaderLocation);
+    }
+
+    const auto pipeline = shader.getRenderPipeline(renderable,
+                                                   &vertexLayout,
+                                                   1,
+                                                   colorMode,
+                                                   clipMaskPipelineHash);
+    if (!pipeline) {
+        Log::Error(Event::Render, "WebGPU: Failed to create clipping mask pipeline");
+        return false;
+    }
+
+    wgpuRenderPassEncoderSetPipeline(encoder, pipeline);
+
+    wgpuRenderPassEncoderSetVertexBuffer(encoder,
+                                         /*slot=*/0,
+                                         vertexResource.getBuffer(),
+                                         /*offset=*/0,
+                                         vertexResource.getSizeInBytes());
+    wgpuRenderPassEncoderSetIndexBuffer(encoder,
+                                        indexResource.getBuffer(),
+                                        WGPUIndexFormat_Uint16,
+                                        /*offset=*/0,
+                                        indexResource.getSizeInBytes());
+
+    const uint64_t uboSize = sizeof(shaders::ClipUBO);
+
+    clipMaskUniformBuffers.clear();
+    clipMaskUniformBuffers.reserve(tileUBOs.size());
+    for (const auto& ubo : tileUBOs) {
+        auto buffer = createBuffer(&ubo, uboSize, WGPUBufferUsage_Uniform, false, false);
+        if (!buffer.getBuffer()) {
+            Log::Error(Event::Render, "WebGPU: Failed to allocate uniform buffer for clipping mask tile");
+            return false;
+        }
+        clipMaskUniformBuffers.emplace_back(std::move(buffer));
+    }
+
+    auto& rendererBackend = static_cast<RendererBackend&>(getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(rendererBackend.getDevice());
+    if (!device) {
+        Log::Error(Event::Render, "WebGPU: Device unavailable for clipping masks");
+        return false;
+    }
+
+    const auto& bindGroupOrder = shader.getBindGroupOrder();
+    if (bindGroupOrder.empty()) {
+        Log::Error(Event::Render, "WebGPU: No bind group layouts available for clipping mask shader");
+        return false;
+    }
+    const uint32_t bindGroupIndex = bindGroupOrder.front();
+    const auto layout = shader.getBindGroupLayout(bindGroupIndex);
+    if (!layout) {
+        Log::Error(Event::Render, "WebGPU: Bind group layout missing for clipping mask shader");
+        return false;
+    }
+
+    const auto& bindingInfos = shader.getBindingInfosForGroup(bindGroupIndex);
+    uint32_t uniformBinding = 0;
+    bool bindingFound = false;
+    for (const auto& info : bindingInfos) {
+        if (info.type == webgpu::ShaderProgram::BindingType::UniformBuffer) {
+            uniformBinding = info.binding;
+            bindingFound = true;
+            break;
+        }
+    }
+    if (!bindingFound) {
+        Log::Error(Event::Render, "WebGPU: Uniform binding not found for clipping mask shader");
+        return false;
+    }
+
+    clipMaskActiveBindGroups.clear();
+    clipMaskActiveBindGroups.reserve(tileUBOs.size());
+
+    for (std::size_t i = 0; i < tileUBOs.size(); ++i) {
+        WGPUBindGroupEntry entry{};
+        entry.binding = uniformBinding;
+        const auto& uboBuffer = clipMaskUniformBuffers[i];
+        entry.buffer = uboBuffer.getBuffer();
+        entry.offset = 0;
+        entry.size = uboSize;
+
+        WGPUBindGroupDescriptor descriptor{};
+        descriptor.layout = layout;
+        descriptor.entryCount = 1;
+        descriptor.entries = &entry;
+
+        const auto bindGroup = wgpuDeviceCreateBindGroup(device, &descriptor);
+        if (!bindGroup) {
+            Log::Error(Event::Render, "WebGPU: Failed to create bind group for clipping mask draw");
+            continue;
+        }
+
+        clipMaskActiveBindGroups.push_back(bindGroup);
+
+        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, bindGroup, 0, nullptr);
+        wgpuRenderPassEncoderSetStencilReference(encoder, tileUBOs[i].stencil_ref);
+
+        wgpuRenderPassEncoderDrawIndexed(encoder,
+                                         /*indexCount=*/6,
+                                         /*instanceCount=*/1,
+                                         /*firstIndex=*/0,
+                                         /*baseVertex=*/0,
+                                         /*firstInstance=*/0);
+    }
+
+    for (auto bindGroup : clipMaskActiveBindGroups) {
+        if (bindGroup) {
+            wgpuBindGroupRelease(bindGroup);
+        }
+    }
+    clipMaskActiveBindGroups.clear();
+
+    auto& stats = renderingStats();
+    stats.numDrawCalls += tileUBOs.size();
+    stats.totalDrawCalls += tileUBOs.size();
+
+    return true;
 }
 
 gfx::AttributeBindingArray Context::getOrCreateVertexBindings(

@@ -74,19 +74,30 @@ if(MLN_WITH_WEBGPU)
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
     )
+    if(APPLE)
+        set_source_files_properties(
+            ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
+            PROPERTIES LANGUAGE OBJCXX
+        )
+    endif()
     # Add Dawn include directories for GLFW
     target_include_directories(mbgl-glfw SYSTEM PRIVATE
         ${PROJECT_SOURCE_DIR}/vendor/dawn/include
         ${PROJECT_SOURCE_DIR}/vendor/dawn/build/gen/include
     )
     # Link Dawn libraries
+    set(DAWN_LIB_DIR ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn)
     target_link_libraries(mbgl-glfw PRIVATE
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/native/libwebgpu_dawn.a
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/libdawn_proc.a
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/platform/libdawn_platform.a
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/common/libdawn_common.a
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/glfw/libdawn_glfw.a
+        ${DAWN_LIB_DIR}/native/libwebgpu_dawn.a
+        ${DAWN_LIB_DIR}/libdawn_proc.a
+        ${DAWN_LIB_DIR}/platform/libdawn_platform.a
+        ${DAWN_LIB_DIR}/common/libdawn_common.a
     )
+
+    set(DAWN_GLFW_LIB ${DAWN_LIB_DIR}/glfw/libdawn_glfw.a)
+    if(EXISTS ${DAWN_GLFW_LIB})
+        target_link_libraries(mbgl-glfw PRIVATE ${DAWN_GLFW_LIB})
+    endif()
 endif()
 
 target_include_directories(

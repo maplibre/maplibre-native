@@ -92,19 +92,12 @@ void CommandEncoder::submitCommandBuffer() {
 
 
 
-void CommandEncoder::pushDebugGroup(const char* name) {
-    if (encoder) {
-        WGPUStringView label = {name, name ? strlen(name) : 0};
-        wgpuCommandEncoderPushDebugGroup(encoder, label);
-    } else {
-    }
+void CommandEncoder::pushDebugGroup(const char*) {
+    // Debug markers are currently handled at the render pass level.
 }
 
 void CommandEncoder::popDebugGroup() {
-    if (encoder) {
-        wgpuCommandEncoderPopDebugGroup(encoder);
-    } else {
-    }
+    // Debug markers are currently handled at the render pass level.
 }
 
 void CommandEncoder::trackUploadPass(UploadPass* uploadPass) {
