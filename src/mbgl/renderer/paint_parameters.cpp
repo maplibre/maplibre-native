@@ -15,6 +15,11 @@
 #include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
 #endif
 
+#if MLN_RENDER_BACKEND_WEBGPU
+#include <mbgl/webgpu/context.hpp>
+#include <mbgl/shaders/webgpu/clipping_mask.hpp>
+#endif
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
@@ -189,7 +194,40 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         clearStencil();
     }
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_WEBGPU
+    std::vector<shaders::ClipUBO> tileUBOs;
+    for (const auto& tileRef : *renderTiles) {
+        const auto& tileID = tileRef.get().id;
+
+        const int32_t stencilID = nextStencilID;
+        const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
+        if (result.second) {
+            nextStencilID++;
+        } else {
+            continue;
+        }
+
+        if (tileUBOs.empty()) {
+            tileUBOs.reserve(count);
+        }
+
+        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile(tileID)),
+                                               /* .stencil_ref = */ static_cast<uint32_t>(stencilID),
+                                               /* .pad1 = */ 0,
+                                               /* .pad2 = */ 0,
+                                               /* .pad3 = */ 0});
+    }
+
+    if (!tileUBOs.empty()) {
+#if !defined(NDEBUG)
+        const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
+#endif
+
+        auto& webgpuContext = static_cast<webgpu::Context&>(context);
+        webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        webgpuContext.renderingStats().stencilUpdates++;
+    }
+#elif MLN_RENDER_BACKEND_METAL
     // Assign a stencil ID and build a UBO for each tile in the set
     std::vector<shaders::ClipUBO> tileUBOs;
     for (const auto& tileRef : *renderTiles) {

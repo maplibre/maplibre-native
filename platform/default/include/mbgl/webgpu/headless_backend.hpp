@@ -32,7 +32,6 @@ private:
     class Impl;
     std::unique_ptr<Impl> impl;
     bool active = false;
-    SwapBehaviour swapBehaviour = SwapBehaviour::NoFlush;
 };
 
 } // namespace webgpu
