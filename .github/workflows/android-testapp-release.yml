@@ -13,7 +13,6 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Create Release
         run: |
@@ -48,7 +47,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 

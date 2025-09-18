@@ -30,7 +30,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -62,7 +61,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -229,7 +227,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -288,7 +285,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 

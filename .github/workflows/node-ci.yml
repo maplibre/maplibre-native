@@ -102,7 +102,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'

@@ -42,7 +42,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -78,7 +77,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Cache Bazel
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4

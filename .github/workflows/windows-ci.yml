@@ -41,7 +41,6 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Get all Windows files that have changed
         if: github.event_name != 'workflow_dispatch'
