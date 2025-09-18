@@ -33,6 +33,19 @@
 namespace mbgl {
 namespace webgpu {
 
+namespace {
+const auto clipMaskStencilMode = gfx::StencilMode{
+    /*.test=*/gfx::StencilMode::Always(),
+    /*.ref=*/0,
+    /*.mask=*/0xFF,
+    /*.fail=*/gfx::StencilOpType::Keep,
+    /*.depthFail=*/gfx::StencilOpType::Keep,
+    /*.pass=*/gfx::StencilOpType::Replace,
+};
+const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
+                                              .mask = gfx::DepthMaskType::ReadOnly};
+} // namespace
+
 Context::Context(RendererBackend& backend_)
     : gfx::Context(gfx::Context::minimumRequiredVertexBindingCount),
       backend(backend_),
@@ -278,6 +291,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                                    &vertexLayout,
                                                    1,
                                                    colorMode,
+                                                   clipMaskDepthMode,
+                                                   clipMaskStencilMode,
                                                    clipMaskPipelineHash);
     if (!pipeline) {
         Log::Error(Event::Render, "WebGPU: Failed to create clipping mask pipeline");

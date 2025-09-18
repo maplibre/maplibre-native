@@ -57,102 +57,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         parameters.renderTileClippingMasks(stencilTiles);
     }
 
-    // Get shader for this layer group if needed
-    gfx::ShaderProgramBasePtr layerShader = nullptr;
-    if (getDrawableCount() > 0) {
-        // Determine shader type based on layer name
-        // This is a temporary solution - ideally shaders should be set when drawables are created
-        std::string shaderGroupName;
-
-        // Determine shader group name based on layer name
-        const std::string& layerName = getName();
-        if (layerName.find("fill") != std::string::npos || layerName.find("Fill") != std::string::npos) {
-            if (layerName.find("outline") != std::string::npos || layerName.find("Outline") != std::string::npos) {
-                if (layerName.find("pattern") != std::string::npos || layerName.find("Pattern") != std::string::npos) {
-                    shaderGroupName = "FillOutlinePatternShader";
-                } else if (layerName.find("triangulated") != std::string::npos) {
-                    shaderGroupName = "FillOutlineTriangulatedShader";
-                } else {
-                    shaderGroupName = "FillOutlineShader";
-                }
-            } else if (layerName.find("pattern") != std::string::npos || layerName.find("Pattern") != std::string::npos) {
-                shaderGroupName = "FillPatternShader";
-            } else if (layerName.find("extrusion") != std::string::npos || layerName.find("Extrusion") != std::string::npos) {
-                if (layerName.find("pattern") != std::string::npos || layerName.find("Pattern") != std::string::npos) {
-                    shaderGroupName = "FillExtrusionPatternShader";
-                } else {
-                    shaderGroupName = "FillExtrusionShader";
-                }
-            } else {
-                shaderGroupName = "FillShader";
-            }
-        } else if (layerName.find("line") != std::string::npos || layerName.find("Line") != std::string::npos) {
-            if (layerName.find("gradient") != std::string::npos || layerName.find("Gradient") != std::string::npos) {
-                shaderGroupName = "LineGradientShader";
-            } else if (layerName.find("pattern") != std::string::npos || layerName.find("Pattern") != std::string::npos) {
-                shaderGroupName = "LinePatternShader";
-            } else if (layerName.find("sdf") != std::string::npos || layerName.find("SDF") != std::string::npos) {
-                shaderGroupName = "LineSDFShader";
-            } else {
-                shaderGroupName = "LineShader";
-            }
-        } else if (layerName.find("circle") != std::string::npos || layerName.find("Circle") != std::string::npos) {
-            shaderGroupName = "CircleShader";
-        } else if (layerName.find("symbol") != std::string::npos || layerName.find("Symbol") != std::string::npos) {
-            if (layerName.find("icon") != std::string::npos || layerName.find("Icon") != std::string::npos) {
-                if (layerName.find("text") != std::string::npos || layerName.find("Text") != std::string::npos) {
-                    shaderGroupName = "SymbolTextAndIconShader";
-                } else {
-                    shaderGroupName = "SymbolIconShader";
-                }
-            } else if (layerName.find("sdf") != std::string::npos || layerName.find("SDF") != std::string::npos) {
-                shaderGroupName = "SymbolSDFShader";
-            } else {
-                shaderGroupName = "SymbolSDFShader"; // Default for symbols
-            }
-        } else if (layerName.find("background") != std::string::npos || layerName.find("Background") != std::string::npos) {
-            if (layerName.find("pattern") != std::string::npos || layerName.find("Pattern") != std::string::npos) {
-                shaderGroupName = "BackgroundPatternShader";
-            } else {
-                shaderGroupName = "BackgroundShader";
-            }
-        }
-
-        // Get the shader group from the registry
-        if (!shaderGroupName.empty()) {
-            auto shaderGroup = parameters.shaders.getShaderGroup(shaderGroupName);
-            if (shaderGroup) {
-                // Now get or create the shader from the group
-                // The ShaderGroup's getOrCreateShader is likely a virtual method
-                // For now, we'll use getShader() which gets the default shader from the group
-                StringIDSetsPair propertiesAsUniforms;  // Empty for now
-                auto groupPtr = shaderGroup.get();
-                if (groupPtr) {
-                    // Call the virtual getOrCreateShader method
-                    auto shader = groupPtr->getOrCreateShader(
-                        parameters.context,
-                        propertiesAsUniforms,
-                        ""  // No first attribute name override
-                    );
-                    // Cast from ShaderPtr to ShaderProgramBasePtr
-                    // This assumes that the shader returned is actually a ShaderProgramBase
-                    if (shader) {
-                        layerShader = std::static_pointer_cast<gfx::ShaderProgramBase>(shader);
-                    }
-                    if (layerShader) {
-                        mbgl::Log::Info(mbgl::Event::Render, "Got shader from group " + shaderGroupName +
-                                       " for layer group " + getName());
-                    } else {
-                        mbgl::Log::Warning(mbgl::Event::Render, "Failed to get shader from group " + shaderGroupName +
-                                         " for layer group " + getName());
-                    }
-                }
-            } else {
-                mbgl::Log::Warning(mbgl::Event::Render, "No shader group found: " + shaderGroupName);
-            }
-        }
-    }
-
+    // Rely on drawables to provide their shaders; no layer-level override needed.
     bool bindUBOs = false;
     int visitCount = 0;
     int drawCount = 0;
@@ -167,9 +72,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
         drawCount++;
 
-        // Assign shader to drawable if it doesn't have one
-        if (!drawable.getShader() && layerShader) {
-            drawable.setShader(layerShader);
+        if (!drawable.getShader()) {
+            mbgl::Log::Warning(mbgl::Event::Render,
+                               "Drawable " + drawable.getName() + " in " + getName() +
+                                   " missing shader; skipping");
+            return;
         }
 
         if (!bindUBOs) {

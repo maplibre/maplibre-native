@@ -8,12 +8,16 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/gfx/stencil_mode.hpp>
 
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
 #include <fstream>
 #include <map>
+#include <type_traits>
+#include <mbgl/util/variant.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -82,6 +86,73 @@ WGPUBlendFactor webgpuBlendFactor(const gfx::ColorBlendFactorType& factor) {
             return WGPUBlendFactor_OneMinusConstant;
         default:
             return WGPUBlendFactor_One;
+    }
+}
+
+WGPUCompareFunction toCompareFunction(const gfx::DepthFunctionType func) {
+    switch (func) {
+        case gfx::DepthFunctionType::Never:
+            return WGPUCompareFunction_Never;
+        case gfx::DepthFunctionType::Less:
+            return WGPUCompareFunction_Less;
+        case gfx::DepthFunctionType::Equal:
+            return WGPUCompareFunction_Equal;
+        case gfx::DepthFunctionType::LessEqual:
+            return WGPUCompareFunction_LessEqual;
+        case gfx::DepthFunctionType::Greater:
+            return WGPUCompareFunction_Greater;
+        case gfx::DepthFunctionType::NotEqual:
+            return WGPUCompareFunction_NotEqual;
+        case gfx::DepthFunctionType::GreaterEqual:
+            return WGPUCompareFunction_GreaterEqual;
+        case gfx::DepthFunctionType::Always:
+        default:
+            return WGPUCompareFunction_Always;
+    }
+}
+
+WGPUCompareFunction toCompareFunction(const gfx::StencilFunctionType func) {
+    switch (func) {
+        case gfx::StencilFunctionType::Never:
+            return WGPUCompareFunction_Never;
+        case gfx::StencilFunctionType::Less:
+            return WGPUCompareFunction_Less;
+        case gfx::StencilFunctionType::Equal:
+            return WGPUCompareFunction_Equal;
+        case gfx::StencilFunctionType::LessEqual:
+            return WGPUCompareFunction_LessEqual;
+        case gfx::StencilFunctionType::Greater:
+            return WGPUCompareFunction_Greater;
+        case gfx::StencilFunctionType::NotEqual:
+            return WGPUCompareFunction_NotEqual;
+        case gfx::StencilFunctionType::GreaterEqual:
+            return WGPUCompareFunction_GreaterEqual;
+        case gfx::StencilFunctionType::Always:
+        default:
+            return WGPUCompareFunction_Always;
+    }
+}
+
+WGPUStencilOperation toStencilOp(const gfx::StencilOpType op) {
+    switch (op) {
+        case gfx::StencilOpType::Zero:
+            return WGPUStencilOperation_Zero;
+        case gfx::StencilOpType::Keep:
+            return WGPUStencilOperation_Keep;
+        case gfx::StencilOpType::Replace:
+            return WGPUStencilOperation_Replace;
+        case gfx::StencilOpType::Increment:
+            return WGPUStencilOperation_IncrementClamp;
+        case gfx::StencilOpType::Decrement:
+            return WGPUStencilOperation_DecrementClamp;
+        case gfx::StencilOpType::Invert:
+            return WGPUStencilOperation_Invert;
+        case gfx::StencilOpType::IncrementWrap:
+            return WGPUStencilOperation_IncrementWrap;
+        case gfx::StencilOpType::DecrementWrap:
+            return WGPUStencilOperation_DecrementWrap;
+        default:
+            return WGPUStencilOperation_Keep;
     }
 }
 } // namespace
@@ -198,7 +269,10 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
                                                    const WGPUVertexBufferLayout* vertexLayouts,
                                                    uint32_t vertexLayoutCount,
                                                    const gfx::ColorMode& colorMode,
+                                                   const gfx::DepthMode& depthMode,
+                                                   const gfx::StencilMode& stencilMode,
                                                    const std::optional<std::size_t> reuseHash) {
+    (void)renderable;
     // Check cache first
     if (reuseHash.has_value()) {
         auto it = renderPipelineCache.find(reuseHash.value());
@@ -208,7 +282,7 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
     }
 
     // Create new pipeline
-    WGPURenderPipeline pipeline = createPipeline(vertexLayouts, vertexLayoutCount, colorMode);
+    WGPURenderPipeline pipeline = createPipeline(vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode);
 
     // Cache the pipeline if we have a reuse hash
     if (reuseHash.has_value() && pipeline) {
@@ -520,7 +594,9 @@ void ShaderProgram::rebuildBindGroupLayouts() {
 
 WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
                                                 uint32_t vertexLayoutCount,
-                                                const gfx::ColorMode& colorMode) {
+                                                const gfx::ColorMode& colorMode,
+                                                const gfx::DepthMode& depthMode,
+                                                const gfx::StencilMode& stencilMode) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!device || !vertexShaderModule || !fragmentShaderModule || !pipelineLayout) {
@@ -593,18 +669,60 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     const auto depthFormat = backend.getDepthStencilFormat();
     if (depthFormat != wgpu::TextureFormat::Undefined) {
         depthStencilState.format = static_cast<WGPUTextureFormat>(depthFormat);
-        depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
-        depthStencilState.depthCompare = WGPUCompareFunction_Always;
+        depthStencilState.depthWriteEnabled =
+            depthMode.mask == gfx::DepthMaskType::ReadWrite ? WGPUOptionalBool_True : WGPUOptionalBool_False;
+        depthStencilState.depthCompare = toCompareFunction(depthMode.func);
+
         depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
         depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
         depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
         depthStencilState.stencilFront.passOp = WGPUStencilOperation_Keep;
         depthStencilState.stencilBack = depthStencilState.stencilFront;
-        depthStencilState.stencilReadMask = 0xFF;
-        depthStencilState.stencilWriteMask = 0xFF;
+        depthStencilState.stencilReadMask = 0;
+        depthStencilState.stencilWriteMask = 0;
+
+        bool stencilEnabled = true;
+        if (stencilMode.test.is<gfx::StencilMode::Always>() && stencilMode.mask == 0 &&
+            stencilMode.fail == gfx::StencilOpType::Keep && stencilMode.depthFail == gfx::StencilOpType::Keep &&
+            stencilMode.pass == gfx::StencilOpType::Keep) {
+            stencilEnabled = false;
+        }
+
+        if (stencilEnabled) {
+            gfx::StencilFunctionType function = gfx::StencilFunctionType::Always;
+            uint32_t readMask = 0xFF;
+            mapbox::util::apply_visitor(
+                [&](const auto& test) {
+                    using TestType = std::decay_t<decltype(test)>;
+                    function = TestType::func;
+                    if constexpr (requires { test.mask; }) {
+                        readMask = test.mask;
+                    } else {
+                        readMask = 0xFF;
+                    }
+                },
+                stencilMode.test);
+
+            depthStencilState.stencilFront.compare = toCompareFunction(function);
+            depthStencilState.stencilBack = depthStencilState.stencilFront;
+            depthStencilState.stencilFront.failOp = toStencilOp(stencilMode.fail);
+            depthStencilState.stencilFront.depthFailOp = toStencilOp(stencilMode.depthFail);
+            depthStencilState.stencilFront.passOp = toStencilOp(stencilMode.pass);
+            depthStencilState.stencilBack = depthStencilState.stencilFront;
+            depthStencilState.stencilReadMask = readMask;
+            depthStencilState.stencilWriteMask = stencilMode.mask;
+        }
 
         if (shaderName == "ClippingMaskProgram") {
             depthStencilState.stencilFront.passOp = WGPUStencilOperation_Replace;
+            depthStencilState.stencilBack = depthStencilState.stencilFront;
+            if (depthStencilState.stencilWriteMask == 0) {
+                depthStencilState.stencilWriteMask = 0xFF;
+            }
+            if (depthStencilState.stencilReadMask == 0) {
+                depthStencilState.stencilReadMask = 0xFF;
+            }
+            depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
             depthStencilState.stencilBack = depthStencilState.stencilFront;
         }
     }

@@ -51,6 +51,8 @@ public:
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;
     std::size_t vertexAttrId = 0;
+    std::size_t stencilModeHash = 0;
+    bool stencilModeHashValid = false;
 
     // Pipeline state (WebGPU equivalent of Metal's pipelineState)
     WGPURenderPipeline pipelineState = nullptr;
