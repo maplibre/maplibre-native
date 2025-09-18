@@ -534,6 +534,15 @@ MLN_EXPORT
 
 // MARK: Displaying the User’s Location
 
+
+/**
+ A Boolean value indicating whether the map need create a default location manager.
+
+ Disable a creation of a default location manager. The default value
+ of this property is `NO`.
+ */
+@property (nonatomic, assign) BOOL disableDefaultLocationManager;
+
 /**
  The object that this map view uses to start and stop the delivery of
  location-related updates.

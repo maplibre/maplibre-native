@@ -6007,9 +6007,29 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: - User Location -
 
+- (void)setDisableDefaultLocationManager:(BOOL)disableDefaultLocationManager
+{
+    _disableDefaultLocationManager = disableDefaultLocationManager;
+    if (disableDefaultLocationManager)
+    {
+        self.locationManager = nil;
+    }
+}
+
 - (void)setLocationManager:(nullable id<MLNLocationManager>)locationManager
 {
     MLNLogDebug(@"Setting locationManager: %@", locationManager);
+    if (_disableDefaultLocationManager && !locationManager)
+    {
+        if (_locationManager)
+        {
+            [_locationManager stopUpdatingLocation];
+            [_locationManager stopUpdatingHeading];
+            _locationManager = nil;
+        }
+        return;
+    }
+
     if (!locationManager) {
         locationManager = [[MLNCLLocationManager alloc] init];
     }
