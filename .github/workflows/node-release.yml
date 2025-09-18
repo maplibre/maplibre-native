@@ -34,7 +34,7 @@ jobs:
         run: |
           packageName="$( node -e "console.log(require('./package.json').name)" )"
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
-          isPublished="$( npm view $packageName versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
+          isPublished="$( npm view "$packageName" versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
           isPrerelease="$( node -e "console.log(require('semver').prerelease('$currentVersion') ? 'true' : 'false')" )"
           echo "published=$isPublished" >> "$GITHUB_OUTPUT"
           echo "current-version=$currentVersion" >> "$GITHUB_OUTPUT"
@@ -254,7 +254,7 @@ jobs:
         run: npm run package-binaries
 
       - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # 2.3.3
         with:
           tag_name: node-v${{ needs.release-check.outputs.current-version }}
           name: node-v${{ needs.release-check.outputs.current-version }}
@@ -292,14 +292,12 @@ jobs:
         run: |
           # Extract changelog and ensure file exists
           awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## ${{ needs.release-check.outputs.current-version }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
-          
           # Check if changelog was extracted successfully
           if [[ ! -s changelog_for_version.md ]]; then
             echo "No changelog found for version ${{ needs.release-check.outputs.current-version }}"
             echo "## Changes" > changelog_for_version.md
             echo "Release notes will be added later." >> changelog_for_version.md
           fi
-          
           echo "Changelog content:"
           cat changelog_for_version.md
 
