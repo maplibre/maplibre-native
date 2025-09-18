@@ -12,7 +12,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Pin actions
+      - name: Check if all actions versions are immutable SHAs
         uses: suzuki-shunsuke/pinact-action@d735505f3decf76fca3fdbb4c952e5b3eba0ffdd # v0.1.2
         with:
           skip_push: "true"
