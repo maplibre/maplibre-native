@@ -303,12 +303,6 @@ jobs:
           echo "Changelog content:"
           cat changelog_for_version.md
 
-      - name: Debug release status before update
-        run: |
-          gh release view "node-v${{ needs.release-check.outputs.current-version }}" --json isDraft,tagName,name
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Update Release Notes
         id: update_release_notes
         uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
@@ -321,12 +315,6 @@ jobs:
           allowUpdates: true
           draft: true
           prerelease: ${{ steps.prepare_release.outputs.prerelease }}
-
-      - name: Debug release status after update
-        run: |
-          gh release view "node-v${{ needs.release-check.outputs.current-version }}" --json isDraft,tagName,name
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to NPM (release)
         if: ${{ needs.release-check.outputs.prerelease == 'false' }}
