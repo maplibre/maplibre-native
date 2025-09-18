@@ -255,9 +255,9 @@ jobs:
         run: |
           cmake --build build
 
-      - name: Prebuild for debug and testing
+      - name: Create prebuilt binary tarballs
         working-directory: platform/node
-        run: npm run prebuild -- --verbose --debug --strip
+        run: npm run package-binaries
 
       - name: Run render tests on macOS
         id: render_tests
