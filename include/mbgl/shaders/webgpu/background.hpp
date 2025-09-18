@@ -134,7 +134,13 @@ fn main(in: VertexInput) -> VertexOutput {
         pos
     );
 
-    out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let invW = 1.0 / clip.w;
+    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
+    out.position = vec4<f32>(clip.x * invW,
+                             -clip.y * invW,
+                             ndcZ,
+                             1.0);
     return out;
 }
 )";
