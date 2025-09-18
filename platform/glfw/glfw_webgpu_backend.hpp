@@ -49,11 +49,6 @@ protected:
 
     // WebGPU-specific methods
 public:
-    mbgl::webgpu::Context& getContext() { return static_cast<mbgl::webgpu::Context&>(*(this->context)); }
-    WGPUDevice getWGPUDevice() { return wgpuDevice.Get(); }
-    WGPUSurface getWGPUSurface() { return wgpuSurface.Get(); }
-    wgpu::TextureFormat getSwapChainFormat() const { return swapChainFormat; }
-    
     // Override virtual methods from RendererBackend
     void* getCurrentTextureView() override;
     void* getDepthStencilView() override;
@@ -74,9 +69,6 @@ private:
     wgpu::Texture currentTexture;  // Keep the texture alive as well
 
     // Depth/stencil texture and view
-    wgpu::Texture depthStencilTexture;
-    wgpu::TextureView depthStencilView;
-    
     // Frame synchronization
     std::atomic<bool> frameInProgress{false};
     std::condition_variable frameCV;
