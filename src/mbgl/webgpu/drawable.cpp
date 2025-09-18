@@ -50,6 +50,24 @@ struct alignas(16) GlobalUBOIndexData {
     uint32_t pad[3] = {0, 0, 0};
 };
 
+std::size_t hashStencilMode(const gfx::StencilMode& mode) {
+    std::size_t hash = util::hash(static_cast<int>(mode.ref),
+                                  static_cast<uint32_t>(mode.mask),
+                                  static_cast<int>(mode.fail),
+                                  static_cast<int>(mode.depthFail),
+                                  static_cast<int>(mode.pass));
+    mapbox::util::apply_visitor(
+        [&](const auto& test) {
+            using TestType = std::decay_t<decltype(test)>;
+            hash = util::hash(hash, static_cast<int>(TestType::func));
+            if constexpr (requires { test.mask; }) {
+                hash = util::hash(hash, static_cast<uint32_t>(test.mask));
+            }
+        },
+        mode.test);
+    return hash;
+}
+
 WGPUVertexFormat wgpuVertexFormatOf(gfx::AttributeDataType type) {
     switch (type) {
         case gfx::AttributeDataType::Byte:
@@ -582,6 +600,35 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
+    const auto tileID = getTileID();
+
+    gfx::DepthMode depthMode = gfx::DepthMode::disabled();
+    gfx::StencilMode stencilMode = gfx::StencilMode::disabled();
+
+    if (is3D) {
+        depthMode = impl->depthMode;
+        stencilMode = impl->stencilMode;
+    } else {
+        if (getEnableDepth()) {
+            depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        }
+        if (getEnableStencil() && tileID) {
+            stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+        }
+    }
+
+    const std::size_t newStencilHash = hashStencilMode(stencilMode);
+    if (!impl->stencilModeHashValid || impl->stencilModeHash != newStencilHash ||
+        impl->depthMode.func != depthMode.func || impl->depthMode.mask != depthMode.mask) {
+        impl->pipelineState = nullptr;
+        impl->stencilModeHashValid = true;
+    }
+
+    impl->depthMode = depthMode;
+    impl->stencilMode = stencilMode;
+    impl->stencilModeHash = newStencilHash;
+    impl->previousStencilMode = stencilMode;
+
     // Get pipeline from shader if we don't have it yet (like Metal)
     auto& shaderWebGPU = static_cast<mbgl::webgpu::ShaderProgram&>(*shader);
 
@@ -638,6 +685,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
             vertexLayouts.size(),
             colorMode,
+            depthMode,
+            stencilMode,
             std::nullopt);
         if (!impl->pipelineState) {
             Log::Error(Event::Render, "getRenderPipeline returned null");
@@ -657,6 +706,9 @@ void Drawable::draw(PaintParameters& parameters) const {
                 ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
         }
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
+        if (getEnableStencil()) {
+            wgpuRenderPassEncoderSetStencilReference(renderPassEncoder, static_cast<uint32_t>(stencilMode.ref));
+        }
     } else {
         Log::Error(Event::Render, "Failed to create render pipeline state");
         assert(!"Failed to create render pipeline state");

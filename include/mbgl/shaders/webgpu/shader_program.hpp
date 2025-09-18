@@ -4,6 +4,8 @@
 #include <mbgl/webgpu/backend_impl.hpp>
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/gfx/stencil_mode.hpp>
 #include <string>
 #include <unordered_map>
 #include <array>
@@ -118,6 +120,8 @@ public:
                                         const WGPUVertexBufferLayout* vertexLayouts,
                                         uint32_t vertexLayoutCount,
                                         const gfx::ColorMode& colorMode,
+                                        const gfx::DepthMode& depthMode,
+                                        const gfx::StencilMode& stencilMode,
                                         const std::optional<std::size_t> reuseHash = std::nullopt);
 
     const std::vector<BindingInfo>& getBindingInfos() const { return bindingInfos; }
@@ -142,7 +146,9 @@ protected:
     void createPipelineLayout(const std::string& vertexSource, const std::string& fragmentSource);
     WGPURenderPipeline createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
                                      uint32_t vertexLayoutCount,
-                                     const gfx::ColorMode& colorMode);
+                                     const gfx::ColorMode& colorMode,
+                                     const gfx::DepthMode& depthMode,
+                                     const gfx::StencilMode& stencilMode);
 
     void analyzeShaderBindings(const std::string& source, WGPUShaderStage stage);
     void rebuildBindGroupLayouts();
