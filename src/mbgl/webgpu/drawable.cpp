@@ -689,21 +689,35 @@ void Drawable::draw(PaintParameters& parameters) const {
             if (vertexBufferRes) {
                 const auto& buffer = vertexBufferRes->getBuffer();
                 if (buffer.getBuffer()) {
+                    const uint64_t byteOffset = static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
+                    const uint64_t bufferSize = buffer.getSizeInBytes();
+                    if (byteOffset >= bufferSize) {
+                        Log::Warning(Event::Render,
+                                     "Skipping vertex buffer slot " + std::to_string(bufferSlot) +
+                                         " for attribute " + std::to_string(i) +
+                                         " due to offset " + std::to_string(byteOffset) +
+                                         " >= size " + std::to_string(bufferSize));
+                        continue;
+                    }
+
                     if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
                         Log::Info(Event::Render, "  Binding vertex buffer slot " + std::to_string(bufferSlot) +
                                  " for attribute " + std::to_string(i) +
-                                 " size=" + std::to_string(buffer.getSizeInBytes()) +
-                                 " offset=" + std::to_string(binding->attribute.offset) +
+                                 " size=" + std::to_string(bufferSize) +
+                                 " attributeOffset=" + std::to_string(binding->attribute.offset) +
+                                 " vertexOffset=" + std::to_string(binding->vertexOffset) +
+                                 " byteOffset=" + std::to_string(byteOffset) +
                                  " stride=" + std::to_string(binding->vertexStride) +
                                  " dataType=" + std::to_string(static_cast<int>(binding->attribute.dataType)) +
                                  " bufferPtr=" + std::to_string(reinterpret_cast<uintptr_t>(buffer.getBuffer())));
                     }
+
                     wgpuRenderPassEncoderSetVertexBuffer(
                         renderPassEncoder,
-                        bufferSlot,  // Use sequential buffer slot
+                        bufferSlot,
                         buffer.getBuffer(),
-                        binding->attribute.offset,
-                        buffer.getSizeInBytes());
+                        byteOffset,
+                        bufferSize - byteOffset);
                     bufferSlot++;
                     boundBufferCount++;
                 }
