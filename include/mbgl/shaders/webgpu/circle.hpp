@@ -25,7 +25,7 @@ struct VertexInput {
     @location(5) stroke_color: vec4<f32>,
     @location(6) stroke_width: vec2<f32>,
     @location(7) stroke_opacity: vec2<f32>,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -38,7 +38,7 @@ struct VertexOutput {
     @location(6) stroke_color: vec4<f32>,
     @location(7) stroke_width: f32,
     @location(8) stroke_opacity: f32,
-}
+};
 
 struct CircleDrawableUBO {
     matrix: mat4x4<f32>,
@@ -53,7 +53,7 @@ struct CircleDrawableUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
-}
+};
 
 struct CircleEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -66,7 +66,7 @@ struct CircleEvaluatedPropsUBO {
     scale_with_map: u32,
     pitch_with_map: u32,
     pad1: f32,
-}
+};
 
 @group(0) @binding(2) var<uniform> drawable: CircleDrawableUBO;
 @group(0) @binding(5) var<uniform> props: CircleEvaluatedPropsUBO;
@@ -117,7 +117,7 @@ struct FragmentInput {
     @location(6) stroke_color: vec4<f32>,
     @location(7) stroke_width: f32,
     @location(8) stroke_opacity: f32,
-}
+};
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

@@ -18,17 +18,17 @@ struct ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(3) position: vec3<f32>,
     @location(4) texcoord: vec2<f32>,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
-}
+};
 
 struct CustomDrawableUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
-}
+};
 
 @group(0) @binding(0) var<uniform> drawable: CustomDrawableUBO;
 
@@ -44,12 +44,12 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) uv: vec2<f32>,
-}
+};
 
 struct CustomDrawableUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
-}
+};
 
 @group(0) @binding(0) var<uniform> drawable: CustomDrawableUBO;
 @group(1) @binding(0) var texture_sampler: sampler;

@@ -20,13 +20,13 @@ struct VertexInput {
     @location(0) position: vec2<i32>,
     @location(1) weight: vec2<f32>,
     @location(2) radius: vec2<f32>,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) weight: f32,
     @location(1) extrude: vec2<f32>,
-}
+};
 
 struct HeatmapDrawableUBO {
     matrix: mat4x4<f32>,
@@ -34,14 +34,14 @@ struct HeatmapDrawableUBO {
     weight_t: f32,
     radius_t: f32,
     pad1: f32,
-}
+};
 
 struct HeatmapEvaluatedPropsUBO {
     weight: f32,
     radius: f32,
     intensity: f32,
     padding: f32,
-}
+};
 
 @group(0) @binding(0) var<uniform> drawable: HeatmapDrawableUBO;
 @group(0) @binding(1) var<uniform> props: HeatmapEvaluatedPropsUBO;
@@ -80,7 +80,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) weight: f32,
     @location(1) extrude: vec2<f32>,
-}
+};
 
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 const GAUSS_COEF: f32 = 0.3989422804014327;

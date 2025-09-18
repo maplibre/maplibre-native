@@ -22,12 +22,12 @@ struct VertexInput {
     @location(5) color: vec4<f32>,
     @location(6) base: f32,
     @location(7) height: f32,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
-}
+};
 
 struct FillExtrusionDrawableUBO {
     matrix: mat4x4<f32>,
@@ -41,7 +41,7 @@ struct FillExtrusionDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
-}
+};
 
 struct FillExtrusionPropsUBO {
     color: vec4<f32>,
@@ -55,12 +55,12 @@ struct FillExtrusionPropsUBO {
     from_scale: f32,
     to_scale: f32,
     pad2: f32,
-}
+};
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-}
+};
 
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
@@ -106,7 +106,7 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) color: vec4<f32>,
-}
+};
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -130,7 +130,7 @@ struct VertexInput {
     @location(6) height: f32,
     @location(7) pattern_from: vec4<u32>,
     @location(8) pattern_to: vec4<u32>,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -139,7 +139,7 @@ struct VertexOutput {
     @location(2) pos_b: vec2<f32>,
     @location(3) pattern_from: vec4<f32>,
     @location(4) pattern_to: vec4<f32>,
-}
+};
 
 struct FillExtrusionPatternDrawableUBO {
     matrix: mat4x4<f32>,
@@ -153,7 +153,7 @@ struct FillExtrusionPatternDrawableUBO {
     pattern_to_t: f32,
     pad1: f32,
     pad2: f32,
-}
+};
 
 struct FillExtrusionPatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -161,7 +161,7 @@ struct FillExtrusionPatternTilePropsUBO {
     texsize: vec2<f32>,
     pad1: f32,
     pad2: f32,
-}
+};
 
 struct FillExtrusionPropsUBO {
     color: vec4<f32>,
@@ -175,17 +175,17 @@ struct FillExtrusionPropsUBO {
     from_scale: f32,
     to_scale: f32,
     pad2: f32,
-}
+};
 
 struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     // other fields...
-}
+};
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-}
+};
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionPatternDrawableUBO>;
@@ -294,7 +294,7 @@ struct FragmentInput {
     @location(2) pos_b: vec2<f32>,
     @location(3) pattern_from: vec4<f32>,
     @location(4) pattern_to: vec4<f32>,
-}
+};
 
 struct FillExtrusionPatternTilePropsUBO {
     pattern_from: vec4<f32>,
@@ -302,7 +302,7 @@ struct FillExtrusionPatternTilePropsUBO {
     texsize: vec2<f32>,
     pad1: f32,
     pad2: f32,
-}
+};
 
 struct FillExtrusionPropsUBO {
     color: vec4<f32>,
@@ -316,12 +316,12 @@ struct FillExtrusionPropsUBO {
     from_scale: f32,
     to_scale: f32,
     pad2: f32,
-}
+};
 
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
-}
+};
 
 @group(0) @binding(4) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;

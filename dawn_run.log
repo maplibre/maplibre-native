@@ -106,9 +106,9 @@ Warning: maxDynamicStorageBuffersPerPipelineLayout artificially reduced from 500
 [INFO] {mbgl-glfw}[Render]: About to call drawableTargetsPass()
 [INFO] {mbgl-glfw}[Render]: About to call commonClearPass()
 [INFO] {mbgl-glfw}[Render]: Getting surface texture #1
-[INFO] {mbgl-glfw}[Render]: WebGPU: Acquired swapchain view = 715738304
+[INFO] {mbgl-glfw}[Render]: WebGPU: Acquired swapchain view = 718927952
 [INFO] {mbgl-glfw}[Render]: WebGPU: Clearing default framebuffer to black
-[INFO] {mbgl-glfw}[Render]: WebGPU: Using depth stencil view = 715809808
+[INFO] {mbgl-glfw}[Render]: WebGPU: Using depth stencil view = 718930704
 [INFO] {mbgl-glfw}[Render]: WebGPU: Beginning render pass
 [INFO] {mbgl-glfw}[Render]: About to call bindGlobalUniformBuffers()
 [INFO] {mbgl-glfw}[Render]: WebGPU Context::bindGlobalUniformBuffers called
@@ -132,5 +132,29 @@ Warning: maxDynamicStorageBuffersPerPipelineLayout artificially reduced from 500
 [INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
 [INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
 [INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 0 rendered tiles, 16 total tiles
+[INFO] {mbgl-glfw}[Render]: RenderTileSetSource::update called for maplibre needsRendering=1 tileset=null cachedTileset=null
+[INFO] {mbgl-glfw}[Render]: RenderTileSetSource::update returning early - no cachedTileset
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update called for org.maplibre.annotations needsRendering=1 needsRelayout=1 zoomRange=[0,16] currentZoom=2.000000
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update calculated 16 ideal tiles at zoom 2/2
+[INFO] {mbgl-glfw}[Render]:   First tile: 2/3/2=>2
+[INFO] {mbgl-glfw}[Render]: TilePyramid::update finished with 0 rendered tiles, 16 total tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for coastline with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for countries-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for countries-boundary with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for geolines with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderLayer::prepare called for crimea-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: WebGPU Context: beginFrame()
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: upload
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer::update called for countries-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: RenderFillLayer::update called for crimea-fill with 0 tiles
+[INFO] {mbgl-glfw}[Render]: WebGPU CommandEncoder: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: WebGPU: Creating upload pass: layerGroup-upload
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: RenderOrchestrator::visitLayerGroups called, group count: 0
+[INFO] {mbgl-glfw}[Render]: About to call drawableTargetsPass()
 Error: Max anisotropy (0.000000) is less than 1.
+[INFO] {mbgl-glfw}[Render]: About to call commonClearPass()
+[INFO] {mbgl-glfw}[Render]: Getting surface texture #2
+[INFO] {mbgl-glfw}[Render]: WebGPU: Acquired swapchain view = 719005680
 [
