@@ -27,12 +27,15 @@ cmake --build build --target mbgl-glfw -- -j8
 - Corrected the fill-outline WGSL inputs to use `outline_color`/`outline_color_t`, fixing the "struct member not found" errors emitted by Dawn.
 - Retain swapchain and depth-stencil views by calling `wgpuTextureViewAddRef` before wrapping them; this prevents use-after-free when the render pass grabs the current surface texture.
 - Disabled direct command-encoder debug groups for now (Dawn forbids recording while a render pass encoder is open); render-pass markers will drive debugging once the plumbing lands.
+- Render pipelines now consume the layer-provided depth/stencil modes, so tile draws respect the per-tile stencil masks written by the clipping pass.
+- WebGPU tile layer groups no longer guess shaders from layer names; drawables keep the shader assigned by their builders, matching the Metal/Vulkan flow.
 
 ## Observations
 - `./run_webgpu.sh` renders the MapLibre demo style end-to-end with WebGPU/Dawn. There are no remaining Dawn validation errors in the steady state.
 - For automated runs use `gtimeout 20 ./run_webgpu.sh` (part of GNU coreutils) to auto-exit after a short soak; otherwise close the GLFW window by hand.
 - Linking still warns about the Dawn static libs targeting macOS 15.0 while the project is built for 14.3. Bumping `CMAKE_OSX_DEPLOYMENT_TARGET` silences the noise if desired.
 - Verbose logging remains enabled in the backend and shaders; keep it on while stabilising the pipeline, then dial back once the regression suite is green.
+- Stencil clipping is active again: geometry outside a tile’s clip polygon is discarded, matching Metal/Vulkan visuals when panning across tile seams.
 
 ## Earlier backend improvements
 - WebGPU clipping masks now route through a dedicated WGSL program that consumes uniform buffers, and the context builds a Dawn pipeline to populate the stencil attachment before the opaque/translucent passes.
@@ -42,6 +45,6 @@ cmake --build build --target mbgl-glfw -- -j8
 - The GLFW backend wires Dawn device/validation callbacks so WGSL or runtime errors land in the MapLibre log for easier diagnosis.
 
 ## What still needs attention
-- Implement stencil-based clipping for the WebGPU path so tiles match Metal/Vulkan visuals in corner cases.
+- Extend the new depth/stencil plumbing to 3D drawables (extrusions, terrain) once the upstream hooks are ready.
 - Align the WebGPU shader-group selection and bind group layout caching with the Metal/Vulkan registries to reduce redundant pipeline creation.
 - Trim logging/no-op debug group stubs once the backend hardens and we decide how to surface Dawn debug markers across platforms.
