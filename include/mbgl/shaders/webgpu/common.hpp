@@ -53,7 +53,7 @@ fn unpack_mix_color(packedColors: vec4<f32>, t: f32) -> vec4<f32> {
 }
 
 // Get pattern position for texture atlas lookups
-fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
+fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>;
                    pattern_size: vec2<f32>, tile_units_to_pixels: f32, pos: vec2<f32>) -> vec2<f32> {
     let offset_a = (pixel_coord_upper % pattern_size) * 256.0;
     let offset_b = (offset_a % pattern_size) * 256.0 + pixel_coord_lower;
@@ -72,7 +72,7 @@ struct GlobalPaintParams {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
-};
+}
 
 // Radians conversion
 fn radians(degrees: f32) -> f32 {

@@ -19,12 +19,12 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(5) position: vec2<i32>,
     @location(6) texcoord: vec2<i32>,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex_coord: vec2<f32>,
-};
+}
 
 struct HillshadeUBO {
     matrix: mat4x4<f32>,
@@ -33,7 +33,7 @@ struct HillshadeUBO {
     accent: vec4<f32>,
     light: vec2<f32>,
     latrange: vec2<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: HillshadeUBO;
 
@@ -49,7 +49,7 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) tex_coord: vec2<f32>,
-};
+}
 
 struct HillshadeUBO {
     matrix: mat4x4<f32>,
@@ -58,7 +58,7 @@ struct HillshadeUBO {
     accent: vec4<f32>,
     light: vec2<f32>,
     latrange: vec2<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: HillshadeUBO;
 @group(1) @binding(0) var texture_sampler: sampler;

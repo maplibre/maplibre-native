@@ -20,20 +20,20 @@ struct VertexInput {
     @location(5) position: vec3<f32>,
     @location(6) normal: vec2<f32>,
     @location(7) texCoord: vec2<f32>,
-};
+}
 
 struct InstanceInput {
     @location(8) instanceCenter: vec3<f32>,
     @location(9) instanceColor: vec4<f32>,
     @location(10) instancePrev: i32,
     @location(11) instanceNext: i32,
-};
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) texCoord: vec2<f32>,
-};
+}
 
 struct WideVectorUBO {
     mvpMatrix: mat4x4<f32>,
@@ -49,7 +49,7 @@ struct WideVectorUBO {
     edge: f32,
     texRepeat: f32,
     texOffset: vec2<f32>,
-};
+}
 
 @group(0) @binding(0) var<uniform> ubo: WideVectorUBO;
 
