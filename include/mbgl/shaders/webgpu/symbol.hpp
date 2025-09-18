@@ -39,14 +39,14 @@ struct SymbolDrawableUBO {
     halo_width_t: f32,
     halo_blur_t: f32,
     pad: f32,
-}
+};
 
 struct SymbolTilePropsUBO {
     is_text: f32,
     is_halo: f32,
     gamma_scale: f32,
     pad1: f32,
-}
+};
 
 struct SymbolEvaluatedPropsUBO {
     text_fill_color: vec4<f32>,
@@ -61,7 +61,7 @@ struct SymbolEvaluatedPropsUBO {
     icon_halo_width: f32,
     icon_halo_blur: f32,
     pad2: f32,
-}
+};
 
 struct GlobalPaintParamsUBO {
     symbol_fade_change: f32,
@@ -89,14 +89,14 @@ struct VertexInput {
     @location(6) projected_pos: vec3<f32>,
     @location(7) fade_opacity: f32,
     @location(8) opacity: f32,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex: vec2<f32>,
     @location(1) fade_opacity: f32,
     @location(2) opacity: f32,
-}
+};
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
@@ -184,7 +184,7 @@ struct FragmentInput {
     @location(0) tex: vec2<f32>,
     @location(1) fade_opacity: f32,
     @location(2) opacity: f32,
-}
+};
 
 @group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
 @group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
@@ -218,7 +218,7 @@ struct VertexInput {
     @location(10) opacity: f32,
     @location(11) halo_width: f32,
     @location(12) halo_blur: f32,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -231,7 +231,7 @@ struct VertexOutput {
     @location(6) opacity: f32,
     @location(7) halo_width: f32,
     @location(8) halo_blur: f32,
-}
+};
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
@@ -329,7 +329,7 @@ struct FragmentInput {
     @location(6) opacity: f32,
     @location(7) halo_width: f32,
     @location(8) halo_blur: f32,
-}
+};
 
 @group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
 @group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
@@ -386,7 +386,7 @@ struct VertexInput {
     @location(9) opacity: f32,
     @location(10) halo_width: f32,
     @location(11) halo_blur: f32,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -400,7 +400,7 @@ struct VertexOutput {
     @location(7) opacity: f32,
     @location(8) halo_width: f32,
     @location(9) halo_blur: f32,
-}
+};
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
@@ -505,7 +505,7 @@ struct FragmentInput {
     @location(7) opacity: f32,
     @location(8) halo_width: f32,
     @location(9) halo_blur: f32,
-}
+};
 
 @group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
 @group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;

@@ -19,12 +19,12 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(0) position: vec2<i32>,
     @location(1) texcoord: vec2<i32>,
-}
+};
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex_coord: vec2<f32>,
-}
+};
 
 struct RasterUBO {
     matrix: mat4x4<f32>,
@@ -35,7 +35,7 @@ struct RasterUBO {
     saturation_factor: f32,
     contrast_factor: f32,
     spin_weights: vec3<f32>,
-}
+};
 
 @group(0) @binding(0) var<uniform> ubo: RasterUBO;
 
@@ -51,7 +51,7 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) tex_coord: vec2<f32>,
-}
+};
 
 struct RasterUBO {
     matrix: mat4x4<f32>,
@@ -62,7 +62,7 @@ struct RasterUBO {
     saturation_factor: f32,
     contrast_factor: f32,
     spin_weights: vec3<f32>,
-}
+};
 
 @group(0) @binding(0) var<uniform> ubo: RasterUBO;
 @group(1) @binding(0) var texture_sampler: sampler;

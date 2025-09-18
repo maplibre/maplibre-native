@@ -851,7 +851,7 @@ void GLFWWebGPUBackend::ensureDebugTriangleResources() {
 struct VertexOut {
     @builtin(position) position : vec4<f32>,
     @location(0) color : vec3<f32>,
-}
+};
 
 @vertex
 fn vs_main(@location(0) position : vec2<f32>,
