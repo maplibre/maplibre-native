@@ -11,7 +11,7 @@ namespace shaders {
 using BackgroundShaderSource = ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 1> BackgroundShaderSource::attributes = {
-    AttributeInfo{backgroundUBOCount + 0, gfx::AttributeDataType::Float2, idBackgroundPosVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Short2, idBackgroundPosVertexAttribute},
 };
 const std::array<TextureInfo, 0> BackgroundShaderSource::textures = {};
 
@@ -21,7 +21,7 @@ const std::array<TextureInfo, 0> BackgroundShaderSource::textures = {};
 using BackgroundPatternShaderSource = ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 1> BackgroundPatternShaderSource::attributes = {
-    AttributeInfo{backgroundUBOCount + 0, gfx::AttributeDataType::Float2, idBackgroundPosVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Short2, idBackgroundPosVertexAttribute},
 };
 const std::array<TextureInfo, 1> BackgroundPatternShaderSource::textures = {
     TextureInfo{0, idBackgroundImageTexture}

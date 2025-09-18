@@ -8,7 +8,7 @@ namespace shaders {
 using DebugShaderSource = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 1> DebugShaderSource::attributes = {
-    AttributeInfo{debugUBOCount + 0, gfx::AttributeDataType::Float2, idDebugPosVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
 };
 const std::array<TextureInfo, 1> DebugShaderSource::textures = {
     TextureInfo{0, idDebugOverlayTexture}
