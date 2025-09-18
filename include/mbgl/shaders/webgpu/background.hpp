@@ -23,44 +23,69 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
 };
 
-struct BackgroundUBO {
+struct BackgroundDrawableUBO {
     matrix: mat4x4<f32>,
-    color: vec4<f32>,
-    opacity: f32,
 };
 
-@group(0) @binding(0) var<uniform> ubo: BackgroundUBO;
+struct BackgroundDrawableUnionUBO {
+    matrix_col0: vec4<f32>,
+    matrix_col1: vec4<f32>,
+    matrix_col2: vec4<f32>,
+    matrix_col3: vec4<f32>,
+    extra0: vec4<f32>,
+    extra1: vec4<f32>,
+};
+
+struct BackgroundPropsUBO {
+    color: vec4<f32>,
+    opacity: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
+};
+
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundDrawableUnionUBO>;
+@group(0) @binding(4) var<uniform> props: BackgroundPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let transformed = ubo.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    // Convert to NDC coordinates and flip Y for WebGPU
-    // WebGPU uses Z range [0, 1] instead of [-1, 1]
-    // Background should be at the far plane (depth = 1.0)
-    let ndc_z = 0.999;
-    out.position = vec4<f32>(
-        transformed.x / transformed.w,
-        -transformed.y / transformed.w,
-        ndc_z,
-        1.0
-    );
+    let drawable = drawableVector[globalIndex.value];
+    let matrix = mat4x4<f32>(drawable.matrix_col0,
+                             drawable.matrix_col1,
+                             drawable.matrix_col2,
+                             drawable.matrix_col3);
+    let clip = matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let invW = 1.0 / clip.w;
+    let ndc_z = (clip.z * invW) * 0.5 + 0.5;
+    out.position = vec4<f32>(clip.x * invW,
+                             -clip.y * invW,
+                             ndc_z,
+                             1.0);
     return out;
 }
 )";
     
     static constexpr auto fragment = R"(
-struct BackgroundUBO {
-    matrix: mat4x4<f32>,
+struct BackgroundPropsUBO {
     color: vec4<f32>,
     opacity: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
-@group(0) @binding(0) var<uniform> ubo: BackgroundUBO;
+@group(0) @binding(4) var<uniform> props: BackgroundPropsUBO;
 
 @fragment
 fn main() -> @location(0) vec4<f32> {
-    return ubo.color * ubo.opacity;
+    return props.color * props.opacity;
 }
 )";
 };
@@ -83,14 +108,13 @@ struct VertexOutput {
     @location(1) pos_b: vec2<f32>,
 };
 
-struct BackgroundPatternDrawableUBO {
-    matrix: mat4x4<f32>,
-    pixel_coord_upper: vec2<f32>,
-    pixel_coord_lower: vec2<f32>,
-    tile_units_to_pixels: f32,
-    pad1: f32,
-    pad2: f32,
-    pad3: f32,
+struct BackgroundPatternDrawableUnionUBO {
+    matrix_col0: vec4<f32>,
+    matrix_col1: vec4<f32>,
+    matrix_col2: vec4<f32>,
+    matrix_col3: vec4<f32>,
+    pixel_coords: vec4<f32>,
+    params: vec4<f32>,
 };
 
 struct BackgroundPatternPropsUBO {
@@ -108,33 +132,45 @@ struct BackgroundPatternPropsUBO {
     pad2: f32,
 };
 
-@group(0) @binding(2) var<uniform> drawable: BackgroundPatternDrawableUBO;
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundPatternDrawableUnionUBO>;
 @group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
+    let drawable = drawableVector[globalIndex.value];
+    let matrix = mat4x4<f32>(drawable.matrix_col0,
+                             drawable.matrix_col1,
+                             drawable.matrix_col2,
+                             drawable.matrix_col3);
+
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
 
     // Use get_pattern_pos helper function for pattern positioning
     out.pos_a = get_pattern_pos(
-        drawable.pixel_coord_upper,
-        drawable.pixel_coord_lower,
+        drawable.pixel_coords.xy,
+        drawable.pixel_coords.zw,
         props.scale_a * props.pattern_size_a,
-        drawable.tile_units_to_pixels,
+        drawable.params.x,
         pos
     );
 
     out.pos_b = get_pattern_pos(
-        drawable.pixel_coord_upper,
-        drawable.pixel_coord_lower,
+        drawable.pixel_coords.xy,
+        drawable.pixel_coords.zw,
         props.scale_b * props.pattern_size_b,
-        drawable.tile_units_to_pixels,
+        drawable.params.x,
         pos
     );
 
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = matrix * vec4<f32>(pos, 0.0, 1.0);
     let invW = 1.0 / clip.w;
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
     out.position = vec4<f32>(clip.x * invW,
