@@ -94,6 +94,11 @@ jobs:
           rm -rf venv
         shell: bash
 
+      - if: env.SENTRY_DSN != ''
+        run: |
+          echo "SENTRY_ORG=maplibre" >> "$GITHUB_ENV"
+          echo "SENTRY_PROJECT=maplibre-android" >> "$GITHUB_ENV"
+
       - uses: infotroph/tree-is-clean@69d598a958e8cb8f3d0e3d52b5ebcd8684f2adc2 # v1.0.6
         with:
           check_untracked: true
