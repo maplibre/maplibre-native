@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/util/size.hpp>
+#include <webgpu/webgpu_cpp.h>
 #include <memory>
 
 namespace mbgl {
@@ -41,6 +42,9 @@ public:
     virtual void* getCurrentTextureView();
     virtual void* getDepthStencilView();
     virtual mbgl::Size getFramebufferSize() const;
+
+    void setDepthStencilFormat(wgpu::TextureFormat);
+    wgpu::TextureFormat getDepthStencilFormat() const;
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;

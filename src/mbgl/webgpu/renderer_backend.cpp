@@ -37,6 +37,7 @@ public:
     void* device = nullptr;
     void* queue = nullptr;
     void* surface = nullptr;
+    wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
 };
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
@@ -170,6 +171,14 @@ void* RendererBackend::getDepthStencilView() {
 mbgl::Size RendererBackend::getFramebufferSize() const {
     // Default implementation - platform backends should override
     return {0, 0};
+}
+
+void RendererBackend::setDepthStencilFormat(wgpu::TextureFormat format) {
+    impl->depthStencilFormat = format;
+}
+
+wgpu::TextureFormat RendererBackend::getDepthStencilFormat() const {
+    return impl->depthStencilFormat;
 }
 
 } // namespace webgpu

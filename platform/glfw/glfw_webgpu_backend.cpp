@@ -135,16 +135,33 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Log that we're using Dawn WebGPU implementation
     mbgl::Log::Info(mbgl::Event::Render, "Using Dawn WebGPU implementation with native backend");
 
-    // Select first adapter (should be Vulkan on Linux)
     dawn::native::Adapter& selectedAdapter = adapters[0];
     mbgl::Log::Info(mbgl::Event::Render, "Selected Dawn adapter for WebGPU rendering");
 
-    // Set up device descriptor with error callback
+    std::vector<wgpu::FeatureName> supportedFeatures;
+    WGPUSupportedFeatures features = WGPU_SUPPORTED_FEATURES_INIT;
+    wgpuAdapterGetFeatures(selectedAdapter.Get(), &features);
+    if (features.featureCount > 0 && features.features) {
+        supportedFeatures.reserve(features.featureCount);
+        for (size_t i = 0; i < features.featureCount; ++i) {
+            supportedFeatures.push_back(static_cast<wgpu::FeatureName>(features.features[i]));
+        }
+        wgpuSupportedFeaturesFreeMembers(features);
+    }
+    const bool hasDepth32Stencil = std::find(supportedFeatures.begin(), supportedFeatures.end(),
+                                             wgpu::FeatureName::Depth32FloatStencil8) != supportedFeatures.end();
+
+    std::vector<wgpu::FeatureName> requiredFeatures;
+    if (hasDepth32Stencil) {
+        requiredFeatures.push_back(wgpu::FeatureName::Depth32FloatStencil8);
+        depthStencilFormat = wgpu::TextureFormat::Depth32FloatStencil8;
+    } else {
+        depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
+    }
+
+
     wgpu::DeviceDescriptor deviceDesc = {};
     deviceDesc.label = "MapLibre WebGPU Device";
-
-    // Request features we need
-    std::vector<wgpu::FeatureName> requiredFeatures;
     deviceDesc.requiredFeatures = requiredFeatures.data();
     deviceDesc.requiredFeatureCount = requiredFeatures.size();
 
@@ -163,6 +180,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
     wgpuDevice = wgpu::Device::Acquire(rawDevice);
     mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU device created successfully");
+
+    setDepthStencilFormat(depthStencilFormat);
 
     // Process device events to ensure it's ready
     wgpuDeviceTick(rawDevice);
@@ -216,6 +235,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     wgpuSurface.Configure(&config);
     surfaceConfigured = true;
     lastConfiguredSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+
+    createDepthStencilTexture(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 #elif defined(__linux__)
     // Get window size
     int width, height;
@@ -322,14 +343,16 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     // Clear all Dawn/WebGPU resources in proper order
     {
         std::lock_guard<std::mutex> lock(textureViewMutex);
-        
+
         // Release texture views first (they reference textures)
         currentTextureView = nullptr;
         previousTextureView = nullptr;
-        
+        depthStencilView = nullptr;
+
         // Then release textures
         currentTexture = nullptr;
         previousTexture = nullptr;
+        depthStencilTexture = nullptr;
     }
     
     // Ensure all GPU work is complete
@@ -566,39 +589,30 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     try {
         wgpuSurface.GetCurrentTexture(&surfaceTexture);
     } catch (...) {
-        // Handle any exceptions during texture acquisition
         consecutiveErrors++;
         frameInProgress = false;
         return nullptr;
     }
 
-    // Handle various error states
-    if (surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Timeout ||
-        surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Outdated ||
-        surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Lost) {
-        // Surface needs reconfiguration
+    if (!surfaceTexture.texture) {
         surfaceNeedsReconfigure = true;
         consecutiveErrors++;
         frameInProgress = false;
         return nullptr;
     }
-    
-    if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
-        surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
-        // Some other error
+
+    auto status = static_cast<wgpu::SurfaceGetCurrentTextureStatus>(surfaceTexture.status);
+    if (status == wgpu::SurfaceGetCurrentTextureStatus::Outdated ||
+        status == wgpu::SurfaceGetCurrentTextureStatus::Lost) {
+        surfaceNeedsReconfigure = true;
         consecutiveErrors++;
         frameInProgress = false;
         return nullptr;
     }
 
-    if (!surfaceTexture.texture) {
-        consecutiveErrors++;
-        frameInProgress = false;
-        return nullptr;
-    }
-
-    // Check if texture is valid
-    if (!surfaceTexture.texture) {
+    if (status == wgpu::SurfaceGetCurrentTextureStatus::Timeout ||
+        (status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
+         status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal)) {
         consecutiveErrors++;
         frameInProgress = false;
         return nullptr;
@@ -660,7 +674,17 @@ mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
 }
 
 void* GLFWWebGPUBackend::getDepthStencilView() {
-    return nullptr;
+    std::lock_guard<std::mutex> lock(textureViewMutex);
+    if (!depthStencilView) {
+        int width = 0;
+        int height = 0;
+        if (window) {
+            glfwGetFramebufferSize(window, &width, &height);
+        }
+        createDepthStencilTexture(static_cast<uint32_t>(std::max(width, 0)),
+                                  static_cast<uint32_t>(std::max(height, 0)));
+    }
+    return depthStencilView ? reinterpret_cast<void*>(depthStencilView.Get()) : nullptr;
 }
 
 void GLFWWebGPUBackend::reconfigureSurface() {
@@ -709,11 +733,57 @@ void GLFWWebGPUBackend::reconfigureSurface() {
 
     wgpuSurface.Configure(&config);
 
+    createDepthStencilTexture(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+
     // Update state
     surfaceConfigured = true;
     surfaceNeedsReconfigure = false;
     lastConfiguredSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     consecutiveErrors = 0;
+}
+
+void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t height) {
+    depthStencilView = nullptr;
+    depthStencilTexture = nullptr;
+
+    if (!wgpuDevice || width == 0 || height == 0 || depthStencilFormat == wgpu::TextureFormat::Undefined) {
+        return;
+    }
+
+    wgpu::TextureDescriptor depthDesc = {};
+    depthDesc.label = "DepthStencilTexture";
+    depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    depthDesc.dimension = wgpu::TextureDimension::e2D;
+    depthDesc.size = {width, height, 1};
+    depthDesc.format = depthStencilFormat;
+    depthDesc.mipLevelCount = 1;
+    depthDesc.sampleCount = 1;
+
+    depthStencilTexture = wgpuDevice.CreateTexture(&depthDesc);
+    if (!depthStencilTexture) {
+        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to create depth/stencil texture");
+        depthStencilFormat = wgpu::TextureFormat::Undefined;
+        setDepthStencilFormat(depthStencilFormat);
+        return;
+    }
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.label = "DepthStencilTextureView";
+    viewDesc.format = depthDesc.format;
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.baseMipLevel = 0;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = 0;
+    viewDesc.arrayLayerCount = 1;
+    viewDesc.aspect = wgpu::TextureAspect::All;
+
+    depthStencilView = depthStencilTexture.CreateView(&viewDesc);
+    if (!depthStencilView) {
+        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to create depth/stencil view");
+        depthStencilTexture = nullptr;
+        depthStencilFormat = wgpu::TextureFormat::Undefined;
+        setDepthStencilFormat(depthStencilFormat);
+    }
 }
 
 bool GLFWWebGPUBackend::waitForFrame(std::chrono::milliseconds timeout) {

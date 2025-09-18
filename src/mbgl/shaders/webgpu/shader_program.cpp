@@ -590,17 +590,19 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
 
     // Set up depth stencil state
     WGPUDepthStencilState depthStencilState = {};
-    depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    // Temporarily disable depth testing to debug visibility
-    depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
-    depthStencilState.depthCompare = WGPUCompareFunction_Always;
-    depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
-    depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
-    depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
-    depthStencilState.stencilFront.passOp = WGPUStencilOperation_Keep;
-    depthStencilState.stencilBack = depthStencilState.stencilFront;
-    depthStencilState.stencilReadMask = 0xFF;
-    depthStencilState.stencilWriteMask = 0xFF;
+    const auto depthFormat = backend.getDepthStencilFormat();
+    if (depthFormat != wgpu::TextureFormat::Undefined) {
+        depthStencilState.format = static_cast<WGPUTextureFormat>(depthFormat);
+        depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
+        depthStencilState.depthCompare = WGPUCompareFunction_Always;
+        depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
+        depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
+        depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
+        depthStencilState.stencilFront.passOp = WGPUStencilOperation_Keep;
+        depthStencilState.stencilBack = depthStencilState.stencilFront;
+        depthStencilState.stencilReadMask = 0xFF;
+        depthStencilState.stencilWriteMask = 0xFF;
+    }
 
     // Create render pipeline
     WGPURenderPipelineDescriptor pipelineDesc = {};
@@ -610,7 +612,7 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     pipelineDesc.vertex = vertexState;
     pipelineDesc.fragment = &fragmentState;
     pipelineDesc.primitive = primitiveState;
-    pipelineDesc.depthStencil = &depthStencilState;
+    pipelineDesc.depthStencil = depthFormat != wgpu::TextureFormat::Undefined ? &depthStencilState : nullptr;
     pipelineDesc.multisample.count = 1;
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;
