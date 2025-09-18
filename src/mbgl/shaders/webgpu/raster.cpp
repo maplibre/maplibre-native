@@ -8,8 +8,8 @@ namespace shaders {
 using RasterShaderSource = ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> RasterShaderSource::attributes = {
-    AttributeInfo{rasterUBOCount + 0, gfx::AttributeDataType::Float2, idRasterPosVertexAttribute},
-    AttributeInfo{rasterUBOCount + 1, gfx::AttributeDataType::Float2, idRasterTexturePosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idRasterPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idRasterTexturePosVertexAttribute},
 };
 const std::array<TextureInfo, 2> RasterShaderSource::textures = {
     TextureInfo{0, idRasterImage0Texture},
