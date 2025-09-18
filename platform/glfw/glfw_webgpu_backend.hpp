@@ -106,4 +106,13 @@ private:
     bool waitForFrame(std::chrono::milliseconds timeout = std::chrono::milliseconds(100));
     void signalFrameComplete();
     void periodicMaintenance();
+
+    // Debug triangle utilities
+    void ensureDebugTriangleResources();
+    void drawDebugTriangle(const wgpu::TextureView& targetView);
+
+    bool debugTriangleInitialized = false;
+    wgpu::RenderPipeline debugTrianglePipeline;
+    wgpu::Buffer debugTriangleVertexBuffer;
+    uint64_t debugTriangleVertexBufferSize = 0;
 };
