@@ -3,6 +3,8 @@
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 namespace webgpu {
 
@@ -62,6 +64,7 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
     samplerDesc.addressModeU = mapWrapMode(samplerState.wrapU);
     samplerDesc.addressModeV = mapWrapMode(samplerState.wrapV);
     samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
+    samplerDesc.maxAnisotropy = std::max<uint16_t>(1, static_cast<uint16_t>(samplerState.maxAnisotropy));
     
     // Create the sampler
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
