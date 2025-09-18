@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - .github/**
+permissions:
+  contents: write
 jobs:
   pinact:
     runs-on: ubuntu-24.04
