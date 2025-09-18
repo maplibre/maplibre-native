@@ -1,0 +1,20 @@
+WebGPU status for MapLibre Native on Linux (Feb 2025)
+---------------------------------------------------
+
+Current branch adds a Dawn-based WebGPU backend. On Asahi Linux (M1) the Vulkan driver crashes whenever a depth/stencil attachment is used, so GLFW/WebGPU ends up either blank or SIGSEGV. The crash happens inside Dawn’s ValidateRenderPassDepthStencilAttachment after the depth view is attached.
+
+Lenovo Snapdragon X Elite (Ubuntu ARM64) should behave better: Freedreno’s Vulkan stack supports depth/stencil, so Dawn can create Depth24PlusStencil8 or Depth32FloatStencil8 textures and the map renders.
+
+Important build/run notes:
+- Run `cmake --build ./build --target mbgl-glfw -- -j8`.
+- Launch with `./build/platform/glfw/mbgl-glfw --style https://demotiles.maplibre.org/style.json --zoom 2`.
+- `run_webgpu.sh` already builds and uses the hosted MapLibre demotiles style.
+- WebGPU logs via `MBGL_LOG_LEVEL=debug` and Dawn validation via `WGPU_BACKEND_VALIDATION=1`.
+- `WEBGPU_ENABLE_DEBUG_TRIANGLE=1` re-enables the old swapchain debug overlay.
+- Depth/stencil format is negotiated at startup; if the driver can’t supply one, stencil clipping stays disabled.
+
+On the Lenovo machine, verify depth support by checking the log for:
+  "Selected Dawn adapter"
+  "Depth/stencil format set to …" and later
+  "Using depth stencil view"
+If those appear and the window is still black, capture `webgpu_debug.log` with validation enabled.
