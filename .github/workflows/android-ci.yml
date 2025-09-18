@@ -33,7 +33,7 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -53,11 +53,12 @@ jobs:
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -92,6 +93,11 @@ jobs:
           pre-commit run clang-format --all-files
           rm -rf venv
         shell: bash
+
+      - if: env.SENTRY_DSN != ''
+        run: |
+          echo "SENTRY_ORG=maplibre" >> "$GITHUB_ENV"
+          echo "SENTRY_PROJECT=maplibre-android" >> "$GITHUB_ENV"
 
       - uses: infotroph/tree-is-clean@69d598a958e8cb8f3d0e3d52b5ebcd8684f2adc2 # v1.0.6
         with:
@@ -183,6 +189,14 @@ jobs:
           cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug.apk InstrumentationTestApp${{ env.renderer }}.apk
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug-androidTest.apk InstrumentationTests${{ env.renderer }}.apk
 
+      - name: Install sentry-cli
+        if: env.SENTRY_DSN != ''
+        run: curl -sL https://sentry.io/get-cli/ | sh
+
+      - name: Upload debug symbols to sentry
+        if: env.SENTRY_DSN != ''
+        run: sentry-cli debug-files upload MapLibreAndroidTestApp
+
       - name: Upload android-ui-test-${{ matrix.renderer }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -210,7 +224,6 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -268,7 +281,6 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -297,6 +309,9 @@ jobs:
 
   android-ci-result:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job
@@ -320,7 +335,7 @@ jobs:
       - name: VERSION file changed
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: version-file-android-changed
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files: platform/android/VERSION
 
@@ -336,9 +351,11 @@ jobs:
       - name: Create tag if it does not exist
         if: env.make_release == 'true'
         run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Trigger release
         if: env.make_release == 'true'
         run: gh workflow run android-release.yml --ref android-v${{ env.version }}
         env:
-         GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
