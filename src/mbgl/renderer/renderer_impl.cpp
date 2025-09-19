@@ -54,7 +54,11 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
+#if MLN_RENDER_BACKEND_WEBGPU
+    : orchestrator(false, backend_.getThreadPool(), localFontFamily_),
+#else
     : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
+#endif
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
