@@ -45,6 +45,8 @@ public:
 
     void setDepthStencilFormat(wgpu::TextureFormat);
     wgpu::TextureFormat getDepthStencilFormat() const;
+    void setColorFormat(wgpu::TextureFormat);
+    wgpu::TextureFormat getColorFormat() const;
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
