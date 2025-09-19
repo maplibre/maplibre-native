@@ -550,8 +550,140 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
     
-    static constexpr const char* vertex = "";
-    static constexpr const char* fragment = "";
+    static constexpr const char* vertex = R"(
+const SCALE: f32 = 0.015873016;
+
+struct VertexInput {
+    @location(0) pos_normal: vec2<i32>,
+    @location(1) data: vec4<u32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) normal: vec2<f32>,
+    @location(1) width: f32,
+    @location(2) gamma_scale: f32,
+};
+
+struct FillOutlineTriangulatedDrawableUnionUBO {
+    matrix_col0: vec4<f32>,
+    matrix_col1: vec4<f32>,
+    matrix_col2: vec4<f32>,
+    matrix_col3: vec4<f32>,
+    params: vec4<f32>,
+    padding: vec4<f32>,
+};
+
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineTriangulatedDrawableUnionUBO>;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+
+    let drawable = drawableVector[globalIndex.value];
+    let matrix = mat4x4<f32>(drawable.matrix_col0,
+                             drawable.matrix_col1,
+                             drawable.matrix_col2,
+                             drawable.matrix_col3);
+    let ratio = max(drawable.params.x, 1e-6);
+
+    let pos_normal = vec2<f32>(f32(in.pos_normal.x), f32(in.pos_normal.y));
+    let pos = floor(pos_normal * 0.5);
+    var normal = pos_normal - pos * 2.0;
+    normal.y = normal.y * 2.0 - 1.0;
+
+    let data = vec4<f32>(in.data);
+    let extrude = data.xy - vec2<f32>(128.0, 128.0);
+
+    let half_width = 0.5;
+    let antialiasing = 0.5 / paintParams.pixel_ratio;
+    let outset = half_width + antialiasing;
+
+    let dist = extrude * outset * SCALE;
+    let extrude_vec = dist / ratio;
+
+    let projected_extrude = matrix * vec4<f32>(extrude_vec, 0.0, 0.0);
+    let base = matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = base + projected_extrude;
+    let inv_w = 1.0 / clip.w;
+    let ndc_z = (clip.z * inv_w) * 0.5 + 0.5;
+
+    out.position = vec4<f32>(clip.x * inv_w,
+                             clip.y * inv_w,
+                             ndc_z,
+                             1.0);
+
+    let extrude_length_without_perspective = length(dist);
+    let extrude_length_with_perspective = length((projected_extrude.xy / clip.w) * paintParams.units_to_pixels);
+    let gamma_denom = max(extrude_length_with_perspective, 1e-6);
+
+    out.normal = normal;
+    out.width = outset;
+    out.gamma_scale = extrude_length_without_perspective / gamma_denom;
+
+    return out;
+}
+)";
+    
+    static constexpr const char* fragment = R"(
+struct FragmentInput {
+    @location(0) normal: vec2<f32>,
+    @location(1) width: f32,
+    @location(2) gamma_scale: f32,
+};
+
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+
+@fragment
+fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let dist = length(in.normal) * in.width;
+    let blur2 = (1.0 / paintParams.pixel_ratio) * in.gamma_scale;
+    let denom = max(blur2, 1e-6);
+    let alpha = clamp(min(dist + blur2, in.width - dist) / denom, 0.0, 1.0);
+    return props.outline_color * (alpha * props.opacity);
+}
+)";
 };
 
 } // namespace shaders
