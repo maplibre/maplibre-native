@@ -391,7 +391,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
     let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
-    let dist = textureSample(glyph_atlas, texture_sampler, in.tex).a;
+    let dist = textureSample(glyph_atlas, texture_sampler, in.tex).r;
     let gamma_scaled = gamma * in.gamma_scale;
     let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 
@@ -583,7 +583,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let fontGamma = in.fontScale * tileProps.gamma_scale;
     let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
     let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
-    let dist = textureSample(glyph_image, glyph_sampler, in.tex).a;
+    let dist = textureSample(glyph_image, glyph_sampler, in.tex).r;
     let gamma_scaled = gamma * in.gamma_scale;
     let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 
