@@ -213,9 +213,6 @@ jobs:
       - name: Run expression test
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
-
   linux-coverage:
     runs-on: ubuntu-22.04
     steps:
@@ -268,6 +265,9 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
       - name: Mark result as failed
         if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1
