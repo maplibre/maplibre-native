@@ -41,6 +41,7 @@ cmake --build build --target mbgl-glfw -- -j8
 
 - Reworked the symbol WGSL to fetch `SymbolDrawableUBO`/`SymbolTilePropsUBO` from storage-buffer arrays keyed by the shared `GlobalIndexUBO`, eliminating the duplicate `GlobalPaintParamsUBO` definition that Dawn flagged and aligning with the consolidated UBO uploads.
 - Swapped the symbolic `@binding(id…)` decorations in the symbol shaders for literal binding indices, allowing the WebGPU shader introspection to build the correct bind-group layouts.
+- Per-draw `GlobalUBOIndex` uploads now happen inside the WebGPU drawable, fixing the frozen fill tiles that appeared when every draw sampled the first UBO entry.
 
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.

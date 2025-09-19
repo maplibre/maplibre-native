@@ -327,10 +327,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            mbgl::Log::Info(mbgl::Event::Render, "Updated existing drawables for tile " + util::toString(tileID));
+            // mbgl::Log::Info(mbgl::Event::Render, "Updated existing drawables for tile " + util::toString(tileID));
             continue;
         }
-        mbgl::Log::Info(mbgl::Event::Render, "Creating new drawables for tile " + util::toString(tileID));
+        // mbgl::Log::Info(mbgl::Event::Render, "Creating new drawables for tile " + util::toString(tileID));
 
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
