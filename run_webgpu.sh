@@ -40,7 +40,7 @@ try_start() {
     fi
     
     # Start in background and check if it stays alive
-    ./build/platform/glfw/mbgl-glfw --style "$STYLE_URL" --zoom 2 &
+    MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 ./build/platform/glfw/mbgl-glfw --style "$STYLE_URL" --zoom 2 &
     local pid=$!
     
     # Wait a bit to see if it crashes immediately
