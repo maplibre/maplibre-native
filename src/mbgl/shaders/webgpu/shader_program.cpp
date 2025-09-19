@@ -643,7 +643,11 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     blendState.alpha = alphaBlend;
 
     WGPUColorTargetState colorTarget = {};
-    colorTarget.format = WGPUTextureFormat_BGRA8Unorm;
+    auto colorFormat = backend.getColorFormat();
+    if (colorFormat == wgpu::TextureFormat::Undefined) {
+        colorFormat = wgpu::TextureFormat::BGRA8Unorm;
+    }
+    colorTarget.format = static_cast<WGPUTextureFormat>(colorFormat);
     colorTarget.blend = &blendState;
     colorTarget.writeMask = (colorMode.mask.r ? WGPUColorWriteMask_Red : WGPUColorWriteMask_None) |
                            (colorMode.mask.g ? WGPUColorWriteMask_Green : WGPUColorWriteMask_None) |
