@@ -338,6 +338,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             auto drawables = builder.clearDrawables();
             mbgl::Log::Info(mbgl::Event::Render, "Got " + std::to_string(drawables.size()) + " drawables from builder");
             for (auto& drawable : drawables) {
+                const auto& mask = drawable->getColorMode().mask;
+                mbgl::Log::Info(mbgl::Event::Render,
+                                "Drawable color mask before storing " + drawable->getName() +
+                                    ": R=" + std::to_string(mask.r) +
+                                    " G=" + std::to_string(mask.g) +
+                                    " B=" + std::to_string(mask.b) +
+                                    " A=" + std::to_string(mask.a));
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<size_t>(type));
                 drawable->setLayerTweaker(layerTweaker);
