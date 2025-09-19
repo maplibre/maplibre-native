@@ -33,12 +33,12 @@ void DrawableBuilder::init() {
 
     auto& drawable = static_cast<Drawable&>(*currentDrawable);
 
-    mbgl::Log::Info(mbgl::Event::Render, "DrawableBuilder::init for " + drawable.getName() +
-                   " rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
-                   " rawVertices.size=" + std::to_string(impl->rawVertices.size()) +
-                   " segments.size=" + std::to_string(impl->segments.size()) +
-                   " sharedIndexes=" + (impl->sharedIndexes ? "yes" : "no") +
-                   " vertexAttrs=" + (drawable.getVertexAttributes() ? "present" : "null"));
+    // mbgl::Log::Info(mbgl::Event::Render, "DrawableBuilder::init for " + drawable.getName() +
+    //                " rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
+    //                " rawVertices.size=" + std::to_string(impl->rawVertices.size()) +
+    //                " segments.size=" + std::to_string(impl->segments.size()) +
+    //                " sharedIndexes=" + (impl->sharedIndexes ? "yes" : "no") +
+    //                " vertexAttrs=" + (drawable.getVertexAttributes() ? "present" : "null"));
 
     // Set the vertex attribute ID so the drawable knows which shared vertex buffer to use
     drawable.setVertexAttrId(vertexAttrId);
@@ -94,7 +94,7 @@ void DrawableBuilder::init() {
         mbgl::Log::Warning(mbgl::Event::Render, "  No index data to set!");
     }
 
-    mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() completed for " + drawable.getName());
+    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() completed for " + drawable.getName());
 }
 
 
