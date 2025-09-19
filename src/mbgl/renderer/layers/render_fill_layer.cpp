@@ -183,7 +183,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     const auto layerPrefix = getID() + "/";
     // Use the layer's evaluated render passes instead of hardcoding
     const auto renderPass = passes;
+#if MLN_RENDER_BACKEND_WEBGPU
+    constexpr auto lineWidth = 1.0f;
+#else
     constexpr auto lineWidth = 2.0f;
+#endif
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());

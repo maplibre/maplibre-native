@@ -3,12 +3,16 @@
 ## Build configuration
 - Reconfigured CMake with `MLN_WITH_WEBGPU=ON` and `MLN_WEBGPU_BACKEND=dawn`.
 - Added `-DFETCHCONTENT_SOURCE_DIR_TINYOBJLOADER=$(pwd)/build/_deps/tinyobjloader-src` to avoid the FetchContent update that requires network access.
-- Rebuilt Dawn previously bundled under `vendor/dawn/build` is reused; no additional toolchain work needed.
+- Updated Dawn detection to use the in-tree `vendor/dawn` path on every platform; CMake now sets `DAWN_DIR=${PROJECT_SOURCE_DIR}/vendor/dawn` and pulls headers from the generated include directory.
+- Non-Apple builds define `DAWN_ENABLE_BACKEND_VULKAN=1` so Dawn selects the Vulkan backend on Linux; the link step now pulls in `dl`/`pthread` alongside the Dawn static archives.
+- WebGPU now opts into triangulated fill outlines (`MLN_TRIANGULATE_FILL_OUTLINES`), matching the Metal backend and avoiding thin-line rendering artefacts on Dawn/Vulkan.
 
 ## Code changes
 - Treat `glfw_webgpu_backend.cpp` as Objective-C++ on macOS so Dawn/Metal headers compile, and avoid linking Dawn's optional `libdawn_glfw.a` when it is not produced.
 - Normalised forward declarations (`AttributeBinding` now declared as `class`) to satisfy clang with `-Wmismatched-tags`.
 - Removed the unused `swapBehaviour` member from the WebGPU headless backend and silence the unused-parameter warning.
+- WebGPU pipelines now derive their primitive topology from each drawable’s draw mode, so line-based fill outlines use a `LineList` pipeline on Dawn instead of defaulting to triangles.
+- WebGPU fill outlines clamp the hardware line width to 1px (wider lines are unsupported on Vulkan/Dawn), preventing the renderer from silently dropping the draws after the first frame.
 
 ## Running the sample
 ```sh
@@ -19,8 +23,9 @@ cmake -S . -B build -G Ninja \
 cmake --build build --target mbgl-glfw -- -j8
 ./run_webgpu.sh
 ```
-- `run_webgpu.sh` launches `mbgl-glfw` against the MapLibre demo tiles. On headless CI/macOS the window appears on the local console; close it manually to stop the run.
-- Expect the CLI to print the Dawn adapter scan and a "Successfully started" message when the swapchain is ready.
+- `run_webgpu.sh` now requests the WebGPU backend explicitly (`--backend webgpu`) and only applies the Metal debug env vars on macOS.
+- A 20s soak on Linux via `timeout 20 ./run_webgpu.sh` brings up the GLFW window on X11/XWayland, logs the selected Dawn adapter, and repeatedly renders the MapLibre demo tiles without validation errors.
+- Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
 ## Recent WebGPU fixes (2025-09-19)
 - Consolidated vertex attribute bindings so a drawable never binds more than eight unique WebGPU vertex buffers; Dawn no longer complains about exceeding the limit, and the fill layer now reuses shared buffers instead of allocating duplicates per attribute.
@@ -48,8 +53,9 @@ cmake --build build --target mbgl-glfw -- -j8
 
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
+- Linux run (aarch64) selects the Vulkan-backed Dawn adapter, prints `WebGPU: selected surface format BGRA8Unorm`, and the render loop logs fill/background/line bind groups for all visible tiles—confirming we see map content rather than a blank swapchain.
 - `./run_webgpu.sh` renders the MapLibre demo style end-to-end with WebGPU/Dawn. There are no remaining Dawn validation errors in the steady state.
-- For automated runs use `gtimeout 20 ./run_webgpu.sh` (part of GNU coreutils) to auto-exit after a short soak; otherwise close the GLFW window by hand.
+- For automated runs use `timeout 20 ./run_webgpu.sh` on Linux (or `gtimeout` on macOS) to auto-exit after a short soak; otherwise close the GLFW window by hand.
 - A 20-second soak via `./build/platform/glfw/mbgl-glfw --style https://demotiles.maplibre.org/style.json` (captured in `webgpu_run_new.log`) completes without any WebGPU warnings, and boundary/outline geometry renders cleanly.
 - Confirmed the same soak after the constant-fill fix: Crimea and other constant fill tiles stay colored while the style updates, and line layers remain visible across the whole world.
 - Linking still warns about the Dawn static libs targeting macOS 15.0 while the project is built for 14.3. Bumping `CMAKE_OSX_DEPLOYMENT_TARGET` silences the noise if desired.

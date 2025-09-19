@@ -89,6 +89,26 @@ WGPUBlendFactor webgpuBlendFactor(const gfx::ColorBlendFactorType& factor) {
     }
 }
 
+WGPUPrimitiveTopology toPrimitiveTopology(gfx::DrawModeType drawModeType) {
+    switch (drawModeType) {
+        case gfx::DrawModeType::Points:
+            return WGPUPrimitiveTopology_PointList;
+        case gfx::DrawModeType::Lines:
+        case gfx::DrawModeType::LineLoop:
+            return WGPUPrimitiveTopology_LineList;
+        case gfx::DrawModeType::LineStrip:
+            return WGPUPrimitiveTopology_LineStrip;
+        case gfx::DrawModeType::TriangleStrip:
+            return WGPUPrimitiveTopology_TriangleStrip;
+        case gfx::DrawModeType::TriangleFan:
+            // WebGPU does not support triangle fan directly; approximate with triangle list
+            return WGPUPrimitiveTopology_TriangleList;
+        case gfx::DrawModeType::Triangles:
+        default:
+            return WGPUPrimitiveTopology_TriangleList;
+    }
+}
+
 WGPUCompareFunction toCompareFunction(const gfx::DepthFunctionType func) {
     switch (func) {
         case gfx::DepthFunctionType::Never:
@@ -283,6 +303,7 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
                                                    const gfx::ColorMode& colorMode,
                                                    const gfx::DepthMode& depthMode,
                                                    const gfx::StencilMode& stencilMode,
+                                                   gfx::DrawModeType drawModeType,
                                                    const std::optional<std::size_t> reuseHash) {
     (void)renderable;
     // Check cache first
@@ -294,7 +315,8 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
     }
 
     // Create new pipeline
-    WGPURenderPipeline pipeline = createPipeline(vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode);
+    WGPURenderPipeline pipeline =
+        createPipeline(vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode, drawModeType);
 
     // Cache the pipeline if we have a reuse hash
     if (reuseHash.has_value() && pipeline) {
@@ -608,7 +630,8 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
                                                 uint32_t vertexLayoutCount,
                                                 const gfx::ColorMode& colorMode,
                                                 const gfx::DepthMode& depthMode,
-                                                const gfx::StencilMode& stencilMode) {
+                                                const gfx::StencilMode& stencilMode,
+                                                gfx::DrawModeType drawModeType) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!hasVertexEntryPoint || !hasFragmentEntryPoint) {
@@ -684,8 +707,11 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
 
     // Set up primitive state
     WGPUPrimitiveState primitiveState = {};
-    primitiveState.topology = WGPUPrimitiveTopology_TriangleList;
-    primitiveState.stripIndexFormat = WGPUIndexFormat_Undefined;
+    primitiveState.topology = toPrimitiveTopology(drawModeType);
+    primitiveState.stripIndexFormat =
+        (drawModeType == gfx::DrawModeType::LineStrip || drawModeType == gfx::DrawModeType::TriangleStrip)
+            ? WGPUIndexFormat_Uint16
+            : WGPUIndexFormat_Undefined;
     primitiveState.frontFace = WGPUFrontFace_CCW;
     primitiveState.cullMode = WGPUCullMode_None;
 

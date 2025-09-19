@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
+#include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
@@ -122,6 +123,7 @@ public:
                                         const gfx::ColorMode& colorMode,
                                         const gfx::DepthMode& depthMode,
                                         const gfx::StencilMode& stencilMode,
+                                        gfx::DrawModeType drawModeType,
                                         const std::optional<std::size_t> reuseHash = std::nullopt);
 
     const std::vector<BindingInfo>& getBindingInfos() const { return bindingInfos; }
@@ -148,7 +150,8 @@ protected:
                                      uint32_t vertexLayoutCount,
                                      const gfx::ColorMode& colorMode,
                                      const gfx::DepthMode& depthMode,
-                                     const gfx::StencilMode& stencilMode);
+                                     const gfx::StencilMode& stencilMode,
+                                     gfx::DrawModeType drawModeType);
 
     void analyzeShaderBindings(const std::string& source, WGPUShaderStage stage);
     void rebuildBindGroupLayouts();
