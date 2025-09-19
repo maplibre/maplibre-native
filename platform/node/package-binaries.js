@@ -89,7 +89,7 @@ async function createTarballs() {
       await tar.create({
         gzip: true,
         file: tarballName,
-        cwd: '.', // Set current working directory
+        cwd: '.',
       }, [binaryPath]);
 
       // Verify tarball was created and get its size
@@ -117,7 +117,7 @@ if (require.main === module) {
   createTarballs()
     .then(() => {
       console.log('Tarball creation completed successfully');
-      process.exit(0); // Explicitly exit with success
+      process.exit(0);
     })
     .catch(error => {
       console.error('Error creating tarballs:', error);
