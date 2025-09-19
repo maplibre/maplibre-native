@@ -229,8 +229,8 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
                                      bool activate,
                                      UniqueChangeRequestVec& changes) {
     if (layerGroup_) {
-        mbgl::Log::Info(mbgl::Event::Render, "RenderLayer::activateLayerGroup called for: " +
-                        layerGroup_->getName() + " activate=" + std::to_string(activate));
+        // mbgl::Log::Info(mbgl::Event::Render, "RenderLayer::activateLayerGroup called for: " +
+        //                 layerGroup_->getName() + " activate=" + std::to_string(activate));
         if (activate) {
             // The RenderTree has determined this layer should be included in the renderable set for a frame
             changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));

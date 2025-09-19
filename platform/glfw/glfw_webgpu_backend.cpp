@@ -690,7 +690,7 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 
     static int getTextureCount = 0;
     if (getTextureCount++ < 20) {
-        mbgl::Log::Info(mbgl::Event::Render, "Getting surface texture #" + std::to_string(getTextureCount));
+        // mbgl::Log::Info(mbgl::Event::Render, "Getting surface texture #" + std::to_string(getTextureCount));
     }
 
     try {

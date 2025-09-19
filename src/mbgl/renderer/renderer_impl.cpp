@@ -360,15 +360,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        mbgl::Log::Info(mbgl::Event::Render, "Starting drawableOpaquePass with " + std::to_string(orchestrator.numLayerGroups()) + " layer groups");
+        // mbgl::Log::Info(mbgl::Event::Render, "Starting drawableOpaquePass with " + std::to_string(orchestrator.numLayerGroups()) + " layer groups");
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            mbgl::Log::Info(mbgl::Event::Render, "Calling render() on layer group: " + layerGroup.getName() + " (opaque pass)");
+            // mbgl::Log::Info(mbgl::Event::Render, "Calling render() on layer group: " + layerGroup.getName() + " (opaque pass)");
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
-        mbgl::Log::Info(mbgl::Event::Render, "Finished drawableOpaquePass");
+        // mbgl::Log::Info(mbgl::Event::Render, "Finished drawableOpaquePass");
     };
 
     const auto drawableTranslucentPass = [&] {
@@ -377,17 +377,17 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        mbgl::Log::Info(mbgl::Event::Render, "Starting drawableTranslucentPass with " + std::to_string(orchestrator.numLayerGroups()) + " layer groups");
+        // mbgl::Log::Info(mbgl::Event::Render, "Starting drawableTranslucentPass with " + std::to_string(orchestrator.numLayerGroups()) + " layer groups");
         // draw layer groups, translucent pass
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            mbgl::Log::Info(mbgl::Event::Render, "Calling render() on layer group: " + layerGroup.getName() + " (translucent pass)");
+            // mbgl::Log::Info(mbgl::Event::Render, "Calling render() on layer group: " + layerGroup.getName() + " (translucent pass)");
             layerGroup.render(orchestrator, parameters);
             if (parameters.currentLayer > 0) {
                 parameters.currentLayer--;
             }
         });
-        mbgl::Log::Info(mbgl::Event::Render, "Finished drawableTranslucentPass");
+        // mbgl::Log::Info(mbgl::Event::Render, "Finished drawableTranslucentPass");
 
         // Finally, render any legacy layers which have not been converted to drawables.
         // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
@@ -419,22 +419,22 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         common3DPass();
         drawable3DPass();
     }
-    mbgl::Log::Info(mbgl::Event::Render, "About to call drawableTargetsPass()");
+    // mbgl::Log::Info(mbgl::Event::Render, "About to call drawableTargetsPass()");
     drawableTargetsPass();
-    mbgl::Log::Info(mbgl::Event::Render, "About to call commonClearPass()");
+    // mbgl::Log::Info(mbgl::Event::Render, "About to call commonClearPass()");
     commonClearPass();
-    mbgl::Log::Info(mbgl::Event::Render, "About to call bindGlobalUniformBuffers()");
+    // mbgl::Log::Info(mbgl::Event::Render, "About to call bindGlobalUniformBuffers()");
     context.bindGlobalUniformBuffers(*parameters.renderPass);
-    mbgl::Log::Info(mbgl::Event::Render, "About to call drawableOpaquePass()");
+    // mbgl::Log::Info(mbgl::Event::Render, "About to call drawableOpaquePass()");
     drawableOpaquePass();
-    mbgl::Log::Info(mbgl::Event::Render, "About to call drawableTranslucentPass()");
+    // mbgl::Log::Info(mbgl::Event::Render, "About to call drawableTranslucentPass()");
     drawableTranslucentPass();
-#if !MLN_RENDER_BACKEND_WEBGPU
-    mbgl::Log::Info(mbgl::Event::Render, "About to call drawableDebugOverlays()");
+// #if !MLN_RENDER_BACKEND_WEBGPU
+    // mbgl::Log::Info(mbgl::Event::Render, "About to call drawableDebugOverlays()");
     drawableDebugOverlays();
-#else
-    mbgl::Log::Info(mbgl::Event::Render, "Skipping drawableDebugOverlays for WebGPU backend");
-#endif
+// #else
+//     mbgl::Log::Info(mbgl::Event::Render, "Skipping drawableDebugOverlays for WebGPU backend");
+// #endif
 
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });

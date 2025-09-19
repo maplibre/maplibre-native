@@ -45,14 +45,14 @@ void DrawableBuilder::flush(gfx::Context& context) {
                    ", impl->rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
                    ", currentDrawable=" + (currentDrawable ? "present" : "null"));
     if (curVertexCount()) {
-        mbgl::Log::Info(mbgl::Event::Render, "  Entering vertex processing block");
+        // mbgl::Log::Info(mbgl::Event::Render, "  Entering vertex processing block");
         if (Impl::Mode::Polylines == impl->getMode()) {
             // setup for polylines
-            mbgl::Log::Info(mbgl::Event::Render, "  Setting up for polylines");
+            // mbgl::Log::Info(mbgl::Event::Render, "  Setting up for polylines");
             impl->setupForPolylines(context, *this);
         } else if (Impl::Mode::WideVectorLocal == impl->getMode() || Impl::Mode::WideVectorGlobal == impl->getMode()) {
             // setup for wide vectors
-            mbgl::Log::Info(mbgl::Event::Render, "  Setting up for wide vectors");
+            // mbgl::Log::Info(mbgl::Event::Render, "  Setting up for wide vectors");
             impl->setupForWideVectors(context, *this);
         }
 
