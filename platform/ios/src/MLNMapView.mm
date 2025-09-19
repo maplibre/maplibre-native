@@ -782,6 +782,10 @@ public:
         NSStringFromClass(self.class));
     });
 
+    _showsLogoView = YES;
+    _showsCompassView = YES;
+    _showsAttributionButton = YES;
+
     // setup logo
     //
     UIImage *logo = [UIImage mgl_resourceImageNamed:@"maplibre-logo-stroke-gray"];

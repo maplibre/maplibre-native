@@ -361,7 +361,7 @@ MLN_EXPORT
  A Boolean value indicating whether the map may display Compass View.
 
  The view controlled by this property is available at `compassView`. The default value
- of this property is `NO`.
+ of this property is `YES`.
  */
 @property (nonatomic, assign) BOOL showsCompassView;
 
@@ -386,7 +386,7 @@ MLN_EXPORT
  A Boolean value indicating whether the map may display MapLibre logo.
 
  The view controlled by this property is available at `logoView`. The default value
- of this property is `NO`.
+ of this property is `YES`.
  */
 @property (nonatomic, assign) BOOL showsLogoView;
 
@@ -411,7 +411,7 @@ MLN_EXPORT
  A Boolean value indicating whether the map may display Attribution Button.
 
  The view controlled by this property is available at `attributionButton`. The default value
- of this property is `NO`.
+ of this property is `YES`.
  */
 @property (nonatomic, assign) BOOL showsAttributionButton;
 
