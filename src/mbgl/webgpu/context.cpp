@@ -236,6 +236,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         return false;
     }
 
+    Log::Info(Event::Render,
+              "WebGPU: Rendering " + std::to_string(tileUBOs.size()) + " clipping masks for tiles");
+
     if (!clipMaskShader) {
         if (auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
             clipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
