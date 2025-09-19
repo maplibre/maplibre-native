@@ -145,13 +145,12 @@ Drawable::~Drawable() {
     // So we should NOT release it here
     impl->pipelineState = nullptr;
 
-    for (auto bindGroup : impl->bindGroups) {
-        if (bindGroup) {
-            wgpuBindGroupRelease(bindGroup);
+    for (auto& record : impl->bindGroups) {
+        if (record.handle) {
+            wgpuBindGroupRelease(record.handle);
         }
     }
     impl->bindGroups.clear();
-    impl->bindGroupIndices.clear();
 
     // Uniform buffers are managed by UniformBufferArray
     // Vertex and index buffers are now managed through attributeBindings and indexes
@@ -449,16 +448,26 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (webgpuShader) {
             WGPUDevice deviceHandle = static_cast<WGPUDevice>(backend.getDevice());
 
-            for (auto bindGroup : impl->bindGroups) {
-                if (bindGroup) {
-                    wgpuBindGroupRelease(bindGroup);
+            for (auto& record : impl->bindGroups) {
+                if (record.handle) {
+                    wgpuBindGroupRelease(record.handle);
                 }
             }
             impl->bindGroups.clear();
-            impl->bindGroupIndices.clear();
 
             if (deviceHandle) {
                 const auto& groupOrder = webgpuShader->getBindGroupOrder();
+                static bool loggedBindGroupOrder = false;
+                if (!loggedBindGroupOrder && getName().find("fill-outline") != std::string::npos) {
+                    std::string orderStr;
+                    for (size_t idx = 0; idx < groupOrder.size(); ++idx) {
+                        orderStr += std::to_string(groupOrder[idx]);
+                        if (idx + 1 < groupOrder.size()) orderStr += ",";
+                    }
+                    Log::Info(Event::Render,
+                              "Fill-outline bind group order: [" + orderStr + "]");
+                    loggedBindGroupOrder = true;
+                }
                 const auto* globalBuffers = webgpuRenderPass.getGlobalUniformBuffers();
 
                 const auto findTextureForBinding = [&](uint32_t binding, bool samplerBinding) -> Texture2D* {
@@ -479,12 +488,23 @@ void Drawable::draw(PaintParameters& parameters) const {
                     const uint32_t group = groupOrder[slot];
                     auto layout = webgpuShader->getBindGroupLayout(group);
                     if (!layout) {
-                        impl->bindGroups.push_back(nullptr);
-                        impl->bindGroupIndices.push_back(group);
+                        const std::string shaderName = webgpuShader ? std::string(webgpuShader->typeName()) : "unknown";
+                        Log::Warning(Event::Render,
+                                     "WebGPU: missing bind group layout for group " +
+                                         std::to_string(group) + " in shader '" + shaderName + "'");
                         continue;
                     }
 
                     const auto& bindingInfos = webgpuShader->getBindingInfosForGroup(group);
+                    if (getName().find("fill-outline") != std::string::npos) {
+                        std::string infoStr;
+                        for (const auto& info : bindingInfos) {
+                            infoStr += "(binding=" + std::to_string(info.binding) + ", type=" +
+                                        std::to_string(static_cast<int>(info.type)) + ")";
+                        }
+                        Log::Info(Event::Render,
+                                  "Fill-outline bindings for group " + std::to_string(group) + ": " + infoStr);
+                    }
                     std::vector<WGPUBindGroupEntry> entries;
                     entries.reserve(bindingInfos.size());
                     bool validBindings = true;
@@ -508,6 +528,16 @@ void Drawable::draw(PaintParameters& parameters) const {
                                     if (impl->uboIndexUniform) {
                                         impl->uniformBuffers.set(bindingInfo.binding, impl->uboIndexUniform);
                                         buffer = impl->uboIndexUniform;
+                                        static int lineLogCount = 0;
+                                        if (lineLogCount < 128 && getName().find("line") != std::string::npos) {
+                                            const auto& dbgTile = getTileID();
+                                            Log::Info(Event::Render,
+                                                      "Line draw bind global index=" +
+                                                          std::to_string(indexData.value) +
+                                                          " tile=" +
+                                                          (dbgTile ? util::toString(*dbgTile) : std::string("none")));
+                                            lineLogCount++;
+                                        }
                                     }
                                 }
 
@@ -581,8 +611,6 @@ void Drawable::draw(PaintParameters& parameters) const {
                     }
 
                     if (!validBindings || entries.empty()) {
-                        impl->bindGroups.push_back(nullptr);
-                        impl->bindGroupIndices.push_back(group);
                         continue;
                     }
 
@@ -596,8 +624,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                     descriptor.entries = entries.data();
 
                     WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(deviceHandle, &descriptor);
-                    impl->bindGroups.push_back(bindGroup);
-                    impl->bindGroupIndices.push_back(group);
+                    impl->bindGroups.push_back({static_cast<uint32_t>(slot), group, bindGroup});
                 }
             }
         }
@@ -845,20 +872,14 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Set bind group
-    for (size_t slot = 0; slot < impl->bindGroups.size(); ++slot) {
-        const auto bindGroup = impl->bindGroups[slot];
-        const auto groupIndex = (slot < impl->bindGroupIndices.size()) ? impl->bindGroupIndices[slot]
-                                                                       : static_cast<uint32_t>(slot);
-        if (bindGroup) {
-            if (drawCallCount <= 200) {
-                // Log::Info(Event::Render,
-                //           "Setting bind group slot " + std::to_string(groupIndex) + " handle=" +
-                //               std::to_string(reinterpret_cast<uintptr_t>(bindGroup)));
+    for (const auto& record : impl->bindGroups) {
+        if (record.handle) {
+            if (getName().find("fill-outline") != std::string::npos && drawCallCount <= 400) {
+                Log::Info(Event::Render,
+                          "Fill-outline SetBindGroup slot=" + std::to_string(record.slot) +
+                              " group=" + std::to_string(record.group));
             }
-            wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, groupIndex, bindGroup, 0, nullptr);
-        } else {
-            Log::Warning(Event::Render,
-                         "Missing bind group for slot " + std::to_string(groupIndex) + " in drawable " + getName());
+            wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, record.slot, record.handle, 0, nullptr);
         }
     }
 
@@ -889,12 +910,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
 
-            if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
-                // Log::Info(Event::Render, "  FILL Drawing segment " + std::to_string(++segmentCount) +
-                //          " indices=" + std::to_string(mlSegment.indexLength) +
-                //          " indexOffset=" + std::to_string(indexOffset) +
-                //          " baseVertex=" + std::to_string(baseVertex) +
-                //          " instances=" + std::to_string(instanceCount));
+            if (getName().find("fill-outline") != std::string::npos && drawCallCount <= 400) {
+                Log::Info(Event::Render,
+                          "Fill-outline draw segment indices=" + std::to_string(mlSegment.indexLength) +
+                              " uboIndex=" + std::to_string(getUBOIndex()) +
+                              (tileID ? " tile=" + util::toString(*tileID) : std::string("")));
             }
 
             // Check if encoder is valid before drawing
