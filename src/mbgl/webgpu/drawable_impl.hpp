@@ -64,8 +64,12 @@ public:
     gfx::StencilMode previousStencilMode;
 
     // WebGPU-specific resources needed for rendering
-    std::vector<WGPUBindGroup> bindGroups;
-    std::vector<uint32_t> bindGroupIndices;
+    struct BindGroupRecord {
+        uint32_t slot = 0;
+        uint32_t group = 0;
+        WGPUBindGroup handle = nullptr;
+    };
+    std::vector<BindGroupRecord> bindGroups;
 };
 
 // WebGPU-specific DrawSegment inheriting from the base gfx::Drawable::DrawSegment

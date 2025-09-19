@@ -42,6 +42,7 @@ cmake --build build --target mbgl-glfw -- -j8
 - Reworked the symbol WGSL to fetch `SymbolDrawableUBO`/`SymbolTilePropsUBO` from storage-buffer arrays keyed by the shared `GlobalIndexUBO`, eliminating the duplicate `GlobalPaintParamsUBO` definition that Dawn flagged and aligning with the consolidated UBO uploads.
 - Swapped the symbolic `@binding(id…)` decorations in the symbol shaders for literal binding indices, allowing the WebGPU shader introspection to build the correct bind-group layouts.
 - Per-draw `GlobalUBOIndex` uploads now happen inside the WebGPU drawable, fixing the frozen fill tiles that appeared when every draw sampled the first UBO entry.
+- Bind groups now retain both the WGSL `@group` id and the pipeline slot index; `Drawable::draw()` sets the bind group using the slot that the pipeline layout expects. This keeps Dawn’s layout matching stable even when WGSL skips group numbers, so outlines stay on-screen after the first frame.
 - Guarded the layer-group warning so it only fires when drawables actually fail to emit draw calls, eliminating the noisy "visited N drawables but drew none" logs during mismatched render passes.
 - Fill WGSL now falls back to the uniform color/opacity values when a tile uses constant styling, so constant fills like the Crimea overlay no longer disappear after the first frame.
 
@@ -54,6 +55,7 @@ cmake --build build --target mbgl-glfw -- -j8
 - Linking still warns about the Dawn static libs targeting macOS 15.0 while the project is built for 14.3. Bumping `CMAKE_OSX_DEPLOYMENT_TARGET` silences the noise if desired.
 - Verbose logging remains enabled in the backend and shaders; keep it on while stabilising the pipeline, then dial back once the regression suite is green.
 - Stencil clipping is active again: geometry outside a tile’s clip polygon is discarded, matching Metal/Vulkan visuals when panning across tile seams.
+- The current soak shows `Line draw bind global index=0..17` for every frame, confirming the consolidated UBO array is read per-tile and that line outlines now render on all visible tiles instead of jumping between them.
 - 2025-09-19 run via `./run_webgpu.sh` on macOS 14.5 renders the MapLibre demo style; Dawn logs ~30k trace lines while warming caches and occasionally reports `Device was destroyed` when the window closes, but no validation errors appear during steady rendering.
 
 ## Earlier backend improvements
