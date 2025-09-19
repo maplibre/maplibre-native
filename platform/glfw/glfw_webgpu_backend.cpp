@@ -16,6 +16,7 @@
 #include <GLFW/glfw3native.h>
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CAMetalLayer.h>
+#import <CoreGraphics/CoreGraphics.h>
 #include <dawn/native/MetalBackend.h>
 #elif defined(__linux__)
 #define GLFW_EXPOSE_NATIVE_X11
@@ -265,6 +266,11 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Create CAMetalLayer
     CAMetalLayer* layer = [CAMetalLayer layer];
     layer.device = dawn::native::metal::GetMTLDevice(wgpuDevice.Get());
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+    if (colorSpace) {
+        layer.colorspace = colorSpace;
+        CGColorSpaceRelease(colorSpace);
+    }
 
     // Get window size
     int width, height;
@@ -289,10 +295,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         if (wgpuSurfaceGetCapabilities(wgpuSurface.Get(), selectedAdapter.Get(), &capabilities) == WGPUStatus_Success) {
             const auto pickFormat = [&]() {
                 const wgpu::TextureFormat preferredFormats[] = {
-                    wgpu::TextureFormat::BGRA8UnormSrgb,
                     wgpu::TextureFormat::BGRA8Unorm,
-                    wgpu::TextureFormat::RGBA8UnormSrgb,
-                    wgpu::TextureFormat::RGBA8Unorm
+                    wgpu::TextureFormat::BGRA8UnormSrgb,
+                    wgpu::TextureFormat::RGBA8Unorm,
+                    wgpu::TextureFormat::RGBA8UnormSrgb
                 };
                 for (const auto format : preferredFormats) {
                     for (size_t i = 0; i < capabilities.formatCount; ++i) {
@@ -327,9 +333,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.width = width;
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
-    wgpu::TextureFormat viewFormats[] = {swapChainFormat};
+    configuredViewFormats[0] = swapChainFormat;
     config.viewFormatCount = 1;
-    config.viewFormats = viewFormats;
+    config.viewFormats = configuredViewFormats.data();
 
     wgpuSurface.Configure(&config);
     surfaceConfigured = true;
@@ -390,10 +396,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         if (wgpuSurfaceGetCapabilities(wgpuSurface.Get(), selectedAdapter.Get(), &capabilities) == WGPUStatus_Success) {
             const auto pickFormat = [&]() {
                 const wgpu::TextureFormat preferredFormats[] = {
-                    wgpu::TextureFormat::BGRA8UnormSrgb,
                     wgpu::TextureFormat::BGRA8Unorm,
-                    wgpu::TextureFormat::RGBA8UnormSrgb,
-                    wgpu::TextureFormat::RGBA8Unorm
+                    wgpu::TextureFormat::BGRA8UnormSrgb,
+                    wgpu::TextureFormat::RGBA8Unorm,
+                    wgpu::TextureFormat::RGBA8UnormSrgb
                 };
                 for (const auto format : preferredFormats) {
                     for (size_t i = 0; i < capabilities.formatCount; ++i) {
@@ -426,9 +432,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.width = width;
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
-    wgpu::TextureFormat viewFormats[] = {swapChainFormat};
+    configuredViewFormats[0] = swapChainFormat;
     config.viewFormatCount = 1;
-    config.viewFormats = viewFormats;
+    config.viewFormats = configuredViewFormats.data();
 
     wgpuSurface.Configure(&config);
     surfaceConfigured = true;

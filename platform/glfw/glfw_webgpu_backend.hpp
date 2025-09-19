@@ -9,6 +9,7 @@
 #include <webgpu/webgpu_cpp.h>
 #include <queue>
 #include <atomic>
+#include <array>
 
 struct GLFWwindow;
 struct WGPUDeviceImpl;
@@ -71,6 +72,7 @@ private:
     wgpu::Surface wgpuSurface;
     wgpu::TextureFormat swapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
+    std::array<wgpu::TextureFormat, 1> configuredViewFormats{wgpu::TextureFormat::BGRA8Unorm};
     
     // Protect texture view access from multiple threads
     wgpu::TextureView currentTextureView;  // Keep the current texture view alive
