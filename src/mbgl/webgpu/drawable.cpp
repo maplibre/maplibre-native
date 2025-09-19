@@ -13,6 +13,7 @@
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/drawable_impl.hpp>
+#include <algorithm>
 #include <sstream>
 #include <mbgl/webgpu/index_buffer_resource.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
@@ -631,47 +632,104 @@ void Drawable::draw(PaintParameters& parameters) const {
     impl->previousStencilMode = stencilMode;
 
     // Get pipeline from shader if we don't have it yet (like Metal)
+    struct UniqueBinding {
+        const VertexBufferResource* vertexResource = nullptr;
+        const BufferResource* buffer = nullptr;
+        uint32_t stride = 0;
+        uint64_t baseOffset = 0;
+        WGPUVertexStepMode stepMode = WGPUVertexStepMode_Vertex;
+        std::vector<WGPUVertexAttribute> attributes;
+        std::vector<uint64_t> attributeByteOffsets;
+    };
+
+    auto accumulateBindings = [] (const gfx::AttributeBindingArray& source,
+                                  const WGPUVertexStepMode stepMode,
+                                  std::vector<UniqueBinding>& out) {
+        for (size_t attributeIndex = 0; attributeIndex < source.size(); ++attributeIndex) {
+            const auto& binding = source[attributeIndex];
+            if (!binding.has_value() || !binding->vertexBufferResource) {
+                continue;
+            }
+
+            const auto* vertexBufferRes = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
+            if (!vertexBufferRes) {
+                continue;
+            }
+
+            const auto& bufferResource = vertexBufferRes->getBuffer();
+            if (!bufferResource.getBuffer()) {
+                continue;
+            }
+
+            const uint64_t bindingByteOffset = static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
+
+            auto it = std::find_if(out.begin(), out.end(), [&](const UniqueBinding& entry) {
+                return entry.vertexResource == vertexBufferRes && entry.stride == binding->vertexStride &&
+                       entry.stepMode == stepMode;
+            });
+
+            if (it == out.end()) {
+                UniqueBinding entry;
+                entry.vertexResource = vertexBufferRes;
+                entry.buffer = &bufferResource;
+                entry.stride = binding->vertexStride;
+                entry.stepMode = stepMode;
+                entry.baseOffset = bindingByteOffset;
+                entry.attributes.reserve(4);
+                entry.attributeByteOffsets.reserve(4);
+                out.push_back(std::move(entry));
+                it = out.end() - 1;
+            } else {
+                it->baseOffset = std::min(it->baseOffset, bindingByteOffset);
+            }
+
+            WGPUVertexAttribute attr = {};
+            attr.format = wgpuVertexFormatOf(binding->attribute.dataType);
+            attr.shaderLocation = static_cast<uint32_t>(attributeIndex);
+            attr.offset = binding->attribute.offset;
+
+            it->attributes.push_back(attr);
+            it->attributeByteOffsets.push_back(bindingByteOffset);
+        }
+    };
+
+    std::vector<UniqueBinding> uniqueBindings;
+    uniqueBindings.reserve(impl->attributeBindings.size() + impl->instanceBindings.size());
+    accumulateBindings(impl->attributeBindings, WGPUVertexStepMode_Vertex, uniqueBindings);
+    accumulateBindings(impl->instanceBindings, WGPUVertexStepMode_Instance, uniqueBindings);
+
+    constexpr uint32_t maxVertexBufferSlots = 8;
+    if (uniqueBindings.size() > maxVertexBufferSlots) {
+        Log::Warning(Event::Render,
+                     "WebGPU: reducing vertex buffer bindings from " + std::to_string(uniqueBindings.size()) +
+                         " to " + std::to_string(maxVertexBufferSlots));
+        uniqueBindings.resize(maxVertexBufferSlots);
+    }
+
+    for (auto& entry : uniqueBindings) {
+        for (size_t j = 0; j < entry.attributes.size(); ++j) {
+            if (entry.attributeByteOffsets[j] < entry.baseOffset) {
+                continue;
+            }
+            const auto delta = entry.attributeByteOffsets[j] - entry.baseOffset;
+            entry.attributes[j].offset += static_cast<uint32_t>(delta);
+        }
+    }
+
     auto& shaderWebGPU = static_cast<mbgl::webgpu::ShaderProgram&>(*shader);
 
     if (!impl->pipelineState) {
         // Create vertex layout from attribute bindings
-        // IMPORTANT: These must be kept alive until pipeline creation is done
-        std::vector<std::vector<WGPUVertexAttribute>> vertexAttrs;
         std::vector<WGPUVertexBufferLayout> vertexLayouts;
+        vertexLayouts.reserve(uniqueBindings.size());
 
-        // Create vertex buffer layouts from attribute bindings
-        for (size_t i = 0; i < impl->attributeBindings.size(); ++i) {
-            const auto& binding = impl->attributeBindings[i];
-            if (!binding.has_value() || !binding->vertexBufferResource) {
-                continue;
-            }
-
-            // Create vertex attribute for this buffer
-            vertexAttrs.emplace_back();
-            auto& attrs = vertexAttrs.back();
-
-            WGPUVertexAttribute attr = {};
-            attr.format = wgpuVertexFormatOf(binding->attribute.dataType);
-            attr.offset = binding->attribute.offset;
-            attr.shaderLocation = static_cast<uint32_t>(i);  // Use the actual attribute index
-            attrs.push_back(attr);
-        }
-
-        // Now create the layouts with stable pointers to attributes
-        size_t attrIndex = 0;
-        for (const auto& binding : impl->attributeBindings) {
-            if (!binding.has_value() || !binding->vertexBufferResource) {
-                continue;
-            }
-
+        for (auto& binding : uniqueBindings) {
             WGPUVertexBufferLayout layout = {};
-            layout.arrayStride = binding->vertexStride;
-            layout.stepMode = WGPUVertexStepMode_Vertex;
-            layout.attributeCount = vertexAttrs[attrIndex].size();
-            layout.attributes = vertexAttrs[attrIndex].data();
+            layout.arrayStride = binding.stride;
+            layout.stepMode = binding.stepMode;
+            layout.attributeCount = binding.attributes.size();
+            layout.attributes = binding.attributes.data();
             vertexLayouts.push_back(layout);
-
-            attrIndex++;
         }
 
         // Get render pipeline similar to Metal's getRenderPipelineState
@@ -697,9 +755,9 @@ void Drawable::draw(PaintParameters& parameters) const {
             stencilMode,
             std::nullopt);
         if (!impl->pipelineState) {
-            Log::Error(Event::Render, "getRenderPipeline returned null");
-        } else {
-            // Log::Info(Event::Render, "Pipeline created successfully: " + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+            Log::Warning(Event::Render,
+                         "WebGPU: skipping pipeline creation for drawable '" + getName() +
+                             "' (shader='" + shaderWebGPU.typeName().data() + "')");
         }
     }
 
@@ -718,75 +776,49 @@ void Drawable::draw(PaintParameters& parameters) const {
             wgpuRenderPassEncoderSetStencilReference(renderPassEncoder, static_cast<uint32_t>(stencilMode.ref));
         }
     } else {
-        Log::Error(Event::Render, "Failed to create render pipeline state");
-        assert(!"Failed to create render pipeline state");
+        Log::Warning(Event::Render,
+                     "WebGPU: no pipeline available for drawable '" + getName() + "'; draw skipped");
         return;
     }
 
 
-    // Bind vertex buffers from attributeBindings
+    // Bind vertex buffers from the consolidated list
     if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
-        Log::Info(Event::Render, "Total attribute bindings: " + std::to_string(impl->attributeBindings.size()));
-        // Debug: log all attribute bindings
-        for (size_t i = 0; i < impl->attributeBindings.size(); ++i) {
-            const auto& binding = impl->attributeBindings[i];
-            if (binding.has_value()) {
-                Log::Info(Event::Render, "  AttributeBinding[" + std::to_string(i) + "]: has_value=true, vertexBufferResource=" +
-                         (binding->vertexBufferResource ? "present" : "null") +
-                         ", dataType=" + std::to_string(static_cast<int>(binding->attribute.dataType)));
-            } else {
-                Log::Info(Event::Render, "  AttributeBinding[" + std::to_string(i) + "]: has_value=false");
-            }
-        }
+        Log::Info(Event::Render, "Unique vertex buffer bindings: " + std::to_string(uniqueBindings.size()));
     }
 
-    uint32_t boundBufferCount = 0;
     uint32_t bufferSlot = 0;
-    for (size_t i = 0; i < impl->attributeBindings.size(); ++i) {
-        const auto& binding = impl->attributeBindings[i];
-        if (binding.has_value() && binding->vertexBufferResource) {
-            const auto* vertexBufferRes = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
-            if (vertexBufferRes) {
-                const auto& buffer = vertexBufferRes->getBuffer();
-                if (buffer.getBuffer()) {
-                    const uint64_t byteOffset = static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
-                    const uint64_t bufferSize = buffer.getSizeInBytes();
-                    if (byteOffset >= bufferSize) {
-                        Log::Warning(Event::Render,
-                                     "Skipping vertex buffer slot " + std::to_string(bufferSlot) +
-                                         " for attribute " + std::to_string(i) +
-                                         " due to offset " + std::to_string(byteOffset) +
-                                         " >= size " + std::to_string(bufferSize));
-                        continue;
-                    }
-
-                    if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
-                        Log::Info(Event::Render, "  Binding vertex buffer slot " + std::to_string(bufferSlot) +
-                                 " for attribute " + std::to_string(i) +
-                                 " size=" + std::to_string(bufferSize) +
-                                 " attributeOffset=" + std::to_string(binding->attribute.offset) +
-                                 " vertexOffset=" + std::to_string(binding->vertexOffset) +
-                                 " byteOffset=" + std::to_string(byteOffset) +
-                                 " stride=" + std::to_string(binding->vertexStride) +
-                                 " dataType=" + std::to_string(static_cast<int>(binding->attribute.dataType)) +
-                                 " bufferPtr=" + std::to_string(reinterpret_cast<uintptr_t>(buffer.getBuffer())));
-                    }
-
-                    wgpuRenderPassEncoderSetVertexBuffer(
-                        renderPassEncoder,
-                        bufferSlot,
-                        buffer.getBuffer(),
-                        byteOffset,
-                        bufferSize - byteOffset);
-                    bufferSlot++;
-                    boundBufferCount++;
-                }
-            }
+    for (const auto& binding : uniqueBindings) {
+        if (!binding.buffer || !binding.buffer->getBuffer()) {
+            continue;
         }
-    }
 
-    if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
-        Log::Info(Event::Render, "Actually bound " + std::to_string(boundBufferCount) + " vertex buffers");
+        const uint64_t bufferSize = binding.buffer->getSizeInBytes();
+        if (binding.baseOffset >= bufferSize) {
+            Log::Warning(Event::Render,
+                         "Skipping vertex buffer slot " + std::to_string(bufferSlot) +
+                             " due to base offset " + std::to_string(binding.baseOffset) +
+                             " >= size " + std::to_string(bufferSize));
+            continue;
+        }
+
+        if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
+            Log::Info(Event::Render,
+                      "  Binding vertex buffer slot " + std::to_string(bufferSlot) +
+                          " size=" + std::to_string(bufferSize) +
+                          " baseOffset=" + std::to_string(binding.baseOffset) +
+                          " stride=" + std::to_string(binding.stride) +
+                          " attributeCount=" + std::to_string(binding.attributes.size()) +
+                          " bufferPtr=" +
+                          std::to_string(reinterpret_cast<uintptr_t>(binding.buffer->getBuffer())));
+        }
+
+        wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder,
+                                             bufferSlot,
+                                             binding.buffer->getBuffer(),
+                                             binding.baseOffset,
+                                             bufferSize - binding.baseOffset);
+        bufferSlot++;
     }
 
     // Bind index buffer if present

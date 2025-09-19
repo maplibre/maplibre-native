@@ -173,6 +173,10 @@ protected:
 
     std::vector<BindingInfo> bindingInfos;
     std::vector<std::vector<BindingInfo>> bindingsPerGroup;
+
+    bool hasVertexEntryPoint = true;
+    bool hasFragmentEntryPoint = true;
+    bool loggedMissingEntryPoint = false;
 };
 
 } // namespace webgpu

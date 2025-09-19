@@ -180,50 +180,62 @@ ShaderProgram::ShaderProgram(Context& context,
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) return;
 
+    std::string trimmedVertex = trimString(vertexSource);
+    std::string trimmedFragment = trimString(fragmentSource);
+    hasVertexEntryPoint = !trimmedVertex.empty();
+    hasFragmentEntryPoint = !trimmedFragment.empty();
+
     // Get the prelude from common.hpp
     using PreludeShader = shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::WebGPU>;
-    std::string vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
-    mbgl::Log::Info(mbgl::Event::Render, std::string("WGSL vertex snippet for ") + shaderName + "\n" + vertexWithPrelude.substr(0, 200));
-    std::string fragmentWithPrelude = std::string(PreludeShader::prelude) + "\n" + fragmentSource;
 
-    // Don't log here since shaderName will be updated by the template constructor
-    // and the files would be misleading
+    std::string vertexWithPrelude;
+    if (hasVertexEntryPoint) {
+        vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
+        mbgl::Log::Info(mbgl::Event::Render,
+                        std::string("WGSL vertex snippet for ") + shaderName + "\n" + vertexWithPrelude.substr(0, 200));
 
-    // Create vertex shader module
-    WGPUShaderSourceWGSL wgslDesc = {};
-    wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
-    wgslDesc.chain.next = nullptr;
-    WGPUStringView vertexCode = {vertexWithPrelude.c_str(), vertexWithPrelude.length()};
-    wgslDesc.code = vertexCode;
+        WGPUShaderSourceWGSL wgslDesc = {};
+        wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
+        wgslDesc.chain.next = nullptr;
+        WGPUStringView vertexCode = {vertexWithPrelude.c_str(), vertexWithPrelude.length()};
+        wgslDesc.code = vertexCode;
 
-    WGPUShaderModuleDescriptor vertexShaderDesc = {};
-    WGPUStringView vertexLabel = {"Vertex Shader Module", strlen("Vertex Shader Module")};
-    vertexShaderDesc.label = vertexLabel;
-    vertexShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
+        WGPUShaderModuleDescriptor vertexShaderDesc = {};
+        WGPUStringView vertexLabel = {"Vertex Shader Module", strlen("Vertex Shader Module")};
+        vertexShaderDesc.label = vertexLabel;
+        vertexShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
 
-    vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
-    if (!vertexShaderModule) {
-        Log::Error(Event::Render, "Failed to create vertex shader module for " + shaderName);
-        Log::Error(Event::Render, "Vertex shader source length: " + std::to_string(vertexWithPrelude.length()));
-    } else {
-        Log::Info(Event::Render, "Successfully created vertex shader module for " + shaderName);
+        vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
+        if (!vertexShaderModule) {
+            Log::Error(Event::Render, "Failed to create vertex shader module for " + shaderName);
+            Log::Error(Event::Render, "Vertex shader source length: " + std::to_string(vertexWithPrelude.length()));
+        } else {
+            Log::Info(Event::Render, "Successfully created vertex shader module for " + shaderName);
+        }
     }
 
-    // Create fragment shader module
-    WGPUStringView fragmentCode = {fragmentWithPrelude.c_str(), fragmentWithPrelude.length()};
-    wgslDesc.code = fragmentCode;
+    std::string fragmentWithPrelude;
+    if (hasFragmentEntryPoint) {
+        fragmentWithPrelude = std::string(PreludeShader::prelude) + "\n" + fragmentSource;
 
-    WGPUShaderModuleDescriptor fragmentShaderDesc = {};
-    WGPUStringView fragmentLabel = {"Fragment Shader Module", strlen("Fragment Shader Module")};
-    fragmentShaderDesc.label = fragmentLabel;
-    fragmentShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
+        WGPUShaderSourceWGSL wgslDesc = {};
+        wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
+        wgslDesc.chain.next = nullptr;
+        WGPUStringView fragmentCode = {fragmentWithPrelude.c_str(), fragmentWithPrelude.length()};
+        wgslDesc.code = fragmentCode;
 
-    fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
-    if (!fragmentShaderModule) {
-        Log::Error(Event::Render, "Failed to create fragment shader module for " + shaderName);
-        Log::Error(Event::Render, "Fragment shader source length: " + std::to_string(fragmentWithPrelude.length()));
-    } else {
-        Log::Info(Event::Render, "Successfully created fragment shader module for " + shaderName);
+        WGPUShaderModuleDescriptor fragmentShaderDesc = {};
+        WGPUStringView fragmentLabel = {"Fragment Shader Module", strlen("Fragment Shader Module")};
+        fragmentShaderDesc.label = fragmentLabel;
+        fragmentShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
+
+        fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
+        if (!fragmentShaderModule) {
+            Log::Error(Event::Render, "Failed to create fragment shader module for " + shaderName);
+            Log::Error(Event::Render, "Fragment shader source length: " + std::to_string(fragmentWithPrelude.length()));
+        } else {
+            Log::Info(Event::Render, "Successfully created fragment shader module for " + shaderName);
+        }
     }
 
     createPipelineLayout(vertexWithPrelude, fragmentWithPrelude);
@@ -598,6 +610,15 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
                                                 const gfx::DepthMode& depthMode,
                                                 const gfx::StencilMode& stencilMode) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+
+    if (!hasVertexEntryPoint || !hasFragmentEntryPoint) {
+        if (!loggedMissingEntryPoint) {
+            Log::Warning(Event::Render,
+                         "WebGPU: shader '" + shaderName + "' is missing WGSL entry points; skipping pipeline creation");
+            loggedMissingEntryPoint = true;
+        }
+        return nullptr;
+    }
 
     if (!device || !vertexShaderModule || !fragmentShaderModule || !pipelineLayout) {
         Log::Error(Event::Render, "createPipeline missing requirement: device=" +
