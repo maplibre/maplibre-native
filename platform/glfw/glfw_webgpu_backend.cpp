@@ -271,6 +271,11 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         layer.colorspace = colorSpace;
         CGColorSpaceRelease(colorSpace);
     }
+    CGFloat scale = [nsWindow backingScaleFactor];
+    if (scale <= 0.0) {
+        scale = [[NSScreen mainScreen] backingScaleFactor];
+    }
+    layer.contentsScale = scale;
 
     // Get window size
     int width, height;

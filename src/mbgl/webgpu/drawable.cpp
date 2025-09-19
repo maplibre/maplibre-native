@@ -677,6 +677,13 @@ void Drawable::draw(PaintParameters& parameters) const {
         // Get render pipeline similar to Metal's getRenderPipelineState
         // Use the actual color mode from the drawable (like Metal does)
         const auto& colorMode = getColorMode();
+        if (drawCallCount <= 100) {
+            Log::Info(Event::Render,
+                      "Creating pipeline with color mask R=" + std::to_string(colorMode.mask.r) +
+                          " G=" + std::to_string(colorMode.mask.g) +
+                          " B=" + std::to_string(colorMode.mask.b) +
+                          " A=" + std::to_string(colorMode.mask.a));
+        }
 
         // Get the renderable from render pass descriptor like Metal does
         const auto& renderable = webgpuRenderPass.getDescriptor().renderable;
