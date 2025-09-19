@@ -5,31 +5,48 @@
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
 #include <cstring>
+#include <cstdint>
 
 namespace mbgl {
 namespace webgpu {
 
+namespace {
+constexpr std::size_t kUniformBufferAlignment = 256u;
+
+constexpr std::size_t alignedUniformSize(std::size_t size) {
+    if (size == 0u) {
+        return 0u;
+    }
+    return ((size + (kUniformBufferAlignment - 1u)) / kUniformBufferAlignment) * kUniformBufferAlignment;
+}
+} // namespace
+
 UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t size_)
-    : gfx::UniformBuffer(size_), 
+    : gfx::UniformBuffer(alignedUniformSize(size_)),
       context(context_) {
-    
+
+    const std::size_t alignedSize = getSize();
+
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     
-    if (device && size > 0) {
+    if (device && alignedSize > 0) {
         WGPUBufferDescriptor bufferDesc = {};
         WGPUStringView label = {"Uniform Buffer", strlen("Uniform Buffer")};
         bufferDesc.label = label;
-        bufferDesc.size = size;
+        bufferDesc.size = alignedSize;
         bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_Storage | WGPUBufferUsage_CopyDst;
         bufferDesc.mappedAtCreation = data ? 1 : 0;
         
         buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         
         if (buffer && data) {
-            void* mappedData = wgpuBufferGetMappedRange(buffer, 0, size);
+            void* mappedData = wgpuBufferGetMappedRange(buffer, 0, alignedSize);
             if (mappedData) {
-                std::memcpy(mappedData, data, size);
+                std::memcpy(mappedData, data, size_);
+                if (alignedSize > size_) {
+                    std::memset(static_cast<std::uint8_t*>(mappedData) + size_, 0, alignedSize - size_);
+                }
                 wgpuBufferUnmap(buffer);
             }
         }

@@ -23,6 +23,9 @@ cmake --build build --target mbgl-glfw -- -j8
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" message when the swapchain is ready.
 
 ## Recent WebGPU fixes (2025-09-19)
+- Consolidated vertex attribute bindings so a drawable never binds more than eight unique WebGPU vertex buffers; Dawn no longer complains about exceeding the limit, and the fill layer now reuses shared buffers instead of allocating duplicates per attribute.
+- Uniform buffers are allocated with 256-byte alignment before upload, satisfying Dawn's minimum binding size (the global index UBO now binds as 256 bytes instead of 16).
+- Pipelines for placeholder shaders (for example, `FillOutlineTriangulatedShader`) are skipped when no WGSL entry point exists, preventing repeated "entry point missing" validation errors while the WGSL is still being authored.
 - Detect the Dawn surface's preferred color format and propagate it through the renderer backend. The GLFW WebGPU backend now queries `wgpuSurfaceGetCapabilities`, selects a renderable format (preferring `BGRA8Unorm` for broad compatibility), updates the CAMetalLayer pixel format accordingly, and shares the choice with shader pipeline creation.
 - Maintain the swapchain `viewFormats` storage inside the GLFW backend so Dawn sees a stable pointer across reconfigurations, and lock the Metal layer to sRGB color space to avoid color-management surprises.
 - WebGPU drawables once again honour the layer-provided colour mask: the WebGPU-specific `Drawable::setColorMode` now forwards to the base implementation instead of discarding the request, so blend/state configuration matches Metal/Vulkan and fragments actually land in the swapchain.
@@ -42,6 +45,7 @@ cmake --build build --target mbgl-glfw -- -j8
 - Linking still warns about the Dawn static libs targeting macOS 15.0 while the project is built for 14.3. Bumping `CMAKE_OSX_DEPLOYMENT_TARGET` silences the noise if desired.
 - Verbose logging remains enabled in the backend and shaders; keep it on while stabilising the pipeline, then dial back once the regression suite is green.
 - Stencil clipping is active again: geometry outside a tile’s clip polygon is discarded, matching Metal/Vulkan visuals when panning across tile seams.
+- 2025-09-19 run via `./run_webgpu.sh` on macOS 14.5 renders the MapLibre demo style; Dawn logs ~30k trace lines while warming caches and occasionally reports `Device was destroyed` when the window closes, but no validation errors appear during steady rendering.
 
 ## Earlier backend improvements
 - WebGPU clipping masks now route through a dedicated WGSL program that consumes uniform buffers, and the context builds a Dawn pipeline to populate the stencil attachment before the opaque/translucent passes.
