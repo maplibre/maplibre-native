@@ -15,7 +15,7 @@ DrawableBuilder::DrawableBuilder(std::string name_)
 DrawableBuilder::~DrawableBuilder() = default;
 
 std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
-    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating drawable: " + name);
+    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating drawable: " + name);
     return std::make_unique<Drawable>(name);
 }
 
@@ -24,7 +24,7 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 }
 
 void DrawableBuilder::init() {
-    mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() called");
+    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() called");
 
     if (!currentDrawable) {
         mbgl::Log::Warning(mbgl::Event::Render, "DrawableBuilder::init called with no current drawable");
@@ -86,9 +86,9 @@ void DrawableBuilder::init() {
     }
 
     if (impl->sharedIndexes && impl->sharedIndexes->elements()) {
-        mbgl::Log::Info(mbgl::Event::Render, "  Setting index data: " +
-                       std::to_string(impl->sharedIndexes->elements()) + " indices, " +
-                       std::to_string(impl->segments.size()) + " segments");
+        // mbgl::Log::Info(mbgl::Event::Render, "  Setting index data: " +
+        //                std::to_string(impl->sharedIndexes->elements()) + " indices, " +
+        //                std::to_string(impl->segments.size()) + " segments");
         drawable.setIndexData(impl->sharedIndexes, std::move(impl->segments));
     } else {
         mbgl::Log::Warning(mbgl::Event::Render, "  No index data to set!");

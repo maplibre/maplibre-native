@@ -40,10 +40,10 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 }
 
 void DrawableBuilder::flush(gfx::Context& context) {
-    mbgl::Log::Info(mbgl::Event::Render, "DrawableBuilder::flush called for " + name +
-                   ", curVertexCount=" + std::to_string(curVertexCount()) +
-                   ", impl->rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
-                   ", currentDrawable=" + (currentDrawable ? "present" : "null"));
+    // mbgl::Log::Info(mbgl::Event::Render, "DrawableBuilder::flush called for " + name +
+    //                ", curVertexCount=" + std::to_string(curVertexCount()) +
+    //                ", impl->rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
+    //                ", currentDrawable=" + (currentDrawable ? "present" : "null"));
     if (curVertexCount()) {
         // mbgl::Log::Info(mbgl::Event::Render, "  Entering vertex processing block");
         if (Impl::Mode::Polylines == impl->getMode()) {
@@ -56,7 +56,7 @@ void DrawableBuilder::flush(gfx::Context& context) {
             impl->setupForWideVectors(context, *this);
         }
 
-        mbgl::Log::Info(mbgl::Event::Render, "  Getting drawable");
+        // mbgl::Log::Info(mbgl::Event::Render, "  Getting drawable");
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setEnabled(enabled);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
@@ -85,9 +85,9 @@ void DrawableBuilder::flush(gfx::Context& context) {
             draw->setInstanceAttributes(instanceAttrs);
         }
 
-        mbgl::Log::Info(mbgl::Event::Render, "  About to call init()");
+        // mbgl::Log::Info(mbgl::Event::Render, "  About to call init()");
         init();
-        mbgl::Log::Info(mbgl::Event::Render, "  Returned from init()");
+        // mbgl::Log::Info(mbgl::Event::Render, "  Returned from init()");
 
         // reset mode
         impl->setMode(Impl::Mode::Custom);
@@ -96,10 +96,10 @@ void DrawableBuilder::flush(gfx::Context& context) {
         origin.reset();
     }
     if (currentDrawable) {
-        mbgl::Log::Info(mbgl::Event::Render, "  Moving drawable to drawables vector");
+        // mbgl::Log::Info(mbgl::Event::Render, "  Moving drawable to drawables vector");
         drawables.emplace_back(std::move(currentDrawable));
     } else {
-        mbgl::Log::Info(mbgl::Event::Render, "  No drawable to move");
+        // mbgl::Log::Info(mbgl::Event::Render, "  No drawable to move");
     }
 }
 
