@@ -10,10 +10,24 @@ namespace shaders {
 
 constexpr auto symbolShaderPrelude = R"(
 // Symbol shader UBO indices
-const idSymbolDrawableUBO = 0u;
-const idSymbolTilePropsUBO = 1u;
-const idSymbolEvaluatedPropsUBO = 2u;
-const symbolUBOCount = 3u;
+const idGlobalPaintParamsUBO = 0u;
+const idGlobalUBOIndex = 1u;
+const idSymbolDrawableUBO = 2u;
+const idSymbolTilePropsUBO = 3u;
+const idSymbolEvaluatedPropsUBO = 4u;
+const symbolUBOCount = 5u;
+
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
 
 struct SymbolDrawableUBO {
     matrix: mat4x4<f32>,
@@ -23,11 +37,11 @@ struct SymbolDrawableUBO {
     texsize: vec2<f32>,
     texsize_icon: vec2<f32>,
 
-    is_text_prop: f32,
-    rotate_symbol: f32,
-    pitch_with_map: f32,
-    is_size_zoom_constant: f32,
-    is_size_feature_constant: f32,
+    is_text_prop: u32,
+    rotate_symbol: u32,
+    pitch_with_map: u32,
+    is_size_zoom_constant: u32,
+    is_size_feature_constant: u32,
 
     size_t: f32,
     size: f32,
@@ -42,8 +56,8 @@ struct SymbolDrawableUBO {
 };
 
 struct SymbolTilePropsUBO {
-    is_text: f32,
-    is_halo: f32,
+    is_text: u32,
+    is_halo: u32,
     gamma_scale: f32,
     pad1: f32,
 };
@@ -63,11 +77,9 @@ struct SymbolEvaluatedPropsUBO {
     pad2: f32,
 };
 
-struct GlobalPaintParamsUBO {
-    symbol_fade_change: f32,
-    camera_to_center_distance: f32,
-    aspect_ratio: f32,
-    pad: f32,
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
 };
 
 const c_offscreen_degenerate_triangle_location: f32 = -2.0;
@@ -80,6 +92,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
+    static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()" R"(
 struct VertexInput {
@@ -98,12 +111,15 @@ struct VertexOutput {
     @location(2) opacity: f32,
 };
 
-@group(0) @binding(idGlobalPaintParamsUBO) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(idSymbolDrawableUBO) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
+
+    let drawable = drawableVector[globalIndex.value];
 
     let raw_fade_opacity = unpack_opacity(in.fade_opacity);
     let fade_change = select(-paintParams.symbol_fade_change, paintParams.symbol_fade_change, raw_fade_opacity.y > 0.5);
@@ -131,10 +147,12 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let segment_angle = -in.projected_pos.z;
 
+    let size_zoom_constant = drawable.is_size_zoom_constant != 0u;
+    let size_feature_constant = drawable.is_size_feature_constant != 0u;
     var size: f32;
-    if (drawable.is_size_zoom_constant == 0.0 && drawable.is_size_feature_constant == 0.0) {
+    if (!size_zoom_constant && !size_feature_constant) {
         size = mix(a_size_min, a_size.y, drawable.size_t) / 128.0;
-    } else if (drawable.is_size_zoom_constant != 0.0 && drawable.is_size_feature_constant == 0.0) {
+    } else if (size_zoom_constant && !size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
         size = drawable.size;
@@ -142,19 +160,21 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
     let camera_to_anchor_distance = projectedPoint.w;
+    let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
         paintParams.camera_to_center_distance / camera_to_anchor_distance,
         camera_to_anchor_distance / paintParams.camera_to_center_distance,
-        drawable.pitch_with_map != 0.0
+        pitch_with_map
     );
     let perspective_ratio = clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
 
     size *= perspective_ratio;
 
-    let fontScale = select(size, size / 24.0, drawable.is_text_prop != 0.0);
+    let is_text = drawable.is_text_prop != 0u;
+    let fontScale = select(size, size / 24.0, is_text);
 
     var symbol_rotation = 0.0;
-    if (drawable.rotate_symbol != 0.0) {
+    if (drawable.rotate_symbol != 0u) {
         let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -186,14 +206,16 @@ struct FragmentInput {
     @location(2) opacity: f32,
 };
 
-@group(0) @binding(idSymbolTilePropsUBO) var<uniform> tileProps: SymbolTilePropsUBO;
-@group(0) @binding(idSymbolEvaluatedPropsUBO) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var image: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let opacity = select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0.0) * in.opacity;
+    let tileProps = tilePropsVector[globalIndex.value];
+    let opacity = select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u) * in.opacity;
     return textureSample(image, texture_sampler, in.tex) * opacity;
 }
 )";
@@ -205,6 +227,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
+    static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()" R"(
 struct VertexInput {
@@ -233,12 +256,15 @@ struct VertexOutput {
     @location(8) halo_blur: f32,
 };
 
-@group(0) @binding(idGlobalPaintParamsUBO) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(idSymbolDrawableUBO) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
+
+    let drawable = drawableVector[globalIndex.value];
 
     let fade_opacity = unpack_opacity(in.fade_opacity);
     let fade_change = select(-paintParams.symbol_fade_change, paintParams.symbol_fade_change, fade_opacity.y > 0.5);
@@ -264,9 +290,11 @@ fn main(in: VertexInput) -> VertexOutput {
     let segment_angle = -in.projected_pos.z;
 
     var size: f32;
-    if (drawable.is_size_zoom_constant == 0.0 && drawable.is_size_feature_constant == 0.0) {
+    let size_zoom_constant = drawable.is_size_zoom_constant != 0u;
+    let size_feature_constant = drawable.is_size_feature_constant != 0u;
+    if (!size_zoom_constant && !size_feature_constant) {
         size = mix(a_size_min, a_size.y, drawable.size_t) / 128.0;
-    } else if (drawable.is_size_zoom_constant != 0.0 && drawable.is_size_feature_constant == 0.0) {
+    } else if (size_zoom_constant && !size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
         size = drawable.size;
@@ -274,19 +302,21 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
     let camera_to_anchor_distance = projectedPoint.w;
+    let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
         paintParams.camera_to_center_distance / camera_to_anchor_distance,
         camera_to_anchor_distance / paintParams.camera_to_center_distance,
-        drawable.pitch_with_map != 0.0
+        pitch_with_map
     );
     let perspective_ratio = clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
 
     size *= perspective_ratio;
 
-    let fontScale = select(size, size / 24.0, drawable.is_text_prop != 0.0);
+    let is_text = drawable.is_text_prop != 0u;
+    let fontScale = select(size, size / 24.0, is_text);
 
     var symbol_rotation = 0.0;
-    if (drawable.rotate_symbol != 0.0) {
+    if (drawable.rotate_symbol != 0u) {
         let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -331,34 +361,36 @@ struct FragmentInput {
     @location(8) halo_blur: f32,
 };
 
-@group(0) @binding(idSymbolTilePropsUBO) var<uniform> tileProps: SymbolTilePropsUBO;
-@group(0) @binding(idSymbolEvaluatedPropsUBO) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var glyph_atlas: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let tileProps = tilePropsVector[globalIndex.value];
     let fill_color = select(in.fill_color,
-                           select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0.0),
-                           false); // Use attribute color for now
+                           select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0u),
+                           false);
     let halo_color = select(in.halo_color,
-                           select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0.0),
+                           select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0u),
                            false);
     let opacity = select(in.opacity,
-                        select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0.0),
+                        select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u),
                         false);
     let halo_width = select(in.halo_width,
-                           select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0.0),
+                           select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0u),
                            false);
     let halo_blur = select(in.halo_blur,
-                          select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0.0),
+                          select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u),
                           false);
 
     let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     let fontGamma = in.fontScale * tileProps.gamma_scale;
-    let color = select(fill_color, halo_color, tileProps.is_halo != 0.0);
-    let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0.0) + EDGE_GAMMA) / fontGamma;
-    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0.0);
+    let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
+    let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
+    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
     let dist = textureSample(glyph_atlas, texture_sampler, in.tex).a;
     let gamma_scaled = gamma * in.gamma_scale;
     let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
@@ -374,6 +406,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
+    static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()" R"(
 struct VertexInput {
@@ -402,8 +435,9 @@ struct VertexOutput {
     @location(9) halo_blur: f32,
 };
 
-@group(0) @binding(idGlobalPaintParamsUBO) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(idSymbolDrawableUBO) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
 
 const SDF = 1.0;
 const ICON = 0.0;
@@ -411,6 +445,8 @@ const ICON = 0.0;
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
+
+    let drawable = drawableVector[globalIndex.value];
 
     let fade_opacity = unpack_opacity(in.fade_opacity);
     let fade_change = select(-paintParams.symbol_fade_change, paintParams.symbol_fade_change, fade_opacity.y > 0.5);
@@ -435,10 +471,12 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let segment_angle = -in.projected_pos.z;
 
+    let size_zoom_constant = drawable.is_size_zoom_constant != 0u;
+    let size_feature_constant = drawable.is_size_feature_constant != 0u;
     var size: f32;
-    if (drawable.is_size_zoom_constant == 0.0 && drawable.is_size_feature_constant == 0.0) {
+    if (!size_zoom_constant && !size_feature_constant) {
         size = mix(a_size_min, a_size.y, drawable.size_t) / 128.0;
-    } else if (drawable.is_size_zoom_constant != 0.0 && drawable.is_size_feature_constant == 0.0) {
+    } else if (size_zoom_constant && !size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
         size = drawable.size;
@@ -446,10 +484,11 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
     let camera_to_anchor_distance = projectedPoint.w;
+    let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
         paintParams.camera_to_center_distance / camera_to_anchor_distance,
         camera_to_anchor_distance / paintParams.camera_to_center_distance,
-        drawable.pitch_with_map != 0.0
+        pitch_with_map
     );
     let perspective_ratio = clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
 
@@ -458,7 +497,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let fontScale = size / 24.0;
 
     var symbol_rotation = 0.0;
-    if (drawable.rotate_symbol != 0.0) {
+    if (drawable.rotate_symbol != 0u) {
         let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -507,8 +546,9 @@ struct FragmentInput {
     @location(9) halo_blur: f32,
 };
 
-@group(0) @binding(idSymbolTilePropsUBO) var<uniform> tileProps: SymbolTilePropsUBO;
-@group(0) @binding(idSymbolEvaluatedPropsUBO) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var glyph_sampler: sampler;
 @group(1) @binding(1) var glyph_image: texture_2d<f32>;
 @group(1) @binding(2) var icon_sampler: sampler;
@@ -516,20 +556,21 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let tileProps = tilePropsVector[globalIndex.value];
     let fill_color = select(in.fill_color,
-                           select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0.0),
+                           select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0u),
                            false);
     let halo_color = select(in.halo_color,
-                           select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0.0),
+                           select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0u),
                            false);
     let opacity = select(in.opacity,
-                        select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0.0),
+                        select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u),
                         false);
     let halo_width = select(in.halo_width,
-                           select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0.0),
+                           select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0u),
                            false);
     let halo_blur = select(in.halo_blur,
-                          select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0.0),
+                          select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u),
                           false);
 
     if (in.is_icon != 0.0) {
@@ -538,10 +579,10 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     }
 
     let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
-    let color = select(fill_color, halo_color, tileProps.is_halo != 0.0);
+    let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let fontGamma = in.fontScale * tileProps.gamma_scale;
-    let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0.0) + EDGE_GAMMA) / fontGamma;
-    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0.0);
+    let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
+    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
     let dist = textureSample(glyph_image, glyph_sampler, in.tex).a;
     let gamma_scaled = gamma * in.gamma_scale;
     let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
