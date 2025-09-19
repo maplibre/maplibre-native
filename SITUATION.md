@@ -39,6 +39,9 @@ cmake --build build --target mbgl-glfw -- -j8
 - WebGPU tile layer groups no longer guess shaders from layer names; drawables keep the shader assigned by their builders, matching the Metal/Vulkan flow.
 - Reconciled every WebGPU shader's `AttributeInfo` indices and data types with the WGSL `@location` declarations. Dawn no longer flags the clipping mask pipeline (or any other program) as invalid, and the GLFW demo presents a full map instead of a black surface.
 
+- Reworked the symbol WGSL to fetch `SymbolDrawableUBO`/`SymbolTilePropsUBO` from storage-buffer arrays keyed by the shared `GlobalIndexUBO`, eliminating the duplicate `GlobalPaintParamsUBO` definition that Dawn flagged and aligning with the consolidated UBO uploads.
+- Swapped the symbolic `@binding(id…)` decorations in the symbol shaders for literal binding indices, allowing the WebGPU shader introspection to build the correct bind-group layouts.
+
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
 - `./run_webgpu.sh` renders the MapLibre demo style end-to-end with WebGPU/Dawn. There are no remaining Dawn validation errors in the steady state.

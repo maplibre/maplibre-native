@@ -61,19 +61,6 @@ fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
-// Global paint parameters struct (matches GlobalPaintParamsUBO)
-struct GlobalPaintParams {
-    pattern_atlas_texsize: vec2<f32>,
-    units_to_pixels: vec2<f32>,
-    world_size: vec2<f32>,
-    camera_to_center_distance: f32,
-    symbol_fade_change: f32,
-    aspect_ratio: f32,
-    pixel_ratio: f32,
-    map_zoom: f32,
-    pad1: f32,
-};
-
 // Radians conversion
 fn radians(degrees: f32) -> f32 {
     return PI * degrees / 180.0;
@@ -90,6 +77,11 @@ fn glMod2(x: vec2<f32>, y: f32) -> vec2<f32> {
 
 fn glMod2v(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
     return x - y * floor(x / y);
+}
+
+// GLSL compatibility helpers
+fn gl_mod(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
+    return glMod2v(x, y);
 }
 )";
 };
