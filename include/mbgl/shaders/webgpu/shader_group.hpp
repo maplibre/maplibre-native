@@ -62,13 +62,21 @@ public:
             // since WGSL doesn't support preprocessor directives
             // Instead, we'll handle data-driven properties with uniform buffers
 
-            const std::string vertexSource(vert);
-            const std::string fragmentSource(frag);
+        std::string vertexSource;
+        std::string fragmentSource;
 
-            auto& context = static_cast<Context&>(gfxContext);
-            shader = std::make_shared<ShaderProgram>(
-                context,
-                vertexSource,
+        if constexpr (requires { ShaderSource::prelude; }) {
+            vertexSource = std::string(ShaderSource::prelude) + vert;
+            fragmentSource = std::string(ShaderSource::prelude) + frag;
+        } else {
+            vertexSource = vert;
+            fragmentSource = frag;
+        }
+
+        auto& context = static_cast<Context&>(gfxContext);
+        shader = std::make_shared<ShaderProgram>(
+            context,
+            vertexSource,
                 fragmentSource,
                 ShaderSource::attributes,
                 ShaderSource::textures,
