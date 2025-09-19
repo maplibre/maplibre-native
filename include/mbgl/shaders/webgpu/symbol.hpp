@@ -83,9 +83,9 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU> {
 
     static constexpr auto vertex = R"()" R"(
 struct VertexInput {
-    @location(3) pos_offset: vec4<i16>,
-    @location(4) data: vec4<u16>,
-    @location(5) pixeloffset: vec4<i16>,
+    @location(3) pos_offset: vec4<i32>,
+    @location(4) data: vec4<u32>,
+    @location(5) pixeloffset: vec4<i32>,
     @location(6) projected_pos: vec3<f32>,
     @location(7) fade_opacity: f32,
     @location(8) opacity: f32,
@@ -98,8 +98,8 @@ struct VertexOutput {
     @location(2) opacity: f32,
 };
 
-@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(idGlobalPaintParamsUBO) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(idSymbolDrawableUBO) var<uniform> drawable: SymbolDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -186,8 +186,8 @@ struct FragmentInput {
     @location(2) opacity: f32,
 };
 
-@group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
-@group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(idSymbolTilePropsUBO) var<uniform> tileProps: SymbolTilePropsUBO;
+@group(0) @binding(idSymbolEvaluatedPropsUBO) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var image: texture_2d<f32>;
 
@@ -208,9 +208,9 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::WebGPU> {
 
     static constexpr auto vertex = R"()" R"(
 struct VertexInput {
-    @location(3) pos_offset: vec4<i16>,
-    @location(4) data: vec4<u16>,
-    @location(5) pixeloffset: vec4<i16>,
+    @location(3) pos_offset: vec4<i32>,
+    @location(4) data: vec4<u32>,
+    @location(5) pixeloffset: vec4<i32>,
     @location(6) projected_pos: vec3<f32>,
     @location(7) fade_opacity: f32,
     @location(8) fill_color: vec4<f32>,
@@ -233,8 +233,8 @@ struct VertexOutput {
     @location(8) halo_blur: f32,
 };
 
-@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(idGlobalPaintParamsUBO) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(idSymbolDrawableUBO) var<uniform> drawable: SymbolDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -331,8 +331,8 @@ struct FragmentInput {
     @location(8) halo_blur: f32,
 };
 
-@group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
-@group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(idSymbolTilePropsUBO) var<uniform> tileProps: SymbolTilePropsUBO;
+@group(0) @binding(idSymbolEvaluatedPropsUBO) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var glyph_atlas: texture_2d<f32>;
 
@@ -377,8 +377,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU
 
     static constexpr auto vertex = R"()" R"(
 struct VertexInput {
-    @location(3) pos_offset: vec4<i16>,
-    @location(4) data: vec4<u16>,
+    @location(3) pos_offset: vec4<i32>,
+    @location(4) data: vec4<u32>,
     @location(5) projected_pos: vec3<f32>,
     @location(6) fade_opacity: f32,
     @location(7) fill_color: vec4<f32>,
@@ -402,8 +402,8 @@ struct VertexOutput {
     @location(9) halo_blur: f32,
 };
 
-@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<uniform> drawable: SymbolDrawableUBO;
+@group(0) @binding(idGlobalPaintParamsUBO) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(idSymbolDrawableUBO) var<uniform> drawable: SymbolDrawableUBO;
 
 const SDF = 1.0;
 const ICON = 0.0;
@@ -507,8 +507,8 @@ struct FragmentInput {
     @location(9) halo_blur: f32,
 };
 
-@group(0) @binding(3) var<uniform> tileProps: SymbolTilePropsUBO;
-@group(0) @binding(3) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(idSymbolTilePropsUBO) var<uniform> tileProps: SymbolTilePropsUBO;
+@group(0) @binding(idSymbolEvaluatedPropsUBO) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var glyph_sampler: sampler;
 @group(1) @binding(1) var glyph_image: texture_2d<f32>;
 @group(1) @binding(2) var icon_sampler: sampler;
