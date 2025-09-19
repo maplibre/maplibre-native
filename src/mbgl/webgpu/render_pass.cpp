@@ -63,19 +63,17 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     colorAttachment.storeOp = WGPUStoreOp_Store;
 
     if (descriptor.clearColor) {
-        const bool isDefaultFramebuffer = &descriptor.renderable == &backend.getDefaultRenderable();
         const auto& clearColor = descriptor.clearColor.value();
-        const WGPUColor value = isDefaultFramebuffer
-                                     ? WGPUColor{0.0, 0.0, 0.0, 1.0}
-                                     : WGPUColor{static_cast<double>(clearColor.r),
-                                                 static_cast<double>(clearColor.g),
-                                                 static_cast<double>(clearColor.b),
-                                                 static_cast<double>(clearColor.a)};
+        const WGPUColor value{static_cast<double>(clearColor.r),
+                              static_cast<double>(clearColor.g),
+                              static_cast<double>(clearColor.b),
+                              static_cast<double>(clearColor.a)};
         colorAttachment.loadOp = WGPULoadOp_Clear;
         colorAttachment.clearValue = value;
         mbgl::Log::Info(mbgl::Event::Render,
-                        isDefaultFramebuffer ? "WebGPU: Clearing default framebuffer to black"
-                                              : "WebGPU: Clearing with clearColor");
+                        "WebGPU: Clearing with clearColor " + std::to_string(clearColor.r) + ", " +
+                            std::to_string(clearColor.g) + ", " + std::to_string(clearColor.b) + ", " +
+                            std::to_string(clearColor.a));
     } else {
         colorAttachment.loadOp = WGPULoadOp_Load;
     }
