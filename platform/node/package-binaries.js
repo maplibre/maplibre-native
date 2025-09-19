@@ -11,10 +11,13 @@ const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 function getPlatform() {
   // Use Node.js built-in process.platform
   switch (process.platform) {
-    case 'linux': return 'linux';
-    case 'darwin': return 'darwin';
-    case 'win32': return 'win32';
-    default: 
+    case 'linux':
+      return 'linux';
+    case 'darwin':
+      return 'darwin';
+    case 'win32':
+      return 'win32';
+    default:
       console.warn(`Unknown platform: ${process.platform}, using as-is`);
       return process.platform;
   }
@@ -23,12 +26,18 @@ function getPlatform() {
 function getArch() {
   // Use Node.js built-in process.arch
   switch (process.arch) {
-    case 'x64': return 'x64';
-    case 'arm64': return 'arm64';
-    case 'ia32': return 'ia32';
-    case 'arm': return 'arm';
-    case 's390x': return 's390x';
-    case 'ppc64': return 'ppc64';
+    case 'x64':
+      return 'x64';
+    case 'arm64':
+      return 'arm64';
+    case 'ia32':
+      return 'ia32';
+    case 'arm':
+      return 'arm';
+    case 's390x':
+      return 's390x';
+    case 'ppc64':
+      return 'ppc64';
     default:
       console.warn(`Unknown architecture: ${process.arch}, using as-is`);
       return process.arch;
@@ -125,4 +134,9 @@ if (require.main === module) {
     });
 }
 
-module.exports = { createTarballs, getPlatform, getArch, cleanPackageName };
+module.exports = {
+  createTarballs,
+  getPlatform,
+  getArch,
+  cleanPackageName
+};
