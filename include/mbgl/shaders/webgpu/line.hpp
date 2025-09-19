@@ -49,6 +49,14 @@ struct LineDrawableUBO {
     pad1: f32,
 };
 
+const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
+const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
+const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
+const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
+const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
+const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
+const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
+
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
     blur: f32,
@@ -56,14 +64,21 @@ struct LineEvaluatedPropsUBO {
     gapwidth: f32,
     offset: f32,
     width: f32,
+    floorwidth: f32,
+    expressionMask: u32,
     pad1: f32,
-    pad2: f32,
-    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
     units_to_pixels: vec2<f32>,
-    // other fields...
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct GlobalIndexUBO {
@@ -80,31 +95,68 @@ struct GlobalIndexUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[globalIndex.value];
-
-    // Constants
-    let ANTIALIASING = 1.0 / 2.0;  // Would use DEVICE_PIXEL_RATIO but simplified for WebGPU
+    let ratio = max(drawable.ratio, 1e-6);
+    let pixel_ratio = paintParams.pixel_ratio;
+    let antialiasing = 0.5 / pixel_ratio;
 
     // Unpack vertex data
-    let a_extrude = vec2<f32>(f32(in.data.x), f32(in.data.y)) - 128.0;
-    let a_direction = f32(in.data.z % 4u) - 1.0;
-    let v_linesofar = (f32(in.data.z / 4u) + f32(in.data.w) * 64.0) * 2.0 / 32767.0; // MAX_LINE_DISTANCE
+    let a_extrude = vec2<f32>(f32(in.data.x), f32(in.data.y)) - vec2<f32>(128.0, 128.0);
+    let a_direction = f32(in.data.z & 3u) - 1.0;
+    let raw_pos = vec2<f32>(f32(in.pos_normal.x), f32(in.pos_normal.y));
+    let pos = floor(raw_pos * 0.5);
+    var normal = raw_pos - pos * 2.0;
+    normal.y = normal.y * 2.0 - 1.0;
 
-    // Unpack position and normal
-    let pos = floor(vec2<f32>(f32(in.pos_normal.x), f32(in.pos_normal.y)) * 0.5);
-    let normal = vec2<f32>(f32(in.pos_normal.x), f32(in.pos_normal.y)) - 2.0 * pos;
-    let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
+    let mask = props.expressionMask;
 
-    // Unpack attributes using helper functions
-    let color = unpack_mix_color(in.color, drawable.color_t);
-    let blur = unpack_mix_float(in.blur, drawable.blur_t);
-    let opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    let gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t) / 2.0;
-    let offset = unpack_mix_float(in.offset, drawable.offset_t) * -1.0;
-    let width = unpack_mix_float(in.width, drawable.width_t);
+    var color: vec4<f32>;
+    if ((mask & LINE_EXPRESSION_COLOR) == 0u) {
+        color = props.color;
+    } else {
+        color = unpack_mix_color(in.color, drawable.color_t);
+    }
 
-    let halfwidth = width / 2.0;
-    let inset = gapwidth + select(0.0, ANTIALIASING, gapwidth > 0.0);
-    let outset = gapwidth + halfwidth * select(1.0, 2.0, gapwidth > 0.0) + select(0.0, ANTIALIASING, halfwidth != 0.0);
+    var blur: f32;
+    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
+        blur = props.blur;
+    } else {
+        blur = unpack_mix_float(in.blur, drawable.blur_t);
+    }
+
+    var opacity: f32;
+    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
+        opacity = props.opacity;
+    } else {
+        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    }
+
+    var gapwidth: f32;
+    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
+        gapwidth = props.gapwidth;
+    } else {
+        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    }
+    gapwidth = gapwidth / 2.0;
+
+    var offset: f32;
+    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
+        offset = props.offset;
+    } else {
+        offset = unpack_mix_float(in.offset, drawable.offset_t);
+    }
+    offset = -offset;
+
+    var width: f32;
+    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
+        width = props.width;
+    } else {
+        width = unpack_mix_float(in.width, drawable.width_t);
+    }
+
+    let halfwidth = width * 0.5;
+    let inset = gapwidth + select(0.0, antialiasing, gapwidth > 0.0);
+    let outset = gapwidth + halfwidth * select(1.0, 2.0, gapwidth > 0.0) +
+                 select(0.0, antialiasing, halfwidth != 0.0);
 
     // Scale the extrusion vector down to a normal and then up by the line width of this vertex
     let dist = outset * a_extrude * LINE_NORMAL_SCALE;
@@ -112,26 +164,28 @@ fn main(in: VertexInput) -> VertexOutput {
     // Calculate the offset when drawing a line that is to the side of the actual line
     let u = 0.5 * a_direction;
     let t = 1.0 - abs(u);
-    let offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * mat2x2<f32>(t, -u, u, t);
+    let offset2 = offset * a_extrude * LINE_NORMAL_SCALE * normal.y * mat2x2<f32>(t, -u, u, t);
 
-    let projected_extrude = drawable.matrix * vec4<f32>(dist / drawable.ratio, 0.0, 0.0);
-    let position = drawable.matrix * vec4<f32>(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    let projected_extrude = drawable.matrix * vec4<f32>(dist / ratio, 0.0, 0.0);
+    let base = drawable.matrix * vec4<f32>(pos + offset2 / ratio, 0.0, 1.0);
+    let clip = base + projected_extrude;
 
-    // Calculate gamma scale for antialiasing
+    let inv_w = 1.0 / clip.w;
+    let ndc_z = (clip.z * inv_w) * 0.5 + 0.5;
+
+    out.position = vec4<f32>(clip.x * inv_w,
+                             clip.y * inv_w,
+                             ndc_z,
+                             1.0);
+
     let extrude_length_without_perspective = length(dist);
-    let extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
+    let extrude_length_with_perspective =
+        length((projected_extrude.xy / clip.w) * paintParams.units_to_pixels);
+    let gamma_denom = max(extrude_length_with_perspective, 1e-6);
 
-    // Convert to NDC coordinates (WebGPU uses Z range [0, 1])
-    let ndc_z = (position.z / position.w) * 0.5 + 0.5;
-    out.position = vec4<f32>(
-        position.x / position.w,
-        position.y / position.w,
-        ndc_z,
-        1.0
-    );
     out.v_width2 = vec2<f32>(outset, inset);
-    out.v_normal = v_normal;
-    out.v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    out.v_normal = normal;
+    out.v_gamma_scale = extrude_length_without_perspective / gamma_denom;
     out.v_color = color;
     out.v_blur = blur;
     out.v_opacity = opacity;
@@ -150,14 +204,30 @@ struct FragmentInput {
     @location(5) v_opacity: f32,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     // Calculate the distance of the pixel from the line in pixels
     let dist = length(in.v_normal) * in.v_width2.x;
 
     // Calculate the antialiasing fade factor
-    let blur2 = (in.v_blur + 1.0 / 2.0) * in.v_gamma_scale;  // Would use DEVICE_PIXEL_RATIO
-    let alpha = clamp(min(dist - (in.v_width2.y - blur2), in.v_width2.x - dist) / blur2, 0.0, 1.0);
+    let antialiasing = 0.5 / paintParams.pixel_ratio;
+    let blur2 = (in.v_blur + antialiasing) * in.v_gamma_scale;
+    let denom = max(blur2, 1e-6);
+    let alpha = clamp(min(dist - (in.v_width2.y - blur2), in.v_width2.x - dist) / denom, 0.0, 1.0);
 
     return in.v_color * (alpha * in.v_opacity);
 }
@@ -211,14 +281,21 @@ struct LineEvaluatedPropsUBO {
     gapwidth: f32,
     offset: f32,
     width: f32,
+    floorwidth: f32,
+    expressionMask: u32,
     pad1: f32,
-    pad2: f32,
-    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
     units_to_pixels: vec2<f32>,
-    // other fields...
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct GlobalIndexUBO {
@@ -378,15 +455,21 @@ struct LineEvaluatedPropsUBO {
     gapwidth: f32,
     offset: f32,
     width: f32,
+    floorwidth: f32,
+    expressionMask: u32,
     pad1: f32,
-    pad2: f32,
-    pad3: f32,
 };
 
 struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
     units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
     pixel_ratio: f32,
-    // other fields...
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct GlobalIndexUBO {
@@ -591,13 +674,20 @@ struct LineEvaluatedPropsUBO {
     offset: f32,
     width: f32,
     floorwidth: f32,
+    expressionMask: u32,
     pad1: f32,
-    pad2: f32,
 };
 
 struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
     units_to_pixels: vec2<f32>,
-    // other fields...
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct GlobalIndexUBO {
