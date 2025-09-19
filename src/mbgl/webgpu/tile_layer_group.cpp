@@ -61,6 +61,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     bool bindUBOs = false;
     int visitCount = 0;
     int drawCount = 0;
+    const auto initialDrawCalls = parameters.context.renderingStats().numDrawCalls;
     // mbgl::Log::Info(mbgl::Event::Render, "TileLayerGroup::render starting visitDrawables for " + getName());
     visitDrawables([&](gfx::Drawable& drawable) {
         visitCount++;
@@ -122,9 +123,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // mbgl::Log::Info(mbgl::Event::Render, "TileLayerGroup::render finished for " + getName() +
     //                " visited=" + std::to_string(visitCount) + " drawn=" + std::to_string(drawCount));
 
-    if (visitCount > 0 && drawCount == 0) {
+    const auto finalDrawCalls = parameters.context.renderingStats().numDrawCalls;
+    if (drawCount > 0 && finalDrawCalls == initialDrawCalls) {
         mbgl::Log::Warning(mbgl::Event::Render, getName() + " visited " + std::to_string(visitCount) +
-                          " drawables but drew none!");
+                          " drawables but produced no draw calls!");
     }
 }
 
