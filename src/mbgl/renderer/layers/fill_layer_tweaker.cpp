@@ -122,8 +122,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .color_t = std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
-                    .pad2 = 0
+                    .pad1 = binders->get<FillColor>()->getVertexCount() > 0 ? 1.0f : 0.0f,
+                    .pad2 = binders->get<FillOpacity>()->getVertexCount() > 0 ? 1.0f : 0.0f
                 };
 
 #if !MLN_UBO_CONSOLIDATION
@@ -154,8 +154,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .outline_color_t = std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
-                    .pad2 = 0
+                    .pad1 = binders->get<FillOutlineColor>()->getVertexCount() > 0 ? 1.0f : 0.0f,
+                    .pad2 = binders->get<FillOpacity>()->getVertexCount() > 0 ? 1.0f : 0.0f
                 };
 
 #if !MLN_UBO_CONSOLIDATION

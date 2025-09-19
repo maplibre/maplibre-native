@@ -40,6 +40,15 @@ struct FillDrawableUnionUBO {
     padding: vec4<f32>,
 };
 
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
@@ -47,6 +56,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 
 @vertex
 fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
@@ -62,9 +72,17 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
                              ndcZ,
                              1.0);
 
-    // Interpolate color and opacity
-    out.color = unpack_mix_color(in.color, drawable.color_t);
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    var color = props.color;
+    if (drawable.pad1 > 0.5) {
+        color = unpack_mix_color(in.color, drawable.color_t);
+    }
+    var opacity = props.opacity;
+    if (drawable.pad2 > 0.5) {
+        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    }
+
+    out.color = color;
+    out.opacity = opacity;
 
     return out;
 }
@@ -117,6 +135,15 @@ struct FillOutlineDrawableUnionUBO {
     padding: vec4<f32>,
 };
 
+struct FillOutlineEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
@@ -124,6 +151,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
+@group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 @vertex
 fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
@@ -139,9 +167,17 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
                              ndcZ,
                              1.0);
 
-    // Interpolate color and opacity
-    out.color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    var color = props.outline_color;
+    if (drawable.pad1 > 0.5) {
+        color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
+    }
+    var opacity = props.opacity;
+    if (drawable.pad2 > 0.5) {
+        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    }
+
+    out.color = color;
+    out.opacity = opacity;
 
     return out;
 }

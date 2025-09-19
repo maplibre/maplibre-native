@@ -43,12 +43,14 @@ cmake --build build --target mbgl-glfw -- -j8
 - Swapped the symbolic `@binding(id…)` decorations in the symbol shaders for literal binding indices, allowing the WebGPU shader introspection to build the correct bind-group layouts.
 - Per-draw `GlobalUBOIndex` uploads now happen inside the WebGPU drawable, fixing the frozen fill tiles that appeared when every draw sampled the first UBO entry.
 - Guarded the layer-group warning so it only fires when drawables actually fail to emit draw calls, eliminating the noisy "visited N drawables but drew none" logs during mismatched render passes.
+- Fill WGSL now falls back to the uniform color/opacity values when a tile uses constant styling, so constant fills like the Crimea overlay no longer disappear after the first frame.
 
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
 - `./run_webgpu.sh` renders the MapLibre demo style end-to-end with WebGPU/Dawn. There are no remaining Dawn validation errors in the steady state.
 - For automated runs use `gtimeout 20 ./run_webgpu.sh` (part of GNU coreutils) to auto-exit after a short soak; otherwise close the GLFW window by hand.
 - A 20-second soak via `./build/platform/glfw/mbgl-glfw --style https://demotiles.maplibre.org/style.json` (captured in `webgpu_run_new.log`) completes without any WebGPU warnings, and boundary/outline geometry renders cleanly.
+- Confirmed the same soak after the constant-fill fix: Crimea and other constant fill tiles stay colored while the style updates, and line layers remain visible across the whole world.
 - Linking still warns about the Dawn static libs targeting macOS 15.0 while the project is built for 14.3. Bumping `CMAKE_OSX_DEPLOYMENT_TARGET` silences the noise if desired.
 - Verbose logging remains enabled in the backend and shaders; keep it on while stabilising the pipeline, then dial back once the regression suite is green.
 - Stencil clipping is active again: geometry outside a tile’s clip polygon is discarded, matching Metal/Vulkan visuals when panning across tile seams.
