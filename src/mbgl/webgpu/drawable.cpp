@@ -611,6 +611,10 @@ void Drawable::draw(PaintParameters& parameters) const {
                     }
 
                     if (!validBindings || entries.empty()) {
+                        Log::Warning(Event::Render,
+                                     "WebGPU: invalid bindings for drawable '" + getName() +
+                                         "' (group=" + std::to_string(group) + ", slot=" +
+                                         std::to_string(slot) + ")");
                         continue;
                     }
 
