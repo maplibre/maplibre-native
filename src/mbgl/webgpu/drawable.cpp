@@ -630,7 +630,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    const auto tileID = getTileID();
+    const auto drawableTileID = getTileID();
 
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode = gfx::StencilMode::disabled();
@@ -642,8 +642,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (getEnableDepth()) {
             depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
         }
-        if (getEnableStencil() && tileID) {
-            stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+        if (getEnableStencil() && drawableTileID) {
+            stencilMode = parameters.stencilModeForClipping(drawableTileID->toUnwrapped());
         }
     }
 
@@ -774,6 +774,11 @@ void Drawable::draw(PaintParameters& parameters) const {
         // Get the renderable from render pass descriptor like Metal does
         const auto& renderable = webgpuRenderPass.getDescriptor().renderable;
 
+        gfx::DrawModeType drawModeType = gfx::DrawModeType::Triangles;
+        if (!impl->segments.empty()) {
+            drawModeType = impl->segments.front()->getMode().type;
+        }
+
         impl->pipelineState = shaderWebGPU.getRenderPipeline(
             renderable,
             vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
@@ -781,6 +786,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             colorMode,
             depthMode,
             stencilMode,
+            drawModeType,
             std::nullopt);
         if (!impl->pipelineState) {
             Log::Warning(Event::Render,

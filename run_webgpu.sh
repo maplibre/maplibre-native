@@ -11,11 +11,11 @@ STYLE_URL="https://demotiles.maplibre.org/style.json"
 
 # Build the project first
 echo "Building WebGPU implementation..."
-if cmake --build ./build -- -j8 > /dev/null 2>&1; then
+if cmake --build ./build --target mbgl-glfw -- -j8 > /dev/null 2>&1; then
     echo "✓ Build successful"
 else
     echo "✗ Build failed. Running with verbose output:"
-    cmake --build ./build -- -j8
+    cmake --build ./build --target mbgl-glfw -- -j8
     exit 1
 fi
 echo ""
@@ -39,8 +39,14 @@ try_start() {
         sleep 0.5
     fi
     
+    # Select platform-specific environment overrides
+    local cmd=("./build/platform/glfw/mbgl-glfw" "--style" "$STYLE_URL" "--zoom" "2" "--backend" "webgpu")
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        cmd=("env" "MTL_DEBUG_LAYER=1" "MTL_SHADER_VALIDATION=1" "${cmd[@]}")
+    fi
+
     # Start in background and check if it stays alive
-    MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 ./build/platform/glfw/mbgl-glfw --style "$STYLE_URL" --zoom 2 &
+    "${cmd[@]}" &
     local pid=$!
     
     # Wait a bit to see if it crashes immediately

@@ -1417,8 +1417,8 @@ if(MLN_WITH_WEBGPU)
     # Include WebGPU vendor configuration (Dawn or wgpu)
     include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 
-    # Include Dawn if available
-    if(EXISTS "/Users/admin/repos/dawn")
+    # Include Dawn if the bundled copy is present
+    if(EXISTS "${PROJECT_SOURCE_DIR}/vendor/dawn")
         include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
     endif()
 endif()

@@ -3,8 +3,8 @@
 if(MLN_WITH_WEBGPU)
     message(STATUS "Configuring Dawn WebGPU implementation")
 
-    # Dawn library paths
-    set(DAWN_DIR "/Users/admin/repos/maplibre-native/vendor/dawn")
+    # Dawn library paths (bundled in the repository)
+    set(DAWN_DIR "${PROJECT_SOURCE_DIR}/vendor/dawn")
     set(DAWN_BUILD_DIR "${DAWN_DIR}/build")
 
     # Add Dawn include directories
@@ -16,15 +16,22 @@ if(MLN_WITH_WEBGPU)
     )
 
     # Link core Dawn libraries (order matters for static linking)
-    target_link_libraries(mbgl-core
-        PUBLIC
-            ${DAWN_BUILD_DIR}/src/dawn/native/libwebgpu_dawn.a
-            ${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a
-            ${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a
-            ${DAWN_BUILD_DIR}/src/dawn/libdawn_proc.a
-            ${DAWN_BUILD_DIR}/src/dawn/platform/libdawn_platform.a
-            ${DAWN_BUILD_DIR}/src/dawn/common/libdawn_common.a
+    set(DAWN_CORE_LIBS
+        ${DAWN_BUILD_DIR}/src/dawn/native/libwebgpu_dawn.a
+        ${DAWN_BUILD_DIR}/src/dawn/libdawn_proc.a
+        ${DAWN_BUILD_DIR}/src/dawn/platform/libdawn_platform.a
+        ${DAWN_BUILD_DIR}/src/dawn/common/libdawn_common.a
     )
+
+    if(EXISTS "${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a")
+        list(APPEND DAWN_CORE_LIBS ${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a)
+    endif()
+
+    if(EXISTS "${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a")
+        list(APPEND DAWN_CORE_LIBS ${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a)
+    endif()
+
+    target_link_libraries(mbgl-core PUBLIC ${DAWN_CORE_LIBS})
 
     # Link Tint libraries (shader compiler)
     file(GLOB TINT_LIBS "${DAWN_BUILD_DIR}/src/tint/*.a")
@@ -51,13 +58,16 @@ if(MLN_WITH_WEBGPU)
                 "-framework IOSurface"
                 "-framework CoreGraphics"
         )
+    else()
+        target_link_libraries(mbgl-core PUBLIC dl pthread)
     endif()
 
     # Define that we're using Dawn
-    target_compile_definitions(mbgl-core
-        PUBLIC
-            DAWN_ENABLE_BACKEND_METAL=1
-            MLN_WITH_DAWN=1
-            WEBGPU_BACKEND_DAWN=1
-    )
+    target_compile_definitions(mbgl-core PUBLIC MLN_WITH_DAWN=1 WEBGPU_BACKEND_DAWN=1)
+
+    if(APPLE)
+        target_compile_definitions(mbgl-core PUBLIC DAWN_ENABLE_BACKEND_METAL=1)
+    else()
+        target_compile_definitions(mbgl-core PUBLIC DAWN_ENABLE_BACKEND_VULKAN=1)
+    endif()
 endif()

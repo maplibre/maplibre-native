@@ -29,6 +29,7 @@
 #include <mbgl/shaders/webgpu/clipping_mask.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
+#include <mbgl/gfx/gfx_types.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -296,6 +297,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                                    colorMode,
                                                    clipMaskDepthMode,
                                                    clipMaskStencilMode,
+                                                   gfx::DrawModeType::Triangles,
                                                    clipMaskPipelineHash);
     if (!pipeline) {
         Log::Error(Event::Render, "WebGPU: Failed to create clipping mask pipeline");
@@ -404,9 +406,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     }
     clipMaskActiveBindGroups.clear();
 
-    auto& stats = renderingStats();
-    stats.numDrawCalls += tileUBOs.size();
-    stats.totalDrawCalls += tileUBOs.size();
+    auto& renderStats = renderingStats();
+    renderStats.numDrawCalls += tileUBOs.size();
+    renderStats.totalDrawCalls += tileUBOs.size();
 
     return true;
 }
@@ -421,6 +423,10 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
     gfx::BufferUsageType,
     const std::optional<std::chrono::duration<double>>&,
     std::shared_ptr<VertexBufferResource>&) noexcept {
+
+    static_cast<void>(vertexType);
+    static_cast<void>(vertexAttributeIndex);
+    static_cast<void>(vertexData);
 
     gfx::AttributeBindingArray result;
     result.resize(overrides.allocatedSize());
