@@ -386,9 +386,9 @@ void Drawable::draw(PaintParameters& parameters) const {
     static int drawCallCount = 0;
     drawCallCount++;
     if (drawCallCount <= 2000) {
-        Log::Info(Event::Render, "WebGPU Drawable::draw #" + std::to_string(drawCallCount) + " for " + getName() +
-                  " pass=" + std::to_string(mbgl::underlying_type(parameters.pass)) +
-                  " shader=" + (shader ? shader->typeName().data() : "null"));
+        // Log::Info(Event::Render, "WebGPU Drawable::draw #" + std::to_string(drawCallCount) + " for " + getName() +
+        //           " pass=" + std::to_string(mbgl::underlying_type(parameters.pass)) +
+        //           " shader=" + (shader ? shader->typeName().data() : "null"));
     }
 
     if (isCustom) {
@@ -498,10 +498,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                             case ShaderProgram::BindingType::ReadOnlyStorageBuffer:
                             case ShaderProgram::BindingType::StorageBuffer: {
                                 std::shared_ptr<gfx::UniformBuffer> buffer = impl->uniformBuffers.get(bindingInfo.binding);
-                                if (!buffer && globalBuffers) {
-                                    buffer = globalBuffers->get(bindingInfo.binding);
-                                }
-                                if (!buffer && bindingInfo.binding == shaders::idGlobalUBOIndex) {
+                                if (bindingInfo.binding == shaders::idGlobalUBOIndex) {
                                     GlobalUBOIndexData indexData;
                                     indexData.value = getUBOIndex();
                                     context.emplaceOrUpdateUniformBuffer(impl->uboIndexUniform,
@@ -512,6 +509,10 @@ void Drawable::draw(PaintParameters& parameters) const {
                                         impl->uniformBuffers.set(bindingInfo.binding, impl->uboIndexUniform);
                                         buffer = impl->uboIndexUniform;
                                     }
+                                }
+
+                                if (!buffer && globalBuffers) {
+                                    buffer = globalBuffers->get(bindingInfo.binding);
                                 }
 
                                 if (!buffer) {
@@ -767,9 +768,9 @@ void Drawable::draw(PaintParameters& parameters) const {
             return;
         }
         if (drawCallCount <= 200) {
-            Log::Info(Event::Render, "Setting pipeline state: encoder=" +
-                std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
-                ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
+            // Log::Info(Event::Render, "Setting pipeline state: encoder=" +
+            //     std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
+            //     ", pipeline=" + std::to_string(reinterpret_cast<uintptr_t>(impl->pipelineState)));
         }
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipelineState);
         if (getEnableStencil()) {
@@ -803,14 +804,14 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
-            Log::Info(Event::Render,
-                      "  Binding vertex buffer slot " + std::to_string(bufferSlot) +
-                          " size=" + std::to_string(bufferSize) +
-                          " baseOffset=" + std::to_string(binding.baseOffset) +
-                          " stride=" + std::to_string(binding.stride) +
-                          " attributeCount=" + std::to_string(binding.attributes.size()) +
-                          " bufferPtr=" +
-                          std::to_string(reinterpret_cast<uintptr_t>(binding.buffer->getBuffer())));
+            // Log::Info(Event::Render,
+            //           "  Binding vertex buffer slot " + std::to_string(bufferSlot) +
+            //               " size=" + std::to_string(bufferSize) +
+            //               " baseOffset=" + std::to_string(binding.baseOffset) +
+            //               " stride=" + std::to_string(binding.stride) +
+            //               " attributeCount=" + std::to_string(binding.attributes.size()) +
+            //               " bufferPtr=" +
+            //               std::to_string(reinterpret_cast<uintptr_t>(binding.buffer->getBuffer())));
         }
 
         wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder,
@@ -850,9 +851,9 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                                        : static_cast<uint32_t>(slot);
         if (bindGroup) {
             if (drawCallCount <= 200) {
-                Log::Info(Event::Render,
-                          "Setting bind group slot " + std::to_string(groupIndex) + " handle=" +
-                              std::to_string(reinterpret_cast<uintptr_t>(bindGroup)));
+                // Log::Info(Event::Render,
+                //           "Setting bind group slot " + std::to_string(groupIndex) + " handle=" +
+                //               std::to_string(reinterpret_cast<uintptr_t>(bindGroup)));
             }
             wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, groupIndex, bindGroup, 0, nullptr);
         } else {
@@ -878,7 +879,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Draw indexed geometry - loop through segments (exactly like Metal does)
-    int segmentCount = 0;
+    // int segmentCount = 0;
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
@@ -889,11 +890,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             const uint32_t baseInstance = 0;
 
             if (drawCallCount <= 200 && getName().find("fill") != std::string::npos) {
-                Log::Info(Event::Render, "  FILL Drawing segment " + std::to_string(++segmentCount) +
-                         " indices=" + std::to_string(mlSegment.indexLength) +
-                         " indexOffset=" + std::to_string(indexOffset) +
-                         " baseVertex=" + std::to_string(baseVertex) +
-                         " instances=" + std::to_string(instanceCount));
+                // Log::Info(Event::Render, "  FILL Drawing segment " + std::to_string(++segmentCount) +
+                //          " indices=" + std::to_string(mlSegment.indexLength) +
+                //          " indexOffset=" + std::to_string(indexOffset) +
+                //          " baseVertex=" + std::to_string(baseVertex) +
+                //          " instances=" + std::to_string(instanceCount));
             }
 
             // Check if encoder is valid before drawing
@@ -902,9 +903,9 @@ void Drawable::draw(PaintParameters& parameters) const {
                 return;
             }
 
-            Log::Info(Event::Render, "Calling wgpuRenderPassEncoderDrawIndexed with encoder=" +
-                     std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
-                     " indexCount=" + std::to_string(mlSegment.indexLength));
+            // Log::Info(Event::Render, "Calling wgpuRenderPassEncoderDrawIndexed with encoder=" +
+            //          std::to_string(reinterpret_cast<uintptr_t>(renderPassEncoder)) +
+            //          " indexCount=" + std::to_string(mlSegment.indexLength));
 
             // Make sure we have valid indices
             if (mlSegment.indexLength == 0) {
@@ -919,7 +920,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                             baseVertex,              // baseVertex
                                             baseInstance);           // firstInstance
 
-            Log::Info(Event::Render, "wgpuRenderPassEncoderDrawIndexed call completed");
+            // Log::Info(Event::Render, "wgpuRenderPassEncoderDrawIndexed call completed");
 
             context.renderingStats().numDrawCalls++;
         }
