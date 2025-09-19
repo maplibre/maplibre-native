@@ -29,6 +29,7 @@
 #endif
 
 #include <dawn/native/DawnNative.h>
+#include <webgpu/webgpu.h>
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_glfw.h>
 
@@ -38,6 +39,7 @@
 #include <chrono>
 #include <limits>
 #include <mutex>
+#include <string>
 
 namespace {
 
@@ -53,6 +55,40 @@ void logDeviceLost(const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::Str
                      std::string("Dawn device lost [") +
                          std::to_string(static_cast<int>(reason)) + "] " +
                          (message.data ? std::string(message.data, message.length) : std::string()));
+}
+
+#ifdef __APPLE__
+MTLPixelFormat toMetalPixelFormat(wgpu::TextureFormat format) {
+    switch (format) {
+        case wgpu::TextureFormat::BGRA8UnormSrgb:
+            return MTLPixelFormatBGRA8Unorm_sRGB;
+        case wgpu::TextureFormat::RGBA16Float:
+            return MTLPixelFormatRGBA16Float;
+        default:
+            return MTLPixelFormatBGRA8Unorm;
+    }
+}
+#endif
+
+std::string textureFormatToString(wgpu::TextureFormat format) {
+    switch (format) {
+        case wgpu::TextureFormat::BGRA8Unorm:
+            return "BGRA8Unorm";
+        case wgpu::TextureFormat::BGRA8UnormSrgb:
+            return "BGRA8UnormSrgb";
+        case wgpu::TextureFormat::RGBA8Unorm:
+            return "RGBA8Unorm";
+        case wgpu::TextureFormat::RGBA8UnormSrgb:
+            return "RGBA8UnormSrgb";
+        case wgpu::TextureFormat::RGBA16Float:
+            return "RGBA16Float";
+        case wgpu::TextureFormat::Depth24PlusStencil8:
+            return "Depth24PlusStencil8";
+        case wgpu::TextureFormat::Depth32FloatStencil8:
+            return "Depth32FloatStencil8";
+        default:
+            return "Format(" + std::to_string(static_cast<int>(format)) + ")";
+    }
 }
 
 } // namespace
@@ -229,7 +265,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Create CAMetalLayer
     CAMetalLayer* layer = [CAMetalLayer layer];
     layer.device = dawn::native::metal::GetMTLDevice(wgpuDevice.Get());
-    layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
 
     // Get window size
     int width, height;
@@ -249,6 +284,37 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     wgpu::Instance wgpuInstance(instance->Get());
     wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
 
+    if (wgpuSurface) {
+        WGPUSurfaceCapabilities capabilities = WGPU_SURFACE_CAPABILITIES_INIT;
+        if (wgpuSurfaceGetCapabilities(wgpuSurface.Get(), selectedAdapter.Get(), &capabilities) == WGPUStatus_Success) {
+            const auto pickFormat = [&]() {
+                const wgpu::TextureFormat preferredFormats[] = {
+                    wgpu::TextureFormat::BGRA8UnormSrgb,
+                    wgpu::TextureFormat::BGRA8Unorm,
+                    wgpu::TextureFormat::RGBA8UnormSrgb,
+                    wgpu::TextureFormat::RGBA8Unorm
+                };
+                for (const auto format : preferredFormats) {
+                    for (size_t i = 0; i < capabilities.formatCount; ++i) {
+                        if (capabilities.formats[i] == static_cast<WGPUTextureFormat>(format)) {
+                            return format;
+                        }
+                    }
+                }
+                return capabilities.formatCount > 0 ? static_cast<wgpu::TextureFormat>(capabilities.formats[0])
+                                                    : swapChainFormat;
+            };
+            swapChainFormat = pickFormat();
+            mbgl::Log::Info(mbgl::Event::Render,
+                            "WebGPU: selected surface format " + textureFormatToString(swapChainFormat));
+        }
+        wgpuSurfaceCapabilitiesFreeMembers(capabilities);
+    }
+
+    setColorFormat(swapChainFormat);
+
+    layer.pixelFormat = toMetalPixelFormat(swapChainFormat);
+
     // Get the queue
     queue = wgpuDevice.GetQueue();
 
@@ -261,6 +327,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.width = width;
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
+    wgpu::TextureFormat viewFormats[] = {swapChainFormat};
+    config.viewFormatCount = 1;
+    config.viewFormats = viewFormats;
 
     wgpuSurface.Configure(&config);
     surfaceConfigured = true;
@@ -306,15 +375,44 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
             waylandDesc.display = waylandDisplay;
             waylandDesc.surface = waylandSurface;
 
-            wgpu::SurfaceDescriptor surfaceDesc = {};
-            surfaceDesc.nextInChain = &waylandDesc;
+        wgpu::SurfaceDescriptor surfaceDesc = {};
+        surfaceDesc.nextInChain = &waylandDesc;
 
-            wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-            mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU Wayland surface created");
+        wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
+        mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU Wayland surface created");
         } else {
             throw std::runtime_error("Failed to get window surface from GLFW");
         }
     }
+
+    if (wgpuSurface) {
+        WGPUSurfaceCapabilities capabilities = WGPU_SURFACE_CAPABILITIES_INIT;
+        if (wgpuSurfaceGetCapabilities(wgpuSurface.Get(), selectedAdapter.Get(), &capabilities) == WGPUStatus_Success) {
+            const auto pickFormat = [&]() {
+                const wgpu::TextureFormat preferredFormats[] = {
+                    wgpu::TextureFormat::BGRA8UnormSrgb,
+                    wgpu::TextureFormat::BGRA8Unorm,
+                    wgpu::TextureFormat::RGBA8UnormSrgb,
+                    wgpu::TextureFormat::RGBA8Unorm
+                };
+                for (const auto format : preferredFormats) {
+                    for (size_t i = 0; i < capabilities.formatCount; ++i) {
+                        if (capabilities.formats[i] == static_cast<WGPUTextureFormat>(format)) {
+                            return format;
+                        }
+                    }
+                }
+                return capabilities.formatCount > 0 ? static_cast<wgpu::TextureFormat>(capabilities.formats[0])
+                                                    : swapChainFormat;
+            };
+            swapChainFormat = pickFormat();
+            mbgl::Log::Info(mbgl::Event::Render,
+                            "WebGPU: selected surface format " + textureFormatToString(swapChainFormat));
+        }
+        wgpuSurfaceCapabilitiesFreeMembers(capabilities);
+    }
+
+    setColorFormat(swapChainFormat);
 
     // Get the queue
     queue = wgpuDevice.GetQueue();
@@ -328,6 +426,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.width = width;
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
+    wgpu::TextureFormat viewFormats[] = {swapChainFormat};
+    config.viewFormatCount = 1;
+    config.viewFormats = viewFormats;
 
     wgpuSurface.Configure(&config);
     surfaceConfigured = true;
