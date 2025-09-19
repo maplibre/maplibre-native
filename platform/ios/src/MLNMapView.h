@@ -535,9 +535,9 @@ MLN_EXPORT
 // MARK: Displaying the User’s Location
 
 /**
- Disabled using a default location manager.
+ Disabled using a current location manager.
  */
-- (void)disableDefaultLocationManager;
+- (void)disableLocationManager;
 
 /**
  The object that this map view uses to start and stop the delivery of
