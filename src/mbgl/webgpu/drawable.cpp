@@ -190,8 +190,9 @@ namespace {
 
 } // namespace
 
-void Drawable::setColorMode(const gfx::ColorMode&) {
-    // Color mode is handled during pipeline creation
+void Drawable::setColorMode(const gfx::ColorMode& value) {
+    gfx::Drawable::setColorMode(value);
+    impl->pipelineState = nullptr;  // Rebuild pipeline to honour new color mode
 }
 
 void Drawable::setEnableStencil(bool value) {
