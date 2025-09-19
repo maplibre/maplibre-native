@@ -11,7 +11,8 @@
   },
   "files": [
     "lib",
-    "index.d.ts"
+    "index.d.ts",
+    "package-binaries.js"
   ],
   "main": "index.js",
   "types": "index.d.ts",
