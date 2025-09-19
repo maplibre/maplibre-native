@@ -6,7 +6,7 @@ cc_library(
     hdrs = glob(["include/mbgl/test/*.hpp"]),
     strip_include_prefix = "include",
     deps = [
-        "//vendor/googletest:gtest",
+        "@googletest//:gtest",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_library(
         "testutils",
         "//:mbgl-core",
         "//platform/default:mbgl-default",
-        "//vendor/googletest:gtest_main",
+        "@googletest//:gtest_main",
     ],
     alwayslink = True,
 )
