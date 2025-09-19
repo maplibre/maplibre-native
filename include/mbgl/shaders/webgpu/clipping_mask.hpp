@@ -51,7 +51,7 @@ struct ClipUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let clip_pos = clip.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    out.position = vec4<f32>(clip_pos.x, -clip_pos.y, clip_pos.z, clip_pos.w);
+    out.position = vec4<f32>(clip_pos.x, clip_pos.y, clip_pos.z, clip_pos.w);
     return out;
 }
 )";

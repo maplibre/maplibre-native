@@ -58,7 +58,7 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
     let invW = 1.0 / clip.w;
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
     out.position = vec4<f32>(clip.x * invW,
-                             -clip.y * invW,
+                             clip.y * invW,
                              ndcZ,
                              1.0);
 
@@ -135,7 +135,7 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
     let invW = 1.0 / clip.w;
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
     out.position = vec4<f32>(clip.x * invW,
-                             -clip.y * invW,
+                             clip.y * invW,
                              ndcZ,
                              1.0);
 
@@ -262,7 +262,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let invW = 1.0 / clip.w;
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
     out.position = vec4<f32>(clip.x * invW,
-                             -clip.y * invW,
+                             clip.y * invW,
                              ndcZ,
                              1.0);
     out.v_pos_a = get_pattern_pos(

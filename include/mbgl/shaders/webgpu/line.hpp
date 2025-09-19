@@ -121,12 +121,11 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude_length_without_perspective = length(dist);
     let extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
-    // Convert to NDC coordinates and flip Y for WebGPU
-    // WebGPU uses Z range [0, 1] instead of [-1, 1]
+    // Convert to NDC coordinates (WebGPU uses Z range [0, 1])
     let ndc_z = (position.z / position.w) * 0.5 + 0.5;
     out.position = vec4<f32>(
         position.x / position.w,
-        -position.y / position.w,  // Flip Y after perspective divide
+        position.y / position.w,
         ndc_z,
         1.0
     );

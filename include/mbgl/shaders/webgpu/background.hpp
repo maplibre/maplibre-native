@@ -65,7 +65,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let invW = 1.0 / clip.w;
     let ndc_z = (clip.z * invW) * 0.5 + 0.5;
     out.position = vec4<f32>(clip.x * invW,
-                             -clip.y * invW,
+                             clip.y * invW,
                              ndc_z,
                              1.0);
     return out;
@@ -174,7 +174,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let invW = 1.0 / clip.w;
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
     out.position = vec4<f32>(clip.x * invW,
-                             -clip.y * invW,
+                             clip.y * invW,
                              ndcZ,
                              1.0);
     return out;
