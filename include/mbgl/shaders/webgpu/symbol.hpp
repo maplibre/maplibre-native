@@ -394,8 +394,10 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let dist = textureSample(glyph_atlas, texture_sampler, in.tex).r;
     let gamma_scaled = gamma * in.gamma_scale;
     let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    let coverage = alpha * opacity * in.fade_opacity;
+    let outAlpha = color.a * coverage;
 
-    return vec4<f32>(color.rgb, color.a * alpha * opacity * in.fade_opacity);
+    return vec4<f32>(color.rgb * coverage, outAlpha);
 }
 )";
 };
@@ -586,8 +588,10 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let dist = textureSample(glyph_image, glyph_sampler, in.tex).r;
     let gamma_scaled = gamma * in.gamma_scale;
     let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    let coverage = alpha * opacity * in.fade_opacity;
+    let outAlpha = color.a * coverage;
 
-    return vec4<f32>(color.rgb, color.a * alpha * opacity * in.fade_opacity);
+    return vec4<f32>(color.rgb * coverage, outAlpha);
 }
 )";
 };

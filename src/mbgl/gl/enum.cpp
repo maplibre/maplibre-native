@@ -380,7 +380,7 @@ platform::GLenum Enum<gfx::TexturePixelType>::to(const gfx::TexturePixelType val
         case gfx::TexturePixelType::RGBA:
             return GL_RGBA;
         case gfx::TexturePixelType::Alpha:
-            return GL_ALPHA;
+            return GL_RED;
         case gfx::TexturePixelType::Stencil:
             return GL_STENCIL_INDEX;
         case gfx::TexturePixelType::Depth:
