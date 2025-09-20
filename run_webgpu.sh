@@ -40,7 +40,7 @@ try_start() {
     fi
     
     # Select platform-specific environment overrides
-    local cmd=("./build/platform/glfw/mbgl-glfw" "--style" "$STYLE_URL" "--zoom" "2" "--backend" "webgpu")
+    local cmd=("./build/platform/glfw/mbgl-glfw" "--style" "$STYLE_URL" "--zoom" "5" "--backend" "webgpu")
     if [[ "$(uname -s)" == "Darwin" ]]; then
         cmd=("env" "MTL_DEBUG_LAYER=1" "MTL_SHADER_VALIDATION=1" "${cmd[@]}")
     fi
