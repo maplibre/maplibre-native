@@ -502,8 +502,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                             infoStr += "(binding=" + std::to_string(info.binding) + ", type=" +
                                         std::to_string(static_cast<int>(info.type)) + ")";
                         }
-                        Log::Info(Event::Render,
-                                  "Fill-outline bindings for group " + std::to_string(group) + ": " + infoStr);
+                        // Log::Info(Event::Render,
+                        //           "Fill-outline bindings for group " + std::to_string(group) + ": " + infoStr);
                     }
                     std::vector<WGPUBindGroupEntry> entries;
                     entries.reserve(bindingInfos.size());
