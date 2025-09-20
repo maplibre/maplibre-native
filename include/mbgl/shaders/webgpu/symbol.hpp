@@ -52,7 +52,6 @@ struct SymbolDrawableUBO {
     opacity_t: f32,
     halo_width_t: f32,
     halo_blur_t: f32,
-    pad: f32,
 };
 
 struct SymbolTilePropsUBO {
