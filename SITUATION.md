@@ -63,6 +63,11 @@ cmake --build build --target mbgl-glfw -- -j8
 - Vulkan glyph textures now swizzle the red source channel into both `.r` and `.a`, so the existing `.a` sampling paths continue to work after the GL_ALPHA→GL_R8 switch. (The shader changes were kept aligned with WebGPU.)
 - Rebuilt and ran `./run_webgpu.sh` after the change; the GLFW sample still renders the MapLibre demo tiles. Dawn prints no copy-stride validation errors and labels regain smooth alpha.
 
+## WebGPU fixes (2025-09-21)
+- `GLFWWebGPUBackend` now initialises and tracks the framebuffer size through its base `Renderable`, so the backend size that the renderer sees matches the GLFW framebuffer. The GLFW WebGPU demo launched with `--zoom 5` now logs `TransformParameters ... scale=32` and `TilePyramid::update ... currentZoom=5`, matching the Metal run instead of dropping to zoom 2.
+- Removed the stray padding member from the WebGPU `SymbolDrawableUBO` WGSL struct; Dawn no longer expects a 272-byte binding, and the symbol pipelines consume the 256-byte UBO allocations without validation errors.
+- Validated with `timeout 25 ./build/platform/glfw/mbgl-glfw --backend webgpu --style https://demotiles.maplibre.org/style.json --zoom 5` and via `./run_webgpu.sh`. Both runs rendered the demotiles style, logged the corrected zoom, and produced no Dawn validation errors before the scripted timeout terminated the app.
+
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
 - Linux run (aarch64) selects the Vulkan-backed Dawn adapter, prints `WebGPU: selected surface format BGRA8Unorm`, and the render loop logs fill/background/line bind groups for all visible tiles—confirming we see map content rather than a blank swapchain.
