@@ -51,6 +51,10 @@ cmake --build build --target mbgl-glfw -- -j8
 - Guarded the layer-group warning so it only fires when drawables actually fail to emit draw calls, eliminating the noisy "visited N drawables but drew none" logs during mismatched render passes.
 - Fill WGSL now falls back to the uniform color/opacity values when a tile uses constant styling, so constant fills like the Crimea overlay no longer disappear after the first frame.
 
+## WebGPU fixes (2025-09-20)
+- Dashed line layers were blank because the WebGPU WGSL for `LineGradient`, `LinePattern`, and `LineSDF` always sampled per-vertex attributes, even when a property was constant. The corresponding binders then uploaded only uniforms, leaving width, gap, and opacity at zero. The shaders now consult `LineEvaluatedPropsUBO.expressionMask` (matching the simple line path) and fall back to uniform values whenever a property is constant. See `include/mbgl/shaders/webgpu/line.hpp`.
+- Rebuilt and ran `timeout 30 ./run_webgpu.sh` (demotiles style) after the change; Dawn launches the GLFW demo cleanly and line dash layers render alongside the rest of the MapLibre map.
+
 ## Text alpha investigation (2025-09-20)
 - OpenGL 3.3/ES 3.0 builds now bind `GL_RED` glyph atlases with a swizzle of `r,r,r,r`, so legacy `.a` sampling continues to work without relying on deprecated `GL_ALPHA` formats.
 - Glyph atlases land in `R8Unorm` textures on WebGPU. Dawn promotes the missing channels to `0,0,1`, so sampling `.a` always returns `1`. The WGSL symbol shaders already sample `.r`, matching Metal/Vulkan.
