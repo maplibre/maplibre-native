@@ -4,6 +4,52 @@
 #include <mbgl/webgpu/backend_impl.hpp>
 
 #include <algorithm>
+#include <cstring>
+#include <vector>
+
+namespace {
+constexpr uint32_t bytesPerRowAlignment = 256u;
+
+struct UploadCopyData {
+    const void* dataPtr = nullptr;
+    size_t dataSize = 0u;
+    uint32_t bytesPerRow = 0u;
+    std::vector<uint8_t> staging;
+};
+
+UploadCopyData prepareCopyData(const void* pixelData, const mbgl::Size& regionSize, size_t pixelStride) {
+    UploadCopyData copyData;
+
+    if (!pixelData || regionSize.width == 0 || regionSize.height == 0) {
+        return copyData;
+    }
+
+    const size_t rowStride = static_cast<size_t>(regionSize.width) * pixelStride;
+    copyData.bytesPerRow = static_cast<uint32_t>(rowStride);
+    copyData.dataSize = rowStride * regionSize.height;
+    copyData.dataPtr = pixelData;
+
+    if (regionSize.height > 1 && (rowStride % bytesPerRowAlignment) != 0) {
+        const size_t alignedRowStride =
+            ((rowStride + bytesPerRowAlignment - 1) / bytesPerRowAlignment) * bytesPerRowAlignment;
+        copyData.bytesPerRow = static_cast<uint32_t>(alignedRowStride);
+        copyData.staging.resize(alignedRowStride * regionSize.height, 0u);
+
+        auto* dst = copyData.staging.data();
+        const auto* src = static_cast<const uint8_t*>(pixelData);
+        for (uint32_t row = 0; row < regionSize.height; ++row) {
+            std::memcpy(dst + static_cast<size_t>(row) * alignedRowStride,
+                        src + static_cast<size_t>(row) * rowStride,
+                        rowStride);
+        }
+
+        copyData.dataPtr = copyData.staging.data();
+        copyData.dataSize = copyData.staging.size();
+    }
+
+    return copyData;
+}
+} // namespace
 
 namespace mbgl {
 namespace webgpu {
@@ -225,32 +271,34 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
         return;
     }
     
-    // Write texture data using queue
+    const auto copyData = prepareCopyData(pixelData, size, getPixelStride());
+    if (!copyData.dataPtr) {
+        return;
+    }
+
     WGPUTexelCopyTextureInfo destination = {};
     destination.texture = texture;
     destination.mipLevel = 0;
     destination.origin = {0, 0, 0};
     destination.aspect = WGPUTextureAspect_All;
-    
+
     WGPUTexelCopyBufferLayout dataLayout = {};
     dataLayout.offset = 0;
-    dataLayout.bytesPerRow = static_cast<uint32_t>(size.width * getPixelStride());
+    dataLayout.bytesPerRow = copyData.bytesPerRow;
     dataLayout.rowsPerImage = static_cast<uint32_t>(size.height);
-    
+
     WGPUExtent3D writeSize = {
         static_cast<uint32_t>(size.width),
         static_cast<uint32_t>(size.height),
         1
     };
-    
-    wgpuQueueWriteTexture(
-        queue,
-        &destination,
-        pixelData,
-        getDataSize(),
-        &dataLayout,
-        &writeSize
-    );
+
+    wgpuQueueWriteTexture(queue,
+                          &destination,
+                          copyData.dataPtr,
+                          copyData.dataSize,
+                          &dataLayout,
+                          &writeSize);
 }
 
 void Texture2D::upload() noexcept {
@@ -271,34 +319,34 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, u
         return;
     }
     
-    // Write texture subregion data using queue
+    const auto copyData = prepareCopyData(pixelData, regionSize, getPixelStride());
+    if (!copyData.dataPtr) {
+        return;
+    }
+
     WGPUTexelCopyTextureInfo destination = {};
     destination.texture = texture;
     destination.mipLevel = 0;
     destination.origin = {xOffset, yOffset, 0};
     destination.aspect = WGPUTextureAspect_All;
-    
+
     WGPUTexelCopyBufferLayout dataLayout = {};
     dataLayout.offset = 0;
-    dataLayout.bytesPerRow = static_cast<uint32_t>(regionSize.width * getPixelStride());
+    dataLayout.bytesPerRow = copyData.bytesPerRow;
     dataLayout.rowsPerImage = static_cast<uint32_t>(regionSize.height);
-    
+
     WGPUExtent3D writeSize = {
         static_cast<uint32_t>(regionSize.width),
         static_cast<uint32_t>(regionSize.height),
         1
     };
-    
-    size_t dataSize = regionSize.width * regionSize.height * getPixelStride();
-    
-    wgpuQueueWriteTexture(
-        queue,
-        &destination,
-        pixelData,
-        dataSize,
-        &dataLayout,
-        &writeSize
-    );
+
+    wgpuQueueWriteTexture(queue,
+                          &destination,
+                          copyData.dataPtr,
+                          copyData.dataSize,
+                          &dataLayout,
+                          &writeSize);
 }
 
 } // namespace webgpu

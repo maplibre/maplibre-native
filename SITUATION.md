@@ -51,6 +51,14 @@ cmake --build build --target mbgl-glfw -- -j8
 - Guarded the layer-group warning so it only fires when drawables actually fail to emit draw calls, eliminating the noisy "visited N drawables but drew none" logs during mismatched render passes.
 - Fill WGSL now falls back to the uniform color/opacity values when a tile uses constant styling, so constant fills like the Crimea overlay no longer disappear after the first frame.
 
+## Text alpha investigation (2025-09-20)
+- OpenGL 3.3/ES 3.0 builds now bind `GL_RED` glyph atlases with a swizzle of `r,r,r,r`, so legacy `.a` sampling continues to work without relying on deprecated `GL_ALPHA` formats.
+- Glyph atlases land in `R8Unorm` textures on WebGPU. Dawn promotes the missing channels to `0,0,1`, so sampling `.a` always returns `1`. The WGSL symbol shaders already sample `.r`, matching Metal/Vulkan.
+- The blocky text edges stemmed from `wgpuQueueWriteTexture` uploads that used the glyph width as `bytesPerRow`. Dawn requires 256-byte alignment when `height > 1`, so every row past the first was being dropped.
+- `webgpu::Texture2D::upload()` and `uploadSubRegion()` now pad rows into a 256-byte-aligned staging buffer before calling Dawn. The helper copies the glyph data into the padded span and zero-fills the slack, restoring the expected SDF gradients.
+- Vulkan glyph textures now swizzle the red source channel into both `.r` and `.a`, so the existing `.a` sampling paths continue to work after the GL_ALPHA→GL_R8 switch. (The shader changes were kept aligned with WebGPU.)
+- Rebuilt and ran `./run_webgpu.sh` after the change; the GLFW sample still renders the MapLibre demo tiles. Dawn prints no copy-stride validation errors and labels regain smooth alpha.
+
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
 - Linux run (aarch64) selects the Vulkan-backed Dawn adapter, prints `WebGPU: selected surface format BGRA8Unorm`, and the render loop logs fill/background/line bind groups for all visible tiles—confirming we see map content rather than a blank swapchain.
