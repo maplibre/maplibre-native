@@ -64,7 +64,7 @@
     },
     {
       "name": "macos-node",
-      "inherits": "macos",
+      "inherits": "macos-vulkan",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "MLN_WITH_NODE": "ON",
