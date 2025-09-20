@@ -1,4 +1,4 @@
-# We need CMake 3.9 because the Xcode generator doesn't know about systems include paths before 3.9.
+# We need CMake 3.10 because the Xcode generator doesn't know about systems include paths before 3.9, and the minimum required version has been increased to 3.10.
 # See https://gitlab.kitware.com/cmake/cmake/issues/16795
 cmake_minimum_required(VERSION 3.10)
 
