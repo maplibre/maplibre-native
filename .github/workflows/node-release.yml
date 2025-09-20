@@ -9,6 +9,8 @@ jobs:
   release-check:
     name: Check if version is published
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         shell: bash
@@ -17,22 +19,47 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Use Node.js from nvmrc
+      - name: Use Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
         with:
           node-version-file: 'platform/node/.nvmrc'
+
+      - name: npm ci
+        working-directory: platform/node
+        run: npm ci --ignore-scripts
 
       - name: Check if version is published
         id: check
         working-directory: platform/node
         run: |
+          packageName="$( node -e "console.log(require('./package.json').name)" )"
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
-          isPublished="$( npm view @maplibre/maplibre-gl-native versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
-          echo "published=$isPublished" >> "$GITHUB_OUTPUT"
+          isPublished="$( npm view "$packageName" versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
+          isPrerelease="$( node -e "console.log(require('semver').prerelease('$currentVersion') ? 'true' : 'false')" )"
+          {
+            echo "published=$isPublished"
+            echo "current-version=$currentVersion"
+            echo "prerelease=$isPrerelease"
+            echo "package-name=$packageName"
+          } >> "$GITHUB_OUTPUT"
           echo "currentVersion: $currentVersion"
           echo "isPublished: $isPublished"
+          echo "isPrerelease: $isPrerelease"
+          echo "packageName: $packageName"
+
+      - name: Create Git Tag
+        if: ${{ steps.check.outputs.published == 'false' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag node-v${{ steps.check.outputs.current-version }}
+          git push origin node-v${{ steps.check.outputs.current-version }}
+
     outputs:
       published: ${{ steps.check.outputs.published }}
+      current-version: ${{ steps.check.outputs.current-version }}
+      prerelease: ${{ steps.check.outputs.prerelease }}
+      package-name: ${{ steps.check.outputs.package-name }}
 
   publish_binaries:
     needs: release-check
@@ -182,6 +209,9 @@ jobs:
       - name: Get vcpkg commit id
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
           $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
@@ -221,29 +251,24 @@ jobs:
         run: |
           cmake --build build
 
-      - name: Publish X64 Release to Github
-        if: matrix.arch == 'x86_64'
+      - name: Create prebuilt binary tarballs
         working-directory: platform/node
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./scripts/publish.sh
+        run: npm run package-binaries
 
-      - name: Publish ARM Release to Github
-        if: matrix.arch == 'arm64'
-        working-directory: platform/node
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # 2.3.3
+        with:
+          tag_name: node-v${{ needs.release-check.outputs.current-version }}
+          name: node-v${{ needs.release-check.outputs.current-version }}
+          files: platform/node/*.tar.gz
+          draft: true
+          prerelease: ${{ needs.release-check.outputs.prerelease == 'true' }}
         env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./scripts/publish.sh --target_arch=arm64
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_npm:
     runs-on: ubuntu-latest
-    needs: publish_binaries
+    needs: [release-check, publish_binaries]
     permissions:
       contents: write
     defaults:
@@ -260,31 +285,22 @@ jobs:
         with:
           node-version-file: 'platform/node/.nvmrc'
 
-      - name: Get version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
-        with:
-          path: platform/node
-
       - name: npm ci
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Prepare release
-        id: prepare_release
-        working-directory: platform/node
-        run: |
-          RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
-          if [[ $RELEASE_TYPE == 'regular' ]]; then
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Extract changelog for version
         working-directory: platform/node
         run: |
-          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## ${{ steps.package-version.outputs.current-version }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
+          # Extract changelog and ensure file exists
+          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## ${{ needs.release-check.outputs.current-version }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
+          # Check if changelog was extracted successfully
+          if [[ ! -s changelog_for_version.md ]]; then
+            echo "No changelog found for version ${{ needs.release-check.outputs.current-version }}"
+            echo "## Changes" > changelog_for_version.md
+            echo "Release notes will be added later." >> changelog_for_version.md
+          fi
+          echo "Changelog content:"
           cat changelog_for_version.md
 
       - name: Update Release Notes
@@ -293,15 +309,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag: node-v${{ steps.package-version.outputs.current-version }}
-          name: node-v${{ steps.package-version.outputs.current-version }}
+          tag: node-v${{ needs.release-check.outputs.current-version }}
+          name: node-v${{ needs.release-check.outputs.current-version }}
           bodyFile: platform/node/changelog_for_version.md
           allowUpdates: true
           draft: true
           prerelease: ${{ steps.prepare_release.outputs.prerelease }}
 
       - name: Publish to NPM (release)
-        if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
+        if: ${{ needs.release-check.outputs.prerelease == 'false' }}
         working-directory: platform/node
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
@@ -310,7 +326,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: ${{ steps.prepare_release.outputs.prerelease == 'true' }}
+        if: ${{ needs.release-check.outputs.prerelease == 'true' }}
         working-directory: platform/node
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
