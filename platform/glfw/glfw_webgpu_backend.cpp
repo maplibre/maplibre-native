@@ -41,6 +41,7 @@
 #include <limits>
 #include <mutex>
 #include <string>
+#include <algorithm>
 
 namespace {
 
@@ -157,7 +158,16 @@ void GLFWWebGPUBackend::SpinLock::unlock() {
 GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     : GLFWBackend(),
       mbgl::webgpu::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(mbgl::Size{0, 0}, std::make_unique<mbgl::WebGPURenderableResource>(*this)),
+      mbgl::gfx::Renderable([window_] {
+          int fbWidth = 0;
+          int fbHeight = 0;
+          if (window_) {
+              glfwGetFramebufferSize(window_, &fbWidth, &fbHeight);
+          }
+          return mbgl::Size{static_cast<uint32_t>(std::max(fbWidth, 0)),
+                            static_cast<uint32_t>(std::max(fbHeight, 0))};
+      }(),
+          std::make_unique<mbgl::WebGPURenderableResource>(*this)),
       window(window_) {
     
 
@@ -612,29 +622,28 @@ void GLFWWebGPUBackend::deactivate() {
 }
 
 mbgl::Size GLFWWebGPUBackend::getSize() const {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+    return size;
 }
 
 void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
     // Update swap chain size if needed
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-
-    if (static_cast<uint32_t>(width) != newSize.width ||
-        static_cast<uint32_t>(height) != newSize.height) {
+    if (size != newSize) {
 #ifdef __APPLE__
-        NSWindow* nsWindow = glfwGetCocoaWindow(window);
-        if (nsWindow) {
-            CAMetalLayer* layer = (CAMetalLayer*)[[nsWindow contentView] layer];
-            if (layer) {
-                layer.drawableSize = CGSizeMake(newSize.width, newSize.height);
+        int width = 0;
+        int height = 0;
+        glfwGetFramebufferSize(window, &width, &height);
+        if (static_cast<uint32_t>(width) != newSize.width ||
+            static_cast<uint32_t>(height) != newSize.height) {
+            NSWindow* nsWindow = glfwGetCocoaWindow(window);
+            if (nsWindow) {
+                CAMetalLayer* layer = (CAMetalLayer*)[[nsWindow contentView] layer];
+                if (layer) {
+                    layer.drawableSize = CGSizeMake(newSize.width, newSize.height);
+                }
             }
         }
 #endif
-
-        // Mark surface for reconfiguration
+        size = newSize;
         surfaceNeedsReconfigure = true;
     }
 }
@@ -826,7 +835,7 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     // Get current size
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    
+
     // Skip if size hasn't changed and we're already configured
     if (surfaceConfigured && 
         lastConfiguredSize.width == static_cast<uint32_t>(width) &&
@@ -834,7 +843,9 @@ void GLFWWebGPUBackend::reconfigureSurface() {
         surfaceNeedsReconfigure = false;
         return;
     }
-    
+
+    size = {static_cast<uint32_t>(std::max(width, 0)), static_cast<uint32_t>(std::max(height, 0))};
+
     // Configure surface
     wgpu::SurfaceConfiguration config = {};
     config.device = wgpuDevice;
