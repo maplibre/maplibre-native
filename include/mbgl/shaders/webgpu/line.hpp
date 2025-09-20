@@ -274,6 +274,14 @@ struct LineGradientDrawableUBO {
     pad2: f32,
 };
 
+const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
+const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
+const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
+const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
+const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
+const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
+const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
+
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
     blur: f32,
@@ -312,6 +320,7 @@ struct GlobalIndexUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[globalIndex.value];
+    let mask = props.expressionMask;
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
@@ -328,11 +337,42 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    let blur = unpack_mix_float(in.blur, drawable.blur_t);
-    let opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    let gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t) / 2.0;
-    let offset = unpack_mix_float(in.offset, drawable.offset_t) * -1.0;
-    let width = unpack_mix_float(in.width, drawable.width_t);
+    var blur: f32;
+    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
+        blur = props.blur;
+    } else {
+        blur = unpack_mix_float(in.blur, drawable.blur_t);
+    }
+
+    var opacity: f32;
+    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
+        opacity = props.opacity;
+    } else {
+        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    }
+
+    var gapwidth: f32;
+    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
+        gapwidth = props.gapwidth;
+    } else {
+        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    }
+    gapwidth = gapwidth / 2.0;
+
+    var offset: f32;
+    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
+        offset = props.offset;
+    } else {
+        offset = unpack_mix_float(in.offset, drawable.offset_t);
+    }
+    offset = -offset;
+
+    var width: f32;
+    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
+        width = props.width;
+    } else {
+        width = unpack_mix_float(in.width, drawable.width_t);
+    }
 
     let halfwidth = width / 2.0;
     let inset = gapwidth + select(0.0, ANTIALIASING, gapwidth > 0.0);
@@ -439,6 +479,14 @@ struct LinePatternDrawableUBO {
     pattern_to_t: f32,
 };
 
+const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
+const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
+const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
+const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
+const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
+const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
+const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
+
 struct LinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
     pattern_to: vec4<f32>,
@@ -489,6 +537,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let index = globalIndex.value;
     let drawable = drawableVector[index];
     let tileProps = tilePropsVector[index];
+    let mask = props.expressionMask;
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
@@ -505,11 +554,42 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    let blur = unpack_mix_float(in.blur, drawable.blur_t);
-    let opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    let gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t) / 2.0;
-    let offset = unpack_mix_float(in.offset, drawable.offset_t) * -1.0;
-    let width = unpack_mix_float(in.width, drawable.width_t);
+    var blur: f32;
+    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
+        blur = props.blur;
+    } else {
+        blur = unpack_mix_float(in.blur, drawable.blur_t);
+    }
+
+    var opacity: f32;
+    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
+        opacity = props.opacity;
+    } else {
+        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    }
+
+    var gapwidth: f32;
+    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
+        gapwidth = props.gapwidth;
+    } else {
+        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    }
+    gapwidth = gapwidth / 2.0;
+
+    var offset: f32;
+    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
+        offset = props.offset;
+    } else {
+        offset = unpack_mix_float(in.offset, drawable.offset_t);
+    }
+    offset = -offset;
+
+    var width: f32;
+    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
+        width = props.width;
+    } else {
+        width = unpack_mix_float(in.width, drawable.width_t);
+    }
     let pattern_from = vec4<f32>(in.pattern_from);
     let pattern_to = vec4<f32>(in.pattern_to);
 
@@ -659,6 +739,14 @@ struct LineSDFDrawableUBO {
     pad2: f32,
 };
 
+const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
+const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
+const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
+const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
+const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
+const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
+const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
+
 struct LineSDFTilePropsUBO {
     sdfgamma: f32,
     mix: f32,
@@ -707,6 +795,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let index = globalIndex.value;
     let drawable = drawableVector[index];
     let tileProps = tilePropsVector[index];
+    let mask = props.expressionMask;
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
@@ -723,13 +812,56 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    let color = unpack_mix_color(in.color, drawable.color_t);
-    let blur = unpack_mix_float(in.blur, drawable.blur_t);
-    let opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    let gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t) / 2.0;
-    let offset = unpack_mix_float(in.offset, drawable.offset_t) * -1.0;
-    let width = unpack_mix_float(in.width, drawable.width_t);
-    let floorwidth = unpack_mix_float(in.floorwidth, drawable.floorwidth_t);
+    var color: vec4<f32>;
+    if ((mask & LINE_EXPRESSION_COLOR) == 0u) {
+        color = props.color;
+    } else {
+        color = unpack_mix_color(in.color, drawable.color_t);
+    }
+
+    var blur: f32;
+    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
+        blur = props.blur;
+    } else {
+        blur = unpack_mix_float(in.blur, drawable.blur_t);
+    }
+
+    var opacity: f32;
+    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
+        opacity = props.opacity;
+    } else {
+        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    }
+
+    var gapwidth: f32;
+    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
+        gapwidth = props.gapwidth;
+    } else {
+        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    }
+    gapwidth = gapwidth / 2.0;
+
+    var offset: f32;
+    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
+        offset = props.offset;
+    } else {
+        offset = unpack_mix_float(in.offset, drawable.offset_t);
+    }
+    offset = -offset;
+
+    var width: f32;
+    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
+        width = props.width;
+    } else {
+        width = unpack_mix_float(in.width, drawable.width_t);
+    }
+
+    var floorwidth: f32;
+    if ((mask & LINE_EXPRESSION_FLOORWIDTH) == 0u) {
+        floorwidth = props.floorwidth;
+    } else {
+        floorwidth = unpack_mix_float(in.floorwidth, drawable.floorwidth_t);
+    }
 
     let halfwidth = width / 2.0;
     let inset = gapwidth + select(0.0, ANTIALIASING, gapwidth > 0.0);
