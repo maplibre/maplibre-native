@@ -71,6 +71,7 @@ cmake --build build --target mbgl-glfw -- -j8
 ## Raster WGSL update (2025-09-22)
 - Aligned the WebGPU raster shader with the Metal/GL uniform layout: the WGSL now reads `RasterDrawableUBO` and `RasterEvaluatedPropsUBO` through the consolidated UBO array, reconstructs the parent cross-fade coordinates, and applies hue/brightness adjustments per pixel. See `include/mbgl/shaders/webgpu/raster.hpp`.
 - Built and ran `timeout 15 ./build/platform/glfw/mbgl-glfw --backend webgpu --style satstyle.json --zoom 2`; Dawn compiled the new raster pipeline without validation errors and the satellite raster tiles render in the GLFW WebGPU sample.
+- Raster drawables now rebind their textures for each tile build. The GLFW builder previously kept the first tile's `Texture2D` handle and reused it for all subsequent drawables, so every quad sampled the same raster image. The loop now always calls `setTextures(builder, bucket)` when an image is present (`src/mbgl/renderer/layers/render_raster_layer.cpp`).
 
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
