@@ -348,10 +348,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder = createBuilder();
             }
 
-            if (bucket.image && !builder->getTexture(idRasterImage0Texture) &&
-                !builder->getTexture(idRasterImage1Texture)) {
+            if (bucket.image) {
                 setTextures(builder, bucket);
-            };
+            }
 
             buildVertexData(builder, /*drawable=*/nullptr, bucket);
 
