@@ -95,6 +95,13 @@ void DrawableBuilder::init() {
     }
 
     // mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() completed for " + drawable.getName());
+
+    // Flush texture bindings so the shared builder doesn't leak the previous tile's
+    // Texture2D handles into the next draw call. Other backends reset textures while
+    // binding state; WebGPU relies on the builder being fresh per pass.
+    for (auto& textureSlot : textures) {
+        textureSlot.reset();
+    }
 }
 
 
