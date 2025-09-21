@@ -68,6 +68,10 @@ cmake --build build --target mbgl-glfw -- -j8
 - Removed the stray padding member from the WebGPU `SymbolDrawableUBO` WGSL struct; Dawn no longer expects a 272-byte binding, and the symbol pipelines consume the 256-byte UBO allocations without validation errors.
 - Validated with `timeout 25 ./build/platform/glfw/mbgl-glfw --backend webgpu --style https://demotiles.maplibre.org/style.json --zoom 5` and via `./run_webgpu.sh`. Both runs rendered the demotiles style, logged the corrected zoom, and produced no Dawn validation errors before the scripted timeout terminated the app.
 
+## Raster WGSL update (2025-09-22)
+- Aligned the WebGPU raster shader with the Metal/GL uniform layout: the WGSL now reads `RasterDrawableUBO` and `RasterEvaluatedPropsUBO` through the consolidated UBO array, reconstructs the parent cross-fade coordinates, and applies hue/brightness adjustments per pixel. See `include/mbgl/shaders/webgpu/raster.hpp`.
+- Built and ran `timeout 15 ./build/platform/glfw/mbgl-glfw --backend webgpu --style satstyle.json --zoom 2`; Dawn compiled the new raster pipeline without validation errors and the satellite raster tiles render in the GLFW WebGPU sample.
+
 ## Observations
 - `./build/platform/glfw/mbgl-glfw --backend=webgpu --style=https://demotiles.maplibre.org/style.json` now reports `WebGPU: selected surface format BGRA8Unorm` and renders the MapLibre demo tiles correctly on macOS. The translucent/opaque passes log non-zero drawable counts, confirming geometry is making it through the pipeline.
 - Linux run (aarch64) selects the Vulkan-backed Dawn adapter, prints `WebGPU: selected surface format BGRA8Unorm`, and the render loop logs fill/background/line bind groups for all visible tiles—confirming we see map content rather than a blank swapchain.
