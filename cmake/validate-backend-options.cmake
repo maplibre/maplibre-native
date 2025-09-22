@@ -14,7 +14,6 @@ if (MLN_WITH_METAL)
   math(EXPR backend_count "${backend_count} + 1")
 endif()
 if (MLN_WITH_VULKAN)
-  message(MLN_WITH_VULKAN)
   math(EXPR backend_count "${backend_count} + 1")
 endif()
 
