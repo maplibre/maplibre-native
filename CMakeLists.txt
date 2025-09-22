@@ -1433,6 +1433,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1442,7 +1443,6 @@ target_link_libraries(
     mbgl-core
     PRIVATE
         MapLibreNative::Base::Extras::kdbush.hpp
-        MapLibreNative::Base::supercluster.hpp
         MapLibreNative::Base::shelf-pack-cpp
         MapLibreNative::Base::geojson-vt-cpp
         MapLibreNative::Base::cheap-ruler-cpp
@@ -1454,6 +1454,7 @@ target_link_libraries(
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
+    mbgl-vendor-supercluster.hpp
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
@@ -1484,7 +1485,7 @@ set(EXPORT_TARGETS
     maplibre-native-base-jni.hpp
     maplibre-native-base-pixelmatch-cpp
     maplibre-native-base-shelf-pack-cpp
-    maplibre-native-base-supercluster.hpp
+    mbgl-vendor-supercluster.hpp
     maplibre-native-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost

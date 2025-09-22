@@ -141,6 +141,7 @@ cc_library(
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:rapidjson",
+        "//vendor:supercluster.hpp",
         "//vendor:unique_resource",
         "//vendor:unordered_dense",
         "//vendor:vector-tile",

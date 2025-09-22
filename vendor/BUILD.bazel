@@ -14,7 +14,6 @@ cc_library(
             "maplibre-native-base/deps/jni.hpp/include/jni/*.hpp",
             "maplibre-native-base/deps/pixelmatch-cpp/include/mapbox/*.hpp",
             "maplibre-native-base/deps/shelf-pack-cpp/include/**/*.hpp",
-            "maplibre-native-base/deps/supercluster.hpp/include/*.hpp",
             "maplibre-native-base/deps/variant/include/mapbox/*.hpp",
             "maplibre-native-base/extras/expected-lite/include/**/*.hpp",
             "maplibre-native-base/extras/filesystem/include/ghc/*.hpp",
@@ -32,7 +31,6 @@ cc_library(
         "maplibre-native-base/deps/jni.hpp/include",
         "maplibre-native-base/deps/pixelmatch-cpp/include",
         "maplibre-native-base/deps/shelf-pack-cpp/include",
-        "maplibre-native-base/deps/supercluster.hpp/include",
         "maplibre-native-base/deps/variant/include",
         "maplibre-native-base/extras/args",
         "maplibre-native-base/extras/expected-lite/include",
@@ -121,6 +119,15 @@ cc_library(
     hdrs = glob(["protozero/include/protozero/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["protozero/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/supercluster.hpp
+cc_library(
+    name = "supercluster.hpp",
+    hdrs = ["supercluster/include/supercluster.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["supercluster/include"],
     visibility = ["//visibility:public"],
 )
 

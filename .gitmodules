@@ -95,7 +95,7 @@
 	path = vendor/maplibre-native-base/deps/shelf-pack-cpp
 	url = https://github.com/mapbox/shelf-pack-cpp.git
 [submodule "vendor/maplibre-native-base/deps/supercluster.hpp"]
-	path = vendor/maplibre-native-base/deps/supercluster.hpp
+	path = vendor/supercluster
 	url = https://github.com/mapbox/supercluster.hpp.git
 [submodule "vendor/maplibre-native-base/deps/variant"]
 	path = vendor/maplibre-native-base/deps/variant
