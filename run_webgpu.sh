@@ -7,7 +7,7 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
-STYLE_URL="./coastline.json"
+STYLE_URL="./dash.json"
 
 # Build the project first
 echo "Building WebGPU implementation..."
