@@ -56,14 +56,7 @@ set_target_properties(
         INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/geojson-vt-cpp/LICENSE
 )
 
-set_target_properties(
-    maplibre-native-base-extras-rapidjson
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "RapidJSON"
-        INTERFACE_MAPLIBRE_URL "https://rapidjson.org"
-        INTERFACE_MAPLIBRE_AUTHOR "THL A29 Limited, a Tencent company, and Milo Yip"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/rapidjson/license.txt
-)
+
 
 set_target_properties(
     maplibre-native-base-geojson.hpp

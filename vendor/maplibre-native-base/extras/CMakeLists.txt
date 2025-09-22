@@ -24,5 +24,3 @@ maplibre_native_base_extras_add_library(args ${CMAKE_CURRENT_LIST_DIR}/args)
 maplibre_native_base_extras_add_library(filesystem ${CMAKE_CURRENT_LIST_DIR}/filesystem/include)
 maplibre_native_base_extras_add_library(expected-lite ${CMAKE_CURRENT_LIST_DIR}/expected-lite/include)
 maplibre_native_base_extras_add_library(kdbush.hpp ${CMAKE_CURRENT_LIST_DIR}/kdbush.hpp/include)
-
-include(${PROJECT_SOURCE_DIR}/extras/rapidjson.cmake)

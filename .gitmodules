@@ -71,7 +71,7 @@
 	path = vendor/maplibre-native-base/extras/kdbush.hpp
 	url = https://github.com/mourner/kdbush.hpp.git
 [submodule "vendor/maplibre-native-base/extras/rapidjson"]
-	path = vendor/maplibre-native-base/extras/rapidjson
+	path = vendor/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
 [submodule "vendor/maplibre-native-base/deps/cheap-ruler-cpp"]
 	path = vendor/maplibre-native-base/deps/cheap-ruler-cpp

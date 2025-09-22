@@ -140,6 +140,7 @@ cc_library(
         "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
+        "//vendor:rapidjson",
         "//vendor:unique_resource",
         "//vendor:unordered_dense",
         "//vendor:vector-tile",

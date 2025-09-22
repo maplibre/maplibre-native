@@ -1421,6 +1421,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/rapidjson.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/maplibre-native-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
@@ -1462,7 +1463,7 @@ target_link_libraries(
     PUBLIC
         MapLibreNative::Base
         MapLibreNative::Base::Extras::expected-lite
-        MapLibreNative::Base::Extras::rapidjson
+        mbgl-vendor-rapidjson
         MapLibreNative::Base::geojson.hpp
         MapLibreNative::Base::geometry.hpp
         MapLibreNative::Base::variant
@@ -1477,7 +1478,6 @@ set(EXPORT_TARGETS
     maplibre-native-base-extras-filesystem
     maplibre-native-base-extras-expected-lite
     maplibre-native-base-extras-kdbush.hpp
-    maplibre-native-base-extras-rapidjson
     maplibre-native-base-geojson-vt-cpp
     maplibre-native-base-geojson.hpp
     maplibre-native-base-geometry.hpp
@@ -1490,6 +1490,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
+    mbgl-vendor-rapidjson
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
