@@ -563,12 +563,12 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
-    let MAX_LINE_DISTANCE = 32767.0;
+    let LINE_DISTANCE_SCALE = 2.0;
 
     // Unpack vertex data
     let a_extrude = vec2<f32>(f32(in.data.x), f32(in.data.y)) - 128.0;
     let a_direction = f32(in.data.z % 4u) - 1.0;
-    let v_linesofar = (f32(in.data.z / 4u) + f32(in.data.w) * 64.0) * 2.0 / MAX_LINE_DISTANCE;
+    let v_linesofar = (floor(f32(in.data.z) * 0.25) + f32(in.data.w) * 64.0) * LINE_DISTANCE_SCALE;
 
     // Unpack position and normal
     let pos = floor(vec2<f32>(f32(in.pos_normal.x), f32(in.pos_normal.y)) * 0.5);
@@ -836,12 +836,12 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Constants
     let ANTIALIASING = 1.0 / 2.0;
-    let MAX_LINE_DISTANCE = 32767.0;
+    let LINE_DISTANCE_SCALE = 2.0;
 
     // Unpack vertex data
     let a_extrude = vec2<f32>(f32(in.data.x), f32(in.data.y)) - 128.0;
     let a_direction = f32(in.data.z % 4u) - 1.0;
-    let v_linesofar = (f32(in.data.z / 4u) + f32(in.data.w) * 64.0) * 2.0 / MAX_LINE_DISTANCE;
+    let v_linesofar = (floor(f32(in.data.z) * 0.25) + f32(in.data.w) * 64.0) * LINE_DISTANCE_SCALE;
 
     // Unpack position and normal
     let pos = floor(vec2<f32>(f32(in.pos_normal.x), f32(in.pos_normal.y)) * 0.5);
@@ -993,8 +993,8 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let alpha = clamp(min(dist - (in.v_width2.y - blur2), in.v_width2.x - dist) / blur2, 0.0, 1.0);
 
     // Sample SDF texture
-    let dist_a = textureSample(sdf_texture, sdf_sampler, in.v_tex_a).a;
-    let dist_b = textureSample(sdf_texture, sdf_sampler, in.v_tex_b).a;
+    let dist_a = textureSample(sdf_texture, sdf_sampler, in.v_tex_a).r;
+    let dist_b = textureSample(sdf_texture, sdf_sampler, in.v_tex_b).r;
     let sdfdist = mix(dist_a, dist_b, tileProps.mix);
 
     // Calculate SDF alpha
