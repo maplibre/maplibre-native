@@ -27,6 +27,11 @@ cmake --build build --target mbgl-glfw -- -j8
 - A 20s soak on Linux via `timeout 20 ./run_webgpu.sh` brings up the GLFW window on X11/XWayland, logs the selected Dawn adapter, and repeatedly renders the MapLibre demo tiles without validation errors.
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
+## Recent WebGPU fixes (2025-09-20)
+- Fixed the consolidated line UBO layout: WebGPU now wraps every `Line*DrawableUBO` in a padded storage entry so Dawn sees the 128-byte stride produced by the C++ union, and similarly pads the shared tile-props buffer to 64 bytes. Per-drawable matrices no longer alias between tiles, so `LineShader`, `LineGradientShader`, `LinePatternShader`, and `LineSDFShader` all render across every tile.
+- Corrected the `LinePattern` tweaker to write the gap-width and offset interpolation factors to the matching UBO slots; dashed and image-pattern lines now respect their spacing instead of collapsing to solid strokes.
+- Validation run: `timeout 10 ./build/platform/glfw/mbgl-glfw --backend webgpu --style https://demotiles.maplibre.org/style.json --zoom 3 --benchmark` (no Dawn validation errors; solid and dashed layers appear on every tile).
+
 ## Recent WebGPU fixes (2025-09-19)
 - Consolidated vertex attribute bindings so a drawable never binds more than eight unique WebGPU vertex buffers; Dawn no longer complains about exceeding the limit, and the fill layer now reuses shared buffers instead of allocating duplicates per attribute.
 - Uniform buffers are allocated with 256-byte alignment before upload, satisfying Dawn's minimum binding size (the global index UBO now binds as 256 bytes instead of 16).

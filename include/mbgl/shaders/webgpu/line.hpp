@@ -86,15 +86,21 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct LineDrawableEntry {
+    data: LineDrawableUBO,
+    pad0: vec4<f32>,
+    pad1: vec4<f32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<storage, read> drawableVector: array<LineDrawableUBO>;
+@group(0) @binding(2) var<storage, read> drawableVector: array<LineDrawableEntry>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[globalIndex.value];
+    let drawable = drawableVector[globalIndex.value].data;
     let ratio = max(drawable.ratio, 1e-6);
     let pixel_ratio = paintParams.pixel_ratio;
     let antialiasing = 0.5 / pixel_ratio;
@@ -311,15 +317,21 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct LineGradientDrawableEntry {
+    data: LineGradientDrawableUBO,
+    pad0: vec4<f32>,
+    pad1: vec4<f32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<storage, read> drawableVector: array<LineGradientDrawableUBO>;
+@group(0) @binding(2) var<storage, read> drawableVector: array<LineGradientDrawableEntry>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    let drawable = drawableVector[globalIndex.value];
+    let drawable = drawableVector[globalIndex.value].data;
     let mask = props.expressionMask;
 
     // Constants
@@ -525,9 +537,19 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct LinePatternDrawableEntry {
+    data: LinePatternDrawableUBO,
+    pad0: vec4<f32>,
+    pad1: vec4<f32>,
+};
+
+struct LinePatternTilePropsEntry {
+    data: LinePatternTilePropsUBO,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<storage, read> drawableVector: array<LinePatternDrawableUBO>;
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsUBO>;
+@group(0) @binding(2) var<storage, read> drawableVector: array<LinePatternDrawableEntry>;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsEntry>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
@@ -535,8 +557,8 @@ struct GlobalIndexUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let index = globalIndex.value;
-    let drawable = drawableVector[index];
-    let tileProps = tilePropsVector[index];
+    let drawable = drawableVector[index].data;
+    let tileProps = tilePropsVector[index].data;
     let mask = props.expressionMask;
 
     // Constants
@@ -652,14 +674,18 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsUBO>;
+struct LinePatternTilePropsEntry {
+    data: LinePatternTilePropsUBO,
+};
+
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsEntry>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var pattern_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[globalIndex.value];
+    let tileProps = tilePropsVector[globalIndex.value].data;
 
     // Calculate the distance of the pixel from the line
     let dist = length(in.v_normal) * in.v_width2.x;
@@ -783,9 +809,20 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct LineSDFDrawableEntry {
+    data: LineSDFDrawableUBO,
+};
+
+struct LineSDFTilePropsEntry {
+    data: LineSDFTilePropsUBO,
+    pad0: vec4<f32>,
+    pad1: vec4<f32>,
+    pad2: vec4<f32>,
+};
+
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableUBO>;
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsUBO>;
+@group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableEntry>;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsEntry>;
 @group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
@@ -793,8 +830,8 @@ struct GlobalIndexUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let index = globalIndex.value;
-    let drawable = drawableVector[index];
-    let tileProps = tilePropsVector[index];
+    let drawable = drawableVector[index].data;
+    let tileProps = tilePropsVector[index].data;
     let mask = props.expressionMask;
 
     // Constants
@@ -932,14 +969,21 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsUBO>;
+struct LineSDFTilePropsEntry {
+    data: LineSDFTilePropsUBO,
+    pad0: vec4<f32>,
+    pad1: vec4<f32>,
+    pad2: vec4<f32>,
+};
+
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsEntry>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var sdf_sampler: sampler;
 @group(1) @binding(1) var sdf_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let tileProps = tilePropsVector[globalIndex.value];
+    let tileProps = tilePropsVector[globalIndex.value].data;
 
     // Calculate the distance of the pixel from the line
     let dist = length(in.v_normal) * in.v_width2.x;
