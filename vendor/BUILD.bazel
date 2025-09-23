@@ -59,7 +59,7 @@ cc_library(
 # vendor/args
 cc_library(
     name = "args",
-    hdrs = ["expe/args.hxx"],
+    hdrs = ["args/args.hxx"],
     includes = ["args"],
     visibility = ["//visibility:public"],
 )
