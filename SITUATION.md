@@ -27,6 +27,12 @@ cmake --build build --target mbgl-glfw -- -j8
 - A 20s soak on Linux via `timeout 20 ./run_webgpu.sh` brings up the GLFW window on X11/XWayland, logs the selected Dawn adapter, and repeatedly renders the MapLibre demo tiles without validation errors.
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
+## Recent WebGPU fixes (2025-09-22)
+- Dropped the WebGPU-specific `adjustSymbolShader` string surgery; symbol WGSL now matches the other backends by using `HAS_UNIFORM_u_*` guards for optional varyings.
+- Added an inline WGSL pre-pass in the WebGPU shader group to evaluate those guards before pipeline creation, keeping Dawn’s vertex layouts consistent with the compiled shaders while still sharing the existing `ProgramParameters` define plumbing.
+- Updated the icon, SDF, and text+icon WGSL to gate their vertex inputs, varyings, and fragment fallbacks with the new macros so constant paint properties rely solely on uniforms.
+- `./run_webgpu.sh` (Dawn/Vulkan on X11) rebuilds and launches successfully with symbol layers rendering; the previously-logged fill pipeline validation errors no longer appear.
+
 ## Recent WebGPU fixes (2025-09-21)
 - Packed the circle shader varyings into two vectors (`circle_data` + `stroke_data`) so Dawn sees only five user interpolants; the earlier layout tripped validation by emitting nine varyings and the render pipeline was rejected.
 - Reused the shared WGSL prelude for both stages, so the circle vertex/fragment entry points now reference the same consolidated UBO/SSBO bindings (`globalIndex`, `drawableVector`, `props`).
