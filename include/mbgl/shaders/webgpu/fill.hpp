@@ -207,18 +207,30 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) position: vec2<i32>,
+#ifndef HAS_UNIFORM_u_pattern_from
     @location(5) pattern_from: vec4<u32>,
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     @location(6) pattern_to: vec4<u32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(7) opacity: vec2<f32>,
+#endif
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
+#ifndef HAS_UNIFORM_u_pattern_from
     @location(2) pattern_from: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     @location(3) pattern_to: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(4) opacity: f32,
+#endif
 };
 
 struct FillPatternDrawableUBO {
@@ -271,8 +283,19 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[index];
     let tileProps = tilePropsVector[index];
 
-    let pattern_from = vec4<f32>(in.pattern_from);
-    let pattern_to = vec4<f32>(in.pattern_to);
+    var pattern_from: vec4<f32>;
+#ifdef HAS_UNIFORM_u_pattern_from
+    pattern_from = tileProps.pattern_from;
+#else
+    pattern_from = vec4<f32>(in.pattern_from);
+#endif
+
+    var pattern_to: vec4<f32>;
+#ifdef HAS_UNIFORM_u_pattern_to
+    pattern_to = tileProps.pattern_to;
+#else
+    pattern_to = vec4<f32>(in.pattern_to);
+#endif
 
     let pattern_tl_a = pattern_from.xy;
     let pattern_br_a = pattern_from.zw;
@@ -315,9 +338,15 @@ fn main(in: VertexInput) -> VertexOutput {
         tileZoomRatio,
         pos
     );
+#ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     out.pattern_to = pattern_to;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 
     return out;
 }
@@ -327,9 +356,15 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
+#ifndef HAS_UNIFORM_u_pattern_from
     @location(2) pattern_from: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     @location(3) pattern_to: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(4) opacity: f32,
+#endif
 };
 
 struct FillPatternTilePropsUBO {
@@ -364,10 +399,24 @@ struct GlobalIndexUBO {
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
 
-    let pattern_tl_a = in.pattern_from.xy;
-    let pattern_br_a = in.pattern_from.zw;
-    let pattern_tl_b = in.pattern_to.xy;
-    let pattern_br_b = in.pattern_to.zw;
+    let pattern_from =
+#ifdef HAS_UNIFORM_u_pattern_from
+        tileProps.pattern_from;
+#else
+        in.pattern_from;
+#endif
+
+    let pattern_to =
+#ifdef HAS_UNIFORM_u_pattern_to
+        tileProps.pattern_to;
+#else
+        in.pattern_to;
+#endif
+
+    let pattern_tl_a = pattern_from.xy;
+    let pattern_br_a = pattern_from.zw;
+    let pattern_tl_b = pattern_to.xy;
+    let pattern_br_b = pattern_to.zw;
 
     // Sample pattern A
     let imagecoord_a = gl_mod(in.v_pos_a, vec2<f32>(1.0));
@@ -380,7 +429,14 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     // Mix patterns and apply opacity
-    return mix(color_a, color_b, props.fade) * in.opacity;
+    let opacity =
+#ifdef HAS_UNIFORM_u_opacity
+        props.opacity;
+#else
+        in.opacity;
+#endif
+
+    return mix(color_a, color_b, props.fade) * opacity;
 }
 )";
 };
@@ -395,9 +451,15 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGP
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) position: vec2<i32>,
+#ifndef HAS_UNIFORM_u_pattern_from
     @location(5) pattern_from: vec4<u32>,
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     @location(6) pattern_to: vec4<u32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(7) opacity: vec2<f32>,
+#endif
 };
 
 struct VertexOutput {
@@ -405,9 +467,15 @@ struct VertexOutput {
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
     @location(2) v_pos: vec2<f32>,
+#ifndef HAS_UNIFORM_u_pattern_from
     @location(3) pattern_from: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     @location(4) pattern_to: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(5) opacity: f32,
+#endif
 };
 
 struct FillOutlinePatternDrawableUBO {
@@ -461,8 +529,19 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[index];
     let tileProps = tilePropsVector[index];
 
-    let pattern_from = vec4<f32>(in.pattern_from);
-    let pattern_to = vec4<f32>(in.pattern_to);
+    var pattern_from: vec4<f32>;
+#ifdef HAS_UNIFORM_u_pattern_from
+    pattern_from = tileProps.pattern_from;
+#else
+    pattern_from = vec4<f32>(in.pattern_from);
+#endif
+
+    var pattern_to: vec4<f32>;
+#ifdef HAS_UNIFORM_u_pattern_to
+    pattern_to = tileProps.pattern_to;
+#else
+    pattern_to = vec4<f32>(in.pattern_to);
+#endif
 
     let pattern_tl_a = pattern_from.xy;
     let pattern_br_a = pattern_from.zw;
@@ -508,9 +587,15 @@ fn main(in: VertexInput) -> VertexOutput {
         pos
     );
     out.v_pos = (ndcXY + vec2<f32>(1.0, 1.0)) * 0.5 * paintParams.world_size;
+#ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     out.pattern_to = pattern_to;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 
     return out;
 }
@@ -521,9 +606,15 @@ struct FragmentInput {
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
     @location(2) v_pos: vec2<f32>,
+#ifndef HAS_UNIFORM_u_pattern_from
     @location(3) pattern_from: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_pattern_to
     @location(4) pattern_to: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(5) opacity: f32,
+#endif
 };
 
 struct FillOutlinePatternTilePropsUBO {
@@ -558,10 +649,24 @@ struct GlobalIndexUBO {
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
 
-    let pattern_tl_a = in.pattern_from.xy;
-    let pattern_br_a = in.pattern_from.zw;
-    let pattern_tl_b = in.pattern_to.xy;
-    let pattern_br_b = in.pattern_to.zw;
+    let pattern_from =
+#ifdef HAS_UNIFORM_u_pattern_from
+        tileProps.pattern_from;
+#else
+        in.pattern_from;
+#endif
+
+    let pattern_to =
+#ifdef HAS_UNIFORM_u_pattern_to
+        tileProps.pattern_to;
+#else
+        in.pattern_to;
+#endif
+
+    let pattern_tl_a = pattern_from.xy;
+    let pattern_br_a = pattern_from.zw;
+    let pattern_tl_b = pattern_to.xy;
+    let pattern_br_b = pattern_to.zw;
 
     // Sample pattern A
     let imagecoord_a = gl_mod(in.v_pos_a, vec2<f32>(1.0));
@@ -574,7 +679,14 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     // Mix patterns and apply opacity
-    return mix(color_a, color_b, props.fade) * in.opacity;
+    let opacity =
+#ifdef HAS_UNIFORM_u_opacity
+        props.opacity;
+#else
+        in.opacity;
+#endif
+
+    return mix(color_a, color_b, props.fade) * opacity;
 }
 )";
 };
