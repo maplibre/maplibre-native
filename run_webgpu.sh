@@ -7,7 +7,7 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
-STYLE_URL="${STYLE_URL:-./demotiles.json}"
+STYLE_URL="${STYLE_URL:-https://tiles.openfreemap.org/styles/liberty}"
 
 print_usage() {
     cat <<EOF
