@@ -23,12 +23,13 @@ cmake -S . -B build -G Ninja \
 cmake --build build --target mbgl-glfw -- -j8
 ./run_webgpu.sh
 ```
-- `run_webgpu.sh` now requests the WebGPU backend explicitly (`--backend webgpu`), only applies the Metal debug env vars on macOS, and defaults to `https://demotiles.maplibre.org/style.json` (override with `STYLE_URL=...`).
+- `run_webgpu.sh` now requests the WebGPU backend explicitly (`--backend webgpu`), only applies the Metal debug env vars on macOS, defaults to `https://demotiles.maplibre.org/style.json`, and accepts optional overrides via `--style <url>` or `STYLE_URL=...`.
 - A 20s soak on Linux via `timeout 20 ./run_webgpu.sh` brings up the GLFW window on X11/XWayland, logs the selected Dawn adapter, and repeatedly renders the MapLibre demo tiles without validation errors.
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
 ## Recent WebGPU fixes (2025-09-22)
 - Align the WebGPU `SymbolIconShader` vertex stage with Metal: when `HAS_UNIFORM_u_opacity` is defined we now skip sampling evaluated property uniforms and drop the extra varyings so the fragment shader no longer declares location 2. Dawn stops rejecting the module with "Invalid ShaderModule" / "fragment input has no matching vertex output" during `CreateRenderPipeline`.
+- Corrected the symbol rotation matrices (`SymbolIcon`, `SymbolSDF`, `SymbolTextAndIcon`) to match Metal's column-major construction. Dawn now rotates glyph quads clockwise like the Metal/Vulkan backends, so road labels follow the street geometry instead of appearing flipped.
 - Dropped the WebGPU-specific `adjustSymbolShader` string surgery; symbol WGSL now matches the other backends by using `HAS_UNIFORM_u_*` guards for optional varyings.
 - Added an inline WGSL pre-pass in the WebGPU shader group to evaluate those guards before pipeline creation, keeping Dawn’s vertex layouts consistent with the compiled shaders while still sharing the existing `ProgramParameters` define plumbing.
 - Updated the icon, SDF, and text+icon WGSL to gate their vertex inputs, varyings, and fragment fallbacks with the new macros so constant paint properties rely solely on uniforms.
