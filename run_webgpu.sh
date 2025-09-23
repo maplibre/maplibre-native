@@ -7,7 +7,7 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
-STYLE_URL="./demotiles-heatmap.json"
+STYLE_URL="./demotiles.json"
 
 # Build the project first
 echo "Building WebGPU implementation..."
