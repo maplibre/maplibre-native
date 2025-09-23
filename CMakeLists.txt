@@ -1457,7 +1457,7 @@ target_link_libraries(
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
-    mbgl-vendor-supercluster.hpp
+        mbgl-vendor-supercluster
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
@@ -1487,7 +1487,7 @@ set(EXPORT_TARGETS
     maplibre-native-base-jni.hpp
     maplibre-native-base-pixelmatch-cpp
     maplibre-native-base-shelf-pack-cpp
-    mbgl-vendor-supercluster.hpp
+    mbgl-vendor-supercluster
     maplibre-native-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
