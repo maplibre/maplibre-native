@@ -229,6 +229,10 @@ ShaderProgram::ShaderProgram(Context& context,
         if (!vertexShaderModule) {
             Log::Error(Event::Render, "Failed to create vertex shader module for " + shaderName);
             Log::Error(Event::Render, "Vertex shader source length: " + std::to_string(vertexWithPrelude.length()));
+            if (shaderName.find("CircleShader") != std::string::npos) {
+                std::ofstream dump("/tmp/circle_vertex.wgsl", std::ios::trunc);
+                dump << vertexSource;
+            }
         } else {
             Log::Info(Event::Render, "Successfully created vertex shader module for " + shaderName);
         }
@@ -253,6 +257,10 @@ ShaderProgram::ShaderProgram(Context& context,
         if (!fragmentShaderModule) {
             Log::Error(Event::Render, "Failed to create fragment shader module for " + shaderName);
             Log::Error(Event::Render, "Fragment shader source length: " + std::to_string(fragmentWithPrelude.length()));
+            if (shaderName.find("CircleShader") != std::string::npos) {
+                std::ofstream dump("/tmp/circle_fragment.wgsl", std::ios::trunc);
+                dump << fragmentSource;
+            }
         } else {
             Log::Info(Event::Render, "Successfully created fragment shader module for " + shaderName);
         }
