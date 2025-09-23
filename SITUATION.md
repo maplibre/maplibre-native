@@ -30,6 +30,8 @@ cmake --build build --target mbgl-glfw -- -j8
 ## Recent WebGPU fixes (2025-09-21)
 - Packed the circle shader varyings into two vectors (`circle_data` + `stroke_data`) so Dawn sees only five user interpolants; the earlier layout tripped validation by emitting nine varyings and the render pipeline was rejected.
 - Reused the shared WGSL prelude for both stages, so the circle vertex/fragment entry points now reference the same consolidated UBO/SSBO bindings (`globalIndex`, `drawableVector`, `props`).
+- Mirrored the GL/Metal circle transform path: the WebGPU vertex shader now samples `paintParams` to respect pitch/scale alignment flags, so viewport-aligned bubbles no longer shear when the map tilts.
+- Added a circle expression mask to `CircleEvaluatedPropsUBO` (packed into the existing padding slot) and taught the WGSL to fall back to uniform values when a paint property is constant; Dawn no longer sees undefined vertex attributes when the style omits per-feature data.
 - Circle smoke test: `timeout 5 ./build/platform/glfw/mbgl-glfw --backend webgpu --style $(pwd)/demotiles-circle.json --zoom 3 --benchmark`.
 - Demo tiles regression run: `timeout 10 ./build/platform/glfw/mbgl-glfw --backend webgpu --style https://demotiles.maplibre.org/style.json --zoom 3 --benchmark`.
 

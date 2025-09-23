@@ -16,11 +16,22 @@
 #endif
 
 #include <cstring>
+#include <bit>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
+
+namespace {
+constexpr uint32_t CircleExpressionColor = 1u << 0u;
+constexpr uint32_t CircleExpressionRadius = 1u << 1u;
+constexpr uint32_t CircleExpressionBlur = 1u << 2u;
+constexpr uint32_t CircleExpressionOpacity = 1u << 3u;
+constexpr uint32_t CircleExpressionStrokeColor = 1u << 4u;
+constexpr uint32_t CircleExpressionStrokeWidth = 1u << 5u;
+constexpr uint32_t CircleExpressionStrokeOpacity = 1u << 6u;
+} // namespace
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
@@ -41,6 +52,29 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     // Updated only with evaluated properties
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+        uint32_t expressionMask = 0;
+        if (!evaluated.get<CircleColor>().isConstant()) {
+            expressionMask |= CircleExpressionColor;
+        }
+        if (!evaluated.get<CircleRadius>().isConstant()) {
+            expressionMask |= CircleExpressionRadius;
+        }
+        if (!evaluated.get<CircleBlur>().isConstant()) {
+            expressionMask |= CircleExpressionBlur;
+        }
+        if (!evaluated.get<CircleOpacity>().isConstant()) {
+            expressionMask |= CircleExpressionOpacity;
+        }
+        if (!evaluated.get<CircleStrokeColor>().isConstant()) {
+            expressionMask |= CircleExpressionStrokeColor;
+        }
+        if (!evaluated.get<CircleStrokeWidth>().isConstant()) {
+            expressionMask |= CircleExpressionStrokeWidth;
+        }
+        if (!evaluated.get<CircleStrokeOpacity>().isConstant()) {
+            expressionMask |= CircleExpressionStrokeOpacity;
+        }
+
         const CircleEvaluatedPropsUBO evaluatedPropsUBO = {
             .color = constOrDefault<CircleColor>(evaluated),
             .stroke_color = constOrDefault<CircleStrokeColor>(evaluated),
@@ -51,7 +85,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .stroke_opacity = constOrDefault<CircleStrokeOpacity>(evaluated),
             .scale_with_map = scaleWithMap,
             .pitch_with_map = pitchWithMap,
-            .pad1 = 0};
+            .pad1 = std::bit_cast<float>(expressionMask)};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }
