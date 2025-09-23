@@ -23,11 +23,18 @@ cmake -S . -B build -G Ninja \
 cmake --build build --target mbgl-glfw -- -j8
 ./run_webgpu.sh
 ```
-- `run_webgpu.sh` now requests the WebGPU backend explicitly (`--backend webgpu`) and only applies the Metal debug env vars on macOS.
+- `run_webgpu.sh` now requests the WebGPU backend explicitly (`--backend webgpu`), only applies the Metal debug env vars on macOS, and defaults to `https://demotiles.maplibre.org/style.json` (override with `STYLE_URL=...`).
 - A 20s soak on Linux via `timeout 20 ./run_webgpu.sh` brings up the GLFW window on X11/XWayland, logs the selected Dawn adapter, and repeatedly renders the MapLibre demo tiles without validation errors.
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
+## Recent WebGPU fixes (2025-09-21)
+- Packed the circle shader varyings into two vectors (`circle_data` + `stroke_data`) so Dawn sees only five user interpolants; the earlier layout tripped validation by emitting nine varyings and the render pipeline was rejected.
+- Reused the shared WGSL prelude for both stages, so the circle vertex/fragment entry points now reference the same consolidated UBO/SSBO bindings (`globalIndex`, `drawableVector`, `props`).
+- Circle smoke test: `timeout 5 ./build/platform/glfw/mbgl-glfw --backend webgpu --style $(pwd)/demotiles-circle.json --zoom 3 --benchmark`.
+- Demo tiles regression run: `timeout 10 ./build/platform/glfw/mbgl-glfw --backend webgpu --style https://demotiles.maplibre.org/style.json --zoom 3 --benchmark`.
+
 ## Recent WebGPU fixes (2025-09-20)
+- `CircleShader` WGSL now mirrors the consolidated UBO pattern: the per-drawable data is fetched from a storage buffer (binding `2`), evaluated props sit at binding `4`, and the global index UBO at binding `1`. Circle layers render without forcing changes in the common renderer code, honoring WebGPU’s bind-group semantics instead of relying on backend-specific hacks.
 - Fixed the consolidated line UBO layout: WebGPU now wraps every `Line*DrawableUBO` in a padded storage entry so Dawn sees the 128-byte stride produced by the C++ union, and similarly pads the shared tile-props buffer to 64 bytes. Per-drawable matrices no longer alias between tiles, so `LineShader`, `LineGradientShader`, `LinePatternShader`, and `LineSDFShader` all render across every tile.
 - Corrected the `LinePattern` tweaker to write the gap-width and offset interpolation factors to the matching UBO slots; dashed and image-pattern lines now respect their spacing instead of collapsing to solid strokes.
 - Validation run: `timeout 10 ./build/platform/glfw/mbgl-glfw --backend webgpu --style https://demotiles.maplibre.org/style.json --zoom 3 --benchmark` (no Dawn validation errors; solid and dashed layers appear on every tile).
