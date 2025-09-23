@@ -14,7 +14,7 @@ class RasterDEMTileWorker {
 public:
     RasterDEMTileWorker(const ActorRef<RasterDEMTileWorker>&, ActorRef<RasterDEMTile>);
 
-    void parse(const std::shared_ptr<const std::string>& data, uint64_t correlationID, Tileset::DEMEncoding encoding);
+    void parse(const std::shared_ptr<const std::string>& data, uint64_t correlationID, Tileset::Encoding encoding);
 
 private:
     ActorRef<RasterDEMTile> parent;

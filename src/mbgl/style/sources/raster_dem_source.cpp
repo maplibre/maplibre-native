@@ -15,7 +15,7 @@ namespace style {
 RasterDEMSource::RasterDEMSource(std::string id,
                                  variant<std::string, Tileset> urlOrTileset_,
                                  uint16_t tileSize,
-                                 std::optional<RasterDEMOptions> options_)
+                                 std::optional<SourceOptions> options_)
     : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM),
       options(std::move(options_)) {}
 
@@ -30,7 +30,7 @@ bool RasterDEMSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) 
 
 void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
     if (options) {
-        if (std::optional<Tileset::DEMEncoding> encoding = options.value().encoding) {
+        if (std::optional<Tileset::Encoding> encoding = options.value().encoding) {
             tileset.encoding = encoding.value();
         }
     }

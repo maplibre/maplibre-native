@@ -8,8 +8,8 @@ namespace style {
 namespace conversion {
 
 template <>
-struct Converter<RasterDEMOptions> {
-    std::optional<RasterDEMOptions> operator()(const Convertible& value, Error& error) const;
+struct Converter<SourceOptions> {
+    std::optional<SourceOptions> operator()(const Convertible& value, Error& error) const;
 };
 
 } // namespace conversion
