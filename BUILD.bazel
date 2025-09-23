@@ -135,6 +135,7 @@ cc_library(
         "//vendor:boost",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
+        "//vendor:expected-lite",
         "//vendor:maplibre-native-base",
         "//vendor:parsedate",
         "//vendor:pmtiles",

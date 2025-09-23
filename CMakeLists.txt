@@ -1435,6 +1435,8 @@ include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1443,7 +1445,7 @@ endif()
 target_link_libraries(
     mbgl-core
     PRIVATE
-        MapLibreNative::Base::Extras::kdbush.hpp
+        mbgl-vendor-kdbush
         MapLibreNative::Base::shelf-pack-cpp
         MapLibreNative::Base::geojson-vt-cpp
         MapLibreNative::Base::cheap-ruler-cpp
@@ -1464,7 +1466,7 @@ target_link_libraries(
         ${SHAPE_TARGETS} # from harfbuzz.cmake
     PUBLIC
         MapLibreNative::Base
-        MapLibreNative::Base::Extras::expected-lite
+        mbgl-vendor-expected-lite
         mbgl-vendor-rapidjson
         MapLibreNative::Base::geojson.hpp
         MapLibreNative::Base::geometry.hpp
@@ -1477,9 +1479,8 @@ set(EXPORT_TARGETS
     mbgl-core
     maplibre-native-base
     maplibre-native-base-cheap-ruler-cpp
-    maplibre-native-base-extras-filesystem
-    maplibre-native-base-extras-expected-lite
-    maplibre-native-base-extras-kdbush.hpp
+    mbgl-vendor-expected-lite
+    mbgl-vendor-kdbush
     maplibre-native-base-geojson-vt-cpp
     maplibre-native-base-geojson.hpp
     maplibre-native-base-geometry.hpp

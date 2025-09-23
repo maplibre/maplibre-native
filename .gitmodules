@@ -65,10 +65,10 @@
 	path = vendor/args
 	url = https://github.com/Taywee/args.git
 [submodule "vendor/maplibre-native-base/extras/expected-lite"]
-	path = vendor/maplibre-native-base/extras/expected-lite
+	path = vendor/expected-lite
 	url = https://github.com/martinmoene/expected-lite.git
 [submodule "vendor/maplibre-native-base/extras/kdbush.hpp"]
-	path = vendor/maplibre-native-base/extras/kdbush.hpp
+	path = vendor/kdbush.hpp
 	url = https://github.com/mourner/kdbush.hpp.git
 [submodule "vendor/maplibre-native-base/extras/rapidjson"]
 	path = vendor/rapidjson

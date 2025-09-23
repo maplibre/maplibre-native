@@ -3,35 +3,6 @@ if(NOT TARGET maplibre-native)
 endif()
 
 set_target_properties(
-    maplibre-native-base-extras-kdbush.hpp
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "kdbush.hpp"
-        INTERFACE_MAPLIBRE_URL "https://github.com/mourner/kdbush.hpp"
-        INTERFACE_MAPLIBRE_AUTHOR "Vladimir Agafonkin"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/kdbush.hpp/LICENSE
-)
-
-set_target_properties(
-    maplibre-native-base-extras-expected-lite
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "expected-lite"
-        INTERFACE_MAPLIBRE_URL "https://github.com/martinmoene/expected-lite"
-        INTERFACE_MAPLIBRE_AUTHOR "Martin Moene"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/expected-lite/LICENSE.txt
-)
-
-set_target_properties(
-    maplibre-native-base-extras-filesystem
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "filesystem"
-        INTERFACE_MAPLIBRE_URL "https://github.com/gulrak/filesystem"
-        INTERFACE_MAPLIBRE_AUTHOR "Steffen Schümann"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/filesystem/LICENSE.txt
-)
-
-
-
-set_target_properties(
     maplibre-native-base-shelf-pack-cpp
     PROPERTIES
         INTERFACE_MAPLIBRE_NAME "shelf-pack-cpp"

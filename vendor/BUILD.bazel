@@ -13,8 +13,6 @@ cc_library(
             "maplibre-native-base/deps/pixelmatch-cpp/include/mapbox/*.hpp",
             "maplibre-native-base/deps/shelf-pack-cpp/include/**/*.hpp",
             "maplibre-native-base/deps/variant/include/mapbox/*.hpp",
-            "maplibre-native-base/extras/expected-lite/include/**/*.hpp",
-            "maplibre-native-base/extras/kdbush.hpp/include/*.hpp",
             "maplibre-native-base/include/mapbox/**/*.hpp",
         ],
         exclude = ["maplibre-native-base/deps/jni.hpp/include/jni/string_conversion.hpp"],
@@ -29,11 +27,21 @@ cc_library(
         "maplibre-native-base/deps/pixelmatch-cpp/include",
         "maplibre-native-base/deps/shelf-pack-cpp/include",
         "maplibre-native-base/deps/variant/include",
-        "maplibre-native-base/extras/expected-lite/include",
-        "maplibre-native-base/extras/kdbush.hpp/include",
         "maplibre-native-base/include",
     ],
     visibility = ["//visibility:public"],
+)
+
+# vendor/kdbush
+cc_library(
+    name = "kdbush",
+    hdrs = glob([
+        "kdbush.hpp/include/*.hpp",
+    ]),
+    copts = CPP_FLAGS,
+    includes = [
+        "kdbush.hpp/include",
+    ],
 )
 
 cc_library(
@@ -51,8 +59,20 @@ cc_library(
 # vendor/args
 cc_library(
     name = "args",
-    hdrs = ["args/args.hxx"],
+    hdrs = ["expe/args.hxx"],
     includes = ["args"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/args
+cc_library(
+    name = "expected-lite",
+    hdrs = glob([
+        "expected-lite/include/**/*.hpp",
+    ]),
+    includes = [
+        "expected-lite/include",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -144,6 +164,7 @@ cc_library(
     copts = CPP_FLAGS,
     includes = ["supercluster/include"],
     visibility = ["//visibility:public"],
+    deps = ["kdbush"],
 )
 
 # vendor/rapidjson
