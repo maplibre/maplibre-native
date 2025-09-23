@@ -582,7 +582,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
 
     out.position = vec4<f32>(ndcXY.x,
-                             -ndcXY.y,
+                             ndcXY.y,
                              ndcZ,
                              1.0);
     out.v_pos_a = get_pattern_pos(
