@@ -1,0 +1,56 @@
+{
+    "version": 8,
+    "sources": {
+        "demo": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [-122.4194, 37.7749]
+                        },
+                        "properties": {
+                            "name": "San Francisco"
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [-74.0060, 40.7128]
+                        },
+                        "properties": {
+                            "name": "New York"
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [-0.1276, 51.5074]
+                        },
+                        "properties": {
+                            "name": "London"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "layers": [
+        {
+            "id": "demo-circles",
+            "type": "circle",
+            "source": "demo",
+            "paint": {
+                "circle-radius": 8,
+                "circle-color": "#ff0000",
+                "circle-stroke-width": 2,
+                "circle-stroke-color": "#ffffff"
+            }
+        }
+    ]
+}
