@@ -1437,6 +1437,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1502,6 +1503,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
     mbgl-vendor-metal-cpp
+    mbgl-vendor-filesystem
     unordered_dense
     ${SHAPE_TARGETS} # from harfbuzz.cmake
 )
