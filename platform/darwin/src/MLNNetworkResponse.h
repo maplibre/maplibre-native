@@ -9,6 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+MLN_EXPORT
 @interface MLNNetworkResponse : NSObject
 
 @property (retain, nullable) NSError *error;
