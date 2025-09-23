@@ -538,9 +538,9 @@
         "type": "circle",
         "source": "demo",
         "paint": {
-            "circle-radius": 8,
+            "circle-radius": 60,
             "circle-color": "#ff0000",
-            "circle-stroke-width": 2,
+            "circle-stroke-width": 50,
             "circle-stroke-color": "#ffffff"
         }
     }
