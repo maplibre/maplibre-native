@@ -261,8 +261,15 @@ struct FillEvaluatedPropsUBO {
 };
 
 struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
     pixel_ratio: f32,
-    // other fields...
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct GlobalIndexUBO {
@@ -506,9 +513,15 @@ struct FillEvaluatedPropsUBO {
 };
 
 struct GlobalPaintParamsUBO {
-    pixel_ratio: f32,
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
     world_size: vec2<f32>,
-    // other fields...
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct GlobalIndexUBO {
