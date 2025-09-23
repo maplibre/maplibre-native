@@ -7,7 +7,41 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
-STYLE_URL="./demotiles.json"
+STYLE_URL="${STYLE_URL:-./demotiles.json}"
+
+print_usage() {
+    cat <<EOF
+Usage: $0 [--style <style-url>]
+
+Options:
+  --style <style-url>   Override the style URL passed to mbgl-glfw.
+                        Defaults to ./demotiles.json or the value of STYLE_URL.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --style)
+            shift
+            if [[ -z "$1" ]]; then
+                echo "Error: --style requires an argument" >&2
+                print_usage
+                exit 1
+            fi
+            STYLE_URL="$1"
+            ;;
+        -h|--help)
+            print_usage
+            exit 0
+            ;;
+        *)
+            echo "Error: unknown option '$1'" >&2
+            print_usage
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # Build the project first
 echo "Building WebGPU implementation..."
