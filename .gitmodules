@@ -67,9 +67,6 @@
 [submodule "vendor/maplibre-native-base/extras/expected-lite"]
 	path = vendor/expected-lite
 	url = https://github.com/martinmoene/expected-lite.git
-[submodule "vendor/maplibre-native-base/extras/kdbush.hpp"]
-	path = vendor/kdbush.hpp
-	url = https://github.com/mourner/kdbush.hpp.git
 [submodule "vendor/maplibre-native-base/extras/rapidjson"]
 	path = vendor/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
@@ -106,3 +103,6 @@
 [submodule "vendor/maplibre-native-base/extras/filesystem"]
 	path = vendor/filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "vendor/kdbush.hpp"]
+	path = vendor/kdbush.hpp
+	url = https://github.com/mourner/kdbush.hpp.git
