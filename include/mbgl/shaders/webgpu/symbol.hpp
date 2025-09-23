@@ -100,14 +100,18 @@ struct VertexInput {
     @location(5) pixeloffset: vec4<i32>,
     @location(6) projected_pos: vec3<f32>,
     @location(7) fade_opacity: f32,
+#ifndef HAS_UNIFORM_u_opacity
     @location(8) opacity: f32,
+#endif
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex: vec2<f32>,
     @location(1) fade_opacity: f32,
+#ifndef HAS_UNIFORM_u_opacity
     @location(2) opacity: f32,
+#endif
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
@@ -124,10 +128,15 @@ fn main(in: VertexInput) -> VertexOutput {
     let fade_change = select(-paintParams.symbol_fade_change, paintParams.symbol_fade_change, raw_fade_opacity.y > 0.5);
     let fade_opacity = max(0.0, min(1.0, raw_fade_opacity.x + fade_change));
 
-    let fo = unpack_mix_float(vec2<f32>(in.opacity, in.opacity), drawable.opacity_t) * fade_opacity;
+#ifndef HAS_UNIFORM_u_opacity
+    let paint_opacity = unpack_mix_float(vec2<f32>(in.opacity, in.opacity), drawable.opacity_t);
+#else
+    let paint_opacity = select(props.icon_opacity, props.text_opacity, drawable.is_text_prop != 0u);
+#endif
+    let final_opacity = paint_opacity * fade_opacity;
 
     // Cull vertices with zero opacity
-    if (fo == 0.0) {
+    if (final_opacity == 0.0) {
         out.position = vec4<f32>(c_offscreen_degenerate_triangle_location,
                                  c_offscreen_degenerate_triangle_location,
                                  c_offscreen_degenerate_triangle_location, 1.0);
@@ -192,7 +201,9 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.tex = a_tex / drawable.texsize;
     out.fade_opacity = fade_opacity;
-    out.opacity = fo;
+#ifndef HAS_UNIFORM_u_opacity
+    out.opacity = final_opacity;
+#endif
 
     return out;
 }
@@ -214,7 +225,12 @@ struct FragmentInput {
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
+#ifdef HAS_UNIFORM_u_opacity
+    let base_opacity = select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u);
+    let opacity = base_opacity * in.fade_opacity;
+#else
     let opacity = select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u) * in.opacity;
+#endif
     return textureSample(image, texture_sampler, in.tex) * opacity;
 }
 )";
@@ -235,11 +251,21 @@ struct VertexInput {
     @location(5) pixeloffset: vec4<i32>,
     @location(6) projected_pos: vec3<f32>,
     @location(7) fade_opacity: f32,
+#ifndef HAS_UNIFORM_u_fill_color
     @location(8) fill_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     @location(9) halo_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(10) opacity: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     @location(11) halo_width: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     @location(12) halo_blur: f32,
+#endif
 };
 
 struct VertexOutput {
@@ -248,16 +274,27 @@ struct VertexOutput {
     @location(1) fade_opacity: f32,
     @location(2) gamma_scale: f32,
     @location(3) fontScale: f32,
+#ifndef HAS_UNIFORM_u_fill_color
     @location(4) fill_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     @location(5) halo_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(6) opacity: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     @location(7) halo_width: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     @location(8) halo_blur: f32,
+#endif
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
+@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -336,12 +373,21 @@ fn main(in: VertexInput) -> VertexOutput {
     out.gamma_scale = position.w;
     out.fontScale = fontScale;
     out.fade_opacity = fo;
-
+#ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     out.halo_color = unpack_mix_color(in.halo_color, drawable.halo_color_t);
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     out.halo_width = unpack_mix_float(vec2<f32>(in.halo_width, in.halo_width), drawable.halo_width_t);
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     out.halo_blur = unpack_mix_float(vec2<f32>(in.halo_blur, in.halo_blur), drawable.halo_blur_t);
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     out.opacity = unpack_mix_float(vec2<f32>(in.opacity, in.opacity), drawable.opacity_t);
+#endif
 
     return out;
 }
@@ -353,11 +399,21 @@ struct FragmentInput {
     @location(1) fade_opacity: f32,
     @location(2) gamma_scale: f32,
     @location(3) fontScale: f32,
+#ifndef HAS_UNIFORM_u_fill_color
     @location(4) fill_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     @location(5) halo_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(6) opacity: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     @location(7) halo_width: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     @location(8) halo_blur: f32,
+#endif
 };
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
@@ -369,21 +425,31 @@ struct FragmentInput {
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
-    let fill_color = select(in.fill_color,
-                           select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0u),
-                           false);
-    let halo_color = select(in.halo_color,
-                           select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0u),
-                           false);
-    let opacity = select(in.opacity,
-                        select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u),
-                        false);
-    let halo_width = select(in.halo_width,
-                           select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0u),
-                           false);
-    let halo_blur = select(in.halo_blur,
-                          select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u),
-                          false);
+#ifndef HAS_UNIFORM_u_fill_color
+    let fill_color = in.fill_color;
+#else
+    let fill_color = select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
+    let halo_color = in.halo_color;
+#else
+    let halo_color = select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+    let opacity = in.opacity;
+#else
+    let opacity = select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
+    let halo_width = in.halo_width;
+#else
+    let halo_width = select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
+    let halo_blur = in.halo_blur;
+#else
+    let halo_blur = select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u);
+#endif
 
     let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     let fontGamma = in.fontScale * tileProps.gamma_scale;
@@ -415,11 +481,21 @@ struct VertexInput {
     @location(4) data: vec4<u32>,
     @location(5) projected_pos: vec3<f32>,
     @location(6) fade_opacity: f32,
+#ifndef HAS_UNIFORM_u_fill_color
     @location(7) fill_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     @location(8) halo_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(9) opacity: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     @location(10) halo_width: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     @location(11) halo_blur: f32,
+#endif
 };
 
 struct VertexOutput {
@@ -429,11 +505,21 @@ struct VertexOutput {
     @location(2) gamma_scale: f32,
     @location(3) fontScale: f32,
     @location(4) is_icon: f32,
+#ifndef HAS_UNIFORM_u_fill_color
     @location(5) fill_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     @location(6) halo_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(7) opacity: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     @location(8) halo_width: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     @location(9) halo_blur: f32,
+#endif
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
@@ -523,11 +609,21 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fade_opacity = fo;
     out.is_icon = is_icon;
 
+#ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     out.halo_color = unpack_mix_color(in.halo_color, drawable.halo_color_t);
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     out.opacity = unpack_mix_float(vec2<f32>(in.opacity, in.opacity), drawable.opacity_t);
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     out.halo_width = unpack_mix_float(vec2<f32>(in.halo_width, in.halo_width), drawable.halo_width_t);
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     out.halo_blur = unpack_mix_float(vec2<f32>(in.halo_blur, in.halo_blur), drawable.halo_blur_t);
+#endif
 
     return out;
 }
@@ -540,11 +636,21 @@ struct FragmentInput {
     @location(2) gamma_scale: f32,
     @location(3) fontScale: f32,
     @location(4) is_icon: f32,
+#ifndef HAS_UNIFORM_u_fill_color
     @location(5) fill_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
     @location(6) halo_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(7) opacity: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
     @location(8) halo_width: f32,
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
     @location(9) halo_blur: f32,
+#endif
 };
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
@@ -558,21 +664,31 @@ struct FragmentInput {
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let tileProps = tilePropsVector[globalIndex.value];
-    let fill_color = select(in.fill_color,
-                           select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0u),
-                           false);
-    let halo_color = select(in.halo_color,
-                           select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0u),
-                           false);
-    let opacity = select(in.opacity,
-                        select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u),
-                        false);
-    let halo_width = select(in.halo_width,
-                           select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0u),
-                           false);
-    let halo_blur = select(in.halo_blur,
-                          select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u),
-                          false);
+#ifndef HAS_UNIFORM_u_fill_color
+    let fill_color = in.fill_color;
+#else
+    let fill_color = select(props.icon_fill_color, props.text_fill_color, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
+    let halo_color = in.halo_color;
+#else
+    let halo_color = select(props.icon_halo_color, props.text_halo_color, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+    let opacity = in.opacity;
+#else
+    let opacity = select(props.icon_opacity, props.text_opacity, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
+    let halo_width = in.halo_width;
+#else
+    let halo_width = select(props.icon_halo_width, props.text_halo_width, tileProps.is_text != 0u);
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
+    let halo_blur = in.halo_blur;
+#else
+    let halo_blur = select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u);
+#endif
 
     if (in.is_icon != 0.0) {
         let alpha = opacity * in.fade_opacity;
