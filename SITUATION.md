@@ -28,6 +28,7 @@ cmake --build build --target mbgl-glfw -- -j8
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
 ## Recent WebGPU fixes (2025-09-22)
+- Align the WebGPU `SymbolIconShader` vertex stage with Metal: when `HAS_UNIFORM_u_opacity` is defined we now skip sampling evaluated property uniforms and drop the extra varyings so the fragment shader no longer declares location 2. Dawn stops rejecting the module with "Invalid ShaderModule" / "fragment input has no matching vertex output" during `CreateRenderPipeline`.
 - Dropped the WebGPU-specific `adjustSymbolShader` string surgery; symbol WGSL now matches the other backends by using `HAS_UNIFORM_u_*` guards for optional varyings.
 - Added an inline WGSL pre-pass in the WebGPU shader group to evaluate those guards before pipeline creation, keeping Dawn’s vertex layouts consistent with the compiled shaders while still sharing the existing `ProgramParameters` define plumbing.
 - Updated the icon, SDF, and text+icon WGSL to gate their vertex inputs, varyings, and fragment fallbacks with the new macros so constant paint properties rely solely on uniforms.

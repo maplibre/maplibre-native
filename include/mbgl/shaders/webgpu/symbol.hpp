@@ -128,12 +128,12 @@ fn main(in: VertexInput) -> VertexOutput {
     let fade_change = select(-paintParams.symbol_fade_change, paintParams.symbol_fade_change, raw_fade_opacity.y > 0.5);
     let fade_opacity = max(0.0, min(1.0, raw_fade_opacity.x + fade_change));
 
-#ifndef HAS_UNIFORM_u_opacity
-    let paint_opacity = unpack_mix_float(vec2<f32>(in.opacity, in.opacity), drawable.opacity_t);
+#ifdef HAS_UNIFORM_u_opacity
+    let final_opacity = fade_opacity;
 #else
-    let paint_opacity = select(props.icon_opacity, props.text_opacity, drawable.is_text_prop != 0u);
-#endif
+    let paint_opacity = unpack_mix_float(vec2<f32>(in.opacity, in.opacity), drawable.opacity_t);
     let final_opacity = paint_opacity * fade_opacity;
+#endif
 
     // Cull vertices with zero opacity
     if (final_opacity == 0.0) {
@@ -213,7 +213,9 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) tex: vec2<f32>,
     @location(1) fade_opacity: f32,
+#ifndef HAS_UNIFORM_u_opacity
     @location(2) opacity: f32,
+#endif
 };
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
