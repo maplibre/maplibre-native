@@ -148,6 +148,7 @@ cc_library(
         "//vendor:wagyu",
     ] + select({
         "@platforms//os:ios": [
+            "//vendor:ghc_filesystem",
             "//vendor:icu",
         ],
         "@platforms//os:osx": [

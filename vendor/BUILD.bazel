@@ -14,7 +14,6 @@ cc_library(
             "maplibre-native-base/deps/shelf-pack-cpp/include/**/*.hpp",
             "maplibre-native-base/deps/variant/include/mapbox/*.hpp",
             "maplibre-native-base/extras/expected-lite/include/**/*.hpp",
-            "maplibre-native-base/extras/filesystem/include/ghc/*.hpp",
             "maplibre-native-base/extras/kdbush.hpp/include/*.hpp",
             "maplibre-native-base/include/mapbox/**/*.hpp",
         ],
@@ -31,9 +30,20 @@ cc_library(
         "maplibre-native-base/deps/shelf-pack-cpp/include",
         "maplibre-native-base/deps/variant/include",
         "maplibre-native-base/extras/expected-lite/include",
-        "maplibre-native-base/extras/filesystem/include",
         "maplibre-native-base/extras/kdbush.hpp/include",
         "maplibre-native-base/include",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "ghc_filesystem",
+    hdrs = glob([
+        "filesystem/include/ghc/*.hpp",
+    ]),
+    copts = CPP_FLAGS,
+    includes = [
+        "filesystem/include",
     ],
     visibility = ["//visibility:public"],
 )
