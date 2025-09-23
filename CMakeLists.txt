@@ -1417,6 +1417,7 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
+include(${PROJECT_SOURCE_DIR}/vendor/args.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)

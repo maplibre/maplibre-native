@@ -3,9 +3,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS")
 
 cc_library(
     name = "maplibre-native-base",
-    hdrs = [
-        "maplibre-native-base/extras/args/args.hxx",
-    ] + glob(
+    hdrs = glob(
         [
             "maplibre-native-base/deps/cheap-ruler-cpp/include/mapbox/*.hpp",
             "maplibre-native-base/deps/geojson-vt-cpp/include/**/*.hpp",
@@ -32,12 +30,19 @@ cc_library(
         "maplibre-native-base/deps/pixelmatch-cpp/include",
         "maplibre-native-base/deps/shelf-pack-cpp/include",
         "maplibre-native-base/deps/variant/include",
-        "maplibre-native-base/extras/args",
         "maplibre-native-base/extras/expected-lite/include",
         "maplibre-native-base/extras/filesystem/include",
         "maplibre-native-base/extras/kdbush.hpp/include",
         "maplibre-native-base/include",
     ],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/args
+cc_library(
+    name = "args",
+    hdrs = ["args/args.hxx"],
+    includes = ["args"],
     visibility = ["//visibility:public"],
 )
 
