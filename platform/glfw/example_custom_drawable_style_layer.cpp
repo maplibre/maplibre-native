@@ -522,6 +522,7 @@ void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
 
     if (!reader.ParseFromFile(filename, readerConfig)) {
         if (!reader.Error().empty()) {
+            mbgl::Log::Error(mbgl::Event::General, reader.Error());
         }
 
         assert(false);
@@ -529,6 +530,7 @@ void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
     }
 
     if (!reader.Warning().empty()) {
+        mbgl::Log::Error(mbgl::Event::General, reader.Warning());
     }
 
     const tinyobj::attrib_t& attributes = reader.GetAttrib();
