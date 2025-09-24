@@ -31,6 +31,7 @@ cmake --build build --target mbgl-glfw -- -j8
 - WebGPU now treats stencil tests that omit an explicit read mask as requesting the full `0xFF` mask, mirroring the Metal and Vulkan backends. Dawn previously propagated a zero mask from `stencilModeForClipping`, so later drawables skipped the tile clip test and entire tiles intermittently adopted the colour of another layer.
 - `webgpu::Drawable` now programs the stencil reference immediately before each draw (and resets it when stencilling is disabled) while asserting that the cached depth/stencil state matches the paint parameters. This brings the WebGPU path in line with Metal’s bookkeeping and prevents stale stencil refs when toggling per-drawable stencil usage.
 - Re-synced the fill outline WGSL with the Metal implementation: `FillOutlineShader` now binds `GlobalPaintParamsUBO` and emits the world-space position varying so future anti-alias logic has the same inputs across backends.
+- The WebGPU fill pipelines now hand the full clip-space position to Dawn (no manual divide-by-W); this matches Metal/Vulkan depth behaviour and eliminates the perspective loss that let later layers paint over entire tiles at high zoom.
 - `./run_webgpu.sh --style ./debug-glitch.json` and `STYLE_URL=https://demotiles.maplibre.org/style.json ./run_webgpu.sh` (Dawn/Vulkan/X11) both render repeatedly without the solid tile flashes or colour bleeding seen previously.
 
 ## Recent WebGPU fixes (2025-09-24)
