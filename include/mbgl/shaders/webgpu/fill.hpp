@@ -17,8 +17,12 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,
+#ifndef HAS_UNIFORM_u_color
     @location(1) color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(2) opacity: vec2<f32>,
+#endif
 };
 
 struct VertexOutput {
@@ -59,7 +63,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 
 @vertex
-fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
+fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     // Transform position using the matrix
@@ -72,14 +76,19 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
                              ndcZ,
                              1.0);
 
-    var color = props.color;
-    if (drawable.pad1 > 0.5) {
-        color = unpack_mix_color(in.color, drawable.color_t);
-    }
-    var opacity = props.opacity;
-    if (drawable.pad2 > 0.5) {
-        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    }
+    var color: vec4<f32>;
+#ifdef HAS_UNIFORM_u_color
+    color = props.color;
+#else
+    color = unpack_mix_color(in.color, drawable.color_t);
+#endif
+
+    var opacity: f32;
+#ifdef HAS_UNIFORM_u_opacity
+    opacity = props.opacity;
+#else
+    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 
     out.color = color;
     out.opacity = opacity;
@@ -89,6 +98,17 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
 )";
     
     static constexpr const char* fragment = R"(
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+
 struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
@@ -96,8 +116,21 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Use color and opacity from vertex shader
-    return in.color * in.opacity;
+    var color: vec4<f32>;
+#ifdef HAS_UNIFORM_u_color
+    color = props.color;
+#else
+    color = in.color;
+#endif
+
+    var opacity: f32;
+#ifdef HAS_UNIFORM_u_opacity
+    opacity = props.opacity;
+#else
+    opacity = in.opacity;
+#endif
+
+    return color * opacity;
 }
 )";
 };
@@ -112,8 +145,12 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,
+#ifndef HAS_UNIFORM_u_outline_color
     @location(1) outline_color: vec4<f32>,
+#endif
+#ifndef HAS_UNIFORM_u_opacity
     @location(2) opacity: vec2<f32>,
+#endif
 };
 
 struct VertexOutput {
@@ -154,7 +191,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 @vertex
-fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput {
+fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     // Transform position using the matrix
@@ -167,14 +204,19 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
                              ndcZ,
                              1.0);
 
-    var color = props.outline_color;
-    if (drawable.pad1 > 0.5) {
-        color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
-    }
-    var opacity = props.opacity;
-    if (drawable.pad2 > 0.5) {
-        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    }
+    var color: vec4<f32>;
+#ifdef HAS_UNIFORM_u_outline_color
+    color = props.outline_color;
+#else
+    color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
+#endif
+
+    var opacity: f32;
+#ifdef HAS_UNIFORM_u_opacity
+    opacity = props.opacity;
+#else
+    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 
     out.color = color;
     out.opacity = opacity;
@@ -184,6 +226,17 @@ fn main(@builtin(vertex_index) vertex_id: u32, in: VertexInput) -> VertexOutput 
 )";
     
     static constexpr const char* fragment = R"(
+struct FillOutlineEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+@group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
+
 struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
@@ -191,8 +244,21 @@ struct FragmentInput {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Use color and opacity from vertex shader
-    return in.color * in.opacity;
+    var color: vec4<f32>;
+#ifdef HAS_UNIFORM_u_outline_color
+    color = props.outline_color;
+#else
+    color = in.color;
+#endif
+
+    var opacity: f32;
+#ifdef HAS_UNIFORM_u_opacity
+    opacity = props.opacity;
+#else
+    opacity = in.opacity;
+#endif
+
+    return color * opacity;
 }
 )";
 };
