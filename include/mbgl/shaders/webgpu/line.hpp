@@ -177,12 +177,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let clip = base + projected_extrude;
 
     let inv_w = 1.0 / clip.w;
-    let ndc_z = (clip.z * inv_w) * 0.5 + 0.5;
 
-    out.position = vec4<f32>(clip.x * inv_w,
-                             clip.y * inv_w,
-                             ndc_z,
-                             1.0);
+    out.position = clip;
 
     let extrude_length_without_perspective = length(dist);
     let extrude_length_with_perspective =
