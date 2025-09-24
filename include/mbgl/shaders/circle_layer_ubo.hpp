@@ -35,7 +35,7 @@ struct alignas(16) CircleEvaluatedPropsUBO {
     /* 48 */ float stroke_opacity;
     /* 52 */ int scale_with_map;
     /* 56 */ int pitch_with_map;
-    /* 60 */ float pad1; // expression mask bits (WebGPU uses bit_cast from uint32)
+    /* 60 */ float pad1;
     /* 64 */
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16);
