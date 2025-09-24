@@ -14,8 +14,8 @@ const std::array<AttributeInfo, 5> FillExtrusionShaderSource::attributes = {
     AttributeInfo{3, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idFillExtrusionHeightVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillExtrusionShaderSource::textures = {};
 
@@ -27,8 +27,8 @@ using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatt
 const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes = {
     AttributeInfo{3, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idFillExtrusionHeightVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
     AttributeInfo{8, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
 };
