@@ -104,6 +104,7 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
         MLNNetworkResponse *tempResponse = [MLNNetworkResponse responseWithData:response.data
                                                                     urlResponse:response.response
                                                                           error:response.error];
+        tempResponse = [self.delegate didReceiveResponse:tempResponse];
         if (tempResponse) {
             MLNInternalNetworkResponse *internalResponse = [MLNInternalNetworkResponse responseWithData:tempResponse.data
                                                                                             urlResponse:tempResponse.response
