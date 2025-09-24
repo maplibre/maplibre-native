@@ -92,7 +92,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let latRange = tileProps.latrange;
     let latitude = (latRange.x - latRange.y) * in.tex_coord.y + latRange.y;
     let scaleFactor = cos(radians(latitude));
-    let slope = atan(1.25 * length(deriv) / max(abs(scaleFactor), 1e-6));
+    let slope = atan(1.25 * length(deriv) / scaleFactor);
     let aspectDefault = 0.5 * PI * select(-1.0, 1.0, deriv.y > 0.0);
     let aspect = select(aspectDefault, atan2(deriv.y, -deriv.x), deriv.x != 0.0);
 
@@ -101,10 +101,11 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 
     let base = 1.875 - intensity * 1.75;
     let maxValue = 0.5 * PI;
-    let denom = max(pow(base, maxValue) - 1.0, 1e-6);
-    let scaledSlope = select((pow(base, slope) - 1.0) / denom * maxValue,
-                              slope,
-                              abs(intensity - 0.5) < 1e-6);
+    let denom = pow(base, maxValue) - 1.0;
+    let useLinear = abs(intensity - 0.5) < 1e-6;
+    let scaledSlope = select(((pow(base, slope) - 1.0) / denom) * maxValue,
+                             slope,
+                             useLinear);
 
     let accent = cos(scaledSlope);
     let accentColor = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
