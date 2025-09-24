@@ -39,6 +39,12 @@ cmake --build build --target mbgl-glfw -- -j8
 - The WebGPU fill and line pipelines now hand the full clip-space position to Dawn (no manual divide-by-W); this matches Metal/Vulkan depth behaviour and eliminates the perspective loss that let later layers paint over entire tiles or line segments at high zoom.
 - `./run_webgpu.sh --style ./debug-glitch.json` and `STYLE_URL=https://demotiles.maplibre.org/style.json ./run_webgpu.sh` (Dawn/Vulkan/X11) both render repeatedly without the solid tile flashes or colour bleeding seen previously.
 
+## Recent WebGPU fixes (2025-09-27)
+- Ported the fill-extrusion WGSL from the Metal/Vulkan implementation: normals now split top vs. base vertices via `glMod`, lighting matches the shared luminance/vertical-gradient formula, and the shader respects the `HAS_UNIFORM_*` toggles so constant layers avoid unused attributes.
+- Updated the WebGPU attribute descriptors so `FillExtrusionBase`/`FillExtrusionHeight` use `Float2`. The old single-float declaration starved Dawn of the interpolation pair, letting the edge-distance attribute drive Z, which manifested as neon-pink skyscrapers and runaway buffer churn.
+- `timeout 25 ./run_webgpu.sh` (Dawn/Vulkan/X11, demotiles style) now produces correctly lit extrusions; the terminal’s "device lost" line is from the enforced timeout rather than a rendering fault.
+- Depth state stays sourced from `PaintParameters::depthModeFor3D()`/`stencilModeFor3D()` via `webgpu::TileLayerGroup::setDepthModeFor3D`, matching Metal/Vulkan—no backend-specific overrides required.
+
 ## Recent WebGPU fixes (2025-09-24)
 - Matched the WGSL `GlobalPaintParamsUBO` layout used by `FillPattern`/`FillOutlinePattern` with the shared std140 struct so Dawn reads the real `pixel_ratio` instead of the atlas width. Pattern fills now honor the style scale rather than repeating at texture-atlas frequency on WebGPU.
 - `cmake --build build --target mbgl-glfw -- -j8` followed by `./run_webgpu.sh --style https://demotiles.maplibre.org/style.json` (Dawn/Vulkan on X11) rebuilds, launches, and streams patterned fill tiles; the window logs continuous draw submissions until closed, matching the Metal/Vulkan output.
