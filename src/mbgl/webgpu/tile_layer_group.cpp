@@ -14,6 +14,8 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <optional>
+
 namespace mbgl {
 namespace webgpu {
 
@@ -45,15 +47,35 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
-    // TODO: Handle 3D features and stencil clipping when needed
-    // For now, WebGPU handles stenciling through the render pipeline state
+    // `stencilModeFor3D` increments a shared mask value each call, so we cache the results
+    // when a layer contains 3D drawables to ensure consistent state across drawables.
+    bool features3d = false;
+    bool stencil3d = false;
+    std::optional<gfx::DepthMode> depthMode3d;
+    std::optional<gfx::StencilMode> stencilMode3d;
+
+    if (stencilTiles && !stencilTiles->empty()) {
+        visitDrawables([&](const gfx::Drawable& drawable) {
+            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+                features3d = true;
+                if (drawable.getEnableStencil()) {
+                    stencil3d = true;
+                }
+            }
+        });
+    }
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    // Handle stencil tiles if present (2D stenciling)
-    if (stencilTiles && !stencilTiles->empty()) {
+    if (features3d) {
+        depthMode3d = parameters.depthModeFor3D();
+        if (stencil3d) {
+            stencilMode3d = parameters.stencilModeFor3D();
+        }
+    } else if (stencilTiles && !stencilTiles->empty()) {
+        // Handle stencil tiles if present (2D stenciling)
         parameters.renderTileClippingMasks(stencilTiles);
     }
 
@@ -104,6 +126,17 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // Execute tweakers - they create drawable-specific uniform buffers like FillDrawableUBO
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
+        }
+
+        if (features3d) {
+            const auto depth = (drawable.getEnableDepth() && depthMode3d)
+                                   ? *depthMode3d
+                                   : gfx::DepthMode::disabled();
+            const auto stencil = (drawable.getEnableStencil() && stencilMode3d)
+                                     ? *stencilMode3d
+                                     : gfx::StencilMode::disabled();
+            drawableWebGPU.setDepthModeFor3D(depth);
+            drawableWebGPU.setStencilModeFor3D(stencil);
         }
 
         // Log uniform buffer status after tweakers

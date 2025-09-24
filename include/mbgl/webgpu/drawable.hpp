@@ -44,6 +44,8 @@ public:
     void setEnableDepth(bool) override;
     void setSubLayerIndex(int32_t) override;
     void setDepthType(gfx::DepthMaskType) override;
+    void setDepthModeFor3D(const gfx::DepthMode&);
+    void setStencilModeFor3D(const gfx::StencilMode&);
 
     void setVertexAttrId(const size_t);
     
