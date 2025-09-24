@@ -77,11 +77,9 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
     passes = RenderPass::Translucent;
 
-    bool hasPattern = !unevaluated.get<style::FillPattern>().isUndefined();
-    float colorAlpha = evaluated.get<style::FillColor>().constantOr(Color::black()).a;
-    float opacity = evaluated.get<style::FillOpacity>().constantOr(1);
-
-    if (!(hasPattern || colorAlpha < 1.0f || opacity < 1.0f)) {
+    if (!(!unevaluated.get<style::FillPattern>().isUndefined() ||
+          evaluated.get<style::FillColor>().constantOr(Color()).a < 1.0f ||
+          evaluated.get<style::FillOpacity>().constantOr(0) < 1.0f)) {
         // Supply both - evaluated based on opaquePassCutoff in render().
         passes |= RenderPass::Opaque;
     }
@@ -402,7 +400,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setLineWidth(lineWidth);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
-                    builder->setRenderPass(renderPass);
+                    builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
                 }
             }
@@ -480,7 +478,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(renderPass);
+                    builder->setRenderPass(RenderPass::Translucent);
                     patternBuilder = std::move(builder);
                 }
             }
@@ -492,7 +490,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
-                    builder->setRenderPass(renderPass);
+                    builder->setRenderPass(RenderPass::Translucent);
                     outlinePatternBuilder = std::move(builder);
                 }
             }
