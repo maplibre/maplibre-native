@@ -14,6 +14,13 @@
 - WebGPU pipelines now derive their primitive topology from each drawable’s draw mode, so line-based fill outlines use a `LineList` pipeline on Dawn instead of defaulting to triangles.
 - WebGPU fill outlines clamp the hardware line width to 1px (wider lines are unsupported on Vulkan/Dawn), preventing the renderer from silently dropping the draws after the first frame.
 
+## Recent WebGPU fixes (2025-09-30, hillshade)
+- Reimplemented the WebGPU hillshade and hillshade-prepare WGSL to mirror the Metal pipeline: uniforms now route through the consolidated global-index/storage-buffer path, the prepare pass computes derivatives with the DEM unpack vector, and the lighting shader applies the full slope/aspect logic (intensity scaling, azimuth, accent/shadow mix).
+- Updated the hillshade prepare bind group indices to use `idHillshadePrepareDrawableUBO`/`idHillshadePrepareTilePropsUBO` (bindings 2 and 4) so Dawn receives the per-draw uniforms the tweaker uploads; this eliminated the "No buffer found for binding 0" warnings and makes the prep pass valid on Dawn.
+- Made WebGPU offscreen render targets expose a `RenderableResource` shim, allowing `CommandEncoder::present` to submit command buffers without trying to swap non-surface renderables; this stopped the `--style maptiler` hillshade crash on Linux.
+- `./run_webgpu.sh --style https://api.maptiler.com/maps/outdoor-v2/style.json?key=$MLN_API_KEY` now renders with WebGPU (Dawn/Vulkan/X11). Dawn still emits "No render pass encoder available" once while the pipeline graph warms, but the map continues to render and hillshade layers remain visible.
+
+
 ## Running the sample
 ```sh
 cmake -S . -B build -G Ninja \

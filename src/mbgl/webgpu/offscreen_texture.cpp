@@ -2,13 +2,14 @@
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
 #include <mbgl/util/logging.hpp>
 #include <cstring>
 
 namespace mbgl {
 namespace webgpu {
 
-class OffscreenTextureResource final : public gfx::RenderableResource {
+class OffscreenTextureResource final : public webgpu::RenderableResource {
 public:
     OffscreenTextureResource(Context& context_,
                              const Size size_,
@@ -63,8 +64,22 @@ public:
         }
     }
     
-    // Note: swap() and getBackend() are not part of gfx::RenderableResource
-    // They would be implemented if we had a WebGPU-specific RenderableResource base class
+    void swap() override {
+        // Offscreen targets do not present to a surface.
+    }
+
+    const mbgl::webgpu::RendererBackend& getBackend() const override {
+        return static_cast<const mbgl::webgpu::RendererBackend&>(context.getBackend());
+    }
+
+    const WGPUCommandEncoder& getCommandEncoder() const override {
+        static WGPUCommandEncoder dummyEncoder = nullptr;
+        return dummyEncoder;
+    }
+
+    WGPURenderPassEncoder getRenderPassEncoder() const override {
+        return nullptr;
+    }
     
     PremultipliedImage readStillImage() {
         // Read back the color texture data
