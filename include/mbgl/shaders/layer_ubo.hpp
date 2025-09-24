@@ -66,7 +66,7 @@ enum {
 #elif MLN_RENDER_BACKEND_VULKAN
     idGlobalPlatformParamsUBO,
 #elif MLN_RENDER_BACKEND_WEBGPU
-    idGlobalUBOIndex,  // WebGPU follows Metal's approach
+    idGlobalUBOIndex,
 #endif
     globalUBOCount
 };
