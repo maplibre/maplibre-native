@@ -113,11 +113,6 @@ void Texture2D::updateSamplerConfiguration() noexcept {
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
                                      GL_TEXTURE_WRAP_T,
                                      samplerState.wrapV == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-
-    if (pixelFormat == gfx::TexturePixelType::Alpha) {
-        GLint swizzleRgba[4] = {GL_RED, GL_ZERO, GL_ZERO, GL_RED};
-        MBGL_CHECK_ERROR(glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleRgba));
-    }
 }
 
 void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
