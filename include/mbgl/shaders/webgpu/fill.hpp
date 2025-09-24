@@ -69,12 +69,7 @@ fn main(in: VertexInput) -> VertexOutput {
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
     let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    let invW = 1.0 / clip.w;
-    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
-    out.position = vec4<f32>(clip.x * invW,
-                             clip.y * invW,
-                             ndcZ,
-                             1.0);
+    out.position = clip;
 
     var color: vec4<f32>;
 #ifdef HAS_UNIFORM_u_color
@@ -213,11 +208,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
-    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
-    out.position = vec4<f32>(ndcXY.x,
-                             ndcXY.y,
-                             ndcZ,
-                             1.0);
+    out.position = clip;
     out.pos = (ndcXY + vec2<f32>(1.0)) * 0.5 * paintParams.world_size;
 
     var color: vec4<f32>;
@@ -408,12 +399,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
     let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
-    let invW = 1.0 / clip.w;
-    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
-    out.position = vec4<f32>(clip.x * invW,
-                             clip.y * invW,
-                             ndcZ,
-                             1.0);
+    out.position = clip;
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
         drawable.pixel_coord_lower,
@@ -662,12 +648,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
-    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
 
-    out.position = vec4<f32>(ndcXY.x,
-                             ndcXY.y,
-                             ndcZ,
-                             1.0);
+    out.position = clip;
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
         drawable.pixel_coord_lower,
