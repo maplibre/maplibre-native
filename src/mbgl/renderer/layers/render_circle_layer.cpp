@@ -195,11 +195,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
-    // Use the layer's evaluated render passes instead of hardcoding
-    const auto renderPass = passes;
+    constexpr auto renderPass = RenderPass::Translucent;
 
-    // Skip if this layer doesn't render in any pass
-    if (renderPass == RenderPass::None) {
+    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
