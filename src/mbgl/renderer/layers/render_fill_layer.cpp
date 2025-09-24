@@ -125,12 +125,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              const std::shared_ptr<UpdateParameters>&,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
-    static int updateCount = 0;
-    if (updateCount++ < 5) {
-        mbgl::Log::Info(mbgl::Event::Render, "RenderFillLayer::update called for " + getID() +
-                       " with " + (renderTiles ? std::to_string(renderTiles->size()) : "null") + " tiles");
-    }
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -155,7 +149,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     if (!layerTweaker) {
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
-        mbgl::Log::Info(mbgl::Event::Render, "RenderFillLayer: Added FillLayerTweaker to " + getID());
     }
 
     if (!fillShaderGroup) {
@@ -181,13 +174,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    // Use the layer's evaluated render passes instead of hardcoding
-    const auto renderPass = passes;
-#if MLN_RENDER_BACKEND_WEBGPU
-    constexpr auto lineWidth = 1.0f;
-#else
+    constexpr auto renderPass = RenderPass::Translucent;
     constexpr auto lineWidth = 2.0f;
-#endif
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -337,7 +325,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
 
-        for (auto& drawable : builder.clearDrawables()) {
+            for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<size_t>(type));
                 drawable->setLayerTweaker(layerTweaker);
