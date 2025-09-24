@@ -850,13 +850,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let projected_extrude = matrix * vec4<f32>(extrude_vec, 0.0, 0.0);
     let base = matrix * vec4<f32>(pos, 0.0, 1.0);
     let clip = base + projected_extrude;
-    let inv_w = 1.0 / clip.w;
-    let ndc_z = (clip.z * inv_w) * 0.5 + 0.5;
-
-    out.position = vec4<f32>(clip.x * inv_w,
-                             clip.y * inv_w,
-                             ndc_z,
-                             1.0);
+    out.position = clip;
 
     let extrude_length_without_perspective = length(dist);
     let extrude_length_with_perspective = length((projected_extrude.xy / clip.w) * paintParams.units_to_pixels);
