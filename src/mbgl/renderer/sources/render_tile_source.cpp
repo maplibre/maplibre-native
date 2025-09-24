@@ -591,15 +591,6 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
     enabled = needsRendering;
 
     const auto& implTileset = getTileset();
-
-    static int updateCount = 0;
-    if (updateCount++ < 10) {
-        mbgl::Log::Info(mbgl::Event::Render, "RenderTileSetSource::update called for " + baseImpl->id +
-                       " needsRendering=" + std::to_string(needsRendering) +
-                       " tileset=" + (implTileset ? "present" : "null") +
-                       " cachedTileset=" + (cachedTileset ? "present" : "null"));
-    }
-
     // In Continuous mode, keep the existing tiles if the new cachedTileset is
     // not yet available, thus providing smart style transitions without
     // flickering. In other modes, allow clearing the tile pyramid first, before
@@ -613,12 +604,7 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
         tilePyramid.clearAll();
     }
 
-    if (!cachedTileset) {
-        if (updateCount < 10) {
-            mbgl::Log::Info(mbgl::Event::Render, "RenderTileSetSource::update returning early - no cachedTileset");
-        }
-        return;
-    }
+    if (!cachedTileset) return;
 
     updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
 }
