@@ -36,27 +36,10 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     // from RenderTile::prepare
     mat4 tileMatrix;
     parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
-
-#if MLN_RENDER_BACKEND_WEBGPU
-    static int logCount = 0;
-    if (logCount++ < 3) {
-        mbgl::Log::Info(mbgl::Event::Render, "getTileMatrix: After matrixFor, matrix[15]=" +
-                       std::to_string(tileMatrix[15]));
-    }
-#endif
-
     if (const auto& origin{drawable.getOrigin()}; origin.has_value()) {
         matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
     }
     multiplyWithProjectionMatrix(/*in-out*/ tileMatrix, parameters, drawable, nearClipped, aligned);
-
-#if MLN_RENDER_BACKEND_WEBGPU
-    if (logCount < 4) {
-        mbgl::Log::Info(mbgl::Event::Render, "getTileMatrix: After projection multiply, matrix[15]=" +
-                       std::to_string(tileMatrix[15]));
-    }
-#endif
-
     return RenderTile::translateVtxMatrix(
         tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
@@ -88,13 +71,6 @@ void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
         matrix::multiply(matrix, projMatrix, matrix);
         // early return
         return;
-    }
-#endif
-#if MLN_RENDER_BACKEND_WEBGPU
-    static int projLogCount = 0;
-    if (projLogCount++ < 2) {
-        mbgl::Log::Info(mbgl::Event::Render, "Projection matrix[15]=" + std::to_string(projMatrixRef[15]) +
-                       " matrix[11]=" + std::to_string(projMatrixRef[11]));
     }
 #endif
     matrix::multiply(matrix, projMatrixRef, matrix);
