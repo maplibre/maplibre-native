@@ -218,16 +218,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
 #endif
-#if !defined(NDEBUG)
-                static int simpleLogCount = 0;
-                if (simpleLogCount < 10) {
-                    // `matrix` is a flat std::array<double, 16>; indices 0 and 5 hold the diagonal terms.
-                    mbgl::Log::Info(mbgl::Event::Render,
-                                    "LineLayerTweaker simple matrix diag=" + std::to_string(matrix[0]) + ", " +
-                                        std::to_string(matrix[5]) + ", tile=" + util::toString(tileID));
-                    simpleLogCount++;
-                }
-#endif
 
             } break;
 
@@ -269,8 +259,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     .blur_t = std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
-                    .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
-                    .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                    .gapwidth_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                    .offset_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
                     .pattern_from_t = std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
                     .pattern_to_t = std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom))
