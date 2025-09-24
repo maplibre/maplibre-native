@@ -897,15 +897,31 @@ void Drawable::draw(PaintParameters& parameters) const {
     // For 3D mode, stenciling is handled by the layer group
     if (!is3D) {
         if (enableStencil) {
-            // WebGPU will need to handle stencil state here
-            // TODO: Implement stencil state handling similar to Metal
-            // const auto stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+            if (tileID) {
+                const auto expectedStencil = parameters.stencilModeForClipping(tileID->toUnwrapped());
+#if !defined(NDEBUG)
+                assert(hashStencilMode(expectedStencil) == hashStencilMode(impl->stencilMode));
+#else
+                if (hashStencilMode(expectedStencil) != hashStencilMode(impl->stencilMode)) {
+                    Log::Warning(Event::Render,
+                                 "WebGPU drawable stencil mismatch for '" + getName() + "' tile=" +
+                                     util::toString(*tileID));
+                }
+#endif
+                wgpuRenderPassEncoderSetStencilReference(renderPassEncoder,
+                                                         static_cast<uint32_t>(expectedStencil.ref));
+            }
+        } else {
+            // Reset the reference so subsequent drawables that re-enable stencilling start from a known value.
+            wgpuRenderPassEncoderSetStencilReference(renderPassEncoder, 0u);
         }
 
         if (getEnableDepth()) {
-            // WebGPU will need to handle depth state here
-            // TODO: Implement depth state handling similar to Metal
-            // const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+#if !defined(NDEBUG)
+            const auto expectedDepth = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            assert(expectedDepth.func == impl->depthMode.func);
+            assert(expectedDepth.mask == impl->depthMode.mask);
+#endif
         }
     }
 
