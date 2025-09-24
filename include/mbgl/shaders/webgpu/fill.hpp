@@ -157,6 +157,7 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
+    @location(2) pos: vec2<f32>,
 };
 
 struct FillOutlineDrawableUBO {
@@ -170,6 +171,18 @@ struct FillOutlineDrawableUBO {
 struct FillOutlineDrawableUnionUBO {
     fill: FillOutlineDrawableUBO,
     padding: vec4<f32>,
+};
+
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct FillOutlineEvaluatedPropsUBO {
@@ -186,6 +199,7 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
 @group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
@@ -198,11 +212,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value].fill;
     let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
     let invW = 1.0 / clip.w;
+    let ndcXY = clip.xy * invW;
     let ndcZ = (clip.z * invW) * 0.5 + 0.5;
-    out.position = vec4<f32>(clip.x * invW,
-                             clip.y * invW,
+    out.position = vec4<f32>(ndcXY.x,
+                             ndcXY.y,
                              ndcZ,
                              1.0);
+    out.pos = (ndcXY + vec2<f32>(1.0)) * 0.5 * paintParams.world_size;
 
     var color: vec4<f32>;
 #ifdef HAS_UNIFORM_u_outline_color
@@ -240,6 +256,7 @@ struct FillOutlineEvaluatedPropsUBO {
 struct FragmentInput {
     @location(0) color: vec4<f32>,
     @location(1) opacity: f32,
+    @location(2) pos: vec2<f32>,
 };
 
 @fragment
