@@ -47,16 +47,6 @@ TransformParameters::TransformParameters(const TransformState& state_)
     // very close empty space, for layer types (fill-extrusion) that use the
     // depth buffer to emulate real-world space.
     state.getProjMatrix(nearClippedProjMatrix, static_cast<uint16_t>(0.1 * state.getCameraToCenterDistance()));
-
-#if MLN_RENDER_BACKEND_WEBGPU
-    static int projLogCount = 0;
-    if (projLogCount++ < 3) {
-        mbgl::Log::Info(mbgl::Event::Render, "TransformParameters: projMatrix[15]=" + std::to_string(projMatrix[15]) +
-                       " projMatrix[11]=" + std::to_string(projMatrix[11]) +
-                       " size=" + std::to_string(state.getSize().width) + "x" + std::to_string(state.getSize().height) +
-                       " scale=" + std::to_string(state.getScale()));
-    }
-#endif
 }
 
 PaintParameters::PaintParameters(gfx::Context& context_,
