@@ -62,12 +62,7 @@ fn main(in: VertexInput) -> VertexOutput {
                              drawable.matrix_col2,
                              drawable.matrix_col3);
     let clip = matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    let invW = 1.0 / clip.w;
-    let ndc_z = (clip.z * invW) * 0.5 + 0.5;
-    out.position = vec4<f32>(clip.x * invW,
-                             clip.y * invW,
-                             ndc_z,
-                             1.0);
+    out.position = clip;
     return out;
 }
 )";
