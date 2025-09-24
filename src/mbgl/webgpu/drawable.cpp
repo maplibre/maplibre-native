@@ -226,6 +226,26 @@ void Drawable::setDepthType(gfx::DepthMaskType value) {
     impl->pipelineState = nullptr;  // Reset pipeline to force recreation with new depth mask
 }
 
+void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
+    if (impl->depthMode.func != value.func || impl->depthMode.mask != value.mask) {
+        impl->pipelineState = nullptr;
+    }
+    impl->depthMode = value;
+}
+
+void Drawable::setStencilModeFor3D(const gfx::StencilMode& value) {
+    const auto newHash = hashStencilMode(value);
+    if (!impl->stencilModeHashValid || impl->stencilModeHash != newHash ||
+        impl->stencilMode.ref != value.ref || impl->stencilMode.mask != value.mask ||
+        impl->stencilMode.fail != value.fail || impl->stencilMode.depthFail != value.depthFail ||
+        impl->stencilMode.pass != value.pass) {
+        impl->pipelineState = nullptr;
+        impl->stencilModeHashValid = false;
+    }
+    impl->stencilMode = value;
+    impl->stencilModeHash = newHash;
+}
+
 void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
     if (shader == value) {
         return;
