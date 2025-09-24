@@ -36,12 +36,13 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
 
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -68,10 +69,10 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3.30.1
+        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           languages: cpp
 
@@ -174,7 +175,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3.30.1
+        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           category: "/language:cpp"
 
@@ -214,16 +215,13 @@ jobs:
       - name: Run expression test
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
-
   linux-coverage:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
@@ -270,6 +268,11 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
       - name: Mark result as failed
         if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1

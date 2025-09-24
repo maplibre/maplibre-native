@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
@@ -44,16 +44,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-22.04
+          - runs-on: ubuntu-24.04
             arch: x86_64
-          - runs-on: ubuntu-22.04-arm
-            arch: arm64
-          - runs-on: macos-14
+          - runs-on: ubuntu-24.04-arm
             arch: arm64
           - runs-on: macos-13
             arch: x86_64
+          - runs-on: macos-14
+            arch: arm64
           - runs-on: windows-2022
             arch: x86_64
+          - runs-on: windows-11-arm
+            arch: arm64
     continue-on-error: true
     env:
       BUILDTYPE: "Release"
@@ -64,11 +66,14 @@ jobs:
         shell: bash
 
     steps:
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
-          submodules: true
-          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -114,23 +119,21 @@ jobs:
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Set up msvc dev cmd (Windows)
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+      - name: Set up msvc dev cmd (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
 
-      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
-      - name: Remove Strawberry Perl from PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
-          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Setup cmake
-        if: ${{contains(runner.name, 'GitHub Actions')}}
-        uses: jwlawson/actions-setup-cmake@802fa1a2c4e212495c05bf94dba2704a92a472be # v2.0.2
+      - name: Set up msvc dev cmd (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
         with:
-          cmake-version: '3.31'
+          arch: amd64_arm64
+
+      - name: Test VSCMD_ARG_TGT_ARCH Environment
+        if: runner.os == 'Windows'
+        run: |
+          echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
+        shell: cmd
 
       - name: cmake version
         run: |
@@ -138,24 +141,26 @@ jobs:
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: hendrikmuhs/ccache-action@63069e3931dedbf3b63792097479563182fe70d1 # v1.2.18
+        uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@63069e3931dedbf3b63792097479563182fe70d1 # v1.2.18
+        uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
           variant: "sccache"
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Cache cmake-node-module deps
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -167,47 +172,44 @@ jobs:
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake --preset macos-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake --preset macos-metal-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_C_COMPILER=gcc-12 \
-            -DMLN_WITH_NODE=ON \
-            -DMLN_WITH_OPENGL=ON
+          cmake --preset linux-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
-      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
-        if: runner.os == 'Windows'
-        run: mkdir -p ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
-        shell: bash
-
-      - name: Restore vcpkg cache (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: |
-            ${{ github.workspace }}/platform/windows/vendor/vcpkg
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/buildtrees
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/packages
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/downloads
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/installed
-          key: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
-
-      - name: Configure maplibre-native (Windows)
+      - name: Get vcpkg commit id
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cmake . -B build `
-            -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DMLN_WITH_NODE=ON \
-            -DMLN_WITH_OPENGL=ON
+          $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
+          Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
+
+      - name: Restore vcpkg binary cache
+        if: runner.os == 'Windows'
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
+          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+
+      - name: Configure maplibre-native (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
+        shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
+        run: |
+          cmake --preset windows-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: Configure maplibre-native (Windows arm64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
+        run: |
+          cmake --preset windows-arm64-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -251,7 +253,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
