@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <mbgl/interface/native_apple_interface.h>
 
-@implementation NetworkResponse
+@implementation MLNInternalNetworkResponse
     
-+(NetworkResponse *)responseWithData:(NSData *)data
++(MLNInternalNetworkResponse *)responseWithData:(NSData *)data
                          urlResponse:(NSURLResponse *)response
                                error:(NSError *)error {
     
-    NetworkResponse *tempResult = [[NetworkResponse alloc] init];
+    MLNInternalNetworkResponse *tempResult = [[MLNInternalNetworkResponse alloc] init];
     tempResult.data = data;
     tempResult.response = response;
     tempResult.error = error;
@@ -15,6 +15,7 @@
 }
 
 @end
+
 
 
 @implementation MLNNativeNetworkManager

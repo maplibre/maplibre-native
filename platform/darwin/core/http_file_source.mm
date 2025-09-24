@@ -12,7 +12,6 @@
 #import <Foundation/Foundation.h>
 
 #include <mbgl/interface/native_apple_interface.h>
-
 #include <mutex>
 #include <chrono>
 
@@ -302,7 +301,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
                 session = nil;
 
                 if ([networkManager.delegate respondsToSelector:@selector(didReceiveResponse:)]) {
-                    NetworkResponse *networkResponse = [NetworkResponse responseWithData:data urlResponse:res error:error];
+                    MLNInternalNetworkResponse *networkResponse = [MLNInternalNetworkResponse responseWithData:data urlResponse:res error:error];
                     networkResponse = [networkManager.delegate didReceiveResponse:networkResponse];
                     data = networkResponse.data;
                     res = networkResponse.response;
