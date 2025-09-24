@@ -26,22 +26,27 @@ struct VertexOutput {
     @location(0) tex_coord: vec2<f32>,
 };
 
-struct HillshadeUBO {
-    matrix: mat4x4<f32>,
-    highlight: vec4<f32>,
-    shadow: vec4<f32>,
-    accent: vec4<f32>,
-    light: vec2<f32>,
-    latrange: vec2<f32>,
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: HillshadeUBO;
+struct HillshadeDrawableUBO {
+    matrix: mat4x4<f32>,
+};
+
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<HillshadeDrawableUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    out.position = ubo.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    out.tex_coord = vec2<f32>(f32(in.texcoord.x), f32(in.texcoord.y)) / 8192.0;
+    let drawable = drawableVector[globalIndex.value];
+    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+
+    var tex = vec2<f32>(f32(in.texcoord.x), f32(in.texcoord.y)) / 8192.0;
+    tex.y = 1.0 - tex.y;
+    out.tex_coord = tex;
     return out;
 }
 )";
@@ -51,29 +56,64 @@ struct FragmentInput {
     @location(0) tex_coord: vec2<f32>,
 };
 
-struct HillshadeUBO {
-    matrix: mat4x4<f32>,
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
+};
+
+struct HillshadeTilePropsUBO {
+    latrange: vec2<f32>,
+    light: vec2<f32>,
+};
+
+struct HillshadeEvaluatedPropsUBO {
     highlight: vec4<f32>,
     shadow: vec4<f32>,
     accent: vec4<f32>,
-    light: vec2<f32>,
-    latrange: vec2<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: HillshadeUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<HillshadeTilePropsUBO>;
+@group(0) @binding(4) var<uniform> props: HillshadeEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var hillshade_texture: texture_2d<f32>;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    let color = textureSample(hillshade_texture, texture_sampler, in.tex_coord);
-    
-    // Simple hillshade calculation
-    let shade = color.r;
-    let highlight_color = ubo.highlight * shade;
-    let shadow_color = ubo.shadow * (1.0 - shade);
-    
-    return highlight_color + shadow_color + ubo.accent * color.g;
+#ifdef OVERDRAW_INSPECTOR
+    return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+#endif
+
+    let tileProps = tilePropsVector[globalIndex.value];
+    let pixel = textureSample(hillshade_texture, texture_sampler, in.tex_coord);
+
+    let deriv = pixel.rg * 2.0 - vec2<f32>(1.0, 1.0);
+
+    let latRange = tileProps.latrange;
+    let latitude = (latRange.x - latRange.y) * in.tex_coord.y + latRange.y;
+    let scaleFactor = cos(radians(latitude));
+    let slope = atan(1.25 * length(deriv) / max(abs(scaleFactor), 1e-6));
+    let aspectDefault = 0.5 * PI * select(-1.0, 1.0, deriv.y > 0.0);
+    let aspect = select(aspectDefault, atan2(deriv.y, -deriv.x), deriv.x != 0.0);
+
+    let intensity = tileProps.light.x;
+    let azimuth = tileProps.light.y + PI;
+
+    let base = 1.875 - intensity * 1.75;
+    let maxValue = 0.5 * PI;
+    let denom = max(pow(base, maxValue) - 1.0, 1e-6);
+    let scaledSlope = select((pow(base, slope) - 1.0) / denom * maxValue,
+                              slope,
+                              abs(intensity - 0.5) < 1e-6);
+
+    let accent = cos(scaledSlope);
+    let accentColor = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
+
+    let shade = abs(glMod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
+    let shadeColor = mix(props.shadow, props.highlight, shade) * sin(scaledSlope) * clamp(intensity * 2.0, 0.0, 1.0);
+
+    let color = accentColor * (1.0 - shadeColor.a) + shadeColor;
+    return color;
 }
 )";
 };
