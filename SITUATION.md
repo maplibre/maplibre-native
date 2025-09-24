@@ -27,6 +27,11 @@ cmake --build build --target mbgl-glfw -- -j8
 - A 20s soak on Linux via `timeout 20 ./run_webgpu.sh` brings up the GLFW window on X11/XWayland, logs the selected Dawn adapter, and repeatedly renders the MapLibre demo tiles without validation errors.
 - Expect the CLI to print the Dawn adapter scan and a "Successfully started" banner once `mbgl-glfw` survives the startup grace period.
 
+## Recent WebGPU fixes (2025-09-24, fill extrusions)
+- `webgpu::TileLayerGroup` now mirrors the Metal/Vulkan path for 3D drawables: it detects when a layer contains extrusions, requests a shared `depthModeFor3D`/`stencilModeFor3D`, and only falls back to per-tile clipping masks for 2D content. This removes the "TODO" stub that left WebGPU extrusions without depth/stencil setup.
+- `webgpu::Drawable` exposes `setDepthModeFor3D`/`setStencilModeFor3D`, caching the layer-wide depth/stencil state and invalidating the Dawn pipeline when those change so extrusions render with the correct depth test.
+- `./run_webgpu.sh --style https://demotiles.maplibre.org/style.json` (Dawn/Vulkan/X11) now boots cleanly and keeps the fill-extrusion pass alive without the "visited drawables but produced no draw calls" warnings; the GLFW window renders the MapLibre demo tiles with pitched extruded buildings.
+
 ## Recent WebGPU fixes (2025-09-26)
 - WebGPU now treats stencil tests that omit an explicit read mask as requesting the full `0xFF` mask, mirroring the Metal and Vulkan backends. Dawn previously propagated a zero mask from `stencilModeForClipping`, so later drawables skipped the tile clip test and entire tiles intermittently adopted the colour of another layer.
 - `webgpu::Drawable` now programs the stencil reference immediately before each draw (and resets it when stencilling is disabled) while asserting that the cached depth/stencil state matches the paint parameters. This brings the WebGPU path in line with Metal’s bookkeeping and prevents stale stencil refs when toggling per-drawable stencil usage.
@@ -128,6 +133,6 @@ cmake --build build --target mbgl-glfw -- -j8
 - The GLFW backend wires Dawn device/validation callbacks so WGSL or runtime errors land in the MapLibre log for easier diagnosis.
 
 ## What still needs attention
-- Extend the new depth/stencil plumbing to 3D drawables (extrusions, terrain) once the upstream hooks are ready.
+- Audit the terrain and globe renderers once they migrate to the shared 3D depth/stencil hooks; only fill extrusions are wired up today.
 - Align the WebGPU shader-group selection and bind group layout caching with the Metal/Vulkan registries to reduce redundant pipeline creation.
 - Trim logging/no-op debug group stubs once the backend hardens and we decide how to surface Dawn debug markers across platforms.
