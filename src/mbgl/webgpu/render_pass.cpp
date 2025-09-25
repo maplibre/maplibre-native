@@ -23,6 +23,10 @@ public:
     const gfx::UniformBufferArray* globalUniformBuffers = nullptr;
     wgpu::TextureView colorView;
     wgpu::TextureView depthStencilView;
+    wgpu::TextureFormat previousColorFormat = wgpu::TextureFormat::Undefined;
+    wgpu::TextureFormat previousDepthStencilFormat = wgpu::TextureFormat::Undefined;
+    bool colorFormatUpdated = false;
+    bool depthFormatUpdated = false;
 };
 
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor_)
@@ -45,6 +49,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     // Get the backend to access device and surface fallbacks
     auto& context = commandEncoder_.getContext();
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    impl->previousColorFormat = backend.getColorFormat();
+    impl->previousDepthStencilFormat = backend.getDepthStencilFormat();
 
     // Resolve the color attachment view, preferring the renderable's texture view
     WGPUTextureView colorViewHandle = renderableResource.getColorTextureView();
@@ -61,6 +67,11 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     wgpuTextureViewAddRef(colorViewHandle);
     impl->colorView = wgpu::TextureView::Acquire(colorViewHandle);
+
+    if (auto colorFormat = renderableResource.getColorTextureFormat()) {
+        backend.setColorFormat(*colorFormat);
+        impl->colorFormatUpdated = true;
+    }
 
     WGPURenderPassColorAttachment colorAttachment = {};
     colorAttachment.view = impl->colorView.Get();
@@ -89,10 +100,15 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     depthAttachment.depthStoreOp = WGPUStoreOp_Store;
     depthAttachment.depthClearValue = descriptor.clearDepth ? descriptor.clearDepth.value() : 1.0f;
     depthAttachment.depthReadOnly = WGPU_FALSE;
-    depthAttachment.stencilLoadOp = descriptor.clearStencil ? WGPULoadOp_Clear : WGPULoadOp_Load;
-    depthAttachment.stencilStoreOp = WGPUStoreOp_Store;
-    depthAttachment.stencilClearValue =
-        descriptor.clearStencil ? static_cast<uint32_t>(descriptor.clearStencil.value()) : 0u;
+    if (descriptor.clearStencil) {
+        depthAttachment.stencilLoadOp = WGPULoadOp_Clear;
+        depthAttachment.stencilStoreOp = WGPUStoreOp_Store;
+        depthAttachment.stencilClearValue = static_cast<uint32_t>(descriptor.clearStencil.value());
+    } else {
+        depthAttachment.stencilLoadOp = WGPULoadOp_Undefined;
+        depthAttachment.stencilStoreOp = WGPUStoreOp_Undefined;
+        depthAttachment.stencilClearValue = 0u;
+    }
     depthAttachment.stencilReadOnly = WGPU_FALSE;
     depthAttachment.view = nullptr;
 
@@ -111,6 +127,13 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         if (impl->depthStencilView) {
             depthAttachment.view = impl->depthStencilView.Get();
             depthAttachmentPtr = &depthAttachment;
+        }
+    }
+
+    if (depthAttachmentPtr) {
+        if (auto depthFormat = renderableResource.getDepthStencilTextureFormat()) {
+            backend.setDepthStencilFormat(*depthFormat);
+            impl->depthFormatUpdated = true;
         }
     }
 
@@ -152,6 +175,14 @@ RenderPass::~RenderPass() {
             mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to end render pass");
         }
         wgpuRenderPassEncoderRelease(impl->encoder);
+    }
+
+    auto& backend = static_cast<RendererBackend&>(commandEncoder.getContext().getBackend());
+    if (impl->colorFormatUpdated) {
+        backend.setColorFormat(impl->previousColorFormat);
+    }
+    if (impl->depthFormatUpdated) {
+        backend.setDepthStencilFormat(impl->previousDepthStencilFormat);
     }
 }
 

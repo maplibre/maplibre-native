@@ -21,6 +21,8 @@ public:
     gfx::Texture2D& setFormat(gfx::TexturePixelType, gfx::TextureChannelDataType) noexcept override;
     gfx::Texture2D& setSize(Size size_) noexcept override;
     gfx::Texture2D& setImage(std::shared_ptr<PremultipliedImage>) noexcept override;
+    Texture2D& setUsage(uint32_t usageFlags_) noexcept;
+    WGPUTextureFormat getNativeFormat() const noexcept { return nativeFormat; }
 
     gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
     Size getSize() const noexcept override { return size; }
@@ -44,6 +46,9 @@ protected:
     WGPUTexture texture = nullptr;
     WGPUTextureView textureView = nullptr;
     WGPUSampler sampler = nullptr;
+    uint32_t usageFlags = WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst |
+                          WGPUTextureUsage_CopySrc;
+    WGPUTextureFormat nativeFormat = WGPUTextureFormat_Undefined;
     
     Size size{0, 0};
     gfx::TexturePixelType pixelFormat = gfx::TexturePixelType::RGBA;
