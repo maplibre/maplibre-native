@@ -50,7 +50,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let scaled = quad_pos * paintParams.world_size;
 
     out.position = ubo.matrix * vec4<f32>(scaled, 0.0, 1.0);
-    out.tex_coord = vec2<f32>(quad_pos.x, 1.0 - quad_pos.y);
+    out.tex_coord = quad_pos;
 
     return out;
 }
