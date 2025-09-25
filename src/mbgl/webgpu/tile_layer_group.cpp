@@ -84,12 +84,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     int visitCount = 0;
     int drawCount = 0;
     const auto initialDrawCalls = parameters.context.renderingStats().numDrawCalls;
-    // mbgl::Log::Info(mbgl::Event::Render, "TileLayerGroup::render starting visitDrawables for " + getName());
     visitDrawables([&](gfx::Drawable& drawable) {
         visitCount++;
-        // mbgl::Log::Info(mbgl::Event::Render, "  Visiting drawable " + std::to_string(visitCount) +
-        //                " enabled=" + std::to_string(drawable.getEnabled()) +
-        //                " hasRenderPass=" + std::to_string(drawable.hasRenderPass(parameters.pass)));
+        
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
@@ -143,18 +140,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (drawCount <= 3) {
             for (size_t i = 0; i < 4; ++i) {
                 const auto& uniformBuffer = drawableUniforms.get(i);
-                if (uniformBuffer) {
-                    // mbgl::Log::Info(mbgl::Event::Render, getName() + " drawable " + std::to_string(drawCount) +
-                    //                " has UBO[" + std::to_string(i) + "] size=" + std::to_string(uniformBuffer->getSize()));
-                }
             }
         }
 
         drawable.draw(parameters);
     });
-
-    // mbgl::Log::Info(mbgl::Event::Render, "TileLayerGroup::render finished for " + getName() +
-    //                " visited=" + std::to_string(visitCount) + " drawn=" + std::to_string(drawCount));
 
     const auto finalDrawCalls = parameters.context.renderingStats().numDrawCalls;
     if (drawCount > 0 && finalDrawCalls == initialDrawCalls) {

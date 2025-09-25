@@ -78,8 +78,6 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
             assert(!"duplicate shader group");
             throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
-        } else {
-            mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Registered shader group for '" + std::string(ShaderClass::name) + "'");
         }
     }(), ...);
 }

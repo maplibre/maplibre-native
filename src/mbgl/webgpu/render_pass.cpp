@@ -87,10 +87,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                               static_cast<double>(clearColor.a)};
         colorAttachment.loadOp = WGPULoadOp_Clear;
         colorAttachment.clearValue = value;
-        // mbgl::Log::Info(mbgl::Event::Render,
-        //                 "WebGPU: Clearing with clearColor " + std::to_string(clearColor.r) + ", " +
-        //                     std::to_string(clearColor.g) + ", " + std::to_string(clearColor.b) + ", " +
-        //                     std::to_string(clearColor.a));
     } else {
         colorAttachment.loadOp = WGPULoadOp_Load;
     }
@@ -144,7 +140,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     renderPassDesc.colorAttachments = &colorAttachment;
     renderPassDesc.depthStencilAttachment = depthAttachmentPtr;
 
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Beginning render pass");
     impl->encoder = wgpuCommandEncoderBeginRenderPass(impl->commandEncoder, &renderPassDesc);
 
     if (impl->encoder) {
@@ -166,11 +161,9 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
 RenderPass::~RenderPass() {
     if (impl->encoder) {
-        // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Ending render pass (destructor called)");
         // End the render pass
         try {
             wgpuRenderPassEncoderEnd(impl->encoder);
-            // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Render pass ended successfully");
         } catch (...) {
             mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to end render pass");
         }
