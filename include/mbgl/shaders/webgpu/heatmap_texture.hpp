@@ -32,15 +32,26 @@ struct HeatmapTextureUBO {
     pad3: f32,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    // remaining fields unused
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(4) var<uniform> ubo: HeatmapTextureUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    
-    out.position = ubo.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
-    out.tex_coord = vec2<f32>(f32(in.position.x), f32(in.position.y)) / 8192.0;
-    
+
+    let quad_pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let scaled = quad_pos * paintParams.world_size;
+
+    out.position = ubo.matrix * vec4<f32>(scaled, 0.0, 1.0);
+    out.tex_coord = vec2<f32>(quad_pos.x, 1.0 - quad_pos.y);
+
     return out;
 }
 )";
