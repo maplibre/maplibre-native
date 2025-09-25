@@ -1417,10 +1417,12 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
+include(${PROJECT_SOURCE_DIR}/vendor/args.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/rapidjson.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/maplibre-native-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
@@ -1432,6 +1434,10 @@ include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1440,8 +1446,7 @@ endif()
 target_link_libraries(
     mbgl-core
     PRIVATE
-        MapLibreNative::Base::Extras::kdbush.hpp
-        MapLibreNative::Base::supercluster.hpp
+        mbgl-vendor-kdbush
         MapLibreNative::Base::shelf-pack-cpp
         MapLibreNative::Base::geojson-vt-cpp
         MapLibreNative::Base::cheap-ruler-cpp
@@ -1453,6 +1458,7 @@ target_link_libraries(
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
+        mbgl-vendor-supercluster
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
@@ -1461,8 +1467,8 @@ target_link_libraries(
         ${SHAPE_TARGETS} # from harfbuzz.cmake
     PUBLIC
         MapLibreNative::Base
-        MapLibreNative::Base::Extras::expected-lite
-        MapLibreNative::Base::Extras::rapidjson
+        mbgl-vendor-expected-lite
+        mbgl-vendor-rapidjson
         MapLibreNative::Base::geojson.hpp
         MapLibreNative::Base::geometry.hpp
         MapLibreNative::Base::variant
@@ -1474,22 +1480,21 @@ set(EXPORT_TARGETS
     mbgl-core
     maplibre-native-base
     maplibre-native-base-cheap-ruler-cpp
-    maplibre-native-base-extras-filesystem
-    maplibre-native-base-extras-expected-lite
-    maplibre-native-base-extras-kdbush.hpp
-    maplibre-native-base-extras-rapidjson
+    mbgl-vendor-expected-lite
+    mbgl-vendor-kdbush
     maplibre-native-base-geojson-vt-cpp
     maplibre-native-base-geojson.hpp
     maplibre-native-base-geometry.hpp
     maplibre-native-base-jni.hpp
     maplibre-native-base-pixelmatch-cpp
     maplibre-native-base-shelf-pack-cpp
-    maplibre-native-base-supercluster.hpp
+    mbgl-vendor-supercluster
     maplibre-native-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
+    mbgl-vendor-rapidjson
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
@@ -1498,6 +1503,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
     mbgl-vendor-metal-cpp
+    mbgl-vendor-filesystem
     unordered_dense
     ${SHAPE_TARGETS} # from harfbuzz.cmake
 )
