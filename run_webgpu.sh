@@ -7,7 +7,7 @@ echo "MapLibre Native WebGPU Demo"
 echo "============================"
 echo ""
 
-STYLE_URL="${STYLE_URL:-./debug-glitch.json}"
+STYLE_URL="${STYLE_URL:-./review-styles/demotiles-heatmap.json}"
 
 print_usage() {
     cat <<EOF
