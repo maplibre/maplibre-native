@@ -10,7 +10,7 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/webgpu/vertex_buffer_resource.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>

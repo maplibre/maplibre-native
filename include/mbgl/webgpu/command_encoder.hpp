@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/util/containers.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 
 #include <functional>
 #include <memory>

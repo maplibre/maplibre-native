@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 #include <memory>
 #include <vector>
 

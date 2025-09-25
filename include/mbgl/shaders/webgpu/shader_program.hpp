@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/color_mode.hpp>

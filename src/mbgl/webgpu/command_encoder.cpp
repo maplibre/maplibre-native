@@ -4,7 +4,7 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 #include <mbgl/util/logging.hpp>
 #include <cstring> // for strlen
 

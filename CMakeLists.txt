@@ -1361,7 +1361,6 @@ if(MLN_WITH_WEBGPU)
 
     list(APPEND
         INCLUDE_FILES
-            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/backend_impl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
@@ -1398,7 +1397,6 @@ if(MLN_WITH_WEBGPU)
 
     list(APPEND
         SRC_FILES
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/backend_impl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp

@@ -1,6 +1,6 @@
 // WebGPU implementation file - placeholder for shared WebGPU utilities
 
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 
 namespace mbgl {
 namespace webgpu {
