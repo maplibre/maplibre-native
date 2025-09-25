@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 
 #include <cstdint>
 #include <cstddef>

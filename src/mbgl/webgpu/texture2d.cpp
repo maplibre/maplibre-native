@@ -1,7 +1,7 @@
 #include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 
 #include <algorithm>
 #include <cstring>

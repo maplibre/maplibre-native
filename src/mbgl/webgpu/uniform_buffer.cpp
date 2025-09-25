@@ -1,7 +1,7 @@
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
 #include <cstring>
