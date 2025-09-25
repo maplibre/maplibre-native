@@ -25,23 +25,35 @@ public:
         colorTexture = context.createTexture2D();
         colorTexture->setSize(size);
         colorTexture->setFormat(gfx::TexturePixelType::RGBA, type);
+        if (auto* webgpuTexture = static_cast<Texture2D*>(colorTexture.get())) {
+            webgpuTexture->setUsage(WGPUTextureUsage_TextureBinding |
+                                    WGPUTextureUsage_CopyDst |
+                                    WGPUTextureUsage_CopySrc |
+                                    WGPUTextureUsage_RenderAttachment);
+        }
         colorTexture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        
+
         // Create depth texture if needed
         if (depth) {
             depthTexture = context.createTexture2D();
             depthTexture->setSize(size);
             depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
+            if (auto* webgpuDepth = static_cast<Texture2D*>(depthTexture.get())) {
+                webgpuDepth->setUsage(WGPUTextureUsage_RenderAttachment);
+            }
             depthTexture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         }
-        
+
         // Create stencil texture if needed
         if (stencil) {
             stencilTexture = context.createTexture2D();
             stencilTexture->setSize(size);
             stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
+            if (auto* webgpuStencil = static_cast<Texture2D*>(stencilTexture.get())) {
+                webgpuStencil->setUsage(WGPUTextureUsage_RenderAttachment);
+            }
             stencilTexture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         }
@@ -91,6 +103,14 @@ public:
         return texture.getTextureView();
     }
 
+    std::optional<wgpu::TextureFormat> getColorTextureFormat() const override {
+        if (!colorTexture) {
+            return std::nullopt;
+        }
+        const auto* texture = static_cast<const Texture2D*>(colorTexture.get());
+        return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
+    }
+
     WGPUTextureView getDepthStencilTextureView() override {
         if (depthTexture) {
             auto& texture = static_cast<Texture2D&>(*depthTexture);
@@ -103,6 +123,18 @@ public:
             return texture.getTextureView();
         }
         return nullptr;
+    }
+
+    std::optional<wgpu::TextureFormat> getDepthStencilTextureFormat() const override {
+        if (depthTexture) {
+            const auto* texture = static_cast<const Texture2D*>(depthTexture.get());
+            return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
+        }
+        if (stencilTexture) {
+            const auto* texture = static_cast<const Texture2D*>(stencilTexture.get());
+            return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
+        }
+        return std::nullopt;
     }
 
     PremultipliedImage readStillImage() {
