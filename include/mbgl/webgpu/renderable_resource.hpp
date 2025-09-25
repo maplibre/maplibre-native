@@ -28,6 +28,21 @@ public:
     virtual const mbgl::webgpu::RendererBackend& getBackend() const = 0;
     virtual const WGPUCommandEncoder& getCommandEncoder() const = 0;
     virtual WGPURenderPassEncoder getRenderPassEncoder() const = 0;
+
+    /**
+     * Obtain a texture view that should be bound as the color attachment for
+     * the render pass targeting this resource. Implementations should return a
+     * valid `WGPUTextureView` or `nullptr` if the resource relies on the
+     * backend to supply the swapchain view (e.g. default framebuffer).
+     */
+    virtual WGPUTextureView getColorTextureView() { return nullptr; }
+
+    /**
+     * Obtain a depth/stencil texture view for the render pass if the resource
+     * manages one. Returning `nullptr` indicates that the backend-provided
+     * depth/stencil view (if any) should be used instead.
+     */
+    virtual WGPUTextureView getDepthStencilTextureView() { return nullptr; }
 };
 
 } // namespace webgpu
