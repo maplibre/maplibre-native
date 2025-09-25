@@ -133,7 +133,14 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::Te
 }
 
 gfx::Texture2D& Texture2D::setSize(Size size_) noexcept {
+    if (size == size_) {
+        return *this;
+    }
     size = size_;
+    dirty = true;
+    if (sizeChangedCallback) {
+        sizeChangedCallback(size);
+    }
     return *this;
 }
 
@@ -329,6 +336,10 @@ void Texture2D::create() noexcept {
     if (!sampler) {
         setSamplerConfiguration(samplerState);
     }
+}
+
+void Texture2D::setSizeChangedCallback(std::function<void(const Size&)> callback) noexcept {
+    sizeChangedCallback = std::move(callback);
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {

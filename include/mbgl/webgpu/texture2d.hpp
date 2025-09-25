@@ -22,6 +22,7 @@ public:
     gfx::Texture2D& setSize(Size size_) noexcept override;
     gfx::Texture2D& setImage(std::shared_ptr<PremultipliedImage>) noexcept override;
     Texture2D& setUsage(uint32_t usageFlags_) noexcept;
+    void setSizeChangedCallback(std::function<void(const Size&)>) noexcept;
     WGPUTextureFormat getNativeFormat() const noexcept { return nativeFormat; }
 
     gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
@@ -56,7 +57,9 @@ protected:
     SamplerState samplerState;
     std::shared_ptr<PremultipliedImage> image;
     bool dirty = false;
+    std::function<void(const Size&)> sizeChangedCallback;
 };
 
 } // namespace webgpu
 } // namespace mbgl
+#include <functional>
