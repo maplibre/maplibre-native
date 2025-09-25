@@ -16,7 +16,6 @@ namespace webgpu {
 
 UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
-    // mbgl::Log::Info(mbgl::Event::Render, std::string("WebGPU: Creating upload pass: ") + (name ? name : "unnamed"));
     // Metal pattern: get resource from renderable and bind it
     // In WebGPU, this is optional as we may not always have a RenderableResource
     try {
@@ -69,14 +68,10 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     gfx::BufferUsageType /*usage*/,
     bool persistent) {
 
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating vertex buffer resource, size=" + std::to_string(size));
-
     auto& context = static_cast<Context&>(getContext());
     BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, /*isIndexBuffer=*/false, persistent);
 
-    if (buffer.getBuffer()) {
-        // mbgl::Log::Info(mbgl::Event::Render, "  Vertex buffer created successfully");
-    } else {
+    if (!buffer.getBuffer()) {
         mbgl::Log::Error(mbgl::Event::Render, "  Failed to create vertex buffer!");
     }
 
@@ -162,19 +157,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& vertexBuffers) {
 
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU buildAttributeBindings called with vertexCount=" +
-    //                 std::to_string(vertexCount) + " vertexData.size=" + std::to_string(vertexData.size()));
-
-    // Count how many overrides actually exist
-    int overrideCount = 0;
-    overrides.visitAttributes([&](const gfx::VertexAttribute& attr) {
-        overrideCount++;
-        // mbgl::Log::Info(mbgl::Event::Render, "  Override attribute " + std::to_string(attr.getIndex()) +
-        //                 " has shared data: " + (attr.getSharedRawData() ? "yes" : "no") +
-        //                 " stride=" + std::to_string(attr.getStride()));
-    });
-    // mbgl::Log::Info(mbgl::Event::Render, "  Total override attributes: " + std::to_string(overrideCount));
-
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
@@ -235,8 +217,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // Store the buffer so it doesn't get destroyed
             vertexBuffers.push_back(std::move(dummyBuffer));
 
-            // mbgl::Log::Info(mbgl::Event::Render, "Created dummy buffer for missing attribute " +
-            //                std::to_string(index) + " size=" + std::to_string(bufferSize));
             return;
         }
 
@@ -248,18 +228,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // Log vertex data for debugging
             if (effectiveAttr.getSharedRawData()) {
                 const int16_t* rawVerts = reinterpret_cast<const int16_t*>(effectiveAttr.getSharedRawData()->getRawData());
-                if (rawVerts) {
-                    // mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
-                    //                " from shared buffer. First verts: [" +
-                    //                std::to_string(rawVerts[0]) + ", " + std::to_string(rawVerts[1]) + "]");
-                } else {
-                    // mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
-                    //                " from shared buffer");
-                }
-            } else {
-                // mbgl::Log::Info(mbgl::Event::Render, "    Created binding for attribute " + std::to_string(index) +
-                //                " from shared buffer");
-            }
+            } 
 
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
@@ -294,22 +263,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     };
 
     defaults.resolve(overrides, resolveAttr, missingAttr);
-
-    // std::stringstream processed;
-    // processed << "  Processed " << attrCount << " attributes";
-    // Log::Info(Event::Render, processed.str());
-
-    // // Count how many valid bindings we have
-    // size_t validBindings = 0;
-    // for (const auto& binding : bindings) {
-    //     if (binding && binding->vertexBufferResource) {
-    //         validBindings++;
-    //     }
-    // }
-
-    // std::stringstream result;
-    // result << "  Created " << validBindings << " valid bindings out of " << bindings.size() << " total";
-    // Log::Info(Event::Render, result.str());
 
     return bindings;
 }

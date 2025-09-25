@@ -191,19 +191,15 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Check window visibility
     if (window) {
         int visible = glfwGetWindowAttrib(window, GLFW_VISIBLE);
-        mbgl::Log::Info(mbgl::Event::Render, "GLFW window visible: " + std::to_string(visible));
 
         if (!visible) {
-            mbgl::Log::Info(mbgl::Event::Render, "Showing GLFW window...");
             glfwShowWindow(window);
         }
     }
 
 
     // Create Dawn instance
-    mbgl::Log::Info(mbgl::Event::Render, "Initializing Dawn WebGPU backend...");
     instance = std::make_unique<dawn::native::Instance>();
-    mbgl::Log::Info(mbgl::Event::Render, "Dawn instance created successfully");
 
     // Enumerate adapters with retry logic
     std::vector<dawn::native::Adapter> adapters;
@@ -212,7 +208,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         if (!adapters.empty()) {
             // Format the count as a string to avoid logging API issues
             std::string adapterMsg = "Found " + std::to_string(adapters.size()) + " Dawn adapters";
-            mbgl::Log::Info(mbgl::Event::Render, adapterMsg);
             break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -222,11 +217,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         throw std::runtime_error("No WebGPU adapters found after retries");
     }
 
-    // Log that we're using Dawn WebGPU implementation
-    mbgl::Log::Info(mbgl::Event::Render, "Using Dawn WebGPU implementation with native backend");
 
     dawn::native::Adapter& selectedAdapter = adapters[0];
-    mbgl::Log::Info(mbgl::Event::Render, "Selected Dawn adapter for WebGPU rendering");
 
     std::vector<wgpu::FeatureName> supportedFeatures;
     WGPUSupportedFeatures features = WGPU_SUPPORTED_FEATURES_INIT;
@@ -258,7 +250,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     deviceDesc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous, logDeviceLost);
 
     // Create device with descriptor
-    mbgl::Log::Info(mbgl::Event::Render, "Creating Dawn WebGPU device...");
     WGPUDevice rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
     if (!rawDevice) {
         // Retry once after delay
@@ -271,7 +262,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     }
 
     wgpuDevice = wgpu::Device::Acquire(rawDevice);
-    mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU device created successfully");
 
     setDepthStencilFormat(depthStencilFormat);
 
@@ -340,8 +330,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
                                                     : swapChainFormat;
             };
             swapChainFormat = pickFormat();
-            mbgl::Log::Info(mbgl::Event::Render,
-                            "WebGPU: selected surface format " + textureFormatToString(swapChainFormat));
         }
         wgpuSurfaceCapabilitiesFreeMembers(capabilities);
     }
@@ -376,10 +364,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     std::string windowSizeMsg = "Window size: " + std::to_string(width) + "x" + std::to_string(height);
-    mbgl::Log::Info(mbgl::Event::Render, windowSizeMsg);
 
     // Create surface for WebGPU
-    mbgl::Log::Info(mbgl::Event::Render, "Creating surface for WebGPU...");
     wgpu::Instance wgpuInstance(instance->Get());
 
     // Check if we can get X11 handles (through XWayland if on Wayland)
@@ -387,7 +373,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     Window x11Window = glfwGetX11Window(window);
 
     if (x11Display && x11Window) {
-        mbgl::Log::Info(mbgl::Event::Render, "Using X11 surface (may be through XWayland)");
 
         wgpu::SurfaceDescriptorFromXlibWindow x11Desc = {};
         x11Desc.display = x11Display;
@@ -397,7 +382,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         surfaceDesc.nextInChain = &x11Desc;
 
         wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-        mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU X11 surface created");
     } else {
         // Try Wayland even though Dawn may not fully support it
         struct wl_display* waylandDisplay = glfwGetWaylandDisplay();
@@ -414,7 +398,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         surfaceDesc.nextInChain = &waylandDesc;
 
         wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-        mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU Wayland surface created");
         } else {
             throw std::runtime_error("Failed to get window surface from GLFW");
         }
@@ -441,8 +424,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
                                                     : swapChainFormat;
             };
             swapChainFormat = pickFormat();
-            mbgl::Log::Info(mbgl::Event::Render,
-                            "WebGPU: selected surface format " + textureFormatToString(swapChainFormat));
         }
         wgpuSurfaceCapabilitiesFreeMembers(capabilities);
     }
@@ -468,7 +449,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     wgpuSurface.Configure(&config);
     surfaceConfigured = true;
     lastConfiguredSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
-    mbgl::Log::Info(mbgl::Event::Render, "Dawn WebGPU surface configured successfully");
 #endif
 
     // Store WebGPU instance, device and queue in the base class
@@ -712,9 +692,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     wgpu::SurfaceTexture surfaceTexture;
 
     static int getTextureCount = 0;
-    if (getTextureCount++ < 20) {
-        // mbgl::Log::Info(mbgl::Event::Render, "Getting surface texture #" + std::to_string(getTextureCount));
-    }
 
     try {
         wgpuSurface.GetCurrentTexture(&surfaceTexture);
@@ -1094,13 +1071,11 @@ fn fs_main(input : VertexOut) -> @location(0) vec4<f32> {
 
 void GLFWWebGPUBackend::drawDebugTriangle(const wgpu::TextureView& targetView) {
     if (!targetView) {
-        mbgl::Log::Info(mbgl::Event::Render, "Debug triangle: no target view");
         return;
     }
 
     ensureDebugTriangleResources();
     if (!debugTriangleInitialized || !debugTrianglePipeline || !debugTriangleVertexBuffer) {
-        mbgl::Log::Info(mbgl::Event::Render, "Debug triangle: resources not ready");
         return;
     }
 
@@ -1132,5 +1107,4 @@ void GLFWWebGPUBackend::drawDebugTriangle(const wgpu::TextureView& targetView) {
     auto commandBuffer = encoder.Finish();
 
     queue.Submit(1, &commandBuffer);
-    mbgl::Log::Info(mbgl::Event::Render, "Debug triangle draw submitted");
 }

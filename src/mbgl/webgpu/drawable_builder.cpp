@@ -15,7 +15,6 @@ DrawableBuilder::DrawableBuilder(std::string name_)
 DrawableBuilder::~DrawableBuilder() = default;
 
 std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating drawable: " + name);
     return std::make_unique<Drawable>(name);
 }
 
@@ -24,21 +23,12 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 }
 
 void DrawableBuilder::init() {
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() called");
-
     if (!currentDrawable) {
         mbgl::Log::Warning(mbgl::Event::Render, "DrawableBuilder::init called with no current drawable");
         return;
     }
 
     auto& drawable = static_cast<Drawable&>(*currentDrawable);
-
-    // mbgl::Log::Info(mbgl::Event::Render, "DrawableBuilder::init for " + drawable.getName() +
-    //                " rawVerticesCount=" + std::to_string(impl->rawVerticesCount) +
-    //                " rawVertices.size=" + std::to_string(impl->rawVertices.size()) +
-    //                " segments.size=" + std::to_string(impl->segments.size()) +
-    //                " sharedIndexes=" + (impl->sharedIndexes ? "yes" : "no") +
-    //                " vertexAttrs=" + (drawable.getVertexAttributes() ? "present" : "null"));
 
     // Set the vertex attribute ID so the drawable knows which shared vertex buffer to use
     drawable.setVertexAttrId(vertexAttrId);
@@ -86,15 +76,10 @@ void DrawableBuilder::init() {
     }
 
     if (impl->sharedIndexes && impl->sharedIndexes->elements()) {
-        // mbgl::Log::Info(mbgl::Event::Render, "  Setting index data: " +
-        //                std::to_string(impl->sharedIndexes->elements()) + " indices, " +
-        //                std::to_string(impl->segments.size()) + " segments");
         drawable.setIndexData(impl->sharedIndexes, std::move(impl->segments));
     } else {
         mbgl::Log::Warning(mbgl::Event::Render, "  No index data to set!");
     }
-
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU DrawableBuilder::init() completed for " + drawable.getName());
 
     // Flush texture bindings so the shared builder doesn't leak the previous tile's
     // Texture2D handles into the next draw call. Other backends reset textures while

@@ -211,9 +211,6 @@ ShaderProgram::ShaderProgram(Context& context,
     std::string vertexWithPrelude;
     if (hasVertexEntryPoint) {
         vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
-        mbgl::Log::Info(mbgl::Event::Render,
-                        std::string("WGSL vertex snippet for ") + shaderName + "\n" + vertexWithPrelude.substr(0, 200));
-
         WGPUShaderSourceWGSL wgslDesc = {};
         wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
         wgslDesc.chain.next = nullptr;
@@ -233,8 +230,6 @@ ShaderProgram::ShaderProgram(Context& context,
                 std::ofstream dump("/tmp/circle_vertex.wgsl", std::ios::trunc);
                 dump << vertexSource;
             }
-        } else {
-            Log::Info(Event::Render, "Successfully created vertex shader module for " + shaderName);
         }
     }
 
@@ -261,8 +256,6 @@ ShaderProgram::ShaderProgram(Context& context,
                 std::ofstream dump("/tmp/circle_fragment.wgsl", std::ios::trunc);
                 dump << fragmentSource;
             }
-        } else {
-            Log::Info(Event::Render, "Successfully created fragment shader module for " + shaderName);
         }
     }
 

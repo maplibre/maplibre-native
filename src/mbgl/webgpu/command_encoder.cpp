@@ -42,7 +42,6 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
 }
 
 std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
-    // Log::Info(Event::Render, std::string("WebGPU CommandEncoder: Creating upload pass: ") + (name ? name : "unnamed"));
     return std::make_unique<UploadPass>(renderable, *this, name);
 }
 
@@ -78,7 +77,6 @@ void CommandEncoder::submitCommandBuffer() {
     if (cmdBuffer) {
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
-        // Log::Info(Event::Render, "WebGPU: Command buffer submitted to queue");
     } else {
         Log::Error(Event::Render, "WebGPU: Failed to finish command encoder");
     }
