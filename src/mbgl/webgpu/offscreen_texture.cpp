@@ -80,7 +80,31 @@ public:
     WGPURenderPassEncoder getRenderPassEncoder() const override {
         return nullptr;
     }
-    
+
+    WGPUTextureView getColorTextureView() override {
+        if (!colorTexture) {
+            return nullptr;
+        }
+
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+        texture.create();
+        return texture.getTextureView();
+    }
+
+    WGPUTextureView getDepthStencilTextureView() override {
+        if (depthTexture) {
+            auto& texture = static_cast<Texture2D&>(*depthTexture);
+            texture.create();
+            return texture.getTextureView();
+        }
+        if (stencilTexture) {
+            auto& texture = static_cast<Texture2D&>(*stencilTexture);
+            texture.create();
+            return texture.getTextureView();
+        }
+        return nullptr;
+    }
+
     PremultipliedImage readStillImage() {
         // Read back the color texture data
         auto dataSize = colorTexture->getDataSize();

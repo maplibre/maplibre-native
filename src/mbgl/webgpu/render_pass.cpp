@@ -6,6 +6,7 @@
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -37,24 +38,29 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         return;
     }
 
-    // Get the backend to access device and surface
+    // Access the renderable resource associated with this pass
+    auto& renderableResource = descriptor.renderable.getResource<RenderableResource>();
+    renderableResource.bind();
+
+    // Get the backend to access device and surface fallbacks
     auto& context = commandEncoder_.getContext();
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
 
-    if (void* textureViewPtr = backend.getCurrentTextureView()) {
-        // mbgl::Log::Info(mbgl::Event::Render,
-        //                 "WebGPU: Attempting to acquire swapchain view = " +
-        //                     std::to_string(reinterpret_cast<uintptr_t>(textureViewPtr)));
-        auto* colorViewHandle = reinterpret_cast<WGPUTextureView>(textureViewPtr);
-        wgpuTextureViewAddRef(colorViewHandle);
-        impl->colorView = wgpu::TextureView::Acquire(colorViewHandle);
-        // mbgl::Log::Info(mbgl::Event::Render,
-        //                 "WebGPU: Acquired swapchain view handle = " +
-        //                     std::to_string(reinterpret_cast<uintptr_t>(impl->colorView.Get())));
-    } else {
-        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to acquire swapchain view");
+    // Resolve the color attachment view, preferring the renderable's texture view
+    WGPUTextureView colorViewHandle = renderableResource.getColorTextureView();
+    if (!colorViewHandle) {
+        if (void* textureViewPtr = backend.getCurrentTextureView()) {
+            colorViewHandle = reinterpret_cast<WGPUTextureView>(textureViewPtr);
+        }
+    }
+
+    if (!colorViewHandle) {
+        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to acquire color attachment view");
         return;
     }
+
+    wgpuTextureViewAddRef(colorViewHandle);
+    impl->colorView = wgpu::TextureView::Acquire(colorViewHandle);
 
     WGPURenderPassColorAttachment colorAttachment = {};
     colorAttachment.view = impl->colorView.Get();
@@ -91,25 +97,21 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     depthAttachment.view = nullptr;
 
     WGPURenderPassDepthStencilAttachment* depthAttachmentPtr = nullptr;
-    if (void* depthStencilViewPtr = backend.getDepthStencilView()) {
-        // mbgl::Log::Info(mbgl::Event::Render,
-        //                 "WebGPU: Attempting depth stencil view = " +
-        //                     std::to_string(reinterpret_cast<uintptr_t>(depthStencilViewPtr)));
-        auto* depthViewHandle = reinterpret_cast<WGPUTextureView>(depthStencilViewPtr);
+
+    WGPUTextureView depthViewHandle = renderableResource.getDepthStencilTextureView();
+    if (!depthViewHandle) {
+        if (void* depthStencilViewPtr = backend.getDepthStencilView()) {
+            depthViewHandle = reinterpret_cast<WGPUTextureView>(depthStencilViewPtr);
+        }
+    }
+
+    if (depthViewHandle) {
         wgpuTextureViewAddRef(depthViewHandle);
         impl->depthStencilView = wgpu::TextureView::Acquire(depthViewHandle);
         if (impl->depthStencilView) {
             depthAttachment.view = impl->depthStencilView.Get();
             depthAttachmentPtr = &depthAttachment;
-            // mbgl::Log::Info(mbgl::Event::Render,
-            //                 "WebGPU: Using depth stencil view handle = " +
-            //                     std::to_string(reinterpret_cast<uintptr_t>(depthAttachment.view)));
-        } else {
-            mbgl::Log::Warning(mbgl::Event::Render,
-                                "WebGPU: depth stencil view Acquire returned null");
         }
-    } else {
-        // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: No depth stencil view provided by backend");
     }
 
     WGPURenderPassDescriptor renderPassDesc = {};
@@ -123,7 +125,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     impl->encoder = wgpuCommandEncoderBeginRenderPass(impl->commandEncoder, &renderPassDesc);
 
     if (impl->encoder) {
-        auto size = backend.getFramebufferSize();
+        auto size = descriptor.renderable.getSize();
         wgpuRenderPassEncoderSetViewport(impl->encoder,
                                          0.0f,
                                          0.0f,
