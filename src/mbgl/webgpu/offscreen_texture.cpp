@@ -5,6 +5,7 @@
 #include <mbgl/webgpu/renderable_resource.hpp>
 #include <mbgl/util/logging.hpp>
 #include <cstring>
+#include <functional>
 
 namespace mbgl {
 namespace webgpu {
@@ -30,6 +31,7 @@ public:
                                     WGPUTextureUsage_CopyDst |
                                     WGPUTextureUsage_CopySrc |
                                     WGPUTextureUsage_RenderAttachment);
+            webgpuTexture->setSizeChangedCallback([this](const Size& newSize) { handleResize(newSize); });
         }
         colorTexture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
@@ -264,14 +266,43 @@ public:
         assert(colorTexture);
         return colorTexture;
     }
-    
+
+    void setSizeListener(std::function<void(const Size&)> listener) {
+        sizeListener = std::move(listener);
+    }
+
 private:
+    void handleResize(const Size& newSize) {
+        if (newSize == size || newSize.isEmpty()) {
+            return;
+        }
+        size = newSize;
+
+        if (depthTexture) {
+            static_cast<Texture2D&>(*depthTexture).setSize(newSize);
+            static_cast<Texture2D&>(*depthTexture).create();
+        }
+        if (stencilTexture) {
+            static_cast<Texture2D&>(*stencilTexture).setSize(newSize);
+            static_cast<Texture2D&>(*stencilTexture).create();
+        }
+
+        if (auto* color = static_cast<Texture2D*>(colorTexture.get())) {
+            color->create();
+        }
+
+        if (sizeListener) {
+            sizeListener(size);
+        }
+    }
+
     Context& context;
-    const Size size;
+    Size size;
     const gfx::TextureChannelDataType type;
     gfx::Texture2DPtr colorTexture;
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
+    std::function<void(const Size&)> sizeListener;
 };
 
 OffscreenTexture::OffscreenTexture(Context& context,
@@ -280,6 +311,10 @@ OffscreenTexture::OffscreenTexture(Context& context,
                                    bool depth,
                                    bool stencil)
     : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {
+    auto& offscreenResource = getResource<OffscreenTextureResource>();
+    offscreenResource.setSizeListener([this](const Size& newSize) {
+        size = newSize;
+    });
 }
 
 bool OffscreenTexture::isRenderable() {
