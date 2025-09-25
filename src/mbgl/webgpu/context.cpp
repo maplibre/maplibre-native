@@ -56,12 +56,10 @@ Context::~Context() = default;
 
 void Context::beginFrame() {
     // Begin a new frame - WebGPU command recording starts here
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context: beginFrame()");
 }
 
 void Context::endFrame() {
     // End the frame - submit WebGPU commands
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context: endFrame()");
 }
 
 void Context::performCleanup() {
@@ -107,13 +105,11 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating TileLayerGroup: " + name);
     auto tileLayerGroup = std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
     return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating LayerGroup: " + name);
     auto layerGroup = std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
     return layerGroup;
 }
@@ -141,13 +137,11 @@ void Context::clearStencilBuffer(int32_t value) {
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const void* data, std::size_t size, bool persistent) {
     if (!ptr) {
-        // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating new uniform buffer, size: " + std::to_string(size));
         ptr = createUniformBuffer(data, size, persistent);
         return true;
     }
 
     // Update existing buffer
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Updating uniform buffer, size: " + std::to_string(size));
     auto* buffer = static_cast<UniformBuffer*>(ptr.get());
     buffer->update(data, size);
     return false;
@@ -162,7 +156,6 @@ gfx::UniformBufferArray& Context::mutableGlobalUniformBuffers() {
 }
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context::bindGlobalUniformBuffers called");
     // In WebGPU, we can't bind buffers globally to the render pass like Metal does.
     // Instead, we need to ensure these buffers are available for drawables to include
     // in their bind groups. The actual binding happens per-drawable.
@@ -173,7 +166,6 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
 }
 
 void Context::unbindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
-    // mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context::unbindGlobalUniformBuffers called");
     // Clear the global buffer reference from the render pass
     auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(renderPass);
     webgpuRenderPass.setGlobalUniformBuffers(nullptr);
@@ -236,9 +228,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     if (tileUBOs.empty()) {
         return false;
     }
-
-    Log::Info(Event::Render,
-              "WebGPU: Rendering " + std::to_string(tileUBOs.size()) + " clipping masks for tiles");
 
     if (!clipMaskShader) {
         if (auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
@@ -453,11 +442,7 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
             if (dataSize > 0) {
                 // Log first few vertices for debugging
                 const int16_t* rawVerts = reinterpret_cast<const int16_t*>(sharedRaw->getRawData());
-                if (rawVerts && dataSize >= 8) {
-                    mbgl::Log::Info(mbgl::Event::Render, "First vertex data: [" +
-                                   std::to_string(rawVerts[0]) + ", " + std::to_string(rawVerts[1]) +
-                                   ", " + std::to_string(rawVerts[2]) + ", " + std::to_string(rawVerts[3]) + "]");
-                }
+                
 
                 // Create GPU buffer for this vertex attribute
                 uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
@@ -472,10 +457,6 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
                     /*.vertexBufferResource = */ bufferResource.get(),
                     /*.vertexOffset = */ 0
                 };
-
-                mbgl::Log::Info(mbgl::Event::Render, "Created vertex buffer for attribute " +
-                               std::to_string(index) + " size=" + std::to_string(dataSize) +
-                               " stride=" + std::to_string(attr.getStride()));
             }
         }
     });
