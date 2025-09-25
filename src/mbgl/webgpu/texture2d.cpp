@@ -146,6 +146,11 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
     return *this;
 }
 
+Texture2D& Texture2D::setUsage(uint32_t usageFlags_) noexcept {
+    usageFlags = usageFlags_;
+    return *this;
+}
+
 
 
 
@@ -199,6 +204,7 @@ void Texture2D::create() noexcept {
     
     // Determine WebGPU texture format based on pixel format
     WGPUTextureFormat format;
+    uint32_t usage = usageFlags;
     switch (pixelFormat) {
         case gfx::TexturePixelType::Alpha:
             format = WGPUTextureFormat_R8Unorm;
@@ -206,11 +212,25 @@ void Texture2D::create() noexcept {
         case gfx::TexturePixelType::Luminance:
             format = WGPUTextureFormat_R8Unorm;
             break;
+        case gfx::TexturePixelType::Depth:
+            format = WGPUTextureFormat_Depth32Float;
+            usage |= WGPUTextureUsage_RenderAttachment;
+            break;
+        case gfx::TexturePixelType::Stencil:
+#ifdef WGPUTextureFormat_Stencil8
+            format = WGPUTextureFormat_Stencil8;
+#else
+            format = WGPUTextureFormat_Depth24PlusStencil8;
+#endif
+            usage |= WGPUTextureUsage_RenderAttachment;
+            break;
         case gfx::TexturePixelType::RGBA:
         default:
             format = WGPUTextureFormat_RGBA8Unorm;
             break;
     }
+
+    nativeFormat = format;
     
     // Create texture descriptor
     WGPUTextureDescriptor textureDesc = {};
@@ -225,7 +245,11 @@ void Texture2D::create() noexcept {
     textureDesc.sampleCount = 1;
     textureDesc.dimension = WGPUTextureDimension_2D;
     textureDesc.format = format;
-    textureDesc.usage = WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst;
+    // Ensure color targets are renderable when requested via usage flags
+    if (pixelFormat == gfx::TexturePixelType::RGBA) {
+        usage |= WGPUTextureUsage_RenderAttachment;
+    }
+    textureDesc.usage = usage;
     
     // Create the texture
     texture = wgpuDeviceCreateTexture(device, &textureDesc);
