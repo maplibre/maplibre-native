@@ -162,10 +162,25 @@ size_t Texture2D::getDataSize() const noexcept {
 size_t Texture2D::getPixelStride() const noexcept {
     switch (pixelFormat) {
         case gfx::TexturePixelType::Alpha:
-            return 1;
         case gfx::TexturePixelType::Luminance:
+            switch (channelType) {
+                case gfx::TextureChannelDataType::UnsignedByte:
+                    return 1;
+                case gfx::TextureChannelDataType::HalfFloat:
+                    return 2;
+                case gfx::TextureChannelDataType::Float:
+                    return 4;
+            }
             return 1;
         case gfx::TexturePixelType::RGBA:
+            switch (channelType) {
+                case gfx::TextureChannelDataType::UnsignedByte:
+                    return 4;
+                case gfx::TextureChannelDataType::HalfFloat:
+                    return 8;
+                case gfx::TextureChannelDataType::Float:
+                    return 16;
+            }
             return 4;
         default:
             return 4;
@@ -203,14 +218,38 @@ void Texture2D::create() noexcept {
     }
     
     // Determine WebGPU texture format based on pixel format
-    WGPUTextureFormat format;
+    WGPUTextureFormat format = WGPUTextureFormat_Undefined;
     uint32_t usage = usageFlags;
     switch (pixelFormat) {
         case gfx::TexturePixelType::Alpha:
-            format = WGPUTextureFormat_R8Unorm;
+            switch (channelType) {
+                case gfx::TextureChannelDataType::UnsignedByte:
+                    format = WGPUTextureFormat_R8Unorm;
+                    break;
+                case gfx::TextureChannelDataType::HalfFloat:
+                    format = WGPUTextureFormat_R16Float;
+                    usage |= WGPUTextureUsage_RenderAttachment;
+                    break;
+                case gfx::TextureChannelDataType::Float:
+                    format = WGPUTextureFormat_R32Float;
+                    usage |= WGPUTextureUsage_RenderAttachment;
+                    break;
+            }
             break;
         case gfx::TexturePixelType::Luminance:
-            format = WGPUTextureFormat_R8Unorm;
+            switch (channelType) {
+                case gfx::TextureChannelDataType::UnsignedByte:
+                    format = WGPUTextureFormat_R8Unorm;
+                    break;
+                case gfx::TextureChannelDataType::HalfFloat:
+                    format = WGPUTextureFormat_R16Float;
+                    usage |= WGPUTextureUsage_RenderAttachment;
+                    break;
+                case gfx::TextureChannelDataType::Float:
+                    format = WGPUTextureFormat_R32Float;
+                    usage |= WGPUTextureUsage_RenderAttachment;
+                    break;
+            }
             break;
         case gfx::TexturePixelType::Depth:
             format = WGPUTextureFormat_Depth32Float;
@@ -226,8 +265,24 @@ void Texture2D::create() noexcept {
             break;
         case gfx::TexturePixelType::RGBA:
         default:
-            format = WGPUTextureFormat_RGBA8Unorm;
+            switch (channelType) {
+                case gfx::TextureChannelDataType::UnsignedByte:
+                    format = WGPUTextureFormat_RGBA8Unorm;
+                    break;
+                case gfx::TextureChannelDataType::HalfFloat:
+                    format = WGPUTextureFormat_RGBA16Float;
+                    usage |= WGPUTextureUsage_RenderAttachment;
+                    break;
+                case gfx::TextureChannelDataType::Float:
+                    format = WGPUTextureFormat_RGBA32Float;
+                    usage |= WGPUTextureUsage_RenderAttachment;
+                    break;
+            }
             break;
+    }
+
+    if (format == WGPUTextureFormat_Undefined) {
+        format = WGPUTextureFormat_RGBA8Unorm;
     }
 
     nativeFormat = format;
