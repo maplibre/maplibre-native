@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 
 namespace mbgl {
 namespace webgpu {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <webgpu/webgpu.h>
 #include <mbgl/util/image.hpp>
 
 #include <memory>
