@@ -133,6 +133,20 @@ public:
         return nullptr;
     }
 
+    WGPUTextureView getColorTextureView() override {
+        if (auto* viewPtr = static_cast<WGPUTextureView>(backend.getCurrentTextureView())) {
+            return viewPtr;
+        }
+        return nullptr;
+    }
+
+    WGPUTextureView getDepthStencilTextureView() override {
+        if (auto* viewPtr = static_cast<WGPUTextureView>(backend.getDepthStencilView())) {
+            return viewPtr;
+        }
+        return nullptr;
+    }
+
 private:
     GLFWWebGPUBackend& backend;
 };
