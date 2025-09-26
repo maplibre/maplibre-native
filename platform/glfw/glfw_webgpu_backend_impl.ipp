@@ -546,7 +546,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     // Set shutdown flag atomically with memory barrier
     isShuttingDown.store(true, std::memory_order_release);
-    
+
     // Mark any in-flight frame as completed so tear-down logic can continue.
     frameInProgress.store(false, std::memory_order_release);
 
@@ -605,13 +605,13 @@ void GLFWWebGPUBackend::swap() {
     if (isShuttingDown) {
         return;
     }
-    
+
     // Keep track of swap calls for debugging
     static int swapCount = 0;
     static auto lastSwapTime = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
     auto timeSinceLastSwap = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwapTime).count();
-    
+
     // If it's been too long since last swap, tick the device to keep it alive
     if (timeSinceLastSwap > 1000) {  // 1 second
         // Keep Dawn device alive during idle periods
@@ -623,10 +623,10 @@ void GLFWWebGPUBackend::swap() {
     }
     lastSwapTime = now;
     swapCount++;
-    
+
     // Process any pending device work
     processEvents();
-    
+
     // Run periodic maintenance
     periodicMaintenance();
 
@@ -645,7 +645,7 @@ void GLFWWebGPUBackend::swap() {
         if (surfaceNeedsReconfigure) {
             reconfigureSurface();
         }
-        
+
         // Only present if we have a valid texture view and haven't presented yet
         {
             std::lock_guard<SpinLock> guard(textureStateLock);
@@ -663,11 +663,11 @@ void GLFWWebGPUBackend::swap() {
                 currentTexture = nullptr;
             }
         }
-        
+
         // Reset error counter on successful present
         consecutiveErrors = 0;
     }
-    
+
     // Signal frame completion
     signalFrameComplete();
 
@@ -728,10 +728,10 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 
     // Process any pending device work before acquiring texture
     processEvents();
-    
+
     // Run periodic maintenance
     periodicMaintenance();
-    
+
     // Check error threshold
     if (consecutiveErrors >= maxConsecutiveErrors) {
         // Too many errors, need to reconfigure
@@ -806,7 +806,7 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     viewDesc.arrayLayerCount = 1;
     viewDesc.aspect = wgpu::TextureAspect::All;
     viewDesc.label = "SwapChain TextureView";
-    
+
     // Store the texture to keep it alive
     currentTexture = surfaceTexture.texture;
 
@@ -821,7 +821,7 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         frameInProgress = false;
         return nullptr;
     }
-    
+
     // Validate the new view before storing
     if (!newView) {
         currentTexture = nullptr;
@@ -829,10 +829,10 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         frameInProgress = false;
         return nullptr;
     }
-    
+
     // Store the validated view
     currentTextureView = newView;
-    
+
     // Return the created texture view
     if (!currentTextureView) {
         currentTexture = nullptr;
@@ -840,10 +840,10 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         frameInProgress = false;
         return nullptr;
     }
-    
+
     // Success - reset error counter
     consecutiveErrors = 0;
-    
+
 #if defined(__APPLE__)
     }
 #endif
@@ -873,10 +873,10 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     if (!wgpuSurface || !wgpuDevice || isShuttingDown) {
         return;
     }
-    
+
     // Wait for any in-progress frame
     waitForFrame();
-    
+
     // Don't proceed if we're shutting down after waiting
     if (isShuttingDown) {
         return;
@@ -891,13 +891,13 @@ void GLFWWebGPUBackend::reconfigureSurface() {
         previousTextureView = nullptr;
         previousTexture = nullptr;
     }
-    
+
     // Get current size
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
 
     // Skip if size hasn't changed and we're already configured
-    if (surfaceConfigured && 
+    if (surfaceConfigured &&
         lastConfiguredSize.width == static_cast<uint32_t>(width) &&
         lastConfiguredSize.height == static_cast<uint32_t>(height)) {
         surfaceNeedsReconfigure = false;
@@ -1006,11 +1006,11 @@ void GLFWWebGPUBackend::periodicMaintenance() {
     if (isShuttingDown.load(std::memory_order_acquire)) {
         return;
     }
-    
+
     static auto lastMaintenanceTime = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
     auto timeSinceLastMaintenance = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastMaintenanceTime).count();
-    
+
     // Run maintenance every 100ms to keep Dawn alive during idle periods
     if (timeSinceLastMaintenance > 100) {
         // Pump pending callbacks; we intentionally ignore errors here because

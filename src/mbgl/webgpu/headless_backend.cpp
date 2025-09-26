@@ -22,7 +22,6 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
     : webgpu::RendererBackend(mode),
       gfx::HeadlessBackend(size_),
       impl(std::make_unique<Impl>()) {
-
     static_cast<void>(swapBehaviour_);
 
     impl->framebufferSize = size_;
@@ -92,8 +91,8 @@ void HeadlessBackend::createOffscreenTextures() {
     wgpu::TextureDescriptor colorDesc = {};
     colorDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     colorDesc.dimension = wgpu::TextureDimension::e2D;
-    colorDesc.size = {static_cast<uint32_t>(impl->framebufferSize.width),
-                     static_cast<uint32_t>(impl->framebufferSize.height), 1};
+    colorDesc.size = {
+        static_cast<uint32_t>(impl->framebufferSize.width), static_cast<uint32_t>(impl->framebufferSize.height), 1};
     colorDesc.format = wgpu::TextureFormat::RGBA8Unorm;
     colorDesc.mipLevelCount = 1;
     colorDesc.sampleCount = 1;
@@ -119,8 +118,8 @@ void HeadlessBackend::createOffscreenTextures() {
     wgpu::TextureDescriptor depthDesc = {};
     depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
     depthDesc.dimension = wgpu::TextureDimension::e2D;
-    depthDesc.size = {static_cast<uint32_t>(impl->framebufferSize.width),
-                      static_cast<uint32_t>(impl->framebufferSize.height), 1};
+    depthDesc.size = {
+        static_cast<uint32_t>(impl->framebufferSize.width), static_cast<uint32_t>(impl->framebufferSize.height), 1};
     depthDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
     depthDesc.mipLevelCount = 1;
     depthDesc.sampleCount = 1;
@@ -198,9 +197,7 @@ namespace gfx {
 
 template <>
 std::unique_ptr<gfx::HeadlessBackend> Backend::Create<Backend::Type::WebGPU>(
-    Size size,
-    gfx::Renderable::SwapBehaviour swapBehaviour,
-    gfx::ContextMode contextMode) {
+    Size size, gfx::Renderable::SwapBehaviour swapBehaviour, gfx::ContextMode contextMode) {
     return std::make_unique<webgpu::HeadlessBackend>(size, swapBehaviour, contextMode);
 }
 

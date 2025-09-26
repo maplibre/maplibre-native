@@ -17,7 +17,7 @@ if(MLN_WITH_WEBGPU)
             # Check if Dawn is already built
             if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/native/libwebgpu_dawn.a)
                 message(STATUS "Using prebuilt Dawn libraries")
-                target_link_libraries(mbgl-core PRIVATE 
+                target_link_libraries(mbgl-core PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/native/libwebgpu_dawn.a
                     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/libdawn_proc.a
                     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/platform/libdawn_platform.a

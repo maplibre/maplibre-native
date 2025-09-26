@@ -31,9 +31,7 @@ public:
     std::chrono::duration<double> getLastUpdated() const { return lastUpdated; }
     void setLastUpdated(std::chrono::duration<double> time) { lastUpdated = time; }
 
-    void update(const void* data, std::size_t size) {
-        buffer.update(data, size, 0);
-    }
+    void update(const void* data, std::size_t size) { buffer.update(data, size, 0); }
 
 protected:
     BufferResource buffer;

@@ -23,9 +23,7 @@ public:
     const BufferResource& getBuffer() const { return buffer; }
     BufferResource& getBuffer() { return buffer; }
 
-    void update(const void* data, std::size_t size) {
-        buffer.update(data, size, 0);
-    }
+    void update(const void* data, std::size_t size) { buffer.update(data, size, 0); }
 
 protected:
     BufferResource buffer;

@@ -10,12 +10,12 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "CircleShader";
-    
+
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-static constexpr auto prelude = R"(
+    static constexpr auto prelude = R"(
 struct CircleDrawableUBO {
     matrix: mat4x4<f32>,
     extrude_scale: vec2<f32>,
@@ -180,7 +180,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) extrude: vec2<f32>,

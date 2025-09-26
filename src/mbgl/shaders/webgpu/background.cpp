@@ -23,9 +23,7 @@ using BackgroundPatternShaderSource = ShaderSource<BuiltIn::BackgroundPatternSha
 const std::array<AttributeInfo, 1> BackgroundPatternShaderSource::attributes = {
     AttributeInfo{3, gfx::AttributeDataType::Short2, idBackgroundPosVertexAttribute},
 };
-const std::array<TextureInfo, 1> BackgroundPatternShaderSource::textures = {
-    TextureInfo{0, idBackgroundImageTexture}
-};
+const std::array<TextureInfo, 1> BackgroundPatternShaderSource::textures = {TextureInfo{0, idBackgroundImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

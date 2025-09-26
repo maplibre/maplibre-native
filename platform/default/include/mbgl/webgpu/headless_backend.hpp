@@ -13,7 +13,7 @@ public:
                     SwapBehaviour = SwapBehaviour::NoFlush,
                     gfx::ContextMode = gfx::ContextMode::Unique);
     ~HeadlessBackend() override;
-    
+
     gfx::Renderable& getDefaultRenderable() override;
     PremultipliedImage readStillImage() override;
     RendererBackend* getRendererBackend() override;

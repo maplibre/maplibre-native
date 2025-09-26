@@ -43,8 +43,7 @@ public:
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
-      impl(std::make_unique<Impl>()) {
-}
+      impl(std::make_unique<Impl>()) {}
 
 RendererBackend::~RendererBackend() = default;
 
@@ -72,14 +71,16 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     using namespace std::string_literals;
 
     // Register each shader type using fold expression
-    ([&]() {
-        using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::WebGPU>;
-        auto group = std::make_shared<webgpu::ShaderGroup<ShaderID>>(programParameters);
-        if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
-            assert(!"duplicate shader group");
-            throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
-        }
-    }(), ...);
+    (
+        [&]() {
+            using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::WebGPU>;
+            auto group = std::make_shared<webgpu::ShaderGroup<ShaderID>>(programParameters);
+            if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
+                assert(!"duplicate shader group");
+                throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
+            }
+        }(),
+        ...);
 }
 
 } // namespace
@@ -87,39 +88,37 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
     // Register all shader types - even if headers don't exist yet, fallback implementation will be used
     // As WebGPU shader headers are created, they will automatically be picked up
-    registerTypes<
-        shaders::BuiltIn::BackgroundShader,
-        shaders::BuiltIn::BackgroundPatternShader,
-        shaders::BuiltIn::CircleShader,
-        shaders::BuiltIn::ClippingMaskProgram,
-        shaders::BuiltIn::CollisionBoxShader,
-        shaders::BuiltIn::CollisionCircleShader,
-        shaders::BuiltIn::CustomGeometryShader,
-        shaders::BuiltIn::CustomSymbolIconShader,
-        shaders::BuiltIn::DebugShader,
-        shaders::BuiltIn::FillShader,
-        shaders::BuiltIn::FillOutlineShader,
-        shaders::BuiltIn::FillPatternShader,
-        shaders::BuiltIn::FillOutlinePatternShader,
-        shaders::BuiltIn::FillOutlineTriangulatedShader,
-        shaders::BuiltIn::FillExtrusionShader,
-        shaders::BuiltIn::FillExtrusionPatternShader,
-        shaders::BuiltIn::HeatmapShader,
-        shaders::BuiltIn::HeatmapTextureShader,
-        shaders::BuiltIn::HillshadeShader,
-        shaders::BuiltIn::HillshadePrepareShader,
-        shaders::BuiltIn::LineShader,
-        shaders::BuiltIn::LineGradientShader,
-        shaders::BuiltIn::LinePatternShader,
-        shaders::BuiltIn::LineSDFShader,
-        shaders::BuiltIn::LocationIndicatorShader,
-        shaders::BuiltIn::LocationIndicatorTexturedShader,
-        shaders::BuiltIn::RasterShader,
-        shaders::BuiltIn::SymbolIconShader,
-        shaders::BuiltIn::SymbolSDFShader,
-        shaders::BuiltIn::SymbolTextAndIconShader,
-        shaders::BuiltIn::WideVectorShader
-    >(registry, parameters);
+    registerTypes<shaders::BuiltIn::BackgroundShader,
+                  shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::CircleShader,
+                  shaders::BuiltIn::ClippingMaskProgram,
+                  shaders::BuiltIn::CollisionBoxShader,
+                  shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomGeometryShader,
+                  shaders::BuiltIn::CustomSymbolIconShader,
+                  shaders::BuiltIn::DebugShader,
+                  shaders::BuiltIn::FillShader,
+                  shaders::BuiltIn::FillOutlineShader,
+                  shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::FillOutlinePatternShader,
+                  shaders::BuiltIn::FillOutlineTriangulatedShader,
+                  shaders::BuiltIn::FillExtrusionShader,
+                  shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::HeatmapShader,
+                  shaders::BuiltIn::HeatmapTextureShader,
+                  shaders::BuiltIn::HillshadeShader,
+                  shaders::BuiltIn::HillshadePrepareShader,
+                  shaders::BuiltIn::LineShader,
+                  shaders::BuiltIn::LineGradientShader,
+                  shaders::BuiltIn::LinePatternShader,
+                  shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LocationIndicatorShader,
+                  shaders::BuiltIn::LocationIndicatorTexturedShader,
+                  shaders::BuiltIn::RasterShader,
+                  shaders::BuiltIn::SymbolIconShader,
+                  shaders::BuiltIn::SymbolSDFShader,
+                  shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::WideVectorShader>(registry, parameters);
 }
 
 void RendererBackend::setSurface(void* nativeWindow) {

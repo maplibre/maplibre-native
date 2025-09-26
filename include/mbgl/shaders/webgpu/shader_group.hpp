@@ -58,8 +58,7 @@ inline std::string getDirectiveArgument(const std::string& line) {
     return line.substr(pos, end == std::string::npos ? std::string::npos : end - pos);
 }
 
-inline std::string preprocessWGSL(const std::string& source,
-                                  const std::unordered_map<std::string, bool>& defines) {
+inline std::string preprocessWGSL(const std::string& source, const std::unordered_map<std::string, bool>& defines) {
     std::stringstream input(source);
     std::string line;
     std::string output;

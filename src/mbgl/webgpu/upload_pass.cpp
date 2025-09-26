@@ -62,12 +62,10 @@ const gfx::Context& UploadPass::getContext() const {
     return commandEncoder.getContext();
 }
 
-std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(
-    const void* data,
-    std::size_t size,
-    gfx::BufferUsageType /*usage*/,
-    bool persistent) {
-
+std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
+                                                                                  std::size_t size,
+                                                                                  gfx::BufferUsageType /*usage*/,
+                                                                                  bool persistent) {
     auto& context = static_cast<Context&>(getContext());
     BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, /*isIndexBuffer=*/false, persistent);
 
@@ -78,27 +76,21 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     return std::make_unique<VertexBufferResource>(std::move(buffer));
 }
 
-void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, 
-                                           const void* data, 
-                                           std::size_t size) {
+void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
     auto& buffer = static_cast<VertexBufferResource&>(resource);
     buffer.update(data, size);
 }
 
-std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
-    const void* data,
-    std::size_t size,
-    gfx::BufferUsageType /*usage*/,
-    bool persistent) {
-
+std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
+                                                                                std::size_t size,
+                                                                                gfx::BufferUsageType /*usage*/,
+                                                                                bool persistent) {
     auto& context = static_cast<Context&>(getContext());
     BufferResource buffer(context, data, size, WGPUBufferUsage_Index, /*isIndexBuffer=*/true, persistent);
     return std::make_unique<IndexBufferResource>(std::move(buffer));
 }
 
-void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, 
-                                          const void* data, 
-                                          std::size_t size) {
+void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
     auto& buffer = static_cast<IndexBufferResource&>(resource);
     buffer.update(data, size);
 }
@@ -151,7 +143,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::BufferUsageType usage,
     const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& vertexBuffers) {
-
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
@@ -195,11 +186,10 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             }
 
             // Create vertex buffer resource for the dummy data
-            auto dummyBuffer = createVertexBufferResource(
-                dummyData.data(),
-                bufferSize,
-                usage,
-                /*persistent=*/false);
+            auto dummyBuffer = createVertexBufferResource(dummyData.data(),
+                                                          bufferSize,
+                                                          usage,
+                                                          /*persistent=*/false);
 
             bindings[index] = {
                 /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},

@@ -44,7 +44,7 @@ public:
      * Obtain a depth/stencil texture view for the render pass if the resource
      * manages one. Returning `nullptr` indicates that the backend-provided
      * depth/stencil view (if any) should be used instead.
-    */
+     */
     virtual WGPUTextureView getDepthStencilTextureView() { return nullptr; }
 
     virtual std::optional<wgpu::TextureFormat> getDepthStencilTextureFormat() const { return std::nullopt; }

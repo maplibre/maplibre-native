@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::WebGPU>
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
+
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(4) position: vec3<f32>,
@@ -40,7 +40,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) uv: vec2<f32>,

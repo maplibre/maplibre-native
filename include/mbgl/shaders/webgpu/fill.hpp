@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
-    
+
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,
@@ -91,7 +91,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr const char* fragment = R"(
 struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -136,7 +136,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
-    
+
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,
@@ -231,7 +231,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr const char* fragment = R"(
 struct FillOutlineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -775,7 +775,7 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
-    
+
     static constexpr const char* vertex = R"(
 const SCALE: f32 = 0.015873016;
 
@@ -863,7 +863,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr const char* fragment = R"(
 struct FragmentInput {
     @location(0) normal: vec2<f32>,

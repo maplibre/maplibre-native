@@ -18,15 +18,15 @@ const std::array<TextureInfo, 0> LocationIndicatorShaderSource::textures = {};
 //
 // Location indicator textured
 
-using LocationIndicatorTexturedShaderSource = ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::WebGPU>;
+using LocationIndicatorTexturedShaderSource =
+    ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> LocationIndicatorTexturedShaderSource::attributes = {
     AttributeInfo{5, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute},
     AttributeInfo{6, gfx::AttributeDataType::Float2, idLocationIndicatorTexVertexAttribute},
 };
 const std::array<TextureInfo, 1> LocationIndicatorTexturedShaderSource::textures = {
-    TextureInfo{0, idLocationIndicatorTexture}
-};
+    TextureInfo{0, idLocationIndicatorTexture}};
 
 } // namespace shaders
 } // namespace mbgl

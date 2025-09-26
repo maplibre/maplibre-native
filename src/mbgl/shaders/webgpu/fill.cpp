@@ -40,9 +40,7 @@ const std::array<AttributeInfo, 4> FillPatternShaderSource::attributes = {
     AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
 };
-const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
-    TextureInfo{0, idFillImageTexture}
-};
+const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {TextureInfo{0, idFillImageTexture}};
 
 //
 // Fill outline pattern
@@ -55,14 +53,13 @@ const std::array<AttributeInfo, 4> FillOutlinePatternShaderSource::attributes = 
     AttributeInfo{6, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
 };
-const std::array<TextureInfo, 1> FillOutlinePatternShaderSource::textures = {
-    TextureInfo{0, idFillImageTexture}
-};
+const std::array<TextureInfo, 1> FillOutlinePatternShaderSource::textures = {TextureInfo{0, idFillImageTexture}};
 
 //
 // Fill outline triangulated
 
-using FillOutlineTriangulatedShaderSource = ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::WebGPU>;
+using FillOutlineTriangulatedShaderSource =
+    ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> FillOutlineTriangulatedShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},

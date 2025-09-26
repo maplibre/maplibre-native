@@ -135,7 +135,10 @@ void Context::clearStencilBuffer(int32_t value) {
     (void)value;
 }
 
-bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const void* data, std::size_t size, bool persistent) {
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
+                                           const void* data,
+                                           std::size_t size,
+                                           bool persistent) {
     if (!ptr) {
         ptr = createUniformBuffer(data, size, persistent);
         return true;
@@ -181,7 +184,8 @@ void Context::visualizeDepthBuffer([[maybe_unused]] float depthRangeSize) {
 }
 #endif
 
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType type, Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType type,
+                                                                               Size size) {
     (void)type;
     (void)size;
     return std::make_unique<RenderbufferResource>();
@@ -192,11 +196,8 @@ std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
 }
 
 // Buffer creation (aligned with Metal)
-BufferResource Context::createBuffer(const void* data,
-                                    std::size_t size,
-                                    uint32_t usage,
-                                    bool isIndexBuffer,
-                                    bool persistent) const {
+BufferResource Context::createBuffer(
+    const void* data, std::size_t size, uint32_t usage, bool isIndexBuffer, bool persistent) const {
     return BufferResource(const_cast<Context&>(*this), data, size, usage, isIndexBuffer, persistent);
 }
 
@@ -402,17 +403,15 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     return true;
 }
 
-gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
-    gfx::Context&,
-    const gfx::AttributeDataType vertexType,
-    const size_t vertexAttributeIndex,
-    const std::vector<uint8_t>& vertexData,
-    const gfx::VertexAttributeArray& defaults,
-    const gfx::VertexAttributeArray& overrides,
-    gfx::BufferUsageType,
-    const std::optional<std::chrono::duration<double>>&,
-    std::shared_ptr<VertexBufferResource>&) noexcept {
-
+gfx::AttributeBindingArray Context::getOrCreateVertexBindings(gfx::Context&,
+                                                              const gfx::AttributeDataType vertexType,
+                                                              const size_t vertexAttributeIndex,
+                                                              const std::vector<uint8_t>& vertexData,
+                                                              const gfx::VertexAttributeArray& defaults,
+                                                              const gfx::VertexAttributeArray& overrides,
+                                                              gfx::BufferUsageType,
+                                                              const std::optional<std::chrono::duration<double>>&,
+                                                              std::shared_ptr<VertexBufferResource>&) noexcept {
     static_cast<void>(vertexType);
     static_cast<void>(vertexAttributeIndex);
     static_cast<void>(vertexData);
@@ -443,16 +442,13 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
                 // Create GPU buffer for this vertex attribute
                 uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
                 auto bufferResource = std::make_shared<VertexBufferResource>(
-                    createBuffer(sharedRaw->getRawData(), dataSize, usage, false, false)
-                );
+                    createBuffer(sharedRaw->getRawData(), dataSize, usage, false, false));
 
                 // Create attribute binding
-                result[index] = {
-                    /*.attribute = */ {attr.getDataType(), /*offset=*/0},
-                    /*.vertexStride = */ static_cast<uint32_t>(attr.getStride()),
-                    /*.vertexBufferResource = */ bufferResource.get(),
-                    /*.vertexOffset = */ 0
-                };
+                result[index] = {/*.attribute = */ {attr.getDataType(), /*offset=*/0},
+                                 /*.vertexStride = */ static_cast<uint32_t>(attr.getStride()),
+                                 /*.vertexBufferResource = */ bufferResource.get(),
+                                 /*.vertexOffset = */ 0};
             }
         }
     });

@@ -29,13 +29,13 @@ public:
 
     void upload(gfx::UploadPass&);
     void draw(PaintParameters&) const override;
-    
+
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
     void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;
-    
+
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
-    
+
     void setColorMode(const gfx::ColorMode&) override;
 
     void setShader(gfx::ShaderProgramBasePtr) override;
@@ -48,15 +48,13 @@ public:
     void setStencilModeFor3D(const gfx::StencilMode&);
 
     void setVertexAttrId(const size_t);
-    
+
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
-                               std::size_t vertexCount,
-                               gfx::DrawMode,
-                               gfx::IndexVectorBasePtr,
-                               const SegmentBase* segments,
-                               std::size_t segmentCount) override;
-
-
+                                std::size_t vertexCount,
+                                gfx::DrawMode,
+                                gfx::IndexVectorBasePtr,
+                                const SegmentBase* segments,
+                                std::size_t segmentCount) override;
 
     class Impl;
     const std::unique_ptr<Impl> impl;
