@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/renderable.hpp>
-#include <webgpu/webgpu_cpp.h>
+#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 
 #include <cstdlib>
 #include <optional>

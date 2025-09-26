@@ -1,6 +1,6 @@
 // Include Dawn headers first to define WEBGPU_H_
 #include <webgpu/webgpu.h>
-#include <webgpu/webgpu_cpp.h>
+#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
