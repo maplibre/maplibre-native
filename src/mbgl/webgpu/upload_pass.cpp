@@ -103,7 +103,6 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource,
     buffer.update(data, size);
 }
 
-// Metal-like VertexBuffer struct
 struct VertexBuffer : public gfx::VertexBufferBase {
     ~VertexBuffer() override = default;
 
@@ -121,13 +120,10 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
 
-        // If we already have a buffer...
         if (auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer()); rawData && rawData->resource) {
             auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
 
-            // If the already-allocated buffer is large enough, we can re-use it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                // If the source changed, update the buffer contents
                 if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
@@ -135,7 +131,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
                 return rawData->resource;
             }
         }
-        // Otherwise, create a new one
         if (rawBufSize > 0) {
             auto buffer_ = std::make_unique<VertexBuffer>();
             buffer_->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
@@ -160,7 +155,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
-    // For each attribute in the program, with the corresponding default and optional override...
     const auto resolveAttr = [&]([[maybe_unused]] const size_t id, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
