@@ -1548,7 +1548,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
-    include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
+include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
 endif()
 
 target_link_libraries(
@@ -1679,7 +1679,7 @@ if(MLN_WITH_CORE_ONLY)
     return()
 endif()
 
-# include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
+include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
 
 if(MLN_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
@@ -1702,10 +1702,5 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
-
-# Add examples if WebGPU is enabled
-# if(MLN_WITH_WEBGPU)
-#     add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
-# endif()
 
 include(cmake/mbgl-core-deps.cmake)
