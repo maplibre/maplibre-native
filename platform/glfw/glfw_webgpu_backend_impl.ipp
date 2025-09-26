@@ -34,14 +34,18 @@
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_glfw.h>
 
-#include <iostream>
+#include <algorithm>
 #include <cassert>
-#include <thread>
 #include <chrono>
+#include <cctype>
+#include <condition_variable>
+#include <cstdlib>
+#include <optional>
+#include <iostream>
 #include <limits>
 #include <mutex>
 #include <string>
-#include <algorithm>
+#include <thread>
 
 namespace {
 
@@ -57,6 +61,55 @@ void logDeviceLost(const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::Str
                      std::string("Dawn device lost [") +
                          std::to_string(static_cast<int>(reason)) + "] " +
                          (message.data ? std::string(message.data, message.length) : std::string()));
+}
+
+std::optional<WGPUBackendType> desiredBackendFromEnv() {
+    if (const char* env = std::getenv("MLN_WEBGPU_FORCE_BACKEND")) {
+        std::string value(env);
+        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) { return std::tolower(c); });
+        if (value == "vulkan") {
+            return WGPUBackendType_Vulkan;
+        } else if (value == "opengl" || value == "gl" || value == "opengles" || value == "gles") {
+            return WGPUBackendType_OpenGL;
+        } else if (value == "metal") {
+            return WGPUBackendType_Metal;
+        } else if (value == "d3d11") {
+            return WGPUBackendType_D3D11;
+        } else if (value == "d3d12") {
+            return WGPUBackendType_D3D12;
+        }
+    }
+    return std::nullopt;
+}
+
+const char* backendTypeToString(WGPUBackendType type) {
+    switch (type) {
+        case WGPUBackendType_Null:
+            return "Null";
+        case WGPUBackendType_WebGPU:
+            return "WebGPU";
+        case WGPUBackendType_D3D11:
+            return "D3D11";
+        case WGPUBackendType_D3D12:
+            return "D3D12";
+        case WGPUBackendType_Metal:
+            return "Metal";
+        case WGPUBackendType_Vulkan:
+            return "Vulkan";
+        case WGPUBackendType_OpenGL:
+            return "OpenGL";
+        case WGPUBackendType_OpenGLES:
+            return "OpenGLES";
+        default:
+            return "Unknown";
+    }
+}
+
+bool backendMatches(WGPUBackendType candidate, WGPUBackendType desired) {
+    if (desired == WGPUBackendType_OpenGL) {
+        return candidate == WGPUBackendType_OpenGL || candidate == WGPUBackendType_OpenGLES;
+    }
+    return candidate == desired;
 }
 
 #ifdef __APPLE__
@@ -197,7 +250,46 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     }
 
 
-    dawn::native::Adapter& selectedAdapter = adapters[0];
+    std::size_t selectedIndex = 0;
+    if (auto forcedBackend = desiredBackendFromEnv()) {
+        bool matched = false;
+        for (std::size_t i = 0; i < adapters.size(); ++i) {
+            WGPUAdapterInfo info = WGPU_ADAPTER_INFO_INIT;
+            if (wgpuAdapterGetInfo(adapters[i].Get(), &info) != WGPUStatus_Success) {
+                continue;
+            }
+            const auto candidate = info.backendType;
+            const bool isMatch = backendMatches(candidate, *forcedBackend);
+            wgpuAdapterInfoFreeMembers(info);
+            if (isMatch) {
+                selectedIndex = i;
+                matched = true;
+                mbgl::Log::Info(mbgl::Event::Render,
+                                std::string("WebGPU: Forcing adapter backend to ") +
+                                    backendTypeToString(candidate));
+                break;
+            }
+        }
+        if (!matched) {
+            mbgl::Log::Warning(mbgl::Event::Render,
+                               "WebGPU: Requested backend not available, using default adapter");
+        }
+    }
+
+    dawn::native::Adapter& selectedAdapter = adapters[selectedIndex];
+
+    {
+        WGPUAdapterInfo info = WGPU_ADAPTER_INFO_INIT;
+        if (wgpuAdapterGetInfo(selectedAdapter.Get(), &info) == WGPUStatus_Success) {
+            mbgl::Log::Info(mbgl::Event::Render,
+                            std::string("WebGPU: Selected adapter backend = ") +
+                                backendTypeToString(info.backendType) +
+                                ", name = " +
+                                (info.device.data ? std::string(info.device.data, info.device.length)
+                                                  : std::string("<unknown>")));
+            wgpuAdapterInfoFreeMembers(info);
+        }
+    }
 
     std::vector<wgpu::FeatureName> supportedFeatures;
     WGPUSupportedFeatures features = WGPU_SUPPORTED_FEATURES_INIT;
