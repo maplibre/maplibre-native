@@ -70,4 +70,9 @@ if(MLN_WITH_WEBGPU)
     else()
         target_compile_definitions(mbgl-core PUBLIC DAWN_ENABLE_BACKEND_VULKAN=1)
     endif()
+
+    # Dawn's generated C++ headers rely on reinterpret casts that trigger
+    # -Wstrict-aliasing diagnostics under GCC; silence these when the Dawn
+    # backend is enabled so the build doesn't fail with -Werror.
+    target_compile_options(mbgl-core PRIVATE -Wno-strict-aliasing -Wno-error=strict-aliasing)
 endif()
