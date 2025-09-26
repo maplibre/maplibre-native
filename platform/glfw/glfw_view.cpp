@@ -249,12 +249,13 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwSetErrorCallback(glfwError);
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
-#ifdef __linux__
-    // Force X11 platform for WebGPU compatibility (Dawn doesn't support Wayland yet)
-    // For now, always use X11 when WebGPU might be used
-    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-#endif
+    #if defined(MLN_RENDER_BACKEND_WEBGPU)
+    #ifdef __linux__
+        // Force X11 platform for WebGPU compatibility (Dawn doesn't support Wayland yet)
+        // For now, always use X11 when WebGPU might be used
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+    #endif
+    #endif
 
     if (!glfwInit()) {
         exit(1);
@@ -302,6 +303,7 @@ GLFWView::GLFWView(bool fullscreen_,
     window = glfwCreateWindow(width, height, "MapLibre Native", monitor, nullptr);
     if (!window) {
         glfwTerminate();
+        mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize window");
         exit(1);
     }
 
@@ -313,7 +315,7 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwSetScrollCallback(window, onScroll);
     glfwSetKeyCallback(window, onKey);
     glfwSetWindowFocusCallback(window, onWindowFocus);
-#if defined(__APPLE__) && (defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_WEBGPU))
+#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
     glfwSetWindowRefreshCallback(window, onWindowRefresh);
 #endif
 
@@ -638,16 +640,21 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                                    .write(view->testDirectory);
 
                 if (success) {
+                    mbgl::Log::Info(mbgl::Event::General, "Render test created!");
                 } else {
-
+                    mbgl::Log::Error(mbgl::Event::General,
+                                     "Fail to create render test! Base directory does not "
+                                     "exist or permission denied.");
                 }
             } break;
             case GLFW_KEY_U: {
                 auto bounds = view->map->getBounds();
                 if (bounds.minPitch == mbgl::util::rad2deg(mbgl::util::PITCH_MIN) &&
                     bounds.maxPitch == mbgl::util::rad2deg(mbgl::util::PITCH_MAX)) {
+                    mbgl::Log::Info(mbgl::Event::General, "Limiting pitch bounds to [30, 40] degrees");
                     view->map->setBounds(mbgl::BoundOptions().withMinPitch(30).withMaxPitch(40));
                 } else {
+                    mbgl::Log::Info(mbgl::Event::General, "Resetting pitch bounds to [0, 60] degrees");
                     view->map->setBounds(mbgl::BoundOptions().withMinPitch(0).withMaxPitch(60));
                 }
             } break;
@@ -981,10 +988,11 @@ void GLFWView::makeSnapshot(bool withOverlay) {
                 std::ostringstream oss;
                 oss << "Made snapshot './snapshot.png' with size w:" << image.size.width << "px h:" << image.size.height
                     << "px";
+                mbgl::Log::Info(mbgl::Event::General, oss.str());
                 std::ofstream file("./snapshot.png");
                 file << mbgl::encodePNG(image);
             } else {
-
+                mbgl::Log::Error(mbgl::Event::General, "Failed to make a snapshot!");
             }
         });
     };
@@ -1056,11 +1064,14 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     // which triggers a rerender with the new framebuffer dimensions.
     view->invalidate();
 
-#if defined(__APPLE__) && (defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_WEBGPU))
+#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
     // Render continuously while resizing
     // Untested elsewhere
     view->render();
-    // Note: swap is now handled inside render() for all backends
+
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+    glfwSwapBuffers(window);
+#endif
 #endif
 }
 
@@ -1168,13 +1179,15 @@ void GLFWView::onWindowFocus(GLFWwindow *window, int focused) {
     }
 }
 
-#if defined(__APPLE__) && (defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_WEBGPU))
+#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
 void GLFWView::onWindowRefresh(GLFWwindow *window) {
     // Untested elsewhere
     if (auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window))) {
         view->invalidate();
         view->render();
-        // Note: swap is now handled inside render() for all backends
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+        glfwSwapBuffers(window);
+#endif
     }
 }
 #endif
@@ -1196,27 +1209,11 @@ void GLFWView::render() {
 
         mbgl::gfx::BackendScope scope{backend->getRendererBackend()};
 
-#if defined(__APPLE__)
-        AutoreleasePool pool;
-#endif
         rendererFrontend->render();
 
         if (freeCameraDemoPhase >= 0.0) {
             updateFreeCameraDemo();
         }
-
-        // Swap buffers for the appropriate backend
-#if MLN_RENDER_BACKEND_WEBGPU
-        // For WebGPU backend, call swap() which submits command buffer and presents
-        // We can safely static_cast here since we know the backend type from compilation
-        if (backend) {
-            auto* webgpuBackend = static_cast<GLFWWebGPUBackend*>(backend.get());
-            webgpuBackend->swap();
-        }
-#else
-        // OpenGL or other backends
-        glfwSwapBuffers(window);
-#endif
 
         report(static_cast<float>(1000 * (glfwGetTime() - started)));
         if (benchmark) {
@@ -1261,28 +1258,7 @@ void GLFWView::run() {
     }
     frameTick.start(mbgl::Duration::zero(), tickDuration, callback);
 #if defined(__APPLE__)
-    int frameCount = 0;
-    while (!glfwWindowShouldClose(window)) {
-        // Poll GLFW events
-        glfwPollEvents();
-        
-        // Check if window should close
-        if (glfwWindowShouldClose(window)) {
-            runLoop.stop();
-            break;
-        }
-        
-        // Render directly instead of through callback to avoid double polling
-        render();
-        
-        // Process RunLoop for any timer events
-        runLoop.runOnce();
-
-        frameCount++;
-
-        if (frameCount % 60 == 0) {
-        }
-    }
+    while (!glfwWindowShouldClose(window)) runLoop.run();
 #else
     runLoop.run();
 #endif
@@ -1314,6 +1290,7 @@ void GLFWView::report(float duration) {
         std::ostringstream oss;
         oss.precision(2);
         oss << "Frame time: " << std::fixed << frameTime << "ms (" << 1000 / frameTime << "fps)";
+        mbgl::Log::Info(mbgl::Event::Render, oss.str());
 
         frames = 0;
         frameTime = 0;
