@@ -64,7 +64,7 @@ void logDeviceLost(const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::Str
 }
 
 std::optional<WGPUBackendType> desiredBackendFromEnv() {
-    if (const char* env = std::getenv("MLN_WEBGPU_FORCE_BACKEND")) {
+    if (const char* env = std::getenv("MLN_WEBGPU_BACKEND_TARGET")) {
         std::string value(env);
         std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) { return std::tolower(c); });
         if (value == "vulkan") {
@@ -251,7 +251,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
 
     std::size_t selectedIndex = 0;
-    if (auto forcedBackend = desiredBackendFromEnv()) {
+    if (auto targettedBackend = desiredBackendFromEnv()) {
         bool matched = false;
         for (std::size_t i = 0; i < adapters.size(); ++i) {
             WGPUAdapterInfo info = WGPU_ADAPTER_INFO_INIT;
@@ -259,7 +259,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
                 continue;
             }
             const auto candidate = info.backendType;
-            const bool isMatch = backendMatches(candidate, *forcedBackend);
+            const bool isMatch = backendMatches(candidate, *targettedBackend);
             wgpuAdapterInfoFreeMembers(info);
             if (isMatch) {
                 selectedIndex = i;
