@@ -80,18 +80,15 @@ public:
         WGPUShaderStage visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
     };
 
-    // Metal-like constructor: takes pre-compiled shader modules
     ShaderProgram(std::string name,
                   RendererBackend& backend,
                   WGPUShaderModule vertexModule,
                   WGPUShaderModule fragmentModule);
 
-    // Minimal constructor for Context::createShader compatibility
     ShaderProgram(Context& context,
                   const std::string& vertexSource,
                   const std::string& fragmentSource);
 
-    // Template constructor for shader_group compatibility (required by shader definitions)
     template<size_t N, size_t M>
     ShaderProgram(Context& context,
                   const std::string& vertexSource,
@@ -100,15 +97,15 @@ public:
                   const std::array<shaders::TextureInfo, M>& texts,
                   const std::string& name = "ShaderProgram")
         : ShaderProgram(context, vertexSource, fragmentSource) {
-        // Update the shader name if provided
-        if (name != "ShaderProgram") {
+
+            if (name != "ShaderProgram") {
             shaderName = name;
         }
-        // Initialize attributes like Metal does
+
         for (const auto& attr : attrs) {
             initAttribute(attr);
         }
-        // Initialize textures like Metal does
+
         for (const auto& tex : texts) {
             initTexture(tex);
         }
@@ -116,7 +113,7 @@ public:
 
     ~ShaderProgram() override;
 
-    // Metal-like lazy pipeline creation with caching
+
     WGPURenderPipeline getRenderPipeline(const gfx::Renderable& renderable,
                                         const WGPUVertexBufferLayout* vertexLayouts,
                                         uint32_t vertexLayoutCount,
@@ -132,13 +129,11 @@ public:
     const std::vector<WGPUBindGroupLayout>& getBindGroupLayouts() const { return bindGroupLayouts; }
     const std::vector<uint32_t>& getBindGroupOrder() const { return bindGroupOrder; }
 
-    // gfx::Shader interface (required for is_shader_v trait)
     const std::string_view typeName() const noexcept override { return Name; }
     std::optional<size_t> getSamplerLocation(const size_t id) const override;
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
 
-    // Metal-like attribute/texture initialization
     void initAttribute(const shaders::AttributeInfo& info);
     void initInstanceAttribute(const shaders::AttributeInfo& info);
     void initTexture(const shaders::TextureInfo& info);
@@ -159,17 +154,14 @@ protected:
     std::string shaderName;
     RendererBackend& backend;
 
-    // Metal-like resource management
     WGPUShaderModule vertexShaderModule = nullptr;
     WGPUShaderModule fragmentShaderModule = nullptr;
     std::vector<WGPUBindGroupLayout> bindGroupLayouts;
     std::vector<uint32_t> bindGroupOrder;
     WGPUPipelineLayout pipelineLayout = nullptr;
 
-    // Metal-like pipeline caching
     mutable std::unordered_map<std::size_t, WGPURenderPipeline> renderPipelineCache;
 
-    // Metal-like attribute/texture management
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
