@@ -1,8 +1,5 @@
 #include "glfw_view.hpp"
 #include "glfw_backend.hpp"
-#if defined(MLN_RENDER_BACKEND_WEBGPU)
-#include "glfw_webgpu_backend.hpp"
-#endif
 #include "glfw_renderer_frontend.hpp"
 #include "ny_route.hpp"
 #include "test_writer.hpp"
@@ -46,8 +43,6 @@
 #include <mapbox/geometry.hpp>
 #include <mapbox/geojson.hpp>
 
-#include <chrono>
-
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -71,33 +66,7 @@
 #include <sstream>
 #include <numbers>
 
-#if defined(__APPLE__)
-#include <objc/objc.h>
-#include <objc/runtime.h>
-#undef YES
-#undef NO
-extern "C" void* objc_autoreleasePoolPush(void);
-extern "C" void objc_autoreleasePoolPop(void* pool);
-#endif
-
 using namespace std::numbers;
-
-#if defined(__APPLE__)
-namespace {
-class AutoreleasePool {
-public:
-    AutoreleasePool()
-        : token(objc_autoreleasePoolPush()) {}
-
-    ~AutoreleasePool() {
-        objc_autoreleasePoolPop(token);
-    }
-
-private:
-    void* token;
-};
-} // namespace
-#endif
 
 #ifdef ENABLE_LOCATION_INDICATOR
 namespace {
@@ -167,20 +136,24 @@ void cycleTileLodMode(mbgl::Map &map) {
             map.setTileLodMinRadius(defaultRadius);
             map.setTileLodScale(defaultScale);
             map.setTileLodPitchThreshold(defaultTilePitchThreshold);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
             break;
         case TileLodMode::NoLod:
             // When LOD is off we set a maximum PitchThreshold
             map.setTileLodPitchThreshold(std::numbers::pi);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: disabled");
             break;
         case TileLodMode::Reduced:
             map.setTileLodMinRadius(2);
             map.setTileLodScale(1.5);
             map.setTileLodPitchThreshold(std::numbers::pi / 4);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: reduced");
             break;
         case TileLodMode::Aggressive:
             map.setTileLodMinRadius(1);
             map.setTileLodScale(2);
             map.setTileLodPitchThreshold(0);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: aggressive");
             break;
     }
     map.triggerRepaint();
@@ -191,6 +164,7 @@ void tileLodZoomShift(mbgl::Map &map, bool positive) {
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
     shift = map.getTileLodZoomShift() + shift;
     shift = mbgl::util::clamp(shift, -2.5, 2.5);
+    mbgl::Log::Info(mbgl::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
     map.setTileLodZoomShift(shift);
     map.triggerRepaint();
 }
@@ -230,9 +204,8 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
 }
 } // namespace
 
-void glfwError(int error, const char* description) {
-    static_cast<void>(error);
-    static_cast<void>(description);
+void glfwError(int error, const char *description) {
+    mbgl::Log::Error(mbgl::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,
@@ -258,6 +231,7 @@ GLFWView::GLFWView(bool fullscreen_,
     #endif
 
     if (!glfwInit()) {
+        mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize glfw");
         exit(1);
     }
 
