@@ -17,7 +17,6 @@ if (MLN_WITH_VULKAN)
   math(EXPR backend_count "${backend_count} + 1")
 endif()
 
-message(${backend_count})
 if (backend_count EQUAL 0)
   message(FATAL_ERROR
     "You need to set a rendering backend. "
