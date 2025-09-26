@@ -1349,7 +1349,6 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/symbol.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/widevector.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_impl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
