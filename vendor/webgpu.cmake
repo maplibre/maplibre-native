@@ -1,7 +1,8 @@
 # WebGPU implementation configuration
 # This file handles the integration of either Dawn or wgpu
 
-option(MLN_WEBGPU_IMPL "WebGPU backend implementation (dawn or wgpu)" "dawn")
+set(MLN_WEBGPU_IMPL "dawn" CACHE STRING "WebGPU backend implementation (dawn or wgpu)")
+set_property(CACHE MLN_WEBGPU_IMPL PROPERTY STRINGS dawn wgpu stub)
 
 if(MLN_WITH_WEBGPU)
     if(MLN_WEBGPU_IMPL STREQUAL "dawn")
