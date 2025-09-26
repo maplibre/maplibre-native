@@ -21,14 +21,7 @@ option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CORE_INCLUDE_DEPS "Include depdendencies in static build of core" OFF)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 
-if (MLN_LEGACY_RENDERER)
-    message(FATAL "The legacy renderer is no longer supported")
-endif()
-
-if (MLN_DRAWABLE_RENDERER)
-    message(FATAL "Do not pass MLN_DRAWABLE_RENDERER, the drawable renderer is now the default")
-endif()
-
+include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
 
 if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
