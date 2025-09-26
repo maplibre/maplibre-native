@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
-    
+
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(5) position: vec2<i32>,
@@ -55,7 +55,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) tex_coord: vec2<f32>,

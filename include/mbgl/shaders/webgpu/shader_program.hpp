@@ -85,11 +85,9 @@ public:
                   WGPUShaderModule vertexModule,
                   WGPUShaderModule fragmentModule);
 
-    ShaderProgram(Context& context,
-                  const std::string& vertexSource,
-                  const std::string& fragmentSource);
+    ShaderProgram(Context& context, const std::string& vertexSource, const std::string& fragmentSource);
 
-    template<size_t N, size_t M>
+    template <size_t N, size_t M>
     ShaderProgram(Context& context,
                   const std::string& vertexSource,
                   const std::string& fragmentSource,
@@ -97,8 +95,7 @@ public:
                   const std::array<shaders::TextureInfo, M>& texts,
                   const std::string& name = "ShaderProgram")
         : ShaderProgram(context, vertexSource, fragmentSource) {
-
-            if (name != "ShaderProgram") {
+        if (name != "ShaderProgram") {
             shaderName = name;
         }
 
@@ -113,15 +110,14 @@ public:
 
     ~ShaderProgram() override;
 
-
     WGPURenderPipeline getRenderPipeline(const gfx::Renderable& renderable,
-                                        const WGPUVertexBufferLayout* vertexLayouts,
-                                        uint32_t vertexLayoutCount,
-                                        const gfx::ColorMode& colorMode,
-                                        const gfx::DepthMode& depthMode,
-                                        const gfx::StencilMode& stencilMode,
-                                        gfx::DrawModeType drawModeType,
-                                        const std::optional<std::size_t> reuseHash = std::nullopt);
+                                         const WGPUVertexBufferLayout* vertexLayouts,
+                                         uint32_t vertexLayoutCount,
+                                         const gfx::ColorMode& colorMode,
+                                         const gfx::DepthMode& depthMode,
+                                         const gfx::StencilMode& stencilMode,
+                                         gfx::DrawModeType drawModeType,
+                                         const std::optional<std::size_t> reuseHash = std::nullopt);
 
     const std::vector<BindingInfo>& getBindingInfos() const { return bindingInfos; }
     const std::vector<BindingInfo>& getBindingInfosForGroup(uint32_t group) const;
@@ -138,15 +134,14 @@ public:
     void initInstanceAttribute(const shaders::AttributeInfo& info);
     void initTexture(const shaders::TextureInfo& info);
 
-
 protected:
     void createPipelineLayout(const std::string& vertexSource, const std::string& fragmentSource);
     WGPURenderPipeline createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
-                                     uint32_t vertexLayoutCount,
-                                     const gfx::ColorMode& colorMode,
-                                     const gfx::DepthMode& depthMode,
-                                     const gfx::StencilMode& stencilMode,
-                                     gfx::DrawModeType drawModeType);
+                                      uint32_t vertexLayoutCount,
+                                      const gfx::ColorMode& colorMode,
+                                      const gfx::DepthMode& depthMode,
+                                      const gfx::StencilMode& stencilMode,
+                                      gfx::DrawModeType drawModeType);
 
     void analyzeShaderBindings(const std::string& source, WGPUShaderStage stage);
     void rebuildBindGroupLayouts();

@@ -93,7 +93,8 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU> {
     static const std::array<TextureInfo, 1> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
-    static constexpr auto vertex = R"()" R"(
+    static constexpr auto vertex = R"()"
+                                   R"(
 struct VertexInput {
     @location(3) pos_offset: vec4<i32>,
     @location(4) data: vec4<u32>,
@@ -246,7 +247,8 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::WebGPU> {
     static const std::array<TextureInfo, 1> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
-    static constexpr auto vertex = R"()" R"(
+    static constexpr auto vertex = R"()"
+                                   R"(
 struct VertexInput {
     @location(3) pos_offset: vec4<i32>,
     @location(4) data: vec4<u32>,
@@ -477,7 +479,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU
     static const std::array<TextureInfo, 2> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
-    static constexpr auto vertex = R"()" R"(
+    static constexpr auto vertex = R"()"
+                                   R"(
 struct VertexInput {
     @location(3) pos_offset: vec4<i32>,
     @location(4) data: vec4<u32>,

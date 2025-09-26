@@ -30,8 +30,8 @@ UploadCopyData prepareCopyData(const void* pixelData, const mbgl::Size& regionSi
     copyData.dataPtr = pixelData;
 
     if (regionSize.height > 1 && (rowStride % bytesPerRowAlignment) != 0) {
-        const size_t alignedRowStride =
-            ((rowStride + bytesPerRowAlignment - 1) / bytesPerRowAlignment) * bytesPerRowAlignment;
+        const size_t alignedRowStride = ((rowStride + bytesPerRowAlignment - 1) / bytesPerRowAlignment) *
+                                        bytesPerRowAlignment;
         copyData.bytesPerRow = static_cast<uint32_t>(alignedRowStride);
         copyData.staging.resize(alignedRowStride * regionSize.height, 0u);
 
@@ -55,8 +55,7 @@ namespace mbgl {
 namespace webgpu {
 
 Texture2D::Texture2D(Context& context_)
-    : context(context_) {
-}
+    : context(context_) {}
 
 Texture2D::~Texture2D() {
     if (textureView) {
@@ -79,26 +78,25 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
         safeState.maxAnisotropy = 1;
     }
     samplerState = safeState;
-    
+
     // Release old sampler if it exists
     if (sampler) {
         wgpuSamplerRelease(sampler);
         sampler = nullptr;
     }
-    
+
     // Create new sampler with updated configuration
     WGPUSamplerDescriptor samplerDesc = {};
     WGPUStringView samplerLabel = {"Texture Sampler", strlen("Texture Sampler")};
     samplerDesc.label = samplerLabel;
-    
+
     // Map filter modes
-    samplerDesc.minFilter = (samplerState.filter == gfx::TextureFilterType::Linear) 
-        ? WGPUFilterMode_Linear : WGPUFilterMode_Nearest;
-    samplerDesc.magFilter = (samplerState.filter == gfx::TextureFilterType::Linear)
-        ? WGPUFilterMode_Linear : WGPUFilterMode_Nearest;
-    samplerDesc.mipmapFilter = samplerState.mipmapped
-        ? WGPUMipmapFilterMode_Linear : WGPUMipmapFilterMode_Nearest;
-    
+    samplerDesc.minFilter = (samplerState.filter == gfx::TextureFilterType::Linear) ? WGPUFilterMode_Linear
+                                                                                    : WGPUFilterMode_Nearest;
+    samplerDesc.magFilter = (samplerState.filter == gfx::TextureFilterType::Linear) ? WGPUFilterMode_Linear
+                                                                                    : WGPUFilterMode_Nearest;
+    samplerDesc.mipmapFilter = samplerState.mipmapped ? WGPUMipmapFilterMode_Linear : WGPUMipmapFilterMode_Nearest;
+
     // Map wrap modes
     auto mapWrapMode = [](gfx::TextureWrapType wrap) -> WGPUAddressMode {
         switch (wrap) {
@@ -110,23 +108,24 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
                 return WGPUAddressMode_ClampToEdge;
         }
     };
-    
+
     samplerDesc.addressModeU = mapWrapMode(samplerState.wrapU);
     samplerDesc.addressModeV = mapWrapMode(samplerState.wrapV);
     samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
     samplerDesc.maxAnisotropy = static_cast<uint16_t>(samplerState.maxAnisotropy);
-    
+
     // Create the sampler
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (device) {
         sampler = wgpuDeviceCreateSampler(device, &samplerDesc);
     }
-    
+
     return *this;
 }
 
-gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::TextureChannelDataType channelType_) noexcept {
+gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
+                                     gfx::TextureChannelDataType channelType_) noexcept {
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     return *this;
@@ -157,10 +156,6 @@ Texture2D& Texture2D::setUsage(uint32_t usageFlags_) noexcept {
     usageFlags = usageFlags_;
     return *this;
 }
-
-
-
-
 
 size_t Texture2D::getDataSize() const noexcept {
     return size.width * size.height * getPixelStride();
@@ -217,13 +212,13 @@ void Texture2D::create() noexcept {
         wgpuTextureRelease(texture);
         texture = nullptr;
     }
-    
+
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device || size.width == 0 || size.height == 0) {
         return;
     }
-    
+
     // Determine WebGPU texture format based on pixel format
     WGPUTextureFormat format = WGPUTextureFormat_Undefined;
     uint32_t usage = usageFlags;
@@ -293,16 +288,12 @@ void Texture2D::create() noexcept {
     }
 
     nativeFormat = format;
-    
+
     // Create texture descriptor
     WGPUTextureDescriptor textureDesc = {};
     WGPUStringView textureLabel = {"Texture2D", strlen("Texture2D")};
     textureDesc.label = textureLabel;
-    textureDesc.size = {
-        static_cast<uint32_t>(size.width),
-        static_cast<uint32_t>(size.height),
-        1
-    };
+    textureDesc.size = {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), 1};
     textureDesc.mipLevelCount = 1;
     textureDesc.sampleCount = 1;
     textureDesc.dimension = WGPUTextureDimension_2D;
@@ -312,10 +303,10 @@ void Texture2D::create() noexcept {
         usage |= WGPUTextureUsage_RenderAttachment;
     }
     textureDesc.usage = usage;
-    
+
     // Create the texture
     texture = wgpuDeviceCreateTexture(device, &textureDesc);
-    
+
     // Create texture view
     if (texture) {
         WGPUTextureViewDescriptor viewDesc = {};
@@ -328,10 +319,10 @@ void Texture2D::create() noexcept {
         viewDesc.baseArrayLayer = 0;
         viewDesc.arrayLayerCount = 1;
         viewDesc.aspect = WGPUTextureAspect_All;
-        
+
         textureView = wgpuTextureCreateView(texture, &viewDesc);
     }
-    
+
     // Create default sampler if not already created
     if (!sampler) {
         setSamplerConfiguration(samplerState);
@@ -344,23 +335,23 @@ void Texture2D::setSizeChangedCallback(std::function<void(const Size&)> callback
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     size = size_;
-    
+
     // Create texture if it doesn't exist
     if (!texture) {
         create();
     }
-    
+
     if (!texture || !pixelData) {
         return;
     }
-    
+
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     if (!device || !queue) {
         return;
     }
-    
+
     const auto copyData = prepareCopyData(pixelData, size, getPixelStride());
     if (!copyData.dataPtr) {
         return;
@@ -377,18 +368,9 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     dataLayout.bytesPerRow = copyData.bytesPerRow;
     dataLayout.rowsPerImage = static_cast<uint32_t>(size.height);
 
-    WGPUExtent3D writeSize = {
-        static_cast<uint32_t>(size.width),
-        static_cast<uint32_t>(size.height),
-        1
-    };
+    WGPUExtent3D writeSize = {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), 1};
 
-    wgpuQueueWriteTexture(queue,
-                          &destination,
-                          copyData.dataPtr,
-                          copyData.dataSize,
-                          &dataLayout,
-                          &writeSize);
+    wgpuQueueWriteTexture(queue, &destination, copyData.dataPtr, copyData.dataSize, &dataLayout, &writeSize);
 }
 
 void Texture2D::upload() noexcept {
@@ -398,17 +380,20 @@ void Texture2D::upload() noexcept {
     }
 }
 
-void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, uint16_t xOffset, uint16_t yOffset) noexcept {
+void Texture2D::uploadSubRegion(const void* pixelData,
+                                const Size& regionSize,
+                                uint16_t xOffset,
+                                uint16_t yOffset) noexcept {
     if (!texture || !pixelData) {
         return;
     }
-    
+
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     if (!queue) {
         return;
     }
-    
+
     const auto copyData = prepareCopyData(pixelData, regionSize, getPixelStride());
     if (!copyData.dataPtr) {
         return;
@@ -425,18 +410,9 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, u
     dataLayout.bytesPerRow = copyData.bytesPerRow;
     dataLayout.rowsPerImage = static_cast<uint32_t>(regionSize.height);
 
-    WGPUExtent3D writeSize = {
-        static_cast<uint32_t>(regionSize.width),
-        static_cast<uint32_t>(regionSize.height),
-        1
-    };
+    WGPUExtent3D writeSize = {static_cast<uint32_t>(regionSize.width), static_cast<uint32_t>(regionSize.height), 1};
 
-    wgpuQueueWriteTexture(queue,
-                          &destination,
-                          copyData.dataPtr,
-                          copyData.dataSize,
-                          &dataLayout,
-                          &writeSize);
+    wgpuQueueWriteTexture(queue, &destination, copyData.dataPtr, copyData.dataSize, &dataLayout, &writeSize);
 }
 
 } // namespace webgpu

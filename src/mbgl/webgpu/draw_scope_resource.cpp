@@ -5,8 +5,7 @@ namespace mbgl {
 namespace webgpu {
 
 DrawScopeResource::DrawScopeResource(Context& context_)
-    : context(context_) {
-}
+    : context(context_) {}
 
 } // namespace webgpu
 } // namespace mbgl

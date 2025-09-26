@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
-    
+
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
@@ -66,7 +66,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr auto fragment = R"(
 struct BackgroundPropsUBO {
     color: vec4<f32>,

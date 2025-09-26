@@ -12,7 +12,7 @@ class Texture2D;
 class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
     OffscreenTexture(Context&, Size size, gfx::TextureChannelDataType type, bool depth, bool stencil);
-    
+
     bool isRenderable() override;
     PremultipliedImage readStillImage() override;
     const gfx::Texture2DPtr& getTexture() override;

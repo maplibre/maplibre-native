@@ -20,8 +20,7 @@ namespace mbgl {
 namespace webgpu {
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {
-}
+    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled || !getDrawableCount()) {
@@ -86,7 +85,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto initialDrawCalls = parameters.context.renderingStats().numDrawCalls;
     visitDrawables([&](gfx::Drawable& drawable) {
         visitCount++;
-        
+
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
@@ -94,8 +93,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (!drawable.getShader()) {
             mbgl::Log::Warning(mbgl::Event::Render,
-                               "Drawable " + drawable.getName() + " in " + getName() +
-                                   " missing shader; skipping");
+                               "Drawable " + drawable.getName() + " in " + getName() + " missing shader; skipping");
             return;
         }
 
@@ -126,12 +124,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (features3d) {
-            const auto depth = (drawable.getEnableDepth() && depthMode3d)
-                                   ? *depthMode3d
-                                   : gfx::DepthMode::disabled();
-            const auto stencil = (drawable.getEnableStencil() && stencilMode3d)
-                                     ? *stencilMode3d
-                                     : gfx::StencilMode::disabled();
+            const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
+            const auto stencil = (drawable.getEnableStencil() && stencilMode3d) ? *stencilMode3d
+                                                                                : gfx::StencilMode::disabled();
             drawableWebGPU.setDepthModeFor3D(depth);
             drawableWebGPU.setStencilModeFor3D(stencil);
         }
@@ -141,8 +136,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     const auto finalDrawCalls = parameters.context.renderingStats().numDrawCalls;
     if (drawCount > 0 && finalDrawCalls == initialDrawCalls) {
-        mbgl::Log::Warning(mbgl::Event::Render, getName() + " visited " + std::to_string(visitCount) +
-                          " drawables but produced no draw calls!");
+        mbgl::Log::Warning(
+            mbgl::Event::Render,
+            getName() + " visited " + std::to_string(visitCount) + " drawables but produced no draw calls!");
     }
 }
 

@@ -23,7 +23,7 @@
             },
             "maxzoom": 24
         },
-      
+
         {
             "id": "countries-boundary",
             "type": "line",

@@ -37,7 +37,7 @@ CommandEncoder::~CommandEncoder() {
 }
 
 std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* name,
-                                                                   const gfx::RenderPassDescriptor& descriptor) {
+                                                                  const gfx::RenderPassDescriptor& descriptor) {
     return std::make_unique<RenderPass>(*this, name, descriptor);
 }
 
@@ -93,8 +93,6 @@ void CommandEncoder::submitCommandBuffer() {
         context.setCurrentCommandEncoder(nullptr);
     }
 }
-
-
 
 void CommandEncoder::pushDebugGroup(const char*) {
     // Debug markers are currently handled at the render pass level.

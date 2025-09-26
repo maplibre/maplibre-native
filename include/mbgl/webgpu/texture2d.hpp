@@ -47,10 +47,9 @@ protected:
     WGPUTexture texture = nullptr;
     WGPUTextureView textureView = nullptr;
     WGPUSampler sampler = nullptr;
-    uint32_t usageFlags = WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst |
-                          WGPUTextureUsage_CopySrc;
+    uint32_t usageFlags = WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst | WGPUTextureUsage_CopySrc;
     WGPUTextureFormat nativeFormat = WGPUTextureFormat_Undefined;
-    
+
     Size size{0, 0};
     gfx::TexturePixelType pixelFormat = gfx::TexturePixelType::RGBA;
     gfx::TextureChannelDataType channelType = gfx::TextureChannelDataType::UnsignedByte;
