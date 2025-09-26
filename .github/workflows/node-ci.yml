@@ -34,34 +34,6 @@ on:
       - "package.json"
       - "package-lock.json"
 
-  pull_request:
-    branches:
-      - "*"
-    paths:
-      - CMakeLists.txt
-      - "platform/linux/**"
-      - "platform/default/**"
-      - "platform/node/**"
-      - "platform/windows/**"
-      - "platform/darwin/**"
-      - "platform/macos/**"
-      - "platform/ios/platform/darwin/**"
-      - "platform/ios/platform/macos/**"
-      - ".github/workflows/node-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
-      - "package.json"
-      - "package-lock.json"
-
 concurrency:
   # cancel jobs on PRs only
   group: ${{ github.workflow }}-${{ github.ref }}

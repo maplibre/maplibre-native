@@ -22,26 +22,6 @@ on:
       - '.bazelversion'
       - 'pnpm-lock.yaml'
 
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'platform/macos/**'
-      - 'platform/darwin/**'
-      - '.github/workflows/macos-ci.yml'
-      - 'bin/**'
-      - 'include/**'
-      - 'platform/default/**'
-      - 'src/**'
-      - 'vendor/**'
-      - '.gitmodules'
-      - '!**/*.md'
-      - 'WORKSPACE'
-      - 'BUILD.bazel'
-      - '.bazelrc'
-      - '.bazelversion'
-      - 'pnpm-lock.yaml'
-
 concurrency:
   # cancel jobs on PRs only
   group: ${{ github.workflow }}-${{ github.ref }}
