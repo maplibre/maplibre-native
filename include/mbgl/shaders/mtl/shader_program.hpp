@@ -12,6 +12,9 @@
 
 namespace mbgl {
 namespace shaders {
+
+#ifndef MBGL_SHADERS_PROGRAM_COMMON_TYPES_DEFINED
+#define MBGL_SHADERS_PROGRAM_COMMON_TYPES_DEFINED
 struct UniformBlockInfo {
     constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
         : index(id_),
@@ -41,6 +44,7 @@ struct TextureInfo {
     std::size_t index;
     std::size_t id;
 };
+#endif // MBGL_SHADERS_PROGRAM_COMMON_TYPES_DEFINED
 } // namespace shaders
 namespace mtl {
 class RenderableResource;

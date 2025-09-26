@@ -70,14 +70,15 @@ if(MLN_WITH_METAL)
 endif()
 
 if(MLN_WITH_WEBGPU)
-    target_sources(
-        mbgl-glfw
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
-    )
     if(APPLE)
-        set_source_files_properties(
-            ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
-            PROPERTIES LANGUAGE OBJCXX
+        target_sources(
+            mbgl-glfw
+            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.mm
+        )
+    else()
+        target_sources(
+            mbgl-glfw
+            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
         )
     endif()
     # Add Dawn include directories for GLFW
