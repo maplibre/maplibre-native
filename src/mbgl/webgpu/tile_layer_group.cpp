@@ -136,13 +136,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             drawableWebGPU.setStencilModeFor3D(stencil);
         }
 
-        // Log uniform buffer status after tweakers
-        if (drawCount <= 3) {
-            for (size_t i = 0; i < 4; ++i) {
-                const auto& uniformBuffer = drawableUniforms.get(i);
-            }
-        }
-
         drawable.draw(parameters);
     });
 

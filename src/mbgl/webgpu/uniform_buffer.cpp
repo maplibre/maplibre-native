@@ -99,6 +99,7 @@ void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
 // The copy() method is now implemented inline in the header file to match Metal
 
 void UniformBufferArray::bindWebgpu(RenderPass& renderPass) const noexcept {
+    static_cast<void>(renderPass);
     // In WebGPU, uniform buffers are bound through bind groups per drawable,
     // not globally to the render pass like in Metal.
     // The actual binding happens in Drawable::draw when creating the bind group.

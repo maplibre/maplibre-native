@@ -531,11 +531,6 @@ void Drawable::draw(PaintParameters& parameters) const {
                                     if (impl->uboIndexUniform) {
                                         impl->uniformBuffers.set(bindingInfo.binding, impl->uboIndexUniform);
                                         buffer = impl->uboIndexUniform;
-                                        static int lineLogCount = 0;
-                                        if (lineLogCount < 128 && getName().find("line") != std::string::npos) {
-                                            const auto& dbgTile = getTileID();
-                                            lineLogCount++;
-                                        }
                                     }
                                 }
 

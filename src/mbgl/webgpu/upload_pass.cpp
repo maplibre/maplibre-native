@@ -225,11 +225,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
-            // Log vertex data for debugging
-            if (effectiveAttr.getSharedRawData()) {
-                const int16_t* rawVerts = reinterpret_cast<const int16_t*>(effectiveAttr.getSharedRawData()->getRawData());
-            } 
-
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
