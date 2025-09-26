@@ -18,13 +18,11 @@ struct WGPUSurfaceImpl;
 namespace dawn::native {
 class Instance;
 class Adapter;
-}
+} // namespace dawn::native
 
-// Multiple inheritance: GLFWBackend for window management, 
+// Multiple inheritance: GLFWBackend for window management,
 // webgpu::RendererBackend for rendering, gfx::Renderable for framebuffer
-class GLFWWebGPUBackend final : public GLFWBackend,
-                                 public mbgl::webgpu::RendererBackend,
-                                 public mbgl::gfx::Renderable {
+class GLFWWebGPUBackend final : public GLFWBackend, public mbgl::webgpu::RendererBackend, public mbgl::gfx::Renderable {
 public:
     GLFWWebGPUBackend(GLFWwindow* window, bool capFrameRate);
     ~GLFWWebGPUBackend() override;
@@ -39,8 +37,7 @@ public:
 
     // mbgl::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override; 
-    
+    mbgl::gfx::Renderable& getDefaultRenderable() override;
 
 protected:
     void activate() override;
@@ -67,16 +64,16 @@ private:
 
     GLFWwindow* window;
     std::unique_ptr<dawn::native::Instance> instance;
-    wgpu::Device wgpuDevice;  // This owns the device
+    wgpu::Device wgpuDevice; // This owns the device
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
     wgpu::TextureFormat swapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     std::array<wgpu::TextureFormat, 1> configuredViewFormats{wgpu::TextureFormat::BGRA8Unorm};
-    
+
     // Protect texture view access from multiple threads
-    wgpu::TextureView currentTextureView;  // Keep the current texture view alive
-    wgpu::Texture currentTexture;  // Keep the texture alive as well
+    wgpu::TextureView currentTextureView; // Keep the current texture view alive
+    wgpu::Texture currentTexture;         // Keep the texture alive as well
 
     // Depth/stencil texture and view
     wgpu::Texture depthStencilTexture;
@@ -86,23 +83,23 @@ private:
     std::atomic<bool> frameInProgress{false};
     // Track if we have presented the current frame
     std::atomic<bool> framePresented{true};
-    
+
     // Track if we're shutting down to prevent mutex usage during destruction
     std::atomic<bool> isShuttingDown{false};
-    
+
     // Previous frame resources - keep alive until next swap
     wgpu::TextureView previousTextureView;
     wgpu::Texture previousTexture;
-    
+
     // Surface state tracking
     std::atomic<bool> surfaceConfigured{false};
     std::atomic<bool> surfaceNeedsReconfigure{false};
     mbgl::Size lastConfiguredSize{0, 0};
-    
+
     // Error recovery
     std::atomic<int> consecutiveErrors{0};
     static constexpr int maxConsecutiveErrors = 3;
-    
+
     // Helper methods
     void reconfigureSurface();
     void createDepthStencilTexture(uint32_t width, uint32_t height);

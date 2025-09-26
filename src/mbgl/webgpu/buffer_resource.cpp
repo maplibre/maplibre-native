@@ -8,18 +8,13 @@
 namespace mbgl {
 namespace webgpu {
 
-BufferResource::BufferResource(Context& context_,
-                               const void* data,
-                               std::size_t size_,
-                               uint32_t usage_,
-                               bool isIndexBuffer_,
-                               bool persistent_)
+BufferResource::BufferResource(
+    Context& context_, const void* data, std::size_t size_, uint32_t usage_, bool isIndexBuffer_, bool persistent_)
     : context(context_),
       size(size_),
       usage(usage_),
       isIndexBuffer(isIndexBuffer_),
       persistent(persistent_) {
-
     if (size == 0) {
         return;
     }

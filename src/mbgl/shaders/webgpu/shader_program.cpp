@@ -178,9 +178,9 @@ WGPUStencilOperation toStencilOp(const gfx::StencilOpType op) {
 } // namespace
 
 ShaderProgram::ShaderProgram(std::string name,
-                           RendererBackend& backend_,
-                           WGPUShaderModule vertexModule,
-                           WGPUShaderModule fragmentModule)
+                             RendererBackend& backend_,
+                             WGPUShaderModule vertexModule,
+                             WGPUShaderModule fragmentModule)
     : ShaderProgramBase(),
       shaderName(std::move(name)),
       backend(backend_),
@@ -190,13 +190,10 @@ ShaderProgram::ShaderProgram(std::string name,
 }
 
 // Minimal constructor for Context::createShader compatibility
-ShaderProgram::ShaderProgram(Context& context,
-                           const std::string& vertexSource,
-                           const std::string& fragmentSource)
+ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, const std::string& fragmentSource)
     : ShaderProgramBase(),
       shaderName("ContextShader"),
       backend(static_cast<RendererBackend&>(context.getBackend())) {
-
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) return;
 
@@ -299,13 +296,13 @@ ShaderProgram::~ShaderProgram() {
 }
 
 WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& renderable,
-                                                   const WGPUVertexBufferLayout* vertexLayouts,
-                                                   uint32_t vertexLayoutCount,
-                                                   const gfx::ColorMode& colorMode,
-                                                   const gfx::DepthMode& depthMode,
-                                                   const gfx::StencilMode& stencilMode,
-                                                   gfx::DrawModeType drawModeType,
-                                                   const std::optional<std::size_t> reuseHash) {
+                                                    const WGPUVertexBufferLayout* vertexLayouts,
+                                                    uint32_t vertexLayoutCount,
+                                                    const gfx::ColorMode& colorMode,
+                                                    const gfx::DepthMode& depthMode,
+                                                    const gfx::StencilMode& stencilMode,
+                                                    gfx::DrawModeType drawModeType,
+                                                    const std::optional<std::size_t> reuseHash) {
     (void)renderable;
     // Check cache first
     if (reuseHash.has_value()) {
@@ -316,8 +313,8 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
     }
 
     // Create new pipeline
-    WGPURenderPipeline pipeline =
-        createPipeline(vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode, drawModeType);
+    WGPURenderPipeline pipeline = createPipeline(
+        vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode, drawModeType);
 
     // Cache the pipeline if we have a reuse hash
     if (reuseHash.has_value() && pipeline) {
@@ -335,12 +332,8 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
-    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
 #endif
     vertexAttributes.set(info.id, index, info.dataType, 1);
 }
@@ -351,9 +344,7 @@ void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
 #if !defined(NDEBUG)
     // Indexes must not be reused by regular attributes or uniform blocks
     // More than one instance attribute can have the same index, if they share the block
-    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
 #endif
     instanceAttributes.set(info.id, index, info.dataType, 1);
 }
@@ -447,7 +438,8 @@ void ShaderProgram::analyzeShaderBindings(const std::string& source, WGPUShaderS
             searchPos = groupEnd;
             continue;
         }
-        uint32_t group = static_cast<uint32_t>(std::strtoul(source.substr(groupStart, groupEnd - groupStart).c_str(), nullptr, 10));
+        uint32_t group = static_cast<uint32_t>(
+            std::strtoul(source.substr(groupStart, groupEnd - groupStart).c_str(), nullptr, 10));
 
         size_t bindingToken = source.find("@binding", groupEnd);
         if (bindingToken == std::string::npos) {
@@ -469,7 +461,8 @@ void ShaderProgram::analyzeShaderBindings(const std::string& source, WGPUShaderS
             searchPos = bindingEnd;
             continue;
         }
-        uint32_t binding = static_cast<uint32_t>(std::strtoul(source.substr(bindingStart, bindingEnd - bindingStart).c_str(), nullptr, 10));
+        uint32_t binding = static_cast<uint32_t>(
+            std::strtoul(source.substr(bindingStart, bindingEnd - bindingStart).c_str(), nullptr, 10));
 
         size_t varPos = source.find("var", bindingEnd);
         if (varPos == std::string::npos) {
@@ -491,7 +484,8 @@ void ShaderProgram::analyzeShaderBindings(const std::string& source, WGPUShaderS
             if (qualifierEnd == std::string::npos) {
                 break;
             }
-            const auto qualifier = trimString(std::string_view(source.data() + afterVar + 1, qualifierEnd - afterVar - 1));
+            const auto qualifier = trimString(
+                std::string_view(source.data() + afterVar + 1, qualifierEnd - afterVar - 1));
             if (qualifier.find("storage") != std::string::npos) {
                 if (qualifier.find("read_write") != std::string::npos) {
                     type = BindingType::StorageBuffer;
@@ -628,28 +622,29 @@ void ShaderProgram::rebuildBindGroupLayouts() {
 }
 
 WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
-                                                uint32_t vertexLayoutCount,
-                                                const gfx::ColorMode& colorMode,
-                                                const gfx::DepthMode& depthMode,
-                                                const gfx::StencilMode& stencilMode,
-                                                gfx::DrawModeType drawModeType) {
+                                                 uint32_t vertexLayoutCount,
+                                                 const gfx::ColorMode& colorMode,
+                                                 const gfx::DepthMode& depthMode,
+                                                 const gfx::StencilMode& stencilMode,
+                                                 gfx::DrawModeType drawModeType) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!hasVertexEntryPoint || !hasFragmentEntryPoint) {
         if (!loggedMissingEntryPoint) {
-            Log::Warning(Event::Render,
-                         "WebGPU: shader '" + shaderName + "' is missing WGSL entry points; skipping pipeline creation");
+            Log::Warning(
+                Event::Render,
+                "WebGPU: shader '" + shaderName + "' is missing WGSL entry points; skipping pipeline creation");
             loggedMissingEntryPoint = true;
         }
         return nullptr;
     }
 
     if (!device || !vertexShaderModule || !fragmentShaderModule || !pipelineLayout) {
-        Log::Error(Event::Render, "createPipeline missing requirement: device=" +
-            std::to_string(device != nullptr) + ", vertexModule=" +
-            std::to_string(vertexShaderModule != nullptr) + ", fragmentModule=" +
-            std::to_string(fragmentShaderModule != nullptr) + ", pipelineLayout=" +
-            std::to_string(pipelineLayout != nullptr));
+        Log::Error(Event::Render,
+                   "createPipeline missing requirement: device=" + std::to_string(device != nullptr) +
+                       ", vertexModule=" + std::to_string(vertexShaderModule != nullptr) +
+                       ", fragmentModule=" + std::to_string(fragmentShaderModule != nullptr) +
+                       ", pipelineLayout=" + std::to_string(pipelineLayout != nullptr));
         return nullptr;
     }
 
@@ -674,13 +669,12 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
 
     // Apply color mode blending if not replace
     if (!colorMode.blendFunction.is<gfx::ColorMode::Replace>()) {
-        colorMode.blendFunction.match(
-            [&](const auto& blendFunction) {
-                colorBlend.operation = webgpuBlendOperation(gfx::ColorBlendEquationType(blendFunction.equation));
-                colorBlend.srcFactor = webgpuBlendFactor(gfx::ColorBlendFactorType(blendFunction.srcFactor));
-                colorBlend.dstFactor = webgpuBlendFactor(gfx::ColorBlendFactorType(blendFunction.dstFactor));
-                alphaBlend = colorBlend;
-            });
+        colorMode.blendFunction.match([&](const auto& blendFunction) {
+            colorBlend.operation = webgpuBlendOperation(gfx::ColorBlendEquationType(blendFunction.equation));
+            colorBlend.srcFactor = webgpuBlendFactor(gfx::ColorBlendFactorType(blendFunction.srcFactor));
+            colorBlend.dstFactor = webgpuBlendFactor(gfx::ColorBlendFactorType(blendFunction.dstFactor));
+            alphaBlend = colorBlend;
+        });
     }
 
     WGPUBlendState blendState = {};
@@ -695,9 +689,9 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     colorTarget.format = static_cast<WGPUTextureFormat>(colorFormat);
     colorTarget.blend = &blendState;
     colorTarget.writeMask = (colorMode.mask.r ? WGPUColorWriteMask_Red : WGPUColorWriteMask_None) |
-                           (colorMode.mask.g ? WGPUColorWriteMask_Green : WGPUColorWriteMask_None) |
-                           (colorMode.mask.b ? WGPUColorWriteMask_Blue : WGPUColorWriteMask_None) |
-                           (colorMode.mask.a ? WGPUColorWriteMask_Alpha : WGPUColorWriteMask_None);
+                            (colorMode.mask.g ? WGPUColorWriteMask_Green : WGPUColorWriteMask_None) |
+                            (colorMode.mask.b ? WGPUColorWriteMask_Blue : WGPUColorWriteMask_None) |
+                            (colorMode.mask.a ? WGPUColorWriteMask_Alpha : WGPUColorWriteMask_None);
 
     WGPUFragmentState fragmentState = {};
     fragmentState.module = fragmentShaderModule;
@@ -709,10 +703,10 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     // Set up primitive state
     WGPUPrimitiveState primitiveState = {};
     primitiveState.topology = toPrimitiveTopology(drawModeType);
-    primitiveState.stripIndexFormat =
-        (drawModeType == gfx::DrawModeType::LineStrip || drawModeType == gfx::DrawModeType::TriangleStrip)
-            ? WGPUIndexFormat_Uint16
-            : WGPUIndexFormat_Undefined;
+    primitiveState.stripIndexFormat = (drawModeType == gfx::DrawModeType::LineStrip ||
+                                       drawModeType == gfx::DrawModeType::TriangleStrip)
+                                          ? WGPUIndexFormat_Uint16
+                                          : WGPUIndexFormat_Undefined;
     primitiveState.frontFace = WGPUFrontFace_CCW;
     primitiveState.cullMode = WGPUCullMode_None;
 
@@ -721,8 +715,8 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     const auto depthFormat = backend.getDepthStencilFormat();
     if (depthFormat != wgpu::TextureFormat::Undefined) {
         depthStencilState.format = static_cast<WGPUTextureFormat>(depthFormat);
-        depthStencilState.depthWriteEnabled =
-            depthMode.mask == gfx::DepthMaskType::ReadWrite ? WGPUOptionalBool_True : WGPUOptionalBool_False;
+        depthStencilState.depthWriteEnabled = depthMode.mask == gfx::DepthMaskType::ReadWrite ? WGPUOptionalBool_True
+                                                                                              : WGPUOptionalBool_False;
         depthStencilState.depthCompare = toCompareFunction(depthMode.func);
 
         depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;

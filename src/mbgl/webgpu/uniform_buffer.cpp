@@ -24,12 +24,11 @@ constexpr std::size_t alignedUniformSize(std::size_t size) {
 UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t size_)
     : gfx::UniformBuffer(alignedUniformSize(size_)),
       context(context_) {
-
     const std::size_t alignedSize = getSize();
 
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
-    
+
     if (device && alignedSize > 0) {
         WGPUBufferDescriptor bufferDesc = {};
         WGPUStringView label = {"Uniform Buffer", strlen("Uniform Buffer")};
@@ -37,9 +36,9 @@ UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t si
         bufferDesc.size = alignedSize;
         bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_Storage | WGPUBufferUsage_CopyDst;
         bufferDesc.mappedAtCreation = data ? 1 : 0;
-        
+
         buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
-        
+
         if (buffer && data) {
             void* mappedData = wgpuBufferGetMappedRange(buffer, 0, alignedSize);
             if (mappedData) {

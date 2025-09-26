@@ -67,12 +67,12 @@ cleanup_processes() {
 try_start() {
     local attempt=$1
     echo "Starting attempt $attempt..."
-    
+
     # Small delay between attempts to let Metal reset
     if [ $attempt -gt 1 ]; then
         sleep 0.5
     fi
-    
+
     # Select platform-specific environment overrides
     local cmd=("./build/platform/glfw/mbgl-glfw" "--style" "$STYLE_URL" "--zoom" "5" "--backend" "webgpu")
     if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -82,10 +82,10 @@ try_start() {
     # Start in background and check if it stays alive
     "${cmd[@]}" &
     local pid=$!
-    
+
     # Wait a bit to see if it crashes immediately
     sleep 2
-    
+
     if kill -0 $pid 2>/dev/null; then
         echo "✓ Successfully started (PID: $pid)"
         echo ""
@@ -99,7 +99,7 @@ try_start() {
         echo "  - Esc: Quit"
         echo ""
         echo "Press Ctrl+C to stop"
-        
+
         # Wait for the process
         wait $pid
         return 0

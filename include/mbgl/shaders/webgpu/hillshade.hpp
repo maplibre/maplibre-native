@@ -7,14 +7,13 @@
 namespace mbgl {
 namespace shaders {
 
-
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "HillshadeShader";
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
+
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(5) position: vec2<i32>,
@@ -50,7 +49,7 @@ fn main(in: VertexInput) -> VertexOutput {
     return out;
 }
 )";
-    
+
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) tex_coord: vec2<f32>,

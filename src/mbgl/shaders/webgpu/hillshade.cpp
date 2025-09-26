@@ -11,9 +11,7 @@ const std::array<AttributeInfo, 2> HillshadeShaderSource::attributes = {
     AttributeInfo{5, gfx::AttributeDataType::Short2, idHillshadePosVertexAttribute},
     AttributeInfo{6, gfx::AttributeDataType::Short2, idHillshadeTexturePosVertexAttribute},
 };
-const std::array<TextureInfo, 1> HillshadeShaderSource::textures = {
-    TextureInfo{0, idHillshadeImageTexture}
-};
+const std::array<TextureInfo, 1> HillshadeShaderSource::textures = {TextureInfo{0, idHillshadeImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

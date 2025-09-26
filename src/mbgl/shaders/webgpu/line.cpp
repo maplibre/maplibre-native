@@ -31,9 +31,7 @@ const std::array<AttributeInfo, 7> LineGradientShaderSource::attributes = {
     AttributeInfo{9, gfx::AttributeDataType::Float2, idLineOffsetVertexAttribute},
     AttributeInfo{10, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
 };
-const std::array<TextureInfo, 1> LineGradientShaderSource::textures = {
-    TextureInfo{0, idLineImageTexture}
-};
+const std::array<TextureInfo, 1> LineGradientShaderSource::textures = {TextureInfo{0, idLineImageTexture}};
 
 // Line Pattern
 using LinePatternShaderSource = ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU>;
@@ -49,9 +47,7 @@ const std::array<AttributeInfo, 9> LinePatternShaderSource::attributes = {
     AttributeInfo{11, gfx::AttributeDataType::UShort4, idLinePatternFromVertexAttribute},
     AttributeInfo{12, gfx::AttributeDataType::UShort4, idLinePatternToVertexAttribute},
 };
-const std::array<TextureInfo, 1> LinePatternShaderSource::textures = {
-    TextureInfo{0, idLineImageTexture}
-};
+const std::array<TextureInfo, 1> LinePatternShaderSource::textures = {TextureInfo{0, idLineImageTexture}};
 
 // Line SDF
 using LineSDFShaderSource = ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU>;
@@ -67,9 +63,7 @@ const std::array<AttributeInfo, 9> LineSDFShaderSource::attributes = {
     AttributeInfo{11, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
     AttributeInfo{12, gfx::AttributeDataType::Float2, idLineFloorWidthVertexAttribute},
 };
-const std::array<TextureInfo, 1> LineSDFShaderSource::textures = {
-    TextureInfo{0, idLineImageTexture}
-};
+const std::array<TextureInfo, 1> LineSDFShaderSource::textures = {TextureInfo{0, idLineImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

@@ -7,7 +7,6 @@
 namespace mbgl {
 namespace shaders {
 
-
 template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineShader";

@@ -18,7 +18,8 @@ std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
     return std::make_unique<Drawable>(name);
 }
 
-std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::DrawMode drawMode, SegmentBase&& segment) {
+std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::DrawMode drawMode,
+                                                                           SegmentBase&& segment) {
     return std::make_unique<Drawable::DrawSegment>(drawMode, std::move(segment));
 }
 
@@ -44,22 +45,16 @@ void DrawableBuilder::init() {
             // The segments in the drawable will be set by setIndexData below
             // We just need to trigger the vertex attribute extraction
             // Pass empty segments for now since setIndexData will set them properly
-            drawable.updateVertexAttributes(drawable.getVertexAttributes(),
-                                           impl->rawVerticesCount,
-                                           drawMode,
-                                           impl->sharedIndexes,
-                                           nullptr,
-                                           0);
+            drawable.updateVertexAttributes(
+                drawable.getVertexAttributes(), impl->rawVerticesCount, drawMode, impl->sharedIndexes, nullptr, 0);
 
         } else {
-
         }
     } else if (impl->rawVerticesCount && !impl->rawVertices.empty()) {
         auto raw = std::move(impl->rawVertices);
         drawable.setVertices(std::move(raw), impl->rawVerticesCount, impl->rawVerticesType);
     } else if (!impl->vertices.empty()) {
         const auto& verts = impl->vertices.vector();
-
 
         if (!verts.empty()) {
             constexpr auto vertSize = sizeof(std::remove_reference<decltype(verts)>::type::value_type);
@@ -88,7 +83,6 @@ void DrawableBuilder::init() {
         textureSlot.reset();
     }
 }
-
 
 } // namespace webgpu
 } // namespace mbgl
