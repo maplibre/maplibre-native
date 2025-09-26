@@ -230,7 +230,9 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
 }
 } // namespace
 
-void glfwError(int error, const char *description) {
+void glfwError(int error, const char* description) {
+    static_cast<void>(error);
+    static_cast<void>(description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,

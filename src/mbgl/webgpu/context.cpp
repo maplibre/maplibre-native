@@ -440,10 +440,6 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(
             // Create vertex buffer from the shared data
             const auto dataSize = sharedRaw->getRawSize() * sharedRaw->getRawCount();
             if (dataSize > 0) {
-                // Log first few vertices for debugging
-                const int16_t* rawVerts = reinterpret_cast<const int16_t*>(sharedRaw->getRawData());
-                
-
                 // Create GPU buffer for this vertex attribute
                 uint32_t usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
                 auto bufferResource = std::make_shared<VertexBufferResource>(

@@ -72,27 +72,6 @@ MTLPixelFormat toMetalPixelFormat(wgpu::TextureFormat format) {
 }
 #endif
 
-std::string textureFormatToString(wgpu::TextureFormat format) {
-    switch (format) {
-        case wgpu::TextureFormat::BGRA8Unorm:
-            return "BGRA8Unorm";
-        case wgpu::TextureFormat::BGRA8UnormSrgb:
-            return "BGRA8UnormSrgb";
-        case wgpu::TextureFormat::RGBA8Unorm:
-            return "RGBA8Unorm";
-        case wgpu::TextureFormat::RGBA8UnormSrgb:
-            return "RGBA8UnormSrgb";
-        case wgpu::TextureFormat::RGBA16Float:
-            return "RGBA16Float";
-        case wgpu::TextureFormat::Depth24PlusStencil8:
-            return "Depth24PlusStencil8";
-        case wgpu::TextureFormat::Depth32FloatStencil8:
-            return "Depth32FloatStencil8";
-        default:
-            return "Format(" + std::to_string(static_cast<int>(format)) + ")";
-    }
-}
-
 } // namespace
 
 // Forward declaration
@@ -183,7 +162,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
       }(),
           std::make_unique<mbgl::WebGPURenderableResource>(*this)),
       window(window_) {
-    
+    static_cast<void>(capFrameRate);
 
     // Add small delay to let previous resources clean up
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -690,8 +669,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     lock.unlock();
 
     wgpu::SurfaceTexture surfaceTexture;
-
-    static int getTextureCount = 0;
 
     try {
         wgpuSurface.GetCurrentTexture(&surfaceTexture);
