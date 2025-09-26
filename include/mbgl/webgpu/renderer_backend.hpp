@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/util/size.hpp>
-#include <webgpu/webgpu_cpp.h>
+#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 #include <memory>
 
 namespace mbgl {

@@ -1,6 +1,6 @@
 #include <mbgl/webgpu/headless_backend.hpp>
 #include <mbgl/util/logging.hpp>
-#include <webgpu/webgpu_cpp.h>
+#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 #include <dawn/native/DawnNative.h>
 
 namespace mbgl {
