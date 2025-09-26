@@ -1,0 +1,320 @@
+#include <mbgl/webgpu/offscreen_texture.hpp>
+#include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mbgl/util/logging.hpp>
+#include <cstring>
+#include <functional>
+
+namespace mbgl {
+namespace webgpu {
+
+class OffscreenTextureResource final : public webgpu::RenderableResource {
+public:
+    OffscreenTextureResource(
+        Context& context_, const Size size_, const gfx::TextureChannelDataType type_, bool depth, bool stencil)
+        : context(context_),
+          size(size_),
+          type(type_) {
+        assert(!size.isEmpty());
+
+        // Create color texture
+        colorTexture = context.createTexture2D();
+        colorTexture->setSize(size);
+        colorTexture->setFormat(gfx::TexturePixelType::RGBA, type);
+        if (auto* webgpuTexture = static_cast<Texture2D*>(colorTexture.get())) {
+            webgpuTexture->setUsage(WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst |
+                                    WGPUTextureUsage_CopySrc | WGPUTextureUsage_RenderAttachment);
+            webgpuTexture->setSizeChangedCallback([this](const Size& newSize) { handleResize(newSize); });
+        }
+        colorTexture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+
+        // Create depth texture if needed
+        if (depth) {
+            depthTexture = context.createTexture2D();
+            depthTexture->setSize(size);
+            depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
+            if (auto* webgpuDepth = static_cast<Texture2D*>(depthTexture.get())) {
+                webgpuDepth->setUsage(WGPUTextureUsage_RenderAttachment);
+            }
+            depthTexture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        }
+
+        // Create stencil texture if needed
+        if (stencil) {
+            stencilTexture = context.createTexture2D();
+            stencilTexture->setSize(size);
+            stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
+            if (auto* webgpuStencil = static_cast<Texture2D*>(stencilTexture.get())) {
+                webgpuStencil->setUsage(WGPUTextureUsage_RenderAttachment);
+            }
+            stencilTexture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        }
+    }
+
+    ~OffscreenTextureResource() noexcept override { context.renderingStats().numFrameBuffers--; }
+
+    void bind() override {
+        // Create textures if not already created
+        colorTexture->create();
+
+        if (depthTexture) {
+            depthTexture->create();
+        }
+
+        if (stencilTexture) {
+            stencilTexture->create();
+        }
+    }
+
+    void swap() override {
+        // Offscreen targets do not present to a surface.
+    }
+
+    const mbgl::webgpu::RendererBackend& getBackend() const override {
+        return static_cast<const mbgl::webgpu::RendererBackend&>(context.getBackend());
+    }
+
+    const WGPUCommandEncoder& getCommandEncoder() const override {
+        static WGPUCommandEncoder dummyEncoder = nullptr;
+        return dummyEncoder;
+    }
+
+    WGPURenderPassEncoder getRenderPassEncoder() const override { return nullptr; }
+
+    WGPUTextureView getColorTextureView() override {
+        if (!colorTexture) {
+            return nullptr;
+        }
+
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+        texture.create();
+        return texture.getTextureView();
+    }
+
+    std::optional<wgpu::TextureFormat> getColorTextureFormat() const override {
+        if (!colorTexture) {
+            return std::nullopt;
+        }
+        const auto* texture = static_cast<const Texture2D*>(colorTexture.get());
+        return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
+    }
+
+    WGPUTextureView getDepthStencilTextureView() override {
+        if (depthTexture) {
+            auto& texture = static_cast<Texture2D&>(*depthTexture);
+            texture.create();
+            return texture.getTextureView();
+        }
+        if (stencilTexture) {
+            auto& texture = static_cast<Texture2D&>(*stencilTexture);
+            texture.create();
+            return texture.getTextureView();
+        }
+        return nullptr;
+    }
+
+    std::optional<wgpu::TextureFormat> getDepthStencilTextureFormat() const override {
+        if (depthTexture) {
+            const auto* texture = static_cast<const Texture2D*>(depthTexture.get());
+            return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
+        }
+        if (stencilTexture) {
+            const auto* texture = static_cast<const Texture2D*>(stencilTexture.get());
+            return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
+        }
+        return std::nullopt;
+    }
+
+    PremultipliedImage readStillImage() {
+        // Read back the color texture data
+        auto dataSize = colorTexture->getDataSize();
+        auto data = std::make_unique<uint8_t[]>(dataSize);
+
+        // WebGPU texture readback requires:
+        // 1. Create a buffer with MAP_READ usage
+        // 2. Copy texture to buffer using command encoder
+        // 3. Map the buffer and read the data
+        // This is an async operation in WebGPU, but we need sync behavior here
+
+        auto& backend = static_cast<const RendererBackend&>(context.getBackend());
+        auto device = static_cast<WGPUDevice>(backend.getDevice());
+        auto queue = static_cast<WGPUQueue>(backend.getQueue());
+        if (!device || !queue) {
+            return {size, std::move(data)};
+        }
+
+        // Create staging buffer for readback
+        WGPUBufferDescriptor bufferDesc = {};
+        WGPUStringView bufferLabel = {"Readback Buffer", strlen("Readback Buffer")};
+        bufferDesc.label = bufferLabel;
+        bufferDesc.size = dataSize;
+        bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
+
+        WGPUBuffer stagingBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+        if (!stagingBuffer) {
+            return {size, std::move(data)};
+        }
+
+        // Copy texture to buffer
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        if (encoder) {
+            auto& webgpuTexture = static_cast<Texture2D&>(*colorTexture);
+            WGPUTexture texture = webgpuTexture.getTexture();
+
+            if (texture) {
+                WGPUTexelCopyTextureInfo src = {};
+                src.texture = texture;
+                src.mipLevel = 0;
+                src.origin = {0, 0, 0};
+                src.aspect = WGPUTextureAspect_All;
+
+                WGPUTexelCopyBufferInfo dst = {};
+                dst.buffer = stagingBuffer;
+                dst.layout.offset = 0;
+                dst.layout.bytesPerRow = size.width * 4; // Assuming RGBA
+                dst.layout.rowsPerImage = size.height;
+
+                WGPUExtent3D copySize = {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), 1};
+
+                // Copy texture to buffer - function name varies between Dawn and wgpu
+                // Using the standard C API name
+                wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &copySize);
+
+                WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, nullptr);
+                wgpuQueueSubmit(queue, 1, &commands);
+                wgpuCommandBufferRelease(commands);
+            }
+            wgpuCommandEncoderRelease(encoder);
+        }
+
+        // Map buffer and read data (blocking)
+        // Use Dawn's new async API with WGPUBufferMapCallbackInfo
+        struct MapContext {
+            bool completed = false;
+            WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
+        };
+        MapContext mapContext;
+
+        WGPUBufferMapCallbackInfo callbackInfo = {};
+        callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+        callbackInfo.callback =
+            [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
+                auto* ctx = static_cast<MapContext*>(userdata1);
+                ctx->completed = true;
+                ctx->status = status;
+                (void)message;
+                (void)userdata2;
+            };
+        callbackInfo.userdata1 = &mapContext;
+        callbackInfo.userdata2 = nullptr;
+
+        WGPUFuture future = wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize, callbackInfo);
+
+        // Proper async handling with wgpuInstanceWaitAny
+        WGPUInstance instance = static_cast<WGPUInstance>(backend.getInstance());
+        if (instance) {
+            WGPUFutureWaitInfo waitInfo = {};
+            waitInfo.future = future;
+            waitInfo.completed = false;
+
+            // Wait for the async operation with a 5 second timeout
+            uint64_t timeout_ns = 5000000000; // 5 seconds in nanoseconds
+            WGPUWaitStatus waitStatus = wgpuInstanceWaitAny(instance, 1, &waitInfo, timeout_ns);
+
+            if (waitStatus == WGPUWaitStatus_Success) {
+                // The callback should have been invoked
+                if (!mapContext.completed) {
+                }
+            } else if (waitStatus == WGPUWaitStatus_TimedOut) {
+            } else {
+            }
+        } else {
+        }
+
+        // Check if mapping was successful and read the data
+        if (mapContext.completed && mapContext.status == WGPUMapAsyncStatus_Success) {
+            const void* mappedData = wgpuBufferGetConstMappedRange(stagingBuffer, 0, dataSize);
+            if (mappedData) {
+                std::memcpy(data.get(), mappedData, dataSize);
+            }
+        }
+
+        wgpuBufferUnmap(stagingBuffer);
+        wgpuBufferRelease(stagingBuffer);
+
+        return {size, std::move(data)};
+    }
+
+    gfx::Texture2DPtr& getTexture() {
+        assert(colorTexture);
+        return colorTexture;
+    }
+
+    void setSizeListener(std::function<void(const Size&)> listener) { sizeListener = std::move(listener); }
+
+private:
+    void handleResize(const Size& newSize) {
+        if (newSize == size || newSize.isEmpty()) {
+            return;
+        }
+        size = newSize;
+
+        if (depthTexture) {
+            static_cast<Texture2D&>(*depthTexture).setSize(newSize);
+            static_cast<Texture2D&>(*depthTexture).create();
+        }
+        if (stencilTexture) {
+            static_cast<Texture2D&>(*stencilTexture).setSize(newSize);
+            static_cast<Texture2D&>(*stencilTexture).create();
+        }
+
+        if (auto* color = static_cast<Texture2D*>(colorTexture.get())) {
+            color->create();
+        }
+
+        if (sizeListener) {
+            sizeListener(size);
+        }
+    }
+
+    Context& context;
+    Size size;
+    const gfx::TextureChannelDataType type;
+    gfx::Texture2DPtr colorTexture;
+    gfx::Texture2DPtr depthTexture;
+    gfx::Texture2DPtr stencilTexture;
+    std::function<void(const Size&)> sizeListener;
+};
+
+OffscreenTexture::OffscreenTexture(
+    Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
+    : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {
+    auto& offscreenResource = getResource<OffscreenTextureResource>();
+    offscreenResource.setSizeListener([this](const Size& newSize) { size = newSize; });
+}
+
+bool OffscreenTexture::isRenderable() {
+    // Check if the texture resource is valid and can be rendered to
+    try {
+        auto& res = getResource<OffscreenTextureResource>();
+        return res.getTexture() != nullptr;
+    } catch (...) {
+        return false;
+    }
+}
+
+PremultipliedImage OffscreenTexture::readStillImage() {
+    return getResource<OffscreenTextureResource>().readStillImage();
+}
+
+const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
+    return getResource<OffscreenTextureResource>().getTexture();
+}
+
+} // namespace webgpu
+} // namespace mbgl
