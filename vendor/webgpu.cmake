@@ -1,10 +1,10 @@
-# WebGPU backend configuration
+# WebGPU implementation configuration
 # This file handles the integration of either Dawn or wgpu
 
-option(MLN_WEBGPU_BACKEND "WebGPU backend implementation (dawn or wgpu)" "dawn")
+option(MLN_WEBGPU_IMPL "WebGPU backend implementation (dawn or wgpu)" "dawn")
 
 if(MLN_WITH_WEBGPU)
-    if(MLN_WEBGPU_BACKEND STREQUAL "dawn")
+    if(MLN_WEBGPU_IMPL STREQUAL "dawn")
         message(STATUS "Using Dawn as WebGPU backend")
 
         # Dawn integration
@@ -41,7 +41,7 @@ if(MLN_WITH_WEBGPU)
             endif()
         endif()
 
-    elseif(MLN_WEBGPU_BACKEND STREQUAL "wgpu")
+    elseif(MLN_WEBGPU_IMPL STREQUAL "wgpu")
         message(STATUS "Using wgpu as WebGPU backend")
 
         # wgpu integration
