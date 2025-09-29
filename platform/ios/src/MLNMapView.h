@@ -1046,8 +1046,6 @@ vertically on the map.
 
 /**
  * The maximum bounds of the map that can be shown on screen.
- *
- * @param MLNCoordinateBounds the bounds to constrain the screen to.
  */
 @property (nonatomic) MLNCoordinateBounds maximumScreenBounds;
 
