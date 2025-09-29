@@ -1,0 +1,55 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 64,
+      "height": 64,
+      "operations": [
+        ["wait"],
+        ["setFilter", "my-fill-layer", ["==", "property", "a"]],
+        ["setFilter", "my-fill-layer", ["==", "property", "b"]],
+        ["wait"]
+      ]
+    }
+  },
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "property": "b"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[-5, -5], [-5, 5], [5, 5], [5, -5]]]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "property": "a"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[-10, -10], [-10, 10], [10, 10], [10, -10]]]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "my-fill-layer",
+      "type": "fill-extrusion",
+      "source": "geojson",
+      "paint": {
+        "fill-extrusion-color": "blue"
+      }
+    }
+  ]
+}
