@@ -2,7 +2,7 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## 6.19.0
+## 6.19.1
 
 - Tweak layer depth distribution ([#3738](https://github.com/maplibre/maplibre-native/pull/3738)).
 - Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
