@@ -245,8 +245,11 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                                                   .sortKeyRange = sortKeyRange};
                     auto sortPosition = std::upper_bound(
                         placementData.cbegin(), placementData.cend(), layerData, [](const auto& lhs, const auto& rhs) {
-                            assert(lhs.sortKeyRange && rhs.sortKeyRange);
-                            return lhs.sortKeyRange->sortKey < rhs.sortKeyRange->sortKey;
+                            if (lhs.sortKeyRange && rhs.sortKeyRange) {
+                                return lhs.sortKeyRange->sortKey < rhs.sortKeyRange->sortKey;
+                            } else {
+                                return lhs.sortKeyRange || !rhs.sortKeyRange;
+                            }
                         });
                     placementData.insert(sortPosition, std::move(layerData));
                 }
