@@ -1413,8 +1413,8 @@ if(MLN_WITH_WEBGPU)
     # Include WebGPU vendor configuration (Dawn or wgpu)
     include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 
-    # Include Dawn if the bundled copy is present
-    if(EXISTS "${PROJECT_SOURCE_DIR}/vendor/dawn")
+    # Include Dawn integration when requested
+    if(MLN_WEBGPU_IMPL STREQUAL "dawn")
         include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
         if(TARGET mbgl-vendor-dawn)
             target_link_libraries(mbgl-core PUBLIC mbgl-vendor-dawn)
