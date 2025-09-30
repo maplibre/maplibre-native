@@ -1416,6 +1416,9 @@ if(MLN_WITH_WEBGPU)
     # Include Dawn if the bundled copy is present
     if(EXISTS "${PROJECT_SOURCE_DIR}/vendor/dawn")
         include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
+        if(TARGET mbgl-vendor-dawn)
+            target_link_libraries(mbgl-core PUBLIC mbgl-vendor-dawn)
+        endif()
     endif()
 endif()
 
@@ -1623,6 +1626,10 @@ endif()
 
 if(MLN_TEXT_SHAPING_HARFBUZZ)
     list(APPEND EXPORT_TARGETS mbgl-freetype mbgl-harfbuzz)
+endif()
+
+if(TARGET mbgl-vendor-dawn)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-dawn)
 endif()
 
 export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
