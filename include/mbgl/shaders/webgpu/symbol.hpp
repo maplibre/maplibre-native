@@ -3,7 +3,6 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/shaders/webgpu/common.hpp>
 
 namespace mbgl {
 namespace shaders {
