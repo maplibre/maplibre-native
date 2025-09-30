@@ -1,10 +1,89 @@
 #include <mbgl/webgpu/headless_backend.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/offscreen_texture.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 #include <dawn/native/DawnNative.h>
 
 namespace mbgl {
 namespace webgpu {
+
+class HeadlessRenderableResource final : public webgpu::RenderableResource {
+public:
+    HeadlessRenderableResource(HeadlessBackend&, webgpu::Context& context_, Size size)
+        : context(context_),
+          size(size) {
+        // Create offscreen texture using the proper WebGPU OffscreenTexture class
+        offscreenTexture = context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte, true, true);
+    }
+
+    ~HeadlessRenderableResource() noexcept override = default;
+
+    void bind() override {
+        // Bind the offscreen texture
+        if (offscreenTexture) {
+            offscreenTexture->getResource<webgpu::RenderableResource>().bind();
+        }
+    }
+
+    void swap() override {
+        // For headless rendering, we don't need to swap
+    }
+
+    const mbgl::webgpu::RendererBackend& getBackend() const override { return context.getBackend(); }
+
+    const WGPUCommandEncoder& getCommandEncoder() const override {
+        // This will be set by the command encoder when needed
+        static WGPUCommandEncoder dummy = nullptr;
+        return dummy;
+    }
+
+    WGPURenderPassEncoder getRenderPassEncoder() const override {
+        // This will be set by the render pass when needed
+        return nullptr;
+    }
+
+    WGPUTextureView getColorTextureView() override {
+        if (offscreenTexture) {
+            return offscreenTexture->getResource<webgpu::RenderableResource>().getColorTextureView();
+        }
+        return nullptr;
+    }
+
+    std::optional<wgpu::TextureFormat> getColorTextureFormat() const override {
+        if (offscreenTexture) {
+            return offscreenTexture->getResource<webgpu::RenderableResource>().getColorTextureFormat();
+        }
+        return std::nullopt;
+    }
+
+    WGPUTextureView getDepthStencilTextureView() override {
+        if (offscreenTexture) {
+            return offscreenTexture->getResource<webgpu::RenderableResource>().getDepthStencilTextureView();
+        }
+        return nullptr;
+    }
+
+    std::optional<wgpu::TextureFormat> getDepthStencilTextureFormat() const override {
+        if (offscreenTexture) {
+            return offscreenTexture->getResource<webgpu::RenderableResource>().getDepthStencilTextureFormat();
+        }
+        return std::nullopt;
+    }
+
+    PremultipliedImage readStillImage() {
+        if (offscreenTexture) {
+            return offscreenTexture->readStillImage();
+        }
+        return PremultipliedImage(size);
+    }
+
+private:
+    webgpu::Context& context;
+    Size size;
+    std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
+};
 
 class HeadlessBackend::Impl {
 public:
@@ -26,8 +105,13 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
 
     impl->framebufferSize = size_;
 
-    // Initialize Dawn instance
-    impl->instance = std::make_unique<dawn::native::Instance>();
+    // Initialize Dawn instance with TimedWaitAny feature enabled
+    wgpu::InstanceFeatureName timedWaitAnyFeature = wgpu::InstanceFeatureName::TimedWaitAny;
+    wgpu::InstanceDescriptor instanceDesc = {};
+    instanceDesc.requiredFeatureCount = 1;
+    instanceDesc.requiredFeatures = &timedWaitAnyFeature;
+
+    impl->instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
     // Enumerate adapters using the correct API
     std::vector<dawn::native::Adapter> adapters = impl->instance->EnumerateAdapters();
@@ -64,6 +148,9 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
 }
 
 HeadlessBackend::~HeadlessBackend() {
+    // Explicitly reset the renderable resource
+    setResource(nullptr);
+
     if (impl) {
         // Clean up textures
         impl->offscreenTextureView = nullptr;
@@ -143,13 +230,17 @@ void HeadlessBackend::createOffscreenTextures() {
 }
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
+    if (!hasResource()) {
+        setResource(
+            std::make_unique<HeadlessRenderableResource>(*this, static_cast<webgpu::Context&>(getContext()), size));
+    }
     return *this;
 }
 
 PremultipliedImage HeadlessBackend::readStillImage() {
-    // TODO: Implement texture readback with Dawn API
-    // The Dawn API for buffer mapping and texture-to-buffer copy has changed significantly.
-    // For now, return an empty image.
+    if (hasResource()) {
+        return getResource<HeadlessRenderableResource>().readStillImage();
+    }
     return PremultipliedImage(getSize());
 }
 
@@ -171,15 +262,15 @@ void HeadlessBackend::deactivate() {
 }
 
 void* HeadlessBackend::getCurrentTextureView() {
-    if (impl && impl->offscreenTextureView) {
-        return impl->offscreenTextureView.Get();
+    if (hasResource()) {
+        return getResource<HeadlessRenderableResource>().getColorTextureView();
     }
     return nullptr;
 }
 
 void* HeadlessBackend::getDepthStencilView() {
-    if (impl && impl->depthTextureView) {
-        return impl->depthTextureView.Get();
+    if (hasResource()) {
+        return getResource<HeadlessRenderableResource>().getDepthStencilTextureView();
     }
     return nullptr;
 }
