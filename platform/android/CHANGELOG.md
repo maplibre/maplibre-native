@@ -1,5 +1,9 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+- 💥 Breaking: bump minimum SDK version from 21 to 23.
+
 ## 11.13.5
 
 ### ✨ Features and improvements
