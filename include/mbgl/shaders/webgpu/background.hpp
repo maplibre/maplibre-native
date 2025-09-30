@@ -108,8 +108,12 @@ struct BackgroundPatternDrawableUnionUBO {
     matrix_col1: vec4<f32>,
     matrix_col2: vec4<f32>,
     matrix_col3: vec4<f32>,
-    pixel_coords: vec4<f32>,
-    params: vec4<f32>,
+    pixel_coord_upper: vec2<f32>,
+    pixel_coord_lower: vec2<f32>,
+    tile_units_to_pixels: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct BackgroundPatternPropsUBO {
@@ -121,7 +125,7 @@ struct BackgroundPatternPropsUBO {
     pattern_size_b: vec2<f32>,
     scale_a: f32,
     scale_b: f32,
-    mix_val: f32,
+    mix: f32,
     opacity: f32,
     pad1: f32,
     pad2: f32,
@@ -134,7 +138,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundPatternDrawableUnionUBO>;
-@group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;
+@group(0) @binding(4) var<uniform> props: BackgroundPatternPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -150,28 +154,23 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Use get_pattern_pos helper function for pattern positioning
     out.pos_a = get_pattern_pos(
-        drawable.pixel_coords.xy,
-        drawable.pixel_coords.zw,
+        drawable.pixel_coord_upper,
+        drawable.pixel_coord_lower,
         props.scale_a * props.pattern_size_a,
-        drawable.params.x,
+        drawable.tile_units_to_pixels,
         pos
     );
 
     out.pos_b = get_pattern_pos(
-        drawable.pixel_coords.xy,
-        drawable.pixel_coords.zw,
+        drawable.pixel_coord_upper,
+        drawable.pixel_coord_lower,
         props.scale_b * props.pattern_size_b,
-        drawable.params.x,
+        drawable.tile_units_to_pixels,
         pos
     );
 
     let clip = matrix * vec4<f32>(pos, 0.0, 1.0);
-    let invW = 1.0 / clip.w;
-    let ndcZ = (clip.z * invW) * 0.5 + 0.5;
-    out.position = vec4<f32>(clip.x * invW,
-                             clip.y * invW,
-                             ndcZ,
-                             1.0);
+    out.position = clip;
     return out;
 }
 )";
@@ -191,7 +190,7 @@ struct BackgroundPatternPropsUBO {
     pattern_size_b: vec2<f32>,
     scale_a: f32,
     scale_b: f32,
-    mix_val: f32,
+    mix: f32,
     opacity: f32,
     pad1: f32,
     pad2: f32,
@@ -202,8 +201,8 @@ struct GlobalPaintParamsUBO {
     // other fields...
 };
 
-@group(0) @binding(4) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(4) var<uniform> props: BackgroundPatternPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 
@@ -222,7 +221,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
 
     // Mix patterns and apply opacity
-    return mix(color_a, color_b, props.mix_val) * props.opacity;
+    return mix(color_a, color_b, props.mix) * props.opacity;
 }
 )";
 };
