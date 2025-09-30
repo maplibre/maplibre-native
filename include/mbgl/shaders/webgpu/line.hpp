@@ -13,7 +13,6 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
-
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) pos_normal: vec2<i32>,  // packed position and normal
@@ -47,14 +46,6 @@ struct LineDrawableUBO {
     width_t: f32,
     pad1: f32,
 };
-
-const LINE_EXPRESSION_COLOR: u32 = 1u << 0u;
-const LINE_EXPRESSION_OPACITY: u32 = 1u << 1u;
-const LINE_EXPRESSION_BLUR: u32 = 1u << 2u;
-const LINE_EXPRESSION_WIDTH: u32 = 1u << 3u;
-const LINE_EXPRESSION_GAPWIDTH: u32 = 1u << 4u;
-const LINE_EXPRESSION_FLOORWIDTH: u32 = 1u << 5u;
-const LINE_EXPRESSION_OFFSET: u32 = 1u << 6u;
 
 struct LineEvaluatedPropsUBO {
     color: vec4<f32>,
@@ -112,51 +103,43 @@ fn main(in: VertexInput) -> VertexOutput {
     var normal = raw_pos - pos * 2.0;
     normal.y = normal.y * 2.0 - 1.0;
 
-    let mask = props.expressionMask;
-
     var color: vec4<f32>;
-    if ((mask & LINE_EXPRESSION_COLOR) == 0u) {
-        color = props.color;
-    } else {
-        color = unpack_mix_color(in.color, drawable.color_t);
-    }
+    color = props.color;
+#ifndef HAS_UNIFORM_u_color
+    color = unpack_mix_color(in.color, drawable.color_t);
+#endif
 
     var blur: f32;
-    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
-        blur = props.blur;
-    } else {
-        blur = unpack_mix_float(in.blur, drawable.blur_t);
-    }
+    blur = props.blur;
+#ifndef HAS_UNIFORM_u_blur
+    blur = unpack_mix_float(in.blur, drawable.blur_t);
+#endif
 
     var opacity: f32;
-    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
-        opacity = props.opacity;
-    } else {
-        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    }
+    opacity = props.opacity;
+#ifndef HAS_UNIFORM_u_opacity
+    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 
     var gapwidth: f32;
-    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
-        gapwidth = props.gapwidth;
-    } else {
-        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
-    }
+    gapwidth = props.gapwidth;
+#ifndef HAS_UNIFORM_u_gapwidth
+    gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+#endif
     gapwidth = gapwidth / 2.0;
 
     var offset: f32;
-    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
-        offset = props.offset;
-    } else {
-        offset = unpack_mix_float(in.offset, drawable.offset_t);
-    }
+    offset = props.offset;
+#ifndef HAS_UNIFORM_u_offset
+    offset = unpack_mix_float(in.offset, drawable.offset_t);
+#endif
     offset = -offset;
 
     var width: f32;
-    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
-        width = props.width;
-    } else {
-        width = unpack_mix_float(in.width, drawable.width_t);
-    }
+    width = props.width;
+#ifndef HAS_UNIFORM_u_width
+    width = unpack_mix_float(in.width, drawable.width_t);
+#endif
 
     let halfwidth = width * 0.5;
     let inset = gapwidth + select(0.0, antialiasing, gapwidth > 0.0);
