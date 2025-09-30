@@ -70,6 +70,13 @@ void Context::reduceMemoryUsage() {
     // Free cached resources to reduce memory
 }
 
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
+                                                                       gfx::TextureChannelDataType type,
+                                                                       bool depth,
+                                                                       bool stencil) {
+    return std::make_unique<OffscreenTexture>(*this, size, type, depth, stencil);
+}
+
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
     return std::make_unique<OffscreenTexture>(*this, size, type, true, false);
 }

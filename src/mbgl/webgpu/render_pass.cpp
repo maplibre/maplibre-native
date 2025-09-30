@@ -43,6 +43,12 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     }
 
     // Access the renderable resource associated with this pass
+    // Check if resource exists before accessing it
+    if (!descriptor.renderable.hasResource()) {
+        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: No renderable resource available");
+        return;
+    }
+
     auto& renderableResource = descriptor.renderable.getResource<RenderableResource>();
     renderableResource.bind();
 
@@ -147,6 +153,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         wgpuRenderPassEncoderSetViewport(
             impl->encoder, 0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height), 0.0f, 1.0f);
         wgpuRenderPassEncoderSetScissorRect(impl->encoder, 0, 0, size.width, size.height);
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "WebGPU: Render pass created successfully with " + std::string(name ? name : "unnamed"));
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to begin render pass");
         impl->colorView = nullptr;

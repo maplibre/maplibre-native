@@ -31,27 +31,25 @@ public:
         colorTexture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
-        // Create depth texture if needed
-        if (depth) {
+        // Create depth/stencil texture if needed
+        // WebGPU requires a combined depth-stencil texture when both are needed
+        if (depth || stencil) {
             depthTexture = context.createTexture2D();
             depthTexture->setSize(size);
-            depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
+
+            // Use combined depth-stencil format when both are needed
+            if (depth && stencil) {
+                depthTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
+            } else if (depth) {
+                depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
+            } else {
+                depthTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
+            }
+
             if (auto* webgpuDepth = static_cast<Texture2D*>(depthTexture.get())) {
                 webgpuDepth->setUsage(WGPUTextureUsage_RenderAttachment);
             }
             depthTexture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        }
-
-        // Create stencil texture if needed
-        if (stencil) {
-            stencilTexture = context.createTexture2D();
-            stencilTexture->setSize(size);
-            stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
-            if (auto* webgpuStencil = static_cast<Texture2D*>(stencilTexture.get())) {
-                webgpuStencil->setUsage(WGPUTextureUsage_RenderAttachment);
-            }
-            stencilTexture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         }
     }
@@ -64,10 +62,6 @@ public:
 
         if (depthTexture) {
             depthTexture->create();
-        }
-
-        if (stencilTexture) {
-            stencilTexture->create();
         }
     }
 
@@ -110,21 +104,12 @@ public:
             texture.create();
             return texture.getTextureView();
         }
-        if (stencilTexture) {
-            auto& texture = static_cast<Texture2D&>(*stencilTexture);
-            texture.create();
-            return texture.getTextureView();
-        }
         return nullptr;
     }
 
     std::optional<wgpu::TextureFormat> getDepthStencilTextureFormat() const override {
         if (depthTexture) {
             const auto* texture = static_cast<const Texture2D*>(depthTexture.get());
-            return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
-        }
-        if (stencilTexture) {
-            const auto* texture = static_cast<const Texture2D*>(stencilTexture.get());
             return static_cast<wgpu::TextureFormat>(texture->getNativeFormat());
         }
         return std::nullopt;
@@ -136,17 +121,22 @@ public:
         auto data = std::make_unique<uint8_t[]>(dataSize);
 
         // WebGPU texture readback requires:
-        // 1. Create a buffer with MAP_READ usage
-        // 2. Copy texture to buffer using command encoder
-        // 3. Map the buffer and read the data
+        // 1. Ensure all rendering commands are submitted and completed
+        // 2. Create a buffer with MAP_READ usage
+        // 3. Copy texture to buffer using command encoder
+        // 4. Map the buffer and read the data
         // This is an async operation in WebGPU, but we need sync behavior here
 
         auto& backend = static_cast<const RendererBackend&>(context.getBackend());
         auto device = static_cast<WGPUDevice>(backend.getDevice());
         auto queue = static_cast<WGPUQueue>(backend.getQueue());
         if (!device || !queue) {
+            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: No device or queue available for readback");
             return {size, std::move(data)};
         }
+
+        // Process all pending device operations to ensure rendering is complete
+        wgpuDeviceTick(device);
 
         // Create staging buffer for readback
         WGPUBufferDescriptor bufferDesc = {};
@@ -157,6 +147,7 @@ public:
 
         WGPUBuffer stagingBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         if (!stagingBuffer) {
+            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create staging buffer");
             return {size, std::move(data)};
         }
 
@@ -181,31 +172,31 @@ public:
 
                 WGPUExtent3D copySize = {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), 1};
 
-                // Copy texture to buffer - function name varies between Dawn and wgpu
-                // Using the standard C API name
                 wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &copySize);
 
                 WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, nullptr);
                 wgpuQueueSubmit(queue, 1, &commands);
                 wgpuCommandBufferRelease(commands);
+            } else {
+                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Color texture is null");
             }
             wgpuCommandEncoderRelease(encoder);
+        } else {
+            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create command encoder");
         }
 
         // Map buffer and read data (blocking)
-        // Use Dawn's new async API with WGPUBufferMapCallbackInfo
+        // Use WaitAny for proper synchronous blocking instead of polling
         struct MapContext {
-            bool completed = false;
             WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
         };
         MapContext mapContext;
 
         WGPUBufferMapCallbackInfo callbackInfo = {};
-        callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+        callbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
         callbackInfo.callback =
             [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
                 auto* ctx = static_cast<MapContext*>(userdata1);
-                ctx->completed = true;
                 ctx->status = status;
                 (void)message;
                 (void)userdata2;
@@ -215,33 +206,32 @@ public:
 
         WGPUFuture future = wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize, callbackInfo);
 
-        // Proper async handling with wgpuInstanceWaitAny
-        WGPUInstance instance = static_cast<WGPUInstance>(backend.getInstance());
+        // Use WaitAny to block until mapping completes
+        auto instance = static_cast<WGPUInstance>(backend.getInstance());
         if (instance) {
             WGPUFutureWaitInfo waitInfo = {};
             waitInfo.future = future;
             waitInfo.completed = false;
 
-            // Wait for the async operation with a 5 second timeout
-            uint64_t timeout_ns = 5000000000; // 5 seconds in nanoseconds
-            WGPUWaitStatus waitStatus = wgpuInstanceWaitAny(instance, 1, &waitInfo, timeout_ns);
+            // Wait indefinitely for the mapping to complete
+            WGPUWaitStatus waitStatus = wgpuInstanceWaitAny(instance, 1, &waitInfo, UINT64_MAX);
 
-            if (waitStatus == WGPUWaitStatus_Success) {
-                // The callback should have been invoked
-                if (!mapContext.completed) {
-                }
-            } else if (waitStatus == WGPUWaitStatus_TimedOut) {
-            } else {
+            if (waitStatus != WGPUWaitStatus_Success || !waitInfo.completed) {
+                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Buffer mapping wait failed");
             }
-        } else {
         }
 
         // Check if mapping was successful and read the data
-        if (mapContext.completed && mapContext.status == WGPUMapAsyncStatus_Success) {
+        if (mapContext.status == WGPUMapAsyncStatus_Success) {
             const void* mappedData = wgpuBufferGetConstMappedRange(stagingBuffer, 0, dataSize);
             if (mappedData) {
                 std::memcpy(data.get(), mappedData, dataSize);
+            } else {
+                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to get mapped range");
             }
+        } else {
+            mbgl::Log::Error(mbgl::Event::Render,
+                             "WebGPU: Buffer mapping failed with status: " + std::to_string(mapContext.status));
         }
 
         wgpuBufferUnmap(stagingBuffer);
@@ -268,10 +258,6 @@ private:
             static_cast<Texture2D&>(*depthTexture).setSize(newSize);
             static_cast<Texture2D&>(*depthTexture).create();
         }
-        if (stencilTexture) {
-            static_cast<Texture2D&>(*stencilTexture).setSize(newSize);
-            static_cast<Texture2D&>(*stencilTexture).create();
-        }
 
         if (auto* color = static_cast<Texture2D*>(colorTexture.get())) {
             color->create();
@@ -287,7 +273,6 @@ private:
     const gfx::TextureChannelDataType type;
     gfx::Texture2DPtr colorTexture;
     gfx::Texture2DPtr depthTexture;
-    gfx::Texture2DPtr stencilTexture;
     std::function<void(const Size&)> sizeListener;
 };
 
