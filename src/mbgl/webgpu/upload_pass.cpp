@@ -16,15 +16,6 @@ namespace webgpu {
 
 UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
-    // Metal pattern: get resource from renderable and bind it
-    // In WebGPU, this is optional as we may not always have a RenderableResource
-    try {
-        auto& resource = renderable.getResource<RenderableResource>();
-        resource.bind();
-    } catch (...) {
-        // No RenderableResource available, which is fine for WebGPU
-    }
-
     // Push debug groups (Metal pattern)
     commandEncoder.visitDebugGroups([this](const auto& group) {
         debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, group.c_str()});
