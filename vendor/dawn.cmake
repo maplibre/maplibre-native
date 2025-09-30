@@ -8,69 +8,74 @@ if(NOT MLN_WITH_WEBGPU)
     return()
 endif()
 
-message(STATUS "Configuring Dawn WebGPU implementation")
+if(POLICY CMP0169)
+    cmake_policy(SET CMP0169 OLD)
+endif()
 
-# Dawn library paths (bundled in the repository)
-set(DAWN_DIR "${PROJECT_SOURCE_DIR}/vendor/dawn")
-set(DAWN_BUILD_DIR "${DAWN_DIR}/build")
+set(MLN_DAWN_GIT_TAG "main" CACHE STRING "Git ref (branch, tag, or commit) used when fetching Dawn")
+
+message(STATUS "Configuring Dawn WebGPU implementation (${MLN_DAWN_GIT_TAG})")
+
+set(_mln_dawn_source_dir "${PROJECT_SOURCE_DIR}/vendor/dawn")
+set(_mln_dawn_binary_dir "${CMAKE_BINARY_DIR}/vendor/dawn/build")
+
+
+if(EXISTS "${_mln_dawn_source_dir}/CMakeLists.txt")
+    set(FETCHCONTENT_SOURCE_DIR_MAPLIBRE_DAWN ${_mln_dawn_source_dir})
+endif()
+
+include(FetchContent)
+
+FetchContent_Declare(maplibre_dawn
+    GIT_REPOSITORY https://github.com/google/dawn.git
+    GIT_TAG ${MLN_DAWN_GIT_TAG}
+    GIT_SUBMODULES ""
+)
+
+FetchContent_GetProperties(maplibre_dawn)
+if(NOT maplibre_dawn_POPULATED)
+    message(STATUS "Fetching Dawn sources into ${_mln_dawn_source_dir}")
+    FetchContent_Populate(maplibre_dawn)
+
+    if(NOT EXISTS "${_mln_dawn_source_dir}/CMakeLists.txt")
+        file(REMOVE_RECURSE "${_mln_dawn_source_dir}")
+        file(RENAME "${maplibre_dawn_SOURCE_DIR}" "${_mln_dawn_source_dir}")
+        # Make future configure runs reuse the relocated checkout.
+        set(FETCHCONTENT_SOURCE_DIR_MAPLIBRE_DAWN "${_mln_dawn_source_dir}" CACHE PATH "" FORCE)
+    endif()
+endif()
+
+set(maplibre_dawn_SOURCE_DIR "${_mln_dawn_source_dir}")
+
+set(DAWN_DIR "${_mln_dawn_source_dir}")
+set(DAWN_BUILD_DIR "${_mln_dawn_binary_dir}")
+
+# Configure Dawn the same way as the quickstart recommends.
+set(DAWN_FETCH_DEPENDENCIES ON CACHE BOOL "Use Dawn's dependency bootstrapper" FORCE)
+set(DAWN_ENABLE_INSTALL ON CACHE BOOL "Generate install targets for Dawn" FORCE)
+set(DAWN_BUILD_SAMPLES OFF CACHE BOOL "Disable Dawn samples" FORCE)
+set(DAWN_BUILD_TESTS OFF CACHE BOOL "Disable Dawn tests" FORCE)
+set(DAWN_BUILD_BENCHMARKS OFF CACHE BOOL "Disable Dawn benchmarks" FORCE)
+set(DAWN_BUILD_NODE_BINDINGS OFF CACHE BOOL "Disable Dawn Node bindings" FORCE)
+set(DAWN_WERROR OFF CACHE BOOL "Disable -Werror in Dawn" FORCE)
+
+if(NOT TARGET dawn::webgpu_dawn)
+    if(APPLE)
+        enable_language(OBJC OBJCXX)
+    endif()
+    add_subdirectory(${DAWN_DIR} ${DAWN_BUILD_DIR})
+endif()
 
 add_library(mbgl-vendor-dawn INTERFACE)
 
-# Publish Dawn include directories to consumers
+target_link_libraries(mbgl-vendor-dawn INTERFACE dawn::webgpu_dawn)
+
 target_include_directories(mbgl-vendor-dawn
     INTERFACE
         ${DAWN_DIR}/include
         ${DAWN_BUILD_DIR}/gen/include
-        ${DAWN_DIR}/src  # Internal headers needed by bundled build
 )
 
-# Link core Dawn libraries (order matters for static linking)
-set(DAWN_CORE_LIBS
-    ${DAWN_BUILD_DIR}/src/dawn/native/libwebgpu_dawn.a
-    ${DAWN_BUILD_DIR}/src/dawn/libdawn_proc.a
-    ${DAWN_BUILD_DIR}/src/dawn/platform/libdawn_platform.a
-    ${DAWN_BUILD_DIR}/src/dawn/common/libdawn_common.a
-)
-
-if(EXISTS "${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a")
-    list(APPEND DAWN_CORE_LIBS ${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a)
-endif()
-
-if(EXISTS "${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a")
-    list(APPEND DAWN_CORE_LIBS ${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a)
-endif()
-
-if(DAWN_CORE_LIBS)
-    target_link_libraries(mbgl-vendor-dawn INTERFACE ${DAWN_CORE_LIBS})
-endif()
-
-# Link Tint libraries (shader compiler)
-file(GLOB TINT_LIBS "${DAWN_BUILD_DIR}/src/tint/*.a")
-if(TINT_LIBS)
-    target_link_libraries(mbgl-vendor-dawn INTERFACE ${TINT_LIBS})
-endif()
-
-# Link abseil libraries (Dawn dependency)
-file(GLOB_RECURSE ABSEIL_LIBS "${DAWN_BUILD_DIR}/third_party/abseil/*.a")
-if(ABSEIL_LIBS)
-    target_link_libraries(mbgl-vendor-dawn INTERFACE ${ABSEIL_LIBS})
-endif()
-
-# Link other third party libraries
-file(GLOB THIRD_PARTY_LIBS
-    "${DAWN_BUILD_DIR}/third_party/protobuf/*.a"
-    "${DAWN_BUILD_DIR}/third_party/glslang/**/*.a"
-)
-if(THIRD_PARTY_LIBS)
-    target_link_libraries(mbgl-vendor-dawn INTERFACE ${THIRD_PARTY_LIBS})
-endif()
-
-# Platform-specific libraries
-if(NOT APPLE)
-    target_link_libraries(mbgl-vendor-dawn INTERFACE dl pthread)
-endif()
-
-# Define that we're using Dawn
 target_compile_definitions(mbgl-vendor-dawn
     INTERFACE
         MLN_WITH_DAWN=1
@@ -83,9 +88,6 @@ else()
     target_compile_definitions(mbgl-vendor-dawn INTERFACE DAWN_ENABLE_BACKEND_VULKAN=1)
 endif()
 
-# Dawn's generated C++ headers rely on reinterpret casts that trigger
-# -Wstrict-aliasing diagnostics under GCC; silence these when the Dawn
-# backend is enabled so the build doesn't fail with -Werror.
 target_compile_options(mbgl-vendor-dawn INTERFACE -Wno-strict-aliasing -Wno-error=strict-aliasing)
 
 set_target_properties(
