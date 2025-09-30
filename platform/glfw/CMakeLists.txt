@@ -81,23 +81,8 @@ if(MLN_WITH_WEBGPU)
             PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
         )
     endif()
-    # Add Dawn include directories for GLFW
-    target_include_directories(mbgl-glfw SYSTEM PRIVATE
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/include
-        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/gen/include
-    )
-    # Link Dawn libraries
-    set(DAWN_LIB_DIR ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn)
-    target_link_libraries(mbgl-glfw PRIVATE
-        ${DAWN_LIB_DIR}/native/libwebgpu_dawn.a
-        ${DAWN_LIB_DIR}/libdawn_proc.a
-        ${DAWN_LIB_DIR}/platform/libdawn_platform.a
-        ${DAWN_LIB_DIR}/common/libdawn_common.a
-    )
-
-    set(DAWN_GLFW_LIB ${DAWN_LIB_DIR}/glfw/libdawn_glfw.a)
-    if(EXISTS ${DAWN_GLFW_LIB})
-        target_link_libraries(mbgl-glfw PRIVATE ${DAWN_GLFW_LIB})
+    if(TARGET mbgl-vendor-dawn)
+        target_link_libraries(mbgl-glfw PRIVATE mbgl-vendor-dawn)
     endif()
 endif()
 
