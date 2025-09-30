@@ -41,7 +41,7 @@ struct CircleEvaluatedPropsUBO {
     stroke_opacity: f32,
     scale_with_map: i32,
     pitch_with_map: i32,
-    expression_mask: f32,
+    pad1: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -60,14 +60,6 @@ struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
 };
-
-const CIRCLE_EXPRESSION_COLOR: u32 = 1u << 0u;
-const CIRCLE_EXPRESSION_RADIUS: u32 = 1u << 1u;
-const CIRCLE_EXPRESSION_BLUR: u32 = 1u << 2u;
-const CIRCLE_EXPRESSION_OPACITY: u32 = 1u << 3u;
-const CIRCLE_EXPRESSION_STROKE_COLOR: u32 = 1u << 4u;
-const CIRCLE_EXPRESSION_STROKE_WIDTH: u32 = 1u << 5u;
-const CIRCLE_EXPRESSION_STROKE_OPACITY: u32 = 1u << 6u;
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -101,7 +93,6 @@ fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     let drawable = drawableVector[globalIndex.value];
-    let expression_mask = bitcast<u32>(props.expression_mask);
     let scale_with_map = props.scale_with_map != 0;
     let pitch_with_map = props.pitch_with_map != 0;
 
@@ -111,39 +102,39 @@ fn main(in: VertexInput) -> VertexOutput {
     let circle_center = floor(pos_f * 0.5);
 
     var color = props.color;
-    if ((expression_mask & CIRCLE_EXPRESSION_COLOR) != 0u) {
-        color = unpack_mix_color(in.color, drawable.color_t);
-    }
+#ifndef HAS_UNIFORM_u_color
+    color = unpack_mix_color(in.color, drawable.color_t);
+#endif
 
     var radius = props.radius;
-    if ((expression_mask & CIRCLE_EXPRESSION_RADIUS) != 0u) {
-        radius = unpack_mix_float(in.radius, drawable.radius_t);
-    }
+#ifndef HAS_UNIFORM_u_radius
+    radius = unpack_mix_float(in.radius, drawable.radius_t);
+#endif
 
     var blur = props.blur;
-    if ((expression_mask & CIRCLE_EXPRESSION_BLUR) != 0u) {
-        blur = unpack_mix_float(in.blur, drawable.blur_t);
-    }
+#ifndef HAS_UNIFORM_u_blur
+    blur = unpack_mix_float(in.blur, drawable.blur_t);
+#endif
 
     var opacity = props.opacity;
-    if ((expression_mask & CIRCLE_EXPRESSION_OPACITY) != 0u) {
-        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-    }
+#ifndef HAS_UNIFORM_u_opacity
+    opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+#endif
 
     var stroke_color = props.stroke_color;
-    if ((expression_mask & CIRCLE_EXPRESSION_STROKE_COLOR) != 0u) {
-        stroke_color = unpack_mix_color(in.stroke_color, drawable.stroke_color_t);
-    }
+#ifndef HAS_UNIFORM_u_stroke_color
+    stroke_color = unpack_mix_color(in.stroke_color, drawable.stroke_color_t);
+#endif
 
     var stroke_width = props.stroke_width;
-    if ((expression_mask & CIRCLE_EXPRESSION_STROKE_WIDTH) != 0u) {
-        stroke_width = unpack_mix_float(in.stroke_width, drawable.stroke_width_t);
-    }
+#ifndef HAS_UNIFORM_u_stroke_width
+    stroke_width = unpack_mix_float(in.stroke_width, drawable.stroke_width_t);
+#endif
 
     var stroke_opacity = props.stroke_opacity;
-    if ((expression_mask & CIRCLE_EXPRESSION_STROKE_OPACITY) != 0u) {
-        stroke_opacity = unpack_mix_float(in.stroke_opacity, drawable.stroke_opacity_t);
-    }
+#ifndef HAS_UNIFORM_u_stroke_opacity
+    stroke_opacity = unpack_mix_float(in.stroke_opacity, drawable.stroke_opacity_t);
+#endif
 
     let radius_with_stroke = radius + stroke_width;
 
