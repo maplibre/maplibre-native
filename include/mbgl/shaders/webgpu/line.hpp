@@ -93,7 +93,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value].data;
     let ratio = max(drawable.ratio, 1e-6);
     let pixel_ratio = paintParams.pixel_ratio;
-    let antialiasing = 0.5 / pixel_ratio;
+    let antialiasing = (1.0 / pixel_ratio) * 0.5;
 
     // Unpack vertex data
     let a_extrude = vec2<f32>(f32(in.data.x), f32(in.data.y)) - vec2<f32>(128.0, 128.0);
@@ -209,7 +209,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 
     // Calculate the antialiasing fade factor
     let antialiasing = 0.5 / paintParams.pixel_ratio;
-    let blur2 = (in.v_blur + antialiasing) * in.v_gamma_scale;
+    let blur2 = (in.v_blur + (1.0 / paintParams.pixel_ratio)) * in.v_gamma_scale;
     let denom = max(blur2, 1e-6);
     let alpha = clamp(min(dist - (in.v_width2.y - blur2), in.v_width2.x - dist) / denom, 0.0, 1.0);
 
