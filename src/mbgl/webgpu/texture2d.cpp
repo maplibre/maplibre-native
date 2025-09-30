@@ -203,6 +203,11 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 void Texture2D::create() noexcept {
+    // If texture already exists, don't recreate it
+    if (texture && textureView) {
+        return;
+    }
+
     // Release old resources if they exist
     if (textureView) {
         wgpuTextureViewRelease(textureView);
