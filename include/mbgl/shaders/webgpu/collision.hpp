@@ -39,8 +39,21 @@ struct CollisionTilePropsUBO {
     pad1: f32,
 };
 
-@group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
+@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -49,8 +62,10 @@ fn main(in: VertexInput) -> VertexOutput {
     let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
     let camera_to_anchor_distance = projected_point.w;
 
-    // Assuming camera_to_center_distance is 1.0 for now
-    let collision_perspective_ratio = clamp(0.5 + 0.5 * (1.0 / camera_to_anchor_distance), 0.0, 4.0);
+    let collision_perspective_ratio = clamp(
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
+        0.0,
+        4.0);
 
     out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
     let extrude_shift = vec2<f32>(f32(in.extrude.x), f32(in.extrude.y)) + in.shift;
@@ -124,8 +139,21 @@ struct CollisionTilePropsUBO {
     pad1: f32,
 };
 
-@group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
+@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -136,20 +164,23 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
     let camera_to_anchor_distance = projected_point.w;
-    let collision_perspective_ratio = clamp(0.5 + 0.5 * (1.0 / camera_to_anchor_distance), 0.0, 4.0);
-
-    let extrude_vec = vec2<f32>(f32(in.extrude.x) / 256.0 - 128.0, f32(in.extrude.y) / 256.0 - 128.0);
-
-    out.position = drawable.matrix * vec4<f32>(
-        f32(in.anchor_position.x) + extrude_vec.x * radius,
-        f32(in.anchor_position.y) + extrude_vec.y * radius,
+    let collision_perspective_ratio = clamp(
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0,
-        1.0
-    );
+        4.0);
 
+    let padding_factor = 1.2;
+    let raw_radius = abs(f32(in.extrude.y));
+    let extrude_vec = vec2<f32>(f32(in.extrude.x), f32(in.extrude.y)) * padding_factor;
+    var position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    position.xy += vec2<f32>(f32(in.extrude.x), f32(in.extrude.y)) * tile_props.extrude_scale * padding_factor *
+                   position.w * collision_perspective_ratio;
+
+    out.position = position;
     out.placed = f32(in.placed);
-    out.radius = radius;
+    out.radius = raw_radius;
     out.extrude = extrude_vec;
+    out.extrude_scale = tile_props.extrude_scale * paintParams.camera_to_center_distance * collision_perspective_ratio;
 
     return out;
 }
@@ -160,7 +191,16 @@ struct FragmentInput {
     @location(0) placed: f32,
     @location(1) radius: f32,
     @location(2) extrude: vec2<f32>,
+    @location(3) extrude_scale: vec2<f32>,
 };
+
+struct CollisionTilePropsUBO {
+    extrude_scale: vec2<f32>,
+    overscale_factor: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -174,13 +214,15 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         color = vec4<f32>(0.0, 0.0, 1.0, 0.5) * alpha;
     }
 
-    // Add circle outline effect
-    let dist = length(in.extrude);
-    if (dist > 1.0) {
-        discard;
-    }
+    let extrude_scale_length = length(in.extrude_scale);
+    let extrude_length = length(in.extrude) * extrude_scale_length;
+    let stroke_width = 15.0 * extrude_scale_length / tile_props.overscale_factor;
+    let radius = in.radius * extrude_scale_length;
 
-    return color;
+    let distance_to_edge = abs(extrude_length - radius);
+    let opacity_t = smoothstep(-stroke_width, 0.0, -distance_to_edge);
+
+    return opacity_t * color;
 }
 )";
 };
