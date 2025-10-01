@@ -7,6 +7,10 @@
 #include <cstring>
 #include <functional>
 
+namespace {
+constexpr uint32_t bytesPerRowAlignment = 256u;
+}
+
 namespace mbgl {
 namespace webgpu {
 
@@ -117,8 +121,13 @@ public:
 
     PremultipliedImage readStillImage() {
         // Read back the color texture data
-        auto dataSize = colorTexture->getDataSize();
-        auto data = std::make_unique<uint8_t[]>(dataSize);
+        constexpr uint32_t bytesPerPixel = 4; // RGBA8 output
+        const uint32_t rowStride = static_cast<uint32_t>(size.width) * bytesPerPixel;
+        const uint32_t alignedRowStride = ((rowStride + bytesPerRowAlignment - 1) / bytesPerRowAlignment) *
+                                          bytesPerRowAlignment;
+        const uint64_t alignedDataSize = static_cast<uint64_t>(alignedRowStride) * size.height;
+
+        auto data = std::make_unique<uint8_t[]>(static_cast<size_t>(rowStride) * size.height);
 
         // WebGPU texture readback requires:
         // 1. Ensure all rendering commands are submitted and completed
@@ -142,7 +151,7 @@ public:
         WGPUBufferDescriptor bufferDesc = {};
         WGPUStringView bufferLabel = {"Readback Buffer", strlen("Readback Buffer")};
         bufferDesc.label = bufferLabel;
-        bufferDesc.size = dataSize;
+        bufferDesc.size = alignedDataSize;
         bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
 
         WGPUBuffer stagingBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
@@ -167,7 +176,7 @@ public:
                 WGPUTexelCopyBufferInfo dst = {};
                 dst.buffer = stagingBuffer;
                 dst.layout.offset = 0;
-                dst.layout.bytesPerRow = size.width * 4; // Assuming RGBA
+                dst.layout.bytesPerRow = alignedRowStride;
                 dst.layout.rowsPerImage = size.height;
 
                 WGPUExtent3D copySize = {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), 1};
@@ -204,7 +213,7 @@ public:
         callbackInfo.userdata1 = &mapContext;
         callbackInfo.userdata2 = nullptr;
 
-        WGPUFuture future = wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize, callbackInfo);
+        WGPUFuture future = wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, alignedDataSize, callbackInfo);
 
         // Use WaitAny to block until mapping completes
         auto instance = static_cast<WGPUInstance>(backend.getInstance());
@@ -223,9 +232,18 @@ public:
 
         // Check if mapping was successful and read the data
         if (mapContext.status == WGPUMapAsyncStatus_Success) {
-            const void* mappedData = wgpuBufferGetConstMappedRange(stagingBuffer, 0, dataSize);
+            const auto* mappedData = static_cast<const uint8_t*>(wgpuBufferGetConstMappedRange(stagingBuffer, 0, alignedDataSize));
             if (mappedData) {
-                std::memcpy(data.get(), mappedData, dataSize);
+                if (alignedRowStride == rowStride) {
+                    std::memcpy(data.get(), mappedData, static_cast<size_t>(alignedDataSize));
+                } else {
+                    auto* dstPtr = data.get();
+                    for (uint32_t row = 0; row < size.height; ++row) {
+                        std::memcpy(dstPtr + static_cast<size_t>(row) * rowStride,
+                                    mappedData + static_cast<size_t>(row) * alignedRowStride,
+                                    rowStride);
+                    }
+                }
             } else {
                 mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to get mapped range");
             }
