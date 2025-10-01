@@ -313,7 +313,8 @@ fn main(in: VertexInput) -> VertexOutput {
     let mask = props.expressionMask;
 
     // Constants
-    let ANTIALIASING = 1.0 / 2.0;
+    let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
+    let antialiasing = 0.5 / pixel_ratio;
     let MAX_LINE_DISTANCE = 32767.0;
 
     // Unpack vertex data
@@ -327,46 +328,37 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    var blur: f32;
-    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
+    var blur = unpack_mix_float(in.blur, drawable.blur_t);
+    if ((mask & LINE_EXPRESSION_BLUR) != 0u) {
         blur = props.blur;
-    } else {
-        blur = unpack_mix_float(in.blur, drawable.blur_t);
     }
 
-    var opacity: f32;
-    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
+    var opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    if ((mask & LINE_EXPRESSION_OPACITY) != 0u) {
         opacity = props.opacity;
-    } else {
-        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
     }
 
-    var gapwidth: f32;
-    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
+    var gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    if ((mask & LINE_EXPRESSION_GAPWIDTH) != 0u) {
         gapwidth = props.gapwidth;
-    } else {
-        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
     }
     gapwidth = gapwidth / 2.0;
 
-    var offset: f32;
-    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
+    var offset = unpack_mix_float(in.offset, drawable.offset_t);
+    if ((mask & LINE_EXPRESSION_OFFSET) != 0u) {
         offset = props.offset;
-    } else {
-        offset = unpack_mix_float(in.offset, drawable.offset_t);
     }
     offset = -offset;
 
-    var width: f32;
-    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
+    var width = unpack_mix_float(in.width, drawable.width_t);
+    if ((mask & LINE_EXPRESSION_WIDTH) != 0u) {
         width = props.width;
-    } else {
-        width = unpack_mix_float(in.width, drawable.width_t);
     }
 
     let halfwidth = width / 2.0;
-    let inset = gapwidth + select(0.0, ANTIALIASING, gapwidth > 0.0);
-    let outset = gapwidth + halfwidth * select(1.0, 2.0, gapwidth > 0.0) + select(0.0, ANTIALIASING, halfwidth != 0.0);
+    let inset = gapwidth + select(0.0, antialiasing, gapwidth > 0.0);
+    let outset = gapwidth + halfwidth * select(1.0, 2.0, gapwidth > 0.0) +
+                 select(0.0, antialiasing, halfwidth != 0.0);
 
     // Scale the extrusion vector down to a normal and then up by the line width
     let dist = outset * a_extrude * LINE_NORMAL_SCALE;
@@ -405,6 +397,19 @@ struct FragmentInput {
     @location(5) v_opacity: f32,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(1) @binding(0) var gradient_sampler: sampler;
 @group(1) @binding(1) var gradient_texture: texture_2d<f32>;
 
@@ -414,7 +419,8 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let dist = length(in.v_normal) * in.v_width2.x;
 
     // Calculate the antialiasing fade factor
-    let blur2 = (in.v_blur + 1.0 / 2.0) * in.v_gamma_scale;
+    let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
+    let blur2 = (in.v_blur + 1.0 / pixel_ratio) * in.v_gamma_scale;
     let alpha = clamp(min(dist - (in.v_width2.y - blur2), in.v_width2.x - dist) / blur2, 0.0, 1.0);
 
     // Sample gradient texture
@@ -844,7 +850,6 @@ fn main(in: VertexInput) -> VertexOutput {
     let mask = props.expressionMask;
 
     // Constants
-    let ANTIALIASING = 1.0 / 2.0;
     let LINE_DISTANCE_SCALE = 2.0;
 
     // Unpack vertex data
@@ -858,60 +863,50 @@ fn main(in: VertexInput) -> VertexOutput {
     let v_normal = vec2<f32>(normal.x, normal.y * 2.0 - 1.0);
 
     // Unpack attributes using helper functions
-    var color: vec4<f32>;
-    if ((mask & LINE_EXPRESSION_COLOR) == 0u) {
+    var color = unpack_mix_color(in.color, drawable.color_t);
+    if ((mask & LINE_EXPRESSION_COLOR) != 0u) {
         color = props.color;
-    } else {
-        color = unpack_mix_color(in.color, drawable.color_t);
     }
 
-    var blur: f32;
-    if ((mask & LINE_EXPRESSION_BLUR) == 0u) {
+    var blur = unpack_mix_float(in.blur, drawable.blur_t);
+    if ((mask & LINE_EXPRESSION_BLUR) != 0u) {
         blur = props.blur;
-    } else {
-        blur = unpack_mix_float(in.blur, drawable.blur_t);
     }
 
-    var opacity: f32;
-    if ((mask & LINE_EXPRESSION_OPACITY) == 0u) {
+    var opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    if ((mask & LINE_EXPRESSION_OPACITY) != 0u) {
         opacity = props.opacity;
-    } else {
-        opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
     }
 
-    var gapwidth: f32;
-    if ((mask & LINE_EXPRESSION_GAPWIDTH) == 0u) {
+    var gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
+    if ((mask & LINE_EXPRESSION_GAPWIDTH) != 0u) {
         gapwidth = props.gapwidth;
-    } else {
-        gapwidth = unpack_mix_float(in.gapwidth, drawable.gapwidth_t);
     }
     gapwidth = gapwidth / 2.0;
 
-    var offset: f32;
-    if ((mask & LINE_EXPRESSION_OFFSET) == 0u) {
+    var offset = unpack_mix_float(in.offset, drawable.offset_t);
+    if ((mask & LINE_EXPRESSION_OFFSET) != 0u) {
         offset = props.offset;
-    } else {
-        offset = unpack_mix_float(in.offset, drawable.offset_t);
     }
     offset = -offset;
 
-    var width: f32;
-    if ((mask & LINE_EXPRESSION_WIDTH) == 0u) {
+    var width = unpack_mix_float(in.width, drawable.width_t);
+    if ((mask & LINE_EXPRESSION_WIDTH) != 0u) {
         width = props.width;
-    } else {
-        width = unpack_mix_float(in.width, drawable.width_t);
     }
 
-    var floorwidth: f32;
-    if ((mask & LINE_EXPRESSION_FLOORWIDTH) == 0u) {
+    var floorwidth = unpack_mix_float(in.floorwidth, drawable.floorwidth_t);
+    if ((mask & LINE_EXPRESSION_FLOORWIDTH) != 0u) {
         floorwidth = props.floorwidth;
-    } else {
-        floorwidth = unpack_mix_float(in.floorwidth, drawable.floorwidth_t);
     }
+
+    let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
+    let antialiasing = 0.5 / pixel_ratio;
 
     let halfwidth = width / 2.0;
-    let inset = gapwidth + select(0.0, ANTIALIASING, gapwidth > 0.0);
-    let outset = gapwidth + halfwidth * select(1.0, 2.0, gapwidth > 0.0) + select(0.0, ANTIALIASING, halfwidth != 0.0);
+    let inset = gapwidth + select(0.0, antialiasing, gapwidth > 0.0);
+    let outset = gapwidth + halfwidth * select(1.0, 2.0, gapwidth > 0.0) +
+                 select(0.0, antialiasing, halfwidth != 0.0);
 
     // Scale the extrusion vector
     let dist = outset * a_extrude * LINE_NORMAL_SCALE;
@@ -931,11 +926,11 @@ fn main(in: VertexInput) -> VertexOutput {
     // Calculate texture coordinates
     let tex_a = vec2<f32>(
         v_linesofar * drawable.patternscale_a.x / floorwidth,
-        normal.y * drawable.patternscale_a.y + drawable.tex_y_a
+        v_normal.y * drawable.patternscale_a.y + drawable.tex_y_a
     );
     let tex_b = vec2<f32>(
         v_linesofar * drawable.patternscale_b.x / floorwidth,
-        normal.y * drawable.patternscale_b.y + drawable.tex_y_b
+        v_normal.y * drawable.patternscale_b.y + drawable.tex_y_b
     );
 
     out.position = position;
@@ -973,6 +968,18 @@ struct LineSDFTilePropsUBO {
     pad2: f32,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+};
+
 struct GlobalIndexUBO {
     value: u32,
     pad0: vec3<u32>,
@@ -985,6 +992,7 @@ struct LineSDFTilePropsEntry {
     pad2: vec4<f32>,
 };
 
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsEntry>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var sdf_sampler: sampler;
@@ -998,7 +1006,8 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let dist = length(in.v_normal) * in.v_width2.x;
 
     // Calculate the antialiasing fade factor
-    let blur2 = (in.v_blur + 1.0 / 2.0) * in.v_gamma_scale;
+    let pixel_ratio = max(paintParams.pixel_ratio, 1e-6);
+    let blur2 = (in.v_blur + 1.0 / pixel_ratio) * in.v_gamma_scale;
     let alpha = clamp(min(dist - (in.v_width2.y - blur2), in.v_width2.x - dist) / blur2, 0.0, 1.0);
 
     // Sample SDF texture
