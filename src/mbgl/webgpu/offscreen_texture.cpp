@@ -232,7 +232,8 @@ public:
 
         // Check if mapping was successful and read the data
         if (mapContext.status == WGPUMapAsyncStatus_Success) {
-            const auto* mappedData = static_cast<const uint8_t*>(wgpuBufferGetConstMappedRange(stagingBuffer, 0, alignedDataSize));
+            const auto* mappedData = static_cast<const uint8_t*>(
+                wgpuBufferGetConstMappedRange(stagingBuffer, 0, alignedDataSize));
             if (mappedData) {
                 if (alignedRowStride == rowStride) {
                     std::memcpy(data.get(), mappedData, static_cast<size_t>(alignedDataSize));
