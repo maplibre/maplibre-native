@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::WebGPU> {
     static constexpr auto prelude = R"(
 // Constants
 const PI: f32 = 3.14159265358979323846;
-const LINE_NORMAL_SCALE: f32 = 1.0 / 63.5;  // 1.0 / (127 / 2)
+const LINE_NORMAL_SCALE: f32 = 1.0 / 63.0;  // 1.0 / (127 / 2)
 const MAX_LINE_DISTANCE: f32 = 32767.0;
 const SDF_PX: f32 = 8.0;
 
