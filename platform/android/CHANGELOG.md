@@ -9,7 +9,7 @@
 ### 🐞 Bug fixes
 
 - Manually free bound resources ([#3831](https://github.com/maplibre/maplibre-native/pull/3831)).
-- fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+- Fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
 - Fix crash in camera position ([#3847](https://github.com/maplibre/maplibre-native/pull/3847)).
 
 ## 11.13.5
