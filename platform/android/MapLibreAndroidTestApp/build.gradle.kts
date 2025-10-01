@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         applicationId = "org.maplibre.android.testapp"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 14
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
