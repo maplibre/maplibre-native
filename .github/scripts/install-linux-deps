@@ -14,4 +14,5 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   glslang-dev \
   libbz2-dev \
   libxinerama-dev \
-  libxcursor-dev
+  libxcursor-dev \
+  libxi-dev
