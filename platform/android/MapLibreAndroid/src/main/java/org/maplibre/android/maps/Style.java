@@ -741,8 +741,8 @@ public class Style {
       for (Source source : builder.sources) {
         try {
           addSource(source);
-        } catch (CannotAddSourceException e) {
-          Logger.e(TAG, "Failed to add source", e);
+        } catch (CannotAddSourceException exception) {
+          Logger.e(TAG, "Failed to add source", exception);
         }
       }
 
@@ -759,8 +759,8 @@ public class Style {
             addLayerBelow(layerWrapper.layer, MapLibreConstants.LAYER_ID_ANNOTATIONS);
           }
         }
-      } catch (CannotAddLayerException e) {
-        Logger.e(TAG, "Failed to add layer", e);
+      } catch (CannotAddLayerException exception) {
+        Logger.e(TAG, "Failed to add layer", exception);
       }
 
       for (Builder.ImageWrapper image : builder.images) {
