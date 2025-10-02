@@ -260,8 +260,6 @@ std::unique_ptr<GeometryTileData> VectorMLTTileData::clone() const {
 std::unique_ptr<GeometryTileLayer> VectorMLTTileData::getLayer(const std::string& name) const {
     MLN_TRACE_FUNC();
 
-    // We're parsing this lazily so that we can construct VectorTileData objects
-    // on the main thread without incurring the overhead of parsing immediately.
     if (data && !tile) {
         try {
             mlt::DataView tileData{data->data(), data->size()};
