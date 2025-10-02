@@ -160,12 +160,31 @@ struct CollisionTilePropsUBO {
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    out.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-    out.placed = 1.0;
-    out.not_used = 0.0;
-    out.radius = 1.0;
-    out.extrude = vec2<f32>(0.0, 0.0);
-    out.extrude_scale = vec2<f32>(1.0, 1.0);
+    
+    
+
+    let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
+    let camera_to_anchor_distance = projected_point.w;
+
+    let perspective = max(camera_to_anchor_distance, 1e-6);
+    let collision_perspective_ratio = clamp(
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / perspective),
+        0.0,
+        4.0);
+
+    var position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let padding_factor = 1.2;
+    let extrude_vec = vec2<f32>(f32(in.extrude.x), f32(in.extrude.y));
+    position.x += extrude_vec.x * tile_props.extrude_scale.x * padding_factor * position.w * collision_perspective_ratio;
+    position.y += extrude_vec.y * tile_props.extrude_scale.y * padding_factor * position.w * collision_perspective_ratio;
+
+    out.position = position;
+
+    out.placed = f32(in.placed.x);
+    out.not_used = f32(in.placed.y);
+    out.radius = abs(f32(in.extrude.y));
+    out.extrude = extrude_vec * padding_factor;
+    out.extrude_scale = tile_props.extrude_scale * paintParams.camera_to_center_distance * collision_perspective_ratio;
     return out;
 }
 )";
@@ -199,13 +218,20 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         color = vec4<f32>(0.0, 0.0, 1.0, 0.5) * alpha;
     }
 
-    // Add circle outline effect
-    let dist = length(in.extrude);
-    if (dist > 1.0) {
-        discard;
+    if (in.not_used > 0.5) {
+        color = color * 0.2;
     }
 
-    return color;
+    // Add circle outline effect
+    let extrude_scale_length = max(length(in.extrude_scale), 1e-6);
+    let extrude_length = length(in.extrude) * extrude_scale_length;
+    let overscale = max(tile_props.overscale_factor, 1.0);
+    let stroke_width = 15.0 * extrude_scale_length / overscale;
+    let radius = in.radius * extrude_scale_length;
+    let distance_to_edge = abs(extrude_length - radius);
+    let opacity_t = smoothstep(-stroke_width, 0.0, -distance_to_edge);
+
+    return opacity_t * color;
 }
 )";
 };
