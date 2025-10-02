@@ -58,7 +58,7 @@ const std::array<AttributeInfo, 9> SymbolTextAndIconShaderSource::attributes = {
 
 const std::array<TextureInfo, 2> SymbolTextAndIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
-    TextureInfo{1, idSymbolImageIconTexture},
+    TextureInfo{2, idSymbolImageIconTexture},
 };
 
 } // namespace shaders
