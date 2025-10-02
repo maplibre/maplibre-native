@@ -607,7 +607,9 @@ fn main(in: VertexInput) -> VertexOutput {
     let is_icon = select(1.0, 0.0, is_sdf == SDF);
 
     out.position = position;
-    out.tex = a_tex / select(drawable.texsize, drawable.texsize_icon, is_icon != 0.0);
+
+    let inv_tex = 1.0 / select(drawable.texsize, drawable.texsize_icon, is_icon != 0.0);
+    out.tex = a_tex * inv_tex;
     out.gamma_scale = gamma_scale;
     out.fontScale = fontScale;
     out.fade_opacity = fo;
@@ -694,18 +696,43 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let halo_blur = select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u);
 #endif
 
-    let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
-    let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
-    let fontGamma = in.fontScale * tileProps.gamma_scale;
-    let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
-    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
-    let dist = textureSample(glyph_image, glyph_sampler, in.tex).r;
-    let gamma_scaled = gamma * in.gamma_scale;
-    let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
-    let coverage = alpha * opacity * in.fade_opacity;
-    let outAlpha = color.a * coverage;
+    // return vec4<f32>(in.is_icon, 0.0, 0.0, 1.0);
 
-    return vec4<f32>(color.rgb * coverage, outAlpha);
+    
+    if (in.is_icon == 0.0) {
+
+        let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
+        let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
+        let fontGamma = in.fontScale * tileProps.gamma_scale;
+        let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
+        let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
+        // let dist = textureSample(glyph_image, glyph_sampler, in.tex).r;
+        let gamma_scaled = gamma * in.gamma_scale;
+        // let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+        // let coverage = alpha * opacity * in.fade_opacity;
+        // let outAlpha = color.a * coverage;
+
+        // return vec4<f32>(color.rgb * coverage, outAlpha);
+
+        
+        return vec4<f32>(0.0, 0.0, 1.0, 1.0);
+        
+    } else if (in.is_icon == 1.0) {
+
+
+    
+        // let alpha = opacity * in.fade_opacity;
+        // return textureSample(icon_image, icon_sampler, in.tex) * alpha;
+    
+
+
+
+        // return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+    
+    } else {
+        return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    }
+
 }
 )";
 };
