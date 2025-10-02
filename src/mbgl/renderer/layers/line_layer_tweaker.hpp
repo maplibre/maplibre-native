@@ -71,7 +71,9 @@ protected:
     bool gpuExpressionsUpdated = true;
 #endif // MLN_RENDER_BACKEND_METAL
 
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
     shaders::LineExpressionMask expressionMask = shaders::LineExpressionMask::None;
+#endif
 };
 
 } // namespace mbgl
