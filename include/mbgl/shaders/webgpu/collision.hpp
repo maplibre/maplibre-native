@@ -160,8 +160,8 @@ struct CollisionTilePropsUBO {
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    
-    
+
+
 
     let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
     let camera_to_anchor_distance = projected_point.w;
