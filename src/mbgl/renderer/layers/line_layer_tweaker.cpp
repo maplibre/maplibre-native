@@ -173,7 +173,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .expressionMask = expressionMask,
             .pad1 = 0};
 #else
-        expressionMask = LineExpressionMask::None;
         const LineEvaluatedPropsUBO propsUBO{/*color =*/evaluate<LineColor>(parameters),
                                              /*blur =*/evaluate<LineBlur>(parameters),
                                              /*opacity =*/evaluate<LineOpacity>(parameters),
