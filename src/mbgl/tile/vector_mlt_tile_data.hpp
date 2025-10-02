@@ -24,8 +24,7 @@ public:
 #if MLT_UNPACK_MULTI_GEOMETRY
                          std::uint32_t subIndex_,
 #endif
-                         std::uint32_t extent,
-                         int version);
+                         std::uint32_t extent);
     VectorMLTTileFeature(const VectorMLTTileFeature&) = delete;
     VectorMLTTileFeature(VectorMLTTileFeature&& other)
         : tile(std::move(other.tile)),

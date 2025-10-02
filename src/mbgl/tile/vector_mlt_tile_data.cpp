@@ -18,16 +18,14 @@ VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> t
 #if MLT_UNPACK_MULTI_GEOMETRY
                                            std::uint32_t subIndex_,
 #endif
-                                           std::uint32_t extent_,
-                                           int version_)
+                                           std::uint32_t extent_)
     : tile(std::move(tile_)),
       layer(layer_),
       feature(feature_),
 #if MLT_UNPACK_MULTI_GEOMETRY
       subIndex(subIndex_),
 #endif
-      extent(extent_),
-      version(version_) {
+      extent(extent_) {
 }
 
 FeatureType VectorMLTTileFeature::getType() const {
@@ -241,8 +239,7 @@ std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t 
 #if MLT_UNPACK_MULTI_GEOMETRY
                                                   subIndex,
 #endif
-                                                  layer.getExtent(),
-                                                  layer.getVersion());
+                                                  layer.getExtent());
 }
 
 std::string VectorMLTTileLayer::getName() const {
@@ -268,7 +265,7 @@ std::unique_ptr<GeometryTileLayer> VectorMLTTileData::getLayer(const std::string
     if (data && !tile) {
         try {
             mlt::DataView tileData{data->data(), data->size()};
-            tile = std::make_shared<MapLibreTile>(mlt::Decoder().decodeTile(tileData));
+            tile = std::make_shared<MapLibreTile>(mlt::Decoder().decode(tileData));
         } catch (const std::exception& ex) {
             Log::Warning(Event::ParseTile, "MLT parse failed: " + std::string(ex.what()));
         }
