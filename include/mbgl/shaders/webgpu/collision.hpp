@@ -119,14 +119,28 @@ struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) anchor_position: vec2<i32>,
     @location(5) extrude: vec2<i32>,
-    @location(6) placed: u32,
+    @location(6) placed: vec2<u32>,
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) placed: f32,
-    @location(1) radius: f32,
-    @location(2) extrude: vec2<f32>,
+    @location(1) not_used: f32,
+    @location(2) radius: f32,
+    @location(3) extrude: vec2<f32>,
+    @location(4) extrude_scale: vec2<f32>,
+};
+
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
 };
 
 struct CollisionDrawableUBO {
@@ -139,33 +153,19 @@ struct CollisionTilePropsUBO {
     pad1: f32,
 };
 
-@group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
+@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-
-    let collision_index = f32(in.position.x);
-    let radius = collision_index / 10.0;
-
-    let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
-    let camera_to_anchor_distance = projected_point.w;
-    let collision_perspective_ratio = clamp(0.5 + 0.5 * (1.0 / camera_to_anchor_distance), 0.0, 4.0);
-
-    let extrude_vec = vec2<f32>(f32(in.extrude.x) / 256.0 - 128.0, f32(in.extrude.y) / 256.0 - 128.0);
-
-    out.position = drawable.matrix * vec4<f32>(
-        f32(in.anchor_position.x) + extrude_vec.x * radius,
-        f32(in.anchor_position.y) + extrude_vec.y * radius,
-        0.0,
-        1.0
-    );
-
-    out.placed = f32(in.placed);
-    out.radius = radius;
-    out.extrude = extrude_vec;
-
+    out.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+    out.placed = 1.0;
+    out.not_used = 0.0;
+    out.radius = 1.0;
+    out.extrude = vec2<f32>(0.0, 0.0);
+    out.extrude_scale = vec2<f32>(1.0, 1.0);
     return out;
 }
 )";
@@ -173,9 +173,19 @@ fn main(in: VertexInput) -> VertexOutput {
     static constexpr auto fragment = R"(
 struct FragmentInput {
     @location(0) placed: f32,
-    @location(1) radius: f32,
-    @location(2) extrude: vec2<f32>,
+    @location(1) not_used: f32,
+    @location(2) radius: f32,
+    @location(3) extrude: vec2<f32>,
+    @location(4) extrude_scale: vec2<f32>,
 };
+
+struct CollisionTilePropsUBO {
+    extrude_scale: vec2<f32>,
+    overscale_factor: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
