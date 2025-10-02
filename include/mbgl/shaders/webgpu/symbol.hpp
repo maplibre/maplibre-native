@@ -694,11 +694,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let halo_blur = select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u);
 #endif
 
-    if (in.is_icon != 0.0) {
-        let alpha = opacity * in.fade_opacity;
-        return textureSample(icon_image, icon_sampler, in.tex) * alpha;
-    }
-
     let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let fontGamma = in.fontScale * tileProps.gamma_scale;
