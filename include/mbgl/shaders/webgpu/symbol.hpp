@@ -81,7 +81,6 @@ struct GlobalIndexUBO {
 };
 
 const c_offscreen_degenerate_triangle_location: f32 = -2.0;
-const DEVICE_PIXEL_RATIO: f32 = 1.0;
 )";
 
 template <>
@@ -419,6 +418,7 @@ struct FragmentInput {
 #endif
 };
 
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
@@ -454,7 +454,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let halo_blur = select(props.icon_halo_blur, props.text_halo_blur, tileProps.is_text != 0u);
 #endif
 
-    let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
+    let EDGE_GAMMA = 0.105 / paintParams.pixel_ratio;
     let fontGamma = in.fontScale * tileProps.gamma_scale;
     let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
@@ -660,6 +660,7 @@ struct FragmentInput {
 #endif
 };
 
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
@@ -703,7 +704,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         return iconSample * alpha;
     }
 
-    let EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
+    let EDGE_GAMMA = 0.105 / paintParams.pixel_ratio;
     let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let fontGamma = in.fontScale * tileProps.gamma_scale;
     let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
