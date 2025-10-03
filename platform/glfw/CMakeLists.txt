@@ -86,6 +86,20 @@ if(MLN_WITH_WEBGPU)
     endif()
 endif()
 
+if(DEFINED MLN_WITH_X11 AND MLN_WITH_X11)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_WITH_X11=1
+    )
+endif()
+
+if(DEFINED MLN_WITH_WAYLAND AND MLN_WITH_WAYLAND)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_WITH_WAYLAND=1
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE

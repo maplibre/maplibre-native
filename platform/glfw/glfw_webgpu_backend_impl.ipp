@@ -439,22 +439,29 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Create surface for WebGPU
     wgpu::Instance wgpuInstance(instance->Get());
 
-    // Check if we can get X11 handles (through XWayland if on Wayland)
-    Display* x11Display = glfwGetX11Display();
-    Window x11Window = glfwGetX11Window(window);
+    bool surfaceCreated = false;
 
-    if (x11Display && x11Window) {
+#if defined(MLN_WITH_X11)
+    if (!surfaceCreated) {
+        Display* x11Display = glfwGetX11Display();
+        Window x11Window = glfwGetX11Window(window);
 
-        wgpu::SurfaceDescriptorFromXlibWindow x11Desc = {};
-        x11Desc.display = x11Display;
-        x11Desc.window = x11Window;
+        if (x11Display && x11Window) {
+            wgpu::SurfaceDescriptorFromXlibWindow x11Desc = {};
+            x11Desc.display = x11Display;
+            x11Desc.window = x11Window;
 
-        wgpu::SurfaceDescriptor surfaceDesc = {};
-        surfaceDesc.nextInChain = &x11Desc;
+            wgpu::SurfaceDescriptor surfaceDesc = {};
+            surfaceDesc.nextInChain = &x11Desc;
 
-        wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-    } else {
-        // Try Wayland even though Dawn may not fully support it
+            wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
+            surfaceCreated = true;
+        }
+    }
+#endif
+
+#if defined(MLN_WITH_WAYLAND)
+    if (!surfaceCreated) {
         struct wl_display* waylandDisplay = glfwGetWaylandDisplay();
         struct wl_surface* waylandSurface = glfwGetWaylandWindow(window);
 
@@ -465,13 +472,25 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
             waylandDesc.display = waylandDisplay;
             waylandDesc.surface = waylandSurface;
 
-        wgpu::SurfaceDescriptor surfaceDesc = {};
-        surfaceDesc.nextInChain = &waylandDesc;
+            wgpu::SurfaceDescriptor surfaceDesc = {};
+            surfaceDesc.nextInChain = &waylandDesc;
 
-        wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-        } else {
-            throw std::runtime_error("Failed to get window surface from GLFW");
+            wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
+            surfaceCreated = true;
         }
+    }
+#endif
+
+    if (!surfaceCreated) {
+#if defined(MLN_WITH_X11) && defined(MLN_WITH_WAYLAND)
+        throw std::runtime_error("Failed to get X11 or Wayland window surface from GLFW");
+#elif defined(MLN_WITH_X11)
+        throw std::runtime_error("Failed to get X11 window surface from GLFW");
+#elif defined(MLN_WITH_WAYLAND)
+        throw std::runtime_error("Failed to get Wayland window surface from GLFW");
+#else
+        throw std::runtime_error("WebGPU backend built without window system support");
+#endif
     }
 
     if (wgpuSurface) {
