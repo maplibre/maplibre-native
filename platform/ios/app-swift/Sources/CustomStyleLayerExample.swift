@@ -83,7 +83,7 @@ class CustomStyleLayer: MLNCustomStyleLayer {
             }
             """
 
-            var error: NSError?
+            let error: NSError? = nil
             let device = resource.device
             let library = try? device?.makeLibrary(source: shaderSource, options: nil)
             assert(library != nil, "Error compiling shaders: \(String(describing: error))")
