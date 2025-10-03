@@ -15,4 +15,5 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   libbz2-dev \
   libxinerama-dev \
   libxcursor-dev \
-  libxi-dev
+  libxi-dev \
+  libx11-xcb-dev
