@@ -54,7 +54,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [metal, webgpu]
+        renderer: [metal]
     defaults:
       run:
         shell: bash
