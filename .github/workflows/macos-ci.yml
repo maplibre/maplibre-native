@@ -109,15 +109,7 @@ jobs:
 
       - name: Configure WebGPU build
         if: matrix.renderer == 'webgpu'
-        run: |
-          cmake -S . -B build-macos-webgpu \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DMLN_WITH_WEBGPU=ON \
-            -DMLN_WITH_OPENGL=OFF \
-            -DMLN_WITH_METAL=OFF \
-            -DMLN_WITH_VULKAN=OFF \
-            -DMLN_WITH_WERROR=OFF
+        run: cmake --preset macos-webgpu
 
       - name: Build WebGPU targets
         if: matrix.renderer == 'webgpu'
