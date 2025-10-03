@@ -76,6 +76,19 @@
       }
     },
     {
+      "name": "macos-webgpu",
+      "displayName": "macOS WebGPU",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-webgpu",
+      "inherits": "macos",
+      "cacheVariables": {
+        "MLN_WITH_METAL": "OFF",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_DARWIN_USE_LIBUV": "ON"
+      }
+    },
+    {
       "name": "linux",
       "hidden": true,
       "generator": "Ninja",
@@ -120,9 +133,7 @@
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
         "MLN_WITH_WAYLAND": "OFF",
-        "MLN_WITH_X11": "ON",
-        "MLN_WITH_WERROR": "OFF",
-        "MLN_WITH_CLANG_TIDY": "OFF"
+        "MLN_WITH_X11": "ON"
       }
     },
     {

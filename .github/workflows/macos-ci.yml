@@ -49,11 +49,14 @@ concurrency:
 
 jobs:
   build:
-    name: MacOS CI Tests
+    name: MacOS CI Tests (${{ matrix.renderer }})
     runs-on: [macos-14]
+    strategy:
+      fail-fast: true
+      matrix:
+        renderer: [metal, webgpu]
     defaults:
       run:
-        working-directory: platform/macos
         shell: bash
 
     steps:
@@ -63,6 +66,7 @@ jobs:
           persist-credentials: false
 
       - name: Cache Bazel
+        if: matrix.renderer == 'metal'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
@@ -70,13 +74,79 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - name: Install dependencies
+      - name: Install dependencies (metal)
+        if: matrix.renderer == 'metal'
         run: |
-          brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
+          brew install bazelisk webp libuv icu4c jpeg-turbo glfw
           brew link icu4c --force
 
       - name: Build AppKit app, GLFW app, cache tool, render tool for macOS
+        if: matrix.renderer == 'metal'
+        working-directory: platform/macos
         run: bazel build //platform/macos/app:macos_app //platform/glfw:glfw_app //bin:cache_tool //bin:render_tool --//:renderer=metal
 
       - name: Generate Xcode project for macOS
+        if: matrix.renderer == 'metal'
+        working-directory: platform/macos
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+
+      - name: Install dependencies (webgpu)
+        if: matrix.renderer == 'webgpu'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+        run: |
+          brew install cmake ninja pkg-config python@3.11 go glfw libuv icu4c jpeg-turbo webp libpng ccache
+          brew link --overwrite python@3.11
+
+      - name: Configure environment (webgpu)
+        if: matrix.renderer == 'webgpu'
+        run: |
+          echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix libuv)/lib/pkgconfig:${PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
+          echo "PATH=$(brew --prefix python@3.11)/bin:$(brew --prefix go)/bin:$PATH" >> "$GITHUB_ENV"
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+
+      - name: Configure WebGPU build
+        if: matrix.renderer == 'webgpu'
+        run: |
+          cmake -S . -B build-macos-webgpu \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DMLN_WITH_WEBGPU=ON \
+            -DMLN_WITH_OPENGL=OFF \
+            -DMLN_WITH_METAL=OFF \
+            -DMLN_WITH_VULKAN=OFF \
+            -DMLN_WITH_WERROR=OFF
+
+      - name: Build WebGPU targets
+        if: matrix.renderer == 'webgpu'
+        run: |
+          cmake --build build-macos-webgpu --target \
+            mbgl-test-runner \
+            mbgl-render-test-runner \
+            mbgl-expression-test
+
+      - name: Run unit tests (webgpu)
+        if: matrix.renderer == 'webgpu'
+        run: build-macos-webgpu/mbgl-test-runner
+
+      - name: Run expression tests (webgpu)
+        if: matrix.renderer == 'webgpu'
+        run: build-macos-webgpu/expression-test/mbgl-expression-test
+
+      - name: Prepare render test output directory (webgpu)
+        if: matrix.renderer == 'webgpu'
+        run: mkdir -p metrics/macos-webgpu
+
+      - name: Run WebGPU render tests
+        id: webgpu_render_test
+        if: matrix.renderer == 'webgpu'
+        run: build-macos-webgpu/mbgl-render-test-runner --manifestPath metrics/macos-webgpu.json
+
+      - name: Upload WebGPU render report
+        if: always() && matrix.renderer == 'webgpu' && steps.webgpu_render_test.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: macos-webgpu-render-report
+          path: metrics/macos-webgpu.html
