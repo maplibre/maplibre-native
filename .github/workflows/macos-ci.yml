@@ -49,7 +49,7 @@ concurrency:
 
 jobs:
   build:
-    name: MacOS CI Tests
+    name: MacOS Metal CI Tests
     runs-on: [macos-14]
     defaults:
       run:
