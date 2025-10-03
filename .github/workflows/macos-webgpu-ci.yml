@@ -47,7 +47,7 @@ concurrency:
 
 jobs:
   webgpu:
-    name: macOS WebGPU
+    name: macOS WebGPU CI Tests
     runs-on: macos-26
 
     steps:
