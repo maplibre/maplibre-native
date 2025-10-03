@@ -71,7 +71,7 @@ add_library(mbgl-vendor-dawn INTERFACE)
 target_link_libraries(mbgl-vendor-dawn INTERFACE dawn::webgpu_dawn)
 
 target_include_directories(mbgl-vendor-dawn
-    INTERFACE
+    SYSTEM INTERFACE
         ${DAWN_DIR}/include
         ${DAWN_BUILD_DIR}/gen/include
 )
