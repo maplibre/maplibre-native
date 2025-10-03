@@ -118,6 +118,7 @@
       "binaryDir": "${sourceDir}/build-linux-webgpu",
       "inherits": "linux",
       "cacheVariables": {
+        "MLN_WITH_WERROR": "OFF",
         "MLN_WITH_WEBGPU": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
