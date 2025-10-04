@@ -83,10 +83,15 @@ class CustomStyleLayer: MLNCustomStyleLayer {
             }
             """
 
-            var error: NSError?
             let device = resource.device
-            let library = try? device?.makeLibrary(source: shaderSource, options: nil)
-            assert(library != nil, "Error compiling shaders: \(String(describing: error))")
+            var library: MTLLibrary? = nil
+            var shaderError: Error? = nil
+            do {
+                library = try device?.makeLibrary(source: shaderSource, options: nil)
+            } catch {
+                shaderError = error
+            }
+            assert(library != nil, "Error compiling shaders: \(String(describing: shaderError))")
             let vertexFunction = library?.makeFunction(name: "vertexShader")
             let fragmentFunction = library?.makeFunction(name: "fragmentShader")
 
