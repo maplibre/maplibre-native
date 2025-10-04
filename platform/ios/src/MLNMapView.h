@@ -2237,6 +2237,106 @@ vertically on the map.
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
+// MARK: Managing Feature State
+
+/**
+ Sets the state of a feature. A feature's state is a set of user-defined key-value pairs that are
+ assigned to a feature at runtime. When using this method, the state object is merged with any
+ existing key-value pairs in the feature's state. Features are identified by their feature.id
+ attribute, which can be any number or string.
+
+ This method can only be used with sources that have a feature.id attribute. The feature.id
+ attribute can be defined in three ways:
+
+ For vector or GeoJSON sources, including an id attribute in the original data file.
+ For vector or GeoJSON sources, using the promoteId option at the time the source is defined.
+ For GeoJSON sources, using the generateId option to auto-assign an id based on the feature's index
+ in the source data. If you change feature data using map.getSource('some id').setData(..), you may
+ need to re-apply state taking into account updated id values.
+
+ You can use the feature-state expression to access the values in a feature's state object for the
+ purposes of styling.
+
+ @param feature The feature identifier. Feature objects returned from `visibleFeaturesAtPoint:`,
+ `visibleFeaturesInRect:`, or event handlers can be used as feature identifiers.
+ @param sourceID The identifier of the source containing the feature.
+ @param state A set of key-value pairs. The values should be valid JSON types.
+
+ #### Related examples
+ - <doc:FeatureStateExample> to learn how to use feature state for interactive styling.
+ */
+- (void)setFeatureState:(id<MLNFeature>)feature
+               sourceID:(NSString *)sourceID
+                  state:(NSDictionary<NSString *, id> *)state;
+
+/**
+ Sets the state of a feature using explicit source and feature identifiers.
+
+ @param sourceID The identifier of the source containing the feature.
+ @param sourceLayerID The identifier of the source layer containing the feature. Pass `nil` if the
+ source does not support source layers.
+ @param featureID The identifier of the feature.
+ @param state A set of key-value pairs. The values should be valid JSON types.
+ */
+- (void)setFeatureStateForSource:(NSString *)sourceID
+                     sourceLayer:(nullable NSString *)sourceLayerID
+                       featureID:(NSString *)featureID
+                           state:(NSDictionary<NSString *, id> *)state;
+
+/**
+ Gets the current state of a feature.
+
+ @param feature The feature identifier. Feature objects returned from `visibleFeaturesAtPoint:`,
+ `visibleFeaturesInRect:`, or event handlers can be used as feature identifiers.
+ @param sourceID The identifier of the source containing the feature.
+ @return A dictionary containing the current state of the feature, or `nil` if the feature has no
+ state.
+ */
+- (nullable NSDictionary<NSString *, id> *)getFeatureState:(id<MLNFeature>)feature
+                                                  sourceID:(NSString *)sourceID;
+
+/**
+ Gets the current state of a feature using explicit source and feature identifiers.
+
+ @param sourceID The identifier of the source containing the feature.
+ @param sourceLayerID The identifier of the source layer containing the feature. Pass `nil` if the
+ source does not support source layers.
+ @param featureID The identifier of the feature.
+ @return A dictionary containing the current state of the feature, or `nil` if the feature has no
+ state.
+ */
+- (nullable NSDictionary<NSString *, id> *)getFeatureStateForSource:(NSString *)sourceID
+                                                        sourceLayer:
+                                                            (nullable NSString *)sourceLayerID
+                                                          featureID:(NSString *)featureID;
+
+/**
+ Removes the state of a feature.
+
+ @param feature The feature identifier. Feature objects returned from `visibleFeaturesAtPoint:`,
+ `visibleFeaturesInRect:`, or event handlers can be used as feature identifiers.
+ @param sourceID The identifier of the source containing the feature.
+ @param stateKey The key of the state to remove. Pass `nil` to remove all state for the feature.
+ */
+- (void)removeFeatureState:(id<MLNFeature>)feature
+                  sourceID:(NSString *)sourceID
+                  stateKey:(nullable NSString *)stateKey;
+
+/**
+ Removes the state of a feature using explicit source and feature identifiers.
+
+ @param sourceID The identifier of the source containing the feature.
+ @param sourceLayerID The identifier of the source layer containing the feature. Pass `nil` if the
+ source does not support source layers.
+ @param featureID The identifier of the feature. Pass `nil` to remove state for all features in the
+ source layer.
+ @param stateKey The key of the state to remove. Pass `nil` to remove all state for the feature.
+ */
+- (void)removeFeatureStateForSource:(NSString *)sourceID
+                        sourceLayer:(nullable NSString *)sourceLayerID
+                          featureID:(nullable NSString *)featureID
+                           stateKey:(nullable NSString *)stateKey;
+
 // MARK: Debugging the Map
 
 /**

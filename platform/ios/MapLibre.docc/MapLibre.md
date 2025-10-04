@@ -31,6 +31,7 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:POIAlongRouteExample>
 - <doc:GeoJSON>
 - <doc:PMTiles>
+- <doc:FeatureStateExample>
 
 ### Map Interaction
 
