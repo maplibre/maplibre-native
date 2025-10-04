@@ -30,7 +30,7 @@ class FeatureStateExampleUIKit: UIViewController, MLNMapViewDelegate {
         let statesSource = MLNShapeSource(identifier: "states", url: statesURL)
         style.addSource(statesSource)
 
-        // Add state fills layer with feature-state expressions for hover and selection effects
+        // Add state fills layer with feature-state expressions for highlighting and selection effects
         let stateFillsLayer = MLNFillStyleLayer(identifier: "state-fills", source: statesSource)
 
         // Use feature-state expression to change color based on selection
@@ -42,19 +42,19 @@ class FeatureStateExampleUIKit: UIViewController, MLNMapViewDelegate {
         ])
         stateFillsLayer.fillColor = fillColorExpression
 
-        // Use feature-state expression to change opacity on hover
-        // This expression checks if the feature has a "hover" state set to true
-        let hoverExpression = NSExpression(mglJSONObject: [
+        // Use feature-state expression to change opacity when highlighted
+        // This expression checks if the feature has a "highlighted" state set to true
+        let highlightedExpression = NSExpression(mglJSONObject: [
             "case",
-            ["boolean", ["feature-state", "hover"], false],
+            ["boolean", ["feature-state", "highlighted"], false],
             1.0,
             0.5,
         ])
-        stateFillsLayer.fillOpacity = hoverExpression
+        stateFillsLayer.fillOpacity = highlightedExpression
 
         style.addLayer(stateFillsLayer)
 
-        // Add state borders layer with feature-state expressions for hover and selection effects
+        // Add state borders layer with feature-state expressions for highlighting and selection effects
         let stateBordersLayer = MLNLineStyleLayer(identifier: "state-borders", source: statesSource)
 
         // Use feature-state expression to change border color based on selection
@@ -66,10 +66,10 @@ class FeatureStateExampleUIKit: UIViewController, MLNMapViewDelegate {
         ])
         stateBordersLayer.lineColor = borderColorExpression
 
-        // Use feature-state expression to change line width on hover
+        // Use feature-state expression to change line width when highlighted
         let borderWidthExpression = NSExpression(mglJSONObject: [
             "case",
-            ["boolean", ["feature-state", "hover"], false],
+            ["boolean", ["feature-state", "highlighted"], false],
             2.0,
             1.0,
         ])
