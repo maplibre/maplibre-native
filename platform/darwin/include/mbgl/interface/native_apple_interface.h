@@ -11,8 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (retain, nullable) NSURLResponse *response;
 
 + (MLNInternalNetworkResponse *)responseWithData:(NSData *)data
-                             urlResponse:(NSURLResponse *)response
-                                   error:(NSError *)error;
+                                     urlResponse:(NSURLResponse *)response
+                                           error:(NSError *)error;
 
 @end
 
