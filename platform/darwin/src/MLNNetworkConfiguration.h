@@ -30,7 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (MLNNetworkResponse *)didReceiveResponse:(MLNNetworkResponse *)response;
 
-
 @end
 
 /**

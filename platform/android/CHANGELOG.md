@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.13.4
+
+### 🐞 Bug fixes
+
+- Avoid crashing when calling `toggleTransform` and `setFrustumOffset` if the map is destroyed.
+
 ## 11.13.3
 
 ### ✨ Features and improvements
