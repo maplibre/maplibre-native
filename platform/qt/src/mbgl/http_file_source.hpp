@@ -22,11 +22,11 @@ class HTTPFileSource::Impl : public QObject {
     Q_OBJECT
 
 public:
-    Impl(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions);
+    Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     virtual ~Impl() = default;
 
-    void request(HTTPRequest *);
-    void cancel(HTTPRequest *);
+    void request(HTTPRequest*);
+    void cancel(HTTPRequest*);
 
     void setResourceOptions(ResourceOptions options);
     ResourceOptions getResourceOptions();
@@ -38,8 +38,8 @@ public slots:
     void onReplyFinished();
 
 private:
-    QMap<QUrl, QPair<QPointer<QNetworkReply>, QVector<HTTPRequest *>>> m_pending;
-    QNetworkAccessManager *m_manager;
+    QMap<QUrl, QPair<QPointer<QNetworkReply>, QVector<HTTPRequest*>>> m_pending;
+    QNetworkAccessManager* m_manager;
     ResourceOptions m_resourceOptions;
     ClientOptions m_clientOptions;
 };
