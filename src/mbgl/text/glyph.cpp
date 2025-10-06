@@ -8,11 +8,11 @@ GlyphRange::GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_)
       second((uint16_t)second_),
       type(type_) {}
 
-bool GlyphRange::operator==(const GlyphRange &other) const {
+bool GlyphRange::operator==(const GlyphRange& other) const {
     return first == other.first && second == other.second && type == other.type;
 }
 
-bool GlyphRange::operator<(const GlyphRange &other) const {
+bool GlyphRange::operator<(const GlyphRange& other) const {
     if (first < other.first) return true;
     if (first > other.first) return false;
 
@@ -31,13 +31,13 @@ GlyphIDType genNewGlyphIDType() {
     return static_cast<GlyphIDType>(glyphType);
 }
 
-GlyphIDType genNewGlyphIDType(const std::string &url,
-                              const FontStack &fontStack,
-                              const std::vector<std::pair<uint32_t, uint32_t>> &pairs) {
+GlyphIDType genNewGlyphIDType(const std::string& url,
+                              const FontStack& fontStack,
+                              const std::vector<std::pair<uint32_t, uint32_t>>& pairs) {
     static std::map<std::string, std::map<std::string, std::map<std::size_t, GlyphIDType>>> glyphTypes;
 
     std::size_t hash = 0;
-    for (auto &pair : pairs) {
+    for (auto& pair : pairs) {
         mbgl::util::hash_combine(hash, pair.first);
         mbgl::util::hash_combine(hash, pair.second);
     }
