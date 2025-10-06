@@ -83,6 +83,12 @@ git_override(
     tag = "1.0.157",
 )
 
+git_override(
+    module_name = "rules_apple",
+    commit = "5005493",
+    remote = "https://github.com/louwers/rules_apple.git",
+)
+
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2021",
