@@ -66,10 +66,12 @@ jobs:
 
       - name: Configure environment
         run: |
-          echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix libuv)/lib/pkgconfig:${PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
-          echo "PATH=$(brew --prefix python@3.11)/bin:$(brew --prefix go)/bin:$PATH" >> "$GITHUB_ENV"
-          echo "CC=clang" >> "$GITHUB_ENV"
-          echo "CXX=clang++" >> "$GITHUB_ENV"
+          {
+            echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix libuv)/lib/pkgconfig:${PKG_CONFIG_PATH}"
+            echo "PATH=$(brew --prefix python@3.11)/bin:$(brew --prefix go)/bin:$PATH"
+            echo "CC=clang"
+            echo "CXX=clang++"
+          } >> "$GITHUB_ENV"
 
       - name: Configure build
         run: cmake --preset macos-webgpu
