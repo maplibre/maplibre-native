@@ -29,6 +29,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -59,6 +60,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -93,6 +95,11 @@ jobs:
           pre-commit run clang-format --all-files
           rm -rf venv
         shell: bash
+
+      - if: env.SENTRY_DSN != ''
+        run: |
+          echo "SENTRY_ORG=maplibre" >> "$GITHUB_ENV"
+          echo "SENTRY_PROJECT=maplibre-android" >> "$GITHUB_ENV"
 
       - uses: infotroph/tree-is-clean@69d598a958e8cb8f3d0e3d52b5ebcd8684f2adc2 # v1.0.6
         with:
@@ -219,6 +226,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -276,6 +284,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 

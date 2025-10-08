@@ -62,16 +62,13 @@
 	path = vendor/PMTiles
 	url = https://github.com/protomaps/PMTiles.git
 [submodule "vendor/maplibre-native-base/extras/args"]
-	path = vendor/maplibre-native-base/extras/args
+	path = vendor/args
 	url = https://github.com/Taywee/args.git
 [submodule "vendor/maplibre-native-base/extras/expected-lite"]
-	path = vendor/maplibre-native-base/extras/expected-lite
+	path = vendor/expected-lite
 	url = https://github.com/martinmoene/expected-lite.git
-[submodule "vendor/maplibre-native-base/extras/kdbush.hpp"]
-	path = vendor/maplibre-native-base/extras/kdbush.hpp
-	url = https://github.com/mourner/kdbush.hpp.git
 [submodule "vendor/maplibre-native-base/extras/rapidjson"]
-	path = vendor/maplibre-native-base/extras/rapidjson
+	path = vendor/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
 [submodule "vendor/maplibre-native-base/deps/cheap-ruler-cpp"]
 	path = vendor/maplibre-native-base/deps/cheap-ruler-cpp
@@ -95,7 +92,7 @@
 	path = vendor/maplibre-native-base/deps/shelf-pack-cpp
 	url = https://github.com/mapbox/shelf-pack-cpp.git
 [submodule "vendor/maplibre-native-base/deps/supercluster.hpp"]
-	path = vendor/maplibre-native-base/deps/supercluster.hpp
+	path = vendor/supercluster
 	url = https://github.com/mapbox/supercluster.hpp.git
 [submodule "vendor/maplibre-native-base/deps/variant"]
 	path = vendor/maplibre-native-base/deps/variant
@@ -104,9 +101,12 @@
 	path = vendor/maplibre-native-base/deps/geojson.hpp
 	url = https://github.com/mapbox/geojson-cpp.git
 [submodule "vendor/maplibre-native-base/extras/filesystem"]
-	path = vendor/maplibre-native-base/extras/filesystem
+	path = vendor/filesystem
 	url = https://github.com/gulrak/filesystem.git
 [submodule "vendor/maplibre-tile-spec"]
 	path = vendor/maplibre-tile-spec
 	url = https://github.com/WetDogWeather/maplibre-tile-spec.git
 	branch = cpp
+[submodule "vendor/kdbush.hpp"]
+	path = vendor/kdbush.hpp
+	url = https://github.com/mourner/kdbush.hpp.git

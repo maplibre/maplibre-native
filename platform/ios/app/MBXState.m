@@ -10,6 +10,9 @@ NSString *const MBXShowsMapScale = @"MBXMapShowsScale";
 NSString *const MBXMapShowsHeadingIndicator = @"MBXMapShowsHeadingIndicator";
 NSString *const MBXMapFramerateMeasurementEnabled = @"MBXMapFramerateMeasurementEnabled";
 NSString *const MBXReuseQueueStatsEnabled = @"MBXReuseQueueStatsEnabled";
+NSString *const MBXShowsCompassView = @"MBXShowsCompassView";
+NSString *const MBXShowsLogoView = @"MBXShowsLogoView";
+NSString *const MBXShowsAttributionButton = @"MBXShowsAttributionButton";
 
 @interface MBXState()
 
@@ -29,6 +32,9 @@ NSString *const MBXReuseQueueStatsEnabled = @"MBXReuseQueueStatsEnabled";
     [coder encodeBool:_showsUserHeadingIndicator forKey:MBXMapShowsHeadingIndicator];
     [coder encodeBool:_framerateMeasurementEnabled forKey:MBXMapFramerateMeasurementEnabled];
     [coder encodeBool:_reuseQueueStatsEnabled forKey:MBXReuseQueueStatsEnabled];
+    [coder encodeBool:_showsLogoView forKey:MBXShowsLogoView];
+    [coder encodeBool:_showsCompassView forKey:MBXShowsCompassView];
+    [coder encodeBool:_showsAttributionButton forKey:MBXShowsAttributionButton];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)decoder {
@@ -43,6 +49,9 @@ NSString *const MBXReuseQueueStatsEnabled = @"MBXReuseQueueStatsEnabled";
         BOOL decodedShowsUserHeadingIndicator = [decoder decodeBoolForKey:MBXMapShowsHeadingIndicator];
         BOOL decodedFramerateMeasurementEnabled = [decoder decodeBoolForKey:MBXMapFramerateMeasurementEnabled];
         BOOL decodedReuseQueueStatsEnabled = [decoder decodeBoolForKey:MBXReuseQueueStatsEnabled];
+        BOOL decodedShowsLogoView = [decoder decodeBoolForKey:MBXShowsLogoView];
+        BOOL decodedShowsCompassView = [decoder decodeBoolForKey:MBXShowsCompassView];
+        BOOL decodedAttributionButton = [decoder decodeBoolForKey:MBXShowsAttributionButton];
 
         _camera = decodedCamera;
         _userTrackingMode = decodedUserTrackingMode.intValue;
@@ -54,6 +63,9 @@ NSString *const MBXReuseQueueStatsEnabled = @"MBXReuseQueueStatsEnabled";
         _showsUserHeadingIndicator = decodedShowsUserHeadingIndicator;
         _framerateMeasurementEnabled = decodedFramerateMeasurementEnabled;
         _reuseQueueStatsEnabled = decodedReuseQueueStatsEnabled;
+        _showsLogoView = decodedShowsLogoView;
+        _showsCompassView = decodedShowsCompassView;
+        _showsAttributionButton = decodedAttributionButton;
     }
 
     return self;
@@ -64,7 +76,7 @@ NSString *const MBXReuseQueueStatsEnabled = @"MBXReuseQueueStatsEnabled";
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"Camera: %@\nTracking mode: %lu\nShows user location: %@\nDebug mask value: %lu\nShows zoom level ornament: %@\nShows time frame graph: %@\nShows map scale: %@\nShows user heading indicator: %@\nFramerate measurement enabled: %@\nReuse queue stats enabled: %@",
+    return [NSString stringWithFormat:@"Camera: %@\nTracking mode: %lu\nShows user location: %@\nDebug mask value: %lu\nShows zoom level ornament: %@\nShows time frame graph: %@\nShows map scale: %@\nShows user heading indicator: %@\nFramerate measurement enabled: %@\nReuse queue stats enabled: %@\nShows logo view: %@\nShows compass view: %@\nShows attribution button: %@",
             self.camera,
             (unsigned long)self.userTrackingMode,
             self.showsUserLocation ? @"YES" : @"NO",
@@ -74,7 +86,10 @@ NSString *const MBXReuseQueueStatsEnabled = @"MBXReuseQueueStatsEnabled";
             self.showsMapScale ? @"YES" : @"NO",
             self.showsUserHeadingIndicator ? @"YES" : @"NO",
             self.framerateMeasurementEnabled ? @"YES" : @"NO",
-            self.reuseQueueStatsEnabled ? @"YES" : @"NO"];
+            self.reuseQueueStatsEnabled ? @"YES" : @"NO",
+            self.showsLogoView ? @"YES" : @"NO",
+            self.showsCompassView ? @"YES" : @"NO",
+            self.showsAttributionButton ? @"YES" : @"NO"];
 }
 
 @end

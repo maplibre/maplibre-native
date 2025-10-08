@@ -227,7 +227,7 @@ target_link_libraries(
     mbgl-test
     PRIVATE
         ${MLN_CORE_PRIVATE_LIBRARIES}
-        MapLibreNative::Base::Extras::args
+        mbgl-vendor-args
         MapLibreNative::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-cpp-httplib

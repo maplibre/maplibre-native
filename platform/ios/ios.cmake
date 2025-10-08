@@ -7,7 +7,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-core
     PRIVATE
-        MapLibreNative::Base::Extras::filesystem
+        mbgl-vendor-filesystem
 )
 
 file(GLOB_RECURSE IOS_SDK_SOURCE_FILES
