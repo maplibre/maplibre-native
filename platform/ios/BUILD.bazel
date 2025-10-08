@@ -102,7 +102,9 @@ public_hdrs = [
 
 apple_static_xcframework(
     name = "MapLibre.static",
+    bundle_id = "com.maplibre.mapbox",
     bundle_name = "MapLibre",
+    infoplists = ["info_static_plist"],
     ios = {
         "simulator": [
             "x86_64",
@@ -112,6 +114,7 @@ apple_static_xcframework(
     },
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
+    version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
 )
