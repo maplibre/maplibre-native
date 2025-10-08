@@ -79,15 +79,7 @@ jobs:
       - name: Build targets
         run: |
           cmake --build build-macos-webgpu --target \
-            mbgl-test-runner \
-            mbgl-render-test-runner \
-            mbgl-expression-test
-
-      # - name: Run unit tests
-      #   run: build-macos-webgpu/mbgl-test-runner
-
-      # - name: Run expression tests
-      #   run: build-macos-webgpu/expression-test/mbgl-expression-test
+            mbgl-render-test-runner
 
       - name: Prepare render test output directory
         run: mkdir -p metrics/macos-webgpu
