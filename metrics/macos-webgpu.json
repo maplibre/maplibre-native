@@ -6,7 +6,7 @@
   ],
   "ignore_paths": [
       "ignores/platform-all.json",
-      "ignores/platform-macos.json"
+      "ignores/platform-macos-webgpu.json"
   ],
   "metric_path": "macos-webgpu",
   "probes": [

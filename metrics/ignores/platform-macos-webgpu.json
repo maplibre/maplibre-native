@@ -1,0 +1,8 @@
+{
+    "render-tests/icon-text-fit/enlargen-both": "Needs to be investigated and fixed.",
+    "render-tests/regressions/mapbox-gl-js#5642": "Failing with mbgl-render-test",
+    "render-tests/regressions/mapbox-gl-js#7066": "Failing with mbgl-render-test",
+    "render-tests/fill-outline-color/zoom-and-property-function": "It will be fixed after triangulated lines will support data driven properties",
+    "render-tests/fill-outline-color/property-function": "It will be fixed after triangulated lines will support data driven properties",
+    "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847"
+}
