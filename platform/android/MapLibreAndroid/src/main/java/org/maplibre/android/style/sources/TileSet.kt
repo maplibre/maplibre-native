@@ -204,7 +204,7 @@ class TileSet(val tilejson: String, vararg tiles: String) {
      * @param top the Float top bound
      */
     fun setBounds(left: Float, bottom: Float, right: Float, top: Float) {
-        setBounds(left, bottom, right, top)
+        this.bounds = arrayOf(left, bottom, right, top)
     }
 
     /**
