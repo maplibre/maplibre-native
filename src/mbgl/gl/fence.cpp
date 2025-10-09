@@ -37,14 +37,33 @@ void Fence::insert() noexcept {
     MLN_TRACE_FUNC();
 
     assert(!fence);
+#ifdef __EMSCRIPTEN__
+    // WebGL / Emscripten environments may not expose GL sync objects
+    // (glFenceSync / glClientWaitSync). As a fallback, flush commands to
+    // the driver so work is submitted; we cannot create a GPU fence, so
+    // leave `fence` null and emulate completion in `isSignaled()`.
+    MBGL_CHECK_ERROR(glFlush());
+    fence = nullptr;
+#else
     fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+#endif
 }
 
 bool Fence::isSignaled() const {
     MLN_TRACE_FUNC();
 
     if (!fence) {
+        // If we don't have a real GL sync object (e.g. on WASM/WebGL),
+        // fall back to a blocking wait to ensure GPU work is complete.
+        // This is heavy ( stalls until completion ) but correct. If you
+        // need a non-blocking approach, consider emulating fences with
+        // timer queries or a different strategy.
+#ifdef __EMSCRIPTEN__
+        MBGL_CHECK_ERROR(glFinish());
+        return true;
+#else
         return false;
+#endif
     }
 
     GLenum fenceStatus = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
