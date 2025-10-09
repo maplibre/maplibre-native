@@ -1,8 +1,9 @@
 ## main
 
-## 6.3.0-pre.0
+## 6.3.0-pre.1
 * Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed.
 * Updated the linux binary to be built on Ubuntu 24.04
+* Updated the macos binary to be built on macOS 15
 * Updated NAN to v2.23.0 to support node v24
 * Moved node-pre-gyp back to @acalcutt/node-pre-gyp to support node v24. There is currently an issue with releases of @mapbox/node-pre-gyp which is preventing using it.
 * Add Windows arm64 binary build to ci and release workflows.
