@@ -5,6 +5,8 @@
 
 #import <mbgl/style/sources/raster_dem_source.hpp>
 
+const MLNTileSourceOption MLNTileSourceOptionDEMEncoding = @"MLNTileSourceOptionDEMEncoding";
+
 @implementation MLNRasterDEMSource
 
 - (std::unique_ptr<mbgl::style::RasterSource>)pendingSourceWithIdentifier:(NSString *)identifier urlOrTileset:(mbgl::variant<std::string, mbgl::Tileset>)urlOrTileset tileSize:(uint16_t)tileSize {
