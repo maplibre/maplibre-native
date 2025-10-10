@@ -8,7 +8,8 @@ namespace mbgl {
 namespace style {
 
 struct SourceOptions {
-    std::optional<Tileset::Encoding> encoding = std::nullopt;
+    std::optional<Tileset::RasterEncoding> rasterEncoding = std::nullopt;
+    std::optional<Tileset::VectorEncoding> vectorEncoding = std::nullopt;
 };
 
 // NOTE: Any derived class must invalidate `weakFactory` in the destructor

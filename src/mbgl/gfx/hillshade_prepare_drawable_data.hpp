@@ -11,13 +11,13 @@ namespace gfx {
 
 class HillshadePrepareDrawableData : public DrawableData {
 public:
-    HillshadePrepareDrawableData(int32_t stride_, Tileset::Encoding encoding_, uint8_t maxzoom_)
+    HillshadePrepareDrawableData(int32_t stride_, Tileset::RasterEncoding encoding_, uint8_t maxzoom_)
         : stride(stride_),
           encoding(encoding_),
           maxzoom(maxzoom_) {}
 
     int32_t stride;
-    Tileset::Encoding encoding;
+    Tileset::RasterEncoding encoding;
     uint8_t maxzoom;
 };
 

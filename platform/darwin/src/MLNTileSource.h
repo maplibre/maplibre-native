@@ -143,33 +143,6 @@ typedef NS_ENUM(NSUInteger, MLNTileCoordinateSystem) {
 };
 
 /**
- The encoding formula used to generate the raster-dem tileset
-*/
-
-typedef NS_ENUM(NSUInteger, MLNSourceEncoding) {
-
-  /**
-   For raster sources:
-     Raster tiles generated with the [Mapbox encodingg
-     formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb)
-    For vector sources:
-     Vector tiles in [MVT format](https://github.com/mapbox/vector-tile-spec).
-  */
-  MLNSourceEncodingMapbox = 0,
-
-  /**
-   Raster tiles generated with the [Mapzen Terrarium encoding
-   formula](https://aws.amazon.com/public-datasets/terrain/).
-  */
-  MLNSourceEncodingTerrarium = 1,
-
-  /**
-   Vector tiles in [MLT format](https://github.com/maplibre/maplibre-tile-spec).
-  */
-  MLNSourceEncodingMLT = 2,
-};
-
-/**
  ``MLNTileSource`` is a map content source that supplies map tiles to be shown on
  the map. The location of and metadata about the tiles are defined either by an
  option dictionary or by an external file that conforms to the

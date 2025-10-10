@@ -41,8 +41,11 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
 
     auto options = convert<SourceOptions>(value, error);
     if (options) {
-        if (auto encoding = options.value().encoding) {
-            result.encoding = encoding.value();
+        if (const auto encoding = options.value().rasterEncoding) {
+            result.rasterEncoding = encoding.value();
+        }
+        if (const auto encoding = options.value().vectorEncoding) {
+            result.vectorEncoding = encoding.value();
         }
     }
 

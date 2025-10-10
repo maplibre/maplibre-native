@@ -7,11 +7,29 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  An `NSNumber` object containing an unsigned integer that specifies the encoding
  formula for vector tilesets. The integer corresponds to one of the constants in
- ``MLNSourceEncoding``.
+ ``MLNVectorTileSourceEncoding``.
 
- The default value for this option is ``MLNSourceEncoding/MLNSourceEncodingMapbox``.
+ The default value for this option is
+ ``MLNVectorTileSourceEncoding/MLNVectorTileSourceEncodingMapbox``.
  */
-FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionEncoding;
+FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNVectorTileSourceOptionEncoding;
+
+/**
+ The encoding formula used to generate the raster-dem tileset
+*/
+
+typedef NS_ENUM(NSUInteger, MLNVectorTileSourceEncoding) {
+
+  /**
+     Vector tiles in [MVT format](https://github.com/mapbox/vector-tile-spec).
+  */
+  MLNVectorTileSourceEncodingMapbox = 0,
+
+  /**
+   Vector tiles in [MLT format](https://github.com/maplibre/maplibre-tile-spec).
+  */
+  MLNVectorTileSourceEncodingMLT = 1,
+};
 
 /**
  ``MLNVectorTileSource`` is a map content source that supplies tiled vector data

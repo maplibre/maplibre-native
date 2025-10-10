@@ -18,30 +18,35 @@ public:
         XYZ,
         TMS
     };
-    enum class Encoding : std::uint8_t {
-        Mapbox,    // Mapbox DEM for raster sources, MVT for vector sources
-        Terrarium, // Terrarium DEM, only valid for raster sources
-        MLT,       // MapLibre Tiles, only valid for vector sources
+    enum class RasterEncoding : std::uint8_t {
+        Mapbox,    // Mapbox DEM
+        Terrarium, // Terrarium DEM
+    };
+    enum class VectorEncoding : std::uint8_t {
+        Mapbox, // Mapbox Vector Tiles (MVT)
+        MLT,    // MapLibre Tiles
     };
 
     std::vector<std::string> tiles;
     Range<uint8_t> zoomRange;
     std::string attribution;
     Scheme scheme;
-    // Encoding is not supported by the TileJSON spec
-    Encoding encoding;
+    std::optional<RasterEncoding> rasterEncoding;
+    std::optional<VectorEncoding> vectorEncoding;
     std::optional<LatLngBounds> bounds;
 
     Tileset(std::vector<std::string> tiles_ = std::vector<std::string>(),
             Range<uint8_t> zoomRange_ = {0, util::DEFAULT_MAX_ZOOM},
             std::string attribution_ = {},
             Scheme scheme_ = Scheme::XYZ,
-            Encoding encoding_ = Encoding::Mapbox)
+            std::optional<RasterEncoding> rasterEncoding_ = std::nullopt,
+            std::optional<VectorEncoding> encoding_ = std::nullopt)
         : tiles(std::move(tiles_)),
           zoomRange(zoomRange_),
           attribution(std::move(attribution_)),
           scheme(scheme_),
-          encoding(encoding_) {};
+          rasterEncoding(rasterEncoding_),
+          vectorEncoding(encoding_) {}
 
     // TileJSON also includes center and zoom but they are not used by mbgl.
 

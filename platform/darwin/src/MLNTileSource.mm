@@ -3,6 +3,7 @@
 #import "MLNAttributionInfo_Private.h"
 #import "MLNGeometry_Private.h"
 #import "MLNRasterDEMSource.h"
+#import "MLNVectorTileSource.h"
 #import "NSString+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
 
@@ -20,8 +21,6 @@ const MLNTileSourceOption MLNTileSourceOptionCoordinateBounds = @"MLNTileSourceO
 const MLNTileSourceOption MLNTileSourceOptionAttributionHTMLString = @"MLNTileSourceOptionAttributionHTMLString";
 const MLNTileSourceOption MLNTileSourceOptionAttributionInfos = @"MLNTileSourceOptionAttributionInfos";
 const MLNTileSourceOption MLNTileSourceOptionTileCoordinateSystem = @"MLNTileSourceOptionTileCoordinateSystem";
-const MLNTileSourceOption MLNTileSourceOptionEncoding = @"MLNTileSourceOptionEncoding";
-const MLNTileSourceOption MLNTileSourceOptionDEMEncoding = @"MLNTileSourceOptionDEMEncoding";
 
 @implementation MLNTileSource
 
@@ -132,27 +131,38 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(NSArray<NSString *> *tileURLTemplat
         }
     }
 
-    NSNumber *encodingNumber = options[MLNTileSourceOptionEncoding];
-    if (!encodingNumber) {
-        // Accept deprecated value if the replacement is not present
-        encodingNumber = options[MLNTileSourceOptionDEMEncoding];
-    }
+    NSNumber *encodingNumber = options[MLNTileSourceOptionDEMEncoding];
     if (encodingNumber) {
         if (![encodingNumber isKindOfClass:[NSValue class]]) {
             [NSException raise:NSInvalidArgumentException
-                        format:@"MLNTileSourceOptionEncoding must be set to an NSValue or NSNumber."];
+                        format:@"MLNTileSourceOptionDEMEncoding must be set to an NSValue or NSNumber."];
         }
-        MLNSourceEncoding encoding;
+        MLNDEMEncoding encoding;
         [encodingNumber getValue:&encoding];
         switch (encoding) {
-            case MLNSourceEncodingMapbox:
-                tileSet.encoding = mbgl::Tileset::Encoding::Mapbox;
+            case MLNDEMEncodingMapbox:
+                tileSet.rasterEncoding = mbgl::Tileset::RasterEncoding::Mapbox;
                 break;
-            case MLNSourceEncodingTerrarium:
-                tileSet.encoding = mbgl::Tileset::Encoding::Terrarium;
+            case MLNDEMEncodingTerrarium:
+                tileSet.rasterEncoding = mbgl::Tileset::RasterEncoding::Terrarium;
                 break;
-            case MLNSourceEncodingMLT:
-                tileSet.encoding = mbgl::Tileset::Encoding::MLT;
+        }
+    }
+
+    encodingNumber = options[MLNVectorTileSourceOptionEncoding];
+    if (encodingNumber) {
+        if (![encodingNumber isKindOfClass:[NSValue class]]) {
+            [NSException raise:NSInvalidArgumentException
+                        format:@"MLNTileSourceOptionVectorEncoding must be set to an NSValue or NSNumber."];
+        }
+        MLNVectorTileSourceEncoding encoding;
+        [encodingNumber getValue:&encoding];
+        switch (encoding) {
+            case MLNVectorTileSourceEncodingMapbox:
+                tileSet.vectorEncoding = mbgl::Tileset::VectorEncoding::Mapbox;
+                break;
+            case MLNVectorTileSourceEncodingMLT:
+                tileSet.vectorEncoding = mbgl::Tileset::VectorEncoding::MLT;
                 break;
         }
     }

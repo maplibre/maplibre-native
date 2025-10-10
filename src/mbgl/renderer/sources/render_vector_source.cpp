@@ -36,7 +36,7 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                 auto impl = staticImmutableCast<style::TileSource::Impl>(baseImpl);
                 assert(impl->tileset); // we should have one by now
                 if (impl->tileset) {
-                    isMLT = (impl->tileset->encoding == Tileset::Encoding::MLT);
+                    isMLT = (impl->tileset->vectorEncoding == Tileset::VectorEncoding::MLT);
                 }
             }
             if (isMLT && *isMLT) {

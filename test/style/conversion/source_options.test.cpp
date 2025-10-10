@@ -13,7 +13,9 @@ using namespace mbgl::style::conversion;
 TEST(SourceOptions, Basic) {
     Error error;
     auto converted = convertJSON<SourceOptions>("{}", error);
-    ASSERT_TRUE((bool)converted);
+    ASSERT_TRUE(converted);
+    ASSERT_FALSE(converted->rasterEncoding);
+    ASSERT_FALSE(converted->vectorEncoding);
 }
 
 TEST(SourceOptions, ErrorHandling) {
@@ -34,7 +36,8 @@ TEST(SourceOptions, TerrariumEncodingParsed) {
         "encoding": "terrarium"
     })JSON",
         error);
-    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Terrarium);
+    ASSERT_EQ(converted.value().rasterEncoding, Tileset::RasterEncoding::Terrarium);
+    ASSERT_FALSE(converted.value().vectorEncoding);
 }
 
 TEST(SourceOptions, MapboxEncodingParsed) {
@@ -44,7 +47,8 @@ TEST(SourceOptions, MapboxEncodingParsed) {
         "encoding": "mapbox"
     })JSON",
         error);
-    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Mapbox);
+    ASSERT_EQ(converted.value().rasterEncoding, Tileset::RasterEncoding::Mapbox);
+    ASSERT_FALSE(converted.value().vectorEncoding);
 }
 
 TEST(SourceOptions, MVTEncodingParsed) {
@@ -54,7 +58,8 @@ TEST(SourceOptions, MVTEncodingParsed) {
         "encoding": "mvt"
     })JSON",
         error);
-    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Mapbox);
+    ASSERT_EQ(converted.value().vectorEncoding, Tileset::VectorEncoding::Mapbox);
+    ASSERT_FALSE(converted.value().rasterEncoding);
 }
 
 TEST(SourceOptions, MLTEncodingParsed) {
@@ -64,5 +69,6 @@ TEST(SourceOptions, MLTEncodingParsed) {
         "encoding": "mlt"
     })JSON",
         error);
-    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::MLT);
+    ASSERT_EQ(converted.value().vectorEncoding, Tileset::VectorEncoding::MLT);
+    ASSERT_FALSE(converted.value().rasterEncoding);
 }

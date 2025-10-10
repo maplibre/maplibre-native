@@ -11,11 +11,13 @@ std::optional<SourceOptions> Converter<SourceOptions>::operator()(const Converti
     if (encodingValue) {
         const auto encoding = toString(*encodingValue);
         if (encoding && *encoding == "terrarium") {
-            return {{.encoding = Tileset::Encoding::Terrarium}};
-        } else if (encoding && (*encoding == "mapbox" || *encoding == "mvt")) {
-            return {{.encoding = Tileset::Encoding::Mapbox}};
+            return {{.rasterEncoding = Tileset::RasterEncoding::Terrarium}};
+        } else if (encoding && *encoding == "mapbox") {
+            return {{.rasterEncoding = Tileset::RasterEncoding::Mapbox}};
+        } else if (encoding && *encoding == "mvt") {
+            return {{.vectorEncoding = Tileset::VectorEncoding::Mapbox}};
         } else if (encoding && *encoding == "mlt") {
-            return {{.encoding = Tileset::Encoding::MLT}};
+            return {{.vectorEncoding = Tileset::VectorEncoding::MLT}};
         } else {
             error.message =
                 "invalid encoding - valid types are 'mapbox' and 'terrarium' for raster sources, 'mvt' and 'mlt' for "
@@ -23,7 +25,7 @@ std::optional<SourceOptions> Converter<SourceOptions>::operator()(const Converti
             return std::nullopt;
         }
     }
-    return {{.encoding = Tileset::Encoding::Mapbox}};
+    return {{}};
 }
 
 } // namespace conversion

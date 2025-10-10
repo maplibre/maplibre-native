@@ -114,13 +114,13 @@ std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id
         }
     }
     const auto encodingValue = objectMember(value, "encoding");
-    auto encoding = Tileset::Encoding::Mapbox;
+    auto encoding = Tileset::VectorEncoding::Mapbox;
     if (encodingValue) {
         const auto encodingStr = toString(*encodingValue);
         if (encodingStr && encodingStr == "mvt") {
-            encoding = Tileset::Encoding::Mapbox;
+            encoding = Tileset::VectorEncoding::Mapbox;
         } else if (encodingStr && encodingStr == "mlt") {
-            encoding = Tileset::Encoding::MLT;
+            encoding = Tileset::VectorEncoding::MLT;
         } else {
             error.message = "invalid encoding";
             return std::nullopt;

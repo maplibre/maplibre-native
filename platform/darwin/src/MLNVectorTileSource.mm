@@ -14,6 +14,8 @@
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/renderer/renderer.hpp>
 
+const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSourceOptionEncoding";
+
 @interface MLNVectorTileSource ()
 
 @property (nonatomic, readonly) mbgl::style::VectorSource *rawSource;

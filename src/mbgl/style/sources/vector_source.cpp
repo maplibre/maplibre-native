@@ -19,7 +19,7 @@ VectorSource::VectorSource(std::string id,
                            variant<std::string, Tileset> urlOrTileset_,
                            std::optional<float> maxZoom_,
                            std::optional<float> minZoom_,
-                           Tileset::Encoding encoding_)
+                           Tileset::VectorEncoding encoding_)
     : TileSource(id, urlOrTileset_, util::tileSize_I, SourceType::Vector),
       maxZoom(std::move(maxZoom_)),
       minZoom(std::move(minZoom_)),

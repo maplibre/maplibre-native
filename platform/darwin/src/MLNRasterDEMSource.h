@@ -5,20 +5,34 @@
 /**
  An `NSNumber` object containing an unsigned integer that specifies the encoding
  formula for raster-dem tilesets. The integer corresponds to one of
- the constants described in ``MLNSourceEncoding``.
+ the constants described in ``MLNDEMEncoding``.
 
- The default value for this option is ``MLNSourceEncoding/MLNSourceEncodingMapbox``.
+ The default value for this option is ``MLNDEMEncoding/MLNDEMEncodingMapbox``.
 
  This option cannot be represented in a TileJSON or style JSON file. It is used
- with the ``MLNRasterDEMSource`` class and is ignored when creating an
+ with the ``MLNRasterDEMSource`` class and is ignored when creating a
  ``MLNRasterTileSource`` or ``MLNRasterTileSource`` object.
  */
-FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionEncoding;
+FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEncoding;
 
 /**
- Deprecated.  Use ``MLNTileSourceOptionEncoding``.
- */
-FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEncoding;
+ The encoding formula used to generate the raster tileset
+*/
+
+typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
+
+  /**
+     Raster tiles generated with the [Mapbox encoding
+     formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb)
+  */
+  MLNDEMEncodingMapbox = 0,
+
+  /**
+   Raster tiles generated with the [Mapzen Terrarium encoding
+   formula](https://aws.amazon.com/public-datasets/terrain/).
+  */
+  MLNDEMEncodingTerrarium = 1,
+};
 
 /**
  ``MLNRasterDEMSource`` is a map content source that supplies rasterized
