@@ -209,19 +209,23 @@ jobs:
         run: |
           cmake --preset linux-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
-      - name: Get vcpkg commit id
+      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
-          Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
+        run: mkdir -p ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
+        shell: bash
 
-      - name: Restore vcpkg binary cache
+      - name: Restore vcpkg cache (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
-          path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
-          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+          path: |
+            ${{ github.workspace }}/platform/windows/vendor/vcpkg
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/buildtrees
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/packages
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/downloads
+            !${{ github.workspace }}/platform/windows/vendor/vcpkg/installed
+          key: |
+            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
 
       - name: Configure maplibre-native (Windows x64)
         if: runner.os == 'Windows' && matrix.arch == 'x86_64'
@@ -250,6 +254,10 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cmake --build build
+
+      - name: Create prebuilt binary tarballs
+        working-directory: platform/node
+        run: npm run package-binaries
 
       - name: Run render tests on macOS
         id: render_tests
