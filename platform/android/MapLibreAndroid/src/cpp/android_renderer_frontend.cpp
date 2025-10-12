@@ -199,9 +199,15 @@ AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& bo
     return future.get();
 }
 
-AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box) const {
+AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box,
+                                                             const std::chrono::milliseconds& timeout) const {
     // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box).get();
+    auto future = mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box);
+    if (future.wait_for(timeout) != std::future_status::ready) {
+        return {};
+    }
+
+    return future.get();
 }
 
 FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
