@@ -23,6 +23,17 @@
 - Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
 
 - Fix onSprite call on bad references ([#3805](https://github.com/maplibre/maplibre-native/pull/3805)).
+## 11.13.4
+
+### 🐞 Bug fixes
+
+- Avoid crashing when calling `toggleTransform` and `setFrustumOffset` if the map is destroyed.
+
+## 11.13.3
+
+### ✨ Features and improvements
+
+- Added network delegate methods in iOS
 
 ## 11.13.2
 
