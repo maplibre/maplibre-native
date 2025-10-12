@@ -11,10 +11,6 @@ on:
     tags:
       - "android-*"
 
-  pull_request:
-    branches:
-      - "*"
-
 concurrency:
   # cancel jobs on PRs only
   group: ${{ github.workflow }}-${{ github.ref }}
