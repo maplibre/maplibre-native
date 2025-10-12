@@ -33,7 +33,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           gh release create core-${{ github.sha }} \
-            --draft=false \
+            --draft=true \
             --prerelease=false \
             --latest=false \
             --title "core-${{ github.sha }}" \
@@ -51,7 +51,7 @@ jobs:
 
       - run: brew install webp libuv
 
-      - uses: taiki-e/install-action@57511bcdf8cdb0eab6448cb7fa632952d9f25742 # v2.59.1
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with:
           tool: armerge@2
 
@@ -104,7 +104,7 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@57511bcdf8cdb0eab6448cb7fa632952d9f25742 # v2.59.1
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with:
           tool: armerge@2
 

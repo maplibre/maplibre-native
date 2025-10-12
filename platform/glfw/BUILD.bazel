@@ -13,6 +13,7 @@ objc_library(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//:maplibre_lib",
+        "//vendor:args",
         "@glfw",
     ],
 )
