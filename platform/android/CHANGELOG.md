@@ -1,6 +1,10 @@
 # Changelog MapLibre Native for Android
 
-## 12.0.1
+## 12.0.2
+
+### ✨ Features and improvements
+
+- Make Android snapshotter support hiding the attribution ([#3878](https://github.com/maplibre/maplibre-native/pull/3878)).
 
 ### 🐞 Bug fixes
 
