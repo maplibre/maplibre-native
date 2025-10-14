@@ -191,6 +191,11 @@ jobs:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
           max-size: 200M
 
+      - name: Print cmake version
+        run: |
+          cmake --version
+          which cmake
+
       - name: Build maplibre-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
         run: |
