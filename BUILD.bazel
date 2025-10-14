@@ -135,17 +135,21 @@ cc_library(
         "//vendor:boost",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
+        "//vendor:expected-lite",
         "//vendor:maplibre-native-base",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
+        "//vendor:rapidjson",
+        "//vendor:supercluster.hpp",
         "//vendor:unique_resource",
         "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
         "@platforms//os:ios": [
+            "//vendor:ghc_filesystem",
             "//vendor:icu",
         ],
         "@platforms//os:osx": [

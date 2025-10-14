@@ -110,8 +110,8 @@ endif()
 target_link_libraries(
     mbgl-glfw
     PRIVATE
-        MapLibreNative::Base::Extras::args
-        MapLibreNative::Base::Extras::rapidjson
+        mbgl-vendor-args
+        mbgl-vendor-rapidjson
         Mapbox::Map
         mbgl-compiler-options
         MapLibreNative::Base::cheap-ruler-cpp

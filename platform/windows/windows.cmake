@@ -187,7 +187,7 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/windows/include
         ${CURL_INCLUDE_DIRS}
-		${DLFCN_INCLUDE_DIRS}
+        ${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
@@ -234,7 +234,7 @@ if(MSVC)
         mbgl-core
         PRIVATE
             ${CURL_LIBRARIES}
-    		dlfcn-win32::dl
+            dlfcn-win32::dl
     )
 elseif(MSYS)
     target_link_libraries(

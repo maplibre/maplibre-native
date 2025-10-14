@@ -791,6 +791,10 @@ public:
         NSStringFromClass(self.class));
     });
 
+    _showsLogoView = YES;
+    _showsCompassView = YES;
+    _showsAttributionButton = YES;
+
     // setup logo
     //
     UIImage *logo = [UIImage mgl_resourceImageNamed:@"maplibre-logo-stroke-gray"];
@@ -799,6 +803,7 @@ public:
     _logoView.accessibilityLabel = NSLocalizedStringWithDefaultValue(@"LOGO_A11Y_LABEL", nil, nil, @"Mapbox", @"Accessibility label");
     _logoView.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_logoView];
+    _logoView.hidden = !_showsLogoView;
     _logoViewConstraints = [NSMutableArray array];
     _logoViewPosition = MLNOrnamentPositionBottomLeft;
     _logoViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -811,6 +816,7 @@ public:
     [_attributionButton addTarget:self action:@selector(showAttribution:) forControlEvents:UIControlEventTouchUpInside];
     _attributionButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_attributionButton];
+    _attributionButton.hidden = !_showsAttributionButton;
     _attributionButtonConstraints = [NSMutableArray array];
 
     UILongPressGestureRecognizer *attributionLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(showAttribution:)];
@@ -822,6 +828,7 @@ public:
     //
     _compassView = [MLNCompassButton compassButtonWithMapView:self];
     [self addSubview:_compassView];
+    _compassView.hidden = !_showsCompassView;
     _compassViewConstraints = [NSMutableArray array];
     _compassViewPosition = MLNOrnamentPositionTopRight;
     _compassViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -3236,6 +3243,27 @@ static void *windowScreenContext = &windowScreenContext;
     {
         [self updateScaleBar];
     }
+}
+
+- (void)setShowsLogoView:(BOOL)showsLogoView
+{
+    MLNLogDebug(@"Setting showsLogoView: %@", MLNStringFromBOOL(showsLogoView));
+    _showsLogoView = showsLogoView;
+    self.logoView.hidden = !showsLogoView;
+}
+
+- (void)setShowsCompassView:(BOOL)showsCompassView
+{
+    MLNLogDebug(@"Setting showsCompassView: %@", MLNStringFromBOOL(showsCompassView));
+    _showsCompassView = showsCompassView;
+    self.compassView.hidden = !showsCompassView;
+}
+
+- (void)setShowsAttributionButton:(BOOL)showsAttributionButton
+{
+    MLNLogDebug(@"Setting showsAttributionButton: %@", MLNStringFromBOOL(showsAttributionButton));
+    _showsAttributionButton = showsAttributionButton;
+    self.attributionButton.hidden = !showsAttributionButton;
 }
 
 - (void)setScaleBarShouldShowDarkStyles:(BOOL)scaleBarShouldShowDarkStyles {
@@ -6004,9 +6032,18 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: - User Location -
 
+
+- (void)disableLocationManager
+{
+    [_locationManager stopUpdatingLocation];
+    [_locationManager stopUpdatingHeading];
+    _locationManager = nil;
+}
+
 - (void)setLocationManager:(nullable id<MLNLocationManager>)locationManager
 {
     MLNLogDebug(@"Setting locationManager: %@", locationManager);
+
     if (!locationManager) {
         locationManager = [[MLNCLLocationManager alloc] init];
     }

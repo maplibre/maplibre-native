@@ -101,6 +101,8 @@ Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
+        glUseProgram(0);
+
         for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
             globalUniformBuffers.set(i, nullptr);
         }
@@ -109,6 +111,7 @@ Context::~Context() noexcept {
 
         // Delete all pooled resources while the context is still valid
         texturePool.reset();
+        uboAllocator.reset();
 
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));

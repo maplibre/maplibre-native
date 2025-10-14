@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         applicationId = "org.maplibre.android.testapp"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 14
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
@@ -79,9 +79,19 @@ android {
     productFlavors {
         create("opengl") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=ON", "-DMLN_WITH_VULKAN=OFF")
+                }
+            }
         }
         create("vulkan") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
+                }
+            }
         }
     }
 

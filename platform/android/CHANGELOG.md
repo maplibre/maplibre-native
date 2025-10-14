@@ -1,5 +1,28 @@
 # Changelog MapLibre Native for Android
 
+## 12.0.0
+
+### ✨ Features and improvements
+
+- 💥 Breaking: Bump minimum Android SDK version from 21 to 23 ([#3849](https://github.com/maplibre/maplibre-native/pull/3849)).
+
+### 🐞 Bug fixes
+
+- Manually free bound resources ([#3831](https://github.com/maplibre/maplibre-native/pull/3831)).
+- Fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+- Fix crash in camera position ([#3847](https://github.com/maplibre/maplibre-native/pull/3847)).
+
+## 11.13.5
+
+### ✨ Features and improvements
+
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+
+### 🐞 Bug fixes
+
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+
+- Fix onSprite call on bad references ([#3805](https://github.com/maplibre/maplibre-native/pull/3805)).
 ## 11.13.4
 
 ### 🐞 Bug fixes
