@@ -7,6 +7,7 @@
 * Updated NAN to v2.23.0 to support node v24
 * Moved node-pre-gyp back to @acalcutt/node-pre-gyp to support node v24. There is currently an issue with releases of @mapbox/node-pre-gyp which is preventing using it.
 * Add Windows arm64 binary build to ci and release workflows.
+* Add options parameter to addImage method in Node.js type definitions ([#3868](https://github.com/maplibre/maplibre-native/pull/3868))
 
 ## 6.2.0
 * Fix freezing in macos/metal after ~32 renders ([Issue](https://github.com/maplibre/maplibre-native/issues/2928), [PR](https://github.com/maplibre/maplibre-native/pull/3673)).
