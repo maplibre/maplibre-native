@@ -34,6 +34,7 @@ public:
                    const jni::Object<LatLngBounds>& region,
                    const jni::Object<CameraPosition>& position,
                    jni::jboolean showLogo,
+                   jni::jboolean _showAttribution,
                    const jni::String& localIdeographFontFamily);
 
     virtual ~MapSnapshotter() override;
@@ -73,6 +74,7 @@ private:
 
     float pixelRatio;
     bool showLogo;
+    bool showAttribution;
 
     FileSource* jFileSource;
     void activateFilesource(JNIEnv&);

@@ -24,6 +24,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
                                const jni::Object<LatLngBounds>& region,
                                const jni::Object<CameraPosition>& position,
                                jni::jboolean _showLogo,
+                               jni::jboolean _showAttribution,
                                const jni::String& _localIdeographFontFamily)
     : javaPeer(_env, _obj),
       pixelRatio(_pixelRatio) {
@@ -39,6 +40,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
     auto size = mbgl::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
     showLogo = _showLogo;
+    showAttribution = _showAttribution;
 
     // Create the core snapshotter
     snapshotter = std::make_unique<mbgl::MapSnapshotter>(
@@ -94,7 +96,7 @@ void MapSnapshotter::start(JNIEnv& env) {
         } else {
             // Create the wrapper
             auto mapSnapshot = android::MapSnapshot::New(
-                *_env, std::move(image), pixelRatio, attributions, showLogo, pointForFn, latLngForFn);
+                *_env, std::move(image), pixelRatio, attributions, showLogo, showAttribution, pointForFn, latLngForFn);
 
             // invoke callback
             static auto onSnapshotReady = javaClass.GetMethod<void(jni::Object<MapSnapshot>)>(*_env, "onSnapshotReady");
@@ -326,6 +328,7 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
                                                           const jni::String&,
                                                           const jni::Object<LatLngBounds>&,
                                                           const jni::Object<CameraPosition>&,
+                                                          jni::jboolean,
                                                           jni::jboolean,
                                                           const jni::String&>,
                                             "nativeInitialize",
