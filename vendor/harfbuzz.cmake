@@ -2,7 +2,7 @@ if(TARGET harfbuzz)
     return()
 endif()
 if (MLN_TEXT_SHAPING_HARFBUZZ)
-    add_subdirectory(vendor/harfbuzz)
+    add_subdirectory(vendor/harfbuzz SYSTEM)
 
     target_compile_definitions(harfbuzz PRIVATE -DHAVE_FREETYPE)
 

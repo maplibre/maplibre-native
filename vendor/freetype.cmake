@@ -6,7 +6,7 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     set(FT_REQUIRE_BROTLI OFF CACHE BOOL "freetype option")
     set(FT_DISABLE_ZLIB ON CACHE BOOL "freetype option")
     set(FT_REQUIRE_ZLIB OFF CACHE BOOL "freetype option")
-    add_subdirectory(vendor/freetype)
+    add_subdirectory(vendor/freetype SYSTEM)
 
     set_target_properties(
         freetype
