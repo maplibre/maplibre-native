@@ -214,14 +214,12 @@ if(NOT MLN_QT_LIBRARY_ONLY)
             mbgl-test-runner
             PRIVATE
                 -Wl,-force_load mbgl-test
-                unordered_dense
         )
     else()
         target_link_libraries(
             mbgl-test-runner
             PRIVATE
                 $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-                unordered_dense
         )
     endif()
 
