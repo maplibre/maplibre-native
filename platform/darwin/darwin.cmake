@@ -178,13 +178,6 @@ target_link_libraries(
     PRIVATE mbgl-compiler-options mbgl-core
 )
 
-if(MLN_WITH_METAL)
-    target_compile_definitions(
-        custom-layer-examples
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
-    )
-endif()
-
 target_include_directories(
     custom-layer-examples
     PUBLIC

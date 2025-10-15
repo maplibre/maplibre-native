@@ -30,6 +30,10 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                 }
             }
             encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
+
+            const auto& texture = rpd->colorAttachments()->object(0)->texture();
+            width = texture->width();
+            height = texture->height();
         }
     }
 
@@ -216,9 +220,15 @@ void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
     }
 }
 
-void RenderPass::setScissorRect(const MTL::ScissorRect rect) {
+void RenderPass::setScissorRect(MTL::ScissorRect rect) {
     if (rect.x != currentRect.x || rect.y != currentRect.y || rect.width != currentRect.width ||
         rect.height != currentRect.height) {
+        if (rect.width + rect.x > width) {
+            rect.width = width - rect.x;
+        }
+        if (rect.height + rect.y > height) {
+            rect.height = height - rect.y;
+        }
         encoder->setScissorRect(rect);
         currentRect = rect;
     }

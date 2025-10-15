@@ -34,9 +34,11 @@ cc_library(
     ],
     deps = [
         "//expression-test:test_runner_common",
+        "//vendor:args",
     ] + select({
         "@platforms//os:ios": ["//platform:ios-sdk"],
         "@platforms//os:linux": ["//platform/linux:impl"],
+        "//conditions:default": [],
     }),
 )
 
@@ -45,7 +47,7 @@ cc_test(
     timeout = "long",
     args = [
         "--manifestPath",
-        "metrics/linux-drawable.json",
+        "metrics/linux-opengl.json",
     ],
     data = [
         "//metrics:render-test-files",

@@ -114,6 +114,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNPluginStyleLayer.h",
     "src/MLNPluginProtocolHandler.h",
     "src/MLNStyleFilter.h",
+    "src/MLNNetworkResponse.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -231,6 +232,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNPluginStyleLayer.mm",
     "src/MLNPluginProtocolHandler.mm",
     "src/MLNStyleFilter.mm",
+    "src/MLNNetworkResponse.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",

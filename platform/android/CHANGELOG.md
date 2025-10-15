@@ -1,6 +1,62 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 12.0.0
+
+### ✨ Features and improvements
+
+- 💥 Breaking: Bump minimum Android SDK version from 21 to 23 ([#3849](https://github.com/maplibre/maplibre-native/pull/3849)).
+
+### 🐞 Bug fixes
+
+- Manually free bound resources ([#3831](https://github.com/maplibre/maplibre-native/pull/3831)).
+- Fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+- Fix crash in camera position ([#3847](https://github.com/maplibre/maplibre-native/pull/3847)).
+
+## 11.13.5
+
+### ✨ Features and improvements
+
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+
+### 🐞 Bug fixes
+
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+
+- Fix onSprite call on bad references ([#3805](https://github.com/maplibre/maplibre-native/pull/3805)).
+## 11.13.4
+
+### 🐞 Bug fixes
+
+- Avoid crashing when calling `toggleTransform` and `setFrustumOffset` if the map is destroyed.
+
+## 11.13.3
+
+### ✨ Features and improvements
+
+- Added network delegate methods in iOS
+
+## 11.13.2
+
+### ✨ Features and improvements
+
+- Sync with maplibre primary repo
+
+## 11.13.1
+
+### ✨ Features and improvements
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+
+### 🐞 Bug fixes
+
+- Fix Android backend cleanup ([#3681](https://github.com/maplibre/maplibre-native/pull/3681)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
+## 11.13.1
+
+### Bug fixes
+
+- Fixed frustum offset in opengl
 
 ## 11.13.0
 

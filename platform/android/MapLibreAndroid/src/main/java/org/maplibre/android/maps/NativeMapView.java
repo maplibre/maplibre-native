@@ -1155,11 +1155,17 @@ final class NativeMapView implements NativeMap {
 
   @Override
   public void toggleTransform() {
+    if (checkState("toggleTransform")) {
+      return;
+    }
     nativeToggleTransform();
   }
 
   @Override
   public void setFrustumOffset(RectF offset) {
+    if (checkState("setFrustumOffset")) {
+      return;
+    }
     nativeSetFrustumOffset(offset);
   }
 

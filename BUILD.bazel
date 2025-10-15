@@ -4,8 +4,6 @@ load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     "//bazel:core.bzl",
-    "MLN_LAYER_PLUGIN_HEADERS",
-    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
     "MLN_DRAWABLES_GL_HEADERS",
@@ -18,6 +16,8 @@ load(
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_LAYER_PLUGIN_HEADERS",
+    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
@@ -135,17 +135,21 @@ cc_library(
         "//vendor:boost",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
+        "//vendor:expected-lite",
         "//vendor:maplibre-native-base",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
+        "//vendor:rapidjson",
+        "//vendor:supercluster.hpp",
         "//vendor:unique_resource",
         "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
         "@platforms//os:ios": [
+            "//vendor:ghc_filesystem",
             "//vendor:icu",
         ],
         "@platforms//os:osx": [

@@ -2,6 +2,20 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.19.1
+
+- Tweak layer depth distribution ([#3738](https://github.com/maplibre/maplibre-native/pull/3738)).
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+- Add extra UI settings and location manager settings. ([#3817](https://github.com/maplibre/maplibre-native/pull/3817)).
+- fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+
+## 6.18.1
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+- Fix UB in TaggedString constructor ([#3748](https://github.com/maplibre/maplibre-native/pull/3748)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
 ## 6.18.0
 
 - add the ability to have ios camera animation durations dynamic during navigation ([#3568](https://github.com/maplibre/maplibre-native/pull/3568)).

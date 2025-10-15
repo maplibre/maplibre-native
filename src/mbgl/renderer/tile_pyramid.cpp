@@ -22,8 +22,10 @@ namespace mbgl {
 
 using namespace style;
 
-static TileObserver nullObserver;
-static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+namespace {
+TileObserver nullObserver;
+const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+} // namespace
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),

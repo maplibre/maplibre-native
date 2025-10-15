@@ -148,10 +148,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
 endif()
 
 
@@ -163,17 +159,6 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
-    )
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
-    )
-endif()
-
-if(MLN_WITH_METAL)
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
     )
 endif()
 
@@ -242,7 +227,7 @@ target_link_libraries(
     mbgl-test
     PRIVATE
         ${MLN_CORE_PRIVATE_LIBRARIES}
-        MapLibreNative::Base::Extras::args
+        mbgl-vendor-args
         MapLibreNative::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-cpp-httplib

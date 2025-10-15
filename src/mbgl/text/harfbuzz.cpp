@@ -38,7 +38,7 @@ HBShaper::~HBShaper() {
 void HBShaper::createComplexGlyphIDs(const std::u16string &text,
                                      std::vector<GlyphID> &glyphIDs,
                                      std::vector<HBShapeAdjust> &adjusts) {
-    return impl->createComplexGlyphIDs(text, glyphIDs, adjusts);
+    impl->createComplexGlyphIDs(text, glyphIDs, adjusts);
 }
 
 Glyph HBShaper::rasterizeGlyph(const GlyphID &glyph) {
