@@ -6,8 +6,6 @@
 namespace mbgl {
 namespace shaders {
 
-#ifndef MBGL_SHADERS_CLIP_UBO_DEFINED
-#define MBGL_SHADERS_CLIP_UBO_DEFINED
 struct alignas(16) ClipUBO {
     /*  0 */ std::array<float, 4 * 4> matrix;
     /* 64 */ std::uint32_t stencil_ref;
@@ -17,7 +15,6 @@ struct alignas(16) ClipUBO {
     /* 80 */
 };
 static_assert(sizeof(ClipUBO) == 5 * 16);
-#endif
 
 constexpr auto clippingMaskShaderPrelude = R"(
 

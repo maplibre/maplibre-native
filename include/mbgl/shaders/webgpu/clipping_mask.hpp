@@ -9,8 +9,6 @@
 namespace mbgl {
 namespace shaders {
 
-#ifndef MBGL_SHADERS_CLIP_UBO_DEFINED
-#define MBGL_SHADERS_CLIP_UBO_DEFINED
 struct alignas(16) ClipUBO {
     std::array<float, 4 * 4> matrix;
     std::uint32_t stencil_ref;
@@ -19,7 +17,6 @@ struct alignas(16) ClipUBO {
     float pad3;
 };
 static_assert(sizeof(ClipUBO) == 5 * 16, "wrong size");
-#endif
 
 template <>
 struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::WebGPU> {
