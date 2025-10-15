@@ -41,15 +41,18 @@ build:
     - '**/BUILD.bazel'
     - '**/*.bzl'
 OpenGL:
+- changed-files:
   - any-glob-to-any-file:
     - '**/*opengl*'
     - '**/*opengl*/**'
     - '**/gl/**'
 Vulkan:
+- changed-files:
   - any-glob-to-any-file:
     - '**/*vulkan*'
     - '**/*vulkan*/**'
 metal:
+- changed-files:
   - any-glob-to-any-file:
     - '**/*metal*'
     - '**/*metal*/**'
