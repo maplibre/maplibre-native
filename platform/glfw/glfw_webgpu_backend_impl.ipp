@@ -370,7 +370,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     [view setLayer:layer];
 
     // Create surface from metal layer
-    wgpu::SurfaceDescriptorFromMetalLayer metalDesc;
+    wgpu::SurfaceSourceMetalLayer metalDesc;
     metalDesc.layer = (__bridge void*)layer;
 
     wgpu::SurfaceDescriptor surfaceDesc;
@@ -1067,7 +1067,7 @@ fn fs_main(input : VertexOut) -> @location(0) vec4<f32> {
 }
 )";
 
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
+    wgpu::ShaderSourceWGSL wgslDesc{};
     wgslDesc.code = shaderSource;
 
     wgpu::ShaderModuleDescriptor shaderDesc{};
