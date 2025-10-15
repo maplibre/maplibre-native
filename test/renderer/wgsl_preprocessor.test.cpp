@@ -22,27 +22,27 @@ TEST(ShaderGroupPreprocessor, isDirective_ValidDirectives) {
 }
 
 TEST(ShaderGroupPreprocessor, isDirective_InvalidDirectives) {
-    EXPECT_FALSE(isDirective("ifdef FEATURE", "ifdef"));  // Missing #
-    EXPECT_FALSE(isDirective("#ifdef FEATURE", "ifndef")); // Wrong directive
+    EXPECT_FALSE(isDirective("ifdef FEATURE", "ifdef"));     // Missing #
+    EXPECT_FALSE(isDirective("#ifdef FEATURE", "ifndef"));   // Wrong directive
     EXPECT_FALSE(isDirective("#ifdefine FEATURE", "ifdef")); // Similar but not exact
     EXPECT_FALSE(isDirective("// #ifdef FEATURE", "ifdef")); // Commented out
-    EXPECT_FALSE(isDirective("", "ifdef")); // Empty line
-    EXPECT_FALSE(isDirective("   ", "ifdef")); // Whitespace only
+    EXPECT_FALSE(isDirective("", "ifdef"));                  // Empty line
+    EXPECT_FALSE(isDirective("   ", "ifdef"));               // Whitespace only
 }
 
 TEST(ShaderGroupPreprocessor, getDirectiveArgument_ValidArguments) {
     EXPECT_EQ(getDirectiveArgument("#ifdef FEATURE"), "FEATURE");
     EXPECT_EQ(getDirectiveArgument("#ifndef DEBUG_MODE"), "DEBUG_MODE");
-    EXPECT_EQ(getDirectiveArgument("#ifdef  FEATURE"), "FEATURE"); // Extra spaces
+    EXPECT_EQ(getDirectiveArgument("#ifdef  FEATURE"), "FEATURE");  // Extra spaces
     EXPECT_EQ(getDirectiveArgument("  #ifdef FEATURE"), "FEATURE"); // Leading whitespace
-    EXPECT_EQ(getDirectiveArgument("#ifdef\tFEATURE"), "FEATURE"); // Tab separator
+    EXPECT_EQ(getDirectiveArgument("#ifdef\tFEATURE"), "FEATURE");  // Tab separator
 }
 
 TEST(ShaderGroupPreprocessor, getDirectiveArgument_InvalidOrEmpty) {
-    EXPECT_EQ(getDirectiveArgument(""), ""); // Empty line
-    EXPECT_EQ(getDirectiveArgument("#ifdef"), ""); // No argument
-    EXPECT_EQ(getDirectiveArgument("#else"), ""); // No argument expected
-    EXPECT_EQ(getDirectiveArgument("#endif"), ""); // No argument expected
+    EXPECT_EQ(getDirectiveArgument(""), "");               // Empty line
+    EXPECT_EQ(getDirectiveArgument("#ifdef"), "");         // No argument
+    EXPECT_EQ(getDirectiveArgument("#else"), "");          // No argument expected
+    EXPECT_EQ(getDirectiveArgument("#endif"), "");         // No argument expected
     EXPECT_EQ(getDirectiveArgument("no hash symbol"), ""); // Invalid format
 }
 
