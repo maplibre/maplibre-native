@@ -1,4 +1,4 @@
-#include <mbgl/shaders/webgpu/shader_group.hpp>
+#include <mbgl/shaders/webgpu/wgsl_preprocessor.hpp>
 
 #include <cctype>
 #include <sstream>

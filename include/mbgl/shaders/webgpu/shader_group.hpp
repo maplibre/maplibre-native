@@ -3,6 +3,7 @@
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/webgpu/common.hpp>
+#include <mbgl/shaders/webgpu/wgsl_preprocessor.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
@@ -15,14 +16,6 @@
 
 namespace mbgl {
 namespace webgpu {
-
-namespace detail {
-
-bool isDirective(const std::string& line, const std::string& directive);
-std::string getDirectiveArgument(const std::string& line);
-std::string preprocessWGSL(const std::string& source, const std::unordered_map<std::string, bool>& defines);
-
-} // namespace detail
 
 class ShaderGroupBase : public gfx::ShaderGroup {
 protected:

@@ -1331,7 +1331,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/wgsl_preprocessor.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/background.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/clipping_mask.cpp
