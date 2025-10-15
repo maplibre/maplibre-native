@@ -190,12 +190,26 @@ public:
               *this,
               MapOptions().withMapMode(MapMode::Static).withSize(size).withPixelRatio(pixelRatio),
               resourceOptions,
-              clientOptions) {}
+              clientOptions),
+          region(LatLngBounds::empty()),
+          regionInsets{0, 0, 0, 0}{}
 
-    void setRegion(const LatLngBounds& region) {
-        mbgl::EdgeInsets insets{0, 0, 0, 0};
+    void setRegion(const LatLngBounds& _region) {
+        region = _region;
         std::vector<LatLng> latLngs = {region.southwest(), region.northeast()};
-        map.jumpTo(map.cameraForLatLngs(latLngs, insets));
+        map.jumpTo(map.cameraForLatLngs(latLngs, regionInsets));
+    }
+
+    void setRegionPadding(const mbgl::EdgeInsets& insets) {
+        regionInsets = insets;
+        if (!region.isEmpty()) {
+            std::vector<LatLng> latLngs = {region.southwest(), region.northeast()};
+            map.jumpTo(map.cameraForLatLngs(latLngs, regionInsets));
+        }
+    }
+
+    mbgl::EdgeInsets getRegionPadding() const {
+        return regionInsets;
     }
 
     void snapshot(MapSnapshotter::Callback callback) {
@@ -279,6 +293,8 @@ private:
     MapSnapshotterObserver& observer;
     SnapshotterRendererFrontend frontend;
     Map map;
+    LatLngBounds region;
+    mbgl::EdgeInsets regionInsets;
 };
 
 MapSnapshotter::MapSnapshotter(Size size,
@@ -328,8 +344,7 @@ void MapSnapshotter::setCameraOptions(const CameraOptions& options) {
 }
 
 CameraOptions MapSnapshotter::getCameraOptions() const {
-    EdgeInsets insets;
-    return impl->getMap().getCameraOptions(insets);
+    return impl->getMap().getCameraOptions();
 }
 
 void MapSnapshotter::setRegion(const LatLngBounds& region) {
@@ -337,7 +352,15 @@ void MapSnapshotter::setRegion(const LatLngBounds& region) {
 }
 
 LatLngBounds MapSnapshotter::getRegion() const {
-    return impl->getMap().latLngBoundsForCamera(getCameraOptions());
+    return impl->getMap().latLngBoundsForCamera(impl->getMap().getCameraOptions(getRegionPadding()));
+}
+
+void MapSnapshotter::setRegionPadding(const mbgl::EdgeInsets &insets) {
+    impl->setRegionPadding(insets);
+}
+
+mbgl::EdgeInsets MapSnapshotter::getRegionPadding() const {
+    return impl->getRegionPadding();
 }
 
 style::Style& MapSnapshotter::getStyle() {

@@ -126,6 +126,10 @@ open class MapSnapshotter(context: Context, options: Options) {
         var region: LatLngBounds? = null
             private set
 
+        // only works when using region to specify the camera
+        var regionPadding: IntArray = intArrayOf(0, 0, 0, 0)
+            private set
+
         /**
          * @return the camera position
          */
@@ -201,6 +205,16 @@ open class MapSnapshotter(context: Context, options: Options) {
          */
         fun withRegion(region: LatLngBounds?): Options {
             this.region = region
+            return this
+        }
+
+        /**
+         * @param regionPadding of the padding of the region.
+         * This is applied before the region, if region is null, it will not work
+         * @return the mutated [Options]
+         */
+        fun withRegionPadding(left:Int, top:Int, right:Int, bottom:Int): Options {
+            this.regionPadding = intArrayOf(left, top, right, bottom)
             return this
         }
 
@@ -349,7 +363,11 @@ open class MapSnapshotter(context: Context, options: Options) {
             options.cameraPosition,
             options.showLogo,
             options.showAttribution,
-            options.localIdeographFontFamily
+            options.localIdeographFontFamily,
+            options.regionPadding[0] / options.pixelRatio,
+            options.regionPadding[1] / options.pixelRatio,
+            options.regionPadding[2] / options.pixelRatio,
+            options.regionPadding[3] / options.pixelRatio
         )
     }
 
@@ -393,6 +411,14 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     external fun setRegion(region: LatLngBounds?)
+
+    /**
+     * Updates the snapshotter padding with a new [IntArray]
+     *
+     * @param left, top, right, bottom
+     */
+    @Keep
+    external fun setRegionPadding(left:Int, top:Int, right:Int, bottom:Int)
 
     /**
      * Updates the snapshotter with a new style url
@@ -746,7 +772,11 @@ open class MapSnapshotter(context: Context, options: Options) {
         position: CameraPosition?,
         showLogo: Boolean,
         showAttribution: Boolean,
-        localIdeographFontFamily: String?
+        localIdeographFontFamily: String?,
+        regionPaddingLeft: Float,
+        regionPaddingTop: Float,
+        regionPaddingRight: Float,
+        regionPaddingBottom: Float
     )
 
     @Keep

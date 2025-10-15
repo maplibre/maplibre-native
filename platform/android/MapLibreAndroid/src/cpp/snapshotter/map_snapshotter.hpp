@@ -35,7 +35,11 @@ public:
                    const jni::Object<CameraPosition>& position,
                    jni::jboolean showLogo,
                    jni::jboolean _showAttribution,
-                   const jni::String& localIdeographFontFamily);
+                   const jni::String& localIdeographFontFamily,
+                   jni::jfloat regionPaddingLeft,
+                   jni::jfloat regionPaddingTop,
+                   jni::jfloat regionPaddingRight,
+                   jni::jfloat regionPaddingBottom);
 
     virtual ~MapSnapshotter() override;
 
@@ -48,6 +52,12 @@ public:
     void setCameraPosition(JNIEnv&, const jni::Object<CameraPosition>& position);
 
     void setRegion(JNIEnv&, const jni::Object<LatLngBounds>& region);
+
+    void setRegionPadding(JNIEnv&,
+                          jni::jint,
+                          jni::jint,
+                          jni::jint,
+                          jni::jint);
 
     void start(JNIEnv&);
 
