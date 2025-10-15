@@ -304,9 +304,10 @@ fn main(in: VertexInput) -> VertexOutput {
     }
 
     let lightColor = props.light_color_pad.xyz;
-    lighting.rgb += clamp(directional * lightColor,
-                          mix(vec3<f32>(0.0), vec3<f32>(0.3), 1.0 - lightColor),
-                          vec3<f32>(1.0));
+    let lit = clamp(directional * lightColor,
+                    mix(vec3<f32>(0.0), vec3<f32>(0.3), 1.0 - lightColor),
+                    vec3<f32>(1.0));
+    lighting = vec4<f32>(lighting.rgb + lit, lighting.a);
     lighting *= props.opacity;
 
     out.lighting = lighting;
