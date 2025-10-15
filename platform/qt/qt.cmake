@@ -212,12 +212,14 @@ if(NOT MLN_QT_LIBRARY_ONLY)
     if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE -Wl,-force_load mbgl-test
+            PRIVATE
+                -Wl,-force_load mbgl-test
         )
     else()
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
+            PRIVATE
+                $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
         )
     endif()
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
@@ -1342,10 +1342,14 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     )
     include(${PROJECT_SOURCE_DIR}/vendor/freetype.cmake)
     include(${PROJECT_SOURCE_DIR}/vendor/harfbuzz.cmake)
-    set(SHAPE_TARGETS
-        freetype
-        harfbuzz
+
+    target_include_directories(
+        mbgl-core SYSTEM
+        PUBLIC
+            ${PROJECT_SOURCE_DIR}/vendor/freetype/include
+            ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/src
     )
+
 endif()
 
 target_sources(
@@ -1457,7 +1461,8 @@ target_link_libraries(
         mbgl-vendor-wagyu
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
-        ${SHAPE_TARGETS} # from harfbuzz.cmake
+        $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-freetype>
+        $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-harfbuzz>
     PUBLIC
         MapLibreNative::Base
         mbgl-vendor-expected-lite
@@ -1498,13 +1503,16 @@ set(EXPORT_TARGETS
     mbgl-vendor-metal-cpp
     mbgl-vendor-filesystem
     unordered_dense
-    ${SHAPE_TARGETS} # from harfbuzz.cmake
 )
 
 if(MLN_USE_RUST)
     list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
 else()
     list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
+endif()
+
+if(MLN_TEXT_SHAPING_HARFBUZZ)
+    list(APPEND EXPORT_TARGETS mbgl-freetype mbgl-harfbuzz)
 endif()
 
 export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
