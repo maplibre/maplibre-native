@@ -50,11 +50,11 @@ cc_library(
         [
             "**/*.test.cpp",
         ],
-        exclude = select({
-            "//:webgpu_renderer": [],
-            "//conditions:default": ["renderer/wgsl_preprocessor.test.cpp"],
-        }),
-    ),
+        exclude = ["renderer/wgsl_preprocessor.test.cpp"],
+    ) + select({
+        "//:webgpu_renderer": ["renderer/wgsl_preprocessor.test.cpp"],
+        "//conditions:default": [],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     visibility = [
         "//platform/ios/test/core:__pkg__",
