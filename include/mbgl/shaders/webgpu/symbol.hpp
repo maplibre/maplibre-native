@@ -458,11 +458,24 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let fontGamma = in.fontScale * tileProps.gamma_scale;
     let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
-    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
+    let gamma_scaled = gamma * in.gamma_scale;
+
+    // For halos, offset the inner edge outward to create the ring
+    var inner_edge = (256.0 - 64.0) / 256.0;
+    if (tileProps.is_halo != 0u) {
+        inner_edge = inner_edge + gamma_scaled;
+    }
+
     let sample = textureSample(glyph_atlas, texture_sampler, in.tex);
     let dist = select(sample.a, sample.r, tileProps.is_text != 0u);
-    let gamma_scaled = gamma * in.gamma_scale;
-    let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    var alpha = smoothstep(inner_edge - gamma_scaled, inner_edge + gamma_scaled, dist);
+
+    // When drawing halos, make the inside transparent so the fill can show through
+    if (tileProps.is_halo != 0u) {
+        let halo_edge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+        alpha = min(smoothstep(halo_edge - gamma_scaled, halo_edge + gamma_scaled, dist), 1.0 - alpha);
+    }
+
     let coverage = alpha * opacity * in.fade_opacity;
     let outAlpha = color.a * coverage;
 
@@ -708,11 +721,24 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color = select(fill_color, halo_color, tileProps.is_halo != 0u);
     let fontGamma = in.fontScale * tileProps.gamma_scale;
     let gamma = (select(0.0, halo_blur * 1.19 / SDF_PX, tileProps.is_halo != 0u) + EDGE_GAMMA) / fontGamma;
-    let buff = select((256.0 - 64.0) / 256.0, (6.0 - halo_width / in.fontScale) / SDF_PX, tileProps.is_halo != 0u);
+    let gamma_scaled = gamma * in.gamma_scale;
+
+    // For halos, offset the inner edge outward to create the ring
+    var inner_edge = (256.0 - 64.0) / 256.0;
+    if (tileProps.is_halo != 0u) {
+        inner_edge = inner_edge + gamma_scaled;
+    }
+
     let sample = textureSampleLevel(glyph_image, glyph_sampler, in.tex, 0.0);
     let dist = select(sample.a, sample.r, tileProps.is_text != 0u);
-    let gamma_scaled = gamma * in.gamma_scale;
-    let alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    var alpha = smoothstep(inner_edge - gamma_scaled, inner_edge + gamma_scaled, dist);
+
+    // When drawing halos, make the inside transparent so the fill can show through
+    if (tileProps.is_halo != 0u) {
+        let halo_edge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+        alpha = min(smoothstep(halo_edge - gamma_scaled, halo_edge + gamma_scaled, dist), 1.0 - alpha);
+    }
+
     let coverage = alpha * opacity * in.fade_opacity;
     let outAlpha = color.a * coverage;
 
