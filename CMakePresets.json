@@ -76,15 +76,16 @@
       }
     },
     {
-      "name": "macos-webgpu",
-      "displayName": "macOS WebGPU",
+      "name": "macos-webgpu-dawn",
+      "displayName": "macOS WebGPU (Dawn)",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-macos-webgpu",
+      "binaryDir": "${sourceDir}/build-macos-webgpu-dawn",
       "inherits": "macos",
       "cacheVariables": {
         "MLN_WITH_METAL": "OFF",
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL": "dawn",
         "MLN_DARWIN_USE_LIBUV": "ON"
       }
     },
@@ -127,11 +128,12 @@
       }
     },
     {
-      "name": "linux-webgpu",
-      "binaryDir": "${sourceDir}/build-linux-webgpu",
+      "name": "linux-webgpu-dawn",
+      "binaryDir": "${sourceDir}/build-linux-webgpu-dawn",
       "inherits": "linux",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL": "dawn",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
       }
