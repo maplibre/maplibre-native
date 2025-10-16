@@ -128,8 +128,11 @@ target_sources(
 
 target_compile_definitions(
     mbgl-core
-    PRIVATE QT_IMAGE_DECODERS
-    PUBLIC __QT__
+    PRIVATE
+        QT_IMAGE_DECODERS
+        $<$<PLATFORM_ID:Windows>:NOMINMAX>
+    PUBLIC
+        __QT__
 )
 
 target_include_directories(
