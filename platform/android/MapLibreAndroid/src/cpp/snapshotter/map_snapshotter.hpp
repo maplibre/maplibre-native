@@ -53,11 +53,7 @@ public:
 
     void setRegion(JNIEnv&, const jni::Object<LatLngBounds>& region);
 
-    void setRegionPadding(JNIEnv&,
-                          jni::jint,
-                          jni::jint,
-                          jni::jint,
-                          jni::jint);
+    void setRegionPadding(JNIEnv&, jni::jint, jni::jint, jni::jint, jni::jint);
 
     void start(JNIEnv&);
 

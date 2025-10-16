@@ -192,7 +192,7 @@ public:
               resourceOptions,
               clientOptions),
           region(LatLngBounds::empty()),
-          regionInsets{0, 0, 0, 0}{}
+          regionInsets{0, 0, 0, 0} {}
 
     void setRegion(const LatLngBounds& _region) {
         region = _region;
@@ -208,9 +208,7 @@ public:
         }
     }
 
-    mbgl::EdgeInsets getRegionPadding() const {
-        return regionInsets;
-    }
+    mbgl::EdgeInsets getRegionPadding() const { return regionInsets; }
 
     void snapshot(MapSnapshotter::Callback callback) {
         if (!callback) {
@@ -355,7 +353,7 @@ LatLngBounds MapSnapshotter::getRegion() const {
     return impl->getMap().latLngBoundsForCamera(impl->getMap().getCameraOptions(getRegionPadding()));
 }
 
-void MapSnapshotter::setRegionPadding(const mbgl::EdgeInsets &insets) {
+void MapSnapshotter::setRegionPadding(const mbgl::EdgeInsets& insets) {
     impl->setRegionPadding(insets);
 }
 
