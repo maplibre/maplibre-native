@@ -150,6 +150,7 @@ public class BitmapUtils {
       }
     }
   }
+
   /**
    * Decode byte array to drawable object
    *
