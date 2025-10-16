@@ -56,3 +56,10 @@ metal:
   - any-glob-to-any-file:
     - '**/*metal*'
     - '**/*metal*/**'
+WebGPU:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*webgpu*'
+    - '**/*webgpu*/**'
+    - '**/*wgpu*'
+    - '**/*dawn*'
