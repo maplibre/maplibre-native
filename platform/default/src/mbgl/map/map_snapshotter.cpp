@@ -200,7 +200,7 @@ public:
         map.jumpTo(map.cameraForLatLngs(latLngs, regionInsets));
     }
 
-    void setRegionPadding(const mbgl::EdgeInsets& insets) {
+    void setPadding(const mbgl::EdgeInsets& insets) {
         regionInsets = insets;
         if (!region.isEmpty()) {
             std::vector<LatLng> latLngs = {region.southwest(), region.northeast()};
@@ -208,7 +208,7 @@ public:
         }
     }
 
-    mbgl::EdgeInsets getRegionPadding() const { return regionInsets; }
+    mbgl::EdgeInsets getPadding() const { return regionInsets; }
 
     void snapshot(MapSnapshotter::Callback callback) {
         if (!callback) {
@@ -338,7 +338,12 @@ Size MapSnapshotter::getSize() const {
 }
 
 void MapSnapshotter::setCameraOptions(const CameraOptions& options) {
-    impl->getMap().jumpTo(options);
+    CameraOptions optionsWithPadding = options;
+    if (!options.padding) {
+        // Apply region padding if no padding is explicitly set in camera options
+        optionsWithPadding.withPadding(impl->getPadding());
+    }
+    impl->getMap().jumpTo(optionsWithPadding);
 }
 
 CameraOptions MapSnapshotter::getCameraOptions() const {
@@ -350,15 +355,15 @@ void MapSnapshotter::setRegion(const LatLngBounds& region) {
 }
 
 LatLngBounds MapSnapshotter::getRegion() const {
-    return impl->getMap().latLngBoundsForCamera(impl->getMap().getCameraOptions(getRegionPadding()));
+    return impl->getMap().latLngBoundsForCamera(impl->getMap().getCameraOptions(getPadding()));
 }
 
-void MapSnapshotter::setRegionPadding(const mbgl::EdgeInsets& insets) {
-    impl->setRegionPadding(insets);
+void MapSnapshotter::setPadding(const mbgl::EdgeInsets& insets) {
+    impl->setPadding(insets);
 }
 
-mbgl::EdgeInsets MapSnapshotter::getRegionPadding() const {
-    return impl->getRegionPadding();
+mbgl::EdgeInsets MapSnapshotter::getPadding() const {
+    return impl->getPadding();
 }
 
 style::Style& MapSnapshotter::getStyle() {

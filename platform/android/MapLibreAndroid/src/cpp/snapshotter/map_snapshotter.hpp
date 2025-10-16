@@ -36,10 +36,10 @@ public:
                    jni::jboolean showLogo,
                    jni::jboolean _showAttribution,
                    const jni::String& localIdeographFontFamily,
-                   jni::jfloat regionPaddingLeft,
-                   jni::jfloat regionPaddingTop,
-                   jni::jfloat regionPaddingRight,
-                   jni::jfloat regionPaddingBottom);
+                   jni::jfloat paddingLeft,
+                   jni::jfloat paddingTop,
+                   jni::jfloat paddingRight,
+                   jni::jfloat paddingBottom);
 
     virtual ~MapSnapshotter() override;
 
@@ -53,7 +53,7 @@ public:
 
     void setRegion(JNIEnv&, const jni::Object<LatLngBounds>& region);
 
-    void setRegionPadding(JNIEnv&, jni::jint, jni::jint, jni::jint, jni::jint);
+    void setPadding(JNIEnv&, jni::jint left, jni::jint top, jni::jint right, jni::jint bottom);
 
     void start(JNIEnv&);
 

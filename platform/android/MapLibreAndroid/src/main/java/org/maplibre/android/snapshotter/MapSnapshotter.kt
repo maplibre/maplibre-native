@@ -209,11 +209,11 @@ open class MapSnapshotter(context: Context, options: Options) {
         }
 
         /**
-         * @param regionPadding of the padding of the region.
+         * @param padding of the padding of the region.
          * This is applied before the region, if region is null, it will not work
          * @return the mutated [Options]
          */
-        fun withRegionPadding(left:Int, top:Int, right:Int, bottom:Int): Options {
+        fun withPadding(left:Int, top:Int, right:Int, bottom:Int): Options {
             this.regionPadding = intArrayOf(left, top, right, bottom)
             return this
         }
@@ -418,7 +418,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param left, top, right, bottom
      */
     @Keep
-    external fun setRegionPadding(left:Int, top:Int, right:Int, bottom:Int)
+    external fun setPadding(left:Int, top:Int, right:Int, bottom:Int)
 
     /**
      * Updates the snapshotter with a new style url
@@ -773,10 +773,10 @@ open class MapSnapshotter(context: Context, options: Options) {
         showLogo: Boolean,
         showAttribution: Boolean,
         localIdeographFontFamily: String?,
-        regionPaddingLeft: Float,
-        regionPaddingTop: Float,
-        regionPaddingRight: Float,
-        regionPaddingBottom: Float
+        paddingLeft: Float,
+        paddingTop: Float,
+        paddingRight: Float,
+        paddingBottom: Float
     )
 
     @Keep
