@@ -7,6 +7,8 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
+
+# For node versions, see: https://raw.githubusercontent.com/nodejs/node/main/doc/abi_version_registry.json
 add_node_module(
     mbgl-node
     INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
@@ -16,6 +18,9 @@ add_node_module(
         47
         48
         51
+        120  # Node 21
+        131  # Node 23
+        141  # Node 25
 )
 
 if(WIN32)
