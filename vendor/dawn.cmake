@@ -12,9 +12,9 @@ if(POLICY CMP0169)
     cmake_policy(SET CMP0169 OLD)
 endif()
 
-set(MLN_DAWN_GIT_TAG "main" CACHE STRING "Git ref (branch, tag, or commit) used when fetching Dawn")
+set(MLN_DAWN_GIT_VERSION "v20251014.163906" CACHE STRING "Git ref (branch, tag, or commit) used when fetching Dawn")
 
-message(STATUS "Configuring Dawn WebGPU implementation (${MLN_DAWN_GIT_TAG})")
+message(STATUS "Configuring Dawn WebGPU implementation (${MLN_DAWN_GIT_VERSION})")
 
 set(_mln_dawn_source_dir "${PROJECT_SOURCE_DIR}/vendor/dawn")
 set(_mln_dawn_binary_dir "${CMAKE_BINARY_DIR}/vendor/dawn/build")
@@ -28,7 +28,7 @@ include(FetchContent)
 
 FetchContent_Declare(maplibre_dawn
     GIT_REPOSITORY https://github.com/google/dawn.git
-    GIT_TAG ${MLN_DAWN_GIT_TAG}
+    GIT_TAG ${MLN_DAWN_GIT_VERSION}
     GIT_SUBMODULES ""
 )
 
