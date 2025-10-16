@@ -12,6 +12,8 @@ load(
     "MLN_DRAWABLES_MTL_HEADERS",
     "MLN_DRAWABLES_MTL_SOURCE",
     "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_WEBGPU_HEADERS",
+    "MLN_DRAWABLES_WEBGPU_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_SOURCE",
@@ -85,6 +87,7 @@ cc_library(
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
         ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+        ":webgpu_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_WEBGPU_SOURCE,
         "//conditions:default": [],
     }) + select({
         "//:harfbuzz_text_shaping": MLN_SHAPING_HARFBUZZ_SRCS,
@@ -93,6 +96,7 @@ cc_library(
     hdrs = MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+        ":webgpu_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_WEBGPU_HEADERS,
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
@@ -102,6 +106,9 @@ cc_library(
         ],
         ":metal_renderer": [
             "MLN_RENDER_BACKEND_METAL=1",
+        ],
+        ":webgpu_renderer": [
+            "MLN_RENDER_BACKEND_WEBGPU=1",
         ],
     }) + select({
         "@platforms//os:ios": ["GLES_SILENCE_DEPRECATION=1"],
@@ -188,6 +195,7 @@ string_flag(
     values = [
         "drawable",
         "metal",
+        "webgpu",
     ],
 )
 
@@ -202,6 +210,13 @@ config_setting(
     name = "metal_renderer",
     flag_values = {
         ":renderer": "metal",
+    },
+)
+
+config_setting(
+    name = "webgpu_renderer",
+    flag_values = {
+        ":renderer": "webgpu",
     },
 )
 
