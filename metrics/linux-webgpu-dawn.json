@@ -6,9 +6,9 @@
   ],
   "ignore_paths": [
       "ignores/platform-all.json",
-      "ignores/platform-linux.json"
+      "ignores/platform-linux-webgpu.json"
   ],
-  "metric_path": "linux-webgpu",
+  "metric_path": "linux-webgpu-dawn",
   "probes": [
       "probeNetwork"
   ]
