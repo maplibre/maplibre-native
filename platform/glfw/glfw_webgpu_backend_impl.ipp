@@ -81,6 +81,7 @@
 
 namespace {
 
+#if MLN_WEBGPU_IMPL_DAWN
 void logUncapturedError(const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
     mbgl::Log::Error(mbgl::Event::Render,
                      std::string("Dawn validation error [") +
@@ -114,6 +115,14 @@ std::optional<WGPUBackendType> desiredBackendFromEnv() {
     return std::nullopt;
 }
 
+bool backendMatches(WGPUBackendType candidate, WGPUBackendType desired) {
+    if (desired == WGPUBackendType_OpenGL) {
+        return candidate == WGPUBackendType_OpenGL || candidate == WGPUBackendType_OpenGLES;
+    }
+    return candidate == desired;
+}
+#endif  // MLN_WEBGPU_IMPL_DAWN
+
 const char* backendTypeToString(WGPUBackendType type) {
     switch (type) {
         case WGPUBackendType_Null:
@@ -135,13 +144,6 @@ const char* backendTypeToString(WGPUBackendType type) {
         default:
             return "Unknown";
     }
-}
-
-bool backendMatches(WGPUBackendType candidate, WGPUBackendType desired) {
-    if (desired == WGPUBackendType_OpenGL) {
-        return candidate == WGPUBackendType_OpenGL || candidate == WGPUBackendType_OpenGLES;
-    }
-    return candidate == desired;
 }
 
 #ifdef __APPLE__
@@ -285,16 +287,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     }
 
 #elif MLN_WEBGPU_IMPL_WGPU
-    // Create wgpu-native instance with disabled validation for performance
-    WGPUInstanceExtras instanceExtras = {};
-    instanceExtras.chain.sType = static_cast<WGPUSType>(WGPUSType_InstanceExtras);
-    instanceExtras.backends = WGPUInstanceBackend_Metal;  // Use Metal backend on macOS
-    instanceExtras.flags = WGPUInstanceFlag_Default;  // Explicitly disable validation and debug
-
-    wgpu::InstanceDescriptor instanceDesc = {};
-    instanceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&instanceExtras);
-
-    wgpuInstance = wgpu::createInstance(instanceDesc);
+    // Create wgpu-native instance
+    // Try without extras first to see if the instance can be created at all
+    wgpuInstance = wgpu::createInstance();
     if (!wgpuInstance) {
         throw std::runtime_error("Failed to create WebGPU instance");
     }
@@ -592,12 +587,14 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         Window x11Window = glfwGetX11Window(window);
 
         if (x11Display && x11Window) {
-            wgpu::SurfaceDescriptorFromXlibWindow x11Desc = {};
+            wgpu::SurfaceSourceXlibWindow x11Desc = {};
+            x11Desc.chain.sType = wgpu::SType::SurfaceSourceXlibWindow;
+            x11Desc.chain.next = nullptr;
             x11Desc.display = x11Display;
             x11Desc.window = x11Window;
 
             wgpu::SurfaceDescriptor surfaceDesc = {};
-            surfaceDesc.nextInChain = &x11Desc;
+            surfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&x11Desc);
 
 #if MLN_WEBGPU_IMPL_DAWN
             wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
@@ -812,7 +809,7 @@ void GLFWWebGPUBackend::swap() {
     }
 
     // Keep track of swap calls for debugging
-    static int swapCount = 0;
+    [[maybe_unused]] static int swapCount = 0;
     static auto lastSwapTime = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
     auto timeSinceLastSwap = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwapTime).count();
