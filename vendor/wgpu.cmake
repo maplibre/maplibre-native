@@ -183,13 +183,6 @@ target_include_directories(mbgl-vendor-wgpu
         ${_mln_wgpu_source_dir}/ffi
 )
 
-# Define wgpu-specific macros
-target_compile_definitions(mbgl-vendor-wgpu
-    INTERFACE
-        MLN_WITH_WGPU=1
-        WEBGPU_BACKEND_WGPU=1
-)
-
 # Platform-specific system libraries that wgpu-native needs
 if(APPLE)
     target_link_libraries(mbgl-vendor-wgpu INTERFACE
