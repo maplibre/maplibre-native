@@ -9,7 +9,7 @@ if(MLN_WITH_WEBGPU)
         message(STATUS "Using Dawn as WebGPU backend")
 
     elseif(MLN_WEBGPU_IMPL STREQUAL "wgpu")
-        message(FATAL_ERROR "Using wgpu as WebGPU backend is not implemented yet")
+        message(STATUS "Using wgpu as WebGPU backend")
 
     else()
         message(FATAL_ERROR "MLN_WEBGPU_IMPL can take values \"dawn\" or \"wgpu\"")
