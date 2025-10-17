@@ -587,6 +587,18 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         Window x11Window = glfwGetX11Window(window);
 
         if (x11Display && x11Window) {
+#if MLN_WEBGPU_IMPL_DAWN
+            // Dawn uses a different structure without explicit chain member
+            wgpu::SurfaceSourceXlibWindow x11Desc = {};
+            x11Desc.display = x11Display;
+            x11Desc.window = x11Window;
+
+            wgpu::SurfaceDescriptor surfaceDesc = {};
+            surfaceDesc.nextInChain = &x11Desc;
+
+            wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
+#elif MLN_WEBGPU_IMPL_WGPU
+            // wgpu-native uses explicit chain members
             wgpu::SurfaceSourceXlibWindow x11Desc = {};
             x11Desc.chain.sType = wgpu::SType::SurfaceSourceXlibWindow;
             x11Desc.chain.next = nullptr;
@@ -596,9 +608,6 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
             wgpu::SurfaceDescriptor surfaceDesc = {};
             surfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&x11Desc);
 
-#if MLN_WEBGPU_IMPL_DAWN
-            wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-#elif MLN_WEBGPU_IMPL_WGPU
             wgpuSurface = wgpuInstance.createSurface(surfaceDesc);
 #endif
             surfaceCreated = true;
