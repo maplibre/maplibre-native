@@ -117,5 +117,4 @@ private:
     void signalFrameComplete();
     void periodicMaintenance();
     void processEvents();
-
 };

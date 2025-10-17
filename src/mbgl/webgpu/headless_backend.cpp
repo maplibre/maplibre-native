@@ -92,7 +92,6 @@ private:
 
 class HeadlessBackend::Impl {
 public:
-
 #if MLN_WEBGPU_IMPL_DAWN
     std::unique_ptr<dawn::native::Instance> instance;
 #elif MLN_WEBGPU_IMPL_WGPU
@@ -155,7 +154,7 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
     setQueue(impl->queue.Get());
     setInstance(impl->instance->Get());
 #elif MLN_WEBGPU_IMPL_WGPU
-   // wgpu-native backend initialization
+    // wgpu-native backend initialization
     wgpu::InstanceDescriptor instanceDesc = {};
     impl->instance = wgpu::createInstance(instanceDesc);
 
@@ -260,15 +259,14 @@ void HeadlessBackend::createOffscreenTextures() {
         viewDesc.mipLevelCount = 1;
         viewDesc.baseArrayLayer = 0;
         viewDesc.arrayLayerCount = 1;
-        viewDesc.aspect = wgpu::TextureAspect::All;        
+        viewDesc.aspect = wgpu::TextureAspect::All;
 #if MLN_WEBGPU_IMPL_DAWN
         viewDesc.label = "Headless Color TextureView";
-        
+
         impl->offscreenTextureView = impl->offscreenTexture.CreateView(&viewDesc);
 #elif MLN_WEBGPU_IMPL_WGPU
         impl->offscreenTextureView = impl->offscreenTexture.createView(viewDesc);
 #endif
-
     }
 
     // Create depth/stencil texture

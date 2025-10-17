@@ -506,7 +506,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 #endif
 
     if (wgpuSurface) {
-        
+
         WGPUSurfaceCapabilities capabilities = {};
 
 #if MLN_WEBGPU_IMPL_DAWN
@@ -1079,7 +1079,7 @@ void* GLFWWebGPUBackend::getDepthStencilView() {
     return depthStencilView ? reinterpret_cast<void*>(depthStencilView.Get()) : nullptr;
 #elif MLN_WEBGPU_IMPL_WGPU
     return depthStencilView ? reinterpret_cast<void*>(static_cast<WGPUTextureView>(depthStencilView)) : nullptr;
-#endif 
+#endif
 
 
 }
@@ -1182,9 +1182,9 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
     depthDesc.dimension = wgpu::TextureDimension::e2D;
 #elif MLN_WEBGPU_IMPL_WGPU
     depthDesc.dimension = wgpu::TextureDimension::_2D;
-#endif 
-    
-    
+#endif
+
+
     depthDesc.size = {width, height, 1};
     depthDesc.format = depthStencilFormat;
     depthDesc.mipLevelCount = 1;
@@ -1275,4 +1275,3 @@ void GLFWWebGPUBackend::periodicMaintenance() {
         lastMaintenanceTime = now;
     }
 }
-

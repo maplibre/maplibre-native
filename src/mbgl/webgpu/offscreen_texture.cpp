@@ -153,7 +153,6 @@ public:
         wgpuDeviceTick(device);
 #endif
 
-
         // Create staging buffer for readback
         WGPUBufferDescriptor bufferDesc = {};
         WGPUStringView bufferLabel = {"Readback Buffer", strlen("Readback Buffer")};

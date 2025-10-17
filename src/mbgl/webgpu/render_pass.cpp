@@ -146,7 +146,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         impl->depthStencilView = wgpu::TextureView(depthViewHandle);
 #endif
         if (impl->depthStencilView) {
-
 #if MLN_WEBGPU_IMPL_DAWN
             depthAttachment.view = impl->depthStencilView.Get();
 #elif MLN_WEBGPU_IMPL_WGPU

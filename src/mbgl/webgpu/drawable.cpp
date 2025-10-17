@@ -70,10 +70,10 @@ std::size_t hashStencilMode(const gfx::StencilMode& mode) {
 }
 
 std::size_t hashPipelineState(const std::vector<WGPUVertexBufferLayout>& vertexLayouts,
-                               const gfx::ColorMode& colorMode,
-                               const gfx::DepthMode& depthMode,
-                               const gfx::StencilMode& stencilMode,
-                               gfx::DrawModeType drawModeType) {
+                              const gfx::ColorMode& colorMode,
+                              const gfx::DepthMode& depthMode,
+                              const gfx::StencilMode& stencilMode,
+                              gfx::DrawModeType drawModeType) {
     std::size_t hash = 0;
 
     // Hash vertex layouts
@@ -83,31 +83,28 @@ std::size_t hashPipelineState(const std::vector<WGPUVertexBufferLayout>& vertexL
         hash = util::hash(hash, static_cast<uint32_t>(layout.attributeCount));
         for (uint32_t i = 0; i < layout.attributeCount && i < 16; ++i) {
             hash = util::hash(hash,
-                            static_cast<uint32_t>(layout.attributes[i].format),
-                            static_cast<uint32_t>(layout.attributes[i].shaderLocation),
-                            static_cast<uint32_t>(layout.attributes[i].offset));
+                              static_cast<uint32_t>(layout.attributes[i].format),
+                              static_cast<uint32_t>(layout.attributes[i].shaderLocation),
+                              static_cast<uint32_t>(layout.attributes[i].offset));
         }
     }
 
     // Hash color mode
-    hash = util::hash(hash,
-                     colorMode.mask.r, colorMode.mask.g, colorMode.mask.b, colorMode.mask.a);
+    hash = util::hash(hash, colorMode.mask.r, colorMode.mask.g, colorMode.mask.b, colorMode.mask.a);
     colorMode.blendFunction.match([&](const auto& blendFunc) {
         using T = std::decay_t<decltype(blendFunc)>;
         if constexpr (std::is_same_v<T, gfx::ColorMode::Replace>) {
             hash = util::hash(hash, 0);
         } else {
             hash = util::hash(hash,
-                            static_cast<int>(blendFunc.equation),
-                            static_cast<int>(blendFunc.srcFactor),
-                            static_cast<int>(blendFunc.dstFactor));
+                              static_cast<int>(blendFunc.equation),
+                              static_cast<int>(blendFunc.srcFactor),
+                              static_cast<int>(blendFunc.dstFactor));
         }
     });
 
     // Hash depth mode
-    hash = util::hash(hash,
-                     static_cast<int>(depthMode.func),
-                     static_cast<int>(depthMode.mask));
+    hash = util::hash(hash, static_cast<int>(depthMode.func), static_cast<int>(depthMode.mask));
 
     // Hash stencil mode
     hash = util::hash(hash, hashStencilMode(stencilMode));
@@ -812,7 +809,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         // Compute pipeline state hash for caching
-        const std::size_t pipelineHash = hashPipelineState(vertexLayouts, colorMode, depthMode, stencilMode, drawModeType);
+        const std::size_t pipelineHash = hashPipelineState(
+            vertexLayouts, colorMode, depthMode, stencilMode, drawModeType);
 
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
