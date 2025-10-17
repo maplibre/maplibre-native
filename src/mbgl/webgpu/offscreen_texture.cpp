@@ -7,6 +7,10 @@
 #include <cstring>
 #include <functional>
 
+#if MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#include <webgpu/wgpu.h>
+#endif
+
 namespace {
 constexpr uint32_t bytesPerRowAlignment = 256u;
 }
@@ -145,7 +149,10 @@ public:
         }
 
         // Process all pending device operations to ensure rendering is complete
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
         wgpuDeviceTick(device);
+#endif
+
 
         // Create staging buffer for readback
         WGPUBufferDescriptor bufferDesc = {};
@@ -198,15 +205,19 @@ public:
         // Use WaitAny for proper synchronous blocking instead of polling
         struct MapContext {
             WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
+            bool completed = false;
         };
         MapContext mapContext;
 
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+        // Dawn: Use WaitAny for proper synchronous blocking
         WGPUBufferMapCallbackInfo callbackInfo = {};
         callbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
         callbackInfo.callback =
             [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
                 auto* ctx = static_cast<MapContext*>(userdata1);
                 ctx->status = status;
+                ctx->completed = true;
                 (void)message;
                 (void)userdata2;
             };
@@ -229,6 +240,40 @@ public:
                 mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Buffer mapping wait failed");
             }
         }
+#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+
+        // wgpu-native: Use polling approach (WaitAny not implemented yet)
+        // Use AllowProcessEvents callback mode for synchronous polling
+        WGPUBufferMapCallbackInfo callbackInfo = {};
+        callbackInfo.mode = WGPUCallbackMode_AllowProcessEvents;
+        callbackInfo.callback =
+            [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
+                auto* ctx = static_cast<MapContext*>(userdata1);
+                ctx->status = status;
+                ctx->completed = true;
+                (void)message;
+                (void)userdata2;
+            };
+        callbackInfo.userdata1 = &mapContext;
+        callbackInfo.userdata2 = nullptr;
+
+        wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, alignedDataSize, callbackInfo);
+
+        // Poll device until mapping completes
+        // wgpu-native processes callbacks during wgpuDevicePoll
+        constexpr int maxIterations = 1000;
+        for (int i = 0; i < maxIterations && !mapContext.completed; ++i) {
+            wgpuDevicePoll(device, true, nullptr);
+            if (!mapContext.completed) {
+                // Small sleep to avoid busy-waiting
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+
+        if (!mapContext.completed) {
+            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Buffer mapping timeout after polling");
+        }
+#endif
 
         // Check if mapping was successful and read the data
         if (mapContext.status == WGPUMapAsyncStatus_Success) {
