@@ -60,8 +60,8 @@ public:
     void setRegion(const LatLngBounds&);
     LatLngBounds getRegion() const;
 
-    void setRegionPadding(const mbgl::EdgeInsets&);
-    mbgl::EdgeInsets getRegionPadding() const;
+    void setPadding(const mbgl::EdgeInsets&);
+    mbgl::EdgeInsets getPadding() const;
 
     style::Style& getStyle();
     const style::Style& getStyle() const;

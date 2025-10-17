@@ -26,10 +26,10 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
                                jni::jboolean _showLogo,
                                jni::jboolean _showAttribution,
                                const jni::String& _localIdeographFontFamily,
-                               jni::jfloat regionPaddingLeft,
-                               jni::jfloat regionPaddingTop,
-                               jni::jfloat regionPaddingRight,
-                               jni::jfloat regionPaddingBottom)
+                               jni::jfloat paddingLeft,
+                               jni::jfloat paddingTop,
+                               jni::jfloat paddingRight,
+                               jni::jfloat paddingBottom)
     : javaPeer(_env, _obj),
       pixelRatio(_pixelRatio) {
     // Get a reference to the JavaVM for callbacks
@@ -61,10 +61,10 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
     }
 
     if (region) {
-        snapshotter->setRegionPadding({static_cast<double>(regionPaddingTop),
-                                       static_cast<double>(regionPaddingLeft),
-                                       static_cast<double>(regionPaddingBottom),
-                                       static_cast<double>(regionPaddingRight)});
+        snapshotter->setPadding({static_cast<double>(paddingTop),
+                                 static_cast<double>(paddingLeft),
+                                 static_cast<double>(paddingBottom),
+                                 static_cast<double>(paddingRight)});
         snapshotter->setRegion(LatLngBounds::getLatLngBounds(_env, region));
     }
 
@@ -146,15 +146,9 @@ void MapSnapshotter::setRegion(JNIEnv& env, const jni::Object<LatLngBounds>& reg
     snapshotter->setRegion(LatLngBounds::getLatLngBounds(env, region));
 }
 
-void MapSnapshotter::setRegionPadding(JNIEnv&,
-                                      jni::jint regionPaddingLeft,
-                                      jni::jint regionPaddingTop,
-                                      jni::jint regionPaddingRight,
-                                      jni::jint regionPaddingBottom) {
-    snapshotter->setRegionPadding({static_cast<double>(regionPaddingTop),
-                                   static_cast<double>(regionPaddingLeft),
-                                   static_cast<double>(regionPaddingBottom),
-                                   static_cast<double>(regionPaddingRight)});
+void MapSnapshotter::setPadding(JNIEnv&, jni::jint left, jni::jint top, jni::jint right, jni::jint bottom) {
+    snapshotter->setPadding(
+        {static_cast<double>(top), static_cast<double>(left), static_cast<double>(bottom), static_cast<double>(right)});
 }
 
 // Private methods //
@@ -368,7 +362,7 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
                                             METHOD(&MapSnapshotter::setSize, "setSize"),
                                             METHOD(&MapSnapshotter::setCameraPosition, "setCameraPosition"),
                                             METHOD(&MapSnapshotter::setRegion, "setRegion"),
-                                            METHOD(&MapSnapshotter::setRegionPadding, "setRegionPadding"),
+                                            METHOD(&MapSnapshotter::setPadding, "setPadding"),
                                             METHOD(&MapSnapshotter::start, "nativeStart"),
                                             METHOD(&MapSnapshotter::cancel, "nativeCancel"));
 }
