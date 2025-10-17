@@ -15,10 +15,12 @@ struct GLFWwindow;
 struct WGPUDeviceImpl;
 struct WGPUSurfaceImpl;
 
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
 namespace dawn::native {
 class Instance;
 class Adapter;
 } // namespace dawn::native
+#endif
 
 // Multiple inheritance: GLFWBackend for window management,
 // webgpu::RendererBackend for rendering, gfx::Renderable for framebuffer
@@ -63,7 +65,12 @@ private:
     mutable SpinLock textureStateLock;
 
     GLFWwindow* window;
+
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
     std::unique_ptr<dawn::native::Instance> instance;
+#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+    wgpu::Instance wgpuInstance;
+#endif
     wgpu::Device wgpuDevice; // This owns the device
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
@@ -108,12 +115,4 @@ private:
     void periodicMaintenance();
     void processEvents();
 
-    // Debug triangle utilities
-    void ensureDebugTriangleResources();
-    void drawDebugTriangle(const wgpu::TextureView& targetView);
-
-    bool debugTriangleInitialized = false;
-    wgpu::RenderPipeline debugTrianglePipeline;
-    wgpu::Buffer debugTriangleVertexBuffer;
-    uint64_t debugTriangleVertexBufferSize = 0;
 };
