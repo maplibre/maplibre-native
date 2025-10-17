@@ -103,7 +103,7 @@ jobs:
           - impl: dawn
             name: Dawn
           - impl: wgpu
-            name: wgpu-native
+            name: wgpu
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
