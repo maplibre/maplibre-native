@@ -72,7 +72,12 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     }
 
     wgpuTextureViewAddRef(colorViewHandle);
+
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
     impl->colorView = wgpu::TextureView::Acquire(colorViewHandle);
+#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+    impl->colorView = wgpu::TextureView(colorViewHandle);
+#endif
 
     if (auto colorFormat = renderableResource.getColorTextureFormat()) {
         backend.setColorFormat(*colorFormat);
@@ -80,7 +85,13 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     }
 
     WGPURenderPassColorAttachment colorAttachment = {};
+
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
     colorAttachment.view = impl->colorView.Get();
+#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+    colorAttachment.view = static_cast<WGPUTextureView>(impl->colorView);
+
+#endif
     colorAttachment.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
     colorAttachment.resolveTarget = nullptr;
     colorAttachment.storeOp = WGPUStoreOp_Store;
@@ -101,7 +112,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     depthAttachment.depthLoadOp = descriptor.clearDepth ? WGPULoadOp_Clear : WGPULoadOp_Load;
     depthAttachment.depthStoreOp = WGPUStoreOp_Store;
     depthAttachment.depthClearValue = descriptor.clearDepth ? descriptor.clearDepth.value() : 1.0f;
-    depthAttachment.depthReadOnly = WGPU_FALSE;
+    depthAttachment.depthReadOnly = false;
     if (descriptor.clearStencil) {
         depthAttachment.stencilLoadOp = WGPULoadOp_Clear;
         depthAttachment.stencilStoreOp = WGPUStoreOp_Store;
@@ -111,7 +122,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         depthAttachment.stencilStoreOp = WGPUStoreOp_Undefined;
         depthAttachment.stencilClearValue = 0u;
     }
-    depthAttachment.stencilReadOnly = WGPU_FALSE;
+    depthAttachment.stencilReadOnly = false;
     depthAttachment.view = nullptr;
 
     WGPURenderPassDepthStencilAttachment* depthAttachmentPtr = nullptr;
@@ -125,9 +136,18 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     if (depthViewHandle) {
         wgpuTextureViewAddRef(depthViewHandle);
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
         impl->depthStencilView = wgpu::TextureView::Acquire(depthViewHandle);
+#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+        impl->depthStencilView = wgpu::TextureView(depthViewHandle);
+#endif
         if (impl->depthStencilView) {
+
+#if MLN_WEBGPU_IMPL STREQUAL "dawn"
             depthAttachment.view = impl->depthStencilView.Get();
+#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+            depthAttachment.view = static_cast<WGPUTextureView>(impl->depthStencilView);
+#endif
             depthAttachmentPtr = &depthAttachment;
         }
     }
