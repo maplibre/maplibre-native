@@ -17,6 +17,7 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CAMetalLayer.h>
 #import <CoreGraphics/CoreGraphics.h>
+#import <Metal/Metal.h>
 
 #if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/MetalBackend.h>
@@ -46,6 +47,8 @@
 
 #if MLN_WEBGPU_IMPL_DAWN
 #include <webgpu/webgpu_glfw.h>
+#elif MLN_WEBGPU_IMPL_WGPU
+#include <webgpu/wgpu.h>
 #endif
 
 #include <algorithm>
@@ -282,8 +285,15 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     }
 
 #elif MLN_WEBGPU_IMPL_WGPU
-    // Create wgpu-native instance
+    // Create wgpu-native instance with disabled validation for performance
+    WGPUInstanceExtras instanceExtras = {};
+    instanceExtras.chain.sType = static_cast<WGPUSType>(WGPUSType_InstanceExtras);
+    instanceExtras.backends = WGPUInstanceBackend_Metal;  // Use Metal backend on macOS
+    instanceExtras.flags = WGPUInstanceFlag_Default;  // Explicitly disable validation and debug
+
     wgpu::InstanceDescriptor instanceDesc = {};
+    instanceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&instanceExtras);
+
     wgpuInstance = wgpu::createInstance(instanceDesc);
     if (!wgpuInstance) {
         throw std::runtime_error("Failed to create WebGPU instance");
@@ -448,8 +458,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 #if MLN_WEBGPU_IMPL_DAWN
     // For Dawn, use Dawn's native API to get Metal device
     layer.device = dawn::native::metal::GetMTLDevice(wgpuDevice.Get());
+#elif MLN_WEBGPU_IMPL_WGPU
+    // For wgpu-native, don't set the device - the surface configuration will handle it
+    // Setting it to a different device could cause performance issues
 #endif
-    // For wgpu-native, the device is set automatically by the surface
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     if (colorSpace) {
         layer.colorspace = colorSpace;
@@ -844,13 +856,11 @@ void GLFWWebGPUBackend::swap() {
 #endif
                 framePresented = true;
 
-                // Move current resources to previous (keep them alive)
-                previousTextureView = std::move(currentTextureView);
-                previousTexture = std::move(currentTexture);
-
-                // Clear current references
+                // Release resources immediately (wgpu-native performs better with immediate release)
                 currentTextureView = nullptr;
                 currentTexture = nullptr;
+                previousTextureView = nullptr;
+                previousTexture = nullptr;
             }
         }
 
@@ -941,11 +951,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         currentTexture = nullptr;
     }
 
-    bool expected = false;
-    if (!frameInProgress.compare_exchange_strong(expected, true)) {
-        return nullptr;
-    }
-
     framePresented = false;
 
     lock.unlock();
@@ -961,14 +966,12 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 
     } catch (...) {
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
     if (!surfaceTexture.texture) {
         surfaceNeedsReconfigure = true;
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
@@ -977,7 +980,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         status == wgpu::SurfaceGetCurrentTextureStatus::Lost) {
         surfaceNeedsReconfigure = true;
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
@@ -985,7 +987,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         (status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
          status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal)) {
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
@@ -1022,7 +1023,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         // Handle any exceptions from Dawn
         currentTexture = nullptr;
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
@@ -1030,7 +1030,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     if (!newView) {
         currentTexture = nullptr;
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
@@ -1041,7 +1040,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     if (!currentTextureView) {
         currentTexture = nullptr;
         consecutiveErrors++;
-        frameInProgress = false;
         return nullptr;
     }
 
@@ -1147,7 +1145,7 @@ void GLFWWebGPUBackend::reconfigureSurface() {
 }
 
 void GLFWWebGPUBackend::processEvents() {
-    
+
 #if MLN_WEBGPU_IMPL_DAWN
     // Dawn: Process device events for resource lifecycle management
     // This ticks the Dawn device to process pending callbacks and resource cleanup
@@ -1155,10 +1153,11 @@ void GLFWWebGPUBackend::processEvents() {
         wgpuDeviceTick(wgpuDevice.Get());
     }
 #elif MLN_WEBGPU_IMPL_WGPU
-    // wgpu-native: Process instance events for pending work completion and resource cleanup
-    // Note: wgpu-native uses wgpuInstanceProcessEvents on the instance, not the device
-    if (wgpuInstance) {
-        wgpuInstanceProcessEvents(static_cast<WGPUInstance>(wgpuInstance));
+    // wgpu-native: Use wgpuDevicePoll to process GPU work
+    // This is the lightweight equivalent of Dawn's wgpuDeviceTick
+    // wgpuDevicePoll with wait=false just processes pending GPU work without blocking
+    if (wgpuDevice) {
+        wgpuDevicePoll(static_cast<WGPUDevice>(wgpuDevice), false, nullptr);
     }
 #endif
 
@@ -1238,8 +1237,6 @@ bool GLFWWebGPUBackend::waitForFrame(std::chrono::milliseconds timeout) {
         if (isShuttingDown.load(std::memory_order_acquire)) {
             return true;
         }
-
-        processEvents();
 
         if (std::chrono::steady_clock::now() - start >= timeout) {
             return false;
