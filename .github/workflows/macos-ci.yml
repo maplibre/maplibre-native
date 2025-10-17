@@ -102,8 +102,8 @@ jobs:
         variant:
           - impl: dawn
             name: Dawn
-          # - impl: wgpu
-          #   name: wgpu-native
+          - impl: wgpu
+            name: wgpu-native
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
