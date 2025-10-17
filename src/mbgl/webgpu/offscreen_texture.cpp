@@ -7,7 +7,7 @@
 #include <cstring>
 #include <functional>
 
-#if MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#if MLN_WEBGPU_IMPL_WGPU
 #include <webgpu/wgpu.h>
 #endif
 
@@ -149,7 +149,7 @@ public:
         }
 
         // Process all pending device operations to ensure rendering is complete
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         wgpuDeviceTick(device);
 #endif
 
@@ -209,7 +209,7 @@ public:
         };
         MapContext mapContext;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         // Dawn: Use WaitAny for proper synchronous blocking
         WGPUBufferMapCallbackInfo callbackInfo = {};
         callbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
@@ -240,7 +240,7 @@ public:
                 mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Buffer mapping wait failed");
             }
         }
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
 
         // wgpu-native: Use polling approach (WaitAny not implemented yet)
         // Use AllowProcessEvents callback mode for synchronous polling

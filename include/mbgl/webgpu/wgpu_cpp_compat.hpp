@@ -10,10 +10,10 @@
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 // For Dawn backend, use Dawn's C++ wrapper
 #include <webgpu/webgpu_cpp.h>
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
 // For wgpu-native backend, use the WebGPU-Cpp wrapper
 #include <webgpu.hpp>
 #endif

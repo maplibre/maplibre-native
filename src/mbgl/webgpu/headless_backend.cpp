@@ -5,9 +5,9 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/DawnNative.h>
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
 #include <webgpu/wgpu.h>
 #endif
 
@@ -93,9 +93,9 @@ private:
 class HeadlessBackend::Impl {
 public:
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     std::unique_ptr<dawn::native::Instance> instance;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     wgpu::Instance instance;
     wgpu::Adapter adapter;
 #endif
@@ -116,7 +116,7 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
 
     impl->framebufferSize = size_;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Initialize Dawn instance with TimedWaitAny feature enabled
     wgpu::InstanceFeatureName timedWaitAnyFeature = wgpu::InstanceFeatureName::TimedWaitAny;
     wgpu::InstanceDescriptor instanceDesc = {};
@@ -154,7 +154,7 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
     setDevice(impl->device.Get());
     setQueue(impl->queue.Get());
     setInstance(impl->instance->Get());
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
    // wgpu-native backend initialization
     wgpu::InstanceDescriptor instanceDesc = {};
     impl->instance = wgpu::createInstance(instanceDesc);
@@ -228,9 +228,9 @@ void HeadlessBackend::createOffscreenTextures() {
     wgpu::TextureDescriptor colorDesc = {};
     colorDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     colorDesc.dimension = wgpu::TextureDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     colorDesc.dimension = wgpu::TextureDimension::_2D;
 #endif
     colorDesc.size = {
@@ -239,10 +239,10 @@ void HeadlessBackend::createOffscreenTextures() {
     colorDesc.mipLevelCount = 1;
     colorDesc.sampleCount = 1;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     colorDesc.label = "Headless Color Texture";
     impl->offscreenTexture = impl->device.CreateTexture(&colorDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     impl->offscreenTexture = impl->device.createTexture(colorDesc);
 
 #endif
@@ -251,9 +251,9 @@ void HeadlessBackend::createOffscreenTextures() {
         wgpu::TextureViewDescriptor viewDesc = {};
         viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         viewDesc.dimension = wgpu::TextureViewDimension::_2D;
 #endif
         viewDesc.baseMipLevel = 0;
@@ -261,11 +261,11 @@ void HeadlessBackend::createOffscreenTextures() {
         viewDesc.baseArrayLayer = 0;
         viewDesc.arrayLayerCount = 1;
         viewDesc.aspect = wgpu::TextureAspect::All;        
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.label = "Headless Color TextureView";
         
         impl->offscreenTextureView = impl->offscreenTexture.CreateView(&viewDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         impl->offscreenTextureView = impl->offscreenTexture.createView(viewDesc);
 #endif
 
@@ -275,9 +275,9 @@ void HeadlessBackend::createOffscreenTextures() {
     wgpu::TextureDescriptor depthDesc = {};
     depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     depthDesc.dimension = wgpu::TextureDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     depthDesc.dimension = wgpu::TextureDimension::_2D;
 #endif
     depthDesc.size = {
@@ -286,11 +286,11 @@ void HeadlessBackend::createOffscreenTextures() {
     depthDesc.mipLevelCount = 1;
     depthDesc.sampleCount = 1;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     depthDesc.label = "Headless Depth/Stencil Texture";
 
     impl->depthTexture = impl->device.CreateTexture(&depthDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     impl->depthTexture = impl->device.createTexture(depthDesc);
 #endif
 
@@ -298,9 +298,9 @@ void HeadlessBackend::createOffscreenTextures() {
         wgpu::TextureViewDescriptor viewDesc = {};
         viewDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         viewDesc.dimension = wgpu::TextureViewDimension::_2D;
 #endif
         viewDesc.baseMipLevel = 0;
@@ -309,11 +309,11 @@ void HeadlessBackend::createOffscreenTextures() {
         viewDesc.arrayLayerCount = 1;
         viewDesc.aspect = wgpu::TextureAspect::All;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.label = "Headless Depth/Stencil TextureView";
 
         impl->depthTextureView = impl->depthTexture.CreateView(&viewDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         impl->depthTextureView = impl->depthTexture.createView(viewDesc);
 #endif
     }

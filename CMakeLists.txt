@@ -1415,12 +1415,12 @@ if(MLN_WITH_WEBGPU)
     include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 
     # Include Dawn integration when requested
-    if(MLN_WEBGPU_IMPL STREQUAL "dawn")
+    if(MLN_WEBGPU_IMPL_DAWN)
         include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
         if(TARGET mbgl-vendor-dawn)
             target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
         endif()
-    elseif(MLN_WEBGPU_IMPL STREQUAL "wgpu")
+    elseif(MLN_WEBGPU_IMPL_WGPU)
         # Include wgpu-native integration
         include(${PROJECT_SOURCE_DIR}/vendor/wgpu.cmake)
         if(TARGET mbgl-vendor-wgpu)

@@ -18,7 +18,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/MetalBackend.h>
 #endif
 
@@ -27,7 +27,7 @@
 #define GLFW_EXPOSE_NATIVE_WAYLAND
 #include <GLFW/glfw3native.h>
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/VulkanBackend.h>
 #endif
 
@@ -37,14 +37,14 @@
 #undef None
 #endif
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/DawnNative.h>
 #endif
 
 #include <webgpu/webgpu.h>
 #include <webgpu/webgpu_cpp.h>
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 #include <webgpu/webgpu_glfw.h>
 #endif
 
@@ -62,11 +62,11 @@
 #include <thread>
 
 // Helper macro for label assignment (wgpu-native needs WGPUStringView)
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 // Dawn uses simple const char* labels - just assign directly inline
 #define WGPU_LABEL(desc, labelStr) \
     (desc.label = labelStr)
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
 #define WGPU_LABEL(desc, labelStr) \
     do { \
         static constexpr char label_text[] = labelStr; \
@@ -260,7 +260,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
 
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
 
     // Create Dawn instance
     instance = std::make_unique<dawn::native::Instance>();
@@ -281,7 +281,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         throw std::runtime_error("No WebGPU adapters found after retries");
     }
 
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     // Create wgpu-native instance
     wgpu::InstanceDescriptor instanceDesc = {};
     wgpuInstance = wgpu::createInstance(instanceDesc);
@@ -301,7 +301,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 #endif
 
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     std::size_t selectedIndex = 0;
     if (auto targettedBackend = desiredBackendFromEnv()) {
         bool matched = false;
@@ -343,7 +343,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         }
     }
 
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     // Log adapter info for wgpu-native
     {
         WGPUAdapterInfo info = {};
@@ -363,9 +363,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
     WGPUSupportedFeatures features = {};
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     wgpuAdapterGetFeatures(selectedAdapter.Get(), &features);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     wgpuAdapterGetFeatures(static_cast<WGPUAdapter>(selectedAdapter), &features);
 #endif
 
@@ -389,24 +389,24 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
 
     wgpu::DeviceDescriptor deviceDesc = {};
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     deviceDesc.requiredFeatures = requiredFeatures.data();
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     deviceDesc.requiredFeatures = reinterpret_cast<const WGPUFeatureName*>(requiredFeatures.data());
 #endif
     deviceDesc.requiredFeatureCount = requiredFeatures.size();
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Dawn supports error callbacks at device creation time
     deviceDesc.label = "MapLibre WebGPU Device";
     deviceDesc.SetUncapturedErrorCallback(logUncapturedError);
     deviceDesc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous, logDeviceLost);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     // wgpu-native: Use label through descriptor, callbacks are set after device creation
     WGPU_LABEL(deviceDesc, "MapLibre WebGPU Device");
 #endif
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Create device with descriptor
     WGPUDevice rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
     if (!rawDevice) {
@@ -420,7 +420,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     }
 
     wgpuDevice = wgpu::Device::Acquire(rawDevice);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     // Create device with wgpu-native
     wgpuDevice = selectedAdapter.requestDevice(deviceDesc);
     if (!wgpuDevice) {
@@ -445,7 +445,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Create CAMetalLayer
     CAMetalLayer* layer = [CAMetalLayer layer];
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // For Dawn, use Dawn's native API to get Metal device
     layer.device = dawn::native::metal::GetMTLDevice(wgpuDevice.Get());
 #endif
@@ -468,14 +468,14 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
     [view setLayer:layer];
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Create surface from metal layer
     wgpu::SurfaceSourceMetalLayer metalDesc;
     metalDesc.layer = (__bridge void*)layer;
 
     wgpu::SurfaceDescriptor surfaceDesc;
     surfaceDesc.nextInChain = &metalDesc;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
    wgpu::SurfaceSourceMetalLayer metalDesc = {};
     metalDesc.chain.sType = wgpu::SType::SurfaceSourceMetalLayer;
     metalDesc.chain.next = nullptr;
@@ -485,11 +485,11 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     surfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&metalDesc);
 #endif
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Create surface using the instance
     wgpu::Instance wgpuInstance(instance->Get());
     wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     wgpuSurface = wgpuInstance.createSurface(surfaceDesc);
 #endif
 
@@ -497,9 +497,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         
         WGPUSurfaceCapabilities capabilities = {};
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         if (wgpuSurfaceGetCapabilities(wgpuSurface.Get(), selectedAdapter.Get(), &capabilities) == WGPUStatus_Success) {
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         if (wgpuSurfaceGetCapabilities(static_cast<WGPUSurface>(wgpuSurface), static_cast<WGPUAdapter>(selectedAdapter), &capabilities) == WGPUStatus_Success) {
 #endif
             const auto pickFormat = [&]() {
@@ -529,9 +529,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     layer.pixelFormat = toMetalPixelFormat(swapChainFormat);
 
     // Get the queue
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     queue = wgpuDevice.GetQueue();
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     queue = wgpuDevice.getQueue();
 #endif
 
@@ -547,11 +547,11 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     configuredViewFormats[0] = swapChainFormat;
     config.viewFormatCount = 1;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     config.viewFormats = configuredViewFormats.data();
 
     wgpuSurface.Configure(&config);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     config.viewFormats = reinterpret_cast<const WGPUTextureFormat*>(configuredViewFormats.data());
     wgpuSurface.configure(config);
 #endif
@@ -567,7 +567,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     std::string windowSizeMsg = "Window size: " + std::to_string(width) + "x" + std::to_string(height);
 
     // Create surface for WebGPU
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     wgpu::Instance wgpuInstance(instance->Get());
 #endif
 
@@ -586,9 +586,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
             wgpu::SurfaceDescriptor surfaceDesc = {};
             surfaceDesc.nextInChain = &x11Desc;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
             wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
             wgpuSurface = wgpuInstance.createSurface(surfaceDesc);
 #endif
             surfaceCreated = true;
@@ -611,9 +611,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
             wgpu::SurfaceDescriptor surfaceDesc = {};
             surfaceDesc.nextInChain = &waylandDesc;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
             wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
             wgpuSurface = wgpuInstance.createSurface(surfaceDesc);
 #endif
             surfaceCreated = true;
@@ -636,9 +636,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     if (wgpuSurface) {
 
         WGPUSurfaceCapabilities capabilities = {};
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         if (wgpuSurfaceGetCapabilities(wgpuSurface.Get(), selectedAdapter.Get(), &capabilities) == WGPUStatus_Success) {
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
             if (wgpuSurfaceGetCapabilities(static_cast<WGPUSurface>(wgpuSurface), static_cast<WGPUAdapter>(selectedAdapter), &capabilities) == WGPUStatus_Success) {
 #endif
             const auto pickFormat = [&]() {
@@ -666,9 +666,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     setColorFormat(swapChainFormat);
 
     // Get the queue
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     queue = wgpuDevice.GetQueue();
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     queue = wgpuDevice.getQueue();
 #endif
 
@@ -684,10 +684,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     configuredViewFormats[0] = swapChainFormat;
     config.viewFormatCount = 1;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     config.viewFormats = configuredViewFormats.data();
     wgpuSurface.Configure(&config);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     config.viewFormats = reinterpret_cast<const WGPUTextureFormat*>(configuredViewFormats.data());
     wgpuSurface.configure(config);
 #endif
@@ -698,11 +698,11 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
     // Store WebGPU instance, device and queue in the base class
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     setInstance(instance->Get());
     setDevice(reinterpret_cast<void*>(wgpuDevice.Get()));
     setQueue(reinterpret_cast<void*>(queue.Get()));
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     setInstance(static_cast<WGPUInstance>(wgpuInstance));
     setDevice(static_cast<WGPUDevice>(wgpuDevice));
     setQueue(static_cast<WGPUQueue>(queue));
@@ -754,9 +754,9 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     // Unconfigure surface before releasing device
     if (wgpuSurface && surfaceConfigured) {
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         wgpuSurface.Unconfigure();
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         wgpuSurface.unconfigure();
 #endif
         surfaceConfigured = false;
@@ -767,10 +767,10 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     queue = nullptr;         // Queue is owned by device
     wgpuDevice = nullptr;    // Device depends on instance
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Release Dawn instance last (it owns the backend)
     instance.reset();
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     wgpuInstance = nullptr;
 #endif
 
@@ -837,9 +837,9 @@ void GLFWWebGPUBackend::swap() {
 
             if (currentTextureView && !framePresented) {
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
                 wgpuSurface.Present();
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
                 wgpuSurface.present();
 #endif
                 framePresented = true;
@@ -928,9 +928,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 
     if (currentTextureView && !framePresented) {
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         return reinterpret_cast<void*>(currentTextureView.Get());
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         return reinterpret_cast<void*>(static_cast<WGPUTextureView>(currentTextureView));
 #endif
 
@@ -953,9 +953,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     wgpu::SurfaceTexture surfaceTexture;
 
     try {
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         wgpuSurface.GetCurrentTexture(&surfaceTexture);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         wgpuSurface.getCurrentTexture(&surfaceTexture);
 #endif
 
@@ -994,9 +994,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     // Create texture view with explicit descriptor
     wgpu::TextureViewDescriptor viewDesc = {};
     viewDesc.format = swapChainFormat;
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     viewDesc.dimension = wgpu::TextureViewDimension::_2D;
 #endif
 
@@ -1013,9 +1013,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     // Create the texture view with validation
     wgpu::TextureView newView;
     try {
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
         newView = currentTexture.CreateView(&viewDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
         newView = currentTexture.createView(viewDesc);
 #endif
     } catch (...) {
@@ -1052,9 +1052,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     }
 #endif
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     return reinterpret_cast<void*>(currentTextureView.Get());
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     return reinterpret_cast<void*>(static_cast<WGPUTextureView>(currentTextureView));
 #endif
 }
@@ -1075,9 +1075,9 @@ void* GLFWWebGPUBackend::getDepthStencilView() {
                                   static_cast<uint32_t>(std::max(height, 0)));
     }
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     return depthStencilView ? reinterpret_cast<void*>(depthStencilView.Get()) : nullptr;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     return depthStencilView ? reinterpret_cast<void*>(static_cast<WGPUTextureView>(depthStencilView)) : nullptr;
 #endif 
 
@@ -1131,9 +1131,9 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     wgpuSurface.Configure(&config);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     wgpuSurface.configure(config);
 #endif
 
@@ -1148,13 +1148,13 @@ void GLFWWebGPUBackend::reconfigureSurface() {
 
 void GLFWWebGPUBackend::processEvents() {
     
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     // Dawn: Process device events for resource lifecycle management
     // This ticks the Dawn device to process pending callbacks and resource cleanup
     if (wgpuDevice) {
         wgpuDeviceTick(wgpuDevice.Get());
     }
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     // wgpu-native: Process device events using wgpuDevicePoll
     // This is needed for pending work completion and resource cleanup
     if (wgpuDevice) {
@@ -1176,9 +1176,9 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
     WGPU_LABEL(depthDesc, "DepthStencilTexture");
     depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     depthDesc.dimension = wgpu::TextureDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     depthDesc.dimension = wgpu::TextureDimension::_2D;
 #endif 
     
@@ -1188,9 +1188,9 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
     depthDesc.mipLevelCount = 1;
     depthDesc.sampleCount = 1;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     depthStencilTexture = wgpuDevice.CreateTexture(&depthDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     depthStencilTexture = wgpuDevice.createTexture(depthDesc);
 #endif
 
@@ -1205,9 +1205,9 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
     WGPU_LABEL(viewDesc, "DepthStencilTextureView");
     viewDesc.format = depthDesc.format;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     viewDesc.dimension = wgpu::TextureViewDimension::_2D;
 #endif
 
@@ -1217,9 +1217,9 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
     viewDesc.arrayLayerCount = 1;
     viewDesc.aspect = wgpu::TextureAspect::All;
 
-#if MLN_WEBGPU_IMPL STREQUAL "dawn"
+#if MLN_WEBGPU_IMPL_DAWN
     depthStencilView = depthStencilTexture.CreateView(&viewDesc);
-#elif MLN_WEBGPU_IMPL STREQUAL "wgpu"
+#elif MLN_WEBGPU_IMPL_WGPU
     depthStencilView = depthStencilTexture.createView(viewDesc);
 #endif
 
