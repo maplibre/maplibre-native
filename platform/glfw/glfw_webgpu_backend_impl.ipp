@@ -246,8 +246,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
                             static_cast<uint32_t>(std::max(fbHeight, 0))};
       }(),
           std::make_unique<mbgl::WebGPURenderableResource>(*this)),
-      window(window_) {
-    static_cast<void>(capFrameRate);
+      window(window_),
+      enableVSync(capFrameRate) {
 
     // Add small delay to let previous resources clean up
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -555,7 +555,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.alphaMode = wgpu::CompositeAlphaMode::Auto;
     config.width = width;
     config.height = height;
-    config.presentMode = wgpu::PresentMode::Fifo;
+    // Use Immediate mode (no vsync) in benchmark mode, Fifo (vsync) otherwise
+    config.presentMode = enableVSync ? wgpu::PresentMode::Fifo : wgpu::PresentMode::Immediate;
     configuredViewFormats[0] = swapChainFormat;
     config.viewFormatCount = 1;
 
@@ -692,7 +693,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.alphaMode = wgpu::CompositeAlphaMode::Auto;
     config.width = width;
     config.height = height;
-    config.presentMode = wgpu::PresentMode::Fifo;
+    // Use Immediate mode (no vsync) in benchmark mode, Fifo (vsync) otherwise
+    config.presentMode = enableVSync ? wgpu::PresentMode::Fifo : wgpu::PresentMode::Immediate;
     configuredViewFormats[0] = swapChainFormat;
     config.viewFormatCount = 1;
 
@@ -1127,7 +1129,8 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     config.alphaMode = wgpu::CompositeAlphaMode::Auto;
     config.width = width;
     config.height = height;
-    config.presentMode = wgpu::PresentMode::Fifo;
+    // Use Immediate mode (no vsync) in benchmark mode, Fifo (vsync) otherwise
+    config.presentMode = enableVSync ? wgpu::PresentMode::Fifo : wgpu::PresentMode::Immediate;
 
 #if MLN_WEBGPU_IMPL_DAWN
     wgpuSurface.Configure(&config);

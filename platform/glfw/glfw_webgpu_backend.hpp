@@ -107,6 +107,9 @@ private:
     std::atomic<int> consecutiveErrors{0};
     static constexpr int maxConsecutiveErrors = 3;
 
+    // VSync control
+    bool enableVSync = true;
+
     // Helper methods
     void reconfigureSurface();
     void createDepthStencilTexture(uint32_t width, uint32_t height);
