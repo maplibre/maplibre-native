@@ -106,3 +106,6 @@
 [submodule "vendor/webgpu-cpp"]
 	path = vendor/webgpu-cpp
 	url = https://github.com/eliemichel/WebGPU-Cpp.git
+[submodule "vendor/wgpu-native"]
+	path = vendor/wgpu-native
+	url = https://github.com/gfx-rs/wgpu-native.git

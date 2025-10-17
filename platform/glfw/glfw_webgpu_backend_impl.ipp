@@ -1005,7 +1005,7 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     viewDesc.baseArrayLayer = 0;
     viewDesc.arrayLayerCount = 1;
     viewDesc.aspect = wgpu::TextureAspect::All;
-    viewDesc.label = "SwapChain TextureView";
+    WGPU_LABEL(viewDesc, "SwapChain TextureView");
 
     // Store the texture to keep it alive
     currentTexture = surfaceTexture.texture;
@@ -1155,10 +1155,10 @@ void GLFWWebGPUBackend::processEvents() {
         wgpuDeviceTick(wgpuDevice.Get());
     }
 #elif MLN_WEBGPU_IMPL_WGPU
-    // wgpu-native: Process device events using wgpuDevicePoll
-    // This is needed for pending work completion and resource cleanup
-    if (wgpuDevice) {
-        wgpuDevicePoll(static_cast<WGPUDevice>(wgpuDevice), false, nullptr);
+    // wgpu-native: Process instance events for pending work completion and resource cleanup
+    // Note: wgpu-native uses wgpuInstanceProcessEvents on the instance, not the device
+    if (wgpuInstance) {
+        wgpuInstanceProcessEvents(static_cast<WGPUInstance>(wgpuInstance));
     }
 #endif
 

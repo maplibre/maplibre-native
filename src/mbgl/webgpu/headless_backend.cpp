@@ -8,7 +8,7 @@
 #if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/DawnNative.h>
 #elif MLN_WEBGPU_IMPL_WGPU
-#include <webgpu/wgpu.h>
+#include <wgpu.h>
 #endif
 
 namespace mbgl {

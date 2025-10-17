@@ -1,5 +1,9 @@
-// Include Dawn headers first to define WEBGPU_H_
+// Include WebGPU headers first to define WEBGPU_H_
+#if MLN_WEBGPU_IMPL_DAWN
 #include <webgpu/webgpu.h>
+#elif MLN_WEBGPU_IMPL_WGPU
+#include <webgpu.h>
+#endif
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 
 #include <mbgl/webgpu/render_pass.hpp>

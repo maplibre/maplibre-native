@@ -133,7 +133,7 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} generate.py
             --use-init-macros
-            --header ${_mln_wgpu_source_dir}/ffi/webgpu/webgpu.h
+            --header ${_mln_wgpu_source_dir}/ffi/webgpu-headers/webgpu.h
         WORKING_DIRECTORY ${_webgpu_cpp_dir}
         RESULT_VARIABLE _gen_result
         OUTPUT_VARIABLE _gen_output
@@ -148,9 +148,10 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
     message(STATUS "Successfully generated WebGPU-Cpp wrapper")
 endif()
 
-# Create compatibility shim for Dawn header paths if it doesn't exist
+# Create compatibility shims for Dawn header paths if they don't exist
 set(_compat_shim_dir "${_webgpu_cpp_dir}/wgpu-native/webgpu")
 set(_compat_shim_header "${_compat_shim_dir}/webgpu_cpp.h")
+set(_compat_shim_webgpu_h "${_compat_shim_dir}/webgpu.h")
 
 if(NOT EXISTS "${_compat_shim_header}")
     message(STATUS "Creating WebGPU-Cpp compatibility shim...")
@@ -166,7 +167,41 @@ if(NOT EXISTS "${_compat_shim_header}")
 #include \"../../webgpu.hpp\"
 ")
 
-    message(STATUS "Successfully created compatibility shim")
+    message(STATUS "Successfully created WebGPU-Cpp compatibility shim")
+endif()
+
+if(NOT EXISTS "${_compat_shim_webgpu_h}")
+    message(STATUS "Creating webgpu.h compatibility shim...")
+
+    file(WRITE "${_compat_shim_webgpu_h}"
+"#pragma once
+// Compatibility shim for Dawn header paths
+// This file allows MapLibre code to use #include <webgpu/webgpu.h>
+// for both Dawn and wgpu-native backends
+
+// Include the actual webgpu.h header
+#include <webgpu.h>
+")
+
+    message(STATUS "Successfully created webgpu.h compatibility shim")
+endif()
+
+# Also create wgpu.h shim for wgpu-native specific includes
+set(_compat_shim_wgpu_h "${_compat_shim_dir}/wgpu.h")
+if(NOT EXISTS "${_compat_shim_wgpu_h}")
+    message(STATUS "Creating wgpu.h compatibility shim...")
+
+    file(WRITE "${_compat_shim_wgpu_h}"
+"#pragma once
+// Compatibility shim for wgpu-native specific header
+// This file allows MapLibre code to use #include <webgpu/wgpu.h>
+// for both Dawn and wgpu-native backends
+
+// Include the actual wgpu.h header
+#include <wgpu.h>
+")
+
+    message(STATUS "Successfully created wgpu.h compatibility shim")
 endif()
 
 # Create interface library
