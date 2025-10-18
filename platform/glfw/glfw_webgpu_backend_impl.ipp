@@ -954,10 +954,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 
     }
 
-    if (framePresented) {
-        currentTextureView = nullptr;
-        currentTexture = nullptr;
-    }
+    // Always release textures before acquiring new ones to avoid "already acquired" error
+    currentTextureView = nullptr;
+    currentTexture = nullptr;
 
     framePresented = false;
 
