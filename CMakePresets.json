@@ -48,7 +48,7 @@
       "name": "macos-metal-xcode",
       "displayName": "macOS (Xcode)",
       "generator": "Xcode",
-      "binaryDir": "${sourceDir}/build-macos-xcode",
+      "binaryDir": "${sourceDir}/build-macos-metal-xcode",
       "inherits": "macos-metal"
     },
     {
