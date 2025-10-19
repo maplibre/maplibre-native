@@ -140,7 +140,7 @@ jobs:
 
       - name: Run unit tests
         id: unit_test
-        run: build-macos-webgpu-${{ matrix.variant.impl }}/mbgl-test-runner --gtest_filter=-Map.StyleNetworkErrorRetry:LocalGlyphRasterizer.PingFang:LocalGlyphRasterizer.PingFangWithBoldInStyle:LocalGlyphRasterizer.PingFangSemibold
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/mbgl-test-runner --gtest_filter=-Map.StyleNetworkErrorRetry:LocalGlyphRasterizer.PingFang:LocalGlyphRasterizer.PingFangWithBoldInStyle:LocalGlyphRasterizer.PingFangSemibold:Map.Offline
 
       - name: Run expression tests
         id: expression_test
