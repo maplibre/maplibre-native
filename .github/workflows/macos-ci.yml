@@ -134,7 +134,12 @@ jobs:
       - name: Build targets
         run: |
           cmake --build build-macos-webgpu-${{ matrix.variant.impl }} --target \
-            mbgl-render-test-runner
+            mbgl-render-test-runner \
+            mbgl-expression-test
+
+      - name: Run expression tests
+        id: expression_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/expression-test/mbgl-expression-test
 
       - name: Prepare render test output directory
         run: mkdir -p metrics/macos-webgpu-${{ matrix.variant.impl }}
