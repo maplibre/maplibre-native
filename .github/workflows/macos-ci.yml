@@ -135,7 +135,12 @@ jobs:
         run: |
           cmake --build build-macos-webgpu-${{ matrix.variant.impl }} --target \
             mbgl-render-test-runner \
-            mbgl-expression-test
+            mbgl-expression-test \
+            mbgl-test-runner
+
+      - name: Run unit tests
+        id: unit_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/mbgl-test-runner --gtest_filter=-Map.StyleNetworkErrorRetry:LocalGlyphRasterizer.PingFang:LocalGlyphRasterizer.PingFangWithBoldInStyle:LocalGlyphRasterizer.PingFangSemibold
 
       - name: Run expression tests
         id: expression_test
