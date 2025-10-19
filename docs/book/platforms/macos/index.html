@@ -332,8 +332,8 @@ npm install &amp;&amp; node test/storage/server.js  # required test server
 build-macos/mbgl-test-runner
 </code></pre>
 <p>Create and open an Xcode project with CMake:</p>
-<pre><code class="language-sh">cmake --preset macos-xcode
-xed build-macos-xcode/MapLibre\ Native.xcodeproj
+<pre><code class="language-sh">cmake --preset macos-metal-xcode
+xed build-macos-metal-xcode/MapLibre\ Native.xcodeproj
 </code></pre>
 <p>Configure project for Vulkan (make sure <a href="https://github.com/KhronosGroup/MoltenVK">MoltenVK</a> is installed):</p>
 <pre><code class="language-sh">cmake --preset macos-vulkan
