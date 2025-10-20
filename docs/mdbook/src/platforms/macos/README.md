@@ -79,8 +79,8 @@ build-macos/mbgl-test-runner
 Create and open an Xcode project with CMake:
 
 ```sh
-cmake --preset macos-xcode
-xed build-macos-xcode/MapLibre\ Native.xcodeproj
+cmake --preset macos-metal-xcode
+xed build-macos-metal-xcode/MapLibre\ Native.xcodeproj
 ```
 
 Configure project for Vulkan (make sure [MoltenVK](https://github.com/KhronosGroup/MoltenVK) is installed):
