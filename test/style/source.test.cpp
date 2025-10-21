@@ -836,6 +836,7 @@ TEST(Source, InvisibleSourcesTileNecessity) {
     Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
         staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
+    EXPECT_CALL(renderTilesetSource, tileSetMinimumUpdateInterval).Times(testing::AnyNumber());
     EXPECT_CALL(renderTilesetSource, tileSetNecessity(TileNecessity::Required)).Times(1);
     renderSource->update(initialized.baseImpl, layers, true, true, test.tileParameters());
 
@@ -863,6 +864,7 @@ TEST(Source, SourceMinimumUpdateInterval) {
     Duration minimumTileUpdateInterval = initialized.getMinimumTileUpdateInterval();
     auto baseImpl = initialized.baseImpl;
     EXPECT_EQ(Duration::zero(), minimumTileUpdateInterval);
+    EXPECT_CALL(renderTilesetSource, tileSetNecessity).Times(testing::AnyNumber());
     EXPECT_CALL(renderTilesetSource, tileSetMinimumUpdateInterval(minimumTileUpdateInterval)).Times(1);
     renderSource->update(baseImpl, layers, true, false, test.tileParameters());
 
