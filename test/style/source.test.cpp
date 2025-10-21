@@ -668,14 +668,14 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
     SourceTest test;
 
     test.fileSource->sourceResponse = [&](const Resource& resource) {
-        EXPECT_EQ("url", resource.url);
+        EXPECT_EQ("http://source-url.ext", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(
             R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})");
         return response;
     };
 
-    test.styleObserver.sourceDescriptionChanged = [&](Source&) {
+    test.styleObserver.sourceLoaded = [&](Source&) {
         // Should be called (test will hang if it doesn't)
         test.end();
     };
@@ -690,6 +690,7 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
     test.loop.invoke([&]() {
         // Update the url
         source.setURL(std::string("http://source-url.ext"));
+        source.loadDescription(*test.fileSource);
     });
 
     test.run();
