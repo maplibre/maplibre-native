@@ -48,9 +48,9 @@ jobs:
             arch: x86_64
           - runs-on: ubuntu-24.04-arm
             arch: arm64
-          - runs-on: macos-13
+          - runs-on: macos-15-intel
             arch: x86_64
-          - runs-on: macos-14
+          - runs-on: macos-15
             arch: arm64
           - runs-on: windows-2022
             arch: x86_64
