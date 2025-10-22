@@ -34,5 +34,8 @@
   "scripts": {
     "copy-style-spec": "cp node_modules/@maplibre/maplibre-gl-style-spec/dist/latest.json scripts/style-spec-reference/v8.json"
   },
-  "type": "module"
+  "type": "module",
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  }
 }
