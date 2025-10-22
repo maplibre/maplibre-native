@@ -11,7 +11,7 @@
 
 namespace {
 
-std::string toAbsoluteURL(const std::string &fileName) {
+std::string toAbsoluteURL(const std::string& fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/mbtiles" / fileName;
     return "mbtiles://" + path.string();
 }
