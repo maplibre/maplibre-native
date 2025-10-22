@@ -208,7 +208,6 @@ public:
         };
         MapContext mapContext;
 
-
         // Use WaitAny for proper synchronous blocking
         WGPUBufferMapCallbackInfo callbackInfo = {};
         callbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
