@@ -213,12 +213,10 @@ public:
         WGPUBufferMapCallbackInfo callbackInfo = {};
         callbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
         callbackInfo.callback =
-            [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
+            [](WGPUMapAsyncStatus status, WGPUStringView /*message*/, void* userdata1, void* /*userdata2*/) {
                 auto* ctx = static_cast<MapContext*>(userdata1);
                 ctx->status = status;
                 ctx->completed = true;
-                (void)message;
-                (void)userdata2;
             };
         callbackInfo.userdata1 = &mapContext;
         callbackInfo.userdata2 = nullptr;
@@ -246,12 +244,10 @@ public:
         WGPUBufferMapCallbackInfo callbackInfo = {};
         callbackInfo.mode = WGPUCallbackMode_AllowProcessEvents;
         callbackInfo.callback =
-            [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
+            [](WGPUMapAsyncStatus status, WGPUStringView /*message*/, void* userdata1, void* /*userdata2*/) {
                 auto* ctx = static_cast<MapContext*>(userdata1);
                 ctx->status = status;
                 ctx->completed = true;
-                (void)message;
-                (void)userdata2;
             };
         callbackInfo.userdata1 = &mapContext;
         callbackInfo.userdata2 = nullptr;
