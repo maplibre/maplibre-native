@@ -38,8 +38,6 @@
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
     "pretty-bytes": "^6.1.1",
-    "semver": "^7.6.0",
-    "shuffle-seed": "1.1.6",
     "st": "3.0.0",
     "typescript": "^5.4.5"
   },

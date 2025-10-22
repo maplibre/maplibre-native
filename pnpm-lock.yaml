@@ -96,12 +96,6 @@ importers:
       pretty-bytes:
         specifier: ^6.1.1
         version: 6.1.1
-      semver:
-        specifier: ^7.6.0
-        version: 7.7.3
-      shuffle-seed:
-        specifier: 1.1.6
-        version: 1.1.6
       st:
         specifier: 3.0.0
         version: 3.0.0
@@ -1400,9 +1394,6 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  seedrandom@2.4.4:
-    resolution: {integrity: sha512-9A+PDmgm+2du77B5i0Ip2cxOqqHjgNxnBgglxLcX78A2D6c2rTo61z4jnVABpF4cKeDMDG+cmXXvdnqse2VqMA==}
-
   semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
     hasBin: true
@@ -1446,9 +1437,6 @@ packages:
   shell-quote@1.8.3:
     resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
     engines: {node: '>= 0.4'}
-
-  shuffle-seed@1.1.6:
-    resolution: {integrity: sha512-Vr9wlwMKJVUeFNGyc4aNbrzkI568gkve7ykyJ+1/cz78j3yRlJODWU0CuJ/fmk3MCjvAClpnqlycd/Y53UG3UA==}
 
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
@@ -3526,8 +3514,6 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  seedrandom@2.4.4: {}
-
   semver@5.7.2: {}
 
   semver@7.7.3: {}
@@ -3590,10 +3576,6 @@ snapshots:
   shebang-regex@1.0.0: {}
 
   shell-quote@1.8.3: {}
-
-  shuffle-seed@1.1.6:
-    dependencies:
-      seedrandom: 2.4.4
 
   side-channel-list@1.0.0:
     dependencies:
