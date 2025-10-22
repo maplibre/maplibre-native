@@ -69,15 +69,9 @@ importers:
       ejs:
         specifier: ^3.1.10
         version: 3.1.10
-      esm:
-        specifier: ~3.2.25
-        version: 3.2.25
       express:
         specifier: ^4.19.2
         version: 4.21.2
-      json-stringify-pretty-compact:
-        specifier: ^4.0.0
-        version: 4.0.0
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -860,10 +854,6 @@ packages:
   escape-string-regexp@1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
     engines: {node: '>=0.8.0'}
-
-  esm@3.2.25:
-    resolution: {integrity: sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==}
-    engines: {node: '>=6'}
 
   etag@1.8.1:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
@@ -2928,8 +2918,6 @@ snapshots:
   escape-html@1.0.3: {}
 
   escape-string-regexp@1.0.5: {}
-
-  esm@3.2.25: {}
 
   etag@1.8.1: {}
 
