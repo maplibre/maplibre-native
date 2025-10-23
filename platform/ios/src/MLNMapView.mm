@@ -642,6 +642,9 @@ public:
 
 - (void)setStyleURL:(nullable NSURL *)styleURL
 {
+    // Remove all the plugin layers
+    [self.pluginLayers removeAllObjects];
+    
     if ( ! styleURL)
     {
         styleURL = [MLNStyle defaultStyleURL];

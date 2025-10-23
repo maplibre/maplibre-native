@@ -362,6 +362,26 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         }
     }];
+    /* This is just a test of adding a plugin at runtime via style layer
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self createPluginStyleLayer];
+    });
+     */
+    
+}
+
+-(void)createPluginStyleLayer {
+    
+    MLNPluginStyleLayer *layer = [[MLNPluginStyleLayer alloc] initWithType:@"maplibre::filter_features"
+                                                           layerIdentifier:@"centroid-features"
+                                                            layerPropeties:@{
+        @"source": @"maplibre",
+        @"source-layer": @"countries",
+        @"maxzoom": @(24),
+        @"minzoom": @(1)
+    }];
+    [self.mapView.style addLayer:layer];
+    
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
