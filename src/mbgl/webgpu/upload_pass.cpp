@@ -14,7 +14,7 @@
 namespace mbgl {
 namespace webgpu {
 
-UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
+UploadPass::UploadPass([[maybe_unused]] gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
     // Push debug groups (Metal pattern)
     commandEncoder.visitDebugGroups([this](const auto& group) {

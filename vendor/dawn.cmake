@@ -76,12 +76,6 @@ target_include_directories(mbgl-vendor-dawn
         ${DAWN_BUILD_DIR}/gen/include
 )
 
-target_compile_definitions(mbgl-vendor-dawn
-    INTERFACE
-        MLN_WITH_DAWN=1
-        WEBGPU_BACKEND_DAWN=1
-)
-
 if(APPLE)
     target_compile_definitions(mbgl-vendor-dawn INTERFACE DAWN_ENABLE_BACKEND_METAL=1)
 else()

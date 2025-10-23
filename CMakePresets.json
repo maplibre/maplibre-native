@@ -89,7 +89,7 @@
       "inherits": "macos",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "dawn",
+        "MLN_WEBGPU_IMPL_DAWN": "ON",
         "MLN_DARWIN_USE_LIBUV": "ON"
       }
     },
@@ -101,7 +101,7 @@
       "inherits": "macos",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "wgpu",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
         "MLN_DARWIN_USE_LIBUV": "ON"
       }
     },
@@ -149,7 +149,7 @@
       "inherits": "linux",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "dawn",
+        "MLN_WEBGPU_IMPL_DAWN": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
       }
@@ -160,7 +160,7 @@
       "inherits": "linux",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "wgpu",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
       }

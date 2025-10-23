@@ -15,10 +15,12 @@ struct GLFWwindow;
 struct WGPUDeviceImpl;
 struct WGPUSurfaceImpl;
 
+#if MLN_WEBGPU_IMPL_DAWN
 namespace dawn::native {
 class Instance;
 class Adapter;
 } // namespace dawn::native
+#endif
 
 // Multiple inheritance: GLFWBackend for window management,
 // webgpu::RendererBackend for rendering, gfx::Renderable for framebuffer
@@ -63,7 +65,12 @@ private:
     mutable SpinLock textureStateLock;
 
     GLFWwindow* window;
+
+#if MLN_WEBGPU_IMPL_DAWN
     std::unique_ptr<dawn::native::Instance> instance;
+#elif MLN_WEBGPU_IMPL_WGPU
+    wgpu::Instance wgpuInstance;
+#endif
     wgpu::Device wgpuDevice; // This owns the device
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
@@ -100,6 +107,9 @@ private:
     std::atomic<int> consecutiveErrors{0};
     static constexpr int maxConsecutiveErrors = 3;
 
+    // VSync control
+    bool enableVSync = true;
+
     // Helper methods
     void reconfigureSurface();
     void createDepthStencilTexture(uint32_t width, uint32_t height);
@@ -107,13 +117,4 @@ private:
     void signalFrameComplete();
     void periodicMaintenance();
     void processEvents();
-
-    // Debug triangle utilities
-    void ensureDebugTriangleResources();
-    void drawDebugTriangle(const wgpu::TextureView& targetView);
-
-    bool debugTriangleInitialized = false;
-    wgpu::RenderPipeline debugTrianglePipeline;
-    wgpu::Buffer debugTriangleVertexBuffer;
-    uint64_t debugTriangleVertexBufferSize = 0;
 };

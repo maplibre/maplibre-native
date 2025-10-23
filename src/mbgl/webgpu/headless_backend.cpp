@@ -4,7 +4,12 @@
 #include <mbgl/webgpu/offscreen_texture.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
+
+#if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/DawnNative.h>
+#elif MLN_WEBGPU_IMPL_WGPU
+#include <wgpu.h>
+#endif
 
 namespace mbgl {
 namespace webgpu {
@@ -87,7 +92,12 @@ private:
 
 class HeadlessBackend::Impl {
 public:
+#if MLN_WEBGPU_IMPL_DAWN
     std::unique_ptr<dawn::native::Instance> instance;
+#elif MLN_WEBGPU_IMPL_WGPU
+    wgpu::Instance instance;
+    wgpu::Adapter adapter;
+#endif
     wgpu::Device device;
     wgpu::Queue queue;
     wgpu::Texture offscreenTexture;
@@ -105,6 +115,7 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
 
     impl->framebufferSize = size_;
 
+#if MLN_WEBGPU_IMPL_DAWN
     // Initialize Dawn instance with TimedWaitAny feature enabled
     wgpu::InstanceFeatureName timedWaitAnyFeature = wgpu::InstanceFeatureName::TimedWaitAny;
     wgpu::InstanceDescriptor instanceDesc = {};
@@ -142,6 +153,44 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
     setDevice(impl->device.Get());
     setQueue(impl->queue.Get());
     setInstance(impl->instance->Get());
+#elif MLN_WEBGPU_IMPL_WGPU
+    // wgpu-native backend initialization
+    wgpu::InstanceDescriptor instanceDesc = {};
+    impl->instance = wgpu::createInstance(instanceDesc);
+
+    if (!impl->instance) {
+        Log::Error(Event::Render, "WebGPU HeadlessBackend: Failed to create instance");
+        return;
+    }
+
+    // Request adapter using simpler blocking API
+    wgpu::RequestAdapterOptions adapterOpts = {};
+    adapterOpts.powerPreference = wgpu::PowerPreference::HighPerformance;
+
+    impl->adapter = impl->instance.requestAdapter(adapterOpts);
+
+    if (!impl->adapter) {
+        Log::Error(Event::Render, "WebGPU HeadlessBackend: No adapter found");
+        return;
+    }
+
+    // Request device using simpler blocking API
+    wgpu::DeviceDescriptor deviceDesc = {};
+
+    impl->device = impl->adapter.requestDevice(deviceDesc);
+
+    if (!impl->device) {
+        Log::Error(Event::Render, "WebGPU HeadlessBackend: Failed to create device");
+        return;
+    }
+
+    impl->queue = impl->device.getQueue();
+
+    // Store device, queue, and instance in base class
+    setDevice(static_cast<WGPUDevice>(impl->device));
+    setQueue(static_cast<WGPUQueue>(impl->queue));
+    setInstance(static_cast<WGPUInstance>(impl->instance));
+#endif
 
     // Create offscreen render texture
     createOffscreenTextures();
@@ -177,55 +226,94 @@ void HeadlessBackend::createOffscreenTextures() {
     // Create offscreen color texture
     wgpu::TextureDescriptor colorDesc = {};
     colorDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+
+#if MLN_WEBGPU_IMPL_DAWN
     colorDesc.dimension = wgpu::TextureDimension::e2D;
+#elif MLN_WEBGPU_IMPL_WGPU
+    colorDesc.dimension = wgpu::TextureDimension::_2D;
+#endif
     colorDesc.size = {
         static_cast<uint32_t>(impl->framebufferSize.width), static_cast<uint32_t>(impl->framebufferSize.height), 1};
     colorDesc.format = wgpu::TextureFormat::RGBA8Unorm;
     colorDesc.mipLevelCount = 1;
     colorDesc.sampleCount = 1;
-    colorDesc.label = "Headless Color Texture";
 
+#if MLN_WEBGPU_IMPL_DAWN
+    colorDesc.label = "Headless Color Texture";
     impl->offscreenTexture = impl->device.CreateTexture(&colorDesc);
+#elif MLN_WEBGPU_IMPL_WGPU
+    impl->offscreenTexture = impl->device.createTexture(colorDesc);
+
+#endif
 
     if (impl->offscreenTexture) {
         wgpu::TextureViewDescriptor viewDesc = {};
         viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+#elif MLN_WEBGPU_IMPL_WGPU
+        viewDesc.dimension = wgpu::TextureViewDimension::_2D;
+#endif
         viewDesc.baseMipLevel = 0;
         viewDesc.mipLevelCount = 1;
         viewDesc.baseArrayLayer = 0;
         viewDesc.arrayLayerCount = 1;
         viewDesc.aspect = wgpu::TextureAspect::All;
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.label = "Headless Color TextureView";
 
         impl->offscreenTextureView = impl->offscreenTexture.CreateView(&viewDesc);
+#elif MLN_WEBGPU_IMPL_WGPU
+        impl->offscreenTextureView = impl->offscreenTexture.createView(viewDesc);
+#endif
     }
 
     // Create depth/stencil texture
     wgpu::TextureDescriptor depthDesc = {};
     depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
+
+#if MLN_WEBGPU_IMPL_DAWN
     depthDesc.dimension = wgpu::TextureDimension::e2D;
+#elif MLN_WEBGPU_IMPL_WGPU
+    depthDesc.dimension = wgpu::TextureDimension::_2D;
+#endif
     depthDesc.size = {
         static_cast<uint32_t>(impl->framebufferSize.width), static_cast<uint32_t>(impl->framebufferSize.height), 1};
     depthDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
     depthDesc.mipLevelCount = 1;
     depthDesc.sampleCount = 1;
+
+#if MLN_WEBGPU_IMPL_DAWN
     depthDesc.label = "Headless Depth/Stencil Texture";
 
     impl->depthTexture = impl->device.CreateTexture(&depthDesc);
+#elif MLN_WEBGPU_IMPL_WGPU
+    impl->depthTexture = impl->device.createTexture(depthDesc);
+#endif
 
     if (impl->depthTexture) {
         wgpu::TextureViewDescriptor viewDesc = {};
         viewDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+#elif MLN_WEBGPU_IMPL_WGPU
+        viewDesc.dimension = wgpu::TextureViewDimension::_2D;
+#endif
         viewDesc.baseMipLevel = 0;
         viewDesc.mipLevelCount = 1;
         viewDesc.baseArrayLayer = 0;
         viewDesc.arrayLayerCount = 1;
         viewDesc.aspect = wgpu::TextureAspect::All;
+
+#if MLN_WEBGPU_IMPL_DAWN
         viewDesc.label = "Headless Depth/Stencil TextureView";
 
         impl->depthTextureView = impl->depthTexture.CreateView(&viewDesc);
+#elif MLN_WEBGPU_IMPL_WGPU
+        impl->depthTextureView = impl->depthTexture.createView(viewDesc);
+#endif
     }
 }
 
