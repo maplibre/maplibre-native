@@ -1420,10 +1420,18 @@ if(MLN_WITH_WEBGPU)
     include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 
     # Include Dawn integration when requested
-    if(MLN_WEBGPU_IMPL STREQUAL "dawn")
+    if(MLN_WEBGPU_IMPL_DAWN)
         include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
         if(TARGET mbgl-vendor-dawn)
-            target_link_libraries(mbgl-core PUBLIC mbgl-vendor-dawn)
+            target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
+        endif()
+    elseif(MLN_WEBGPU_IMPL_WGPU)
+        # Include wgpu-native integration
+        include(${PROJECT_SOURCE_DIR}/vendor/wgpu.cmake)
+        if(TARGET mbgl-vendor-wgpu)
+            target_link_libraries(mbgl-core PRIVATE mbgl-vendor-wgpu)
+            # Add WebGPU-Cpp implementation file (required for wgpu-native backend)
+            list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_cpp_impl.cpp)
         endif()
     endif()
 endif()
@@ -1639,6 +1647,10 @@ endif()
 
 if(TARGET mbgl-vendor-dawn)
     list(APPEND EXPORT_TARGETS mbgl-vendor-dawn)
+endif()
+
+if(TARGET mbgl-vendor-wgpu)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-wgpu)
 endif()
 
 export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
