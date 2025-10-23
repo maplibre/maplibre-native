@@ -3,8 +3,11 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/plugin/feature_collection.hpp>
 
 namespace mbgl {
+
+class RawBucketFeature;
 
 namespace style {
 
@@ -28,6 +31,10 @@ public:
     using OnRenderLayer = std::function<void(PaintParameters&)>;
     using OnUpdateLayer = std::function<void(const LayerPrepareParameters&)>;
     using OnUpdateLayerProperties = std::function<void(const std::string& properties)>;
+    using OnFeatureCollectionLoaded =
+        std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
+    using OnFeatureCollectionUnloaded =
+        std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
 
     void* _platformReference = nullptr;
 

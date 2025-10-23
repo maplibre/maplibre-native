@@ -27,7 +27,7 @@ jobs:
             vendor/maplibre-native-base/deps/geometry.hpp/include \
             vendor/maplibre-native-base/deps/geojson.hpp/include \
             vendor/metal-cpp \
-            vendor/maplibre-native-base/extras/expected-lite/include
+            vendor/expected-lite/include
 
       - name: Create Release
         if: github.event_name == 'workflow_dispatch'

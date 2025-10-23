@@ -1,1 +1,7 @@
 MapLibreAndroid/src/vulkanDebug
+.project
+.settings
+.classpath
+.kotlin
+build/
+lint/

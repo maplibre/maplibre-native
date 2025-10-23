@@ -11,7 +11,7 @@
 
 #import "MLNFoundation.h"
 #import "MLN<%-
-(type === 'background' ? '' :
+(type === 'background' || type == 'location-indicator' ? '' :
  (type === 'raster' || type === 'hillshade' ? 'Foreground' :
   'Vector'))
 %>StyleLayer.h"
@@ -83,11 +83,11 @@ typedef NS_ENUM(NSUInteger, MLN<%- camelize(enumName(property)) %>) {
 <% } -%>
 MLN_EXPORT
 @interface MLN<%- camelize(type) %>StyleLayer : MLN<%-
-(type === 'background' ? '' :
+(type === 'background' || type === 'location-indicator' ? '' :
  (type === 'raster' || type === 'hillshade' ? 'Foreground' :
   'Vector'))
 %>StyleLayer
-<% if (type === 'background') { -%>
+<% if (type === 'background' || type === 'location-indicator') { -%>
 
 /**
 Returns a <%- type %> style layer initialized with an identifier.

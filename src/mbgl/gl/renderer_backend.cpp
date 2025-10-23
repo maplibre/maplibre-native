@@ -53,10 +53,10 @@ void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
-void RendererBackend::assumeScissorTest(bool enabled) {
+void RendererBackend::assumeScissorTest(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().scissorTest.setCurrentValue(enabled);
+    getContext<gl::Context>().scissorTest.setCurrentValue({x, y, width, height});
     assert(gl::value::ScissorTest::Get() == getContext<gl::Context>().scissorTest.getCurrentValue());
 }
 
@@ -82,10 +82,10 @@ void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
-void RendererBackend::setScissorTest(bool enabled) {
+void RendererBackend::setScissorTest(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().scissorTest = enabled;
+    getContext<gl::Context>().scissorTest = {x, y, width, height};
     assert(gl::value::ScissorTest::Get() == getContext<gl::Context>().scissorTest.getCurrentValue());
 }
 

@@ -34,6 +34,23 @@
 - Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
 
 - Fix onSprite call on bad references ([#3805](https://github.com/maplibre/maplibre-native/pull/3805)).
+## 11.13.4
+
+### 🐞 Bug fixes
+
+- Avoid crashing when calling `toggleTransform` and `setFrustumOffset` if the map is destroyed.
+
+## 11.13.3
+
+### ✨ Features and improvements
+
+- Added network delegate methods in iOS
+
+## 11.13.2
+
+### ✨ Features and improvements
+
+- Sync with maplibre primary repo
 
 ## 11.13.1
 
@@ -45,6 +62,12 @@
 
 - Fix Android backend cleanup ([#3681](https://github.com/maplibre/maplibre-native/pull/3681)).
 - Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
+## 11.13.1
+
+### Bug fixes
+
+- Fixed frustum offset in opengl
 
 ## 11.13.0
 
@@ -64,6 +87,11 @@
 - Fix dashed line issue when style change ([#3675](https://github.com/maplibre/maplibre-native/pull/3675)).
 
 ## 11.12.1
+
+### ✨ Features and improvements
+
+- Concurrent Camera Animations
+- Ability to set out of bounds region to improve rendering
 
 ### 🐞 Bug fixes
 
@@ -88,6 +116,18 @@
 
 - Prevent `Style.validateState()` exception on location state updates ([#3574](https://github.com/maplibre/maplibre-native/pull/3574)).
 - Fix the symbol blink issue by only placing the symbol in current level ([#3534](https://github.com/maplibre/maplibre-native/pull/3534)).
+
+## 11.10.5
+
+### ✨ Features and improvements
+
+- Release debug builds for android
+
+## 11.10.4
+
+### ✨ Features and improvements
+
+- Concurrent camera animations
 
 ## 11.10.3
 
@@ -160,6 +200,12 @@ We now make releases with debug builds to make it easier to report issues with r
 
 They are available with a `-debug` postfix on Maven Central, for example `org.maplibre.gl:android-sdk-vulkan-debug`.
 
+## 11.8.7
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
 ## 11.8.6
 
 ### ✨ Features and improvements
@@ -171,6 +217,7 @@ They are available with a `-debug` postfix on Maven Central, for example `org.ma
 - Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
 - Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
 - Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
+- Fix issue related to symbol icon scaling with offset
 
 ## 11.8.5
 
@@ -272,6 +319,20 @@ Thanks to everyone who helped test the pre-releases!
 ### 🐞 Bug fixes
 
 - Fix crash on unsupported attribute type conversion ([#3066](https://github.com/maplibre/maplibre-native/pull/3066)).
+## 11.6.3
+
+## Features and improvements
+
+### Bug fixes
+
+- LoD Clamping fixed to be based on view range and not source range to support over/under zooming
+- Disable depth writing for the location indicator layer
+
+## 11.6.2
+
+### Features and Improvements
+
+- Add LoD Support
 
 ## 11.6.1
 

@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#include <mbgl/util/constants.hpp>
 
 #import "MLNStyleValue.h"
 
@@ -19,6 +20,7 @@
 
 #import <mbgl/util/enum.hpp>
 #include <mbgl/util/interpolate.hpp>
+#include <mbgl/util/unitbezier.hpp>
 
 #include <memory>
 
@@ -48,8 +50,18 @@ NS_INLINE MLNTransition MLNTransitionFromOptions(const mbgl::style::TransitionOp
 }
 
 NS_INLINE mbgl::style::TransitionOptions MLNOptionsFromTransition(MLNTransition transition) {
+  mbgl::util::UnitBezier ease = mbgl::util::DEFAULT_TRANSITION_EASE;
+  if (transition.ease) {
+    CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:transition.ease];
+    float p1[2], p2[2];
+    [function getControlPointAtIndex:1 values:p1];
+    [function getControlPointAtIndex:2 values:p2];
+    ease = {p1[0], p1[1], p2[0], p2[1]};
+  }
+
   mbgl::style::TransitionOptions options{{MLNDurationFromTimeInterval(transition.duration)},
-                                         {MLNDurationFromTimeInterval(transition.delay)}};
+                                         {MLNDurationFromTimeInterval(transition.delay)},
+                                         ease};
   return options;
 }
 
@@ -183,6 +195,12 @@ class MLNStyleValueTransformer {
   // Float
   void getMBGLValue(NSNumber *rawValue, float &mbglValue) { mbglValue = rawValue.floatValue; }
 
+  void getMBGLValue(NSNumber *rawValue, double &mbglValue) { mbglValue = rawValue.doubleValue; }
+
+  void getMBGLValue(NSNumber *rawValue, mbgl::style::Rotation &mbglValue) {
+    mbglValue = rawValue.floatValue;
+  }
+
   // String
   void getMBGLValue(NSString *rawValue, std::string &mbglValue) { mbglValue = rawValue.UTF8String; }
 
@@ -213,6 +231,17 @@ class MLNStyleValueTransformer {
       getMBGLValue(array[2], mbglValue[2]);
       getMBGLValue(array[3], mbglValue[3]);
       getMBGLValue(array[4], mbglValue[4]);
+    }
+  }
+
+  void getMBGLValue(id rawValue, std::array<double, 3> &mbglValue) {
+    if ([rawValue isKindOfClass:[NSValue class]]) {
+      mbglValue = [rawValue mgl_locationArrayValue];
+    } else if ([rawValue isKindOfClass:[NSArray class]]) {
+      NSArray *array = (NSArray *)rawValue;
+      getMBGLValue(array[0], mbglValue[0]);
+      getMBGLValue(array[1], mbglValue[1]);
+      getMBGLValue(array[2], mbglValue[2]);
     }
   }
 
@@ -314,6 +343,12 @@ class MLNStyleValueTransformer {
   // Float
   static NSNumber *toMLNRawStyleValue(const float mbglStopValue) { return @(mbglStopValue); }
 
+  static NSNumber *toMLNRawStyleValue(const double mbglStopValue) { return @(mbglStopValue); }
+
+  static NSNumber *toMLNRawStyleValue(const mbgl::style::Rotation mbglStopValue) {
+    return @(mbglStopValue.getAngle());
+  }
+
   // Integer
   static NSNumber *toMLNRawStyleValue(const int64_t mbglStopValue) { return @(mbglStopValue); }
 
@@ -335,6 +370,10 @@ class MLNStyleValueTransformer {
   // Padding as array<float, 4>
   static NSValue *toMLNRawStyleValue(const std::array<float, 4> &mbglStopValue) {
     return [NSValue mgl_valueWithPaddingArray:mbglStopValue];
+  }
+
+  static NSValue *toMLNRawStyleValue(const std::array<double, 3> &mbglStopValue) {
+    return [NSValue mgl_valueWithLocationArray:mbglStopValue];
   }
 
   // Padding type

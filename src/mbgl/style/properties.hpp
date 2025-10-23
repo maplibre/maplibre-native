@@ -10,8 +10,10 @@
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/constants.hpp>
 
 #include <bitset>
+#include <mbgl/util/unitbezier.hpp>
 #include <tuple>
 
 namespace mbgl {
@@ -31,6 +33,7 @@ public:
     Transitioning(Value value_, Transitioning<Value> prior_, const TransitionOptions& transition, TimePoint now)
         : begin(now + transition.delay.value_or(Duration::zero())),
           end(begin + transition.duration.value_or(Duration::zero())),
+          ease(transition.ease.value_or(util::DEFAULT_TRANSITION_EASE)),
           value(std::move(value_)) {
         if (transition.isDefined()) {
             prior = {std::move(prior_)};
@@ -60,9 +63,8 @@ public:
         } else {
             // Interpolate between recursively-calculated prior value and final.
             float t = std::chrono::duration<float>(now - begin) / (end - begin);
-            return util::interpolate(prior->get().evaluate(evaluator, now),
-                                     finalValue,
-                                     static_cast<float>(util::DEFAULT_TRANSITION_EASE.solve(t, 0.001)));
+            return util::interpolate(
+                prior->get().evaluate(evaluator, now), finalValue, static_cast<float>(ease.solve(t, 0.001)));
         }
     }
 
@@ -81,6 +83,7 @@ private:
     mutable std::optional<mapbox::util::recursive_wrapper<Transitioning<Value>>> prior;
     TimePoint begin;
     TimePoint end;
+    util::UnitBezier ease = util::DEFAULT_TRANSITION_EASE;
     Value value;
 };
 
