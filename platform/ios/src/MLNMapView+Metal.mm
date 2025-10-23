@@ -157,7 +157,7 @@ void MLNMapViewMetalImpl::createView() {
     }
 
     id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
-    const auto scaleFactor = MLNEffectiveScaleFactorForView(resource.mtlView);
+    const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
 
     resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
     resource.mtlView.delegate = resource.delegate;
@@ -217,9 +217,15 @@ UIImage* MLNMapViewMetalImpl::snapshot() {
 
 void MLNMapViewMetalImpl::layoutChanged() {
     const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
-    const auto screenSize = mapView.window.screen.nativeBounds.size;
-    size = { static_cast<uint32_t>(screenSize.width * scaleFactor),
-             static_cast<uint32_t>(screenSize.height * scaleFactor) };
+    const auto screenSize = mapView.bounds.size;
+
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+
+    resource.mtlView.contentScaleFactor = scaleFactor;
+    resource.mtlView.drawableSize = CGSizeMake(screenSize.width * scaleFactor, screenSize.height * scaleFactor);
+
+    size = { static_cast<uint32_t>(resource.mtlView.drawableSize.width),
+             static_cast<uint32_t>(resource.mtlView.drawableSize.height) };
 }
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {
