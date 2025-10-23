@@ -1,4 +1,4 @@
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import * as path from "node:path";
 import spec from "./style-spec.mjs";
 import colorParser from "csscolorparser";
@@ -7,14 +7,17 @@ import { camelize, camelizeWithLeadingLowercase, readAndCompile, writeIfModified
 
 // Parse command line
 const args = (() => {
-  const parser = new ArgumentParser({
-      description: "MapLibre Shader Tools"
+  const { values } = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      out: {
+        type: 'string',
+        short: 'o'
+      }
+    },
+    allowPositionals: false
   });
-  parser.add_argument("--out", "--o", {
-      help: "Directory root to write generated code.",
-      required: false
-  });
-  return parser.parse_args();
+  return values;
 })();
 
 function parseCSSColor(/** @type {string} **/ str) {

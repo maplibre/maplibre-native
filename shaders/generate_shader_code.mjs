@@ -1,6 +1,6 @@
 console.log("Generating shaders...");
 
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -194,25 +194,26 @@ const strip = (source) => {
 };
 
 // Parse command line
-const args = (() => {
-    const parser = new ArgumentParser({
-        description: "MapLibre Shader Tools"
-    });
-    parser.add_argument("--out", "--o", {
-        help: "Directory root to write generated code.",
-        required: false
-    });
-    parser.add_argument("--compress", "--c", {
-        help: "Compress shader text with zlib and output byte arrays instead of strings",
-        required: false
-    });
-    parser.add_argument("--strip", "--s", {
-        help: "Strip comments, new lines and whitespace",
-        required: false,
-        action: "store_true"
-    });
-    return parser.parse_args();
-})();
+const args = parseArgs({
+    options: {
+        out: {
+            type: 'string',
+            short: 'o',
+            description: 'Directory root to write generated code.'
+        },
+        compress: {
+            type: 'string',
+            short: 'c',
+            description: 'Compress shader text with zlib and output byte arrays instead of strings'
+        },
+        strip: {
+            type: 'boolean',
+            short: 's',
+            description: 'Strip comments, new lines and whitespace'
+        }
+    },
+    allowPositionals: false
+});
 
 
 // Generate shader source headers

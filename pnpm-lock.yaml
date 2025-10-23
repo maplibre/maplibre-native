@@ -42,18 +42,12 @@ importers:
       '@octokit/rest':
         specifier: ^20.1.0
         version: 20.1.2
-      '@types/argparse':
-        specifier: ^2.0.16
-        version: 2.0.17
       '@types/ejs':
         specifier: ^3.1.5
         version: 3.1.5
       '@types/node':
         specifier: ^22.9.0
         version: 22.18.12
-      argparse:
-        specifier: ^2.0.1
-        version: 2.0.1
       csscolorparser:
         specifier: ^1.0.3
         version: 1.0.3
@@ -572,9 +566,6 @@ packages:
     resolution: {integrity: sha512-4aUIteuyxtBUhVdiQqcDhKFitwfd9hqoSDYY2KRXiWtgoWJ9Bmise+KfEPDiVHWeJepvF8xJO9/9+WDIciMFFw==}
     engines: {node: '>=18.0.0'}
 
-  '@types/argparse@2.0.17':
-    resolution: {integrity: sha512-fueJssTf+4dW4HODshEGkIZbkLKHzgu1FvCI4cTc/MKum/534Euo3SrN+ilq8xgyHnOjtmg33/hee8iXLRg1XA==}
-
   '@types/ejs@3.1.5':
     resolution: {integrity: sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==}
 
@@ -588,9 +579,6 @@ packages:
   ansi-styles@3.2.1:
     resolution: {integrity: sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==}
     engines: {node: '>=4'}
-
-  argparse@2.0.1:
-    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   array-buffer-byte-length@1.0.2:
     resolution: {integrity: sha512-LHE+8BuR7RYGDKvnrmcuSq3tDcKv9OFEXQt/HpbZhY7V6h0zlUXutnAD82GiFx9rdieCMjkvtcsPqBwgUl1Iiw==}
@@ -2445,8 +2433,6 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@types/argparse@2.0.17': {}
-
   '@types/ejs@3.1.5': {}
 
   '@types/node@22.18.12':
@@ -2461,8 +2447,6 @@ snapshots:
   ansi-styles@3.2.1:
     dependencies:
       color-convert: 1.9.3
-
-  argparse@2.0.1: {}
 
   array-buffer-byte-length@1.0.2:
     dependencies:
