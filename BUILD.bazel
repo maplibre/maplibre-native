@@ -274,7 +274,6 @@ npm_link_all_packages(
 js_binary(
     name = "generate-style-code-script",
     data = [
-        ":node_modules/argparse",
         ":node_modules/csscolorparser",
         ":style-code",
         ":style-spec",
@@ -284,9 +283,6 @@ js_binary(
 
 js_binary(
     name = "generate-shader-code-script",
-    data = [
-        ":node_modules/argparse",
-    ],
     entry_point = "shaders/generate_shader_code.mjs",
 )
 
