@@ -1,18 +1,19 @@
+#include <mbgl/tile/vector_mvt_tile.hpp>
+
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/tile_loader_impl.hpp>
-#include <mbgl/tile/vector_tile.hpp>
-#include <mbgl/tile/vector_tile_data.hpp>
+
 #include <utility>
 
 namespace mbgl {
 
 VectorTile::VectorTile(const OverscaledTileID& id_,
                        std::string sourceID_,
-                       const TileParameters& parameters,
+                       const TileParameters& parameters_,
                        const Tileset& tileset,
                        TileObserver* observer_)
-    : GeometryTile(id_, std::move(sourceID_), parameters, observer_),
-      loader(*this, id_, parameters, tileset) {}
+    : GeometryTile(id_, std::move(sourceID_), parameters_, observer_),
+      loader(*this, id_, parameters_, tileset) {}
 
 VectorTile::~VectorTile() {
     // Don't rely on `~TileLoader` to close, it's not safe to call there.
@@ -31,14 +32,6 @@ void VectorTile::setUpdateParameters(const TileUpdateParameters& params) {
 void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<Timestamp> expires_) {
     modified = std::move(modified_);
     expires = std::move(expires_);
-}
-
-void VectorTile::setData(const std::shared_ptr<const std::string>& data_) {
-    if (obsolete) {
-        return;
-    }
-
-    GeometryTile::setData(data_ ? std::make_unique<VectorTileData>(data_) : nullptr);
 }
 
 } // namespace mbgl

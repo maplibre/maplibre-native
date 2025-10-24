@@ -1,5 +1,5 @@
 #include <mbgl/style/conversion/tileset.hpp>
-#include <mbgl/style/conversion/raster_dem_options.hpp>
+#include <mbgl/style/conversion/source_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/math/clamp.hpp>
@@ -39,10 +39,13 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
         }
     }
 
-    auto rasterDEMOptions = convert<RasterDEMOptions>(value, error);
-    if (rasterDEMOptions) {
-        if (std::optional<Tileset::DEMEncoding> encoding = rasterDEMOptions.value().encoding) {
-            result.encoding = encoding.value();
+    auto options = convert<SourceOptions>(value, error);
+    if (options) {
+        if (const auto encoding = options->rasterEncoding) {
+            result.rasterEncoding = encoding;
+        }
+        if (const auto encoding = options->vectorEncoding) {
+            result.vectorEncoding = encoding;
         }
     }
 

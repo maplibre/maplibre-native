@@ -47,6 +47,11 @@ std::string extract_url(const std::string& url) {
 }
 } // namespace
 
+// temporary, remove this when it's available in `pmtiles.hpp`
+namespace pmtiles {
+const uint8_t TILETYPE_MLT = 0x6;
+} // namespace pmtiles
+
 namespace mbgl {
 using namespace rapidjson;
 
@@ -303,6 +308,11 @@ private:
                 if (!doc["tiles"].IsArray()) {
                     doc["tiles"] = rapidjson::Value().SetArray().PushBack(
                         rapidjson::Value().SetString(std::string(util::PMTILES_PROTOCOL + url), allocator), allocator);
+                }
+
+                // Translate tile type field to source encoding.
+                if (header.tile_type == pmtiles::TILETYPE_MLT) {
+                    doc.AddMember("encoding", "mlt", allocator);
                 }
 
                 if (!doc.HasMember("bounds")) {

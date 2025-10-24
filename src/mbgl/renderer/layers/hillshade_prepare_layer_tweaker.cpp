@@ -22,8 +22,8 @@ constexpr std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}}
 // https://aws.amazon.com/public-datasets/terrain/
 constexpr std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
 
-constexpr const std::array<float, 4>& getUnpackVector(const Tileset::DEMEncoding encoding) {
-    return (encoding == Tileset::DEMEncoding::Terrarium) ? unpackTerrarium : unpackMapbox;
+constexpr const std::array<float, 4>& getUnpackVector(const Tileset::RasterEncoding encoding) {
+    return (encoding == Tileset::RasterEncoding::Terrarium) ? unpackTerrarium : unpackMapbox;
 }
 } // namespace
 

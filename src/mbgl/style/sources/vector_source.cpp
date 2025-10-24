@@ -10,6 +10,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/mapbox.hpp>
+#include <string>
 
 namespace mbgl {
 namespace style {
@@ -17,10 +18,12 @@ namespace style {
 VectorSource::VectorSource(std::string id,
                            variant<std::string, Tileset> urlOrTileset_,
                            std::optional<float> maxZoom_,
-                           std::optional<float> minZoom_)
+                           std::optional<float> minZoom_,
+                           Tileset::VectorEncoding encoding_)
     : TileSource(id, urlOrTileset_, util::tileSize_I, SourceType::Vector),
       maxZoom(std::move(maxZoom_)),
-      minZoom(std::move(minZoom_)) {}
+      minZoom(std::move(minZoom_)),
+      encoding(encoding_) {}
 
 void VectorSource::setTilesetOverrides(Tileset& tileset) {
     if (maxZoom) {
