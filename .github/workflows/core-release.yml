@@ -57,13 +57,13 @@ jobs:
 
       - name: Build mbgl-core for macOS
         run: |
-          cmake --preset macos -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
-          cmake --build build-macos --target mbgl-core
+          cmake --preset macos-metal -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
+          cmake --build build-macos-metal --target mbgl-core
 
       - name: Rename artifact
         run: |
-          cp build-macos/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
-          cp build-macos/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
 
       - name: Upload macOS artifacts
         if: github.event_name == 'pull_request'
