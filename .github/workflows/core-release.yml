@@ -135,6 +135,57 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+  build-android:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        renderer: [opengl, vulkan]
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+
+      - name: Set up NDK
+        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
+        with:
+          ndk-version: r28c
+          add-to-path: true
+
+      - name: Set NDK environment
+        run: echo "ANDROID_NDK_ROOT=\"$ANDROID_NDK_HOME\"" >> "$GITHUB_ENV"
+
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
+        with:
+          tool: armerge@2
+
+      - name: Build mbgl-core for Android
+        run: |
+          cmake --preset android-arm64-v8a-${{ matrix.renderer }}
+          cmake --build build-android-arm64-v8a-${{ matrix.renderer }} --target mbgl-core
+
+      - name: Rename artifacts
+        run: |
+          cp build-android-arm64-v8a-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-android-arm64-v8a-${{ matrix.renderer }}.a
+          cp build-android-arm64-v8a-${{ matrix.renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-android-arm64-v8a-${{ matrix.renderer }}.a
+
+      - name: Upload Android artifacts
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-arm64-v8a-${{ matrix.renderer }}-build
+          path: |
+            libmaplibre-native-core-android-arm64-v8a-${{ matrix.renderer }}.a
+            libmaplibre-native-core-amalgam-android-arm64-v8a-${{ matrix.renderer }}.a
+
+      - name: Upload Android artifacts (release)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-android-arm64-v8a-${{ matrix.renderer }}.a
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-amalgam-android-arm64-v8a-${{ matrix.renderer }}.a
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build-windows:
     needs: [create-release]
     runs-on: windows-2022
