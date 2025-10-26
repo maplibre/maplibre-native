@@ -286,3 +286,31 @@ add_custom_command(
 )
 
 install(TARGETS mbgl-render-test-runner LIBRARY DESTINATION lib)
+
+find_program(ARMERGE NAMES armerge)
+
+if(NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    message(STATUS "Found armerge: ${ARMERGE}")
+
+    # Detect NDK toolchain binaries for armerge
+    set(ARMERGE_LD "${ANDROID_TOOLCHAIN_ROOT}/bin/${ANDROID_TOOLCHAIN_PREFIX}ld")
+    set(ARMERGE_OBJCOPY "${ANDROID_TOOLCHAIN_ROOT}/bin/llvm-objcopy")
+    set(ARMERGE_RANLIB "${ANDROID_TOOLCHAIN_ROOT}/bin/llvm-ranlib")
+
+    add_custom_command(
+        TARGET mbgl-core
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E env
+            LD=${ARMERGE_LD}
+            OBJCOPY=${ARMERGE_OBJCOPY}
+            RANLIB=${ARMERGE_RANLIB}
+            ${ARMERGE} --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+                $<TARGET_FILE:mbgl-core>
+                $<TARGET_FILE:mbgl-freetype>
+                $<TARGET_FILE:mbgl-vendor-csscolorparser>
+                $<TARGET_FILE:mbgl-harfbuzz>
+                $<TARGET_FILE:mbgl-vendor-parsedate>
+                $<TARGET_FILE:mbgl-vendor-sqlite>
+                $<TARGET_FILE:mbgl-vendor-icu>
+    )
+endif()
