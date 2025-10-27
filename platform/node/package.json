@@ -34,7 +34,6 @@
     "@octokit/plugin-retry": "^7.1.0",
     "@octokit/rest": "^20.1.0",
     "@types/node": "^22.9.0",
-    "argparse": "^2.0.1",
     "csscolorparser": "^1.0.3",
     "d3-queue": "3.0.7",
     "diff": "5.2.0",
