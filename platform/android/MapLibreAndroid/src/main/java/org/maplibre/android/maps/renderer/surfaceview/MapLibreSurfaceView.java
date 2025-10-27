@@ -334,7 +334,15 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
         wantRenderNotification = true;
         requestRender = true;
         renderComplete = false;
-        finishDrawingRunnable = finishDrawing;
+        final Runnable oldCallback = finishDrawingRunnable;
+        finishDrawingRunnable = () -> {
+          if (oldCallback != null) {
+            oldCallback.run();
+          }
+          if (finishDrawing != null) {
+            finishDrawing.run();
+          }
+        };
 
         renderThreadManager.notifyAll();
       }
