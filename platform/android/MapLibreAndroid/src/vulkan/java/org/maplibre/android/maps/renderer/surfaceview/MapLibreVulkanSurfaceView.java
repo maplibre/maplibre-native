@@ -174,6 +174,6 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
 
     private boolean graphicsSurfaceCreated;
 
-    private WeakReference<MapLibreVulkanSurfaceView> mSurfaceViewWeakRef;
+    private final WeakReference<MapLibreVulkanSurfaceView> mSurfaceViewWeakRef;
   }
 }
