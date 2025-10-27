@@ -310,7 +310,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
       return function + " failed: " + EGLLogWrapper.getErrorString(error);
     }
 
-    private WeakReference<MapLibreGLSurfaceView> mGLSurfaceViewWeakRef;
+    private final WeakReference<MapLibreGLSurfaceView> mGLSurfaceViewWeakRef;
     EGL10 mEgl;
     EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
@@ -561,14 +561,17 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
             sizeChanged = false;
           }
 
-          MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onDrawFrame();
-            if (finishDrawingRunnable != null) {
-              finishDrawingRunnable.run();
-              finishDrawingRunnable = null;
+          {
+            MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+            if (view != null) {
+              view.renderer.onDrawFrame();
+              if (finishDrawingRunnable != null) {
+                finishDrawingRunnable.run();
+                finishDrawingRunnable = null;
+              }
             }
           }
+
           int swapError = eglHelper.swap();
           switch (swapError) {
             case EGL10.EGL_SUCCESS:

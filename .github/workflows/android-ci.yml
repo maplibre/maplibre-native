@@ -315,7 +315,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
-      contents: read
+      contents: write
     if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job

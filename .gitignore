@@ -36,6 +36,7 @@ compile_commands.json
 node_modules
 .cxx
 .env
+vendor/dawn/
 
 # Node binaries.
 /lib
