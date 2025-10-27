@@ -290,9 +290,6 @@ const double MLNMinimumZoomLevelForUserTracking = 10.5;
 /// Initial zoom level when entering user tracking mode from a low zoom level.
 const double MLNDefaultZoomLevelForUserTracking = 14.0;
 
-/// Tolerance for snapping to true north, measured in degrees in either direction.
-const CLLocationDirection MLNToleranceForSnappingToNorth = 7;
-
 /// Distance threshold to stop the camera while animating.
 const CLLocationDistance MLNDistanceThresholdForCameraPause = 500;
 
@@ -883,7 +880,8 @@ public:
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
     _rotationThresholdWhileZooming = 3;
-
+    _rotateSnapThreshold = 7;
+    
     _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
     _doubleTap.numberOfTapsRequired = 2;
     [self addGestureRecognizer:_doubleTap];
@@ -6839,8 +6837,8 @@ static void *windowScreenContext = &windowScreenContext;
         [self unrotateIfNeededAnimated:YES];
 
         // Snap to north.
-        if ((self.direction < MLNToleranceForSnappingToNorth
-             || self.direction > 360 - MLNToleranceForSnappingToNorth)
+        if ((self.direction < self.rotateSnapThreshold
+             || self.direction > 360 - self.rotateSnapThreshold)
             && self.userTrackingMode != MLNUserTrackingModeFollowWithHeading
             && self.userTrackingMode != MLNUserTrackingModeFollowWithCourse)
         {
