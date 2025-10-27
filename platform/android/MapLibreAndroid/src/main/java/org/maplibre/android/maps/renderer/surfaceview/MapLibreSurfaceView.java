@@ -498,7 +498,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected ArrayList<Runnable> eventQueue = new ArrayList<>();
     protected boolean sizeChanged = true;
     protected Runnable finishDrawingRunnable = null;
-    protected RenderThreadManager renderThreadManager = null;
+    protected final RenderThreadManager renderThreadManager;
     // End of member variables protected by the sRenderThreadManager monitor.
 
   }
