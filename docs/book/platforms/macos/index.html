@@ -319,17 +319,17 @@ xed platform/macos/MapLibre.xcodeproj
 </code></pre>
 <h2 id="cmake"><a class="header" href="#cmake">CMake</a></h2>
 <p>Configure CMake:</p>
-<pre><code class="language-sh">cmake --preset macos
+<pre><code class="language-sh">cmake --preset macos-metal
 </code></pre>
 <p>Build and run the render tests:</p>
 <pre><code class="language-sh">cmake --build build-macos --target mbgl-render-test-runner
 build-macos/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
 </code></pre>
 <p>Build and run the C++ Tests:</p>
-<pre><code class="language-sh">cmake --build build-macos --target mbgl-test-runner
+<pre><code class="language-sh">cmake --build build-macos-metal --target mbgl-test-runner
 npm install &amp;&amp; node test/storage/server.js  # required test server
 # in another terminal
-build-macos/mbgl-test-runner
+build-macos-metal/mbgl-test-runner
 </code></pre>
 <p>Create and open an Xcode project with CMake:</p>
 <pre><code class="language-sh">cmake --preset macos-metal-xcode
