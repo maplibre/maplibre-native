@@ -57,7 +57,7 @@ xed platform/macos/MapLibre.xcodeproj
 Configure CMake:
 
 ```sh
-cmake --preset macos
+cmake --preset macos-metal
 ```
 
 Build and run the render tests:
@@ -70,10 +70,10 @@ build-macos/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release
 Build and run the C++ Tests:
 
 ```sh
-cmake --build build-macos --target mbgl-test-runner
+cmake --build build-macos-metal --target mbgl-test-runner
 npm install && node test/storage/server.js  # required test server
 # in another terminal
-build-macos/mbgl-test-runner
+build-macos-metal/mbgl-test-runner
 ```
 
 Create and open an Xcode project with CMake:
