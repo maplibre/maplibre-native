@@ -211,9 +211,9 @@ if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
         POST_BUILD
         COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
-            $<TARGET_FILE:freetype>
+            $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
-            $<TARGET_FILE:harfbuzz>
+            $<TARGET_FILE:mbgl-harfbuzz>
             $<TARGET_FILE:mbgl-vendor-nunicode>
             $<TARGET_FILE:mbgl-vendor-sqlite>
             $<TARGET_FILE:mbgl-vendor-parsedate>
