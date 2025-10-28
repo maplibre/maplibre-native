@@ -880,7 +880,7 @@ public:
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
     _rotationThresholdWhileZooming = 3;
-    _rotateSnapThreshold = 7;
+    _toleranceForSnappingToNorth = 7;
 
     _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
     _doubleTap.numberOfTapsRequired = 2;
@@ -6837,8 +6837,8 @@ static void *windowScreenContext = &windowScreenContext;
         [self unrotateIfNeededAnimated:YES];
 
         // Snap to north.
-        if ((self.direction < self.rotateSnapThreshold
-             || self.direction > 360 - self.rotateSnapThreshold)
+        if ((self.direction < self.toleranceForSnappingToNorth
+             || self.direction > 360 - self.toleranceForSnappingToNorth)
             && self.userTrackingMode != MLNUserTrackingModeFollowWithHeading
             && self.userTrackingMode != MLNUserTrackingModeFollowWithCourse)
         {
