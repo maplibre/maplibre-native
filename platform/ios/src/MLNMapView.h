@@ -857,8 +857,8 @@ vertically on the map.
 
 /**
 The threshold, measured in degrees, that determines when the map's bearing will snap to north.
-For example, with a toleranceForSnappingToNorth of 7, if the user rotates the map within 7 degrees of north,
-the map will automatically snap to exact north.
+For example, with a toleranceForSnappingToNorth of 7, if the user rotates the map within 7 degrees
+of north, the map will automatically snap to exact north.
 
  The default value of this property is 7.
  */
