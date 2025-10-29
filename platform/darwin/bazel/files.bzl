@@ -225,7 +225,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSValue+MLNStyleAttributeAdditions.mm",
     "src/MLNPluginLayer.mm",
     "src/MLNPluginStyleLayer.mm",
-    "src/MLNNetworkResponse.m",
+    "src/MLNNetworkResponse.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",

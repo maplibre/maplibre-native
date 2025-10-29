@@ -88,19 +88,19 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
 }
 
 - (NSMutableURLRequest *)willSendRequest:(NSMutableURLRequest *)request {
-    
+
     if ([self.delegate respondsToSelector:@selector(willSendRequest:)]) {
         return [self.delegate willSendRequest:request];
     }
-    
+
     return request;
-    
+
 }
 
 - (MLNInternalNetworkResponse *)didReceiveResponse:(MLNInternalNetworkResponse *)response {
 
     if ([self.delegate respondsToSelector:@selector(didReceiveResponse:)]) {
-        
+
         MLNNetworkResponse *tempResponse = [MLNNetworkResponse responseWithData:response.data
                                                                     urlResponse:response.response
                                                                           error:response.error];
@@ -112,9 +112,9 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
         } else {
             return nil;
         }
-        
+
     }
-    
+
     return response;
 
 }
