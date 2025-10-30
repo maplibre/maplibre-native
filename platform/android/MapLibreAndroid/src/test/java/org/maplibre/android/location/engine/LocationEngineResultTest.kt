@@ -7,12 +7,13 @@ import android.os.Bundle
 import org.assertj.core.api.Assertions.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 import java.util.Collections
 
 @RunWith(MockitoJUnitRunner::class)
-class LocationEngineResultTest {
+class LocationEngineResultTest : BaseTest(){
     @Test
     fun checkNullIntent() {
         val result = LocationEngineResult.extractResult(null)
