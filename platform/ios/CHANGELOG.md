@@ -2,6 +2,17 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.19.3
+
+- fix number-format/currency expression test for darwin ([#3900](https://github.com/maplibre/maplibre-native/pull/3900)).
+- Updates drawable size of metal view after it is attached to display hierarchy. ([#3903](https://github.com/maplibre/maplibre-native/pull/3903)).
+
+## 6.19.2
+
+- [metal] OffscreenTextureResource: fix compilation warnings ([#3727](https://github.com/maplibre/maplibre-native/pull/3727)).
+- Apply symbol shader changes from JS  for Metal, Vulkan, and OpenGL ([#3873](https://github.com/maplibre/maplibre-native/pull/3873)).
+- Fixes wrong map view dimension on CarPlay. ([#3890](https://github.com/maplibre/maplibre-native/pull/3890)).
+
 ## 6.19.1
 
 - Tweak layer depth distribution ([#3738](https://github.com/maplibre/maplibre-native/pull/3738)).

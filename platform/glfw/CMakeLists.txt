@@ -69,6 +69,40 @@ if(MLN_WITH_METAL)
     )
 endif()
 
+if(MLN_WITH_WEBGPU)
+    if(APPLE)
+        target_sources(
+            mbgl-glfw
+            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.mm
+        )
+    else()
+        target_sources(
+            mbgl-glfw
+            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
+        )
+    endif()
+    if(TARGET mbgl-vendor-dawn)
+        target_link_libraries(mbgl-glfw PRIVATE mbgl-vendor-dawn)
+    endif()
+    if(TARGET mbgl-vendor-wgpu)
+        target_link_libraries(mbgl-glfw PRIVATE mbgl-vendor-wgpu)
+    endif()
+endif()
+
+if(DEFINED MLN_WITH_X11 AND MLN_WITH_X11)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_WITH_X11=1
+    )
+endif()
+
+if(DEFINED MLN_WITH_WAYLAND AND MLN_WITH_WAYLAND)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_WITH_WAYLAND=1
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE

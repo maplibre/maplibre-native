@@ -124,7 +124,7 @@ ShaderProgram::~ShaderProgram() noexcept {
         return;
     }
 
-    context.enqueueDeletion([pipelines = std::move(pipelines)](auto&) mutable { pipelines.reset(); });
+    context.enqueueDeletion([ptr = std::move(pipelines)](auto&) mutable { ptr.reset(); });
 }
 
 const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelineInfo) {

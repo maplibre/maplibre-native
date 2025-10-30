@@ -138,6 +138,40 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                                                                             : evaluate<LineFloorWidth>(parameters),
             .expressionMask = expressionMask,
             .pad1 = 0};
+#elif MLN_RENDER_BACKEND_WEBGPU
+        expressionMask = LineExpressionMask::None;
+        if (evaluated.get<LineColor>().isConstant()) {
+            expressionMask |= LineExpressionMask::Color;
+        }
+        if (evaluated.get<LineBlur>().isConstant()) {
+            expressionMask |= LineExpressionMask::Blur;
+        }
+        if (evaluated.get<LineOpacity>().isConstant()) {
+            expressionMask |= LineExpressionMask::Opacity;
+        }
+        if (evaluated.get<LineGapWidth>().isConstant()) {
+            expressionMask |= LineExpressionMask::GapWidth;
+        }
+        if (evaluated.get<LineOffset>().isConstant()) {
+            expressionMask |= LineExpressionMask::Offset;
+        }
+        if (evaluated.get<LineWidth>().isConstant()) {
+            expressionMask |= LineExpressionMask::Width;
+        }
+        if (evaluated.get<LineFloorWidth>().isConstant()) {
+            expressionMask |= LineExpressionMask::FloorWidth;
+        }
+
+        const LineEvaluatedPropsUBO propsUBO{
+            .color = evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
+            .blur = evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
+            .opacity = evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
+            .gapwidth = evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
+            .offset = evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
+            .width = evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
+            .floorwidth = evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
+            .expressionMask = expressionMask,
+            .pad1 = 0};
 #else
         const LineEvaluatedPropsUBO propsUBO{/*color =*/evaluate<LineColor>(parameters),
                                              /*blur =*/evaluate<LineBlur>(parameters),
