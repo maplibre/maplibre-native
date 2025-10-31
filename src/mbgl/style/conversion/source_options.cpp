@@ -25,7 +25,7 @@ std::optional<SourceOptions> Converter<SourceOptions>::operator()(const Converti
             return std::nullopt;
         }
     }
-    return {{}};
+    return {};
 }
 
 } // namespace conversion
