@@ -4,7 +4,7 @@ namespace mbgl {
 namespace android {
 namespace gson {
 
-void JsonPrimitive::registerNative(jni::JNIEnv &env) {
+void JsonPrimitive::registerNative(jni::JNIEnv& env) {
     jni::Class<JsonPrimitive>::Singleton(env);
 }
 
