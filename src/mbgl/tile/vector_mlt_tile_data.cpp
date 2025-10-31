@@ -19,8 +19,7 @@ VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> t
     : tile(std::move(tile_)),
       layer(layer_),
       feature(feature_),
-      extent(extent_) {
-}
+      extent(extent_) {}
 
 FeatureType VectorMLTTileFeature::getType() const {
     switch (feature.getGeometry().type) {
@@ -156,9 +155,7 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
 
 VectorMLTTileLayer::VectorMLTTileLayer(std::shared_ptr<const MapLibreTile> tile_, const mlt::Layer& layer_)
     : tile(std::move(tile_)),
-      layer(layer_)
-{
-}
+      layer(layer_) {}
 
 std::size_t VectorMLTTileLayer::featureCount() const {
     return layer.getFeatures().size();
@@ -168,10 +165,7 @@ std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t 
     const auto& features = layer.getFeatures();
     const mlt::Feature* targetFeature = nullptr;
     targetFeature = &features[index];
-    return std::make_unique<VectorMLTTileFeature>(tile,
-                                                  layer,
-                                                  *targetFeature,
-                                                  layer.getExtent());
+    return std::make_unique<VectorMLTTileFeature>(tile, layer, *targetFeature, layer.getExtent());
 }
 
 std::string VectorMLTTileLayer::getName() const {
