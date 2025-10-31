@@ -15,16 +15,10 @@ using GeometryType = mlt::metadata::tileset::GeometryType;
 VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> tile_,
                                            const mlt::Layer& layer_,
                                            const mlt::Feature& feature_,
-#if MLT_UNPACK_MULTI_GEOMETRY
-                                           std::uint32_t subIndex_,
-#endif
                                            std::uint32_t extent_)
     : tile(std::move(tile_)),
       layer(layer_),
       feature(feature_),
-#if MLT_UNPACK_MULTI_GEOMETRY
-      subIndex(subIndex_),
-#endif
       extent(extent_) {
 }
 
@@ -100,17 +94,6 @@ struct PointConverter {
         return result;
     }
 };
-
-#if MLT_UNPACK_MULTI_GEOMETRY
-std::size_t getFeatureCount(const mlt::Feature& feature) {
-    const auto& geometry = feature.getGeometry();
-    if (geometry.type == GeometryType::MULTIPOLYGON) {
-        const auto& multiPolygon = static_cast<const mlt::geometry::MultiPolygon&>(geometry);
-        return multiPolygon.getPolygons().size();
-    }
-    return 1;
-}
-#endif
 } // namespace
 
 const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
@@ -150,11 +133,6 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
             case GeometryType::MULTIPOLYGON: {
                 const auto& geom = static_cast<const mlt::geometry::MultiPolygon&>(geometry);
                 const auto& polygons = geom.getPolygons();
-#if MLT_UNPACK_MULTI_GEOMETRY
-                const auto& polygon = polygons[subIndex];
-                lines.emplace(polygon.size());
-                std::ranges::transform(polygon, std::back_inserter(*lines), convert);
-#else
                 using RingVec = mlt::geometry::MultiPolygon::RingVec;
                 lines.emplace(std::accumulate(
                     polygons.begin(), polygons.end(), static_cast<std::size_t>(0), [](std::size_t a, const RingVec& b) {
@@ -163,7 +141,6 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
                 for (const auto& poly : polygons) {
                     std::ranges::transform(poly, std::back_inserter(*lines), convert);
                 }
-#endif
                 if (!geometry.getTriangles().empty()) {
                     lines->setTriangles(tile, geometry.getTriangles());
                 }
@@ -180,65 +157,20 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
 VectorMLTTileLayer::VectorMLTTileLayer(std::shared_ptr<const MapLibreTile> tile_, const mlt::Layer& layer_)
     : tile(std::move(tile_)),
       layer(layer_)
-#if MLT_UNPACK_MULTI_GEOMETRY
-      ,
-      // If the layer contains multi-polygon elements, each polygon they contain will be presented
-      // as a separate feature, so the feature count may exceed the number of actual feature objects.
-      featuresCount(std::accumulate(layer.getFeatures().begin(),
-                                    layer.getFeatures().end(),
-                                    0,
-                                    [](auto prev, auto& f) {
-                                        const auto fc = getFeatureCount(f);
-                                        assert(fc > 0); // This doesn't work if features can be empty
-                                        return prev + fc;
-                                    }))
-#endif
 {
 }
 
 std::size_t VectorMLTTileLayer::featureCount() const {
-#if MLT_UNPACK_MULTI_GEOMETRY
-    return featuresCount;
-#else
     return layer.getFeatures().size();
-#endif
 }
 
 std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t index) const {
     const auto& features = layer.getFeatures();
     const mlt::Feature* targetFeature = nullptr;
-#if MLT_UNPACK_MULTI_GEOMETRY
-    // If this layer contains multi-polygons, the index is "virtual" and will index
-    // the individual polygons within a feature as that feature is encountered.
-    // It may be worth building an index in the constructor to avoid this.
-    std::uint32_t subIndex = 0;
-    if (featuresCount > features.size()) {
-        const auto x = index;
-        for (std::size_t i = 0; i < features.size(); ++i) {
-            const auto& feature = features[i];
-            const std::size_t featureCount_ = getFeatureCount(feature);
-            if (index < featureCount_) {
-                targetFeature = &feature;
-                subIndex = static_cast<std::uint32_t>(index);
-                break;
-            }
-            index -= featureCount_;
-        }
-        if (!targetFeature) {
-            assert(false);
-            return {};
-        }
-    } else
-#endif
-    {
-        targetFeature = &features[index];
-    }
+    targetFeature = &features[index];
     return std::make_unique<VectorMLTTileFeature>(tile,
                                                   layer,
                                                   *targetFeature,
-#if MLT_UNPACK_MULTI_GEOMETRY
-                                                  subIndex,
-#endif
                                                   layer.getExtent());
 }
 
