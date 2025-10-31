@@ -19,11 +19,12 @@ import org.maplibre.android.maps.Transform
 import org.maplibre.android.maps.UiSettings
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
-class LocationCameraControllerTest {
+class LocationCameraControllerTest : BaseTest() {
     @Test
     fun setCameraMode_mapTransitionsAreCancelled() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
