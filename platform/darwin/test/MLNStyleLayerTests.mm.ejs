@@ -60,7 +60,7 @@
     XCTAssertEqualObjects(@(layer.rawLayer->getTypeInfo()->type), @"<%- type %>");
     auto rawLayer = static_cast<mbgl::style::<%- camelize(type) %>Layer*>(layer.rawLayer);
 
-    MLNTransition transitionTest = MLNTransitionMake(5, 4);
+    MLNTransition transitionTest = MLNTransitionMake(5, 4, kCAMediaTimingFunctionDefault);
 
 <% for (const property of properties) { -%>
 <%   if (property['property-type'] === 'color-ramp') continue; -%>

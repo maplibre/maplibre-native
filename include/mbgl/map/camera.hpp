@@ -74,6 +74,8 @@ constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
     return !(a == b);
 }
 
+struct PropertyAnimation;
+
 /** Various options for describing a transition between viewpoints with
     animation. All fields are optional; the default values depend on how this
     struct is used. */
@@ -154,6 +156,36 @@ struct FreeCameraOptions {
     /** Helper function for setting the orientation of the camera as a pitch and
        a bearing. Both values are in degrees */
     void setPitchBearing(double pitch, double bearing) noexcept;
+};
+
+struct PropertyAnimation {
+    TimePoint start;
+    Duration duration;
+    AnimationOptions animation;
+    bool ran = false, finished = false, done = false;
+    bool panning = false, scaling = false, rotating = false;
+
+    PropertyAnimation(
+        TimePoint start_, Duration duration_, AnimationOptions animation_, bool panning_, bool scaling_, bool rotating_)
+        : start(start_),
+          duration(duration_),
+          animation(animation_),
+          panning(panning_),
+          scaling(scaling_),
+          rotating(rotating_) {}
+
+    double t(TimePoint now) {
+        bool isAnimated = duration != Duration::zero();
+        double t = isAnimated ? (std::chrono::duration<double>(now - start) / duration) : 1.0f;
+        if (t >= 1.0) {
+            return 1.0;
+        }
+
+        util::UnitBezier ease = animation.easing ? *animation.easing : util::DEFAULT_TRANSITION_EASE;
+        return ease.solve(t, 0.001);
+    }
+
+    bool isAnimated() const { return duration != Duration::zero(); }
 };
 
 } // namespace mbgl

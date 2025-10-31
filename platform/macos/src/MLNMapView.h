@@ -2,6 +2,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "MLNBackendResource.h"
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapOptions.h"
@@ -1336,6 +1337,7 @@ around the returned camera object if it were set as the receiver’s camera.
  */
 - (void)clearActionJournalLog;
 
+- (MLNBackendResource *)backendResource;
 @end
 
 NS_ASSUME_NONNULL_END

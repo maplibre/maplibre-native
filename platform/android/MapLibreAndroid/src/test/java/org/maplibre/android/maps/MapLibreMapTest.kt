@@ -77,7 +77,7 @@ class MapLibreMapTest : BaseTest() {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.moveCamera(update, callback)
-        verify { transform.moveCamera(maplibreMap, update, callback) }
+        verify { transform.moveCamera(maplibreMap, update, true, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
@@ -88,7 +88,7 @@ class MapLibreMapTest : BaseTest() {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.easeCamera(update, callback)
-        verify { transform.easeCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, true, callback) }
+        verify { transform.easeCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, true, true, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
@@ -99,7 +99,7 @@ class MapLibreMapTest : BaseTest() {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.animateCamera(update, callback)
-        verify { transform.animateCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, callback) }
+        verify { transform.animateCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, true, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 

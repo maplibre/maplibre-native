@@ -27,6 +27,7 @@ public:
     std::list<FileSourceInfo> fileSources;
     std::map<FileSourceType, FileSourceFactory> fileSourceFactories;
     std::recursive_mutex mutex;
+    std::vector<std::shared_ptr<FileSource>> customFileSources;
 };
 
 FileSourceManager::FileSourceManager()
@@ -84,6 +85,16 @@ FileSourceManager::FileSourceFactory FileSourceManager::unRegisterFileSourceFact
         impl->fileSourceFactories.erase(it);
     }
     return factory;
+}
+
+// Registers a custom file source factory
+void FileSourceManager::registerCustomFileSource(std::shared_ptr<FileSource> fileSource) noexcept {
+    impl->customFileSources.push_back(fileSource);
+}
+
+// Returns an array of custom file sources
+std::vector<std::shared_ptr<FileSource>> FileSourceManager::getCustomFileSources() noexcept {
+    return impl->customFileSources;
 }
 
 } // namespace mbgl

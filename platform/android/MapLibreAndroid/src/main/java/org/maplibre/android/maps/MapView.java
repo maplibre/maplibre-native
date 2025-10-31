@@ -31,6 +31,7 @@ import org.maplibre.android.location.LocationComponent;
 import org.maplibre.android.maps.renderer.MapRenderer;
 import org.maplibre.android.maps.widgets.CompassView;
 import org.maplibre.android.net.ConnectivityReceiver;
+import org.maplibre.android.plugin.PluginProtocolHandler;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.tile.TileOperation;
@@ -1817,4 +1818,14 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   public static void setMapStrictModeEnabled(boolean strictModeEnabled) {
     MapStrictMode.setStrictModeEnabled(strictModeEnabled);
   }
+
+  /**
+   * Adds a custom protocol handler to the map view
+   */
+  public void addPluginProtocolHandler(PluginProtocolHandler protocolHandler) {
+    if (maplibreMap != null) {
+      maplibreMap.addPluginProtocolHandler(protocolHandler);
+    }
+  }
+
 }

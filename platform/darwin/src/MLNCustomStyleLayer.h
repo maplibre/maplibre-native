@@ -32,6 +32,7 @@ typedef struct MLNStyleLayerDrawingContext {
   CGFloat fieldOfView;
   /// A 4×4 matrix representing the map view’s current projection state.
   MLNMatrix4 projectionMatrix;
+  MLNMatrix4 nearClippedProjMatrix;
 } MLNStyleLayerDrawingContext;
 
 /// A style layer that is rendered by Metal code that you provide.

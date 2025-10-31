@@ -33,7 +33,7 @@ public:
         }
 
         context.activeTextureUnit = 0;
-        context.scissorTest = false;
+        context.scissorTest = {0, 0, 0, 0};
         context.viewport = {.x = 0, .y = 0, .size = size};
     }
 

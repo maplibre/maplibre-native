@@ -71,7 +71,7 @@ class CameraPosition
      */
     @field:Keep
     @JvmField
-    val padding: DoubleArray?
+    val padding: DoubleArray?,
 
 ) : Parcelable {
 

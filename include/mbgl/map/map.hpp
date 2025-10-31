@@ -5,6 +5,7 @@
 #include <mbgl/map/map_observer.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/map/mode.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/annotation/annotation.hpp>
@@ -107,6 +108,8 @@ public:
     void setConstrainMode(ConstrainMode);
     void setViewportMode(ViewportMode);
     void setSize(Size);
+    void setFrustumOffset(const EdgeInsets&);
+    EdgeInsets getFrustumOffset();
     MapOptions getMapOptions() const;
 
     // Projection Mode
@@ -121,6 +124,7 @@ public:
 
     // Transform
     TransformState getTransfromState() const;
+    void toggleTransform();
 
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);

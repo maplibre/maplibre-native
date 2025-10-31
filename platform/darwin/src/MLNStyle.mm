@@ -12,6 +12,7 @@
 #import "MLNHillshadeStyleLayer.h"
 #import "MLNRasterStyleLayer.h"
 #import "MLNBackgroundStyleLayer.h"
+#import "MLNLocationIndicatorStyleLayer.h"
 #import "MLNStyleLayerManager.h"
 
 #import "MLNSource.h"

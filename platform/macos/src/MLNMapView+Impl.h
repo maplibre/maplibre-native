@@ -2,6 +2,8 @@
 #import <mbgl/map/map_observer.hpp>
 #import <mbgl/util/image.hpp>
 
+#import "MLNBackendResource.h"
+
 @class MLNMapView;
 
 typedef struct _CGLContextObject* CGLContextObj;
@@ -22,6 +24,8 @@ class MLNMapViewImpl : public mbgl::MapObserver {
 
   // Called by the view delegate when it's time to render.
   void render();
+
+  virtual MLNBackendResource* getObject() = 0;
 
   // mbgl::MapObserver implementation
   void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;

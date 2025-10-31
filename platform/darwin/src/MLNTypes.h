@@ -1,5 +1,6 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
+#import <QuartzCore/CAMediaTimingFunction.h>
 
 #import "MLNFoundation.h"
 
@@ -101,6 +102,8 @@ typedef struct __attribute__((objc_boxable)) MLNTransition {
    The amount of time in seconds to wait before beginning the animation.
    */
   NSTimeInterval delay;
+
+  CAMediaTimingFunctionName ease;
 } MLNTransition;
 
 NS_INLINE NSString *MLNStringFromMLNTransition(MLNTransition transition) {
@@ -118,10 +121,12 @@ NS_INLINE NSString *MLNStringFromMLNTransition(MLNTransition transition) {
 
  @return Returns a ``MLNTransition`` struct containing the transition attributes.
  */
-NS_INLINE MLNTransition MLNTransitionMake(NSTimeInterval duration, NSTimeInterval delay) {
+NS_INLINE MLNTransition MLNTransitionMake(NSTimeInterval duration, NSTimeInterval delay,
+                                          CAMediaTimingFunctionName ease) {
   MLNTransition transition;
   transition.duration = duration;
   transition.delay = delay;
+  transition.ease = ease;
 
   return transition;
 }
