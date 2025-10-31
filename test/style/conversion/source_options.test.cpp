@@ -13,9 +13,7 @@ using namespace mbgl::style::conversion;
 TEST(SourceOptions, Basic) {
     Error error;
     auto converted = convertJSON<SourceOptions>("{}", error);
-    ASSERT_TRUE(converted);
-    ASSERT_FALSE(converted->rasterEncoding);
-    ASSERT_FALSE(converted->vectorEncoding);
+    ASSERT_FALSE(converted);
 }
 
 TEST(SourceOptions, ErrorHandling) {
