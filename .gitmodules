@@ -100,6 +100,10 @@
 [submodule "vendor/filesystem"]
 	path = vendor/filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "vendor/maplibre-tile-spec"]
+	path = vendor/maplibre-tile-spec
+	url = https://github.com/maplibre/maplibre-tile-spec.git
+	branch = cpp
 [submodule "vendor/kdbush.hpp"]
 	path = vendor/kdbush.hpp
 	url = https://github.com/mourner/kdbush.hpp.git

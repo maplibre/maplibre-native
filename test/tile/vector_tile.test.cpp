@@ -1,7 +1,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/fake_file_source.hpp>
-#include <mbgl/tile/vector_tile.hpp>
-#include <mbgl/tile/vector_tile_data.hpp>
+#include <mbgl/tile/vector_mvt_tile.hpp>
+#include <mbgl/tile/vector_mvt_tile_data.hpp>
 #include <mbgl/tile/tile_loader_impl.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
@@ -25,7 +25,7 @@ using namespace mbgl;
 
 TEST(VectorTile, setError) {
     VectorTileTest test;
-    VectorTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
     tile.setError(std::make_exception_ptr(std::runtime_error("test")));
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -34,7 +34,7 @@ TEST(VectorTile, setError) {
 
 TEST(VectorTile, onError) {
     VectorTileTest test;
-    VectorTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
     tile.onError(std::make_exception_ptr(std::runtime_error("test")), 0);
 
     EXPECT_FALSE(tile.isRenderable());
@@ -44,7 +44,7 @@ TEST(VectorTile, onError) {
 
 TEST(VectorTile, Issue8542) {
     VectorTileTest test;
-    VectorTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
 
     // Query before data is set
     std::vector<Feature> result;
@@ -52,7 +52,7 @@ TEST(VectorTile, Issue8542) {
 }
 
 TEST(VectorTileData, ParseResults) {
-    VectorTileData data(std::make_shared<std::string>(util::read_file("test/fixtures/map/issue12432/0-0-0.mvt")));
+    VectorMVTTileData data(std::make_shared<std::string>(util::read_file("test/fixtures/map/issue12432/0-0-0.mvt")));
 
     std::vector<std::string> layerNames = data.layerNames();
     ASSERT_EQ(layerNames.size(), 2u);

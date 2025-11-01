@@ -105,6 +105,11 @@ public:
         const auto format_ptr = values.find("format");
         const std::string format = (format_ptr == values.end()) ? "png" : format_ptr->second;
 
+        // Translate MIME type field to source encoding.
+        if (format == "mlt" || format == "application/vnd.maplibre-vector-tile") {
+            doc.AddMember("encoding", "mlt", allocator);
+        }
+
         if (format != "pbf" && !values.contains("scale")) {
             values["scale"] = "1";
         }

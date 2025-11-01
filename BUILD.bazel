@@ -144,6 +144,7 @@ cc_library(
         "//vendor:eternal",
         "//vendor:expected-lite",
         "//vendor:maplibre-native-base",
+        "//vendor/maplibre-tile-spec/cpp:mlt_cpp",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",
