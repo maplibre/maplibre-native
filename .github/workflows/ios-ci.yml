@@ -316,7 +316,7 @@ jobs:
           zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
 
-      - name: Release (GitHub) - Create Draft
+      - name: Release (GitHub)
         if: env.make_release
         id: github_release
         uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
@@ -329,7 +329,7 @@ jobs:
           prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
-          draft: true
+          # draft: true
 
       # needed to trigger workflow for Swift Package Index release
       # - name: Generate token
@@ -355,8 +355,8 @@ jobs:
               "version":"${{ env.version }}",
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
-      - run: npm install
-        working-directory: .
+      # - run: npm install
+      #   working-directory: .
 
       # - name: Release (CocoaPods)
       #   shell: bash -leo pipefail {0}  # so pod is found
@@ -365,20 +365,20 @@ jobs:
       #   env:
       #    GH_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
 
-      - name: Publish release (remove draft)
-        if: env.make_release
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
-        with:
-          tag_name: ios-v${{ env.version }}
-          name: ios-v${{ env.version }}
-          draft: false
+      # - name: Publish release (remove draft)
+      #   if: env.make_release
+      #   uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+      #   with:
+      #     tag_name: ios-v${{ env.version }}
+      #     name: ios-v${{ env.version }}
+      #     draft: false
 
-      - name: Write release notifications
-        if: env.make_release && github.repository_owner == 'maplibre'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
-        working-directory: .
+      # - name: Write release notifications
+      #   if: env.make_release && github.repository_owner == 'maplibre'
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
+      #   working-directory: .
 
   ios-build-cmake:
     needs: pre_job
