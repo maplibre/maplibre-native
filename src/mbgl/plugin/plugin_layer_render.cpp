@@ -12,6 +12,8 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/style/properties.hpp>
+#include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/plugin/feature_collection_bucket.hpp>
 
 using namespace mbgl;
 
@@ -82,6 +84,67 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
+    auto pluginLayer = static_cast<const mbgl::style::PluginLayer::Impl&>(*baseImpl);
+
+    std::vector<OverscaledTileID> removedTiles;
+    bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
+
+    // Get list of tiles to remove and then remove them
+    for (auto currentCollection : _featureCollectionByTile) {
+        if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
+            removedTiles.push_back(currentCollection.first);
+        }
+    }
+    if (removedTiles.size() > 0) {
+        for (auto tileID : removedTiles) {
+            auto featureCollection = _featureCollectionByTile[tileID];
+            if (pluginLayer._featureCollectionUnloadedFunction) {
+                pluginLayer._featureCollectionUnloadedFunction(featureCollection);
+            }
+            _featureCollectionByTile.erase(tileID);
+        }
+    }
+
+    if (renderTiles) {
+        if (!renderTiles->empty()) {
+            auto drawPass = RenderPass::Pass3D;
+
+            // If we're reading feature collections, go through
+            // and notify the plugin of any new feature collections
+            for (const RenderTile& tile : *renderTiles) {
+                const auto& tileID = tile.getOverscaledTileID();
+
+                const auto* optRenderData = getRenderDataForPass(tile, drawPass);
+                if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
+                    removeTile(drawPass, tileID);
+                    continue;
+                }
+                const auto& renderData = *optRenderData;
+                auto& bucket = static_cast<FeatureCollectionBucket&>(*renderData.bucket);
+                auto featureCollection = bucket._featureCollection;
+                if (featureCollection == nullptr) {
+                    continue;
+                }
+
+                // See if we already have this tile's feature collection
+                if (_featureCollectionByTile.contains(tileID)) {
+                    continue;
+                }
+
+                _featureCollectionByTile[tileID] = featureCollection;
+
+                //                static_cast<const Impl&>(*baseImpl);
+                //                auto layer = static_cast<const mbgl::style::PluginLayer::Impl
+                //                &>(*renderData.layerProperties->baseImpl);
+                if (pluginLayer._featureCollectionLoadedFunction) {
+                    if (featureCollection != nullptr) {
+                        pluginLayer._featureCollectionLoadedFunction(featureCollection);
+                    }
+                }
+            }
+        }
+    }
+
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
@@ -125,6 +188,13 @@ void RenderPluginLayer::render(PaintParameters& paintParameters) {
 }
 
 void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
+    // This check is here because base prepare will assert on these and crash
+    if (layerParameters.source != nullptr) {
+        if (layerParameters.source->isEnabled()) {
+            RenderLayer::prepare(layerParameters);
+        }
+    }
+
     if (_updateFunction) {
         _updateFunction(layerParameters);
     }
@@ -158,8 +228,13 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     }
 
     std::string jsonProperties = pm.propertiesAsJSON();
-
     i->_updateLayerPropertiesFunction(jsonProperties);
+
+    auto properties = makeMutable<style::PluginLayerProperties>(
+        staticImmutableCast<style::PluginLayer::Impl>(baseImpl));
+    passes = RenderPass::Pass3D;
+    properties->renderPasses = mbgl::underlying_type(passes);
+    evaluatedProperties = std::move(properties);
 }
 
 bool RenderPluginLayer::hasTransition() const {
@@ -185,7 +260,8 @@ void RenderPluginLayer::layerChanged([[maybe_unused]] const TransitionParameters
 
 /// Remove all drawables for the tile from the layer group
 /// @return The number of drawables actually removed.
-std::size_t RenderPluginLayer::removeTile([[maybe_unused]] RenderPass, [[maybe_unused]] const OverscaledTileID&) {
+std::size_t RenderPluginLayer::removeTile([[maybe_unused]] RenderPass renderPass,
+                                          [[maybe_unused]] const OverscaledTileID& tileID) {
     return 0;
 }
 

@@ -62,7 +62,7 @@ jobs:
 
   android-build-and-upload-release:
     needs: android-create-release
-    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: platform/android
@@ -81,6 +81,10 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+
+      - name: Free disk space
+        working-directory: .
+        run: .github/scripts/free_disk_space.sh
 
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
         with:
@@ -127,28 +131,16 @@ jobs:
             platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
             platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
 
-      - name: Prepare MavenCentral release
+      - name: Publish to Github
         env:
-          GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         run: |
-          echo "${GPG_KEY_CONTENTS}" | base64 -d > signing-key.gpg
-        shell: bash
-
-      - name: Publish to MavenCentral
-        run: |
-          renderer=${{ matrix.RENDERER }}
-          if [ "$renderer" = "opengl" ]; then
-            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToSonatypeRepository
-            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToSonatypeRepository
-          else
-            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToSonatypeRepository
-          fi
-        env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+            renderer=${{ matrix.RENDERER }}
+            if [ "$renderer" = "opengl" ]; then
+              ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToGithubPackagesRepository
+            else
+              ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToGithubPackagesRepository
+            fi
 
   finilize-release:
     runs-on: ubuntu-latest
@@ -163,27 +155,12 @@ jobs:
           name: ${{ needs.android-create-release.outputs.version_tag }}
           draft: false
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
-
-      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Close Sonatype staging repository
-        run: ./gradlew closeSonatypeStagingRepository
-        working-directory: platform/android
-        env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
-
       - run: npm install
         working-directory: .
 
       - name: Write release notifications
         if: github.repository_owner == 'maplibre'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
         working-directory: .

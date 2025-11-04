@@ -4,6 +4,10 @@ MLN_LAYER_PLUGIN_HEADERS = [
     "src/mbgl/plugin/plugin_layer_impl.hpp",
     "src/mbgl/plugin/plugin_layer_render.hpp",
     "src/mbgl/plugin/plugin_layer_properties.hpp",
+    "src/mbgl/plugin/plugin_file_source.hpp",
+    "src/mbgl/plugin/plugin_style_filter.hpp",
+    "src/mbgl/plugin/feature_collection_bucket.hpp",
+    "src/mbgl/plugin/feature_collection.hpp",
 ]
 
 MLN_LAYER_PLUGIN_SOURCE = [
@@ -12,6 +16,9 @@ MLN_LAYER_PLUGIN_SOURCE = [
     "src/mbgl/plugin/plugin_layer_impl.cpp",
     "src/mbgl/plugin/plugin_layer_render.cpp",
     "src/mbgl/plugin/plugin_layer_properties.cpp",
+    "src/mbgl/plugin/plugin_style_filter.cpp",
+    "src/mbgl/plugin/feature_collection_bucket.cpp",
+    "src/mbgl/plugin/feature_collection.cpp",
 ]
 
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
@@ -141,6 +148,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/gfx/attribute.cpp",
     "src/mbgl/gfx/attribute.hpp",
     "src/mbgl/gfx/cull_face_mode.hpp",
+    "src/mbgl/gfx/scissor_rect.hpp",
     "src/mbgl/gfx/fill_generator.cpp",
     "src/mbgl/gfx/index_buffer.hpp",
     "src/mbgl/gfx/index_vector.hpp",
@@ -188,6 +196,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/map/map_projection.cpp",
     "src/mbgl/map/transform.cpp",
     "src/mbgl/map/transform.hpp",
+    "src/mbgl/map/transform_active.cpp",
+    "src/mbgl/map/transform_active.hpp",
     "src/mbgl/map/transform_state.cpp",
     "src/mbgl/map/transform_state.hpp",
     "src/mbgl/map/zoom_history.hpp",

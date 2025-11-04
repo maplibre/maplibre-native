@@ -1,3 +1,4 @@
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/util/hash.hpp>
@@ -5,8 +6,6 @@
 
 namespace mbgl {
 namespace vulkan {
-
-#define USE_DYNAMIC_VIEWPORT 0
 
 vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
     switch (value) {
@@ -108,6 +107,10 @@ vk::CullModeFlagBits PipelineInfo::vulkanCullMode(const gfx::CullFaceSideType& v
         default:
             return vk::CullModeFlagBits::eNone;
     }
+}
+
+vk::Rect2D PipelineInfo::vulkanScissorRect(const gfx::ScissorRect& value) {
+    return {{value.x, value.y}, {value.width, value.height}};
 }
 
 vk::FrontFace PipelineInfo::vulkanFrontFace(const gfx::CullFaceWindingType& value) {
@@ -243,6 +246,10 @@ vk::StencilOp PipelineInfo::vulkanStencilOp(const gfx::StencilOpType& value) {
 void PipelineInfo::setCullMode(const gfx::CullFaceMode& value) {
     cullMode = value.enabled ? vulkanCullMode(value.side) : vk::CullModeFlagBits::eNone;
     frontFace = vulkanFrontFace(value.winding);
+}
+
+void PipelineInfo::setScissorRect(const gfx::ScissorRect& value) {
+    scissorRect = vulkanScissorRect(value);
 }
 
 void PipelineInfo::setDrawMode(const gfx::DrawModeType& value) {
@@ -400,10 +407,6 @@ std::size_t PipelineInfo::hash() const {
                       stencilDepthFail,
                       wideLines,
                       VkRenderPass(renderPass),
-#if !USE_DYNAMIC_VIEWPORT
-                      viewExtent.width,
-                      viewExtent.height,
-#endif
                       vertexInputHash);
 }
 
@@ -424,13 +427,10 @@ void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::Un
         buffer->setLineWidth(dynamicValues.lineWidth, dispatcher);
     }
 
-#if USE_DYNAMIC_VIEWPORT
     const vk::Viewport viewport(0.0f, 0.0f, viewExtent.width, viewExtent.height, 0.0f, 1.0f);
-    const vk::Rect2D scissorRect({}, {viewExtent.width, viewExtent.height});
 
     buffer->setViewport(0, viewport, dispatcher);
     buffer->setScissor(0, scissorRect, dispatcher);
-#endif
 }
 
 std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
@@ -450,10 +450,8 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
         dynamicStates.push_back(vk::DynamicState::eLineWidth);
     }
 
-#if USE_DYNAMIC_VIEWPORT
     dynamicStates.push_back(vk::DynamicState::eViewport);
     dynamicStates.push_back(vk::DynamicState::eScissor);
-#endif
 
     return dynamicStates;
 }

@@ -1,3 +1,7 @@
 .gradle/
 **/.cxx/
 app/build
+.project
+.settings
+.classpath
+build/

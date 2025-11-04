@@ -4,6 +4,7 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_impl.hpp>
 #include <mbgl/map/transform.hpp>
+#include <mbgl/map/transform_active.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/renderer/renderer_frontend.hpp>
@@ -16,12 +17,14 @@
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/exception.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/mapbox.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/action_journal.hpp>
 
+#include <memory>
 #include <utility>
 
 namespace mbgl {
@@ -86,7 +89,7 @@ void Map::renderStill(StillImageCallback callback) {
 void Map::renderStill(const CameraOptions& camera, MapDebugOptions debugOptions, StillImageCallback callback) {
     impl->cameraMutated = true;
     impl->debugOptions = debugOptions;
-    impl->transform.jumpTo(camera);
+    impl->transform->jumpTo(camera);
     renderStill(std::move(callback));
 }
 
@@ -116,35 +119,35 @@ void Map::setStyle(std::unique_ptr<Style> style) {
 // MARK: - Transitions
 
 void Map::cancelTransitions() {
-    impl->transform.cancelTransitions();
+    impl->transform->cancelTransitions();
     impl->onUpdate();
 }
 
 void Map::setGestureInProgress(bool inProgress) {
-    impl->transform.setGestureInProgress(inProgress);
+    impl->transform->setGestureInProgress(inProgress);
     impl->onUpdate();
 }
 
 bool Map::isGestureInProgress() const {
-    return impl->transform.isGestureInProgress();
+    return impl->transform->isGestureInProgress();
 }
 
 bool Map::isRotating() const {
-    return impl->transform.isRotating();
+    return impl->transform->isRotating();
 }
 
 bool Map::isScaling() const {
-    return impl->transform.isScaling();
+    return impl->transform->isScaling();
 }
 
 bool Map::isPanning() const {
-    return impl->transform.isPanning();
+    return impl->transform->isPanning();
 }
 
 // MARK: -
 
 CameraOptions Map::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
-    return impl->transform.getCameraOptions(padding);
+    return impl->transform->getCameraOptions(padding);
 }
 
 void Map::jumpTo(const CameraOptions& camera) {
@@ -153,34 +156,34 @@ void Map::jumpTo(const CameraOptions& camera) {
 
 void Map::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
-    impl->transform.easeTo(camera, animation);
+    impl->transform->easeTo(camera, animation);
     impl->onUpdate();
 }
 
 void Map::flyTo(const CameraOptions& camera, const AnimationOptions& animation) {
     impl->cameraMutated = true;
-    impl->transform.flyTo(camera, animation);
+    impl->transform->flyTo(camera, animation);
     impl->onUpdate();
 }
 
 void Map::moveBy(const ScreenCoordinate& point, const AnimationOptions& animation) {
     impl->cameraMutated = true;
-    impl->transform.moveBy(point, animation);
+    impl->transform->moveBy(point, animation);
     impl->onUpdate();
 }
 
 void Map::pitchBy(double pitch, const AnimationOptions& animation) {
-    easeTo(CameraOptions().withPitch(util::rad2deg(impl->transform.getPitch()) - pitch), animation);
+    easeTo(CameraOptions().withPitch(util::rad2deg(impl->transform->getPitch()) - pitch), animation);
 }
 
 void Map::scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation) {
-    const double zoom = impl->transform.getZoom() + impl->transform.getState().scaleZoom(scale);
+    const double zoom = impl->transform->getZoom() + impl->transform->getState().scaleZoom(scale);
     easeTo(CameraOptions().withZoom(zoom).withAnchor(anchor), animation);
 }
 
 void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& animation) {
     impl->cameraMutated = true;
-    impl->transform.rotateBy(first, second, animation);
+    impl->transform->rotateBy(first, second, animation);
     impl->onUpdate();
 }
 
@@ -256,10 +259,10 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
                                     const std::optional<double>& bearing,
                                     const std::optional<double>& pitch) const {
     if (!bearing && !pitch) {
-        return mbgl::cameraForLatLngs(latLngs, impl->transform, padding);
+        return mbgl::cameraForLatLngs(latLngs, *impl->transform, padding);
     }
 
-    Transform transform(impl->transform.getState());
+    Transform transform(impl->transform->getState());
 
     if (bearing || pitch) {
         transform.jumpTo(CameraOptions().withBearing(bearing).withPitch(pitch));
@@ -280,7 +283,7 @@ CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
 }
 
 LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
-    Transform shallow{impl->transform.getState()};
+    Transform shallow{impl->transform->getState()};
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
@@ -290,7 +293,7 @@ LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
 }
 
 LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) const {
-    Transform shallow{impl->transform.getState()};
+    Transform shallow{impl->transform->getState()};
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
@@ -319,36 +322,36 @@ void Map::setBounds(const BoundOptions& options) {
 
     if (options.bounds) {
         changeCamera = true;
-        impl->transform.setLatLngBounds(*options.bounds);
+        impl->transform->setLatLngBounds(*options.bounds);
     }
 
     if (options.minZoom) {
-        impl->transform.setMinZoom(*options.minZoom);
-        if (impl->transform.getZoom() < *options.minZoom) {
+        impl->transform->setMinZoom(*options.minZoom);
+        if (impl->transform->getZoom() < *options.minZoom) {
             changeCamera = true;
             cameraOptions.withZoom(options.minZoom);
         }
     }
 
     if (options.maxZoom) {
-        impl->transform.setMaxZoom(*options.maxZoom);
-        if (impl->transform.getZoom() > *options.maxZoom) {
+        impl->transform->setMaxZoom(*options.maxZoom);
+        if (impl->transform->getZoom() > *options.maxZoom) {
             changeCamera = true;
             cameraOptions.withZoom(options.maxZoom);
         }
     }
 
     if (options.maxPitch) {
-        impl->transform.setMaxPitch(*options.maxPitch);
-        if (impl->transform.getPitch() > impl->transform.getState().getMaxPitch()) {
+        impl->transform->setMaxPitch(*options.maxPitch);
+        if (impl->transform->getPitch() > impl->transform->getState().getMaxPitch()) {
             changeCamera = true;
             cameraOptions.withPitch(options.maxPitch);
         }
     }
 
     if (options.minPitch) {
-        impl->transform.setMinPitch(*options.minPitch);
-        if (impl->transform.getPitch() < impl->transform.getState().getMinPitch()) {
+        impl->transform->setMinPitch(*options.minPitch);
+        if (impl->transform->getPitch() < impl->transform->getState().getMinPitch()) {
             changeCamera = true;
             cameraOptions.withPitch(options.minPitch);
         }
@@ -361,55 +364,64 @@ void Map::setBounds(const BoundOptions& options) {
 
 BoundOptions Map::getBounds() const {
     return BoundOptions()
-        .withLatLngBounds(impl->transform.getState().getLatLngBounds())
-        .withMinZoom(impl->transform.getState().getMinZoom())
-        .withMaxZoom(impl->transform.getState().getMaxZoom())
-        .withMinPitch(util::rad2deg(impl->transform.getState().getMinPitch()))
-        .withMaxPitch(util::rad2deg(impl->transform.getState().getMaxPitch()));
+        .withLatLngBounds(impl->transform->getState().getLatLngBounds())
+        .withMinZoom(impl->transform->getState().getMinZoom())
+        .withMaxZoom(impl->transform->getState().getMaxZoom())
+        .withMinPitch(util::rad2deg(impl->transform->getState().getMinPitch()))
+        .withMaxPitch(util::rad2deg(impl->transform->getState().getMaxPitch()));
 }
 
 // MARK: - Map options
 
 void Map::setSize(const Size size) {
-    impl->transform.resize(size);
+    impl->transform->resize(size);
     impl->onUpdate();
 }
 
+void Map::setFrustumOffset(const EdgeInsets& frustumOffset) {
+    impl->transform->setFrustumOffset(frustumOffset);
+    impl->onUpdate();
+}
+
+EdgeInsets Map::getFrustumOffset() {
+    return impl->transform->getFrustumOffset();
+}
+
 void Map::setNorthOrientation(NorthOrientation orientation) {
-    impl->transform.setNorthOrientation(orientation);
+    impl->transform->setNorthOrientation(orientation);
     impl->onUpdate();
 }
 
 void Map::setConstrainMode(mbgl::ConstrainMode mode) {
-    impl->transform.setConstrainMode(mode);
+    impl->transform->setConstrainMode(mode);
     impl->onUpdate();
 }
 
 void Map::setViewportMode(mbgl::ViewportMode mode) {
-    impl->transform.setViewportMode(mode);
+    impl->transform->setViewportMode(mode);
     impl->onUpdate();
 }
 
 MapOptions Map::getMapOptions() const {
     return std::move(MapOptions()
                          .withMapMode(impl->mode)
-                         .withConstrainMode(impl->transform.getConstrainMode())
-                         .withViewportMode(impl->transform.getViewportMode())
+                         .withConstrainMode(impl->transform->getConstrainMode())
+                         .withViewportMode(impl->transform->getViewportMode())
                          .withCrossSourceCollisions(impl->crossSourceCollisions)
-                         .withNorthOrientation(impl->transform.getNorthOrientation())
-                         .withSize(impl->transform.getState().getSize())
+                         .withNorthOrientation(impl->transform->getNorthOrientation())
+                         .withSize(impl->transform->getState().getSize())
                          .withPixelRatio(impl->pixelRatio));
 }
 
 // MARK: - Projection mode
 
 void Map::setProjectionMode(const ProjectionMode& options) {
-    impl->transform.setProjectionMode(options);
+    impl->transform->setProjectionMode(options);
     impl->onUpdate();
 }
 
 ProjectionMode Map::getProjectionMode() const {
-    return impl->transform.getProjectionMode();
+    return impl->transform->getProjectionMode();
 }
 
 // MARK: - Projection
@@ -419,12 +431,12 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     // antimeridian, we unwrap the point longitude so it would be seen if
     // e.g. the next antimeridian side is visible.
     LatLng unwrappedLatLng = latLng.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(impl->transform.getLatLng());
-    return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
+    unwrappedLatLng.unwrapForShortestPath(impl->transform->getLatLng());
+    return impl->transform->latLngToScreenCoordinate(unwrappedLatLng);
 }
 
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
-    return impl->transform.screenCoordinateToLatLng(pixel);
+    return impl->transform->screenCoordinateToLatLng(pixel);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
@@ -448,7 +460,20 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
 // MARK: - Transform
 
 TransformState Map::getTransfromState() const {
-    return impl->transform.getState();
+    return impl->transform->getState();
+}
+
+void Map::toggleTransform() {
+    MapOptions options = getMapOptions();
+    if (impl->using_active_transform) {
+        impl->transform = std::make_unique<Transform>(*impl, options.constrainMode(), options.viewportMode());
+        impl->using_active_transform = false;
+    } else {
+        impl->transform = std::make_unique<TransformActive>(*impl, options.constrainMode(), options.viewportMode());
+        impl->using_active_transform = true;
+    }
+    impl->transform->setNorthOrientation(options.northOrientation());
+    impl->transform->resize(options.size());
 }
 
 // MARK: - Annotations
@@ -538,13 +563,13 @@ void Map::dumpDebugLogs() const {
 }
 
 void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {
-    impl->transform.setFreeCameraOptions(camera);
+    impl->transform->setFreeCameraOptions(camera);
     impl->cameraMutated = true;
     impl->onUpdate();
 }
 
 FreeCameraOptions Map::getFreeCameraOptions() const {
-    return impl->transform.getFreeCameraOptions();
+    return impl->transform->getFreeCameraOptions();
 }
 
 void Map::setTileLodMinRadius(double radius) {

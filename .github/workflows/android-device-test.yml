@@ -1,10 +1,7 @@
 name: android-device-test
 
 on:
-  workflow_run:
-    workflows: [android-ci]
-    types:
-      - completed
+  workflow_dispatch:
 
 permissions:
   id-token: write         # needed for AWS

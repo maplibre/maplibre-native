@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNScaleBar;
 @class MLNShape;
 @class MLNPluginLayer;
+@class MLNStyleFilter;
 
 @protocol MLNMapViewDelegate;
 @protocol MLNAnnotation;
@@ -532,6 +533,8 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) double tileLodZoomShift;
 
+@property (nonatomic, assign) UIEdgeInsets frustumOffset;
+
 // MARK: Displaying the User’s Location
 
 /**
@@ -580,11 +583,23 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
- A boolean value indicating whether camera animation duration is set based
- on the time difference between the last location update and the current one
- or the default animation duration of 1 second.
+ A boolean value indicating whether the location indicator is drawn using the location
+ indicator layer or the location indication annotation.
+ */
+@property (nonatomic, assign) BOOL useLocationIndicatorLayer;
 
- The default value of this property is `NO`
+/**
+ A boolean value indicating whether the camera allows for concurrent animations. This is
+ a temporary feature flag to avoid breaking existing functionality.
+ */
+@property (nonatomic, assign) BOOL concurrentAnimations;
+
+/**
+A boolean value indicating whether camera animation duration is set based
+on the time difference between the last location update and the current one
+or the default animation duration of 1 second.
+
+The default value of this property is `NO`
  */
 @property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
 
@@ -697,6 +712,13 @@ MLN_EXPORT
  @param duration The duration to animate the change in seconds.
 */
 - (void)updateUserLocationAnnotationViewAnimatedWithDuration:(NSTimeInterval)duration;
+
+/**
+ Creates or updates the user location annotation view. This method calls the
+ `mapView:viewForAnnotation:` delegate method to obtain a custom view. If no custom view is
+ provided, it defaults to a native one.
+ */
+- (void)createUserLocationAnnotationView;
 
 /**
  A Boolean value indicating whether the user location annotation may display a
@@ -1669,6 +1691,16 @@ of north, the map will automatically snap to exact north.
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
 
+/**
+ Toggling between the Transform and the TransformActive implementation.
+
+ It allows us to switch between the two implementations at runtime.
+
+ It also resets the current transform state so be careful when using it
+ in the middle of a transformation.
+ */
+- (void)toggleTransform;
+
 // MARK: Converting Geographic Coordinates
 
 /**
@@ -2311,6 +2343,16 @@ of north, the map will automatically snap to exact north.
  Adds a plug-in layer that is external to this library
  */
 - (void)addPluginLayerType:(Class)pluginLayerClass;
+
+/**
+ Adds a plug-in protocol handler that is external to this library
+ */
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass;
+
+/**
+ Adds a style filter to the map view
+ */
+- (void)addStyleFilter:(MLNStyleFilter *)styleFilter;
 
 @end
 

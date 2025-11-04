@@ -165,9 +165,11 @@ void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
     assert(offset + size_ <= size);
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+        usingVertexBuffer = true;
     } else if (!raw.empty()) {
         size_ = size_ ? std::min(size_, size - offset) : size - offset;
         encoder->setVertexBytes(raw.data() + offset, size_, index);
+        usingVertexBuffer = false;
     }
 }
 
@@ -192,7 +194,7 @@ void BufferResource::updateVertexBindOffset(const MTLRenderCommandEncoderPtr& en
     // The documentation for `setVertexBufferOffset` indicates that it should work for buffers
     // assigned using `setVertexBytes` but, in practice, it produces a validation failure:
     // `Set Vertex Buffer Offset Validation index(1) must have an existing buffer.`
-    if (buffer.get()) {
+    if (buffer.get() && usingVertexBuffer) {
         encoder->setVertexBufferOffset(offset, index);
     } else {
         bindVertex(encoder, offset, index, size_);

@@ -37,6 +37,7 @@ objc_library(
         "CoreLocation",
         "AppKit",
         "SystemConfiguration",
+        "Accelerate",
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -161,6 +162,7 @@ objc_library(
         "CoreGraphics",
         "CoreLocation",
         "QuartzCore",
+        "Accelerate",
     ],
     deps = [
         ":objc-headers",
@@ -271,6 +273,10 @@ objc_library(
         "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
+        "//platform/darwin:app/PluginProtocolExample.h",
+        "//platform/darwin:app/PluginProtocolExample.mm",
+        "//platform/darwin:app/StyleFilterExample.h",
+        "//platform/darwin:app/StyleFilterExample.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
         "//platform/ios:ios_app_srcs",

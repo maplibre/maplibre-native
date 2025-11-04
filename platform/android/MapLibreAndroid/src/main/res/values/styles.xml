@@ -42,5 +42,8 @@
     <item name="maplibre_pulsingLocationCircleAlpha">0.4</item>
     <item name="maplibre_pulsingLocationCircleInterpolator">decelerate</item>
 
+    <!-- Camera Animation -->
+    <item name="maplibre_concurrentCameraAnimation">false</item>
+
   </style>
 </resources>
