@@ -7,14 +7,14 @@ namespace gfx {
 
 class ScissorRect {
 public:
-    int32_t x, y;
-    uint32_t width, height;
+    int32_t x;
+    int32_t y;
+    uint32_t width;
+    uint32_t height;
 
-    bool operator==(const ScissorRect& other) const {
-        return x == other.x && y == other.y && width == other.width && height == other.height;
-    }
+    bool operator==(const ScissorRect& other) const = default;
 
-    bool operator!=(const ScissorRect& other) const { return !(*this == other); }
+    bool operator!=(const ScissorRect& other) const = default;
 };
 
 } // namespace gfx
