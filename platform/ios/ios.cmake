@@ -7,7 +7,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-core
     PRIVATE
-        MapLibreNative::Base::Extras::filesystem
+        mbgl-vendor-filesystem
 )
 
 file(GLOB_RECURSE IOS_SDK_SOURCE_FILES
@@ -90,10 +90,6 @@ set_target_properties(ios-sdk-static PROPERTIES
 
 if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
-    target_compile_definitions(
-        ios-sdk-static
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
-    )
 endif()
 
 target_include_directories(

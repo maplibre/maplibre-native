@@ -150,6 +150,7 @@ In style JSON    | In the SDK
 `tolerance`      | `MLNShapeSourceOptionSimplificationTolerance`
 `cluster`        | `MLNShapeSourceOptionClustered`
 `clusterRadius`  | `MLNShapeSourceOptionClusterRadius`
+`clusterMinPoints`  | `MLNShapeSourceOptionClusterMinPoints`
 `clusterMaxZoom` | `MLNShapeSourceOptionMaximumZoomLevelForClustering`
 `lineMetrics`    | `MLNShapeSourceOptionLineDistanceMetrics`
 

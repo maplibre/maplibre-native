@@ -1,4 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 ICU_FLAGS = [
@@ -16,9 +17,7 @@ cc_library(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     linkopts = [
         "-lGL",
-        "-lglfw",
         "-lX11",
-        "-lsqlite3",
         "-luv",
         "-lz",
         "-lcurl",
@@ -31,6 +30,26 @@ cc_library(
         "//:mbgl-core",
         "//platform/default:mbgl-default",
     ],
+)
+
+cc_static_library(
+    name = "maplibre-linux-static",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":impl",
+    ],
+)
+
+genrule(
+    name = "maplibre-linux-amalgam",
+    srcs = [":maplibre-linux-static"],
+    outs = ["libmaplibre-linux-amalgam.a"],
+    cmd_bash = """(
+        armerge --keep-symbols "^.+" --output $(OUTS) $(BINDIR)/platform/linux/libmaplibre-linux-static.a \
+            $$(pkg-config --variable=libdir icu-uc)/libicuuc.a \
+            $$(pkg-config --variable=libdir icu-uc)/libicudata.a \
+            $$(pkg-config --variable=libdir icu-i18n)/libicui18n.a
+    )""",
 )
 
 sh_binary(

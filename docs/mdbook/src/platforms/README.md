@@ -28,15 +28,16 @@ Originally the project only supported OpenGL 2.0. In 2023, the [renderer was mod
 
 What platforms support which rendering backend can be found below.
 
-| Platform | OpenGL ES 3.0 | Vulkan 1.0 | Metal |
-|---|---|---|---|
-| Android | ✅ | ✅ | ❌ |
-| iOS | ❌ | ❌ | ✅ |
-| Linux | ✅ | ✅ | ❌ |
-| Windows | ✅ | ❌ | ❌ |
-| macOS | ❌ | ✅ | ✅[^1] |
-| Node.js | ✅ | ❌ | ✅ [^2] |
-| Qt | ✅ | ❌ | ❌ |
+
+| Platform | OpenGL ES 3.0  | Vulkan 1.0 | Metal  | WebGPU  |
+| -------- | -------------- | ---------- | ------ | ------- |
+| Android  | ✅             | ✅          | ❌     | ❌      |
+| iOS      | ❌             | ❌          | ✅     | ❌      |
+| Linux    | ✅             | ✅          | ❌     | ✅      |
+| Windows  | ✅             | ❌          | ❌     | ❓      |
+| macOS    | ❌             | ✅          | ✅[^1] | ✅      |
+| Node.js  | ✅             | ❌          | ✅[^2] | ❌      |
+| Qt       | ✅             | ❌          | ❌     | ❌      |
 
 [^1]: Requires MoltenVK. Only available when built via CMake.
 [^2]: Issue reported, see [#2928](https://github.com/maplibre/maplibre-native/issues/2928).

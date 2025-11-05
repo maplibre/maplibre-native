@@ -12,6 +12,7 @@
 /cmake-build-debug
 /platform/android/build
 /platform/android/MapLibreAndroid/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
+/platform/android/MapLibreAndroid/android-binaries-*.zip
 *.code-workspace
 
 local.properties
@@ -35,6 +36,7 @@ compile_commands.json
 node_modules
 .cxx
 .env
+vendor/dawn/
 
 # Node binaries.
 /lib

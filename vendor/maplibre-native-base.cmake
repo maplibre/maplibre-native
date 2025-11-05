@@ -3,42 +3,6 @@ if(NOT TARGET maplibre-native)
 endif()
 
 set_target_properties(
-    maplibre-native-base-extras-kdbush.hpp
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "kdbush.hpp"
-        INTERFACE_MAPLIBRE_URL "https://github.com/mourner/kdbush.hpp"
-        INTERFACE_MAPLIBRE_AUTHOR "Vladimir Agafonkin"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/kdbush.hpp/LICENSE
-)
-
-set_target_properties(
-    maplibre-native-base-extras-expected-lite
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "expected-lite"
-        INTERFACE_MAPLIBRE_URL "https://github.com/martinmoene/expected-lite"
-        INTERFACE_MAPLIBRE_AUTHOR "Martin Moene"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/expected-lite/LICENSE.txt
-)
-
-set_target_properties(
-    maplibre-native-base-extras-filesystem
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "filesystem"
-        INTERFACE_MAPLIBRE_URL "https://github.com/gulrak/filesystem"
-        INTERFACE_MAPLIBRE_AUTHOR "Steffen Schümann"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/filesystem/LICENSE.txt
-)
-
-set_target_properties(
-    maplibre-native-base-supercluster.hpp
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "supercluster.hpp"
-        INTERFACE_MAPLIBRE_URL "https://github.com/mapbox/supercluster.hpp"
-        INTERFACE_MAPLIBRE_AUTHOR "Mapbox"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/supercluster.hpp/LICENSE
-)
-
-set_target_properties(
     maplibre-native-base-shelf-pack-cpp
     PROPERTIES
         INTERFACE_MAPLIBRE_NAME "shelf-pack-cpp"
@@ -56,14 +20,7 @@ set_target_properties(
         INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/deps/geojson-vt-cpp/LICENSE
 )
 
-set_target_properties(
-    maplibre-native-base-extras-rapidjson
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "RapidJSON"
-        INTERFACE_MAPLIBRE_URL "https://rapidjson.org"
-        INTERFACE_MAPLIBRE_AUTHOR "THL A29 Limited, a Tencent company, and Milo Yip"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/rapidjson/license.txt
-)
+
 
 set_target_properties(
     maplibre-native-base-geojson.hpp

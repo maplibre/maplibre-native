@@ -290,9 +290,6 @@ const double MLNMinimumZoomLevelForUserTracking = 10.5;
 /// Initial zoom level when entering user tracking mode from a low zoom level.
 const double MLNDefaultZoomLevelForUserTracking = 14.0;
 
-/// Tolerance for snapping to true north, measured in degrees in either direction.
-const CLLocationDirection MLNToleranceForSnappingToNorth = 7;
-
 /// Distance threshold to stop the camera while animating.
 const CLLocationDistance MLNDistanceThresholdForCameraPause = 500;
 
@@ -782,6 +779,10 @@ public:
         NSStringFromClass(self.class));
     });
 
+    _showsLogoView = YES;
+    _showsCompassView = YES;
+    _showsAttributionButton = YES;
+
     // setup logo
     //
     UIImage *logo = [UIImage mgl_resourceImageNamed:@"maplibre-logo-stroke-gray"];
@@ -790,6 +791,7 @@ public:
     _logoView.accessibilityLabel = NSLocalizedStringWithDefaultValue(@"LOGO_A11Y_LABEL", nil, nil, @"Mapbox", @"Accessibility label");
     _logoView.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_logoView];
+    _logoView.hidden = !_showsLogoView;
     _logoViewConstraints = [NSMutableArray array];
     _logoViewPosition = MLNOrnamentPositionBottomLeft;
     _logoViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -802,6 +804,7 @@ public:
     [_attributionButton addTarget:self action:@selector(showAttribution:) forControlEvents:UIControlEventTouchUpInside];
     _attributionButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_attributionButton];
+    _attributionButton.hidden = !_showsAttributionButton;
     _attributionButtonConstraints = [NSMutableArray array];
 
     UILongPressGestureRecognizer *attributionLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(showAttribution:)];
@@ -813,6 +816,7 @@ public:
     //
     _compassView = [MLNCompassButton compassButtonWithMapView:self];
     [self addSubview:_compassView];
+    _compassView.hidden = !_showsCompassView;
     _compassViewConstraints = [NSMutableArray array];
     _compassViewPosition = MLNOrnamentPositionTopRight;
     _compassViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -861,6 +865,7 @@ public:
     _pinch.delegate = self;
     [self addGestureRecognizer:_pinch];
     _zoomEnabled = YES;
+    _quickZoomReversed = NO;
 
 #if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
     if (isM1Simulator) {
@@ -875,6 +880,7 @@ public:
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
     _rotationThresholdWhileZooming = 3;
+    _toleranceForSnappingToNorth = 7;
 
     _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
     _doubleTap.numberOfTapsRequired = 2;
@@ -950,6 +956,8 @@ public:
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
 
     _shouldRequestAuthorizationToUseLocationServices = YES;
+
+    _dynamicNavigationCameraAnimationDuration = NO;
 }
 
 - (mbgl::Size)size
@@ -2667,6 +2675,8 @@ public:
     {
         CGFloat distance = [quickZoom locationInView:quickZoom.view].y - self.quickZoomStart;
 
+        if (self.isQuickZoomReversed) distance = - distance;
+
         CGFloat newZoom = MAX(log2f(self.scale) + (distance / 75), *self.mbglMap.getBounds().minZoom);
 
         if ([self zoomLevel] == newZoom) return;
@@ -3183,6 +3193,12 @@ static void *windowScreenContext = &windowScreenContext;
     self.twoFingerTap.enabled = zoomEnabled;
 }
 
+- (void)setQuickZoomReversed:(BOOL)quickZoomReversed
+{
+    MLNLogDebug(@"Setting quickZoomReversed: %@", MLNStringFromBOOL(quickZoomReversed));
+    _quickZoomReversed = quickZoomReversed;
+}
+
 - (void)setScrollEnabled:(BOOL)scrollEnabled
 {
     MLNLogDebug(@"Setting scrollEnabled: %@", MLNStringFromBOOL(scrollEnabled));
@@ -3214,6 +3230,27 @@ static void *windowScreenContext = &windowScreenContext;
     {
         [self updateScaleBar];
     }
+}
+
+- (void)setShowsLogoView:(BOOL)showsLogoView
+{
+    MLNLogDebug(@"Setting showsLogoView: %@", MLNStringFromBOOL(showsLogoView));
+    _showsLogoView = showsLogoView;
+    self.logoView.hidden = !showsLogoView;
+}
+
+- (void)setShowsCompassView:(BOOL)showsCompassView
+{
+    MLNLogDebug(@"Setting showsCompassView: %@", MLNStringFromBOOL(showsCompassView));
+    _showsCompassView = showsCompassView;
+    self.compassView.hidden = !showsCompassView;
+}
+
+- (void)setShowsAttributionButton:(BOOL)showsAttributionButton
+{
+    MLNLogDebug(@"Setting showsAttributionButton: %@", MLNStringFromBOOL(showsAttributionButton));
+    _showsAttributionButton = showsAttributionButton;
+    self.attributionButton.hidden = !showsAttributionButton;
 }
 
 - (void)setScaleBarShouldShowDarkStyles:(BOOL)scaleBarShouldShowDarkStyles {
@@ -5973,9 +6010,18 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: - User Location -
 
+
+- (void)disableLocationManager
+{
+    [_locationManager stopUpdatingLocation];
+    [_locationManager stopUpdatingHeading];
+    _locationManager = nil;
+}
+
 - (void)setLocationManager:(nullable id<MLNLocationManager>)locationManager
 {
     MLNLogDebug(@"Setting locationManager: %@", locationManager);
+
     if (!locationManager) {
         locationManager = [[MLNCLLocationManager alloc] init];
     }
@@ -6309,14 +6355,18 @@ static void *windowScreenContext = &windowScreenContext;
         }
     }
 
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
-
-    NSTimeInterval duration = MLNAnimationDuration;
+    NSTimeInterval userLocationDuration = MLNAnimationDuration;
     if (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))
     {
-        duration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
+        userLocationDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
     }
-    [self updateUserLocationAnnotationViewAnimatedWithDuration:duration];
+    [self updateUserLocationAnnotationViewAnimatedWithDuration:userLocationDuration];
+
+    NSTimeInterval cameraDuration = MLNUserLocationAnimationDuration;
+    if (self.dynamicNavigationCameraAnimationDuration && oldLocation) {
+        cameraDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
+    }
+    [self didUpdateLocationWithUserTrackingDuration:cameraDuration completionHandler:completion];
 
     if (self.userTrackingMode == MLNUserTrackingModeNone &&
         self.userLocationAnnotationView.accessibilityElementIsFocused &&
@@ -6328,10 +6378,16 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
 {
+    [self didUpdateLocationWithUserTrackingDuration:animated ? MLNUserLocationAnimationDuration : 0 completionHandler:completion];
+}
+
+- (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
+{
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
         || ! CLLocationCoordinate2DIsValid(location.coordinate)
-        || self.userTrackingMode == MLNUserTrackingModeNone)
+        || self.userTrackingMode == MLNUserTrackingModeNone
+        || self.userTrackingState == MLNUserTrackingStateBegan)
     {
         if (completion)
         {
@@ -6360,31 +6416,31 @@ static void *windowScreenContext = &windowScreenContext;
         if (self.userTrackingState != MLNUserTrackingStateBegan)
         {
             // Keep both the user and the destination in view.
-            [self didUpdateLocationWithTargetAnimated:animated completionHandler:completion];
+            [self didUpdateLocationWithTargetAnimated:duration != 0 completionHandler:completion];
         }
     }
     else if (self.userTrackingState == MLNUserTrackingStatePossible)
     {
         // The first location update is often a great distance away from the
         // current viewport, so fly there to provide additional context.
-        [self didUpdateLocationSignificantlyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationSignificantlyAnimated:duration != 0 completionHandler:completion];
     }
     else if (self.userTrackingState == MLNUserTrackingStateChanged)
     {
         // Subsequent updates get a more subtle animation.
-        [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationIncrementallyDuration:duration completionHandler:completion];
     }
     [self unrotateIfNeededAnimated:YES];
 }
 
 /// Changes the viewport based on an incremental location update.
-- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+- (void)didUpdateLocationIncrementallyDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
 {
     [self _setCenterCoordinate:self.userLocation.location.coordinate
                    edgePadding:self.edgePaddingForFollowing
                      zoomLevel:self.zoomLevel
                      direction:self.directionByFollowingWithCourse
-                      duration:animated ? MLNUserLocationAnimationDuration : 0
+                      duration:duration
        animationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]
              completionHandler:completion];
 }
@@ -6782,8 +6838,8 @@ static void *windowScreenContext = &windowScreenContext;
         [self unrotateIfNeededAnimated:YES];
 
         // Snap to north.
-        if ((self.direction < MLNToleranceForSnappingToNorth
-             || self.direction > 360 - MLNToleranceForSnappingToNorth)
+        if ((self.direction < self.toleranceForSnappingToNorth
+             || self.direction > 360 - self.toleranceForSnappingToNorth)
             && self.userTrackingMode != MLNUserTrackingModeFollowWithHeading
             && self.userTrackingMode != MLNUserTrackingModeFollowWithCourse)
         {
@@ -7740,11 +7796,8 @@ static void *windowScreenContext = &windowScreenContext;
             drawingContext.direction = mbgl::util::rad2deg(-state.getBearing());
             drawingContext.pitch = state.getPitch();
             drawingContext.fieldOfView = state.getFieldOfView();
-            mbgl::mat4 projMatrix;
-            state.getProjMatrix(projMatrix);
-            drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
-
-            //NSLog(@"Rendering");
+            drawingContext.projectionMatrix = MLNMatrix4Make(paintParameters.transformParams.projMatrix);
+            drawingContext.nearClippedProjMatrix = MLNMatrix4Make(paintParameters.transformParams.nearClippedProjMatrix);
 
             // Call update with the scene state variables
             [weakPlugInLayer onUpdateLayer:drawingContext];

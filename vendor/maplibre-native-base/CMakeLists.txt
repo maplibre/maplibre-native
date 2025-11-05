@@ -2,7 +2,7 @@ if(TARGET maplibre-native-base)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(MAPBOX_BASE LANGUAGES CXX C)
 
 option(MAPBOX_BASE_BUILD_TESTING "Bypass project target check and enforce building tests" OFF)
@@ -21,7 +21,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/extras)
 add_subdirectory(${PROJECT_SOURCE_DIR}/include)
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps)
 

@@ -26,7 +26,7 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-#if MLN_RENDER_BACKEND_METAL || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
 #define MLN_ENABLE_POLYLINE_DRAWABLES 1
 #else
 #define MLN_ENABLE_POLYLINE_DRAWABLES 0
@@ -348,7 +348,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
                 return drawable.getName() == drawableName &&
-                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                       !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
             });
         }
 
@@ -404,7 +404,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
             return drawable.getName() == drawableName &&
-                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                   !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
         });
 
         // add new drawables and update existing ones

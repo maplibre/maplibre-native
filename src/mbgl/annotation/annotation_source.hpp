@@ -5,6 +5,7 @@
 
 namespace mbgl {
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class AnnotationSource final : public style::Source {
 public:
     AnnotationSource();

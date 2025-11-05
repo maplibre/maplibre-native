@@ -9,11 +9,12 @@ import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CameraPositionTest {
+class CameraPositionTest : BaseTest() {
     @Test
     fun testSanity() {
         val latLng = LatLng(1.0, 2.0)

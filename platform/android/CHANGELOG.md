@@ -1,5 +1,80 @@
 # Changelog MapLibre Native for Android
 
+## 12.0.1
+
+### ✨ Features and improvements
+
+- Make Android snapshotter support hiding the attribution ([#3878](https://github.com/maplibre/maplibre-native/pull/3878)).
+
+### 🐞 Bug fixes
+
+- Handle style builder exceptions ([#3855](https://github.com/maplibre/maplibre-native/pull/3855)).
+- Add query annotation timeout ([#3874](https://github.com/maplibre/maplibre-native/pull/3874)).
+
+## 12.0.0
+
+### ✨ Features and improvements
+
+- 💥 Breaking: Bump minimum Android SDK version from 21 to 23 ([#3849](https://github.com/maplibre/maplibre-native/pull/3849)).
+
+### 🐞 Bug fixes
+
+- Manually free bound resources ([#3831](https://github.com/maplibre/maplibre-native/pull/3831)).
+- Fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+- Fix crash in camera position ([#3847](https://github.com/maplibre/maplibre-native/pull/3847)).
+
+## 11.13.5
+
+### ✨ Features and improvements
+
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+
+### 🐞 Bug fixes
+
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+
+- Fix onSprite call on bad references ([#3805](https://github.com/maplibre/maplibre-native/pull/3805)).
+
+## 11.13.1
+
+### ✨ Features and improvements
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+
+### 🐞 Bug fixes
+
+- Fix Android backend cleanup ([#3681](https://github.com/maplibre/maplibre-native/pull/3681)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
+## 11.13.0
+
+### ✨ Features and improvements
+
+- Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
+
+## 11.12.1
+
+### ✨ Features and improvements
+
+- texture2d - getVulkanImage and support for Texture2DUsage::Attachment ([#3632](https://github.com/maplibre/maplibre-native/pull/3632)).
+
+### 🐞 Bug fixes
+
+- Fix dashed line issue when style change ([#3675](https://github.com/maplibre/maplibre-native/pull/3675)).
+
+## 11.12.1
+
+### 🐞 Bug fixes
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
+## 11.12.0
+
+### ✨ Features and improvements
+
+- feat: add clusterMinPoints option Android and iOS ([#3601](https://github.com/maplibre/maplibre-native/pull/3601)).
+
 ## 11.11.0
 
 ### ✨ Features and improvements

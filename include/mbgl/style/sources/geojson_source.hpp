@@ -29,6 +29,7 @@ struct GeoJSONOptions {
     bool cluster = false;
     uint16_t clusterRadius = 50;
     uint8_t clusterMaxZoom = 17;
+    size_t clusterMinPoints = 2;
     using ClusterExpression = std::pair<std::shared_ptr<mbgl::style::expression::Expression>,
                                         std::shared_ptr<mbgl::style::expression::Expression>>;
     using ClusterProperties = std::map<std::string, ClusterExpression>;
@@ -53,6 +54,7 @@ public:
     virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
 };
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class GeoJSONSource final : public Source {
 public:
     GeoJSONSource(std::string id, Immutable<GeoJSONOptions> = GeoJSONOptions::defaultOptions());
@@ -80,6 +82,7 @@ protected:
 private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
+    std::atomic<uint64_t> requestGeneration{0};
     std::shared_ptr<Scheduler> sequencedScheduler;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`

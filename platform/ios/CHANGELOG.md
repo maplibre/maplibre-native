@@ -2,7 +2,61 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## main
+## 6.19.3
+
+- fix number-format/currency expression test for darwin ([#3900](https://github.com/maplibre/maplibre-native/pull/3900)).
+- Updates drawable size of metal view after it is attached to display hierarchy. ([#3903](https://github.com/maplibre/maplibre-native/pull/3903)).
+
+## 6.19.2
+
+- [metal] OffscreenTextureResource: fix compilation warnings ([#3727](https://github.com/maplibre/maplibre-native/pull/3727)).
+- Apply symbol shader changes from JS  for Metal, Vulkan, and OpenGL ([#3873](https://github.com/maplibre/maplibre-native/pull/3873)).
+- Fixes wrong map view dimension on CarPlay. ([#3890](https://github.com/maplibre/maplibre-native/pull/3890)).
+
+## 6.19.1
+
+- Tweak layer depth distribution ([#3738](https://github.com/maplibre/maplibre-native/pull/3738)).
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+- Add extra UI settings and location manager settings. ([#3817](https://github.com/maplibre/maplibre-native/pull/3817)).
+- fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+
+## 6.18.1
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+- Fix UB in TaggedString constructor ([#3748](https://github.com/maplibre/maplibre-native/pull/3748)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
+## 6.18.0
+
+- add the ability to have ios camera animation durations dynamic during navigation ([#3568](https://github.com/maplibre/maplibre-native/pull/3568)).
+- Fix dashed line issue when style change ([#3675](https://github.com/maplibre/maplibre-native/pull/3675)).
+- Add rendering info reports to `ActionJournal` ([#3545](https://github.com/maplibre/maplibre-native/pull/3545)).
+- Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
+
+## 6.17.1
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
+## 6.17.0
+
+- Fix render pipeline state bug ([#3598](https://github.com/maplibre/maplibre-native/pull/3598)).
+- Added the nearClippedProjMatrix to the drawing context ([#3599](https://github.com/maplibre/maplibre-native/pull/3599)).
+- feat: add clusterMinPoints option Android and iOS ([#3601](https://github.com/maplibre/maplibre-native/pull/3601)).
+
+## 6.16.0
+
+- Add run-time plug-in layer support to iOS ([#3430](https://github.com/maplibre/maplibre-native/pull/3430)).
+  Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/pluginlayers
+
+- Fix nullability of attributionHtmlString ([#3551](https://github.com/maplibre/maplibre-native/pull/3551)).
+- Fix the symbol blink issue by only placing the symbol in current level ([#3534](https://github.com/maplibre/maplibre-native/pull/3534)).
+- add functionality to metal render pass to cache winding order and cull mode ([#3566](https://github.com/maplibre/maplibre-native/pull/3566)).
+- Add polylines with geographic coordinates for custom drawables ([#3547](https://github.com/maplibre/maplibre-native/pull/3547)).
+- Reduce duplicate GPU buffer uploads ([#3577](https://github.com/maplibre/maplibre-native/pull/3577)).
+- Symbol Shader Performance Improvments ([#3576](https://github.com/maplibre/maplibre-native/pull/3576)).
+- Add an option to reverse the direction of the quick zoom gesture ([#3587](https://github.com/maplibre/maplibre-native/pull/3587)).
 
 ## 6.15.0
 

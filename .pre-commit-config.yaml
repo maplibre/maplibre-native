@@ -19,14 +19,14 @@ repos:
         exclude: '(platform/android/MapLibreAndroid/src/main/java/org/maplibre/android/(location/LocationIndicatorLayer|style/layers/PropertyFactory)\.java$)|(platform/windows/vendor/.*)'
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.5
+    rev: v20.1.8
     hooks:
       - id: clang-format
         files: '.*\.(hpp|cpp|h)'
         exclude: 'vendor/.*'
 
   - repo: https://github.com/keith/pre-commit-buildifier
-    rev: 8.0.3
+    rev: 8.2.0
     hooks:
       - id: buildifier
 
@@ -37,7 +37,7 @@ repos:
         additional_dependencies: [ shellcheck-py ]
 
   - repo: https://github.com/nicklockwood/SwiftFormat
-    rev: "0.56.2"
+    rev: "0.57.2"
     hooks:
       - id: swiftformat
         args: [ --swiftversion, "5.8" ]

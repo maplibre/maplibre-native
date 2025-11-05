@@ -14,7 +14,7 @@ class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
         return options
     }
 
-    override public func setUp() {
+    override func setUp() {
         super.setUp()
         MLNSettings.use(MLNWellKnownTileServer.mapTiler)
     }

@@ -5,7 +5,6 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
 
-#include <iostream>
 #include <string>
 
 namespace mbgl {
@@ -126,7 +125,7 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
 
         } else if (auto s = v.value().getString()) {
             output.append("\"");
-            output.append(s->c_str());
+            output.append(*s);
             output.append("\"");
 
         } else if (auto d = v.value().getDouble()) {

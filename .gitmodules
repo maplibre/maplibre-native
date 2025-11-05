@@ -37,6 +37,12 @@
 [submodule "platform/windows/vendor/vcpkg"]
 	path = platform/windows/vendor/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "vendor/harfbuzzFreetype/freetype"]
+	path = vendor/freetype
+  url=https://github.com/freetype/freetype.git
+[submodule "vendor/harfbuzzFreetype/harfbuzz"]
+	path = vendor/harfbuzz
+  url=https://github.com/harfbuzz/harfbuzz
 [submodule "vendor/boost"]
 	path = vendor/boost
 	url = https://github.com/maplibre/maplibre-gl-native-boost.git
@@ -55,17 +61,14 @@
 [submodule "vendor/PMTiles"]
 	path = vendor/PMTiles
 	url = https://github.com/protomaps/PMTiles.git
-[submodule "vendor/maplibre-native-base/extras/args"]
-	path = vendor/maplibre-native-base/extras/args
+[submodule "vendor/args"]
+	path = vendor/args
 	url = https://github.com/Taywee/args.git
-[submodule "vendor/maplibre-native-base/extras/expected-lite"]
-	path = vendor/maplibre-native-base/extras/expected-lite
+[submodule "vendor/expected-lite"]
+	path = vendor/expected-lite
 	url = https://github.com/martinmoene/expected-lite.git
-[submodule "vendor/maplibre-native-base/extras/kdbush.hpp"]
-	path = vendor/maplibre-native-base/extras/kdbush.hpp
-	url = https://github.com/mourner/kdbush.hpp.git
-[submodule "vendor/maplibre-native-base/extras/rapidjson"]
-	path = vendor/maplibre-native-base/extras/rapidjson
+[submodule "vendor/rapidjson"]
+	path = vendor/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
 [submodule "vendor/maplibre-native-base/deps/cheap-ruler-cpp"]
 	path = vendor/maplibre-native-base/deps/cheap-ruler-cpp
@@ -73,9 +76,6 @@
 [submodule "vendor/maplibre-native-base/deps/geojson-vt-cpp"]
 	path = vendor/maplibre-native-base/deps/geojson-vt-cpp
 	url = https://github.com/mapbox/geojson-vt-cpp.git
-[submodule "vendor/maplibre-native-base/deps/geojson-cpp"]
-	path = vendor/maplibre-native-base/deps/geojson-cpp
-	url = https://github.com/mapbox/geojson-cpp.git
 [submodule "vendor/maplibre-native-base/deps/geometry.hpp"]
 	path = vendor/maplibre-native-base/deps/geometry.hpp
 	url = https://github.com/mapbox/geometry.hpp.git
@@ -88,8 +88,8 @@
 [submodule "vendor/maplibre-native-base/deps/shelf-pack-cpp"]
 	path = vendor/maplibre-native-base/deps/shelf-pack-cpp
 	url = https://github.com/mapbox/shelf-pack-cpp.git
-[submodule "vendor/maplibre-native-base/deps/supercluster.hpp"]
-	path = vendor/maplibre-native-base/deps/supercluster.hpp
+[submodule "vendor/supercluster"]
+	path = vendor/supercluster
 	url = https://github.com/mapbox/supercluster.hpp.git
 [submodule "vendor/maplibre-native-base/deps/variant"]
 	path = vendor/maplibre-native-base/deps/variant
@@ -97,6 +97,19 @@
 [submodule "vendor/maplibre-native-base/deps/geojson.hpp"]
 	path = vendor/maplibre-native-base/deps/geojson.hpp
 	url = https://github.com/mapbox/geojson-cpp.git
-[submodule "vendor/maplibre-native-base/extras/filesystem"]
-	path = vendor/maplibre-native-base/extras/filesystem
+[submodule "vendor/filesystem"]
+	path = vendor/filesystem
 	url = https://github.com/gulrak/filesystem.git
+[submodule "vendor/maplibre-tile-spec"]
+	path = vendor/maplibre-tile-spec
+	url = https://github.com/maplibre/maplibre-tile-spec.git
+	branch = cpp
+[submodule "vendor/kdbush.hpp"]
+	path = vendor/kdbush.hpp
+	url = https://github.com/mourner/kdbush.hpp.git
+[submodule "vendor/webgpu-cpp"]
+	path = vendor/webgpu-cpp
+	url = https://github.com/eliemichel/WebGPU-Cpp.git
+[submodule "vendor/wgpu-native"]
+	path = vendor/wgpu-native
+	url = https://github.com/gfx-rs/wgpu-native.git

@@ -25,6 +25,7 @@
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
+#include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
@@ -1612,6 +1613,82 @@ TEST(Map, ObserveShaderRegistration) {
     EXPECT_EQ(observedRegistry, false);
 }
 
+TEST(Map, ResourceError) {
+    MapTest<> test;
+    test.fileSource->glyphsResponse = [&](const Resource&) {
+        Response response;
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Server, "Font file Server failed");
+        return response;
+    };
+
+    test.map.getStyle().loadJSON(
+        R"(
+{
+  "version": 8,
+  "zoom": 0,
+  "center": [-14.41400, 39.09187],
+  "sources": {
+    "mapbox": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "ជនជាប់សង្ស័យ"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -14.4195556640625,
+                  39.091699613104595
+                ],
+                [
+                  102.3046875,
+                  39.36827914916014
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "fonts": "local://glyphs/{fontstack}/{language}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "lines-symbol",
+      "type": "symbol",
+      "source": "mapbox",
+      "layout": {
+        "text-field": "{name}",
+        "symbol-placement": "point",
+        "symbol-spacing": 150,
+        "text-allow-overlap": true,
+        "text-font": [ "abc" ],
+        "text-size": 24
+      }
+    }
+  ]
+})");
+    try {
+        test.frontend.render(test.map);
+    } catch (...) {
+        auto error = std::current_exception(); // captur
+        EXPECT_EQ(mbgl::util::toString(error), "Font file Server failed");
+    }
+}
+
 TEST(Map, StencilOverflow) {
     MapTest<> test;
 
@@ -1891,4 +1968,55 @@ TEST(BackgroundLayer, StyleUpdateZoomDependency) {
                      test.frontend.render(test.map).image,
                      0.0006,
                      0.1);
+}
+
+TEST(Map, LineLayerDepthDistribution) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    test.map.jumpTo(CameraOptions().withZoom(0.0).withPitch(45.0));
+
+    auto backgroundLayer = std::make_unique<BackgroundLayer>("Background");
+    backgroundLayer->setBackgroundColor(Color(1.0f, 1.0f, 0.0f, 1.0f));
+    test.map.getStyle().addLayer(std::move(backgroundLayer));
+
+    constexpr uint32_t layerCount = 1 << 11;
+    const std::vector<Color> colors = {Color::red(), Color::green(), Color::blue()};
+    const auto& bounds = test.map.latLngBoundsForCamera(test.map.getCameraOptions());
+
+    const auto getSource = [&](uint32_t index) {
+        FeatureCollection features;
+
+        mapbox::geojson::line_string geo;
+
+        double y = (bounds.north() - bounds.south()) * 0.95 / layerCount * (index + 1) / 2.0;
+        double x = (bounds.east() - bounds.west()) * 0.95 / layerCount * (index + 1) / 2.0;
+
+        geo.emplace_back(-x, y);
+        geo.emplace_back(x, y);
+        geo.emplace_back(x, -y);
+        geo.emplace_back(-x, -y);
+        geo.emplace_back(-x, y);
+
+        features.emplace_back(geo);
+
+        auto source = std::make_unique<GeoJSONSource>("GeoJSONSource_" + std::to_string(index));
+        source->setGeoJSON(features);
+
+        return source;
+    };
+
+    for (uint32_t i = 0; i < layerCount; ++i) {
+        // add one source per layer
+        test.map.getStyle().addSource(getSource(i));
+
+        auto layer = std::make_unique<LineLayer>("LineLayer" + std::to_string(i), "GeoJSONSource_" + std::to_string(i));
+        layer->setLineColor(colors[i % colors.size()]);
+
+        test.map.getStyle().addLayer(std::move(layer));
+    }
+
+    test::checkImage(
+        "test/fixtures/map/layer_depth_distribution/line", test.frontend.render(test.map).image, 0.0006, 0.1);
 }

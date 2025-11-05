@@ -35,7 +35,10 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
                              gfx::ContextObserver& observer)
     : ShaderProgramBase(),
       shaderName(name),
-      backend(backend_) {
+      backend(backend_),
+      context(static_cast<Context&>(backend.getContext())) {
+    pipelines = std::make_shared<std::unordered_map<std::size_t, vk::UniquePipeline>>();
+
     std::string defineStr = programParameters.getDefinesString() + "\n\n";
     for (const auto& define : additionalDefines) {
         defineStr += "#define " + define.first + " " + define.second + "\n";
@@ -46,7 +49,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         defineStr += "#define USE_SURFACE_TRANSFORM";
     }
 
-    observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+    observer.onPreCompileShader(shaderID, gfx::Backend::Type::Vulkan, defineStr);
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
@@ -58,8 +61,9 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         glslang::TShader glslShader(language);
 
         const auto preamble = defineStr + "\n" + prelude;
-        const char* shaderData = data.data();
-        const int shaderDataSize = static_cast<int>(data.size());
+        const std::string shaderStr = std::string("#version ") + std::to_string(defaultVersion) + "\n" + data.data();
+        const char* shaderData = shaderStr.data();
+        const int shaderDataSize = static_cast<int>(shaderStr.size());
 
         glslShader.setPreamble(preamble.c_str());
         glslShader.setStringsWithLengths(&shaderData, &shaderDataSize, 1);
@@ -102,22 +106,29 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     if (vertexSpirv.empty() || fragmentSpirv.empty()) return;
 
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
     vertexShader = device->createShaderModuleUnique(
-        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), vertexSpirv));
+        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), vertexSpirv), nullptr, dispatcher);
     fragmentShader = device->createShaderModuleUnique(
-        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), fragmentSpirv));
+        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), fragmentSpirv), nullptr, dispatcher);
 
     backend.setDebugName(vertexShader.get(), shaderName + ".vert");
     backend.setDebugName(fragmentShader.get(), shaderName + ".frag");
 
-    observer.onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+    observer.onPostCompileShader(shaderID, gfx::Backend::Type::Vulkan, defineStr);
 }
 
-ShaderProgram::~ShaderProgram() noexcept = default;
+ShaderProgram::~ShaderProgram() noexcept {
+    if (pipelines->empty()) {
+        return;
+    }
+
+    context.enqueueDeletion([ptr = std::move(pipelines)](auto&) mutable { ptr.reset(); });
+}
 
 const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelineInfo) {
-    auto& pipeline = pipelines[pipelineInfo.hash()];
+    auto& pipeline = pipelines->operator[](pipelineInfo.hash());
     if (pipeline) return pipeline;
 
     const auto vertexInputState = vk::PipelineVertexInputStateCreateInfo()
@@ -194,7 +205,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();
-    auto& context = static_cast<Context&>(backend.getContext());
+    const auto& dispatcher = backend.getDispatcher();
     const auto& pipelineLayout = pipelineInfo.usePushConstants ? context.getPushConstantPipelineLayout()
                                                                : context.getGeneralPipelineLayout();
 
@@ -222,7 +233,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                         .setLayout(pipelineLayout.get())
                                         .setRenderPass(pipelineInfo.renderPass);
 
-    pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value);
+    pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo, nullptr, dispatcher).value);
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");
 
     return pipeline;

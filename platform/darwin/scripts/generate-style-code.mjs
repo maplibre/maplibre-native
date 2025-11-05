@@ -1,4 +1,4 @@
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import path from "node:path";
 import _ from "lodash";
 import colorParser from "csscolorparser";
@@ -29,16 +29,16 @@ function setupGlobalEjsHelpers() {
   setupGlobalEjsHelpers();
 
 // Parse command line
-const args = (() => {
-    const parser = new ArgumentParser({
-        description: "MapLibre Shader Tools"
-    });
-    parser.add_argument("--out", "--o", {
-        help: "Directory root to write generated code.",
-        required: false
-    });
-    return parser.parse_args();
-})();
+const args = parseArgs({
+    options: {
+        out: {
+            type: 'string',
+            short: 'o',
+            description: 'Directory root to write generated code.'
+        }
+    },
+    allowPositionals: false
+});
 
 const prefix = 'MLN';
 const suffix = 'StyleLayer';

@@ -4,6 +4,7 @@
 #include <mbgl/gfx/context.hpp>
 
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+#define VULKAN_HPP_NO_DEFAULT_DISPATCHER
 
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -39,6 +40,7 @@ public:
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
     void init();
 
+    const vk::DispatchLoaderDynamic& getDispatcher() const { return dispatcher; }
     const vk::UniqueInstance& getInstance() const { return instance; }
     const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; }
     const vk::UniqueDevice& getDevice() const { return device; }
@@ -52,7 +54,8 @@ public:
     int32_t getGraphicsQueueIndex() const { return graphicsQueueIndex; }
     int32_t getPresentQueueIndex() const { return presentQueueIndex; }
 
-    template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
+    template <typename T>
+        requires vk::isVulkanHandleType<T>::value
     void setDebugName([[maybe_unused]] const T& object, [[maybe_unused]] const std::string& name) const {
 #ifdef ENABLE_VULKAN_VALIDATION
         if (!debugUtilsEnabled) return;
@@ -60,7 +63,8 @@ public:
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
                                                .setObjectType(object.objectType)
                                                .setObjectHandle(handle)
-                                               .setPObjectName(name.c_str()));
+                                               .setPObjectName(name.c_str()),
+                                           dispatcher);
 #endif
     }
 
@@ -81,19 +85,21 @@ protected:
     virtual std::vector<const char*> getDeviceExtensions();
     std::vector<const char*> getDebugExtensions();
 
-    void initInstance();
-    void initDebug();
-    void initSurface();
-    void initDevice();
-    void initAllocator();
-    void initSwapchain();
-    void initCommandPool();
-    void initFrameCapture();
+    virtual void initInstance();
+    virtual void initDebug();
+    virtual void initSurface();
+    virtual void initDevice();
+    virtual void initAllocator();
+    virtual void initSwapchain();
+    virtual void initCommandPool();
+    virtual void initFrameCapture();
 
-    void destroyResources();
+    virtual void destroyResources();
 
 protected:
     vk::DynamicLoader dynamicLoader;
+    vk::DispatchLoaderDynamic dispatcher;
+
     vk::UniqueInstance instance;
     vk::UniqueDebugUtilsMessengerEXT debugUtilsCallback;
     vk::UniqueDebugReportCallbackEXT debugReportCallback;
@@ -115,6 +121,7 @@ protected:
     VmaAllocator allocator;
 
     bool debugUtilsEnabled{false};
+    bool usingSharedContext{false};
 };
 
 } // namespace vulkan
