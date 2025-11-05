@@ -14,7 +14,6 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include <optional>
 
 namespace mbgl {
 
@@ -45,7 +44,7 @@ public:
     void setLayers(const std::vector<Immutable<style::LayerProperties>>&) override;
     void setShowCollisionBoxes(bool showCollisionBoxes) override;
 
-    void onGlyphsAvailable(GlyphMap) override;
+    void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
 
     void getGlyphs(GlyphDependencies);

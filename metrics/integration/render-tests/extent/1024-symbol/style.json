@@ -2,7 +2,13 @@
   "version": 8,
   "metadata": {
     "test": {
-      "allowed": 0.003
+      "allowed": 0.003,
+      "source-replace": [
+        {
+          "replace": "maplibre",
+          "with": "mlt"
+        }
+      ]
     }
   },
   "center": [
@@ -19,6 +25,14 @@
       "tiles": [
         "local://tiles/extent1024-14-8802-5374.mvt"
       ]
+    },
+    "mlt": {
+      "type": "vector",
+      "maxzoom": 14,
+      "tiles": [
+        "local://tiles/extent1024-14-8802-5374.mlt"
+      ],
+      "encoding": "mlt"
     }
   },
   "layers": [

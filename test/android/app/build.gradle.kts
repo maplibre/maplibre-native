@@ -33,7 +33,8 @@ android {
         externalNativeBuild {
             cmake {
                 arguments += listOf(
-                    "-DANDROID_STL=c++_static"
+                    "-DANDROID_STL=c++_static",
+                    "-DMLN_WITH_OPENGL=ON"
                 )
                 targets += "mbgl-test-runner"
             }

@@ -40,11 +40,11 @@ public:
 
     UniformBufferArray(UniformBufferArray&& other) noexcept
         : gfx::UniformBufferArray(std::move(other)),
-          descriptorSetType(other.descriptorSetType),
-          descriptorStartIndex(other.descriptorStartIndex),
-          descriptorStorageCount(other.descriptorStorageCount),
-          descriptorUniformCount(other.descriptorUniformCount),
-          descriptorSet(std::move(other.descriptorSet)) {}
+          descriptorSetType(other.descriptorSetType),           // NOLINT(bugprone-use-after-move)
+          descriptorStartIndex(other.descriptorStartIndex),     // NOLINT(bugprone-use-after-move)
+          descriptorStorageCount(other.descriptorStorageCount), // NOLINT(bugprone-use-after-move)
+          descriptorUniformCount(other.descriptorUniformCount), // NOLINT(bugprone-use-after-move)
+          descriptorSet(std::move(other.descriptorSet)) {}      // NOLINT(bugprone-use-after-move)
 
     UniformBufferArray(const UniformBufferArray&) = delete;
 
@@ -58,7 +58,7 @@ public:
         return *this;
     }
 
-    ~UniformBufferArray() = default;
+    ~UniformBufferArray() override = default;
 
     const std::shared_ptr<gfx::UniformBuffer>& set(const size_t id,
                                                    std::shared_ptr<gfx::UniformBuffer> uniformBuffer) override;

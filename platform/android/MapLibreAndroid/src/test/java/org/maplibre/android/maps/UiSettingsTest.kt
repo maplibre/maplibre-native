@@ -11,10 +11,11 @@ import org.maplibre.android.maps.widgets.CompassView
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 
-class UiSettingsTest {
+class UiSettingsTest : BaseTest() {
     @InjectMocks
     var mapview = Mockito.mock(MapView::class.java)
 

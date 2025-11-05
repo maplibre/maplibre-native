@@ -39,7 +39,9 @@ BackgroundLayer::BackgroundLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-BackgroundLayer::~BackgroundLayer() = default;
+BackgroundLayer::~BackgroundLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const BackgroundLayer::Impl& BackgroundLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

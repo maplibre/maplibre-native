@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "6.1.0",
+  "version": "6.3.0-pre.1",
   "description": "Renders map tiles with MapLibre Native",
   "keywords": [
     "maplibre",
@@ -21,7 +21,7 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@mapbox/node-pre-gyp": "2.0.0",
+    "@acalcutt/node-pre-gyp": "2.0.1",
     "@acalcutt/node-pre-gyp-github": "2.0.1",
     "minimatch": "^9.0.4",
     "npm-run-all": "^4.1.5"
@@ -34,7 +34,6 @@
     "@octokit/plugin-retry": "^7.1.0",
     "@octokit/rest": "^20.1.0",
     "@types/node": "^22.9.0",
-    "argparse": "^2.0.1",
     "csscolorparser": "^1.0.3",
     "d3-queue": "3.0.7",
     "diff": "5.2.0",
@@ -55,7 +54,7 @@
     "xcode": "^3.0.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build=false",

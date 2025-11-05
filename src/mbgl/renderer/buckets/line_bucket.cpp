@@ -79,7 +79,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     const std::size_t first = [&coordinates, &len] {
         std::size_t i = 0;
         // If the line has duplicate vertices at the start, adjust index to remove them.
-        while (i < len - 1 && coordinates[i] == coordinates[i + 1]) {
+        while (i + 1 < len && coordinates[i] == coordinates[i + 1]) {
             i++;
         }
         return i;
@@ -102,17 +102,16 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         return;
     }
 
-    const auto& props = feature.getProperties();
-    auto clip_start_it = props.find("mapbox_clip_start");
-    auto clip_end_it = props.find("mapbox_clip_end");
-    if (clip_start_it != props.end() && clip_end_it != props.end()) {
+    const auto clip_start = feature.getValue("mapbox_clip_start");
+    const auto clip_end = feature.getValue("mapbox_clip_end");
+    if (clip_start && clip_end) {
         double total_length = 0.0;
         for (std::size_t i = first; i < len - 1; ++i) {
             total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
         }
 
         options.clipDistances = gfx::PolylineGeneratorDistances{
-            *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
+            *numericValue<double>(*clip_start), *numericValue<double>(*clip_end), total_length};
     }
 
     options.joinType = layout.evaluate<LineJoin>(zoom, feature, canonical);
@@ -134,10 +133,11 @@ bool LineBucket::hasData() const {
     return !segments.empty();
 }
 
+namespace {
 template <class Property>
-static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                 const std::string& id,
-                 const std::map<std::string, LineBinders>& paintPropertyBinders) {
+float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
+          const std::string& id,
+          const std::map<std::string, LineBinders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -145,6 +145,7 @@ static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
         return *it->second.statistics<Property>().max();
     }
 }
+} // namespace
 
 float LineBucket::getQueryRadius(const RenderLayer& layer) const {
     const auto& evaluated = getEvaluated<LineLayerProperties>(layer.evaluatedProperties);

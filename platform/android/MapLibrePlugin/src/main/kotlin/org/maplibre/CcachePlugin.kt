@@ -43,8 +43,8 @@ fun findCacheToolPath(): String? {
         }
     }
 
-    // Try to find ccache first, then fallback to sccache
-    return findCommandPath(ccacheCommand) ?: findCommandPath(sccacheCommand)
+    // Try to find sccache first, then fallback to ccache
+    return findCommandPath(sccacheCommand) ?: findCommandPath(ccacheCommand)
 }
 
 class CcachePlugin : Plugin<Project> {
