@@ -94,6 +94,9 @@ private:
     MTL::CullMode currentCullMode = MTL::CullModeNone;
     MTL::Winding currentWinding = MTL::WindingClockwise;
     MTL::ScissorRect currentScissorRect;
+
+    size_t width;
+    size_t height;
 };
 
 } // namespace mtl
