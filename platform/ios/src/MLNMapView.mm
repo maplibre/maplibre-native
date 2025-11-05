@@ -3524,7 +3524,12 @@ static void *windowScreenContext = &windowScreenContext;
 - (id)accessibilityElementForAnnotationWithTag:(MLNAnnotationTag)annotationTag
 {
     MLNAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %llu.", annotationTag);
-    MLNAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
+    auto annotationContextIt = _annotationContextsByAnnotationTag.find(annotationTag);
+    if (annotationContextIt == _annotationContextsByAnnotationTag.end()) {
+        return nil;
+    }
+
+    MLNAnnotationContext &annotationContext = annotationContextIt->second;
     id <MLNAnnotation> annotation = annotationContext.annotation;
 
     // Let the annotation view serve as its own accessibility element.
