@@ -192,8 +192,7 @@ public class Transform implements MapView.OnCameraDidChangeListener {
   void cancelTransitions() {
     MapLibreMap map = mapView.getMapLibreMap();
     if (map != null && map.getLocationComponent().isLocationComponentActivated()
-        && map.getLocationComponent().getLocationComponentOptions().concurrentCameraAnimationsEnabled()
-        && map.getLocationComponent().isLocationTracking()) {
+        && map.getLocationComponent().getLocationComponentOptions().concurrentCameraAnimationsEnabled()) {
       return;
     }
 

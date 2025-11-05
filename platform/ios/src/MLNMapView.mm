@@ -4484,7 +4484,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)cancelTransitions {
-    if (!_mbglMap || (self.enableConcurrentCameraAnimation && self.userTrackingMode != MLNUserTrackingModeNone && self.userTrackingMode != MLNUserTrackingModeFollow))
+    if (!_mbglMap || self.enableConcurrentCameraAnimation)
     {
         return;
     }
