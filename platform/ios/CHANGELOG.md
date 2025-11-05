@@ -2,6 +2,13 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.20.0
+
+- Add configurable threshold for rotate gesture snapping to north ([#3914](https://github.com/maplibre/maplibre-native/pull/3914)).
+- Add support for parsing MLT-format vector tile sources ([#3246](https://github.com/maplibre/maplibre-native/pull/3246)).
+- Adds some network delegate methods ([#3917](https://github.com/maplibre/maplibre-native/pull/3917)).
+- Add accessibility annotation check ([#3926](https://github.com/maplibre/maplibre-native/pull/3926)).
+
 ## 6.19.3
 
 - fix number-format/currency expression test for darwin ([#3900](https://github.com/maplibre/maplibre-native/pull/3900)).
