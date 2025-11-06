@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.18.2
+
+- Backport of https://github.com/maplibre/maplibre-native/pull/3926
+
 ## 6.18.1
 
 - Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
