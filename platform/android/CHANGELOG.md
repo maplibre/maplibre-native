@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 12.0.2
+
+### ✨ Features and improvements
+
+- Add listener to location update events from maplibre to the user
+
 ## 12.0.1
 
 ### ✨ Features and improvements
