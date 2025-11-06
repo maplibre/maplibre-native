@@ -1,172 +1,368 @@
-name: android-release
-
-on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - '*'
-  push:
-    branches:
-      - 'fix_android_release_ci_storage'
+name: android-ci
 
 permissions:
+  id-token: write         # needed for AWS
   contents: write
+  actions: write
+
+on:
+  push:
+    branches:
+      - main
+      - android-*.*.x
+    tags:
+      - "android-*"
+
+  pull_request:
+    branches:
+      - "*"
+
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # android-create-release:
-  #   runs-on: ubuntu-24.04
-  #   outputs:
-  #     version_tag: ${{ steps.prepare_release.outputs.version_tag }}
-  #   defaults:
-  #     run:
-  #       working-directory: platform/android
-  #   steps:
-  #     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
-
-  #     - name: Validate and set version
-  #       working-directory: .
-  #       run: .github/scripts/validate-version.sh platform/android/VERSION
-
-  #     - name: npm install
-  #       run: npm install --ignore-scripts
-
-      # # create github release
-      # - name: Prepare release
-      #   id: prepare_release
-      #   run: |
-      #     RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-      #     node scripts/release-notes.mjs ${{ env.version }} > "${RELEASE_NOTES_PATH}"
-      #     echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
-      #     echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
-      #   shell: bash
-
-      # - name: Check if version is pre-release
-      #   id: check_version
-      #   run: |
-      #     version="${{ env.version }}"
-      #     if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      #       echo "Valid semver: $version"
-      #       echo "prerelease=false" >> "$GITHUB_ENV"
-      #     else
-      #       echo "Invalid semver: $version"
-      #       echo "prerelease=true" >> "$GITHUB_ENV"
-      #     fi
-
-      # - name: Create tag if it does not exist
-      #   working-directory: .
-      #   run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
-
-      # - name: Create release (draft)
-      #   id: create_release
-      #   uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
-      #   with:
-      #     tag_name: ${{ steps.prepare_release.outputs.version_tag }}
-      #     name: ${{ steps.prepare_release.outputs.version_tag }}
-      #     body_path: ${{ steps.prepare_release.outputs.release_notes }}
-      #     draft: true
-      #     prerelease: ${{ env.prerelease }}
-
-  android-build-and-upload-release:
-    # needs: android-create-release
-    runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: platform/android
-    env:
-      JOBS: 8
-      IS_LOCAL_DEVELOPMENT: false
-    strategy:
-      matrix:
-        RENDERER:
-          - vulkan
-          - opengl
-        BUILDTYPE:
-          - Release
-          - Debug
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
-      - name: Free disk space
-        working-directory: .
-        run: .github/scripts/free_disk_space.sh
+      - name: Get all Android files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+        with:
+          files_yaml_from_source_file: .github/changed-files.yml
+
+  android-build:
+    runs-on: ubuntu-24.04
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [opengl, vulkan]
+    defaults:
+      run:
+        working-directory: platform/android
+    env:
+      BUILDTYPE: Debug
+      IS_LOCAL_DEVELOPMENT: false
+      MLN_ANDROID_STL: c++_static
+      # SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      # SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-android-ci
 
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
         with:
           node-version-file: ".nvmrc"
 
-      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
       - name: npm install
         run: npm install --ignore-scripts
+        working-directory: .
+        shell: bash
 
-      - name: Android nitpick
-        run: make run-android-nitpick
+      - name: run platform/android/scripts/generate-style-code.mjs
+        run: node platform/android/scripts/generate-style-code.mjs
+        working-directory: .
+        shell: bash
 
-      - name: Build package
-        run: RENDERER=${{ matrix.RENDERER }} BUILDTYPE=${{ matrix.BUILDTYPE }} make apackage
+      - run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install pre-commit
+        shell: bash
 
-      # - name: Save buildtype to GITHUB_ENV
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
+        continue-on-error: true # this can mean files are modified, which is not an error
+        shell: bash
+
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
+          rm -rf venv
+        shell: bash
+
+      # - if: env.SENTRY_DSN != ''
       #   run: |
-      #     buildtype=${{ matrix.BUILDTYPE }}
-      #     # lowercase
-      #     echo buildtype=${buildtype,,} > "$GITHUB_ENV"
+      #     echo "SENTRY_ORG=maplibre" >> "$GITHUB_ENV"
+      #     echo "SENTRY_PROJECT=maplibre-android" >> "$GITHUB_ENV"
 
-      # - name: Prepare release asset filenames (include tag)
-      #   run: |
-      #     version_tag='${{ needs.android-create-release.outputs.version_tag }}'
-      #     # AAR
-      #     aar_dir='MapLibreAndroid/build/outputs/aar'
-      #     mv "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar" \
-      #        "$aar_dir/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.aar"
-      #     # Debug symbols
-      #     mv "build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz" \
-      #        "build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.tar.gz"
+      - uses: infotroph/tree-is-clean@69d598a958e8cb8f3d0e3d52b5ebcd8684f2adc2 # v1.0.6
+        with:
+          check_untracked: true
 
-      # - name: Upload release assets (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
-      #   uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
-      #   with:
-      #     tag_name: ${{ needs.android-create-release.outputs.version_tag }}
-      #     fail_on_unmatched_files: true
-      #     draft: true
-      #     files: |
-      #       platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
-      #       platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
 
-      # - name: Publish to Github
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
-      #   run: |
-      #       renderer=${{ matrix.RENDERER }}
-      #       if [ "$renderer" = "opengl" ]; then
-      #         ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToGithubPackagesRepository
-      #       else
-      #         ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToGithubPackagesRepository
-      #       fi
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
 
-  # finilize-release:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - android-create-release
-  #     - android-build-and-upload-release
-  #   steps:
-  #     - name: Publish release (remove draft)
-  #       uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
-  #       with:
-  #         tag_name: ${{ needs.android-create-release.outputs.version_tag }}
-  #         name: ${{ needs.android-create-release.outputs.version_tag }}
-  #         draft: false
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
 
-  #     - run: npm install
-  #       working-directory: .
+      - name: Check code style
+        if: matrix.renderer == 'opengl'
+        run: make android-check
 
-  #     - name: Write release notifications
-  #       if: github.repository_owner == 'maplibre'
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
-  #       run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
-  #       working-directory: .
+      - name: Run Android unit tests
+        run: RENDERER=${{ matrix.renderer }} make run-android-unit-test
+
+      - name: Build libmaplibre.so for arm-v8
+        run: RENDERER=${{ matrix.renderer }} make android-lib-arm-v8
+
+      - name: Build API documentation
+        if: matrix.renderer == 'opengl'
+        run: ./gradlew dokkaGenerate
+
+      - name: Build Examples documentation
+        if: matrix.renderer == 'opengl'
+        run: make mkdocs-build
+
+      - name: Copy developer config with API key for UI tests
+        if: github.ref == 'refs/heads/main'
+        run: |
+          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
+          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
+          else
+            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
+          fi
+
+      - name: Build Benchmark, copy to platform/android
+        run: |
+          ./gradlew assemble${{ matrix.renderer }}Release assemble${{ matrix.renderer }}ReleaseAndroidTest -PtestBuildType=release -Pmaplibre.abis=arm64-v8a
+          cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk .
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk .
+
+      # https://developer.android.com/guide/practices/page-sizes
+      - name: Check alignment of .apk
+        run: |
+          unzip -o MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk -d /tmp/my_apk_out
+          scripts/check-alignment.sh /tmp/my_apk_out
+
+      - name: Create artifact for benchmark APKs
+        if: matrix.renderer == 'opengl'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          if-no-files-found: error
+          name: benchmarkAPKs
+          path: |
+            platform/android/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk
+            platform/android/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk
+
+      - if: github.event_name == 'pull_request' && matrix.renderer == 'opengl'
+        uses: ./.github/actions/save-pr-number
+
+      - name: Set renderer env var (OpenGL or Vulkan)
+        shell: bash
+        run: |
+          case "${{ matrix.renderer }}" in
+            opengl) echo "renderer=OpenGL" >> "$GITHUB_ENV" ;;
+            vulkan) echo "renderer=Vulkan" >> "$GITHUB_ENV" ;;
+            *) echo "::error ::Unknown renderer '${{ matrix.renderer }}'"; exit 1 ;;
+          esac
+
+      - name: Build Instrumentation Tests (${{ matrix.renderer }}), copy to platform/android
+        run: |
+          ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug -Pmaplibre.abis=arm64-v8a
+          cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug.apk InstrumentationTestApp${{ env.renderer }}.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug-androidTest.apk InstrumentationTests${{ env.renderer }}.apk
+
+      # - name: Install sentry-cli
+      #   if: env.SENTRY_DSN != ''
+      #   run: curl -sL https://sentry.io/get-cli/ | sh
+
+      # - name: Upload debug symbols to sentry
+      #   if: env.SENTRY_DSN != ''
+      #   run: sentry-cli debug-files upload MapLibreAndroidTestApp
+
+      - name: Upload android-ui-test-${{ matrix.renderer }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          if-no-files-found: error
+          name: android-ui-test-${{ matrix.renderer }}
+          path: |
+            platform/android/InstrumentationTestApp${{ env.renderer }}.apk
+            platform/android/InstrumentationTests${{ env.renderer }}.apk
+
+      - name: Show sccache stats
+        run: sccache --show-stats
+
+  android-build-cpp-test:
+    runs-on: ubuntu-24.04
+
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+
+    defaults:
+      run:
+        working-directory: test/android
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-android-ci
+
+      - name: Create data.zip in assets directory
+        run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
+        working-directory: .
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
+      - name: Build C++ Unit Tests App
+        run: |
+          ./gradlew assembleDebug assembleAndroidTest -Pmaplibre.abis=arm64-v8a
+          cp app/build/outputs/apk/debug/app-debug.apk .
+          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
+
+      - name: Store C++ Unit Tests .apk files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-cpp-tests
+          if-no-files-found: error
+          path: |
+            ./test/android/app-debug.apk
+            ./test/android/app-release-androidTest.apk
+
+  android-build-render-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [opengl, vulkan]
+
+    runs-on: ubuntu-24.04
+
+    needs:
+      - pre_job
+
+    if: needs.pre_job.outputs.should_skip != 'true'
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-android-ci
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
+      - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
+        uses: ./.github/actions/android-build-and-upload-render-test
+        with:
+          flavor: ${{ matrix.flavor }}
+
+  android-ci-result:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    needs:
+      - pre_job
+      - android-build
+      - android-build-cpp-test
+      - android-build-render-test
+    steps:
+      - name: Set success=true
+        if: needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        run: echo success=true > "$GITHUB_ENV"
+
+      - name: Mark result as failed
+        if: env.success != 'true'
+        run: exit 1
+
+      # automatically trigger android-release when code is pushed to main
+      # and the platform/android/VERSION file has changed
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+      - name: VERSION file changed
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: version-file-android-changed
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+        with:
+          files: platform/android/VERSION
+
+      - name: Should make release?
+        if: env.success && github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version-file-android-changed.outputs.any_changed == 'true'
+        run: echo make_release=true >> "$GITHUB_ENV"
+
+      - name: Validate and set version
+        if: env.make_release == 'true'
+        working-directory: .
+        run: .github/scripts/validate-version.sh platform/android/VERSION
+
+      - name: Create tag if it does not exist
+        if: env.make_release == 'true'
+        run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Trigger release
+        if: env.make_release == 'true'
+        run: gh workflow run android-release.yml --ref android-v${{ env.version }}
+        env:
+          GH_TOKEN: ${{ github.token }}
