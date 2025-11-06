@@ -317,10 +317,10 @@ jobs:
           zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
 
-      - name: Release (GitHub)
+      - name: Release (GitHub) - Create Draft
         if: env.make_release
         id: github_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
           name: ios-v${{ env.version }}
           files: |
@@ -330,11 +330,12 @@ jobs:
           prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
+          draft: true
 
       # needed to trigger workflow for Swift Package Index release
       - name: Generate token
         if: env.make_release
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
         id: generate_token
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
@@ -365,6 +366,14 @@ jobs:
         run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
         env:
          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release (remove draft)
+        if: env.make_release
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        with:
+          tag_name: ios-v${{ env.version }}
+          name: ios-v${{ env.version }}
+          draft: false
 
       - name: Write release notifications
         if: env.make_release && github.repository_owner == 'maplibre'
