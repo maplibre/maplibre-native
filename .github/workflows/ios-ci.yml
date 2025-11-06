@@ -223,7 +223,7 @@ jobs:
   ios-release:
     runs-on: macos-14
     needs: ios-build
-    if: github.ref == 'refs/heads/main' || github.event.inputs.release == 'pre'
+    if: github.ref == 'refs/heads/main' || github.event.inputs.release == 'pre' || github.event.inputs.release == 'full'
     defaults:
       run:
         working-directory: platform/ios
