@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.18.0-patch0
+
+- dd accessibility annotation check ([#3926](https://github.com/maplibre/maplibre-native/pull/3926))
+
 ## 6.18.0
 
 - add the ability to have ios camera animation durations dynamic during navigation ([#3568](https://github.com/maplibre/maplibre-native/pull/3568)).
