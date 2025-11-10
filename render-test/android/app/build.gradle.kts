@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "org.maplibre.render_test_runner"
         compileSdk = 34
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
 
         val abi = if (project.hasProperty("maplibre.abis")) {

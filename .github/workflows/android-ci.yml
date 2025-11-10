@@ -29,6 +29,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -59,6 +60,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -224,6 +226,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -281,6 +284,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
@@ -311,7 +315,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
-      contents: read
+      contents: write
     if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job

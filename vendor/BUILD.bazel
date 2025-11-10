@@ -3,9 +3,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS")
 
 cc_library(
     name = "maplibre-native-base",
-    hdrs = [
-        "maplibre-native-base/extras/args/args.hxx",
-    ] + glob(
+    hdrs = glob(
         [
             "maplibre-native-base/deps/cheap-ruler-cpp/include/mapbox/*.hpp",
             "maplibre-native-base/deps/geojson-vt-cpp/include/**/*.hpp",
@@ -14,18 +12,12 @@ cc_library(
             "maplibre-native-base/deps/jni.hpp/include/jni/*.hpp",
             "maplibre-native-base/deps/pixelmatch-cpp/include/mapbox/*.hpp",
             "maplibre-native-base/deps/shelf-pack-cpp/include/**/*.hpp",
-            "maplibre-native-base/deps/supercluster.hpp/include/*.hpp",
             "maplibre-native-base/deps/variant/include/mapbox/*.hpp",
-            "maplibre-native-base/extras/expected-lite/include/**/*.hpp",
-            "maplibre-native-base/extras/filesystem/include/ghc/*.hpp",
-            "maplibre-native-base/extras/kdbush.hpp/include/*.hpp",
-            "maplibre-native-base/extras/rapidjson/include/**/*.h",
             "maplibre-native-base/include/mapbox/**/*.hpp",
         ],
         exclude = ["maplibre-native-base/deps/jni.hpp/include/jni/string_conversion.hpp"],
     ),
     copts = CPP_FLAGS,
-    defines = ["RAPIDJSON_HAS_STDSTRING=1"],
     includes = [
         "maplibre-native-base/deps/cheap-ruler-cpp/include",
         "maplibre-native-base/deps/geojson.hpp/include",
@@ -34,14 +26,52 @@ cc_library(
         "maplibre-native-base/deps/jni.hpp/include",
         "maplibre-native-base/deps/pixelmatch-cpp/include",
         "maplibre-native-base/deps/shelf-pack-cpp/include",
-        "maplibre-native-base/deps/supercluster.hpp/include",
         "maplibre-native-base/deps/variant/include",
-        "maplibre-native-base/extras/args",
-        "maplibre-native-base/extras/expected-lite/include",
-        "maplibre-native-base/extras/filesystem/include",
-        "maplibre-native-base/extras/kdbush.hpp/include",
-        "maplibre-native-base/extras/rapidjson/include",
         "maplibre-native-base/include",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/kdbush
+cc_library(
+    name = "kdbush",
+    hdrs = glob([
+        "kdbush.hpp/include/*.hpp",
+    ]),
+    copts = CPP_FLAGS,
+    includes = [
+        "kdbush.hpp/include",
+    ],
+)
+
+cc_library(
+    name = "ghc_filesystem",
+    hdrs = glob([
+        "filesystem/include/ghc/*.hpp",
+    ]),
+    copts = CPP_FLAGS,
+    includes = [
+        "filesystem/include",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/args
+cc_library(
+    name = "args",
+    hdrs = ["args/args.hxx"],
+    includes = ["args"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/args
+cc_library(
+    name = "expected-lite",
+    hdrs = glob([
+        "expected-lite/include/**/*.hpp",
+    ]),
+    includes = [
+        "expected-lite/include",
     ],
     visibility = ["//visibility:public"],
 )
@@ -124,6 +154,28 @@ cc_library(
     hdrs = glob(["protozero/include/protozero/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["protozero/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/supercluster.hpp
+cc_library(
+    name = "supercluster.hpp",
+    hdrs = ["supercluster/include/supercluster.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["supercluster/include"],
+    visibility = ["//visibility:public"],
+    deps = ["kdbush"],
+)
+
+# vendor/rapidjson
+cc_library(
+    name = "rapidjson",
+    hdrs = glob([
+        "rapidjson/include/**/*.h",
+    ]),
+    copts = CPP_FLAGS,
+    defines = ["RAPIDJSON_HAS_STDSTRING=1"],
+    includes = ["rapidjson/include"],
     visibility = ["//visibility:public"],
 )
 

@@ -19,8 +19,8 @@ using HillshadeLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::
 
 class HillshadeBucket final : public Bucket {
 public:
-    HillshadeBucket(PremultipliedImage&&, Tileset::DEMEncoding encoding);
-    HillshadeBucket(std::shared_ptr<PremultipliedImage>, Tileset::DEMEncoding encoding);
+    HillshadeBucket(PremultipliedImage&&, Tileset::RasterEncoding encoding);
+    HillshadeBucket(std::shared_ptr<PremultipliedImage>, Tileset::RasterEncoding encoding);
     HillshadeBucket(DEMData&&);
     ~HillshadeBucket() override;
 

@@ -73,14 +73,16 @@ jobs:
             deployment_target: 12.0
             deployment_arch: "x86_64;arm64"
             compiler: ""
-          - name: macOS_LLVM
-            os: macos-14
-            build_type: RelWithDebInfo
-            qt_version: 6.9.1
-            qt_target: desktop
-            deployment_target: 12.0
-            deployment_arch: "arm64"
-            compiler: "llvm"
+          # disabled due to https://github.com/llvm/llvm-project/issues/77653
+          # https://github.com/maplibre/maplibre-native/pull/3879#issuecomment-3406495279
+          # - name: macOS_LLVM
+          #   os: macos-14
+          #   build_type: RelWithDebInfo
+          #   qt_version: 6.9.1
+          #   qt_target: desktop
+          #   deployment_target: 12.0
+          #   deployment_arch: "arm64"
+          #   compiler: "llvm"
           - name: win64_msvc2022
             os: windows-2022
             build_type: "RelWithDebInfo"
@@ -106,6 +108,7 @@ jobs:
         with:
           path: source
           submodules: recursive
+          persist-credentials: false
 
       - name: Install test dependencies
         if: runner.os == 'Linux'
@@ -189,6 +192,11 @@ jobs:
         with:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
           max-size: 200M
+
+      - name: Print cmake version
+        run: |
+          cmake --version
+          which cmake
 
       - name: Build maplibre-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'

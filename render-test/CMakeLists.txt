@@ -57,7 +57,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 target_link_libraries(
     mbgl-render-test
     PRIVATE
-        MapLibreNative::Base::Extras::args
+        mbgl-vendor-args
         MapLibreNative::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-boost

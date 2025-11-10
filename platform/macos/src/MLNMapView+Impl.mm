@@ -162,7 +162,7 @@ void MLNMapViewImpl::onGlyphsRequested(const mbgl::FontStack& fontStack, const m
 void MLNMapViewImpl::onTileAction(mbgl::TileOperation operation, const mbgl::OverscaledTileID& tile, const std::string& sourceID) {
     [mapView tileDidTriggerAction:MLNTileOperation(static_cast<int>(operation))
                                 x:tile.canonical.x
-                                y:tile.canonical.x
+                                y:tile.canonical.y
                                 z:tile.canonical.z
                              wrap:tile.wrap
                       overscaledZ:tile.overscaledZ

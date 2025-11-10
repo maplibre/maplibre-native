@@ -112,6 +112,13 @@ js_run_binary(
     visibility = ["//visibility:public"],
 )
 
+# Production-only generated code without test files
+filegroup(
+    name = "generated_code_production",
+    srcs = MLN_GENERATED_DARWIN_STYLE_SOURCE + MLN_GENERATED_DARWIN_STYLE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
 objc_library(
     name = "test_utility",
     srcs = [
@@ -190,7 +197,7 @@ cc_library(
         ":darwin_objc_hdrs",
         ":darwin_objcpp_hdrs",
         ":darwin_private_hdrs",
-        ":generated_code",
+        ":generated_code_production",
     ],
     hdrs = [
         ":generated_style_hdrs",
@@ -323,7 +330,6 @@ js_binary(
     data = [
         "scripts/style-spec-cocoa-conventions-v8.json",
         "scripts/style-spec-overrides-v8.json",
-        "//:node_modules/argparse",
         "//:node_modules/csscolorparser",
         "//:node_modules/lodash",
         "//:style-code",
@@ -340,7 +346,7 @@ js_library(
         ":darwin_objcpp_hdrs",
         ":darwin_objcpp_srcs",
         ":darwin_private_hdrs",
-        ":generated_code",
+        ":generated_code_production",
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({

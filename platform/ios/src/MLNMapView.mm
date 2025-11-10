@@ -290,9 +290,6 @@ const double MLNMinimumZoomLevelForUserTracking = 10.5;
 /// Initial zoom level when entering user tracking mode from a low zoom level.
 const double MLNDefaultZoomLevelForUserTracking = 14.0;
 
-/// Tolerance for snapping to true north, measured in degrees in either direction.
-const CLLocationDirection MLNToleranceForSnappingToNorth = 7;
-
 /// Distance threshold to stop the camera while animating.
 const CLLocationDistance MLNDistanceThresholdForCameraPause = 500;
 
@@ -782,6 +779,10 @@ public:
         NSStringFromClass(self.class));
     });
 
+    _showsLogoView = YES;
+    _showsCompassView = YES;
+    _showsAttributionButton = YES;
+
     // setup logo
     //
     UIImage *logo = [UIImage mgl_resourceImageNamed:@"maplibre-logo-stroke-gray"];
@@ -790,6 +791,7 @@ public:
     _logoView.accessibilityLabel = NSLocalizedStringWithDefaultValue(@"LOGO_A11Y_LABEL", nil, nil, @"Mapbox", @"Accessibility label");
     _logoView.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_logoView];
+    _logoView.hidden = !_showsLogoView;
     _logoViewConstraints = [NSMutableArray array];
     _logoViewPosition = MLNOrnamentPositionBottomLeft;
     _logoViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -802,6 +804,7 @@ public:
     [_attributionButton addTarget:self action:@selector(showAttribution:) forControlEvents:UIControlEventTouchUpInside];
     _attributionButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_attributionButton];
+    _attributionButton.hidden = !_showsAttributionButton;
     _attributionButtonConstraints = [NSMutableArray array];
 
     UILongPressGestureRecognizer *attributionLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(showAttribution:)];
@@ -813,6 +816,7 @@ public:
     //
     _compassView = [MLNCompassButton compassButtonWithMapView:self];
     [self addSubview:_compassView];
+    _compassView.hidden = !_showsCompassView;
     _compassViewConstraints = [NSMutableArray array];
     _compassViewPosition = MLNOrnamentPositionTopRight;
     _compassViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -876,6 +880,7 @@ public:
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
     _rotationThresholdWhileZooming = 3;
+    _toleranceForSnappingToNorth = 7;
 
     _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
     _doubleTap.numberOfTapsRequired = 2;
@@ -3227,6 +3232,27 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
+- (void)setShowsLogoView:(BOOL)showsLogoView
+{
+    MLNLogDebug(@"Setting showsLogoView: %@", MLNStringFromBOOL(showsLogoView));
+    _showsLogoView = showsLogoView;
+    self.logoView.hidden = !showsLogoView;
+}
+
+- (void)setShowsCompassView:(BOOL)showsCompassView
+{
+    MLNLogDebug(@"Setting showsCompassView: %@", MLNStringFromBOOL(showsCompassView));
+    _showsCompassView = showsCompassView;
+    self.compassView.hidden = !showsCompassView;
+}
+
+- (void)setShowsAttributionButton:(BOOL)showsAttributionButton
+{
+    MLNLogDebug(@"Setting showsAttributionButton: %@", MLNStringFromBOOL(showsAttributionButton));
+    _showsAttributionButton = showsAttributionButton;
+    self.attributionButton.hidden = !showsAttributionButton;
+}
+
 - (void)setScaleBarShouldShowDarkStyles:(BOOL)scaleBarShouldShowDarkStyles {
 
     _scaleBarShouldShowDarkStyles = scaleBarShouldShowDarkStyles;
@@ -3524,7 +3550,12 @@ static void *windowScreenContext = &windowScreenContext;
 - (id)accessibilityElementForAnnotationWithTag:(MLNAnnotationTag)annotationTag
 {
     MLNAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %llu.", annotationTag);
-    MLNAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
+    auto annotationContextIt = _annotationContextsByAnnotationTag.find(annotationTag);
+    if (annotationContextIt == _annotationContextsByAnnotationTag.end()) {
+        return nil;
+    }
+
+    MLNAnnotationContext &annotationContext = annotationContextIt->second;
     id <MLNAnnotation> annotation = annotationContext.annotation;
 
     // Let the annotation view serve as its own accessibility element.
@@ -5983,9 +6014,18 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: - User Location -
 
+
+- (void)disableLocationManager
+{
+    [_locationManager stopUpdatingLocation];
+    [_locationManager stopUpdatingHeading];
+    _locationManager = nil;
+}
+
 - (void)setLocationManager:(nullable id<MLNLocationManager>)locationManager
 {
     MLNLogDebug(@"Setting locationManager: %@", locationManager);
+
     if (!locationManager) {
         locationManager = [[MLNCLLocationManager alloc] init];
     }
@@ -6802,8 +6842,8 @@ static void *windowScreenContext = &windowScreenContext;
         [self unrotateIfNeededAnimated:YES];
 
         // Snap to north.
-        if ((self.direction < MLNToleranceForSnappingToNorth
-             || self.direction > 360 - MLNToleranceForSnappingToNorth)
+        if ((self.direction < self.toleranceForSnappingToNorth
+             || self.direction > 360 - self.toleranceForSnappingToNorth)
             && self.userTrackingMode != MLNUserTrackingModeFollowWithHeading
             && self.userTrackingMode != MLNUserTrackingModeFollowWithCourse)
         {

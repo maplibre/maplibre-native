@@ -27,7 +27,7 @@ jobs:
             vendor/maplibre-native-base/deps/geometry.hpp/include \
             vendor/maplibre-native-base/deps/geojson.hpp/include \
             vendor/metal-cpp \
-            vendor/maplibre-native-base/extras/expected-lite/include
+            vendor/expected-lite/include
 
       - name: Create Release
         if: github.event_name == 'workflow_dispatch'
@@ -51,19 +51,19 @@ jobs:
 
       - run: brew install webp libuv
 
-      - uses: taiki-e/install-action@e5f8d33e7166e0491b2ab4ff0567cc6cd6772737 # v2.61.7
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with:
           tool: armerge@2
 
       - name: Build mbgl-core for macOS
         run: |
-          cmake --preset macos -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
-          cmake --build build-macos --target mbgl-core
+          cmake --preset macos-metal -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
+          cmake --build build-macos-metal --target mbgl-core
 
       - name: Rename artifact
         run: |
-          cp build-macos/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
-          cp build-macos/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
 
       - name: Upload macOS artifacts
         if: github.event_name == 'pull_request'
@@ -104,7 +104,7 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@e5f8d33e7166e0491b2ab4ff0567cc6cd6772737 # v2.61.7
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with:
           tool: armerge@2
 
