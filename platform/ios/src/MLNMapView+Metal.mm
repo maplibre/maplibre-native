@@ -1,3 +1,4 @@
+#import "MLNDisplayUtils.h"
 #import "MLNFoundation_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+Metal.h"
@@ -31,14 +32,6 @@
 }
 
 @end
-
-namespace {
-CGFloat contentScaleFactor() {
-    return [UIScreen instancesRespondToSelector:@selector(nativeScale)]
-        ? [[UIScreen mainScreen] nativeScale]
-        : [[UIScreen mainScreen] scale];
-}
-} // namespace
 
 class MLNMapViewMetalRenderableResource final : public mbgl::mtl::RenderableResource {
 public:
@@ -164,11 +157,12 @@ void MLNMapViewMetalImpl::createView() {
     }
 
     id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
+    const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
 
     resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
     resource.mtlView.delegate = resource.delegate;
     resource.mtlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    resource.mtlView.contentScaleFactor = contentScaleFactor();
+    resource.mtlView.contentScaleFactor = scaleFactor;
     resource.mtlView.contentMode = UIViewContentModeCenter;
     resource.mtlView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     resource.mtlView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
@@ -222,9 +216,16 @@ UIImage* MLNMapViewMetalImpl::snapshot() {
 }
 
 void MLNMapViewMetalImpl::layoutChanged() {
-    const auto scaleFactor = contentScaleFactor();
-    size = { static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
-             static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor) };
+    const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
+    const auto screenSize = mapView.bounds.size;
+
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+
+    resource.mtlView.contentScaleFactor = scaleFactor;
+    resource.mtlView.drawableSize = CGSizeMake(screenSize.width * scaleFactor, screenSize.height * scaleFactor);
+
+    size = { static_cast<uint32_t>(resource.mtlView.drawableSize.width),
+             static_cast<uint32_t>(resource.mtlView.drawableSize.height) };
 }
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {

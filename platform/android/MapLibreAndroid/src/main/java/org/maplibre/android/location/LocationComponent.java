@@ -23,16 +23,16 @@ import org.maplibre.android.location.engine.LocationEngineCallback;
 import org.maplibre.android.location.engine.LocationEngineDefault;
 import org.maplibre.android.location.engine.LocationEngineRequest;
 import org.maplibre.android.location.engine.LocationEngineResult;
+import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl;
 import org.maplibre.android.location.modes.CameraMode;
 import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl;
 import org.maplibre.android.location.permissions.PermissionsManager;
 import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener;
 import org.maplibre.android.maps.MapLibreMap.OnCameraMoveListener;
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener;
+import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.maps.Transform;
 import org.maplibre.android.style.layers.SymbolLayer;
@@ -52,7 +52,6 @@ import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_T
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
 import static org.maplibre.android.location.modes.RenderMode.GPS;
-
 
 /**
  * The Location Component provides location awareness to your mobile application. Enabling this
@@ -177,6 +176,8 @@ public final class LocationComponent {
   private final CopyOnWriteArrayList<OnLocationClickListener> onLocationClickListeners
     = new CopyOnWriteArrayList<>();
   private final CopyOnWriteArrayList<OnLocationLongClickListener> onLocationLongClickListeners
+    = new CopyOnWriteArrayList<>();
+  private final CopyOnWriteArrayList<OnPuckPositionChangeListener> onPuckPositionChangeListeners
     = new CopyOnWriteArrayList<>();
   private final CopyOnWriteArrayList<OnCameraTrackingChangedListener> onCameraTrackingChangedListeners
     = new CopyOnWriteArrayList<>();
@@ -991,6 +992,24 @@ public final class LocationComponent {
   }
 
   /**
+   * Adds a listener that receives updates whenever the rendered puck position changes.
+   *
+   * @param listener listener that will be invoked on puck position changes
+   */
+  public void addOnPuckPositionChangeListener(@NonNull OnPuckPositionChangeListener listener) {
+    onPuckPositionChangeListeners.add(listener);
+  }
+
+  /**
+   * Removes a listener that was receiving puck position updates.
+   *
+   * @param listener listener to remove
+   */
+  public void removeOnPuckPositionChangeListener(@NonNull OnPuckPositionChangeListener listener) {
+    onPuckPositionChangeListeners.remove(listener);
+  }
+
+  /**
    * Adds a listener that gets invoked when camera tracking state changes.
    *
    * @param listener Listener that gets invoked when camera tracking state changes.
@@ -1298,6 +1317,12 @@ public final class LocationComponent {
     lastLocation = location;
   }
 
+  private void notifyPuckPositionChange(@NonNull LatLng puckPosition) {
+    for (OnPuckPositionChangeListener listener : onPuckPositionChangeListeners) {
+      listener.onPuckPositionChanged(puckPosition);
+    }
+  }
+
   private Location[] getTargetLocationWithIntermediates(Location location, List<Location> intermediatePoints) {
     Location[] locations = new Location[intermediatePoints.size() + 1];
     locations[locations.length - 1] = location;
@@ -1379,12 +1404,37 @@ public final class LocationComponent {
 
   private void updateAnimatorListenerHolders() {
     Set<AnimatorListenerHolder> animationsValueChangeListeners = new HashSet<>();
-    animationsValueChangeListeners.addAll(locationLayerController.getAnimationListeners());
+    for (AnimatorListenerHolder holder : locationLayerController.getAnimationListeners()) {
+      if (holder.getAnimatorType() == MapLibreAnimator.ANIMATOR_LAYER_LATLNG) {
+        animationsValueChangeListeners.add(wrapPuckPositionListener(holder));
+      } else {
+        animationsValueChangeListeners.add(holder);
+      }
+    }
     animationsValueChangeListeners.addAll(locationCameraController.getAnimationListeners());
     locationAnimatorCoordinator.updateAnimatorListenerHolders(animationsValueChangeListeners);
     locationAnimatorCoordinator.resetAllCameraAnimations(maplibreMap.getCameraPosition(),
       locationCameraController.getCameraMode() == CameraMode.TRACKING_GPS_NORTH);
     locationAnimatorCoordinator.resetAllLayerAnimations();
+  }
+
+  @SuppressWarnings("unchecked")
+  private AnimatorListenerHolder wrapPuckPositionListener(AnimatorListenerHolder originalHolder) {
+    // Forward animator ticks to both the renderer and public puck listeners.
+    final MapLibreAnimator.AnimationsValueChangeListener<LatLng> originalListener =
+      (MapLibreAnimator.AnimationsValueChangeListener<LatLng>) originalHolder.getListener();
+    if (originalListener == null) {
+      return originalHolder;
+    }
+    MapLibreAnimator.AnimationsValueChangeListener<LatLng> compositeListener =
+      new MapLibreAnimator.AnimationsValueChangeListener<LatLng>() {
+        @Override
+        public void onNewAnimationValue(LatLng value) {
+          originalListener.onNewAnimationValue(value);
+          notifyPuckPositionChange(value);
+        }
+      };
+    return new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_LAYER_LATLNG, compositeListener);
   }
 
   @NonNull

@@ -11,8 +11,11 @@ namespace mtl {
 
 class OffscreenTextureResource final : public RenderableResource {
 public:
-    OffscreenTextureResource(
-        Context& context_, const Size size_, const gfx::TextureChannelDataType type_, bool depth, bool stencil)
+    OffscreenTextureResource(Context& context_,
+                             const Size size_,
+                             const gfx::TextureChannelDataType type_,
+                             bool depth,
+                             [[maybe_unused]] bool stencil)
         : context(context_),
           size(size_),
           type(type_) {

@@ -40,16 +40,27 @@ build:
     - '**/*.cmake'
     - '**/BUILD.bazel'
     - '**/*.bzl'
+    - CMakePresets.json
 OpenGL:
+- changed-files:
   - any-glob-to-any-file:
     - '**/*opengl*'
     - '**/*opengl*/**'
     - '**/gl/**'
 Vulkan:
+- changed-files:
   - any-glob-to-any-file:
     - '**/*vulkan*'
     - '**/*vulkan*/**'
 metal:
+- changed-files:
   - any-glob-to-any-file:
     - '**/*metal*'
     - '**/*metal*/**'
+WebGPU:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*webgpu*'
+    - '**/*webgpu*/**'
+    - '**/*wgpu*'
+    - '**/*dawn*'

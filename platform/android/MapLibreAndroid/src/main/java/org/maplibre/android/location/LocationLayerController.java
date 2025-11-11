@@ -1,22 +1,5 @@
 package org.maplibre.android.location;
 
-import android.graphics.Bitmap;
-import android.graphics.PointF;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.maplibre.geojson.Feature;
-import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MapLibreMap;
-import org.maplibre.android.maps.Style;
-import org.maplibre.android.style.expressions.Expression;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_ICON;
 import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_LAYER;
 import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_STALE_ICON;
@@ -30,7 +13,23 @@ import static org.maplibre.android.style.expressions.Expression.linear;
 import static org.maplibre.android.style.expressions.Expression.stop;
 import static org.maplibre.android.style.expressions.Expression.zoom;
 
+import android.graphics.Bitmap;
+import android.graphics.PointF;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.location.modes.RenderMode;
+import org.maplibre.android.log.Logger;
+import org.maplibre.android.maps.MapLibreMap;
+import org.maplibre.android.maps.Style;
+import org.maplibre.android.style.expressions.Expression;
+import org.maplibre.geojson.Feature;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 final class LocationLayerController {
 

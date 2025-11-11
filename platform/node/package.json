@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "6.3.0-pre.0",
+  "version": "6.3.0-pre.1",
   "description": "Renders map tiles with MapLibre Native",
   "keywords": [
     "maplibre",
@@ -34,7 +34,6 @@
     "@octokit/plugin-retry": "^7.1.0",
     "@octokit/rest": "^20.1.0",
     "@types/node": "^22.9.0",
-    "argparse": "^2.0.1",
     "csscolorparser": "^1.0.3",
     "d3-queue": "3.0.7",
     "diff": "5.2.0",

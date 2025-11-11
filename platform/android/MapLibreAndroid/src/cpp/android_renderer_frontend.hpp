@@ -52,8 +52,8 @@ public:
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate&, const RenderedQueryOptions&) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox&, const RenderedQueryOptions&) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&) const;
-    AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
-    AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
+    AnnotationIDs queryPointAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
+    AnnotationIDs queryShapeAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
 
     // Feature extension query
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,

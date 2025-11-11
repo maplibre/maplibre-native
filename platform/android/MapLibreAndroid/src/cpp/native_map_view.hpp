@@ -369,6 +369,8 @@ private:
     int width = 64;
     int height = 64;
 
+    static constexpr auto annotationRequestTimeout = std::chrono::milliseconds(200);
+
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;
 

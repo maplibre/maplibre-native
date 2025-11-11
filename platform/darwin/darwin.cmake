@@ -12,6 +12,18 @@ target_link_libraries(
         z
 )
 
+if(TARGET mbgl-vendor-dawn)
+    target_link_libraries(
+        mbgl-vendor-dawn
+        INTERFACE
+            "-framework Metal"
+            "-framework QuartzCore"
+            "-framework IOKit"
+            "-framework IOSurface"
+            "-framework CoreGraphics"
+    )
+endif()
+
 if(MLN_DARWIN_USE_LIBUV)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)

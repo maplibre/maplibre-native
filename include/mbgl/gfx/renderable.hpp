@@ -42,6 +42,10 @@ public:
         return static_cast<T&>(*resource);
     }
 
+    bool hasResource() const { return resource != nullptr; }
+
+    void setResource(std::unique_ptr<RenderableResource> resource_) { resource = std::move(resource_); }
+
     virtual void wait() {}
 
     bool operator!=(const Renderable& other) const { return resource.get() != other.resource.get(); }
