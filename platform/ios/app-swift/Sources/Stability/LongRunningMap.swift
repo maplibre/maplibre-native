@@ -50,6 +50,12 @@ struct LongRunningMapView: View {
                 SimpleNavigationMapView()
             }
         }
+        .onAppear {
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
         .onReceive(Timer.publish(every: DURATION, on: .current, in: .default).autoconnect()) { _ in
             printMemoryUsage()
             dismiss()
