@@ -698,7 +698,8 @@ void Transform::updateTransitions(const TimePoint& now) {
                                 .withRotatingInProgress(rotating));
 
         const bool zoomSet = properties.zoom.set && properties.zoom.animation;
-        if ((properties.latlng.set && properties.latlng.animation) || zoomSet) {
+        const bool latlngSet = properties.latlng.set && properties.latlng.animation;
+        if (latlngSet || zoomSet) {
             state.setLatLngZoom(
                 properties.latlng.frameLatLngFunc ? properties.latlng.frameLatLngFunc(now) : state.getLatLng(),
                 properties.zoom.frameZoomFunc ? properties.zoom.frameZoomFunc(now) : state.getZoom());
@@ -711,8 +712,12 @@ void Transform::updateTransitions(const TimePoint& now) {
                 properties.zoom.set = false;
             }
 
+            // Prioritize zoom anchor over latlng anchor if two concurrent animations are active,
+            // if it's the same animation then we apply the first one only.
             if (zoomSet && properties.zoom.animation->anchor) {
                 state.moveLatLng(properties.zoom.animation->anchorLatLng, *properties.zoom.animation->anchor);
+            } else if (latlngSet && properties.latlng.animation->anchor) {
+                state.moveLatLng(properties.latlng.animation->anchorLatLng, *properties.latlng.animation->anchor);
             }
         }
         if (properties.bearing.set && properties.bearing.animation) {
@@ -743,10 +748,6 @@ void Transform::updateTransitions(const TimePoint& now) {
                 std::min(maxPitch, util::interpolate(properties.pitch.current, properties.pitch.target, pitch_t)));
             if (animationTransitionFrame(*properties.pitch.animation, pitch_t)) {
                 properties.pitch.set = false;
-            }
-
-            if (properties.pitch.set && properties.pitch.animation && properties.pitch.animation->anchor) {
-                state.moveLatLng(properties.pitch.animation->anchorLatLng, *properties.pitch.animation->anchor);
             }
         }
 
