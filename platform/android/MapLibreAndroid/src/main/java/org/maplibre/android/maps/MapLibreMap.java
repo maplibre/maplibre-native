@@ -2729,11 +2729,10 @@ public final class MapLibreMap {
    * Adds a custom protocol handler to the map view
    */
   ArrayList<PluginProtocolHandler> pluginProtocolHandlers = new ArrayList<PluginProtocolHandler>();
+
   public void addPluginProtocolHandler(PluginProtocolHandler protocolHandler) {
     pluginProtocolHandlers.add(protocolHandler);
     nativeMapView.addPluginProtocolHandler(protocolHandler);
-
-    // nativeMapView.addPolygon()
   }
 
 
