@@ -13,9 +13,7 @@ MLN_EXPORT
              layerIdentifier:(NSString *)identifier
               layerPropeties:(NSDictionary *)layerPropeties;
 
-- (void)setPluginProperty:(NSString *)propertyName
-                    value:(id)propertyValue;
-
+- (void)setPluginProperty:(NSString *)propertyName value:(id)propertyValue;
 
 @end
 
