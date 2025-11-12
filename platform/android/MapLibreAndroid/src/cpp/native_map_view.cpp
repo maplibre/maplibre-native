@@ -1550,7 +1550,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setFrustumOffset, "nativeSetFrustumOffset"),
         METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
         METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
-        METHOD(&NativeMapView::addPluginFileSource, "nativeAddPluginFileSource")
+        METHOD(&NativeMapView::addPluginFileSource, "nativeAddPluginFileSource"));
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
