@@ -7,7 +7,7 @@ open class BaseTest {
         @JvmStatic
         @BeforeClass
         fun setup() {
-            LibraryLoader.enableErrorHandling(true)
+            //LibraryLoader.enableErrorHandling(true)
         }
     }
 }
