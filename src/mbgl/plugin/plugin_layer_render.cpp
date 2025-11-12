@@ -57,7 +57,7 @@ void RenderPluginLayerTweaker::execute([[maybe_unused]] mbgl::gfx::Drawable& dra
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif
 
-    _plugInRenderer->render(paintParameters);
+    _plugInRenderer->callRenderFunction(paintParameters);
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
@@ -181,7 +181,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
 
 void RenderPluginLayer::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {}
 
-void RenderPluginLayer::render(PaintParameters& paintParameters) {
+void RenderPluginLayer::callRenderFunction(PaintParameters& paintParameters) {
     if (_renderFunction) {
         _renderFunction(paintParameters);
     }
