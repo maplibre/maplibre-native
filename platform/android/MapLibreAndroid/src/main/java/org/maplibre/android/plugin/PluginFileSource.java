@@ -11,10 +11,10 @@ public class PluginFileSource {
   }
 
   public PluginProtocolHandlerResponse requestResource(PluginProtocolHandlerResource resource) {
-    
+
     PluginProtocolHandlerResponse response = protocolHandler.requestResource(resource);
     return response;
-  
+
   }
 
 }
