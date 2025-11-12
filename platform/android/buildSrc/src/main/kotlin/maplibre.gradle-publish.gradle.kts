@@ -8,7 +8,6 @@ plugins {
     id("com.android.library")
     id("com.vanniktech.maven.publish.base")
     id("maplibre.artifact-settings")
-    id("maplibre.publish-root")
 }
 
 
