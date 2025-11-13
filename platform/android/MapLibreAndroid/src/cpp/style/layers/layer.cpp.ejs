@@ -57,15 +57,24 @@ namespace android {
 <% if (property.name != 'heatmap-color') { -%>
     jni::Local<jni::Object<>> <%- camelize(type) %>Layer::get<%- camelize(property.name) %>(jni::JNIEnv& env) {
         using namespace mbgl::android::conversion;
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, to<%- camelize(type) %>Layer(layer).get<%- camelize(property.name) %>()));
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::<%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, to<%- camelize(type) %>Layer(*layer).get<%- camelize(property.name) %>()));
     }
 
 <% } else { -%>
     jni::Local<jni::Object<>> HeatmapLayer::getHeatmapColor(jni::JNIEnv& env) {
         using namespace mbgl::android::conversion;
-        auto propertyValue =  to<%- camelize(type) %>Layer(layer).getHeatmapColor();
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::<%- camelize(type) %>Layer::getDefaultHeatmapColor()));
+        }
+
+        auto propertyValue =  to<%- camelize(type) %>Layer(*layer).getHeatmapColor();
         if (propertyValue.isUndefined()) {
-            propertyValue =  to<%- camelize(type) %>Layer(layer).getDefaultHeatmapColor();
+            propertyValue =  to<%- camelize(type) %>Layer(*layer).getDefaultHeatmapColor();
         }
         return std::move(*convert<jni::Local<jni::Object<>>>(env, propertyValue));
     }
@@ -74,15 +83,23 @@ namespace android {
 <% if (property.transition) { -%>
     jni::Local<jni::Object<TransitionOptions>> <%- camelize(type) %>Layer::get<%- camelize(property.name) %>Transition(jni::JNIEnv& env) {
         using namespace mbgl::android::conversion;
-        mbgl::style::TransitionOptions options = to<%- camelize(type) %>Layer(layer).get<%- camelize(property.name) %>Transition();
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = to<%- camelize(type) %>Layer(*layer).get<%- camelize(property.name) %>Transition();
         return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
 
     void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>Transition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
         mbgl::style::TransitionOptions options;
         options.duration.emplace(mbgl::Milliseconds(duration));
         options.delay.emplace(mbgl::Milliseconds(delay));
-        to<%- camelize(type) %>Layer(layer).set<%- camelize(property.name) %>Transition(options);
+        to<%- camelize(type) %>Layer(*layer).set<%- camelize(property.name) %>Transition(options);
     }
 
 <% } -%>
