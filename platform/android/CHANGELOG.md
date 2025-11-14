@@ -1,5 +1,9 @@
 # Changelog MapLibre Native for Android
 
+## 12.1.1
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+
 ## 12.1.0
 
 ### ✨ Features and improvements
