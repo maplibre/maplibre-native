@@ -4008,6 +4008,7 @@ static void *windowScreenContext = &windowScreenContext;
 {
     MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
     if (zoomLevel == self.zoomLevel) return;
+
     [self cancelTransitions];
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
@@ -4488,7 +4489,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)cancelTransitions {
-    if (!_mbglMap)
+    if (!_mbglMap || self.enableConcurrentCameraAnimation)
     {
         return;
     }
