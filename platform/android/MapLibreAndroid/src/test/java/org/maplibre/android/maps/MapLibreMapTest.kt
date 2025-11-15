@@ -19,6 +19,7 @@ import org.maplibre.android.BaseTest
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
+import org.maplibre.android.gestures.AndroidGesturesManager
 
 @RunWith(RobolectricTestRunner::class)
 class MapLibreMapTest : BaseTest() {
@@ -88,7 +89,15 @@ class MapLibreMapTest : BaseTest() {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.easeCamera(update, callback)
-        verify { transform.easeCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, true, callback) }
+        verify {
+            transform.easeCamera(
+                maplibreMap,
+                update,
+                MapLibreConstants.ANIMATION_DURATION,
+                true,
+                callback
+            )
+        }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
@@ -99,9 +108,17 @@ class MapLibreMapTest : BaseTest() {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.animateCamera(update, callback)
-        verify { transform.animateCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, callback) }
+        verify {
+            transform.animateCamera(
+                maplibreMap,
+                update,
+                MapLibreConstants.ANIMATION_DURATION,
+                callback
+            )
+        }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
+
 
     @Test
     fun testScrollBy() {
@@ -260,5 +277,54 @@ class MapLibreMapTest : BaseTest() {
         maplibreMap.setZoom(2.0, target, 0)
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
         verify { nativeMapView.setZoom(2.0, target, 0) }
+    }
+
+    @Test
+    fun testOnSingleTapHandledByAnnotationManager() {
+        val annotationManager = mockk<AnnotationManager>(relaxed = true)
+        every { annotationManager.bind(any()) } returns annotationManager
+        every { annotationManager.onTap(any()) } returns true
+        maplibreMap.injectAnnotationManager(annotationManager)
+
+        maplibreMap.onSingleTap(10f, 20f)
+
+        verify(exactly = 1) { annotationManager.onTap(PointF(10f, 20f)) }
+        verify(exactly = 0) { annotationManager.deselectMarkers() }
+    }
+
+    @Test
+    fun testOnSingleTapNotHandled_DeselectsAndNotifies() {
+        val native = mockk<NativeMap>(relaxed = true)
+        val trans = mockk<Transform>(relaxed = true)
+        val ui = mockk<UiSettings>(relaxed = true)
+        every { ui.isDeselectMarkersOnTap() } returns true
+        val projection = mockk<Projection>(relaxed = true)
+        val gesturesMgr = mockk<AndroidGesturesManager>(relaxed = true)
+        val gesturesListener =
+            mockk<MapLibreMap.OnGesturesManagerInteractionListener>(relaxed = true)
+        every { gesturesListener.gesturesManager } returns gesturesMgr
+
+        val localMap = MapLibreMap(
+            native,
+            trans,
+            ui,
+            projection,
+            gesturesListener,
+            cameraChangeDispatcher,
+            listOf(developerAnimationListener)
+        )
+
+        val annotationManager = mockk<AnnotationManager>(relaxed = true)
+        every { annotationManager.bind(localMap) } returns annotationManager
+        every { annotationManager.onTap(any()) } returns false
+        localMap.injectAnnotationManager(annotationManager)
+
+        localMap.onSingleTap(15f, 25f)
+
+        verify(exactly = 1) { annotationManager.onTap(PointF(15f, 25f)) }
+        verify(exactly = 1) { ui.isDeselectMarkersOnTap }
+        verify(exactly = 1) { annotationManager.deselectMarkers() }
+        // ensure we interacted with the gestures manager (synchronized-notifyAll cannot be verified directly)
+        verify(atLeast = 1) { gesturesListener.gesturesManager }
     }
 }
