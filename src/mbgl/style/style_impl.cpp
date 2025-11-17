@@ -88,7 +88,7 @@ void Style::Impl::filterThenParse(const std::string& styleData) {
 
     // Otherwise, go through the chain of filters
     std::string filteredStyle = styleData;
-    for (auto filter : _styleFilters) {
+    for (const auto & filter : _styleFilters) {
         filteredStyle = filter->filterResponse(filteredStyle);
     }
     parse(filteredStyle);

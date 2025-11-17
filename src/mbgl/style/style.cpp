@@ -180,7 +180,7 @@ std::unique_ptr<Layer> Style::removeLayer(const std::string& id) {
 // Add style parsing filter
 void Style::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter> filter) {
     impl->mutated = true;
-    return impl->addStyleFilter(filter);
+    impl->addStyleFilter(filter);
 }
 
 } // namespace style
