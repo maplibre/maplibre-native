@@ -13,7 +13,7 @@ plugins {
 
 afterEvaluate {
     mavenPublishing {
-        publishToMavenCentral()
+        publishToMavenCentral(true)
         signAllPublications()
     }
 }
