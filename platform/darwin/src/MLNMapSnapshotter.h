@@ -85,6 +85,11 @@ MLN_EXPORT
 @property (nonatomic, readwrite) BOOL showsLogo;
 
 /**
+ Whether to include the MapLibre attribution. Note this is not required.
+ */
+@property (nonatomic, readwrite) BOOL showsAttribution;
+
+/**
  URL of the map style to snapshot.
  */
 @property (nonatomic, readonly) NSURL *styleURL;
