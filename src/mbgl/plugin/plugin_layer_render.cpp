@@ -90,7 +90,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
     bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
 
     // Get list of tiles to remove and then remove them
-    for (const auto & currentCollection : _featureCollectionByTile) {
+    for (const auto& currentCollection : _featureCollectionByTile) {
         if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
             removedTiles.push_back(currentCollection.first);
         }
