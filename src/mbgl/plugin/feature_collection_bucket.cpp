@@ -76,7 +76,7 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
     }
 
     auto pm = tileFeature.getProperties();
-    for (auto p : pm) {
+    for (const auto& p : pm) {
         auto name = p.first;
         mapbox::feature::value value = p.second;
 
