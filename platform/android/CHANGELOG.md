@@ -1,5 +1,9 @@
 # Changelog MapLibre Native for Android
 
+## 12.1.3
+
+- Disable `UnsatisfiedLinkError` during local tests ([#3942](https://github.com/maplibre/maplibre-native/pull/3942)
+
 ## 12.1.2
 
 - Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
