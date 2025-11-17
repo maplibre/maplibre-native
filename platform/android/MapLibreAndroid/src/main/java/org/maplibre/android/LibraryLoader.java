@@ -1,6 +1,7 @@
 package org.maplibre.android;
 
 import org.maplibre.android.log.Logger;
+import org.maplibre.android.utils.PlatformUtils;
 
 /**
  * Loads the mapbox-gl shared library
@@ -56,7 +57,7 @@ public abstract class LibraryLoader {
       Logger.e(TAG, message, error);
       MapStrictMode.strictModeViolation(message, error);
 
-      if (!handleLoadError) {
+      if (!handleLoadError && !PlatformUtils.isTest()) {
         throw error;
       }
     }
