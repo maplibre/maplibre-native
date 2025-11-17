@@ -68,7 +68,7 @@ public:
         // Go through custom handlers
         bool requestHandledByCustomHandler = false;
         auto fm = FileSourceManager::get();
-        for (auto customFileSource : fm->getCustomFileSources()) {
+        for (const auto& customFileSource : fm->getCustomFileSources()) {
             if (customFileSource->canRequest(resource)) {
                 tasks[req] = customFileSource->request(resource, callback);
                 requestHandledByCustomHandler = true;
@@ -195,7 +195,7 @@ public:
     bool canRequest(const Resource& resource) const {
         // Check the custom file sources
         auto fm = FileSourceManager::get();
-        for (auto customFileSource : fm->getCustomFileSources()) {
+        for (const auto& customFileSource : fm->getCustomFileSources()) {
             if (customFileSource->canRequest(resource)) {
                 return true;
             }
