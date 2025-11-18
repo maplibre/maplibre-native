@@ -1,6 +1,6 @@
 set(MLT_WITH_JSON OFF CACHE BOOL "No JSON support" FORCE)
 set(MLT_WITH_PROTOZERO OFF CACHE BOOL "No protozero" FORCE)
-set(MLT_WITH_FASTPFOR OFF CACHE BOOL "disabled for lack of support for ARMv7 in SIMDE and requirement for SSE on x86" FORCE)
+set(MLT_WITH_FASTPFOR ON CACHE BOOL "disabled for lack of support for ARMv7 in SIMDE and requirement for SSE on x86" FORCE)
 set(MLT_WITH_TESTS OFF CACHE BOOL "Google Test conflicts with Dawn")
 set(MLT_WITH_TOOLS OFF CACHE BOOL "Not used")
 
