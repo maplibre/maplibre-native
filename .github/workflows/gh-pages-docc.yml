@@ -1,0 +1,74 @@
+name: gh-pages-docc
+
+permissions:
+  id-token: write
+  pages: write
+  contents: write
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - ios-ci
+    types:
+      - completed
+
+jobs:
+  gh-pages-docc-build:
+    if: ${{ github.ref_name == 'main' }}
+    name: Build DocC Docs
+    runs-on: macos-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Build DocC documentation
+        working-directory: .
+        run: |
+          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+
+      # workaround since colons in filenames are not allowed in artifacts
+      # https://github.com/actions/upload-artifact/issues/333
+      - name: Create ZIP archive
+        run: |
+          cd build
+          zip -r docs.zip docs/
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: docc-docs
+          path: build/docs.zip
+
+  gh-pages-docc-deploy:
+    needs: gh-pages-docc-build
+    name: Deploy DocC Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+
+      - name: Download DocC docs artifacts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4
+        with:
+          name: docc-docs
+          path: build
+
+      - name: Unzip documentation
+        run: |
+          cd build
+          unzip docs.zip
+          rm docs.zip
+
+      - name: Deploy DocC documentation (main) 🚀
+        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
+        with:
+          branch: gh-pages
+          folder: build/docs
+          target-folder: ios/latest/

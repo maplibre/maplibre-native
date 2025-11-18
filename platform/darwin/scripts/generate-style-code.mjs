@@ -1,4 +1,4 @@
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import path from "node:path";
 import _ from "lodash";
 import colorParser from "csscolorparser";
@@ -25,20 +25,20 @@ function setupGlobalEjsHelpers() {
       global[funcName] = func;
     }
   }
-  
+
   setupGlobalEjsHelpers();
 
 // Parse command line
-const args = (() => {
-    const parser = new ArgumentParser({
-        description: "MapLibre Shader Tools"
-    });
-    parser.add_argument("--out", "--o", {
-        help: "Directory root to write generated code.",
-        required: false
-    });
-    return parser.parse_args();
-})();
+const args = parseArgs({
+    options: {
+        out: {
+            type: 'string',
+            short: 'o',
+            description: 'Directory root to write generated code.'
+        }
+    },
+    allowPositionals: false
+});
 
 const prefix = 'MLN';
 const suffix = 'StyleLayer';
@@ -208,6 +208,8 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return '@"%@", [MLNColor redColor]';
         case 'padding':
             return paddingTestValue();
+        case 'variableAnchorOffsetCollection':
+            return `@"{"top": [1, 2]}"`;
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -248,6 +250,7 @@ global.mbglTestValue = function (property, layerType) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             return `"${_.startCase(propertyName)}"`;
         case 'enum': {
             let type = camelize(originalPropertyName(property));
@@ -337,6 +340,7 @@ global.testHelperMessage = function (property, layerType, isFunction) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             return 'testString' + fnSuffix;
         case 'enum':
             let objCType = global.objCType(layerType, property.name);
@@ -547,6 +551,8 @@ global.describeType = function (property) {
                     return 'array';
             }
             break;
+        case 'variableAnchorOffsetCollection':
+            return 'interleaved `MLNTextAnchor` and `CGVector` array';
         default:
             throw new Error(`unknown type for ${property.name}`);
     }
@@ -643,6 +649,8 @@ global.describeValue = function (value, property, layerType) {
                 default:
                     return 'the array `' + value.join('`, `') + '`';
             }
+        case 'variableAnchorOffsetCollection':
+            return 'array of interleaved `MLNTextAnchor` and `CGVector` values';
         default:
             throw new Error(`unknown type for ${property.name}`);
     }
@@ -701,6 +709,8 @@ global.propertyType = function (property) {
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
+        case 'variableAnchorOffsetCollection':
+            return 'NSArray<NSValue *> *';
         default:
             throw new Error(`unknown type for ${property.name}`);
     }
@@ -734,6 +744,8 @@ global.valueTransformerArguments = function (property) {
             return ['mbgl::Color', objCType];
         case 'padding':
             return ['mbgl::Padding', objCType];
+        case 'variableAnchorOffsetCollection':
+            return ['mbgl::VariableAnchorOffsetCollection', objCType];
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -791,6 +803,8 @@ global.mbglType = function(property) {
             return 'mbgl::Color';
         case 'padding':
             return 'mbgl::Padding';
+        case 'variableAnchorOffsetCollection':
+            return 'mbgl::VariableAnchorOffsetCollection';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':

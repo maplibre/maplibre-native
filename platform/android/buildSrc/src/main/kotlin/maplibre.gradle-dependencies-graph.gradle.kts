@@ -13,5 +13,3 @@ val mapboxGenerator = Generator("mapboxLibraries", // Suffix for our Gradle task
 dependencyGraphGenerator {
     generators = listOf(mapboxGenerator)
 }
-
-

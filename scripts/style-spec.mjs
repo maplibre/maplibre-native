@@ -6,9 +6,6 @@ let modifiedReferenceSpec = referenceSpec;
 // https://github.com/maplibre/maplibre-native/issues/250
 delete modifiedReferenceSpec['layout_symbol']['text-rotation-alignment']["values"]['viewport-glyph']
 
-// https://github.com/maplibre/maplibre-native/issues/2358
-delete modifiedReferenceSpec['layout_symbol']['text-variable-anchor-offset'];
-
 // https://github.com/maplibre/maplibre-native/issues/251
 delete modifiedReferenceSpec['layout_symbol']['icon-overlap'];
 delete modifiedReferenceSpec['layout_symbol']['text-overlap'];
@@ -191,6 +188,14 @@ modifiedReferenceSpec["paint_location-indicator"] = {
       "transition": true,
       "doc": "The color for drawing the accuracy radius border. To adjust transparency, set the alpha component of the color accordingly."
   }
+};
+
+// internal use
+modifiedReferenceSpec["layout_symbol"]["symbol-screen-space"] = {
+    "type": "boolean",
+    "default": false,
+    "property-type": "data-constant",
+    "doc": "Internal use only"
 };
 
 export default modifiedReferenceSpec;

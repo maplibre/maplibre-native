@@ -1,0 +1,47 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_rust//rust:defs.bzl", "rust_static_library")
+
+genrule(
+    name = "cpp_bindings",
+    srcs = [
+        "src/color.rs",
+    ],
+    outs = [
+        "cpp/include/rustutils/color.hpp",
+        "cpp/src/color.rs.cpp",
+    ],
+    cmd = "CXXBRIDGE_CMD=$(location @cxx.rs//:codegen) ./$(location :generate.sh) $(@D) $(SRCS)",
+    # Using the cxxbridge binary built by Bazel
+    tools = [
+        ":generate.sh",
+        "@cxx.rs//:codegen",
+    ],
+)
+
+rust_static_library(
+    name = "rustutils",
+    srcs = [
+        "src/color.rs",
+        "src/lib.rs",
+    ],
+    crate_name = "rustutils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crates//:csscolorparser",
+        "@crates//:cxx",
+    ],
+)
+
+cc_library(
+    name = "rustutilslib",
+    srcs = [
+        ":cpp_bindings",
+    ],
+    includes = [
+        "cpp/include",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":rustutils",
+    ],
+)

@@ -35,6 +35,8 @@ struct Watch {
             case UV_READABLE | UV_WRITABLE:
                 watchEvent = RunLoop::Event::ReadWrite;
                 break;
+            default:
+                break;
         }
 
         watch->eventCallback(watch->fd, watchEvent);
@@ -147,6 +149,12 @@ void RunLoop::runOnce() {
 
 void RunLoop::stop() {
     invoke([&] { uv_unref(impl->holderHandle()); });
+}
+
+void RunLoop::updateTime() {
+    MBGL_VERIFY_THREAD(tid);
+
+    uv_update_time(impl->loop);
 }
 
 void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {

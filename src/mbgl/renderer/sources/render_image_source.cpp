@@ -6,7 +6,6 @@
 #include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/instrumentation.hpp>
@@ -23,51 +22,6 @@ ImageSourceRenderData::~ImageSourceRenderData() = default;
 void ImageSourceRenderData::upload(gfx::UploadPass& uploadPass) const {
     if (bucket && bucket->needsUpload()) {
         bucket->upload(uploadPass);
-    }
-
-#if MLN_LEGACY_RENDERER
-    if (!debugTexture) {
-        std::array<uint8_t, 4> data{{0, 0, 0, 0}};
-        static const PremultipliedImage emptyImage{Size(1, 1), data.data(), data.size()};
-        debugTexture = uploadPass.createTexture(emptyImage);
-    }
-#endif
-}
-
-void ImageSourceRenderData::render(PaintParameters& parameters) const {
-    if (!bucket || !(parameters.debugOptions & MapDebugOptions::TileBorders)) {
-        return;
-    }
-    assert(debugTexture);
-    static const style::Properties<>::PossiblyEvaluated properties{};
-    static const DebugProgram::Binders paintAttributeData(properties, 0);
-
-    auto programInstance = parameters.shaders.getLegacyGroup().get<DebugProgram>();
-    if (!programInstance) {
-        return;
-    }
-
-    for (auto matrix : matrices) {
-        programInstance->draw(parameters.context,
-                              *parameters.renderPass,
-                              gfx::LineStrip{4.0f * parameters.pixelRatio},
-                              gfx::DepthMode::disabled(),
-                              gfx::StencilMode::disabled(),
-                              gfx::ColorMode::unblended(),
-                              gfx::CullFaceMode::disabled(),
-                              *parameters.staticData.tileBorderIndexBuffer,
-                              RenderStaticData::tileBorderSegments(),
-                              DebugProgram::computeAllUniformValues(
-                                  DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
-                                                                    uniforms::color::Value(Color::red()),
-                                                                    uniforms::overlay_scale::Value(1.0f)},
-                                  paintAttributeData,
-                                  properties,
-                                  static_cast<float>(parameters.state.getZoom())),
-                              DebugProgram::computeAllAttributeBindings(
-                                  *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
-                              DebugProgram::TextureBindings{textures::image::Value{debugTexture->getResource()}},
-                              "image");
     }
 }
 
@@ -103,9 +57,6 @@ void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
         mat4& matrix = matrices[i];
         matrix::identity(matrix);
         transformParams.state.matrixFor(matrix, tileIds[i]);
-#if MLN_LEGACY_RENDERER
-        matrix::multiply(matrix, transformParams.alignedProjMatrix, matrix);
-#endif
     }
     renderData = std::make_unique<ImageSourceRenderData>(bucket, std::move(matrices), baseImpl->id);
 }
@@ -182,7 +133,9 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     bool hasVisibleTile = false;
     // Add additional wrapped tile ids if neccessary
-    auto idealTiles = util::tileCover(transformState, static_cast<uint8_t>(transformState.getZoom()));
+    auto idealTiles = util::tileCover(
+        {transformState, parameters.tileLodMinRadius, parameters.tileLodScale, parameters.tileLodPitchThreshold},
+        static_cast<uint8_t>(transformState.getZoom()));
     for (auto tile : idealTiles) {
         if (tile.wrap != 0 && tileCover[0].canonical.isChildOf(tile.canonical)) {
             tileIds.emplace_back(tile.wrap, tileCover[0].canonical);
@@ -218,11 +171,11 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     // Set Bucket Vertices, Indices, and segments
-    bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[0].x, geomCoords[0].y}, {0, 0}));
-    bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[1].x, geomCoords[1].y}, {util::EXTENT, 0}));
-    bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[3].x, geomCoords[3].y}, {0, util::EXTENT}));
+    bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[0].x, geomCoords[0].y}, {0, 0}));
+    bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[1].x, geomCoords[1].y}, {util::EXTENT, 0}));
+    bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[3].x, geomCoords[3].y}, {0, util::EXTENT}));
     bucket->vertices.emplace_back(
-        RasterProgram::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT}));
+        RasterBucket::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT}));
 
     bucket->indices.emplace_back(0, 1, 2);
     bucket->indices.emplace_back(1, 2, 3);

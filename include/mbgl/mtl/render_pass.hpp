@@ -5,6 +5,7 @@
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLCommandEncoder.hpp>
+#include <Metal/Metal.hpp>
 
 #include <memory>
 #include <optional>
@@ -40,13 +41,27 @@ public:
     /// Set the sampler for a texture binding
     void setFragmentSamplerState(const MTLSamplerStatePtr&, int32_t location);
 
+    /// Set the render pipeline state
+    void setRenderPipelineState(const MTLRenderPipelineStatePtr&);
+
     void endEncoding();
+
+    /// Resets the states and bindings of the render pass to deal
+    /// with situations where they are changed by calling the
+    /// underlying rendering API directly. Currently this happens
+    /// when a user changes one of these states or bindings
+    /// in a custom layer
+    void resetState();
 
     void addDebugSignpost(const char* name) override;
 
     void bindVertex(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
-
+    void unbindVertex(std::size_t index);
     void bindFragment(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
+    void unbindFragment(std::size_t index);
+
+    void setCullMode(const MTL::CullMode);
+    void setFrontFacingWinding(const MTL::Winding);
 
 private:
     void pushDebugGroup(const char* name) override;
@@ -57,6 +72,8 @@ private:
     mtl::CommandEncoder& commandEncoder;
     MTLRenderCommandEncoderPtr encoder;
     MTLDepthStencilStatePtr currentDepthStencilState;
+    MTLRenderPipelineStatePtr currentPipelineState;
+
     int32_t currentStencilReferenceValue = 0;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
 
@@ -72,6 +89,9 @@ private:
 
     std::array<MTLTexturePtr, maxBinds> fragmentTextureBindings;
     std::array<MTLSamplerStatePtr, maxBinds> fragmentSamplerStates;
+
+    MTL::CullMode currentCullMode = MTL::CullModeNone;
+    MTL::Winding currentWinding = MTL::WindingClockwise;
 };
 
 } // namespace mtl

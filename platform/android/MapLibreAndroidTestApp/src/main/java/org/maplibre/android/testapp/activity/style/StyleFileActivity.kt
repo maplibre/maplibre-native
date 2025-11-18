@@ -75,7 +75,7 @@ class StyleFileActivity : AppCompatActivity() {
      */
     private fun loadStyleFileTask(context: Context): String =
         try {
-            ResourceUtils.readRawResource(context, R.raw.sat_style)
+            ResourceUtils.readRawResource(context, R.raw.demotiles)
         } catch (exception: Exception) {
             Timber.e(exception, "Can't load local file style")
             ""

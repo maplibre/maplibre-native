@@ -131,6 +131,57 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
                           updateResults,
                           std::move(testFilter)};
 }
+
+void runWithAlternateSources(TestRunner& runner, TestMetadata& metadata, bool& errored, bool& passed) {
+    constexpr auto replacementsKey = "source-replace";
+    constexpr auto targetKey = "replace";
+    constexpr auto sourceKey = "with";
+    constexpr auto sourcesKey = "sources";
+
+    if (!metadata.document.HasMember("metadata") || !metadata.document["metadata"].HasMember("test")) {
+        return;
+    }
+
+    auto& testElement = metadata.document["metadata"]["test"];
+    if (!testElement.HasMember(replacementsKey) || !testElement[replacementsKey].IsArray()) {
+        return;
+    }
+
+    const auto& replacesElement = testElement[replacementsKey];
+    if (!replacesElement.IsArray() || replacesElement.Empty()) {
+        return;
+    }
+
+    auto& sources = metadata.document[sourcesKey];
+
+    // Each item in the source replacements array...
+    for (auto i = replacesElement.Begin(); i != replacesElement.End(); ++i) {
+        const auto& entry = *i;
+        if (entry.IsObject() && entry.HasMember(targetKey) && entry.HasMember(sourceKey) &&
+            entry[targetKey].IsString() && entry[sourceKey].IsString()) {
+            const auto* targetName = entry[targetKey].GetString();
+            const auto* sourceName = entry[sourceKey].GetString();
+            if (sources.HasMember(targetName) && sources[targetName].IsObject() && sources.HasMember(sourceName) &&
+                sources[sourceName].IsObject()) {
+                // Swap the named sources
+                sources[targetName].Swap(sources[sourceName]);
+
+                // run the test again with the new source
+                runner.run(metadata);
+
+                // Restore the original source
+                sources[targetName].Swap(sources[sourceName]);
+
+                // stop if the test fails
+                errored = metadata.metricsErrored || metadata.renderErrored || metadata.labelCutOffFound;
+                passed = !errored && !metadata.metricsFailed && !metadata.renderFailed;
+                if (!passed) {
+                    break;
+                }
+            }
+        }
+    }
+}
 } // namespace
 namespace mbgl {
 
@@ -200,8 +251,9 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         if (it != ignores.end()) {
             metadata.ignoredTest = shouldIgnore = true;
             ignoreReason = it->second;
-            if (ignoreReason.rfind("skip", 0) == 0) {
+            if (ignoreReason.starts_with("skip")) {
                 printf(ANSI_COLOR_GRAY "* skipped %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
+                mbgl::Log::Info(mbgl::Event::General, "* skipped " + id + "(" + ignoreReason + ")");
                 continue;
             }
         }
@@ -216,18 +268,24 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         bool errored = metadata.metricsErrored || metadata.renderErrored || metadata.labelCutOffFound;
         bool passed = !errored && !metadata.metricsFailed && !metadata.renderFailed;
 
+        if (passed) {
+            runWithAlternateSources(runner, metadata, errored, passed);
+        }
+
         if (shouldIgnore) {
             if (passed) {
                 status = "ignored passed";
                 color = "#E8A408";
                 stats.ignorePassedTests++;
                 printf(ANSI_COLOR_YELLOW "* ignore %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
+                mbgl::Log::Info(mbgl::Event::General, "* ignore " + id + " (" + ignoreReason + ")");
             } else {
                 status = "ignored failed";
                 color = "#9E9E9E";
                 stats.ignoreFailedTests++;
                 printf(
                     ANSI_COLOR_LIGHT_GRAY "* ignore %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
+                mbgl::Log::Info(mbgl::Event::General, "* ignore " + id + " (" + ignoreReason + ")");
             }
         } else {
             // Only fail the bots on render errors, this is a CI limitation that
@@ -244,6 +302,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                 color = "green";
                 stats.passedTests++;
                 printf(ANSI_COLOR_GREEN "* passed %s" ANSI_COLOR_RESET "\n", id.c_str());
+                mbgl::Log::Info(mbgl::Event::General, "* passed " + id);
             } else if (errored) {
                 status = "errored";
                 color = "red";
@@ -251,12 +310,15 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                 returnCode = 2;
                 printf(ANSI_COLOR_RED "* errored %s" ANSI_COLOR_RESET "\n", id.c_str());
                 printf(ANSI_COLOR_RED "* error: %s" ANSI_COLOR_RESET "\n", metadata.errorMessage.c_str());
+                mbgl::Log::Info(mbgl::Event::General, "* errored " + id);
+                mbgl::Log::Info(mbgl::Event::General, "* error " + metadata.errorMessage);
             } else {
                 status = "failed";
                 color = "red";
                 stats.failedTests++;
                 returnCode = 3;
                 printf(ANSI_COLOR_RED "* failed %s" ANSI_COLOR_RESET "\n", id.c_str());
+                mbgl::Log::Info(mbgl::Event::General, "* failed " + id);
             }
         }
 
@@ -278,26 +340,32 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         printf(ANSI_COLOR_GREEN "%u passed (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.passedTests,
                100.0 * stats.passedTests / count);
+        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.passedTests) + " passed tests");
     }
     if (stats.ignorePassedTests) {
         printf(ANSI_COLOR_YELLOW "%u passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.ignorePassedTests,
                100.0 * stats.ignorePassedTests / count);
+        mbgl::Log::Info(mbgl::Event::General,
+                        std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
     }
     if (stats.ignoreFailedTests) {
         printf(ANSI_COLOR_LIGHT_GRAY "%u ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.ignoreFailedTests,
                100.0 * stats.ignoreFailedTests / count);
+        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.ignoreFailedTests) + " ignored tests");
     }
     if (stats.failedTests) {
         printf(ANSI_COLOR_RED "%u failed (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.failedTests,
                100.0 * stats.failedTests / count);
+        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.failedTests) + " failed tests");
     }
     if (stats.erroredTests) {
         printf(ANSI_COLOR_RED "%u errored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.erroredTests,
                100.0 * stats.erroredTests / count);
+        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.erroredTests) + " errored tests");
     }
 
     printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).generic_string().c_str());

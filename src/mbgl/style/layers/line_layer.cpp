@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* LineLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"line",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::NotRequired,
-                                        LayerTypeInfo::Layout::Required,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::Geometry};
+    const static LayerTypeInfo typeInfo{.type="line",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::NotRequired,
+                                        .layout=LayerTypeInfo::Layout::Required,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::Geometry};
     return &typeInfo;
 }
-
 
 LineLayer::LineLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {
@@ -40,7 +39,9 @@ LineLayer::LineLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-LineLayer::~LineLayer() = default;
+LineLayer::~LineLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const LineLayer::Impl& LineLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

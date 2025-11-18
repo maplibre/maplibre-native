@@ -1,5 +1,6 @@
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
-load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@rules_apple//apple:ios.bzl", "ios_unit_test")
+load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 apple_resource_bundle(
@@ -53,7 +54,7 @@ ios_unit_test(
     name = "RenderTest",
     minimum_os_version = "13.0",
     provisioning_profile = "//platform/ios:xcode_profile",
-    runner = "@build_bazel_rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
+    runner = "@rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     test_host = "//platform/ios/test/common:RenderTestApp",
     visibility = [
         "//visibility:public",

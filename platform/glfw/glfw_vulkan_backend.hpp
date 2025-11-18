@@ -2,12 +2,18 @@
 
 #include "glfw_backend.hpp"
 
-#include <mbgl/gfx/renderable.hpp>
+#include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
+
+// Example of using an application side VkInstance/VkDevice
+// that's shared with MapLibre's renderer backend
+// #define USE_SHARED_VK_CONTEXT
 
 struct GLFWwindow;
 
-class GLFWVulkanBackend final : public GLFWBackend, public mbgl::vulkan::RendererBackend, public mbgl::gfx::Renderable {
+class GLFWVulkanBackend final : public GLFWBackend,
+                                public mbgl::vulkan::RendererBackend,
+                                public mbgl::vulkan::Renderable {
 public:
     GLFWVulkanBackend(GLFWwindow*, bool capFrameRate);
     ~GLFWVulkanBackend() override;
@@ -26,6 +32,11 @@ public:
 
 protected:
     std::vector<const char*> getInstanceExtensions() override;
+
+#ifdef USE_SHARED_VK_CONTEXT
+    void initInstance() override;
+    void initDevice() override;
+#endif
 
     void activate() override {}
     void deactivate() override {}

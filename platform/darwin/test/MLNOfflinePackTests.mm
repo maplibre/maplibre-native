@@ -32,7 +32,7 @@
 
     // Make sure this doesn't crash without asserts
     [invalidPack invalidate];
-    
+
     [[[NSThread currentThread] threadDictionary] setValue:oldHandler forKey:NSAssertionHandlerKey];
 }
 

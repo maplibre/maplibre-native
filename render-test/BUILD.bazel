@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
@@ -33,9 +34,11 @@ cc_library(
     ],
     deps = [
         "//expression-test:test_runner_common",
+        "//vendor:args",
     ] + select({
         "@platforms//os:ios": ["//platform:ios-sdk"],
         "@platforms//os:linux": ["//platform/linux:impl"],
+        "//conditions:default": [],
     }),
 )
 
@@ -44,7 +47,7 @@ cc_test(
     timeout = "long",
     args = [
         "--manifestPath",
-        "metrics/linux-gcc8-release-style.json",
+        "metrics/linux-opengl.json",
     ],
     data = [
         "//metrics:render-test-files",
@@ -53,6 +56,6 @@ cc_test(
     deps = [
         "render-test-srcs",
         "//platform/default:render-test-bin",
-        "//vendor:mapbox-base",
+        "//vendor:maplibre-native-base",
     ],
 )

@@ -1,6 +1,36 @@
 # Ten Thousand Foot View
 
-![](media/ten-thousand-foot-view-diagram.png)    
+```mermaid
+graph TD
+    subgraph Platform
+        MV[Map View]
+        MR[Map Renderer]
+    end
+
+    subgraph "MapLibre Native Core"
+        M[Map]
+        S[Style]
+        L[Layers]
+        I[Images]
+        Glyphs
+        R[Renderer]
+        TW[TileWorker]
+    end
+
+    %% Platform Interactions
+    MV -- initializes --> MR
+    MV -- Initializes --> M
+
+    %% Core Interactions
+    MR -- runs the rendering loop --> R
+    R -- Renders Map --> M
+    L -- Fetches --> S
+    L -- Fetches --> I
+    R -- Sends messages to generate tiles --> TW
+    TW -- Prepares layers to be rendered --> L
+    L -- Fetches --> Glyphs
+```
+
 *Figure 1: MapLibre Native Components – Ten Thousand Foot view*
 
 From ten thousand foot, MapLibre Native is composed of *Map View* and a
@@ -32,7 +62,7 @@ To summarize:
     composed of multiple *layers*.
 
 5.  A ***Layer*** requires ***Style***, ***Glyphs***, and ***Sprites***
-    for to be ready for rendering. Features rendered in a ***Layer*** 
+    for to be ready for rendering. Features rendered in a ***Layer***
     come from data sources. And a ***Layer*** is composed of tiles produced
     from said features.
 
@@ -109,19 +139,19 @@ characters[^5]. Map tiles use labels of text to show name of cities,
 administrative boundaries, or street names. Map tiles also need to show
 icons for amenities like bus stops and parks. A map style uses character
 map from fonts to display labels and icons. Collectively these are
-called *glyphs.* 
+called *glyphs.*
 
-*Glyphs* require resizing, rotation, and a halo for clarity in nearly every 
-interaction with the map. To achieve this, all *glyphs* are pre-rendered 
+*Glyphs* require resizing, rotation, and a halo for clarity in nearly every
+interaction with the map. To achieve this, all *glyphs* are pre-rendered
 in a shared texture, called *texture atlas*. This atlas is packed inside
 protobuf container. Each element of the atlas is an individual texture
 representing the SDF of the character to render.
 
 Each *glyph* bitmap inside is a field of floats, named signed distance. It
-represents how a *glyph* should be drawn by the GPU. Each *glyph* is of font 
+represents how a *glyph* should be drawn by the GPU. Each *glyph* is of font
 size 24 that stores the distance to the next outline in every pixel. Easily
 put if the pixel is inside the *glyph* outline it has a value between `192-255`.
-Every pixel outside the *glyph* outline has a value between `0-191`. This creates 
+Every pixel outside the *glyph* outline has a value between `0-191`. This creates
 a black and white atlas of all the *glyphs* inside.
 
 This document currently does not have a dedicated section on text rendering.
@@ -193,7 +223,7 @@ check [Geometry Tile Worker](./geometry-tile-worker.md) chapter.
 
 ______________
 [^1]: To read in depth about the data flow for map initialization and
-    rendering in Android, please check 
+    rendering in Android, please check
     [Android Map Rendering Data Flow](./android-map-rendering-data-flow.md)
 
 [^2]: This document speaks of a simplified configuration for brevity.

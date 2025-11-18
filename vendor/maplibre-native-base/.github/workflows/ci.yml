@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test_debug_build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        node_version:
+          - 16
+        architecture:
+          - x64
+        ccompiler:
+          - clang
+        cxxcompiler:
+          - clang++
+        release:
+          - Debug
+
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Build and run tests
+        run: |
+          set -eo pipefail
+          export CC=${{ matrix.ccompiler }} CXX=${{ matrix.cxxcompiler }}
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=${{ matrix.release }} -DBUILD_TESTING=ON
+          cmake --build build
+          ctest --test-dir build/test

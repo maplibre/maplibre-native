@@ -1756,13 +1756,12 @@ void (*const glGetInternalformativ)(GLenum, GLenum, GLenum, GLsizei, GLint*) =
 
 /* OpenGL Windows Extensions */
 
-BOOL(*const wglChoosePixelFormatARB)
-(HDC, const int*, const FLOAT*, UINT, int*, UINT*) = [](HDC hdc,
-                                                        const int* piAttribIList,
-                                                        const FLOAT* pfAttribFList,
-                                                        UINT nMaxFormats,
-                                                        int* piFormats,
-                                                        UINT* nNumFormats) {
+BOOL (*const wglChoosePixelFormatARB)(HDC, const int*, const FLOAT*, UINT, int*, UINT*) = [](HDC hdc,
+                                                                                             const int* piAttribIList,
+                                                                                             const FLOAT* pfAttribFList,
+                                                                                             UINT nMaxFormats,
+                                                                                             int* piFormats,
+                                                                                             UINT* nNumFormats) {
     if (!opengl32) loadWGL();
     return ::wgl_wglChoosePixelFormatARB(hdc, piAttribIList, pfAttribFList, nMaxFormats, piFormats, nNumFormats);
 };

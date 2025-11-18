@@ -11,7 +11,7 @@ std::optional<bool> Converter<bool>::operator()(const Convertible& value, Error&
         error.message = "value must be a boolean";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 std::optional<float> Converter<float>::operator()(const Convertible& value, Error& error) const {
@@ -20,7 +20,7 @@ std::optional<float> Converter<float>::operator()(const Convertible& value, Erro
         error.message = "value must be a number";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 std::optional<std::string> Converter<std::string>::operator()(const Convertible& value, Error& error) const {
@@ -29,7 +29,7 @@ std::optional<std::string> Converter<std::string>::operator()(const Convertible&
         error.message = "value must be a string";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 template <class T>
@@ -47,7 +47,7 @@ std::optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::ope
         return std::nullopt;
     }
 
-    return *result;
+    return result;
 }
 
 template <class T>
@@ -111,7 +111,7 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
         return std::nullopt;
     }
 
-    return *color;
+    return color;
 }
 
 std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {
@@ -134,6 +134,55 @@ std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, 
         error.message = "value must be a number or an array of numbers (between 1 and 4 elements)";
     }
     return result;
+}
+
+std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(
+    const Convertible& value, Error& error) const {
+    if (!isArray(value)) {
+        error.message = "value must be an array";
+        return std::nullopt;
+    }
+
+    const auto arraySize = arrayLength(value);
+    if (arraySize < 1 || arraySize % 2 != 0) {
+        error.message = "array must contain an even number of elements";
+        return std::nullopt;
+    }
+
+    std::vector<AnchorOffsetPair> collection;
+    collection.reserve(arraySize / 2);
+    for (size_t index = 0; index < arraySize; index += 2) {
+        Convertible offsetValue = arrayMember(value, index + 1);
+        std::optional<SymbolAnchorType> anchor = Converter<SymbolAnchorType>{}(arrayMember(value, index), error);
+
+        if (!anchor) {
+            error.message = "anchor must be a valid anchor value";
+            return std::nullopt;
+        }
+
+        if (!isArray(offsetValue)) {
+            error.message = "anchor offset must be an array";
+            return std::nullopt;
+        }
+
+        if (arrayLength(offsetValue) != 2) {
+            error.message = "anchor offset must have two elements";
+            return std::nullopt;
+        }
+
+        std::optional<float> xOffset = toNumber(arrayMember(offsetValue, 0));
+        std::optional<float> yOffset = toNumber(arrayMember(offsetValue, 1));
+        if (!xOffset || !yOffset) {
+            error.message = "anchor offset must have two numbers";
+            return std::nullopt;
+        }
+
+        auto anchorType = anchor.value();
+        auto offset = std::array<float, 2>{xOffset.value(), yOffset.value()};
+        collection.push_back(AnchorOffsetPair{anchorType, offset});
+    }
+
+    return VariableAnchorOffsetCollection(std::move(collection));
 }
 
 template <size_t N>

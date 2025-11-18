@@ -40,7 +40,7 @@ LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fon
 LocalGlyphRasterizer::~LocalGlyphRasterizer() {}
 
 bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) {
-    return impl->isConfigured() && impl->metrics->inFont(glyphID) &&
+    return impl->isConfigured() && impl->metrics->inFont(glyphID.complex.code) &&
            util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
 }
 
@@ -53,11 +53,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
         return glyph;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
-    glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID);
-#else
-    glyph.metrics.width = impl->metrics->width(glyphID);
-#endif
+    glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID.complex.code);
     glyph.metrics.height = impl->metrics->height();
     glyph.metrics.left = 3;
     glyph.metrics.top = -8;
@@ -70,16 +66,12 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     QPainter painter(&image);
     painter.setFont(impl->font);
     painter.setRenderHints(QPainter::TextAntialiasing);
-    // Render at constant baseline, to align with glyphs that are rendered by node-fontnik.
-    painter.drawText(QPointF(0, 20), QString(QChar(glyphID)));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    // Render at constant baseline, to align with glyphs that are rendered by node-fontnik.
+    painter.drawText(QPointF(0, 20), QString(QChar(glyphID.complex.code)));
+
     auto img = std::make_unique<uint8_t[]>(image.sizeInBytes());
     memcpy(img.get(), image.constBits(), image.sizeInBytes());
-#else
-    auto img = std::make_unique<uint8_t[]>(image.byteCount());
-    memcpy(img.get(), image.constBits(), image.byteCount());
-#endif
 
     glyph.bitmap = AlphaImage{size, std::move(img)};
 

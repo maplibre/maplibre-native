@@ -1,5 +1,5 @@
 export BUILDTYPE ?= Debug
-export RENDERER ?= drawable
+export RENDERER ?= opengl
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= main
 
@@ -14,11 +14,10 @@ else
   $(error BUILDTYPE must be Debug, Sanitize, Release or RelWithDebInfo)
 endif
 
-ifeq ($(RENDERER), drawable)
-else ifeq ($(RENDERER), legacy)
+ifeq ($(RENDERER), opengl)
 else ifeq ($(RENDERER), vulkan)
 else
-  $(error RENDERER must be 'legacy' (OpenGL), 'drawable' (OpenGL) or 'vulkan')
+  $(error RENDERER must be 'opengl' or 'vulkan')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
@@ -60,7 +59,7 @@ MLN_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.bu
 # Generate code based on the style specification
 .PHONY: android-style-code
 android-style-code:
-	node scripts/generate-style-code.js
+	node scripts/generate-style-code.mjs
 style-code: android-style-code
 
 define ANDROID_RULES
@@ -219,9 +218,11 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
 run-android-unit-test:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:test$(RENDERER)DebugUnitTest --info
 run-android-unit-test-%:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info --tests "$*"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:test$(RENDERER)DebugUnitTest --info --tests "$*"
+
+DEBUG_TAR_FILE_NAME := $(if $(findstring opengl,$(RENDERER)),debug-symbols-opengl-$(MLN_ANDROID_APK_SUFFIX).tar.gz,debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz)
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage
@@ -230,7 +231,7 @@ apackage:
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assemble$(RENDERER)$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/*/*JniLibsProjectOnly/jni .
+	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)$(BUILDTYPE)/*JniLibsProjectOnly/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
@@ -245,7 +246,7 @@ run-android-test-app-center:
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish
 run-android-publish:
-	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmaplibre.abis=all :MapLibreAndroid:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmaplibre.abis=all :MapLibreAndroid:publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo
@@ -279,7 +280,7 @@ android-lint-test-app:
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
 android-license:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:licenseDrawableReleaseReport
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:licenseOpenglReleaseReport
 	python3 scripts/generate-license.py
 
 # Symbolicate ndk stack traces for the arm-v7 abi
@@ -311,3 +312,15 @@ clean:
 	        ./MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/activity/gen \
 	        ./MapLibreAndroid/src/main/assets \
 		    ./MapLibreAndroidTestApp/src/main/assets/integration
+
+### MkDocs Documentation ########################################################
+
+.PHONY: mkdocs
+mkdocs:
+	docker build -t squidfunk/mkdocs-material docs
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
+
+.PHONY: mkdocs-build
+mkdocs-build:
+	docker build -t squidfunk/mkdocs-material docs
+	docker run --rm -v ${PWD}:/docs squidfunk/mkdocs-material build --strict

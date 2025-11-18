@@ -4,14 +4,12 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
-#include <mbgl/programs/segment.hpp>
 
 #include <memory>
 
 namespace mbgl {
 
-template <class AttributeList>
-class Segment;
+class SegmentBase;
 class PaintParameters;
 
 namespace gfx {
@@ -67,9 +65,6 @@ private:
     gfx::StencilMode makeStencilMode(PaintParameters&) const;
 
     void uploadTextures() const;
-
-    void bindUniformBuffers() const;
-    void unbindUniformBuffers() const;
 
     void bindTextures() const;
     void unbindTextures() const;

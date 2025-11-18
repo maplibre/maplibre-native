@@ -24,7 +24,13 @@ public:
     void createPlatformSurface() override {
         auto& backendImpl = static_cast<AndroidVulkanRendererBackend&>(backend);
         const vk::AndroidSurfaceCreateInfoKHR createInfo({}, backendImpl.getWindow());
-        surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(createInfo);
+        surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(
+            createInfo, nullptr, backendImpl.getDispatcher());
+
+        const int apiLevel = android_get_device_api_level();
+        if (apiLevel < __ANDROID_API_Q__) {
+            setSurfaceTransformPollingInterval(30);
+        }
     }
 
     void bind() override {}
@@ -42,7 +48,7 @@ private:
 
 AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window_)
     : vulkan::RendererBackend(gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidVulkanRenderableResource>(*this)),
+      vulkan::Renderable({64, 64}, std::make_unique<AndroidVulkanRenderableResource>(*this)),
       window(window_) {
     init();
 }
@@ -61,6 +67,11 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
     if (context) {
         static_cast<vulkan::Context&>(*context).requestSurfaceUpdate();
     }
+}
+
+PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
+    // TODO not implemented
+    return PremultipliedImage(Size(2, 2));
 }
 
 } // namespace android

@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": true,
+    "checkJs": true,
+    "module": "NodeNext",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "maxNodeModuleJsDepth": 0,
+    "noEmit": true
+  },
+  "include": [
+    ".github/scripts/**/*.ts",
+    "scripts/**/*.mjs",
+    "scripts/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

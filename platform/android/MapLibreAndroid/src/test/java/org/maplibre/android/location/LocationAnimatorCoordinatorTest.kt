@@ -18,13 +18,14 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
 import org.maplibre.testUtils.Assert as MapLibreAssert
 
 @RunWith(RobolectricTestRunner::class)
-class LocationAnimatorCoordinatorTest {
+class LocationAnimatorCoordinatorTest : BaseTest() {
 
     private lateinit var locationAnimatorCoordinator: LocationAnimatorCoordinator
     private val cameraPosition: CameraPosition = CameraPosition.DEFAULT
@@ -581,6 +582,15 @@ class LocationAnimatorCoordinatorTest {
         locationAnimatorCoordinator.cancelAllAnimations()
 
         assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG].isStarted)
+    }
+
+    // regression test for crash https://github.com/maplibre/maplibre-native/issues/3294
+    @Test
+    fun resetAllCameraAnimations_null_target() {
+        locationAnimatorCoordinator.feedNewLocation(Location(""), CameraPosition.DEFAULT, true)
+
+        val cameraPosition = CameraPosition.Builder().build()
+        locationAnimatorCoordinator.resetAllCameraAnimations(cameraPosition, false)
     }
 
     @Test

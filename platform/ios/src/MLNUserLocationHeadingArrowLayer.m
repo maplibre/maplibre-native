@@ -52,7 +52,7 @@ const CGFloat MLNUserLocationHeadingArrowSize = 8;
     [bezierPath addQuadCurveToPoint:right controlPoint:middle];
     [bezierPath addLineToPoint:top];
     [bezierPath closePath];
-    
+
     return bezierPath.CGPath;
 }
 

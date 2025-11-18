@@ -13,10 +13,11 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
-class LocationLayerControllerTest {
+class LocationLayerControllerTest : BaseTest() {
     private val maplibreMap = Mockito.mock(MapLibreMap::class.java)
     private val style = Mockito.mock(
         Style::class.java
@@ -966,6 +967,7 @@ class LocationLayerControllerTest {
         val locationSource = Mockito.mock(GeoJsonSource::class.java)
         Mockito.`when`<Any?>(style.getSourceAs(LocationComponentConstants.LOCATION_SOURCE))
             .thenReturn(locationSource)
+        Mockito.`when`(style.isFullyLoaded).thenReturn(true)
         val sourceProvider = buildLayerProvider()
         Mockito.`when`(
             sourceProvider.generateSource(

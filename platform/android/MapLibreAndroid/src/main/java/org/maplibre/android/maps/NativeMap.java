@@ -55,6 +55,7 @@ interface NativeMap {
   @NonNull
   CameraPosition getCameraPosition();
 
+  // Note for implementors: the ordering of the padding is left, top, right, bottom
   CameraPosition getCameraForLatLngBounds(@NonNull LatLngBounds bounds, int[] padding, double bearing, double pitch);
 
   CameraPosition getCameraForGeometry(@NonNull Geometry geometry, int[] padding, double bearing, double pitch);
@@ -220,6 +221,12 @@ interface NativeMap {
 
   boolean getDebug();
 
+  String[] getActionJournalLogFiles();
+
+  String[] getActionJournalLog();
+
+  void clearActionJournalLog();
+
   void setReachability(boolean status);
 
   void setApiBaseUrl(String baseUrl);
@@ -237,11 +244,31 @@ interface NativeMap {
 
   boolean getTileCacheEnabled();
 
+  void setTileLodMinRadius(double radius);
+
+  double getTileLodMinRadius();
+
+  void setTileLodScale(double scale);
+
+  double getTileLodScale();
+
+  void setTileLodPitchThreshold(double threshold);
+
+  double getTileLodPitchThreshold();
+
+  void setTileLodZoomShift(double shift);
+
+  double getTileLodZoomShift();
+
   void setGestureInProgress(boolean inProgress);
 
   float getPixelRatio();
 
   void triggerRepaint();
+
+  boolean isRenderingStatsViewEnabled();
+
+  void enableRenderingStatsView(boolean value);
 
   void setSwapBehaviorFlush(boolean flush);
 

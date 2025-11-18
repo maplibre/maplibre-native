@@ -1,23 +1,23 @@
 ---
 Checks: [
-    android-*,	
+    android-*,
     boost-*,
     bugprone-*,
-    clang-analyzer-core*,	
-    clang-analyzer-cplusplus*,	
-    clang-analyzer-deadcode*,	
-    clang-analyzer-optin.cplusplus*,	
-    clang-analyzer-optin.performance.Padding,	
-    clang-analyzer-security*,	
+    clang-analyzer-core*,
+    clang-analyzer-cplusplus*,
+    clang-analyzer-deadcode*,
+    clang-analyzer-optin.cplusplus*,
+    clang-analyzer-optin.performance.Padding,
+    clang-analyzer-security*,
     clang-diagnostic-*,
     cppcoreguidelines-avoid-goto,
     cppcoreguidelines-no-malloc,
     google-*,
     llvm-*,
-    misc-*,	
-    modernize-*,	
-    performance-*,	
-    portability-*,	
+    misc-*,
+    modernize-*,
+    performance-*,
+    portability-*,
     readability-*,
     -bugprone-branch-clone,
     -bugprone-easily-swappable-parameters,
@@ -109,10 +109,19 @@ Checks: [
     -readability-suspicious-call-argument,
     -readability-uppercase-literal-suffix,
     -readability-use-anyofallof,
-    -modernize-loop-convert # since C++20 this complains about reverse loops with iterators, but good ranges support only landed in clang 15
+    -modernize-loop-convert, # since C++20 this complains about reverse loops with iterators, but good ranges support only landed in clang 15
+    -performance-enum-size,
+    -misc-include-cleaner,
+    -readability-redundant-inline-specifier,
+    -readability-avoid-nested-conditional-operator,
+    -readability-math-missing-parentheses,
+    -readability-enum-initial-value,
+    -boost-use-ranges,
+    -modernize-use-constraints,
+    -portability-template-virtual-member-function
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-CheckOptions:	
-  - key:   performance-unnecessary-value-param.AllowedTypes	
+CheckOptions:
+  - key:   performance-unnecessary-value-param.AllowedTypes
     value: 'exception_ptr'

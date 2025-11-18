@@ -50,7 +50,7 @@
     if (UIColor *color = [self mgl_colorWithRGBComponents:components]) {
         return [NSExpression expressionForConstantValue:color];
     }
-    
+
     NSExpression *color = [NSExpression expressionForConstantValue:[UIColor class]];
     NSExpression *alpha = [NSExpression expressionForConstantValue:@1.0];
     return [NSExpression expressionForFunction:color
@@ -62,7 +62,7 @@
     if (UIColor *color = [self mgl_colorWithRGBComponents:components]) {
         return [NSExpression expressionForConstantValue:color];
     }
-    
+
     NSExpression *color = [NSExpression expressionForConstantValue:[UIColor class]];
     return [NSExpression expressionForFunction:color
                                   selectorName:@"colorWithRed:green:blue:alpha:"
@@ -73,18 +73,18 @@
     if (components.count < 3 || components.count > 4) {
         return nil;
     }
-    
+
     for (NSExpression *component in components) {
         if (component.expressionType != NSConstantValueExpressionType) {
             return nil;
         }
-        
+
         NSNumber *number = (NSNumber *)component.constantValue;
         if (![number isKindOfClass:[NSNumber class]]) {
             return nil;
         }
     }
-    
+
     return [UIColor colorWithRed:[components[0].constantValue doubleValue] / 255.0
                            green:[components[1].constantValue doubleValue] / 255.0
                             blue:[components[2].constantValue doubleValue] / 255.0

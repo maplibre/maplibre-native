@@ -21,7 +21,7 @@ public:
 
     static TileCoordinate fromLatLng(double zoom, const LatLng& latLng) {
         const double scale = std::pow(2.0, zoom);
-        return {Projection::project(latLng, scale) / util::tileSize_D, zoom};
+        return {.p = Projection::project(latLng, scale) / util::tileSize_D, .z = zoom};
     }
 
     static TileCoordinate fromScreenCoordinate(const TransformState& state,
@@ -32,12 +32,12 @@ public:
 
     TileCoordinate zoomTo(double zoom) const {
         const double scaleDiff = std::pow(2.0, zoom - z);
-        return {p * scaleDiff, zoom};
+        return {.p = p * scaleDiff, .z = zoom};
     }
 
     static GeometryCoordinate toGeometryCoordinate(const UnwrappedTileID& tileID, const TileCoordinatePoint& point) {
         const double scale = std::pow(2.0, tileID.canonical.z);
-        auto zoomed = TileCoordinate{point, 0}.zoomTo(tileID.canonical.z);
+        auto zoomed = TileCoordinate{.p = point, .z = 0}.zoomTo(tileID.canonical.z);
         return {int16_t(util::clamp<int64_t>(
                     static_cast<int64_t>((zoomed.p.x - tileID.canonical.x - tileID.wrap * scale) * util::EXTENT),
                     std::numeric_limits<int16_t>::min(),

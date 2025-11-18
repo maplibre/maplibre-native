@@ -1,31 +1,29 @@
-/mapbox-gl-native-android/MapLibreAndroid/mapbox-gl-native
-/mapbox-gl-native-android/MapLibreAndroidTestApp/mapbox-gl-native
 /platform/android/MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
-/platform/android/local.properties
+
 /platform/android/gradle/configuration.gradle
 /platform/android/arm64-v8a
 /platform/android/armeabi-v7a
-/platform/android/MapLibreAndroid/.cxx
 /platform/android/MapLibreAndroid/build
-/platform/android/MapLibreAndroidTestApp/.cxx
+/platform/android/MapLibrePlugin/build
 /platform/android/MapLibreAndroidTestApp/build
-/platform/android/.gradle
+/platform/android/buildSrc/build
 /platform/android/x86
 /platform/android/x86_64
 /cmake-build-debug
 /platform/android/build
 /platform/android/MapLibreAndroid/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
-/platform/ios/platform/ios/Mapbox.playground/build/
-/platform/windows/vendor/mesa3d/
+/platform/android/MapLibreAndroid/android-binaries-*.zip
 *.code-workspace
 
+local.properties
+.gradle
 .DS_Store
 .cache
 compile_commands.json
 /build
+/build-*
 **/.idea
 **/.clwb
-/platform/android/MapLibreAndroidTestApp/local.properties
 /new_offline.db
 *.gpg
 /.vscode
@@ -33,13 +31,13 @@ compile_commands.json
 /platform/android/signing-key.text
 /platform/android/.java-version
 *.hprof
-/platform/ios/platform/ios/benchmark/assets/tiles/tiles
-/platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Regular,Noto Sans Regular
-/platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Medium,Noto Sans Regular
-/platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Condensed Italic,Noto Sans Italic
-/platform/ios/platform/ios/benchmark/assets/glyphs/Noto Sans Regular
 /platform/android/key.json
+/platform/android/site
 node_modules
+.cxx
+.env
+vendor/dawn/
+
 # Node binaries.
 /lib
 
@@ -56,5 +54,9 @@ __generated__
 cache.sqlite
 cache.sqlite-journal
 out.png
-/test/android/app/.cxx
 /test/android/app/build
+
+# Rust
+**/target/
+**/*.rs.bk
+**/*.profraw

@@ -19,6 +19,7 @@
 
 const MLNShapeSourceOption MLNShapeSourceOptionBuffer = @"MLNShapeSourceOptionBuffer";
 const MLNShapeSourceOption MLNShapeSourceOptionClusterRadius = @"MLNShapeSourceOptionClusterRadius";
+const MLNShapeSourceOption MLNShapeSourceOptionClusterMinPoints = @"MLNShapeSourceOptionClusterMinPoints";
 const MLNShapeSourceOption MLNShapeSourceOptionClustered = @"MLNShapeSourceOptionClustered";
 const MLNShapeSourceOption MLNShapeSourceOptionClusterProperties = @"MLNShapeSourceOptionClusterProperties";
 const MLNShapeSourceOption MLNShapeSourceOptionMaximumZoomLevel = @"MLNShapeSourceOptionMaximumZoomLevel";
@@ -68,6 +69,14 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
                         format:@"MLNShapeSourceOptionClusterRadius must be an NSNumber."];
         }
         geoJSONOptions->clusterRadius = value.integerValue;
+    }
+
+    if (NSNumber *value = options[MLNShapeSourceOptionClusterMinPoints]) {
+        if (![value isKindOfClass:[NSNumber class]]) {
+            [NSException raise:NSInvalidArgumentException
+                        format:@"MLNShapeSourceOptionClusterMinPoints must be an NSNumber."];
+        }
+        geoJSONOptions->clusterMinPoints = value.integerValue;
     }
 
     if (NSNumber *value = options[MLNShapeSourceOptionMaximumZoomLevelForClustering]) {
@@ -241,7 +250,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
-    
+
     std::vector<mbgl::Feature> features;
     if ([self.stylable isKindOfClass:[MLNMapView class]]) {
         MLNMapView *mapView = (MLNMapView *)self.stylable;
@@ -255,21 +264,21 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
 - (std::optional<mbgl::FeatureExtensionValue>)featureExtensionValueOfCluster:(MLNShape<MLNCluster> *)cluster extension:(std::string)extension options:(const std::map<std::string, mbgl::Value>)options {
     MLNAssertStyleSourceIsValid();
     std::optional<mbgl::FeatureExtensionValue> extensionValue;
-    
+
     // Check parameters
     if (!self.rawSource || !self.stylable || !cluster) {
         return extensionValue;
     }
 
     auto geoJSON = [cluster geoJSONObject];
-    
+
     if (!geoJSON.is<mbgl::GeoJSONFeature>()) {
         MLNAssert(0, @"cluster geoJSON object is not a feature.");
         return extensionValue;
     }
-    
+
     auto clusterFeature = geoJSON.get<mbgl::GeoJSONFeature>();
-    
+
     if ([self.stylable isKindOfClass:[MLNMapView class]]) {
         MLNMapView *mapView = (MLNMapView *)self.stylable;
         extensionValue = mapView.renderer->queryFeatureExtensions(self.rawSource->getID(),
@@ -292,26 +301,26 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
     if (!featureExtension) {
         return @[];
     }
-    
+
     if (!featureExtension->is<mbgl::FeatureCollection>()) {
         return @[];
     }
-    
+
     std::vector<mbgl::GeoJSONFeature> leaves = featureExtension->get<mbgl::FeatureCollection>();
     return MLNFeaturesFromMBGLFeatures(leaves);
 }
 
 - (NSArray<id <MLNFeature>> *)childrenOfCluster:(MLNPointFeatureCluster *)cluster {
     auto featureExtension = [self featureExtensionValueOfCluster:cluster extension:"children" options:{}];
-    
+
     if (!featureExtension) {
         return @[];
     }
-    
+
     if (!featureExtension->is<mbgl::FeatureCollection>()) {
         return @[];
     }
-    
+
     std::vector<mbgl::GeoJSONFeature> leaves = featureExtension->get<mbgl::FeatureCollection>();
     return MLNFeaturesFromMBGLFeatures(leaves);
 }
@@ -322,33 +331,33 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
     if (!featureExtension) {
         return -1.0;
     }
-    
+
     if (!featureExtension->is<mbgl::Value>()) {
         return -1.0;
     }
-    
+
     auto value = featureExtension->get<mbgl::Value>();
     if (value.is<uint64_t>()) {
         auto zoom = value.get<uint64_t>();
         return static_cast<double>(zoom);
     }
-    
+
     return -1.0;
 }
 
 - (void)debugRecursiveLogForFeature:(id <MLNFeature>)feature indent:(NSUInteger)indent {
     NSString *description = feature.description;
-    
+
     // Want our recursive log on a single line
     NSString *log = [description stringByReplacingOccurrencesOfString:@"\\s+"
                                                            withString:@" "
                                                               options:NSRegularExpressionSearch
                                                                 range:NSMakeRange(0, description.length)];
-    
+
     printf("%*s%s\n", (int)indent, "", log.UTF8String);
-    
+
     MLNPointFeatureCluster *cluster = MLN_OBJC_DYNAMIC_CAST(feature, MLNPointFeatureCluster);
-    
+
     if (cluster) {
         for (id <MLNFeature> child in [self childrenOfCluster:cluster]) {
             [self debugRecursiveLogForFeature:child indent:indent + 4];

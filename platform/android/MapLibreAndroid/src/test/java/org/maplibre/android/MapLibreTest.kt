@@ -18,8 +18,9 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.utils.ConfigUtils.Companion.getMockedOptions
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import java.io.File
 
-class MapLibreTest {
+class MapLibreTest : BaseTest() {
     private var context: Context? = null
     private var appContext: Context? = null
 
@@ -68,14 +69,16 @@ class MapLibreTest {
     fun testNoInstance() {
         val displayMetrics = Mockito.mock(DisplayMetrics::class.java)
         val resources = Mockito.mock(Resources::class.java)
+        val files = Mockito.mock(File::class.java)
         Mockito.`when`(resources.displayMetrics).thenReturn(displayMetrics)
         Mockito.`when`(context!!.resources).thenReturn(resources)
+        Mockito.`when`(context!!.filesDir).thenReturn(files)
         val typedArray = Mockito.mock(TypedArray::class.java)
         Mockito.`when`(context!!.obtainStyledAttributes(ArgumentMatchers.nullable(AttributeSet::class.java), ArgumentMatchers.any(IntArray::class.java), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt()))
                 .thenReturn(typedArray)
         expectedException.expect(MapLibreConfigurationException::class.java)
         expectedException.expectMessage("""
-    
+
     Using MapView requires calling MapLibre.getInstance(Context context, String apiKey, WellKnownTileServer wellKnownTileServer) before inflating or creating the view.
     """.trimIndent())
         MapView(context!!)

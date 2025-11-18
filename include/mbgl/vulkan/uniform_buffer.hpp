@@ -15,10 +15,11 @@ public:
     ~UniformBuffer() override;
 
     const BufferResource& getBufferResource() const { return buffer; }
+    BufferResource& mutableBufferResource() { return buffer; }
 
     UniformBuffer clone() const { return {buffer.clone()}; }
 
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 protected:
     BufferResource buffer;
@@ -30,31 +31,42 @@ public:
     UniformBufferArray() = delete;
     UniformBufferArray(DescriptorSetType descriptorSetType_,
                        uint32_t descriptorStartIndex_,
-                       uint32_t descriptorBindingCount_)
+                       uint32_t descriptorStorageCount_,
+                       uint32_t descriptorUniformCount_)
         : descriptorSetType(descriptorSetType_),
           descriptorStartIndex(descriptorStartIndex_),
-          descriptorBindingCount(descriptorBindingCount_) {}
+          descriptorStorageCount(descriptorStorageCount_),
+          descriptorUniformCount(descriptorUniformCount_) {}
 
-    UniformBufferArray(UniformBufferArray&& other)
-        : gfx::UniformBufferArray(std::move(other)) {}
+    UniformBufferArray(UniformBufferArray&& other) noexcept
+        : gfx::UniformBufferArray(std::move(other)),
+          descriptorSetType(other.descriptorSetType),           // NOLINT(bugprone-use-after-move)
+          descriptorStartIndex(other.descriptorStartIndex),     // NOLINT(bugprone-use-after-move)
+          descriptorStorageCount(other.descriptorStorageCount), // NOLINT(bugprone-use-after-move)
+          descriptorUniformCount(other.descriptorUniformCount), // NOLINT(bugprone-use-after-move)
+          descriptorSet(std::move(other.descriptorSet)) {}      // NOLINT(bugprone-use-after-move)
+
     UniformBufferArray(const UniformBufferArray&) = delete;
 
-    UniformBufferArray& operator=(UniformBufferArray&& other) {
+    UniformBufferArray& operator=(UniformBufferArray&& other) noexcept {
         gfx::UniformBufferArray::operator=(std::move(other));
         return *this;
     }
+
     UniformBufferArray& operator=(const UniformBufferArray& other) {
         gfx::UniformBufferArray::operator=(other);
         return *this;
     }
 
-    ~UniformBufferArray() = default;
+    ~UniformBufferArray() override = default;
 
     const std::shared_ptr<gfx::UniformBuffer>& set(const size_t id,
                                                    std::shared_ptr<gfx::UniformBuffer> uniformBuffer) override;
 
     void createOrUpdate(
         const size_t id, const void* data, std::size_t size, gfx::Context& context, bool persistent = false) override;
+
+    void bind(gfx::RenderPass& renderPass) override;
 
     void bindDescriptorSets(CommandEncoder& encoder);
     void freeDescriptorSets() { descriptorSet.reset(); }
@@ -66,7 +78,8 @@ private:
 
     const DescriptorSetType descriptorSetType{DescriptorSetType::DrawableUniform};
     const uint32_t descriptorStartIndex{0};
-    const uint32_t descriptorBindingCount{0};
+    const uint32_t descriptorStorageCount{0};
+    const uint32_t descriptorUniformCount{0};
 
     std::unique_ptr<UniformDescriptorSet> descriptorSet;
 };

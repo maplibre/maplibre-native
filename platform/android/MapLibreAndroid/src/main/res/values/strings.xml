@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Attribution icon. Activate to show attribution dialog.</string>
     <string name="maplibre_myLocationViewContentDescription">Location View. This shows your location on the map.</string>
     <string name="maplibre_mapActionDescription">Showing a Map created with MapLibre. Scroll by dragging two fingers. Zoom by pinching two fingers.</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK for Android</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">No web browser installed on device, can\'t open web page.</string>
     <string name="maplibre_offline_error_region_definition_invalid">Provided OfflineRegionDefinition doesn\'t fit the world bounds: %s</string>
 </resources>

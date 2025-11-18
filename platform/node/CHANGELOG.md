@@ -1,9 +1,27 @@
-
 ## main
 
-## 6.0.1-pre.0
+## 6.3.0-pre.1
+* Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
+* Updated NAN to v2.23.0 to support node v24 ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
+* Updated the linux binary to be built on Ubuntu 24.04 ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
+* Updated the macos binary to be built on macOS 15 ([#3863](https://github.com/maplibre/maplibre-native/pull/3863))
+* Moved node-pre-gyp back to @acalcutt/node-pre-gyp to support node v24. There is currently an issue with releases of @mapbox/node-pre-gyp which is preventing using it. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
+* Add Windows arm64 binary build to ci and release workflows. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
+* Add options parameter to addImage method in Node.js type definitions ([#3868](https://github.com/maplibre/maplibre-native/pull/3868))
+
+## 6.2.0
+* Fix freezing in macos/metal after ~32 renders ([Issue](https://github.com/maplibre/maplibre-native/issues/2928), [PR](https://github.com/maplibre/maplibre-native/pull/3673)).
+* Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
+
+## 6.1.0
 * Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
   More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
+* Update NAN to 2.22.0 ([#2948](https://github.com/maplibre/maplibre-native/pull/2948))
+* Add PMTiles support ([#2882](https://github.com/maplibre/maplibre-native/pull/2882)).
+* Replace deprecated Node Buffer constructor ([#3126](https://github.com/maplibre/maplibre-native/pull/3126)).
+* Moved from legacy renderer to drawable renderer in linux and windows builds. the legacy renderer has been removed. ([#3384](https://github.com/maplibre/maplibre-native/pull/3384))
+* Moved node-pre-gyp back to @mapbox/node-pre-gyp. Note that @mapbox/node-pre-gyp requires node 18+, so node 16 support has been removed. ([#3381](https://github.com/maplibre/maplibre-native/pull/3381))
 
 ## 6.0.0
 * [Note] This is the first release that is back on the main branch.

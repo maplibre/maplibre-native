@@ -2,11 +2,42 @@
 
 #include <mbgl/shaders/heatmap_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto heatmapShaderPrelude = R"(
+
+enum {
+    idHeatmapDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idHeatmapEvaluatedPropsUBO = drawableReservedUBOCount,
+    heatmapUBOCount
+};
+
+struct alignas(16) HeatmapDrawableUBO {
+    /*  0 */ float4x4 matrix;
+    /* 64 */ float extrude_scale;
+
+    // Interpolations
+    /* 68 */ float weight_t;
+    /* 72 */ float radius_t;
+    /* 76 */ float pad1;
+    /* 80 */
+};
+static_assert(sizeof(HeatmapDrawableUBO) == 5 * 16, "wrong size");
+
+/// Evaluated properties that do not depend on the tile
+struct alignas(16) HeatmapEvaluatedPropsUBO {
+    /*  0 */ float weight;
+    /*  4 */ float radius;
+    /*  8 */ float intensity;
+    /* 12 */ float padding;
+    /* 16 */
+};
+static_assert(sizeof(HeatmapEvaluatedPropsUBO) == 16, "wrong size");
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
@@ -14,21 +45,21 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = heatmapShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(4)]];
+    short2 pos [[attribute(heatmapUBOCount + 0)]];
 
 #if !defined(HAS_UNIFORM_u_weight)
-    float2 weight [[attribute(5)]];
+    float2 weight [[attribute(heatmapUBOCount + 1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(6)]];
+    float2 radius [[attribute(heatmapUBOCount + 2)]];
 #endif
 };
 
@@ -36,26 +67,6 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float weight;
     float2 extrude;
-};
-
-struct alignas(16) HeatmapDrawableUBO {
-    float4x4 matrix;
-    float extrude_scale;
-    float pad1;
-    float2 pad2;
-};
-
-struct alignas(16) HeatmapEvaluatedPropsUBO {
-    float weight;
-    float radius;
-    float intensity;
-    float pad1;
-};
-
-struct alignas(16) HeatmapInterpolateUBO {
-    float weight_t;
-    float radius_t;
-    float2 pad1;
 };
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
@@ -67,19 +78,21 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 #define GAUSS_COEF 0.3989422804014327
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HeatmapDrawableUBO& drawable [[buffer(1)]],
-                                device const HeatmapInterpolateUBO& interp [[buffer(2)]],
-                                device const HeatmapEvaluatedPropsUBO& props [[buffer(3)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const HeatmapDrawableUBO* drawableVector [[buffer(idHeatmapDrawableUBO)]],
+                                device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]]) {
+
+    device const HeatmapDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_weight)
     const auto weight = props.weight;
 #else
-    const auto weight = unpack_mix_float(vertx.weight, interp.weight_t);
+    const auto weight = unpack_mix_float(vertx.weight, drawable.weight_t);
 #endif
 #if defined(HAS_UNIFORM_u_radius)
     const auto radius = props.radius;
 #else
-    const auto radius = unpack_mix_float(vertx.radius, interp.radius_t);
+    const auto radius = unpack_mix_float(vertx.radius, drawable.radius_t);
 #endif
 
     // unencode the extrusion vector that we snuck into the a_pos vector
@@ -117,7 +130,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HeatmapEvaluatedPropsUBO& props [[buffer(3)]]) {
+                            device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif

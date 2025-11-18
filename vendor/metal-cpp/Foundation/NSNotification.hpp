@@ -107,4 +107,3 @@ _NS_INLINE void NS::NotificationCenter::removeObserver(Object* pObserver)
 {
     return NS::Object::sendMessage<void>(this, _NS_PRIVATE_SEL(removeObserver_), pObserver);
 }
-

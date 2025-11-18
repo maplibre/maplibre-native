@@ -506,6 +506,18 @@ public class SymbolLayer extends Layer {
   }
 
   /**
+   * Get the TextVariableAnchorOffset property
+   *
+   * @return property wrapper value around Object[]
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Object[]> getTextVariableAnchorOffset() {
+    checkThread();
+    return (PropertyValue<Object[]>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
+  }
+
+  /**
    * Get the TextAnchor property
    *
    * @return property wrapper value around String
@@ -635,6 +647,18 @@ public class SymbolLayer extends Layer {
   public PropertyValue<Boolean> getTextOptional() {
     checkThread();
     return (PropertyValue<Boolean>) new PropertyValue("text-optional", nativeGetTextOptional());
+  }
+
+  /**
+   * Get the SymbolScreenSpace property
+   *
+   * @return property wrapper value around Boolean
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Boolean> getSymbolScreenSpace() {
+    checkThread();
+    return (PropertyValue<Boolean>) new PropertyValue("symbol-screen-space", nativeGetSymbolScreenSpace());
   }
 
   /**
@@ -1247,6 +1271,10 @@ public class SymbolLayer extends Layer {
 
   @NonNull
   @Keep
+  private native Object nativeGetTextVariableAnchorOffset();
+
+  @NonNull
+  @Keep
   private native Object nativeGetTextAnchor();
 
   @NonNull
@@ -1288,6 +1316,10 @@ public class SymbolLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetTextOptional();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetSymbolScreenSpace();
 
   @NonNull
   @Keep

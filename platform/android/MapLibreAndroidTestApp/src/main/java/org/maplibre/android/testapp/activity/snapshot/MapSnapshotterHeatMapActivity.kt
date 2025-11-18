@@ -23,10 +23,15 @@ import java.net.URI
 import java.net.URISyntaxException
 
 /**
- * Test activity showing how to use a the [MapSnapshotter] and heatmap layer on it.
+ * Test activity showing how to use the [MapSnapshotter] and heatmap layer on it.
  */
+
+// # --8<-- [start:class_declaration]
 class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.SnapshotReadyCallback {
+// # --8<-- [end:class_declaration]
     private var mapSnapshotter: MapSnapshotter? = null
+
+    // # --8<-- [start:onCreate]
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_snapshotter_marker)
@@ -36,9 +41,9 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                 override fun onGlobalLayout() {
                     container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     Timber.i("Starting snapshot")
-                    val builder = Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))
+                    val builder = Style.Builder().fromUri(TestStyles.AMERICANA)
                         .withSource(earthquakeSource!!)
-                        .withLayerAbove(heatmapLayer, "water_intermittent")
+                        .withLayerAbove(heatmapLayer, "water")
                     mapSnapshotter = MapSnapshotter(
                         applicationContext,
                         MapSnapshotter.Options(container.measuredWidth, container.measuredHeight)
@@ -55,23 +60,15 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                 }
             })
     }
+    // # --8<-- [end:onCreate]
 
-    // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-    // Begin color ramp at 0-stop with a 0-transparency color
-    // to create a blur-like effect.
-    // Increase the heatmap weight based on frequency and property magnitude
-    // Increase the heatmap color weight weight by zoom level
-    // heatmap-intensity is a multiplier on top of heatmap-weight
-    // Adjust the heatmap radius by zoom level
-    // Transition from heatmap to circle layer by zoom level
+    // # --8<-- [start:heatmapLayer]
     private val heatmapLayer: HeatmapLayer
-        private get() {
+        get() {
             val layer = HeatmapLayer(HEATMAP_LAYER_ID, EARTHQUAKE_SOURCE_ID)
             layer.maxZoom = 9f
             layer.sourceLayer = HEATMAP_LAYER_SOURCE
-            layer.setProperties( // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-                // Begin color ramp at 0-stop with a 0-transparency color
-                // to create a blur-like effect.
+            layer.setProperties(
                 PropertyFactory.heatmapColor(
                     Expression.interpolate(
                         Expression.linear(), Expression.heatmapDensity(),
@@ -82,7 +79,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                         Expression.literal(0.8), Expression.rgb(239, 138, 98),
                         Expression.literal(1), Expression.rgb(178, 24, 43)
                     )
-                ), // Increase the heatmap weight based on frequency and property magnitude
+                ),
                 PropertyFactory.heatmapWeight(
                     Expression.interpolate(
                         Expression.linear(),
@@ -90,8 +87,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                         Expression.stop(0, 0),
                         Expression.stop(6, 1)
                     )
-                ), // Increase the heatmap color weight weight by zoom level
-                // heatmap-intensity is a multiplier on top of heatmap-weight
+                ),
                 PropertyFactory.heatmapIntensity(
                     Expression.interpolate(
                         Expression.linear(),
@@ -99,7 +95,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                         Expression.stop(0, 1),
                         Expression.stop(9, 3)
                     )
-                ), // Adjust the heatmap radius by zoom level
+                ),
                 PropertyFactory.heatmapRadius(
                     Expression.interpolate(
                         Expression.linear(),
@@ -107,7 +103,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                         Expression.stop(0, 2),
                         Expression.stop(9, 20)
                     )
-                ), // Transition from heatmap to circle layer by zoom level
+                ),
                 PropertyFactory.heatmapOpacity(
                     Expression.interpolate(
                         Expression.linear(),
@@ -119,33 +115,40 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
             )
             return layer
         }
+    // # --8<-- [end:heatmapLayer]
 
-    override fun onStop() {
-        super.onStop()
-        mapSnapshotter!!.cancel()
-    }
-
+    // # --8<-- [start:onSnapshotReady]
     @SuppressLint("ClickableViewAccessibility")
     override fun onSnapshotReady(snapshot: MapSnapshot) {
         Timber.i("Snapshot ready")
         val imageView = findViewById<ImageView>(R.id.snapshot_image)
         imageView.setImageBitmap(snapshot.bitmap)
     }
+    // # --8<-- [end:onSnapshotReady]
 
+    // # --8<-- [start:onStop]
+    override fun onStop() {
+        super.onStop()
+        mapSnapshotter?.cancel()
+    }
+    // # --8<-- [end:onStop]
+
+    // # --8<-- [start:earthquakeSource]
     private val earthquakeSource: Source?
-        private get() {
+        get() {
             var source: Source? = null
             try {
                 source = GeoJsonSource(EARTHQUAKE_SOURCE_ID, URI(EARTHQUAKE_SOURCE_URL))
             } catch (uriSyntaxException: URISyntaxException) {
-                Timber.e(uriSyntaxException, "That's not an url... ")
+                Timber.e(uriSyntaxException, "That's not a valid URL.")
             }
             return source
         }
+    // # --8<-- [end:earthquakeSource]
 
     companion object {
         private const val EARTHQUAKE_SOURCE_URL =
-            "https://www.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
+            "https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson"
         private const val EARTHQUAKE_SOURCE_ID = "earthquakes"
         private const val HEATMAP_LAYER_ID = "earthquakes-heat"
         private const val HEATMAP_LAYER_SOURCE = "earthquakes"

@@ -1,5 +1,3 @@
-import org.jetbrains.dokka.gradle.DokkaTask
-
 plugins {
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.dokka)
@@ -12,6 +10,7 @@ plugins {
     id("maplibre.android-nitpick")
     id("maplibre.gradle-publish")
     id("maplibre.artifact-settings")
+    id("org.maplibre.ccache-plugin")
 }
 
 dependencies {
@@ -37,52 +36,49 @@ dependencies {
     androidTestImplementation(libs.testRules)
 }
 
-tasks.withType<DokkaTask> {
+dokka {
     moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-        configureEach {
+        main {
             includes.from("Module.md")
+
+            sourceLink {
+                remoteUrl("https://github.com/maplibre/maplibre-native/tree/main/platform/android/")
+                localDirectory.set(rootDir)
+            }
+
+            // TODO add externalDocumentationLinks when these get dokka or javadocs:
+            // - https://github.com/maplibre/maplibre-java
+            // - https://github.com/maplibre/maplibre-gestures-android
         }
     }
 }
 
 android {
+    ndkVersion = Versions.ndkVersion
+
     defaultConfig {
         compileSdk = 34
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         buildConfigField("String", "GIT_REVISION_SHORT", "\"${getGitRevision()}\"")
         buildConfigField("String", "GIT_REVISION", "\"${getGitRevision(false)}\"")
         buildConfigField(
             "String",
             "MAPLIBRE_VERSION_STRING",
-            "\"MapLibre Native/${project.property("VERSION_NAME")}\""
+            "\"MapLibre Android/${project.extra["versionName"]}\""
         )
         consumerProguardFiles("proguard-rules.pro")
-
-        externalNativeBuild {
-            cmake {
-                arguments("-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF")
-            }
-        }
     }
 
     flavorDimensions += "renderer"
     productFlavors {
-        create("legacy") {
+        create("opengl") {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF")
-                }
-            }
-        }
-        create("drawable") {
-            dimension = "renderer"
-            externalNativeBuild {
-                cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
+                    arguments("-DMLN_WITH_OPENGL=ON", "-DMLN_WITH_VULKAN=OFF")
                 }
             }
         }
@@ -90,7 +86,6 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
                     arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
                 }
             }
@@ -98,10 +93,7 @@ android {
     }
 
     sourceSets {
-        getByName("legacy") {
-            java.srcDirs("src/opengl/java/")
-        }
-        getByName("drawable") {
+        getByName("opengl") {
             java.srcDirs("src/opengl/java/")
         }
     }

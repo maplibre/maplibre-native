@@ -9,6 +9,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/map/camera.hpp>
 #include <mbgl/math/angles.hpp>
+#include <mbgl/math/clamp.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/image.hpp>
@@ -27,6 +28,10 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
+
+#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#include "example_custom_drawable_style_layer.hpp"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -64,9 +69,8 @@
 using namespace std::numbers;
 
 #ifdef ENABLE_LOCATION_INDICATOR
-
 namespace {
-const std::string mbglPuckAssetsPath{MAPBOX_PUCK_ASSETS_PATH};
+const std::string mbglPuckAssetsPath{MLN_ASSETS_PATH};
 
 mbgl::Color premultiply(mbgl::Color c) {
     c.r *= c.a;
@@ -79,7 +83,7 @@ std::array<double, 3> toArray(const mbgl::LatLng &crd) {
     return {crd.latitude(), crd.longitude(), 0};
 }
 } // namespace
-#endif
+#endif // ENABLE_LOCATION_INDICATOR
 
 class SnapshotObserver final : public mbgl::MapSnapshotterObserver {
 public:
@@ -95,6 +99,76 @@ public:
 };
 
 namespace {
+
+enum class TileLodMode {
+    Default,    // Default Tile LOD parameters
+    NoLod,      // Disable LOD
+    Reduced,    // Reduce LOD away from camera
+    Aggressive, // Aggressively reduce LOD away from camera at the detriment of quality
+};
+
+constexpr TileLodMode nextTileLodMode(TileLodMode current) {
+    switch (current) {
+        case TileLodMode::Default:
+            return TileLodMode::NoLod;
+        case TileLodMode::NoLod:
+            return TileLodMode::Reduced;
+        case TileLodMode::Reduced:
+            return TileLodMode::Aggressive;
+        case TileLodMode::Aggressive:
+            return TileLodMode::Default;
+        default:
+            return TileLodMode::Default;
+    }
+}
+
+void cycleTileLodMode(mbgl::Map &map) {
+    // TileLodMode::Default parameters
+    static const auto defaultRadius = map.getTileLodMinRadius();
+    static const auto defaultScale = map.getTileLodScale();
+    static const auto defaultTilePitchThreshold = map.getTileLodPitchThreshold();
+
+    static TileLodMode mode = TileLodMode::Default;
+    mode = nextTileLodMode(mode);
+
+    switch (mode) {
+        case TileLodMode::Default:
+            map.setTileLodMinRadius(defaultRadius);
+            map.setTileLodScale(defaultScale);
+            map.setTileLodPitchThreshold(defaultTilePitchThreshold);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
+            break;
+        case TileLodMode::NoLod:
+            // When LOD is off we set a maximum PitchThreshold
+            map.setTileLodPitchThreshold(std::numbers::pi);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: disabled");
+            break;
+        case TileLodMode::Reduced:
+            map.setTileLodMinRadius(2);
+            map.setTileLodScale(1.5);
+            map.setTileLodPitchThreshold(std::numbers::pi / 4);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: reduced");
+            break;
+        case TileLodMode::Aggressive:
+            map.setTileLodMinRadius(1);
+            map.setTileLodScale(2);
+            map.setTileLodPitchThreshold(0);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: aggressive");
+            break;
+    }
+    map.triggerRepaint();
+}
+
+void tileLodZoomShift(mbgl::Map &map, bool positive) {
+    constexpr auto tileLodZoomShiftStep = 0.25;
+    auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
+    shift = map.getTileLodZoomShift() + shift;
+    shift = mbgl::util::clamp(shift, -2.5, 2.5);
+    mbgl::Log::Info(mbgl::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
+    map.setTileLodZoomShift(shift);
+    map.triggerRepaint();
+}
+
 void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
     MLN_TRACE_FUNC();
 
@@ -148,6 +222,13 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwSetErrorCallback(glfwError);
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
+#if defined(MLN_RENDER_BACKEND_WEBGPU)
+#ifdef __linux__
+    // Force X11 platform for WebGPU compatibility (Dawn doesn't support Wayland yet)
+    // For now, always use X11 when WebGPU might be used
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+#endif
+#endif
 
     if (!glfwInit()) {
         mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize glfw");
@@ -214,7 +295,10 @@ GLFWView::GLFWView(bool fullscreen_,
 
     // "... applications will typically want to set the swap interval to one"
     // https://www.glfw.org/docs/latest/quick.html#quick_swap_buffers
+
+#if defined(MLN_RENDER_BACKEND_OPENGL)
     glfwSwapInterval(1);
+#endif
 
     glfwGetWindowSize(window, &width, &height);
 
@@ -274,6 +358,8 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `K` to add a random custom runtime imagery annotation\n");
     printf("- Press `L` to add a random line annotation\n");
     printf("- Press `W` to pop the last-added annotation off\n");
+    printf("- Press `V` to toggle custom drawable layer\n");
+    printf("- Press `B` to toggle rendering stats\n");
     printf("- Press `P` to pause tile requests\n");
     printf("\n");
     printf("- Hold `Control` + mouse drag to rotate\n");
@@ -282,6 +368,9 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `F1` to generate a render test for the current view\n");
     printf("\n");
     printf("- Press `Tab` to cycle through the map debug options\n");
+    printf("- Press `F6` to cycle through Tile LOD modes\n");
+    printf("- Press `F7` to lower the zoom level without changing the camera\n");
+    printf("- Press `F8` to higher the zoom level without changing the camera\n");
     printf("- Press `Esc` to quit\n");
     printf("\n");
     printf(
@@ -365,6 +454,12 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_C:
                 view->clearAnnotations();
+                break;
+            case GLFW_KEY_V:
+                view->toggleCustomDrawableStyle();
+                break;
+            case GLFW_KEY_B:
+                view->map->enableRenderingStatsView(!view->map->isRenderingStatsViewEnabled());
                 break;
             case GLFW_KEY_I:
                 view->resetDatabaseCallback();
@@ -475,9 +570,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
 
                 auto &style = view->map->getStyle();
                 if (!style.getSource("states")) {
-                    std::string url =
-                        "https://maplibre.org/maplibre-gl-js-docs/assets/"
-                        "us_states.geojson";
+                    std::string url = "https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson";
                     auto source = std::make_unique<GeoJSONSource>("states");
                     source->setURL(url);
                     style.addSource(std::move(source));
@@ -556,6 +649,15 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->freeCameraDemoPhase = 0;
                 view->freeCameraDemoStartTime = mbgl::Clock::now();
                 view->invalidate();
+            } break;
+            case GLFW_KEY_F6: {
+                cycleTileLodMode(*view->map);
+            } break;
+            case GLFW_KEY_F7: {
+                tileLodZoomShift(*view->map, false);
+            } break;
+            case GLFW_KEY_F8: {
+                tileLodZoomShift(*view->map, true);
             } break;
         }
     }
@@ -821,6 +923,23 @@ void GLFWView::popAnnotation() {
 
     map->removeAnnotation(annotationIDs.back());
     annotationIDs.pop_back();
+}
+
+void GLFWView::toggleCustomDrawableStyle() {
+#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+    auto &style = map->getStyle();
+
+    const std::string identifier = "ExampleCustomDrawableStyleLayer";
+    const auto &existingLayer = style.getLayer(identifier);
+
+    if (!existingLayer) {
+        style.addLayer(std::make_unique<mbgl::style::CustomDrawableLayer>(
+            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH)));
+    } else {
+        style.removeLayer(identifier);
+    }
+
+#endif
 }
 
 void GLFWView::makeSnapshot(bool withOverlay) {
@@ -1100,6 +1219,10 @@ void GLFWView::run() {
         }
 
         render();
+
+#ifndef __APPLE__
+        runLoop.updateTime();
+#endif
     };
 
     // Cap frame rate to 60hz if benchmark mode is disabled

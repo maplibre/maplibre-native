@@ -8,37 +8,40 @@ namespace style {
 namespace expression {
 
 type::Type typeOf(const Value& value) {
-    return value.match([&](bool) -> type::Type { return type::Boolean; },
-                       [&](double) -> type::Type { return type::Number; },
-                       [&](const std::string&) -> type::Type { return type::String; },
-                       [&](const Color&) -> type::Type { return type::Color; },
-                       [&](const Padding&) -> type::Type { return type::Padding; },
-                       [&](const Collator&) -> type::Type { return type::Collator; },
-                       [&](const Formatted&) -> type::Type { return type::Formatted; },
-                       [&](const Image&) -> type::Type { return type::Image; },
-                       [&](const NullValue&) -> type::Type { return type::Null; },
-                       [&](const std::unordered_map<std::string, Value>&) -> type::Type { return type::Object; },
-                       [&](const std::vector<Value>& arr) -> type::Type {
-                           std::optional<type::Type> itemType;
-                           for (const auto& item : arr) {
-                               const type::Type t = typeOf(item);
-                               if (!itemType) {
-                                   itemType = {t};
-                               } else if (*itemType == t) {
-                                   continue;
-                               } else {
-                                   itemType = {type::Value};
-                                   break;
-                               }
-                           }
+    return value.match(
+        [&](bool) -> type::Type { return type::Boolean; },
+        [&](double) -> type::Type { return type::Number; },
+        [&](const std::string&) -> type::Type { return type::String; },
+        [&](const Color&) -> type::Type { return type::Color; },
+        [&](const Padding&) -> type::Type { return type::Padding; },
+        [&](const VariableAnchorOffsetCollection&) -> type::Type { return type::VariableAnchorOffsetCollection; },
+        [&](const Collator&) -> type::Type { return type::Collator; },
+        [&](const Formatted&) -> type::Type { return type::Formatted; },
+        [&](const Image&) -> type::Type { return type::Image; },
+        [&](const NullValue&) -> type::Type { return type::Null; },
+        [&](const std::unordered_map<std::string, Value>&) -> type::Type { return type::Object; },
+        [&](const std::vector<Value>& arr) -> type::Type {
+            std::optional<type::Type> itemType;
+            for (const auto& item : arr) {
+                const type::Type t = typeOf(item);
+                if (!itemType) {
+                    itemType = {t};
+                } else if (*itemType == t) {
+                    continue;
+                } else {
+                    itemType = {type::Value};
+                    break;
+                }
+            }
 
-                           return type::Array(itemType.value_or(type::Value), arr.size());
-                       });
+            return type::Array(itemType.value_or(type::Value), arr.size());
+        });
 }
 
 std::string toString(const Value& value) {
     return value.match([](const NullValue&) { return std::string(); },
-                       [](const Color& c) { return c.stringify(); }, // avoid quoting
+                       [](const Color& c) { return c.stringify(); },                         // avoid quoting
+                       [](const VariableAnchorOffsetCollection& v) { return v.toString(); }, // avoid quoting
                        [](const Formatted& f) { return f.toString(); },
                        [](const Image& i) { return i.id(); },
                        [](const std::string& s) { return s; }, // avoid quoting
@@ -55,6 +58,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
                 [&](const Padding& p) { mbgl::style::conversion::stringify(writer, p); },
+                [&](const VariableAnchorOffsetCollection& v) { mbgl::style::conversion::stringify(writer, v); },
                 [&](const Collator&) {
                     // Collators are excluded from constant folding and there's no Literal parser
                     // for them so there shouldn't be any way to serialize this value.
@@ -126,6 +130,7 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
     return value.match(
         [&](const Color& color) -> mbgl::Value { return color.serialize(); },
         [&](const Padding& padding) -> mbgl::Value { return padding.serialize(); },
+        [&](const VariableAnchorOffsetCollection& anchorOffset) -> mbgl::Value { return anchorOffset.serialize(); },
         [&](const Collator&) -> mbgl::Value {
             // fromExpressionValue can't be used for Collator values,
             // because they have no meaningful representation as an mbgl::Value
@@ -314,6 +319,10 @@ type::Type valueTypeToExpressionType<Color>() {
 template <>
 type::Type valueTypeToExpressionType<Padding>() {
     return type::Padding;
+}
+template <>
+type::Type valueTypeToExpressionType<VariableAnchorOffsetCollection>() {
+    return type::VariableAnchorOffsetCollection;
 }
 template <>
 type::Type valueTypeToExpressionType<Collator>() {

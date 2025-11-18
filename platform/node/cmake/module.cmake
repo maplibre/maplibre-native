@@ -1,6 +1,6 @@
-# We need CMake 3.9 because the Xcode generator doesn't know about systems include paths before 3.9.
+# We need CMake 3.10 because the Xcode generator doesn't know about systems include paths before 3.9, and the minimum required version has been increased to 3.10.
 # See https://gitlab.kitware.com/cmake/cmake/issues/16795
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 
 if (NOT NODE_MODULE_MINIMUM_ABI)
     set(NODE_MODULE_MINIMUM_ABI 46) # Don't build node modules for versions earlier than Node 4
@@ -121,7 +121,10 @@ function(add_node_module NAME)
         endif()
 
         if(WIN32)
-            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            # Determine Windows architecture
+            if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+                set(_ARCH arm64)
+            elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
                 set(_ARCH x64)
             else()
                 set(_ARCH x86)
@@ -211,18 +214,6 @@ function(add_node_module NAME)
         )
 
         if(WIN32)
-            if(MLN_WITH_OSMESA)
-                get_filename_component(_OUTPUT_PATH "${_OUTPUT_PATH}" DIRECTORY "${CMAKE_CURRENT_SOURCE_PATH}")
-
-                add_custom_command(
-                    TARGET ${_TARGET}
-                    POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libglapi.dll"  "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libGLESv2.dll" "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/osmesa.dll"    "${_OUTPUT_PATH}"
-                )
-            endif()
-                
             unset(_ARCH)
         endif()
     endforeach()

@@ -14,10 +14,11 @@
 #include <mbgl/vulkan/vertex_buffer_resource.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <cassert>
 #if !defined(NDEBUG)
@@ -129,6 +130,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
@@ -234,11 +237,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
 
     auto& context = static_cast<Context&>(parameters.context);
+    auto& dispatcher = context.getBackend().getDispatcher();
     auto& renderPass_ = static_cast<RenderPass&>(*parameters.renderPass);
     auto& encoder = renderPass_.getEncoder();
     auto& commandBuffer = encoder.getCommandBuffer();
@@ -248,23 +254,38 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (!bindAttributes(encoder)) return;
     if (!bindDescriptors(encoder)) return;
 
-    if (is3D) {
-        impl->pipelineInfo.setDepthMode(impl->depthFor3D);
-        impl->pipelineInfo.setStencilMode(impl->stencilFor3D);
-    } else {
-        if (enableDepth) {
+    commandBuffer->pushConstants(
+        context.getGeneralPipelineLayout().get(),
+        vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+        0,
+        sizeof(uboIndex),
+        &uboIndex,
+        dispatcher);
+
+    if (enableDepth) {
+        if (impl->depthFor3D.has_value()) {
+            impl->pipelineInfo.setDepthMode(impl->depthFor3D.value());
+        } else if (is3D) {
+            impl->pipelineInfo.setDepthMode(parameters.depthModeFor3D());
+        } else {
             const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
             impl->pipelineInfo.setDepthMode(depthMode);
-        } else {
-            impl->pipelineInfo.setDepthMode(gfx::DepthMode::disabled());
         }
+    } else {
+        impl->pipelineInfo.setDepthMode(gfx::DepthMode::disabled());
+    }
 
-        if (enableStencil) {
+    if (enableStencil) {
+        if (impl->stencilFor3D.has_value()) {
+            impl->pipelineInfo.setStencilMode(impl->stencilFor3D.value());
+        } else if (is3D) {
+            impl->pipelineInfo.setStencilMode(parameters.stencilModeFor3D());
+        } else {
             const auto& stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             impl->pipelineInfo.setStencilMode(stencilMode);
-        } else {
-            impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
         }
+    } else {
+        impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
     }
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
@@ -280,19 +301,21 @@ void Drawable::draw(PaintParameters& parameters) const {
         impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);
-        commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
+        commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
 
         if (segment.indexLength) {
             commandBuffer->drawIndexed(static_cast<uint32_t>(segment.indexLength),
                                        static_cast<uint32_t>(instances),
                                        static_cast<uint32_t>(segment.indexOffset),
                                        static_cast<int32_t>(segment.vertexOffset),
-                                       0);
+                                       0,
+                                       dispatcher);
         } else {
             commandBuffer->draw(static_cast<uint32_t>(segment.vertexLength),
                                 static_cast<uint32_t>(instances),
                                 static_cast<uint32_t>(segment.vertexOffset),
-                                0);
+                                0,
+                                dispatcher);
         }
 
         context.renderingStats().numDrawCalls++;
@@ -334,6 +357,8 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
 }
 
 void Drawable::buildVulkanInputBindings() noexcept {
+    MLN_TRACE_FUNC();
+
     impl->vulkanVertexBuffers.clear();
     impl->vulkanVertexOffsets.clear();
 
@@ -386,16 +411,20 @@ void Drawable::buildVulkanInputBindings() noexcept {
 }
 
 bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+    MLN_TRACE_FUNC();
+
     if (impl->vulkanVertexBuffers.empty()) return false;
 
+    const auto& dispatcher = encoder.getContext().getBackend().getDispatcher();
     const auto& commandBuffer = encoder.getCommandBuffer();
 
-    commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets);
+    commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets, dispatcher);
 
     if (impl->indexes) {
         if (const auto* indexBuffer = static_cast<const IndexBuffer*>(impl->indexes->getBuffer())) {
             const auto& indexBufferResource = indexBuffer->buffer->getResource<IndexBufferResource>().get();
-            commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16);
+            commandBuffer->bindIndexBuffer(
+                indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
         }
     }
 
@@ -403,6 +432,8 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
 }
 
 bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
+    MLN_TRACE_FUNC();
+
     if (!shader) return false;
 
     // bind uniforms
@@ -415,6 +446,15 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
             impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
         }
 
+        for (const auto& texture : textures) {
+            if (!texture) continue;
+            const auto textureImpl = static_cast<const Texture2D*>(texture.get());
+            if (textureImpl->isModifiedAfter(impl->imageDescriptorSet->getLastModified())) {
+                impl->imageDescriptorSet->markDirty();
+                break;
+            }
+        }
+
         impl->imageDescriptorSet->update(textures);
         impl->imageDescriptorSet->bind(encoder);
     }
@@ -423,6 +463,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {
+    MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();

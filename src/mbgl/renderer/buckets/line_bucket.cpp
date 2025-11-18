@@ -58,14 +58,14 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     if (coordinates.empty()) {
         return;
     }
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
+    gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         segments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
+            return SegmentBase(vertexOffset, indexOffset);
         },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        [](auto& seg) -> SegmentBase& { return seg; },
         triangles);
 
     gfx::PolylineGeneratorOptions options;
@@ -83,28 +83,39 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     const std::size_t first = [&coordinates, &len] {
         std::size_t i = 0;
         // If the line has duplicate vertices at the start, adjust index to remove them.
-        while (i < len - 1 && coordinates[i] == coordinates[i + 1]) {
+        while (i + 1 < len && coordinates[i] == coordinates[i + 1]) {
             i++;
         }
         return i;
     }();
 
     // Ignore invalid geometry.
-    if (len < (options.type == FeatureType::Polygon ? 3 : 2)) {
+    const std::size_t minLen = (options.type == FeatureType::Polygon ? 3 : 2);
+    if (len < minLen) {
+        // Warn once, but only if the source geometry is invalid, not if de-duplication made it invalid.
+        // This happens, e.g., when attempting to use a GeoJSON `MultiPoint`
+        // or `MLNPointCollectionFeature` as the source for a line layer.
+        // Unfortunately, we cannot show the layer or source name from here.
+        if (coordinates.size() < minLen) {
+            static bool warned = false; // not thread-safe, there's a small chance of warning more than once
+            if (!warned) {
+                warned = true;
+                Log::Warning(Event::General, "Invalid geometry in line layer");
+            }
+        }
         return;
     }
 
-    const auto& props = feature.getProperties();
-    auto clip_start_it = props.find("mapbox_clip_start");
-    auto clip_end_it = props.find("mapbox_clip_end");
-    if (clip_start_it != props.end() && clip_end_it != props.end()) {
+    const auto clip_start = feature.getValue("mapbox_clip_start");
+    const auto clip_end = feature.getValue("mapbox_clip_end");
+    if (clip_start && clip_end) {
         double total_length = 0.0;
         for (std::size_t i = first; i < len - 1; ++i) {
             total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
         }
 
         options.clipDistances = gfx::PolylineGeneratorDistances{
-            *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
+            *numericValue<double>(*clip_start), *numericValue<double>(*clip_end), total_length};
     }
 
     options.joinType = layout.evaluate<LineJoin>(zoom, feature, canonical);
@@ -119,17 +130,6 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 }
 
 void LineBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (!uploaded) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
-    }
-
-    for (auto& pair : paintPropertyBinders) {
-        pair.second.upload(uploadPass);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 
@@ -137,10 +137,11 @@ bool LineBucket::hasData() const {
     return !segments.empty();
 }
 
+namespace {
 template <class Property>
-static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                 const std::string& id,
-                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
+float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
+          const std::string& id,
+          const std::map<std::string, LineBinders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -148,6 +149,7 @@ static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
         return *it->second.statistics<Property>().max();
     }
 }
+} // namespace
 
 float LineBucket::getQueryRadius(const RenderLayer& layer) const {
     const auto& evaluated = getEvaluated<LineLayerProperties>(layer.evaluatedProperties);

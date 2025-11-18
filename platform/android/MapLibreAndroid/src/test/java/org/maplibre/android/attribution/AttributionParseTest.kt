@@ -3,11 +3,12 @@ package org.maplibre.android.attribution
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
-class AttributionParseTest {
+class AttributionParseTest : BaseTest() {
     @Test
     @Throws(Exception::class)
     fun testParseAttributionStringSatellite() {
@@ -359,6 +360,21 @@ class AttributionParseTest {
             "Attribution string should match",
             "© MapLibre / OSM / DigitalGlobe",
             attributionParser.createAttributionString(true)
+        )
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testOutputNoAttribution() {
+        val attributionParser = AttributionParser.Options(RuntimeEnvironment.application)
+            .withAttributionData("")
+            .withCopyrightSign(false)
+            .withImproveMap(false)
+            .build()
+        Assert.assertEquals(
+            "Attribution string should match",
+            "",
+            attributionParser.createAttributionString()
         )
     }
 

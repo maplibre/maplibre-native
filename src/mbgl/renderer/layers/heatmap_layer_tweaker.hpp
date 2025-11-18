@@ -19,6 +19,10 @@ public:
 
 protected:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniformBufferPtr drawableUniformBuffer;
+#endif
 };
 
 } // namespace mbgl

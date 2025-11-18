@@ -14,6 +14,8 @@
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/renderer/renderer.hpp>
 
+const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSourceOptionEncoding";
+
 @interface MLNVectorTileSource ()
 
 @property (nonatomic, readonly) mbgl::style::VectorSource *rawSource;
@@ -25,6 +27,17 @@
 - (instancetype)initWithIdentifier:(NSString *)identifier configurationURL:(NSURL *)configurationURL {
     auto source = std::make_unique<mbgl::style::VectorSource>(identifier.UTF8String,
                                                               configurationURL.mgl_URLByStandardizingScheme.absoluteString.UTF8String);
+    return self = [super initWithPendingSource:std::move(source)];
+}
+
+- (instancetype)initWithIdentifier:(NSString *)identifier
+            configurationURLString:(NSString *)configurationURLString
+{
+    auto source = std::make_unique<mbgl::style::VectorSource>(
+        identifier.UTF8String,
+        configurationURLString.UTF8String
+    );
+
     return self = [super initWithPendingSource:std::move(source)];
 }
 
@@ -65,12 +78,12 @@
         }];
         optionalSourceLayerIDs = layerIDs;
     }
-    
+
     std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
-    
+
     std::vector<mbgl::Feature> features;
     if ([self.stylable isKindOfClass:[MLNMapView class]]) {
         MLNMapView *mapView = (MLNMapView *)self.stylable;
@@ -86,7 +99,7 @@
 /**
  An array of locale codes with dedicated name fields in the Mapbox Streets
  source.
- 
+
  https://www.mapbox.com/vector-tiles/mapbox-streets-v8/
  */
 static NSArray * const MLNMapboxStreetsLanguages = @[
@@ -130,7 +143,7 @@ static NSArray * const MLNMapboxStreetsAlternativeLanguages = @[
 
         return [languageCode isEqualToString:@"en"];
     }]].count;
-    
+
     NSArray<NSString *> *availableLanguages = acceptsEnglish ? MLNMapboxStreetsLanguages : MLNMapboxStreetsAlternativeLanguages;
     NSArray<NSString *> *preferredLanguages = [NSBundle preferredLocalizationsFromArray:availableLanguages
                                                                          forPreferences:preferencesArray];

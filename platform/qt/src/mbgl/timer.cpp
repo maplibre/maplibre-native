@@ -18,11 +18,7 @@ void Timer::Impl::start(uint64_t timeout, uint64_t repeat_, std::function<void()
     callback = std::move(cb);
 
     timer.setSingleShot(true);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
     timer.start(static_cast<std::chrono::milliseconds>(timeout));
-#else
-    timer.start(static_cast<int>(timeout));
-#endif
 }
 
 void Timer::Impl::stop() {
@@ -32,11 +28,7 @@ void Timer::Impl::stop() {
 void Timer::Impl::timerFired() {
     if (repeat) {
         timer.setSingleShot(false);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
         timer.start(static_cast<std::chrono::milliseconds>(repeat));
-#else
-        timer.start(static_cast<int>(repeat));
-#endif
     }
 
     callback();

@@ -4,7 +4,7 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 
 #include <cstring>
@@ -88,19 +88,16 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
       glProgram(std::move(glProgram_)) {}
 
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
-                                 UniformBlockArrayGL&& uniformBlocks_,
                                  VertexAttributeArrayGL&& attributes_,
                                  SamplerLocationArray&& samplerLocations_)
     : ShaderProgramBase(),
       glProgram(std::move(program)),
-      uniformBlocks(std::move(uniformBlocks_)),
       vertexAttributes(std::move(attributes_)),
       samplerLocations(std::move(samplerLocations_)) {}
 
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
-      uniformBlocks(std::move(other.uniformBlocks)),
       vertexAttributes(std::move(other.vertexAttributes)),
       samplerLocations(std::move(other.samplerLocations)) {}
 
@@ -143,7 +140,6 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         context.getObserver().onPostCompileShader(
             programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
 
-        UniformBlockArrayGL uniformBlocks;
         for (const auto& blockInfo : uniformBlocksInfo) {
             GLint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
             GLint size = 0;
@@ -151,7 +147,6 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             assert(size > 0);
             GLint binding = static_cast<GLint>(blockInfo.binding);
             MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-            uniformBlocks.set(blockInfo.id, binding, size);
         }
 
         SamplerLocationArray samplerLocations;
@@ -182,8 +177,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
         }
 
-        return std::make_shared<ShaderProgramGL>(
-            std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
+        return std::make_shared<ShaderProgramGL>(std::move(program), std::move(attrs), std::move(samplerLocations));
     } catch (const std::exception& e) {
         context.getObserver().onShaderCompileFailed(
             programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);

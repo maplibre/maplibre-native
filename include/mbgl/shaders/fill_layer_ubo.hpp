@@ -9,112 +9,127 @@ namespace shaders {
 // Fill
 
 struct alignas(16) FillDrawableUBO {
-    /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-    /* 64 */
-};
-static_assert(sizeof(FillDrawableUBO) == 4 * 16);
+    /*  0 */ std::array<float, 4 * 4> matrix;
 
-struct alignas(16) FillInterpolateUBO {
-    float color_t;
-    float opacity_t;
-    float pad1, pad2;
+    // Interpolations
+    /* 64 */ float color_t;
+    /* 68 */ float opacity_t;
+    /* 72 */ float pad1;
+    /* 76 */ float pad2;
+    /* 80 */
 };
-static_assert(sizeof(FillInterpolateUBO) % 16 == 0);
+static_assert(sizeof(FillDrawableUBO) == 5 * 16);
 
 //
 // Fill outline
 
 struct alignas(16) FillOutlineDrawableUBO {
-    /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-    /* 64 */
-};
-static_assert(sizeof(FillOutlineDrawableUBO) == 4 * 16);
+    /*  0 */ std::array<float, 4 * 4> matrix;
 
-struct alignas(16) FillOutlineInterpolateUBO {
-    float outline_color_t;
-    float opacity_t;
-    float pad1, pad2;
+    // Interpolations
+    /* 64 */ float outline_color_t;
+    /* 68 */ float opacity_t;
+    /* 72 */ float pad1;
+    /* 76 */ float pad2;
+    /* 80 */
 };
-static_assert(sizeof(FillOutlineInterpolateUBO) == 1 * 16);
+static_assert(sizeof(FillOutlineDrawableUBO) == 5 * 16);
 
 //
-// Fill Pattern
+// Fill pattern
 
 struct alignas(16) FillPatternDrawableUBO {
-    /*  0  */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
+    /*  0 */ std::array<float, 4 * 4> matrix;
     /* 64 */ std::array<float, 2> pixel_coord_upper;
     /* 72 */ std::array<float, 2> pixel_coord_lower;
-    /* 80 */ std::array<float, 2> texsize;
-    /* 88 */ float tile_ratio;
-    /* 92 */ float pad;
+    /* 80 */ float tile_ratio;
+
+    // Interpolations
+    /* 84 */ float pattern_from_t;
+    /* 88 */ float pattern_to_t;
+    /* 92 */ float opacity_t;
     /* 96 */
 };
 static_assert(sizeof(FillPatternDrawableUBO) == 6 * 16);
 
 struct alignas(16) FillPatternTilePropsUBO {
-    std::array<float, 4> pattern_from;
-    std::array<float, 4> pattern_to;
+    /*  0 */ std::array<float, 4> pattern_from;
+    /* 16 */ std::array<float, 4> pattern_to;
+    /* 32 */ std::array<float, 2> texsize;
+    /* 40 */ float pad1;
+    /* 44 */ float pad2;
+    /* 48 */
 };
-static_assert(sizeof(FillPatternTilePropsUBO) == 2 * 16);
-
-struct alignas(16) FillPatternInterpolateUBO {
-    float pattern_from_t;
-    float pattern_to_t;
-    float opacity_t;
-    float pad1;
-};
-static_assert(sizeof(FillPatternInterpolateUBO) == 1 * 16);
+static_assert(sizeof(FillPatternTilePropsUBO) == 3 * 16);
 
 //
 // Fill pattern outline
 
 struct alignas(16) FillOutlinePatternDrawableUBO {
-    /*  0  */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-    /*  64 */ std::array<float, 2> pixel_coord_upper;
-    /*  72 */ std::array<float, 2> pixel_coord_lower;
-    /*  80 */ std::array<float, 2> texsize;
-    /*  88 */ float tile_ratio;
-    /*  92 */ float pad;
-    /*  96 */
+    /*  0 */ std::array<float, 4 * 4> matrix;
+    /* 64 */ std::array<float, 2> pixel_coord_upper;
+    /* 72 */ std::array<float, 2> pixel_coord_lower;
+    /* 80 */ float tile_ratio;
+
+    // Interpolations
+    /* 84 */ float pattern_from_t;
+    /* 88 */ float pattern_to_t;
+    /* 92 */ float opacity_t;
+    /* 96 */
 };
 static_assert(sizeof(FillOutlinePatternDrawableUBO) == 6 * 16);
 
 struct alignas(16) FillOutlinePatternTilePropsUBO {
-    std::array<float, 4> pattern_from;
-    std::array<float, 4> pattern_to;
+    /*  0 */ std::array<float, 4> pattern_from;
+    /* 16 */ std::array<float, 4> pattern_to;
+    /* 32 */ std::array<float, 2> texsize;
+    /* 40 */ float pad1;
+    /* 44 */ float pad2;
+    /* 48 */
 };
-static_assert(sizeof(FillOutlinePatternTilePropsUBO) == 2 * 16);
-
-struct alignas(16) FillOutlinePatternInterpolateUBO {
-    float pattern_from_t;
-    float pattern_to_t;
-    float opacity_t;
-    float pad;
-};
-static_assert(sizeof(FillOutlinePatternInterpolateUBO) == 1 * 16);
+static_assert(sizeof(FillOutlinePatternTilePropsUBO) == 3 * 16);
 
 //
 // Fill outline triangulated
 
 struct alignas(16) FillOutlineTriangulatedDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    float ratio;
-    float pad1, pad2, pad3;
+    /*  0 */ std::array<float, 4 * 4> matrix;
+    /* 64 */ float ratio;
+    /* 68 */ float pad1;
+    /* 72 */ float pad2;
+    /* 76 */ float pad3;
+    /* 80 */
 };
-static_assert(sizeof(FillOutlineTriangulatedDrawableUBO) % 16 == 0);
+static_assert(sizeof(FillOutlineTriangulatedDrawableUBO) == 5 * 16);
 
-//
-// Fill evaluated properties
-
+/// Evaluated properties that do not depend on the tile
 struct alignas(16) FillEvaluatedPropsUBO {
-    Color color;
-    Color outline_color;
-    float opacity;
-    float fade;
-    float from_scale;
-    float to_scale;
+    /*  0 */ Color color;
+    /* 16 */ Color outline_color;
+    /* 32 */ float opacity;
+    /* 36 */ float fade;
+    /* 40 */ float from_scale;
+    /* 44 */ float to_scale;
+    /* 48 */
 };
 static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
+
+#if MLN_UBO_CONSOLIDATION
+
+union FillDrawableUnionUBO {
+    FillDrawableUBO fillDrawableUBO;
+    FillOutlineDrawableUBO fillOutlineDrawableUBO;
+    FillPatternDrawableUBO fillPatternDrawableUBO;
+    FillOutlinePatternDrawableUBO fillOutlinePatternDrawableUBO;
+    FillOutlineTriangulatedDrawableUBO fillOutlineTriangulatedDrawableUBO;
+};
+
+union FillTilePropsUnionUBO {
+    FillPatternTilePropsUBO fillPatternTilePropsUBO;
+    FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
+};
+
+#endif
 
 } // namespace shaders
 } // namespace mbgl

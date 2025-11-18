@@ -10,11 +10,7 @@
 #include <mbgl/gl/headless_backend.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 
-#if MLN_LEGACY_RENDERER
-#include <mbgl/gl/texture.hpp>
-#else
 #include <mbgl/gl/texture2d.hpp>
-#endif
 
 using namespace mbgl;
 using namespace mbgl::platform;
@@ -173,13 +169,9 @@ void main() {
     test::checkImage("test/fixtures/offscreen_texture/render-to-fbo", image, 0, 0);
 
     // Now, composite the Framebuffer texture we've rendered to onto the main FBO.
-#if MLN_LEGACY_RENDERER
-    gl::bindTexture(context, 0, {offscreenTexture.getTexture().getResource(), gfx::TextureFilterType::Linear});
-    MBGL_CHECK_ERROR(glUniform1i(u_texture, 0));
-#else
     offscreenTexture.getTexture()->setSamplerConfiguration({gfx::TextureFilterType::Linear});
     std::static_pointer_cast<gl::Texture2D>(offscreenTexture.getTexture())->bind(u_texture, 0);
-#endif
+
     MBGL_CHECK_ERROR(glUseProgram(compositeShader.program));
     MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, viewportBuffer.buffer));
     MBGL_CHECK_ERROR(glEnableVertexAttribArray(compositeShader.a_pos));

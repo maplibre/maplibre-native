@@ -1,14 +1,11 @@
 #pragma once
 
 #include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/util/identity.hpp>
-#endif
 
 #include <atomic>
 
@@ -22,7 +19,7 @@ class RenderLayer;
 class CrossTileSymbolLayerIndex;
 class OverscaledTileID;
 class PatternDependency;
-using PatternLayerMap = std::map<std::string, PatternDependency>;
+using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
 class Placement;
 class TransformState;
 class BucketPlacementData;
@@ -43,7 +40,7 @@ public:
                             const ImagePositions&,
                             const PatternLayerMap&,
                             std::size_t,
-                            const CanonicalTileID&) {};
+                            const CanonicalTileID&) {}
 
     virtual void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {}
 
@@ -71,9 +68,7 @@ public:
     virtual void updateVertices(
         const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {}
 
-#if MLN_DRAWABLE_RENDERER
     const util::SimpleIdentity& getID() const { return bucketID; }
-#endif
 
 #if MLN_SYMBOL_GUARDS
     virtual bool check(std::source_location) { return true; }
@@ -88,9 +83,7 @@ protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
 
-#if MLN_DRAWABLE_RENDERER
     util::SimpleIdentity bucketID;
-#endif
 
     std::optional<std::thread::id> renderThreadID;
 };

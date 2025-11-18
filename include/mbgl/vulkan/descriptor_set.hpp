@@ -3,6 +3,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/vulkan/buffer_resource.hpp>
 #include <span>
+#include <queue>
 
 namespace mbgl {
 namespace vulkan {
@@ -21,6 +22,7 @@ struct DescriptorPoolGrowable {
     struct PoolInfo {
         vk::UniqueDescriptorPool pool;
         uint32_t remainingSets{0};
+        std::queue<std::vector<vk::DescriptorSet>> unusedSets;
 
         PoolInfo(vk::UniqueDescriptorPool&& pool_, uint32_t remainingSets_)
             : pool(std::move(pool_)),
@@ -28,7 +30,9 @@ struct DescriptorPoolGrowable {
     };
 
     const uint32_t maxSets{0};
-    const uint32_t descriptorsPerSet{0};
+    const uint32_t descriptorStoragePerSet{0};
+    const uint32_t descriptorUniformsPerSet{0};
+    const uint32_t descriptorTexturesPerSet{0};
     const float growFactor{1.5f};
 
     std::vector<PoolInfo> pools;
@@ -37,9 +41,15 @@ struct DescriptorPoolGrowable {
     PoolInfo& current() { return pools[currentPoolIndex]; }
 
     DescriptorPoolGrowable() = default;
-    DescriptorPoolGrowable(uint32_t maxSets_, uint32_t descriptorsPerSet_, float growFactor_ = 1.5f)
+    DescriptorPoolGrowable(uint32_t maxSets_,
+                           uint32_t descriptorStoragePerSet_,
+                           uint32_t descriptorUniformsPerSet_,
+                           uint32_t descriptorTexturesPerSet_,
+                           float growFactor_ = 1.5f)
         : maxSets(maxSets_),
-          descriptorsPerSet(descriptorsPerSet_),
+          descriptorStoragePerSet(descriptorStoragePerSet_),
+          descriptorUniformsPerSet(descriptorUniformsPerSet_),
+          descriptorTexturesPerSet(descriptorTexturesPerSet_),
           growFactor(growFactor_) {}
 };
 
@@ -50,7 +60,7 @@ public:
 
     void allocate();
 
-    void markDirty(bool value = true);
+    virtual void markDirty();
     void bind(CommandEncoder& encoder);
 
 protected:
@@ -68,17 +78,26 @@ protected:
 class UniformDescriptorSet : public DescriptorSet {
 public:
     UniformDescriptorSet(Context& context_, DescriptorSetType type_);
-    virtual ~UniformDescriptorSet() = default;
+    ~UniformDescriptorSet() override = default;
 
-    void update(const gfx::UniformBufferArray& uniforms, uint32_t uniformStartIndex, uint32_t descriptorBindingCount);
+    void update(const gfx::UniformBufferArray& uniforms,
+                uint32_t descriptorStartIndex,
+                uint32_t descriptorStorageCount,
+                uint32_t descriptorUniformCount);
 };
 
 class ImageDescriptorSet : public DescriptorSet {
 public:
     ImageDescriptorSet(Context& context_);
-    virtual ~ImageDescriptorSet() = default;
+    ~ImageDescriptorSet() override = default;
+
+    void markDirty() override;
+    const std::chrono::duration<double>& getLastModified() const { return lastModified; }
 
     void update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures);
+
+protected:
+    std::chrono::duration<double> lastModified;
 };
 
 } // namespace vulkan

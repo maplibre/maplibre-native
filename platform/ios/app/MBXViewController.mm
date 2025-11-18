@@ -13,17 +13,20 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
-#import "platform/ios/src/MLNMapView_Private.h"
+#import "MLNMapView_Private.h"
 
 #import "CustomStyleLayerExample.h"
 
-#if MLN_DRAWABLE_RENDERER
 #import "ExampleCustomDrawableStyleLayer.h"
-#endif
 
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
 #import <objc/runtime.h>
+
+// Plug In Examples
+#import "PluginLayerExample.h"
+#import "PluginLayerExampleMetalRendering.h"
+#import "MLNPluginStyleLayer.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
@@ -56,7 +59,8 @@ typedef NS_ENUM(NSInteger, MBXSettingsDebugToolsRows) {
     MBXSettingsDebugToolsOverdrawVisualization,
     MBXSettingsDebugToolsShowZoomLevel,
     MBXSettingsDebugToolsShowFrameTimeGraph,
-    MBXSettingsDebugToolsShowReuseQueueStats
+    MBXSettingsDebugToolsShowReuseQueueStats,
+    MBXSettingsDebugToolsShowRenderingStats
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsAnnotationsRows) {
@@ -105,9 +109,8 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
-#if MLN_DRAWABLE_RENDERER
     MBXSettingsRuntimeStylingCustomDrawableLayer,
-#endif
+    MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
@@ -123,8 +126,17 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
     MBXSettingsMiscellaneousShowCustomLocationManager,
     MBXSettingsMiscellaneousOrnamentsPlacement,
     MBXSettingsMiscellaneousLatLngBoundsWithPadding,
+    MBXSettingsMiscellaneousCycleTileLOD,
     MBXSettingsMiscellaneousPrintLogFile,
     MBXSettingsMiscellaneousDeleteLogFile
+};
+
+typedef NS_ENUM(NSInteger, MBXTileLodMode) {
+    MBXTileLodModeNoLod = 0,
+    MBXTileLodModeDefault,
+    MBXTileLodModeReduced,
+    MBXTileLodModeAggressive,
+    MBXTileLodModeCount
 };
 
 // Utility methods
@@ -223,6 +235,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 @property (nonatomic, getter=isLocalizingLabels) BOOL localizingLabels;
 @property (nonatomic) BOOL reuseQueueStatsEnabled;
 @property (nonatomic) BOOL frameTimeGraphEnabled;
+@property (nonatomic) BOOL renderingStatsEnabled;
 @property (nonatomic) BOOL shouldLimitCameraChanges;
 @property (nonatomic) BOOL randomWalk;
 @property (nonatomic) BOOL zoomLevelOrnamentEnabled;
@@ -243,9 +256,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     NSLayoutConstraint* _firstMapLayout;
     NSArray<NSLayoutConstraint*>* _secondMapLayout;
-    
+
     NSDictionary* _pointFeatures;
     NSLock* _loadLock;
+
+    MBXTileLodMode _tileLodMode;
 }
 
 // MARK: - Setup & Teardown
@@ -260,9 +275,20 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return self;
 }
 
+// This will add the plug-in layers.  This is a demo of how
+// extensible layers for the style can be added to the map view
+-(void)addPluginLayers {
+
+    [self.mapView addPluginLayerType:[PluginLayerExample class]];
+    [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
+
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+
+    [self addPluginLayers];
 
     // Keep track of current map state and debug preferences,
     // saving and restoring when the application's state changes.
@@ -274,6 +300,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
         self.mapView.showsUserHeadingIndicator = YES;
         self.mapView.showsScale = YES;
+        self.mapView.showsLogoView = YES;
+        self.mapView.showsCompassView = YES;
+        self.mapView.showsAttributionButton = YES;
         self.zoomLevelOrnamentEnabled = NO;
         self.frameTimeGraphEnabled = NO;
     } else {
@@ -303,7 +332,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         }
     }
     [self.mapView addGestureRecognizer:singleTap];
-    
+
     // Display a secondary map on any connected external display.
     // https://developer.apple.com/documentation/uikit/windows_and_screens/displaying_content_on_a_connected_screen?language=objc
     self.helperWindows = [NSMutableArray array];
@@ -402,7 +431,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     (debugMask & MLNMapDebugOverdrawVisualizationMask ? @"Hide" :@"Show")],
                 [NSString stringWithFormat:@"%@ zoom level ornament", (self.zoomLevelOrnamentEnabled ? @"Hide" :@"Show")],
                 [NSString stringWithFormat:@"%@ frame time graph", (self.frameTimeGraphEnabled ? @"Hide" :@"Show")],
-                [NSString stringWithFormat:@"%@ reuse queue stats", (self.reuseQueueStatsEnabled ? @"Hide" :@"Show")]
+                [NSString stringWithFormat:@"%@ reuse queue stats", (self.reuseQueueStatsEnabled ? @"Hide" :@"Show")],
+                [NSString stringWithFormat:@"%@ rendering stats", (self.renderingStatsEnabled ? @"Hide" :@"Show")]
             ]];
             break;
         case MBXSettingsAnnotations:
@@ -457,9 +487,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",
-#if MLN_DRAWABLE_RENDERER
                 @"Add Custom Drawable Layer",
-#endif
+                @"Add FourSquare POIs PMTiles Layer"
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -475,7 +504,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 [NSString stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
                 @"View Route Simulation",
                 @"Ornaments Placement",
-                @"Lat Long bounds with padding"
+                @"Lat Long bounds with padding",
+                [NSString stringWithFormat:@"Cycle tile LOD mode: %@", [self getTileLodModeName]]
             ]];
 
             break;
@@ -537,13 +567,19 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self updateHUD];
                     break;
                 }
+                case MBXSettingsDebugToolsShowRenderingStats:
+                {
+                    self.renderingStatsEnabled = !self.renderingStatsEnabled;
+                    [self.mapView enableRenderingStatsView:self.renderingStatsEnabled];
+                    break;
+                }
                 default:
                     NSAssert(NO, @"All debug tools setting rows should be implemented");
                     break;
             }
 
             self.mapView.debugMask = self.currentState.debugMask;
-            
+
             break;
         case MBXSettingsAnnotations:
             switch (indexPath.row)
@@ -682,11 +718,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingLineGradient:
                     [self styleLineGradient];
                     break;
-#if MLN_DRAWABLE_RENDERER
                 case MBXSettingsRuntimeStylingCustomDrawableLayer:
                     [self addCustomDrawableLayer];
                     break;
-#endif
+                case MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles:
+                    [self addFoursquarePOIsPMTilesLayer];
+                    break;
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
                     break;
@@ -801,6 +838,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsMiscellaneousLatLngBoundsWithPadding:
                     [self flyToWithLatLngBoundsAndPadding];
                     break;
+                case MBXSettingsMiscellaneousCycleTileLOD:
+                    [self cycleTileLodMode];
+                    break;
                 default:
                     NSAssert(NO, @"All miscellaneous setting rows should be implemented");
                     break;
@@ -905,10 +945,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         MLNPointAnnotation *annot = [[MLNPointAnnotation alloc] init];
         annot.coordinate = self.mapView.centerCoordinate;
         [self.mapView addAnnotation:annot];
-        
+
         // Move the annotation to a point that is offscreen.
         CGPoint point = CGPointMake(self.view.frame.origin.x - 200, CGRectGetMidY(self.view.frame));
-        
+
         CLLocationCoordinate2D coord = [self.mapView convertPoint:point toCoordinateFromView:self.view];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [UIView animateWithDuration:10 animations:^{
@@ -922,7 +962,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     for (int featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
         double deltaLongitude = featureIndex * 0.01;
         double deltaLatitude = -featureIndex * 0.01;
-        
+
         // Pacific Northwest triangle
         //
         CLLocationCoordinate2D triangleCoordinates[3] =
@@ -931,11 +971,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             CLLocationCoordinate2DMake(46 + deltaLatitude, -122 + deltaLongitude),
             CLLocationCoordinate2DMake(46 + deltaLatitude, -121 + deltaLongitude)
         };
-        
+
         MLNPolygon *triangle = [MLNPolygon polygonWithCoordinates:triangleCoordinates count:3];
-        
+
         [self.mapView addAnnotation:triangle];
-        
+
         // West coast polyline
         //
         CLLocationCoordinate2D lineCoordinates[4] = {
@@ -946,7 +986,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         };
         MLNPolyline *line = [MLNPolyline polylineWithCoordinates:lineCoordinates count:4];
         [self.mapView addAnnotation:line];
-        
+
         // Orcas Island, WA hike polyline
         //
         NSDictionary *hike = [NSJSONSerialization JSONObjectWithData:
@@ -954,23 +994,23 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                [[NSBundle mainBundle] pathForResource:@"polyline" ofType:@"geojson"]]
                                                              options:0
                                                                error:nil];
-        
+
         NSArray *hikeCoordinatePairs = hike[@"features"][0][@"geometry"][@"coordinates"];
-        
+
         CLLocationCoordinate2D *polylineCoordinates = (CLLocationCoordinate2D *)malloc([hikeCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
-        
+
         for (NSUInteger i = 0; i < [hikeCoordinatePairs count]; i++)
         {
             polylineCoordinates[i] = CLLocationCoordinate2DMake([hikeCoordinatePairs[i][1] doubleValue] + deltaLatitude, [hikeCoordinatePairs[i][0] doubleValue] + deltaLongitude);
         }
-        
+
         MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates
                                                                count:[hikeCoordinatePairs count]];
-        
+
         [self.mapView addAnnotation:polyline];
-        
+
         free(polylineCoordinates);
-        
+
         // PA/NJ/DE polygons
         //
         NSDictionary *threestates = [NSJSONSerialization JSONObjectWithData:
@@ -978,28 +1018,28 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                       [[NSBundle mainBundle] pathForResource:@"threestates" ofType:@"geojson"]]
                                                                     options:0
                                                                       error:nil];
-        
+
         for (NSDictionary *feature in threestates[@"features"])
         {
             NSArray *stateCoordinatePairs = feature[@"geometry"][@"coordinates"];
-            
+
             while ([stateCoordinatePairs count] == 1) stateCoordinatePairs = stateCoordinatePairs[0];
-            
+
             CLLocationCoordinate2D *polygonCoordinates = (CLLocationCoordinate2D *)malloc([stateCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
-            
+
             for (NSUInteger i = 0; i < [stateCoordinatePairs count]; i++)
             {
                 polygonCoordinates[i] = CLLocationCoordinate2DMake([stateCoordinatePairs[i][1] doubleValue] + deltaLatitude, [stateCoordinatePairs[i][0] doubleValue] + deltaLongitude);
             }
-            
+
             MLNPolygon *polygon = [MLNPolygon polygonWithCoordinates:polygonCoordinates count:[stateCoordinatePairs count]];
             polygon.title = feature[@"properties"][@"NAME"];
-            
+
             [self.mapView addAnnotation:polygon];
-            
+
             free(polygonCoordinates);
         }
-        
+
         // Null Island polygon with an interior hole
         //
         CLLocationCoordinate2D innerCoordinates[] = {
@@ -1046,6 +1086,45 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView addAnnotations:annotations];
 
     [self.mapView showAnnotations:annotations animated:YES];
+}
+
+// MARK: - Foursquare PMTiles Implementation
+/*
+  Add the new method that creates the PMTiles vector source and circle layer.
+*/
+- (void)addFoursquarePOIsPMTilesLayer {
+    MLNVectorTileSource *foursquareSource = [[MLNVectorTileSource alloc] initWithIdentifier:@"foursquare-10M" configurationURLString:@"pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles"];
+
+    // Also works
+    // MLNVectorTileSource *foursquareSource =
+    //   [[MLNVectorTileSource alloc] initWithIdentifier:@"foursquare-10M"
+    //                                  tileURLTemplates:@[@"pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles"]
+    //                                           options:nil];
+
+    [self.mapView.style addSource:foursquareSource];
+
+    MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"foursquare-10M" source:foursquareSource];
+    circleLayer.sourceLayerIdentifier = @"place";
+    circleLayer.maximumZoomLevel = 11;
+    circleLayer.circleColor = [NSExpression expressionForConstantValue:[UIColor colorWithRed:0.8 green:0.2 blue:0.2 alpha:1.0]];
+    circleLayer.circleOpacity = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate",
+        @[@"linear"],
+        @[@"zoom"],
+        @6, @0.5,
+        @11, @0.5,
+        @14, @1.0
+    ]];
+    circleLayer.circleRadius = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate",
+        @[@"linear"],
+        @[@"zoom"],
+        @6, @1,
+        @11, @3,
+        @16, @4,
+        @18, @8
+    ]];
+    [self.mapView.style addLayer:circleLayer];
 }
 
 - (void)styleBuildingExtrusions
@@ -1535,10 +1614,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                                                          URL:[self radarImageURL:0]];
 
     [self.mapView.style addSource:imageSource];
-    
+
     MLNRasterStyleLayer *rasterLayer = [[MLNRasterStyleLayer alloc] initWithIdentifier:@"style-raster-image-layer-id" source:imageSource];
     [self.mapView.style addLayer:rasterLayer];
-    
+
     [NSTimer scheduledTimerWithTimeInterval:1.0
                                      target:self
                                    selector:@selector(updateAnimatedImageSource:)
@@ -1565,7 +1644,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [timer invalidate];
         return;
     }
-    
+
     static int radarSuffix = 0;
     [imageSource setValue:[self radarImageURL:radarSuffix] forKey:@"URL"];
     radarSuffix = (radarSuffix + 1) % 5;
@@ -1596,7 +1675,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
 
     NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
-    
+
     MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
 
     MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
@@ -1634,7 +1713,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-#if MLN_DRAWABLE_RENDERER
 - (void)addCustomDrawableLayer
 {
     // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
@@ -1644,7 +1722,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [self.mapView.style addLayer:layer];
     }
 }
-#endif
 
 - (void)removeSource:(NSString*)ident
 {
@@ -1695,7 +1772,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
     routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
-    
+
     [self removeLayer:baseRouteLayer.identifier];
     [self removeLayer:routeLayer.identifier];
     [self removeSource:routeSource.identifier];
@@ -1741,12 +1818,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     fillStyleLayer.fillColor = [NSExpression mgl_expressionForConditional:[NSPredicate predicateWithFormat:@"fill == YES"]
                                                            trueExpression:[NSExpression expressionForConstantValue:[UIColor greenColor]]
                                                          falseExpresssion:[NSExpression expressionForConstantValue:[UIColor redColor]]];
-                                                               
-    
+
+
 
     // source, identity function that sets any feature with an "opacity" attribute to use that value and anything without to 1.0
     fillStyleLayer.fillOpacity = [NSExpression mgl_expressionForConditional:[NSPredicate predicateWithFormat:@"opacity != nil"]
-                                                             trueExpression:[NSExpression expressionForKeyPath:@"opacity"] 
+                                                             trueExpression:[NSExpression expressionForKeyPath:@"opacity"]
                                                            falseExpresssion:[NSExpression expressionForConstantValue:@1.0]];
     [self.mapView.style addLayer:fillStyleLayer];
 }
@@ -1930,23 +2007,131 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView removeAnnotations:self.mapView.annotations];
     CLLocationCoordinate2D sw = CLLocationCoordinate2DMake(48, 11);
     CLLocationCoordinate2D ne = CLLocationCoordinate2DMake(50, 12);
-    
+
     UIEdgeInsets padding = UIEdgeInsetsMake(200, 200, 0, 0);
     MLNMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MLNCoordinateBoundsMake(sw, ne)
                                                                           edgePadding:padding];
-    
-    
+
+
     MLNPointAnnotation *annotation = [MLNPointAnnotation new];
     annotation.coordinate = cameraWithoutPadding.centerCoordinate;
     annotation.title = @"Bounds center";
     [self.mapView addAnnotation: annotation];
-    
+
     __weak MBXViewController *weakSelf = self;
     [self.mapView flyToCamera:cameraWithoutPadding edgePadding:padding withDuration:5 completionHandler:^{
         [weakSelf.mapView flyToCamera:cameraWithoutPadding edgePadding:UIEdgeInsetsZero withDuration:5 completionHandler:^{
-            
+
         }];
     }];
+}
+
+-(void)cycleTileLodMode
+{
+    // TileLodMode::Default parameters
+    static const double defaultRadius = self.mapView.tileLodMinRadius;
+    static const double defaultScale = self.mapView.tileLodScale;
+    static const double defaultPitchThreshold = self.mapView.tileLodPitchThreshold;
+
+    _tileLodMode = static_cast<MBXTileLodMode>((static_cast<int>(_tileLodMode) + 1) % static_cast<int>(MBXTileLodModeCount));
+
+    switch (_tileLodMode) {
+        case MBXTileLodModeDefault:
+            self.mapView.tileLodMinRadius = defaultRadius;
+            self.mapView.tileLodScale = defaultScale;
+            self.mapView.tileLodPitchThreshold = defaultPitchThreshold;
+            break;
+        case MBXTileLodModeNoLod:
+            // When LOD is off we set a maximum PitchThreshold
+            self.mapView.tileLodPitchThreshold = M_PI;
+            break;
+        case MBXTileLodModeReduced:
+            self.mapView.tileLodMinRadius = 2;
+            self.mapView.tileLodScale = 1.5;
+            self.mapView.tileLodPitchThreshold = M_PI / 4;
+            break;
+        case MBXTileLodModeAggressive:
+            self.mapView.tileLodMinRadius = 1;
+            self.mapView.tileLodScale = 2;
+            self.mapView.tileLodPitchThreshold = 0;
+            break;
+        default:
+            break;
+    }
+
+    // update UI
+    static UISlider* zoomSlider = nil;
+    if (zoomSlider && _tileLodMode == MBXTileLodModeNoLod) {
+        [zoomSlider removeFromSuperview];
+        zoomSlider = nil;
+    }
+
+    if (!zoomSlider && _tileLodMode != MBXTileLodModeNoLod) {
+        const float zoomShiftRange = 5.0f;
+        zoomSlider = [[UISlider alloc] init];
+        zoomSlider.minimumValue = -zoomShiftRange / 2.0f;
+        zoomSlider.maximumValue = zoomShiftRange / 2.0f;
+        zoomSlider.value = self.mapView.tileLodZoomShift;
+        zoomSlider.continuous = NO;
+
+        [zoomSlider addTarget:self action:@selector(updateTileLodZoom:) forControlEvents:UIControlEventValueChanged];
+        [self.view addSubview:zoomSlider];
+
+        zoomSlider.translatesAutoresizingMaskIntoConstraints = NO;
+        zoomSlider.frame = CGRectMake(0, 0, 100, 100);
+
+        NSArray<NSLayoutConstraint*>* layout = @[
+                [NSLayoutConstraint constraintWithItem:zoomSlider
+                                             attribute:NSLayoutAttributeCenterX
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterX
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:zoomSlider
+                                             attribute:NSLayoutAttributeWidth
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeWidth
+                                            multiplier:0.5
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:zoomSlider
+                                             attribute:NSLayoutAttributeTop
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterY
+                                            multiplier:1
+                                              constant:0],
+                [zoomSlider.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]];
+
+        [self.view addConstraints:layout];
+    }
+
+    [self.mapView triggerRepaint];
+}
+
+-(void)updateTileLodZoom:(id)sender {
+    UISlider* slider = (UISlider*)sender;
+
+    self.mapView.tileLodZoomShift = slider.value;
+    [self.mapView triggerRepaint];
+
+    NSLog(@"Tile LOD zoom shift: %f", self.mapView.tileLodZoomShift);
+}
+
+-(NSString*)getTileLodModeName {
+    switch (_tileLodMode) {
+        case MBXTileLodModeDefault:
+            return @"Default";
+        case MBXTileLodModeNoLod:
+            return @"Disabled";
+        case MBXTileLodModeReduced:
+            return @"Reduced";
+        case MBXTileLodModeAggressive:
+            return @"Aggressive";
+        default:
+            return @"";
+    }
 }
 
 // MARK: - Random World Tour
@@ -2147,10 +2332,19 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     self.styleNames = [NSMutableArray array];
     self.styleURLs = [NSMutableArray array];
-    
+
+
+
+
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+
+    /// This is hte same style as above but copied locally and the three instances of the metal plug-in layer added to the style
+    /// Look for "type": "plugin-layer-metal-rendering" in the PluginLayerTestStyle.json for an example of how the layer is defined
+    [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
+    [self.styleURLs addObject:url];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
@@ -2158,14 +2352,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            
+
             for (MLNDefaultStyle* predefinedStyle in [MLNStyle predefinedStyles]){
                 [self.styleNames addObject:predefinedStyle.name];
                 [self.styleURLs addObject:predefinedStyle.url];
             }
         });
     }
-    
+
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
 }
 
@@ -2229,6 +2423,102 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 // MARK: - MLNMapViewDelegate
+
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source
+{
+    NSLog(@"A source was updated: %@", source.identifier);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines
+{
+    NSLog(@"A new shader is being compiled - shaderID:%ld, backend type:%ld, program configuration:%@", id, backend, defines);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines
+{
+    NSLog(@"A shader has been compiled - shaderID:%ld, backend type:%ld, program configuration:%@", id, backend, defines);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range
+{
+    NSLog(@"Glyphs are being requested for the font stack %@, ranging from %ld to %ld", fontStack, range.location, range.location + range.length);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range
+{
+    NSLog(@"Glyphs have been loaded for the font stack %@, ranging from %ld to %ld", fontStack, range.location, range.location + range.length);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID
+{
+    NSString* tileStr = [NSString stringWithFormat:@"(x: %ld, y: %ld, z: %ld, wrap: %ld, overscaledZ: %ld, sourceID: %@)",
+                         x, y, z, wrap, overscaledZ, sourceID];
+
+    switch (operation) {
+        case MLNTileOperationRequestedFromCache:
+            NSLog(@"Requesting tile %@ from cache", tileStr);
+            break;
+
+        case MLNTileOperationRequestedFromNetwork:
+            NSLog(@"Requesting tile %@ from network", tileStr);
+            break;
+
+        case MLNTileOperationLoadFromCache:
+            NSLog(@"Loading tile %@, requested from the cache", tileStr);
+            break;
+
+        case MLNTileOperationLoadFromNetwork:
+            NSLog(@"Loading tile %@, requested from the network", tileStr);
+            break;
+
+        case MLNTileOperationStartParse:
+            NSLog(@"Parsing tile %@", tileStr);
+            break;
+
+        case MLNTileOperationEndParse:
+            NSLog(@"Completed parsing tile %@", tileStr);
+            break;
+
+        case MLNTileOperationError:
+            NSLog(@"An error occured during proccessing for tile %@", tileStr);
+            break;
+
+        case MLNTileOperationCancelled:
+            NSLog(@"Pending work cancelled on tile %@", tileStr);
+            break;
+
+        case MLNTileOperationNullOp:
+            NSLog(@"An unknown tile operation was emitted for tile %@", tileStr);
+            break;
+    }
+}
+
+- (void)mapView:(MLNMapView *)mapView spriteWillLoad:(NSString *)id url:(NSString *)url
+{
+    NSLog(@"The sprite %@ has been requested from %@", id, url);
+}
+
+- (void)mapView:(MLNMapView *)mapView spriteDidLoad:(NSString *)id url:(NSString *)url
+{
+    NSLog(@"The sprite %@ has been loaded from %@", id, url);
+}
 
 - (MLNAnnotationView *)mapView:(MLNMapView *)mapView viewForAnnotation:(id<MLNAnnotation>)annotation
 {
@@ -2561,9 +2851,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return features;
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameEncodingTime:(double)frameEncodingTime frameRenderingTime:(double)frameRenderingTime {
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(nonnull MLNRenderingStats *)renderingStats {
     if (self.frameTimeGraphEnabled) {
-        [self.frameTimeGraphView updatePathWithFrameDuration:frameEncodingTime];
+        [self.frameTimeGraphView updatePathWithFrameDuration:renderingStats.encodingTime];
     }
 }
 
@@ -2626,7 +2918,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (void)restoreMapState:(__unused NSNotification *)notification {
-    
+
     if ([self isUITesting]) {
         return;
     }

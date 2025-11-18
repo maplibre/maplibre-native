@@ -3,8 +3,9 @@ package org.maplibre.android.geometry
 import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 
-class ProjectedMetersTest {
+class ProjectedMetersTest : BaseTest() {
     @Test
     fun testSanity() {
         val projectedMeters = ProjectedMeters(0.0, 0.0)

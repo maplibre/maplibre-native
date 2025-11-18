@@ -3,7 +3,13 @@ authors = ["MapLibre Contributors"]
 language = "en"
 multilingual = false
 src = "src"
-title = "MapLibre Native Documentation"
+title = "MapLibre Native Developer Documentation"
 
 [output.html]
 additional-css = ["diff.css"]
+additional-js = []
+
+[preprocessor.alerts]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"

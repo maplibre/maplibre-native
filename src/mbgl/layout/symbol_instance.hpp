@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/text/quads.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/collision_feature.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
@@ -120,7 +119,7 @@ public:
                    float overscaling,
                    float iconRotation,
                    float textRotation,
-                   const std::array<float, 2>& variableTextOffset,
+                   const std::optional<VariableAnchorOffsetCollection>& textVariableAnchorOffset,
                    bool allowVerticalPlacement,
                    SymbolContent iconType = SymbolContent::None);
 
@@ -136,6 +135,7 @@ public:
     const std::optional<SymbolQuads>& iconQuads() const;
     const std::optional<SymbolQuads>& verticalIconQuads() const;
     void releaseSharedData();
+    std::vector<style::SymbolAnchorType> getTextAnchors() const;
 
 #if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
@@ -183,7 +183,9 @@ public:
     std::optional<size_t> getPlacedIconIndex() const { return placedIconIndex; }
     std::optional<size_t> getPlacedVerticalIconIndex() const { return placedVerticalIconIndex; }
     float getTextBoxScale() const { return textBoxScale; }
-    std::array<float, 2> getVariableTextOffset() const { return variableTextOffset; }
+    std::optional<VariableAnchorOffsetCollection> getTextVariableAnchorOffset() const {
+        return textVariableAnchorOffset;
+    }
     bool getSingleLine() const { return singleLine; }
 
     uint32_t getCrossTileID() const { return crossTileID; }
@@ -267,7 +269,7 @@ private:
     SYM_GUARD_VALUE(24)
     float textBoxScale;
     SYM_GUARD_VALUE(25)
-    std::array<float, 2> variableTextOffset;
+    std::optional<VariableAnchorOffsetCollection> textVariableAnchorOffset;
     SYM_GUARD_VALUE(26)
     bool singleLine;
     SYM_GUARD_VALUE(27)

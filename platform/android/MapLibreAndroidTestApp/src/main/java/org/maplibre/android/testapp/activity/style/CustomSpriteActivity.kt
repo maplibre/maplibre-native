@@ -37,7 +37,7 @@ class CustomSpriteActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             maplibreMap = it
-            it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+            it.setStyle(TestStyles.OPENFREEMAP_LIBERTY) { style: Style ->
                 val fab = findViewById<FloatingActionButton>(R.id.fab)
                 fab.setColorFilter(
                     ContextCompat.getColor(
@@ -50,6 +50,7 @@ class CustomSpriteActivity : AppCompatActivity() {
                     override fun onClick(view: View) {
                         if (!this::point.isInitialized) {
                             Timber.i("First click -> Car")
+                            // --8<-- [start:addImage]
                             // Add an icon to reference later
                             style.addImage(
                                 CUSTOM_ICON,
@@ -76,8 +77,9 @@ class CustomSpriteActivity : AppCompatActivity() {
                             )
 
                             // lets add a circle below labels!
-                            maplibreMap.style!!.addLayerBelow(layer, "water_intermittent")
+                            maplibreMap.style!!.addLayerBelow(layer, "water-intermittent")
                             fab.setImageResource(R.drawable.ic_directions_car_black)
+                            // --8<-- [end:addImage]
                         } else {
                             // Update point
                             point = Point.fromLngLat(

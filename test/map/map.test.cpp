@@ -19,18 +19,21 @@
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/image.hpp>
+#include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/image_impl.hpp>
+#include <mbgl/style/image.hpp>
+#include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
+#include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
-#include <mbgl/style/style.hpp>
 #include <mbgl/style/style_impl.hpp>
+#include <mbgl/style/style.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/color.hpp>
@@ -385,6 +388,8 @@ TEST(Map, Offline) {
 
 #if ANDROID
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0046, 0.1);
+#elif WIN32
+    test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.035, 0.1);
 #else
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0015, 0.1);
 #endif
@@ -1608,6 +1613,82 @@ TEST(Map, ObserveShaderRegistration) {
     EXPECT_EQ(observedRegistry, false);
 }
 
+TEST(Map, ResourceError) {
+    MapTest<> test;
+    test.fileSource->glyphsResponse = [&](const Resource&) {
+        Response response;
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Server, "Font file Server failed");
+        return response;
+    };
+
+    test.map.getStyle().loadJSON(
+        R"(
+{
+  "version": 8,
+  "zoom": 0,
+  "center": [-14.41400, 39.09187],
+  "sources": {
+    "mapbox": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "ជនជាប់សង្ស័យ"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -14.4195556640625,
+                  39.091699613104595
+                ],
+                [
+                  102.3046875,
+                  39.36827914916014
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "fonts": "local://glyphs/{fontstack}/{language}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "lines-symbol",
+      "type": "symbol",
+      "source": "mapbox",
+      "layout": {
+        "text-field": "{name}",
+        "symbol-placement": "point",
+        "symbol-spacing": 150,
+        "text-allow-overlap": true,
+        "text-font": [ "abc" ],
+        "text-size": 24
+      }
+    }
+  ]
+})");
+    try {
+        test.frontend.render(test.map);
+    } catch (...) {
+        auto error = std::current_exception(); // captur
+        EXPECT_EQ(mbgl::util::toString(error), "Font file Server failed");
+    }
+}
+
 TEST(Map, StencilOverflow) {
     MapTest<> test;
 
@@ -1630,12 +1711,8 @@ TEST(Map, StencilOverflow) {
     test.map.jumpTo(CameraOptions().withZoom(5));
     auto result = test.frontend.render(test.map);
 
-    // In drawable builds, no drawables are built because no bucket/tiledata is available.
-#if MLN_DRAWABLE_RENDERER
+    // No drawables are built because no bucket/tiledata is available.
     ASSERT_LE(0, result.stats.stencilUpdates);
-#else
-    ASSERT_LT(0, result.stats.stencilClears);
-#endif // MLN_DRAWABLE_RENDERER
 
 #if !defined(NDEBUG)
     Log::Info(Event::General, result.stats.toString("\n"));
@@ -1863,4 +1940,83 @@ TEST(Map, ObserveTileLifecycle) {
         EXPECT_THAT(stage, testing::AnyOf(TileOperation::EndParse, TileOperation::Cancelled));
         EXPECT_FALSE(parsing);
     }
+}
+
+TEST(BackgroundLayer, StyleUpdateZoomDependency) {
+    using namespace mbgl::style::expression::dsl;
+
+    MapTest<> test;
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/map/style_update_zoom_dependency/style.json"));
+    test.map.jumpTo(CameraOptions().withZoom(0.0));
+
+    // Initial render: background should be red at zoom 0
+    test::checkImage("test/fixtures/map/style_update_zoom_dependency/initial_red",
+                     test.frontend.render(test.map).image,
+                     0.0006,
+                     0.1);
+
+    // Update background layer to use zoom-dependent color
+    auto layer = static_cast<style::BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    layer->setBackgroundColor(PropertyExpression<Color>(
+        interpolate(linear(), zoom(), 0.0, literal(Color::red()), 14.0, literal(Color::green()))));
+
+    test.frontend.render(test.map);
+
+    // Change zoom to 14 and re-render
+    test.map.jumpTo(CameraOptions().withZoom(14.0));
+    test::checkImage("test/fixtures/map/style_update_zoom_dependency/after_update_green",
+                     test.frontend.render(test.map).image,
+                     0.0006,
+                     0.1);
+}
+
+TEST(Map, LineLayerDepthDistribution) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    test.map.jumpTo(CameraOptions().withZoom(0.0).withPitch(45.0));
+
+    auto backgroundLayer = std::make_unique<BackgroundLayer>("Background");
+    backgroundLayer->setBackgroundColor(Color(1.0f, 1.0f, 0.0f, 1.0f));
+    test.map.getStyle().addLayer(std::move(backgroundLayer));
+
+    constexpr uint32_t layerCount = 1 << 11;
+    const std::vector<Color> colors = {Color::red(), Color::green(), Color::blue()};
+    const auto& bounds = test.map.latLngBoundsForCamera(test.map.getCameraOptions());
+
+    const auto getSource = [&](uint32_t index) {
+        FeatureCollection features;
+
+        mapbox::geojson::line_string geo;
+
+        double y = (bounds.north() - bounds.south()) * 0.95 / layerCount * (index + 1) / 2.0;
+        double x = (bounds.east() - bounds.west()) * 0.95 / layerCount * (index + 1) / 2.0;
+
+        geo.emplace_back(-x, y);
+        geo.emplace_back(x, y);
+        geo.emplace_back(x, -y);
+        geo.emplace_back(-x, -y);
+        geo.emplace_back(-x, y);
+
+        features.emplace_back(geo);
+
+        auto source = std::make_unique<GeoJSONSource>("GeoJSONSource_" + std::to_string(index));
+        source->setGeoJSON(features);
+
+        return source;
+    };
+
+    for (uint32_t i = 0; i < layerCount; ++i) {
+        // add one source per layer
+        test.map.getStyle().addSource(getSource(i));
+
+        auto layer = std::make_unique<LineLayer>("LineLayer" + std::to_string(i), "GeoJSONSource_" + std::to_string(i));
+        layer->setLineColor(colors[i % colors.size()]);
+
+        test.map.getStyle().addLayer(std::move(layer));
+    }
+
+    test::checkImage(
+        "test/fixtures/map/layer_depth_distribution/line", test.frontend.render(test.map).image, 0.0006, 0.1);
 }

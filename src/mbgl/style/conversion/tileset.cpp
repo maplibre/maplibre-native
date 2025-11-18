@@ -1,4 +1,5 @@
 #include <mbgl/style/conversion/tileset.hpp>
+#include <mbgl/style/conversion/source_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/math/clamp.hpp>
@@ -38,15 +39,13 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
         }
     }
 
-    auto encodingValue = objectMember(value, "encoding");
-    if (encodingValue) {
-        std::optional<std::string> encoding = toString(*encodingValue);
-        if (encoding && *encoding == "terrarium") {
-            result.encoding = Tileset::DEMEncoding::Terrarium;
-        } else if (encoding && *encoding != "mapbox") {
-            error.message =
-                "invalid raster-dem encoding type - valid types are 'mapbox' "
-                "and 'terrarium' ";
+    auto options = convert<SourceOptions>(value, error);
+    if (options) {
+        if (const auto encoding = options->rasterEncoding) {
+            result.rasterEncoding = encoding;
+        }
+        if (const auto encoding = options->vectorEncoding) {
+            result.vectorEncoding = encoding;
         }
     }
 

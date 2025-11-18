@@ -15,12 +15,6 @@ import timber.log.Timber
 class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
-    private val clickListener = OnMapClickListener {
-        if (this::maplibreMap.isInitialized) {
-            maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor")))
-        }
-        true
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +27,20 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
+        maplibreMap.setStyle(TestStyles.OPENFREEMAP_LIBERTY)
+        // # --8<-- [start:zoomPreference]
         maplibreMap.setMinZoomPreference(3.0)
         maplibreMap.setMaxZoomPreference(5.0)
-        maplibreMap.addOnMapClickListener(clickListener)
+        // # --8<-- [end:zoomPreference]
+
+        // # --8<-- [start:addOnMapClickListener]
+        maplibreMap.addOnMapClickListener {
+            if (this::maplibreMap.isInitialized) {
+                maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.AMERICANA))
+            }
+            true
+        }
+        // # --8<-- [end:addOnMapClickListener]
     }
 
     override fun onStart() {
@@ -66,9 +70,6 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (this::maplibreMap.isInitialized) {
-            maplibreMap.removeOnMapClickListener(clickListener)
-        }
         mapView.onDestroy()
     }
 

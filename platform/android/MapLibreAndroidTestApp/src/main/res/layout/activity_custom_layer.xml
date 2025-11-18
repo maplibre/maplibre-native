@@ -22,4 +22,3 @@
         app:backgroundTint="@android:color/white"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-

@@ -1,6 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
+    "@rules_swift//swift:swift.bzl",
     "swift_library",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
@@ -111,6 +112,13 @@ js_run_binary(
     visibility = ["//visibility:public"],
 )
 
+# Production-only generated code without test files
+filegroup(
+    name = "generated_code_production",
+    srcs = MLN_GENERATED_DARWIN_STYLE_SOURCE + MLN_GENERATED_DARWIN_STYLE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
 objc_library(
     name = "test_utility",
     srcs = [
@@ -171,6 +179,7 @@ swift_library(
     testonly = True,
     srcs = glob(["test/*.swift"]),
     data = [
+        "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
         "test/one-liner.json",
     ],
@@ -188,7 +197,7 @@ cc_library(
         ":darwin_objc_hdrs",
         ":darwin_objcpp_hdrs",
         ":darwin_private_hdrs",
-        ":generated_code",
+        ":generated_code_production",
     ],
     hdrs = [
         ":generated_style_hdrs",
@@ -200,11 +209,10 @@ cc_library(
 objc_library(
     name = "darwin-objc",
     srcs = [
-        "src/native_apple_interface.m",
+        "core/native_apple_interface.m",
     ],
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
@@ -228,22 +236,21 @@ objc_library(
 objc_library(
     name = "darwin-objcpp",
     srcs = [
+        "core/collator.mm",
+        "core/http_file_source.mm",
+        "core/image.mm",
+        "core/local_glyph_rasterizer.mm",
+        "core/logging_nslog.mm",
+        "core/nsthread.mm",
+        "core/number_format.mm",
+        "core/string_nsstring.mm",
         "src/CFHandle.hpp",
-        "src/collator.mm",
-        "src/http_file_source.mm",
-        "src/image.mm",
-        "src/local_glyph_rasterizer.mm",
-        "src/logging_nslog.mm",
-        "src/nsthread.mm",
-        "src/number_format.mm",
-        "src/string_nsstring.mm",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": ["src/headless_backend_eagl.mm"],
     }),
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
@@ -254,6 +261,7 @@ objc_library(
     ],
     includes = [
         "include",
+        "src",
     ],
     sdk_frameworks = [
         "CoreText",
@@ -271,9 +279,9 @@ objc_library(
 objc_library(
     name = "darwin-loop",
     srcs = [
-        "src/async_task.cpp",
-        "src/run_loop.cpp",
-        "src/timer.cpp",
+        "core/async_task.cpp",
+        "core/run_loop.cpp",
+        "core/timer.cpp",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": ["src/gl_functions.cpp"],
@@ -297,6 +305,11 @@ objc_library(
 
 exports_files(
     [
+        "app/PluginLayerTestStyle.json",
+        "app/PluginLayerExample.h",
+        "app/PluginLayerExample.mm",
+        "app/PluginLayerExampleMetalRendering.h",
+        "app/PluginLayerExampleMetalRendering.mm",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",
@@ -317,7 +330,6 @@ js_binary(
     data = [
         "scripts/style-spec-cocoa-conventions-v8.json",
         "scripts/style-spec-overrides-v8.json",
-        "//:node_modules/argparse",
         "//:node_modules/csscolorparser",
         "//:node_modules/lodash",
         "//:style-code",
@@ -334,11 +346,10 @@ js_library(
         ":darwin_objcpp_hdrs",
         ":darwin_objcpp_srcs",
         ":darwin_private_hdrs",
-        ":generated_code",
+        ":generated_code_production",
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({
-        "//:legacy_renderer": [],
         "//conditions:default": [
             ":darwin_objcpp_custom_drawable_srcs",
         ],

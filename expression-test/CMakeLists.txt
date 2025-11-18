@@ -20,8 +20,8 @@ target_include_directories(
 target_link_libraries(
     mbgl-expression-test
     PRIVATE
-        Mapbox::Base
-        Mapbox::Base::Extras::args
+        MapLibreNative::Base
+        mbgl-vendor-args
         mbgl-core
         mbgl-compiler-options
 )

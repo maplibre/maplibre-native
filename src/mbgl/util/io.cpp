@@ -8,7 +8,7 @@
 #include <sstream>
 #include <fstream>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(WIN32)
 #define MBGL_FOPEN_MODE_WBE "wbe"
 #else
 #define MBGL_FOPEN_MODE_WBE "wb"
@@ -46,14 +46,23 @@ std::string read_file(const std::string &filename) {
     }
 }
 
-std::optional<std::string> readFile(const std::string &filename) {
+std::optional<std::string> readFile(const std::string &filename,
+                                    const std::optional<std::pair<uint64_t, uint64_t>> &dataRange) {
     MLN_TRACE_FUNC();
 
     std::ifstream file(filename, std::ios::binary);
     if (file.good()) {
-        std::stringstream data;
-        data << file.rdbuf();
-        return data.str();
+        if (dataRange) {
+            size_t size = static_cast<size_t>(dataRange->second - dataRange->first + 1);
+            std::string data(size, '\0');
+            file.seekg(static_cast<std::streampos>(dataRange->first));
+            file.read(data.data(), static_cast<std::streamsize>(size));
+            return data;
+        } else {
+            std::stringstream data;
+            data << file.rdbuf();
+            return data.str();
+        }
     }
     return {};
 }

@@ -51,14 +51,18 @@ public:
     void update(const void* data, std::size_t size, std::size_t offset) noexcept;
 
     std::size_t getSizeInBytes() const noexcept { return size; }
-    const void* contents() const noexcept { return (raw.empty() ? nullptr : raw.data()); }
+    const void* contents() const noexcept;
+    const void* contents(uint8_t resourceIndex) const noexcept;
 
     Context& getContext() const noexcept { return context; }
     const vk::Buffer& getVulkanBuffer() const noexcept { return bufferAllocation->buffer; }
     std::size_t getVulkanBufferOffset() const noexcept;
-    std::size_t getVulkanBufferSize() const noexcept;
+    std::size_t getVulkanBufferOffset(uint8_t resourceIndex) const noexcept;
+    // update the current sub-buffer with the latest data
+    void updateVulkanBuffer();
+    void updateVulkanBuffer(const int8_t destination, const uint8_t source);
 
-    bool isValid() const noexcept { return !raw.empty(); }
+    bool isValid() const noexcept { return !!bufferAllocation; }
     operator bool() const noexcept { return isValid(); }
     bool operator!() const noexcept { return !isValid(); }
 
@@ -69,14 +73,14 @@ public:
 
 protected:
     Context& context;
-    std::vector<std::uint8_t> raw;
     std::size_t size;
     std::uint32_t usage;
-    std::uint16_t version = 0;
+    VersionType version = 0;
     bool persistent;
 
     SharedBufferAllocation bufferAllocation;
     size_t bufferWindowSize = 0;
+    std::vector<VersionType> bufferWindowVersions;
 };
 
 } // namespace vulkan

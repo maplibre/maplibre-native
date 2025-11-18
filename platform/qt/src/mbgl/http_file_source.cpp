@@ -30,21 +30,10 @@ void HTTPFileSource::Impl::request(HTTPRequest* req) {
     }
 
     QNetworkRequest networkRequest = req->networkRequest();
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
-    networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-    networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#endif
-#endif
 
     data.first = m_manager->get(networkRequest);
     connect(data.first, &QNetworkReply::finished, this, &HTTPFileSource::Impl::onReplyFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     connect(data.first, &QNetworkReply::errorOccurred, this, &HTTPFileSource::Impl::onReplyFinished);
-#else
-    connect(data.first, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onReplyFinished()));
-#endif
 }
 
 void HTTPFileSource::Impl::cancel(HTTPRequest* req) {
@@ -74,11 +63,20 @@ void HTTPFileSource::Impl::cancel(HTTPRequest* req) {
 
 void HTTPFileSource::Impl::onReplyFinished() {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+
+#if defined(Q_OS_WASM)
+    const QUrl& url = reply->url();
+#else
     const QUrl& url = reply->request().url();
+#endif
 
     auto it = m_pending.find(url);
     if (it == m_pending.end()) {
+#if defined(Q_OS_WASM)
+        reply->abort();
+#else
         reply->deleteLater();
+#endif
         return;
     }
 
@@ -93,7 +91,11 @@ void HTTPFileSource::Impl::onReplyFinished() {
     }
 
     m_pending.erase(it);
+#if defined(Q_OS_WASM)
+    reply->abort();
+#else
     reply->deleteLater();
+#endif
 }
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {

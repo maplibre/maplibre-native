@@ -10,13 +10,13 @@ runs:
     - name: Build APK and Android Test APK for ${{ inputs.flavor }}
       shell: bash
       run: |
-        ./gradlew assemble${{ inputs.flavor }} assemble${{ inputs.flavor }}AndroidTest
+        ./gradlew assemble${{ inputs.flavor }}Release assemble${{ inputs.flavor }}AndroidTest
         cp app/build/outputs/apk/${{ inputs.flavor }}/release/app-${{ inputs.flavor }}-release.apk RenderTestsApp-${{ inputs.flavor }}.apk
         cp app/build/outputs/apk/androidTest/${{ inputs.flavor }}/release/app-${{ inputs.flavor }}-release-androidTest.apk RenderTests-${{ inputs.flavor }}.apk
       working-directory: ./render-test/android
 
     - name: Upload APK files for ${{ inputs.flavor }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: android-render-tests-${{ inputs.flavor }}
         if-no-files-found: error

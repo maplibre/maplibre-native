@@ -4,6 +4,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/text/glyph.hpp>
+#include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/actor/actor_ref.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/style/layer_properties.hpp>
@@ -26,6 +27,11 @@ namespace style {
 class Layer;
 } // namespace style
 
+namespace gfx {
+class DynamicTextureAtlas;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
+} // namespace gfx
+
 class GeometryTileWorker {
 public:
     GeometryTileWorker(ActorRef<GeometryTileWorker> self,
@@ -36,7 +42,9 @@ public:
                        const std::atomic<bool>&,
                        MapMode,
                        float pixelRatio,
-                       bool showCollisionBoxes_);
+                       bool showCollisionBoxes_,
+                       gfx::DynamicTextureAtlasPtr,
+                       std::shared_ptr<FontFaces> fontFaces);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -48,7 +56,8 @@ public:
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
-    void onGlyphsAvailable(GlyphMap newGlyphMap);
+    void onGlyphsAvailable(GlyphMap glyphs, HBShapeResults requests);
+
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,
                            ImageVersionMap versionMap,
@@ -103,13 +112,17 @@ private:
     GlyphDependencies pendingGlyphDependencies;
     ImageDependencies pendingImageDependencies;
     GlyphMap glyphMap;
-    ImageMap imageMap;
+    ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
     std::set<std::string> availableImages;
 
     bool showCollisionBoxes;
     bool firstLoad = true;
+
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+
+    std::shared_ptr<FontFaces> fontFaces;
 };
 
 } // namespace mbgl

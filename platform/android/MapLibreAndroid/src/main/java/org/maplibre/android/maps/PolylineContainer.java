@@ -27,12 +27,10 @@ class PolylineContainer implements Polylines {
   @Override
   public Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap) {
     Polyline polyline = polylineOptions.getPolyline();
-    if (!polyline.getPoints().isEmpty()) {
-      long id = nativeMap != null ? nativeMap.addPolyline(polyline) : 0;
-      polyline.setMapLibreMap(maplibreMap);
-      polyline.setId(id);
-      annotations.put(id, polyline);
-    }
+    long id = nativeMap != null ? nativeMap.addPolyline(polyline) : 0;
+    polyline.setMapLibreMap(maplibreMap);
+    polyline.setId(id);
+    annotations.put(id, polyline);
     return polyline;
   }
 

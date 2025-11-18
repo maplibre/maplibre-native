@@ -151,9 +151,6 @@ public:
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-    int32_t getLayerIndex() const { return layerIndex; }
-
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
@@ -254,6 +251,9 @@ public:
     /// Get drawable user-defined type
     size_t getType() const { return type; }
 
+    void setUBOIndex(uint32_t uboIndex_) { uboIndex = uboIndex_; }
+    uint32_t getUBOIndex() const { return uboIndex; }
+
     /// Associate the drawable with a layer tweaker.  This is used to manage the lifetime of the tweaker.
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
     const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
@@ -293,7 +293,6 @@ protected:
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
-    int32_t layerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
@@ -309,6 +308,7 @@ protected:
 
     std::size_t type = 0;
     std::optional<mbgl::Point<double>> origin;
+    uint32_t uboIndex = 0;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;

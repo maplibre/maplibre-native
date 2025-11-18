@@ -3,8 +3,9 @@ package org.maplibre.android.annotations
 import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 
-class PolylineTest {
+class PolylineTest : BaseTest() {
     @Test
     fun testSanity() {
         val polylineOptions = PolylineOptions()

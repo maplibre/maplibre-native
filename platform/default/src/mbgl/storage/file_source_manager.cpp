@@ -5,6 +5,7 @@
 #include <mbgl/storage/main_resource_loader.hpp>
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/mbtiles_file_source.hpp>
+#include <mbgl/storage/pmtiles_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
 namespace mbgl {
@@ -35,6 +36,11 @@ public:
         registerFileSourceFactory(FileSourceType::Mbtiles,
                                   [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
                                       return std::make_unique<MBTilesFileSource>(resourceOptions, clientOptions);
+                                  });
+
+        registerFileSourceFactory(FileSourceType::Pmtiles,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<PMTilesFileSource>(resourceOptions, clientOptions);
                                   });
 
         registerFileSourceFactory(FileSourceType::Network,

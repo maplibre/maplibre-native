@@ -4,7 +4,7 @@
 
 The maintainers of MapLibre Native are committed to a fast and efficient resolution of critical security vulnerabilities. We aim to get back to you within 24 hours of creating the report. However, we cannot guarantee this. Luckily, vulnerabilities can be reported, fixed, merged, and released by anyone with write access (committers).
 
-1. `[Reporter]` To report a critical security vulnerability in MapLibre Native, create a [security advisory](https://github.com/maplibre/maplibre-native/security/advisories/new). 
+1. `[Reporter]` To report a critical security vulnerability in MapLibre Native, create a [security advisory](https://github.com/maplibre/maplibre-native/security/advisories/new).
 
 2. `[Reporter or Maintainer]` A private fork will be created. You can add collaborators that you believe will be able to help work on a fix.
 

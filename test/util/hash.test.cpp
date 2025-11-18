@@ -11,25 +11,23 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/background.hpp>
-#include <mbgl/shaders/mtl/background_pattern.hpp>
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
-#include <mbgl/shaders/mtl/collision_box.hpp>
-#include <mbgl/shaders/mtl/collision_circle.hpp>
+#include <mbgl/shaders/mtl/collision.hpp>
+#include <mbgl/shaders/mtl/custom_geometry.hpp>
+#include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
-#include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #include <mbgl/shaders/mtl/heatmap.hpp>
 #include <mbgl/shaders/mtl/heatmap_texture.hpp>
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
+#include <mbgl/shaders/mtl/location_indicator.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
-#include <mbgl/shaders/mtl/symbol_icon.hpp>
-#include <mbgl/shaders/mtl/symbol_sdf.hpp>
-#include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
+#include <mbgl/shaders/mtl/symbol.hpp>
 #endif
 
 using namespace mbgl;
@@ -133,6 +131,8 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::CircleShader,
                       BuiltIn::CollisionBoxShader,
                       BuiltIn::CollisionCircleShader,
+                      BuiltIn::CustomGeometryShader,
+                      BuiltIn::CustomSymbolIconShader,
                       BuiltIn::DebugShader,
                       BuiltIn::FillShader,
                       BuiltIn::FillOutlineShader,
@@ -149,9 +149,11 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::LineGradientShader,
                       BuiltIn::LinePatternShader,
                       BuiltIn::LineSDFShader,
+                      BuiltIn::LocationIndicatorShader,
+                      BuiltIn::LocationIndicatorTexturedShader,
                       BuiltIn::RasterShader,
                       BuiltIn::SymbolIconShader,
-                      BuiltIn::SymbolSDFIconShader,
+                      BuiltIn::SymbolSDFShader,
                       BuiltIn::SymbolTextAndIconShader>();
 }
 

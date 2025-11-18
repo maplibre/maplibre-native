@@ -5,6 +5,33 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ An `NSNumber` object containing an unsigned integer that specifies the encoding
+ formula for vector tilesets. The integer corresponds to one of the constants in
+ ``MLNVectorTileSourceEncoding``.
+
+ The default value for this option is
+ ``MLNVectorTileSourceEncoding/MLNVectorTileSourceEncodingMapbox``.
+ */
+FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNVectorTileSourceOptionEncoding;
+
+/**
+ The encoding formula used to generate the raster-dem tileset
+*/
+
+typedef NS_ENUM(NSUInteger, MLNVectorTileSourceEncoding) {
+
+  /**
+     Vector tiles in [MVT format](https://github.com/mapbox/vector-tile-spec).
+  */
+  MLNVectorTileSourceEncodingMapbox = 0,
+
+  /**
+   Vector tiles in [MLT format](https://github.com/maplibre/maplibre-tile-spec).
+  */
+  MLNVectorTileSourceEncodingMLT = 1,
+};
+
+/**
  ``MLNVectorTileSource`` is a map content source that supplies tiled vector data
  in <a href="https://www.mapbox.com/vector-tiles/">Mapbox Vector Tile</a> format
  to be shown on the map. The location of and metadata about the tiles are
@@ -83,6 +110,30 @@ MLN_EXPORT
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier
                   configurationURL:(NSURL *)configurationURL NS_DESIGNATED_INITIALIZER;
+
+/**
+ Returns a vector tile source initialized with an identifier and a
+ string-based configuration URL.
+
+ After initializing and configuring the source, add it to a map view’s style
+ using the ``MLNStyle/addSource:`` method.
+
+ The string may be a full HTTP or HTTPS URL or a canonical URL. The string should
+ point to a JSON file that conforms to the
+ <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
+
+ This constructor can be used for URLs that cause problems with `NSURL`’s URL
+ parsing behavior. For example, URLs starting with `pmtiles://https://` were
+ not parsed correctly on iOS 17.
+
+ @param identifier A string that uniquely identifies the source in the style to
+    which it is added.
+ @param configurationURLString A string to a TileJSON configuration file
+    describing the source’s contents and other metadata.
+ @return An initialized vector tile source.
+ */
+- (instancetype)initWithIdentifier:(NSString *)identifier
+            configurationURLString:(NSString *)configurationURLString NS_DESIGNATED_INITIALIZER;
 
 /**
  Returns a vector tile source initialized an identifier, tile URL templates, and

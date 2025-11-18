@@ -1,6 +1,6 @@
 console.log("Generating shaders...");
 
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -194,25 +194,26 @@ const strip = (source) => {
 };
 
 // Parse command line
-const args = (() => {
-    const parser = new ArgumentParser({
-        description: "MapLibre Shader Tools"
-    });
-    parser.add_argument("--out", "--o", {
-        help: "Directory root to write generated code.",
-        required: false
-    });
-    parser.add_argument("--compress", "--c", {
-        help: "Compress shader text with zlib and output byte arrays instead of strings",
-        required: false
-    });
-    parser.add_argument("--strip", "--s", {
-        help: "Strip comments, new lines and whitespace",
-        required: false,
-        action: "store_true"
-    });
-    return parser.parse_args();
-})();
+const args = parseArgs({
+    options: {
+        out: {
+            type: 'string',
+            short: 'o',
+            description: 'Directory root to write generated code.'
+        },
+        compress: {
+            type: 'string',
+            short: 'c',
+            description: 'Compress shader text with zlib and output byte arrays instead of strings'
+        },
+        strip: {
+            type: 'boolean',
+            short: 's',
+            description: 'Strip comments, new lines and whitespace'
+        }
+    },
+    allowPositionals: false
+});
 
 
 // Generate shader source headers
@@ -220,6 +221,7 @@ const root = path.dirname(import.meta.dirname);
 const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
 const outputRoot = path.join(outLocation, "include/mbgl/shaders");
+const cppOutputRoot = path.join(outLocation, "src/mbgl/shaders");
 let generatedHeaders = [];
 let shaderNames = [];
 
@@ -314,6 +316,23 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
 };
 
 } // namespace shaders
+} // namespace mbgl
+`);
+
+// Generate shader_source.cpp
+fs.writeFileSync(path.join(cppOutputRoot, "shader_source.cpp"),
+`${generatedHeader}
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/util/enum.hpp>
+
+namespace mbgl {
+
+using namespace shaders;
+
+MBGL_DEFINE_ENUM(BuiltIn, {
+{BuiltIn::None, "None"},${shaderNames.map(name => `\n{BuiltIn::` + name + `, "` + name + `"}`)}
+});
+
 } // namespace mbgl
 `);
 

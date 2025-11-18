@@ -2388,6 +2388,50 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * To increase the chance of placing high-priority labels on the map, you can provide an array of {@link Property.TEXT_ANCHOR} locations, each paired with an offset value. The renderer will attempt to place the label at each location, in order, before moving on to the next location+offset. Use `text-justify: auto` to choose justification based on anchor position. 
+
+ The length of the array must be even, and must alternate between enum and point entries. i.e., each anchor location must be accompanied by a point, and that point defines the offset when the corresponding anchor location is used. Positive offset values indicate right and down, while negative values indicate left and up. Anchor locations may repeat, allowing the renderer to try multiple offsets to try and place a label using the same anchor. 
+
+ When present, this property takes precedence over {@link Property.TEXT_ANCHOR}, {@link PropertyFactory#textVariableAnchor}, {@link PropertyFactory#textOffset}, and {@link PropertyFactory#textRadialOffset}. 
+
+ ```json 
+ { "text-variable-anchor-offset": ["top", [0, 4], "left", [3,0], "bottom", [1, 1]] } 
+ ``` 
+
+ When the renderer chooses the `top` anchor, `[0, 4]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted down by 4 ems. 
+
+ When the renderer chooses the `left` anchor, `[3, 0]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted right by 3 ems.
+   *
+   * @param value a Object[] value
+   * @return property wrapper around Object[]
+   */
+  public static PropertyValue<Object[]> textVariableAnchorOffset(Object[] value) {
+    return new LayoutPropertyValue<>("text-variable-anchor-offset", value);
+  }
+
+  /**
+   * To increase the chance of placing high-priority labels on the map, you can provide an array of {@link Property.TEXT_ANCHOR} locations, each paired with an offset value. The renderer will attempt to place the label at each location, in order, before moving on to the next location+offset. Use `text-justify: auto` to choose justification based on anchor position. 
+
+ The length of the array must be even, and must alternate between enum and point entries. i.e., each anchor location must be accompanied by a point, and that point defines the offset when the corresponding anchor location is used. Positive offset values indicate right and down, while negative values indicate left and up. Anchor locations may repeat, allowing the renderer to try multiple offsets to try and place a label using the same anchor. 
+
+ When present, this property takes precedence over {@link Property.TEXT_ANCHOR}, {@link PropertyFactory#textVariableAnchor}, {@link PropertyFactory#textOffset}, and {@link PropertyFactory#textRadialOffset}. 
+
+ ```json 
+ { "text-variable-anchor-offset": ["top", [0, 4], "left", [3,0], "bottom", [1, 1]] } 
+ ``` 
+
+ When the renderer chooses the `top` anchor, `[0, 4]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted down by 4 ems. 
+
+ When the renderer chooses the `left` anchor, `[3, 0]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted right by 3 ems.
+   *
+   * @param value a Object[] value
+   * @return property wrapper around Object[]
+   */
+  public static PropertyValue<Expression> textVariableAnchorOffset(Expression value) {
+    return new LayoutPropertyValue<>("text-variable-anchor-offset", value);
+  }
+
+  /**
    * Part of the text placed closest to the anchor.
    *
    * @param value a String value
@@ -2605,6 +2649,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
    */
   public static PropertyValue<Expression> textOptional(Expression value) {
     return new LayoutPropertyValue<>("text-optional", value);
+  }
+
+  /**
+   * Internal use only
+   *
+   * @param value a Boolean value
+   * @return property wrapper around Boolean
+   */
+  public static PropertyValue<Boolean> symbolScreenSpace(Boolean value) {
+    return new LayoutPropertyValue<>("symbol-screen-space", value);
+  }
+
+  /**
+   * Internal use only
+   *
+   * @param value a Boolean value
+   * @return property wrapper around Boolean
+   */
+  public static PropertyValue<Expression> symbolScreenSpace(Expression value) {
+    return new LayoutPropertyValue<>("symbol-screen-space", value);
   }
 
   /**

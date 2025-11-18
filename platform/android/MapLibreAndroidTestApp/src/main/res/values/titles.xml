@@ -4,6 +4,7 @@
     <string name="activity_map_fragment">Map Fragment</string>
     <string name="activity_map_fragment_backstack">Backstack Map Fragment</string>
     <string name="activity_multimap">Multiple Maps on Screen</string>
+    <string name="activity_long_running_maps">Long running Maps</string>
     <string name="activity_add_bulk_markers">Add Markers In Bulk</string>
     <string name="activity_animated_symbollayer">Animated SymbolLayer</string>
     <string name="activity_dynamic_marker">Dynamic Marker</string>
@@ -76,6 +77,7 @@
     <string name="activity_overlay">Map overlay</string>
     <string name="activity_grid_source">Grid Source</string>
     <string name="activity_no_style">No Style URI/JSON</string>
+    <string name="activity_vector_tile">Vector Tile source</string>
     <string name="activity_local_glyph">Local CJK glyph generation</string>
     <string name="activity_hillshade">Hillshade</string>
     <string name="activity_heatmaplayer">Heatmap layer</string>
@@ -90,7 +92,7 @@
     <string name="activity_location_manual">Manual Location updates</string>
     <string name="activity_location_activation_builder">Build Location Activation</string>
     <string name="activity_recyclerview_textureview">RecyclerView TextureView</string>
-    <string name="activity_recyclerview_glsurfaceview">RecyclerView GLSurfaceView</string>
+    <string name="activity_recyclerview_surfaceview">RecyclerView SurfaceView</string>
     <string name="activity_nested_viewpager">Nested ViewPager</string>
     <string name="activity_performance_measurement">Performance Measurement</string>
     <string name="activity_physical_circle">Physical Unit Circle</string>

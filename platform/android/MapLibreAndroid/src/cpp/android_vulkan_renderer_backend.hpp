@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/renderable.hpp>
+#include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include "android_renderer_backend.hpp"
 #include <android/native_window.h>
@@ -10,7 +10,7 @@ namespace android {
 
 class AndroidVulkanRendererBackend : public AndroidRendererBackend,
                                      public vulkan::RendererBackend,
-                                     public mbgl::gfx::Renderable {
+                                     public vulkan::Renderable {
 public:
     AndroidVulkanRendererBackend(ANativeWindow*);
     ~AndroidVulkanRendererBackend() override;
@@ -21,6 +21,7 @@ public:
     std::vector<const char*> getInstanceExtensions() override;
 
     void resizeFramebuffer(int width, int height) override;
+    PremultipliedImage readFramebuffer() override;
 
     // mbgl::gfx::RendererBackend implementation
 public:

@@ -14,7 +14,7 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
@@ -186,10 +186,15 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
 
+    renderPass.unbindVertex(shaders::idGlobalUBOIndex);
+    renderPass.unbindFragment(shaders::idGlobalUBOIndex);
+    encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+    encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+
     bindAttributes(renderPass);
     bindInstanceAttributes(renderPass);
-    bindUniformBuffers(renderPass);
     bindTextures(renderPass);
+    impl->uniformBuffers.bind(renderPass);
 
     if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
         assert(!"Index buffer not uploaded");
@@ -207,8 +212,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     const auto& cullMode = getCullFaceMode();
-    encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
-    encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
+    renderPass.setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
+    renderPass.setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(
@@ -218,7 +223,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             mbgl::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
     if (impl->pipelineState) {
-        encoder->setRenderPipelineState(impl->pipelineState.get());
+        renderPass.setRenderPipelineState(impl->pipelineState);
     } else {
         assert(!"Failed to create render pipeline state");
         return;
@@ -247,7 +252,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
-            impl->previousStencilMode = *newStencilMode;
+            // FIXME: https://github.com/maplibre/maplibre-native/issues/3248
+            if (newStencilMode) impl->previousStencilMode = *newStencilMode;
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
@@ -311,7 +317,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     unbindTextures(renderPass);
-    unbindUniformBuffers(renderPass);
     unbindAttributes(renderPass);
 }
 
@@ -382,8 +387,6 @@ void Drawable::setVertexAttrId(const size_t id) {
 }
 
 void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
@@ -397,8 +400,6 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 }
 
 void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->instanceBindings) {
         if (binding.has_value()) {
@@ -408,29 +409,6 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
             }
         }
         attributeIndex += 1;
-    }
-}
-
-void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
-    if (shader) {
-        const auto& uniformBlocks = shader->getUniformBlocks();
-        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
-            const auto& block = uniformBlocks.get(id);
-            if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
-            if (uniformBuffer) {
-                const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
-                const auto& resource = buffer.getBufferResource();
-                const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
-
-                if (mtlBlock.getBindVertex()) {
-                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
-                }
-                if (mtlBlock.getBindFragment()) {
-                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
-                }
-            }
-        }
     }
 }
 
@@ -538,8 +516,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         assert(false);
         return;
     }
-    const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-    const auto& shaderUniforms = shaderMTL.getUniformBlocks();
 
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();

@@ -54,10 +54,14 @@ public:
     gfx::Texture2D& setImage(std::shared_ptr<PremultipliedImage>) noexcept override;
     gfx::Texture2D& setUsage(Texture2DUsage) noexcept;
 
+    gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
     Size getSize() const noexcept override { return size; }
     size_t getDataSize() const noexcept override;
     size_t getPixelStride() const noexcept override;
     size_t numChannels() const noexcept override;
+
+    bool isDirty() const { return samplerStateDirty || textureDirty; }
+    bool isModifiedAfter(const std::chrono::duration<double>& t) const { return t < lastModified; }
 
     void create() noexcept override;
 
@@ -76,6 +80,7 @@ public:
 
     const vk::ImageLayout& getVulkanImageLayout() const { return imageLayout; }
     const vk::UniqueImageView& getVulkanImageView() const { return imageAllocation->imageView; }
+    const vk::Image& getVulkanImage() const { return imageAllocation->image; }
     const vk::Sampler& getVulkanSampler();
 
     void copyImage(vk::Image image);
@@ -110,6 +115,7 @@ private:
     std::shared_ptr<PremultipliedImage> imageData{nullptr};
     bool textureDirty{true};
     bool samplerStateDirty{true};
+    std::chrono::duration<double> lastModified{0};
 
     SharedImageAllocation imageAllocation;
     vk::ImageLayout imageLayout{vk::ImageLayout::eUndefined};

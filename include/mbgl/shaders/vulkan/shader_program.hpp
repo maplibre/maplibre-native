@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/vulkan/uniform_block.hpp>
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
@@ -46,6 +45,7 @@ struct TextureInfo {
 namespace vulkan {
 class RenderableResource;
 class RendererBackend;
+class Context;
 class ShaderProgram;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
@@ -70,24 +70,21 @@ public:
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
 
-    const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
-    gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
     bool hasTextures() const;
 
     void initAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
-    void initUniformBlock(const shaders::UniformBlockInfo&);
     void initTexture(const shaders::TextureInfo&);
 
 protected:
     std::string shaderName;
     RendererBackend& backend;
+    Context& context;
 
     vk::UniqueShaderModule vertexShader;
     vk::UniqueShaderModule fragmentShader;
-    std::unordered_map<std::size_t, vk::UniquePipeline> pipelines;
+    std::shared_ptr<std::unordered_map<std::size_t, vk::UniquePipeline>> pipelines;
 
-    UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;

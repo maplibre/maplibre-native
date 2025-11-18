@@ -3,6 +3,13 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
+constexpr auto rasterShaderPrelude = R"(
+
+#define idRasterDrawableUBO         idDrawableReservedVertexOnlyUBO
+#define idRasterEvaluatedPropsUBO   layerUBOStartId
+
+)";
+
 namespace mbgl {
 namespace shaders {
 
@@ -10,21 +17,29 @@ template <>
 struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "RasterShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
+    static constexpr auto prelude = rasterShaderPrelude;
     static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform RasterDrawableUBO {
-    mat4 matrix;
-} drawable;
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
+struct RasterDrawableUBO {
+    mat4 matrix;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idRasterDrawableUBO) readonly buffer RasterDrawableUBOVector {
+    RasterDrawableUBO drawable_ubo[];
+} drawableVector;
+
+layout(set = LAYER_SET_INDEX, binding = idRasterEvaluatedPropsUBO) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
     float scale_parent;
@@ -35,16 +50,18 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    float pad1, pad2;
+    float pad1;
+    float pad2;
 } props;
 
 layout(location = 0) out vec2 frag_position0;
 layout(location = 1) out vec2 frag_position1;
 
 void main() {
+    const RasterDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // We are using Int16 for texture position coordinates to give us enough precision for
     // fractional coordinates. We use 8192 to scale the texture coordinates in the buffer
@@ -63,7 +80,7 @@ layout(location = 1) in vec2 frag_position1;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idRasterEvaluatedPropsUBO) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
     float scale_parent;
@@ -74,7 +91,8 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    float pad1, pad2;
+    float pad1;
+    float pad2;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;

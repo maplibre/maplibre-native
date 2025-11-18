@@ -55,62 +55,62 @@ typedef struct PanTestData {
 static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
 - (void)internalTestOffscreenSelectionTitle:(NSString*)title withTestData:(PanTestData)test animateSelection:(BOOL)animateSelection {
-    
+
     CGPoint relativeCoordinate          = test.relativeCoord;
     BOOL showsCallout                   = test.showsCallout;
     BOOL calloutImplementsMarginHints   = test.implementsMargins;
     BOOL moveIntoView                   = test.moveIntoView;
     BOOL expectMapToHavePanned          = test.expectMapToHavePanned;
     BOOL expectCalloutToBeFullyOnscreen = test.calloutOnScreen;
-    
+
     // Reset the map to a consistent state - want the map to be zoomed in, so that
     // it's free to be panned without hitting boundaries.
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:14 animated:NO];
     [self waitForMapViewToBeRenderedWithTimeout:1.0];
-    
+
     XCTAssert(self.mapView.annotations.count == 0);
-    
+
     NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReuseIdentifer";
     CGSize size = self.mapView.bounds.size;
     CGSize annotationSize = CGSizeMake(floor(size.width*kAnnotationRelativeScale.x), floor(size.height*kAnnotationRelativeScale.y));
-    
+
     self.viewForAnnotation = ^MLNAnnotationView*(MLNMapView *view, id<MLNAnnotation> annotation) {
-        
+
         if (![annotation isKindOfClass:[MLNPointAnnotation class]]) {
             return nil;
         }
-        
+
         // No dequeue
         MLNAnnotationView *annotationView = [[MLNAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:MLNTestAnnotationReuseIdentifer];
         annotationView.bounds             = (CGRect){ .origin = CGPointZero, .size = annotationSize };
         annotationView.backgroundColor    = UIColor.redColor;
         annotationView.enabled            = YES;
-        
+
         return annotationView;
     };
-    
+
     // Coordinate for annotation screen coordinate
     CGPoint annotationPoint = CGPointMake(floor(relativeCoordinate.x * size.width), floor(relativeCoordinate.y * size.height)   );
     CLLocationCoordinate2D coordinate = [self.mapView convertPoint:annotationPoint toCoordinateFromView:self.mapView];
-    
+
     MLNPointAnnotation *point = [[MLNPointAnnotation alloc] init];
     point.title = title;
     point.coordinate = coordinate;
-    
+
     self.mapViewAnnotationCanShowCalloutForAnnotation = ^BOOL(MLNMapView *mapView, id<MLNAnnotation> annotation) {
         return showsCallout;
     };
-    
+
     self.mapViewCalloutViewForAnnotation = ^id<MLNCalloutView>(MLNMapView *mapView, id<MLNAnnotation> annotation) {
         if (!showsCallout)
             return nil;
-        
+
         MLNTestCalloutView *calloutView = [[MLNTestCalloutView alloc] init];
         calloutView.representedObject = annotation;
         calloutView.implementsMarginHints = calloutImplementsMarginHints;
         return calloutView;
     };
-    
+
     [self.mapView addAnnotation:point];
 
     // Check assumptions before selection
@@ -152,12 +152,12 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         CGRect expandedRect1 = CGRectInset(rect1, -accuracy, -accuracy);
         return (BOOL)CGRectContainsRect(expandedRect1, rect2);
     };
-    
+
     CGFloat epsilon = 0.00001;
     if (expectMapToHavePanned) {
         CLLocationDegrees latitudeDelta = fabs(mapCenterAfterSelection.latitude - mapCenterBeforeSelection.latitude);
         CLLocationDegrees longitudeDelta = fabs(mapCenterAfterSelection.longitude - mapCenterBeforeSelection.longitude);
-        
+
         XCTAssert( (latitudeDelta > epsilon) || (longitudeDelta > epsilon), @"Deltas: lat=%f, long=%f", latitudeDelta, longitudeDelta); // One of them should have moved
 
         // If the map panned - the intention is that the annotation is on-screen,
@@ -165,14 +165,14 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         CGRect annotationFrameAfterSelection = annotationViewAfterSelection.frame;
 
         XCTAssertNotNil(annotationViewAfterSelection);
-        
+
         XCTAssert(CGRectContainsRectWithAccuracy(self.mapView.bounds, annotationFrameAfterSelection, 0.25), @"Mapview:%@ frame:%@", NSStringFromCGRect(self.mapView.bounds), NSStringFromCGRect(annotationFrameAfterSelection));
-        
+
         // Check the callout
         if (showsCallout) {
             UIView *calloutView = self.mapView.calloutViewForSelectedAnnotation;
             XCTAssertNotNil(calloutView);
-            
+
             // This can fail if the callout view's width is < the annotations. This is really a warning, so
             // if you need this NOT to fail the tests, consider replacing with MLNTestWarning
             XCTAssert(expectCalloutToBeFullyOnscreen == CGRectContainsRectWithAccuracy(self.mapView.bounds, calloutView.frame, 0.25),
@@ -187,17 +187,17 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         // The map shouldn't have moved, so use equality (rather than an error check)
         XCTAssertEqual(mapCenterBeforeSelection.latitude, mapCenterAfterSelection.latitude);
         XCTAssertEqual(mapCenterBeforeSelection.longitude, mapCenterAfterSelection.longitude);
-        
+
         // Annotation shouldn't have moved
         CGPoint annotationPoint2 = [self.mapView convertCoordinate:point.coordinate toPointToView:self.mapView];
         CGFloat xDelta = fabs(annotationPoint2.x - annotationPoint.x);
         CGFloat yDelta = fabs(annotationPoint2.y - annotationPoint.y);
-        
+
         XCTAssert((xDelta < epsilon) && (yDelta < epsilon));
-        
+
         if (showsCallout) {
             UIView *calloutView = self.mapView.calloutViewForSelectedAnnotation;
-            
+
             if (annotationViewAfterSelection) {
                 XCTAssertNotNil(calloutView);
 
@@ -217,10 +217,10 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
             }
         }
     }
-   
+
     // Remove the annotation
     [self.mapView removeAnnotation:point];
-    
+
     XCTAssert(self.mapView.annotations.count == 0);
 }
 
@@ -251,7 +251,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 - (void)testBasicSelection  {
     // Tests moveIntoView:NO
     // WITHOUT a callout
-    
+
     PanTestData tests[] = {
         //  Coord           showsCallout    impl margins?   moveIntoView    expectMapToPan  calloutOnScreen
         //  Offscreen
@@ -259,43 +259,43 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         {   { 2.0f, 0.5f},  NO,             NO,             NO,             NO,             NO },
         {   { 0.5f,-1.0f},  NO,             NO,             NO,             NO,             NO },
         {   { 0.5f, 2.0f},  NO,             NO,             NO,             NO,             NO },
-        
+
         //  Partial
         {   { 0.0f, 0.5f},  NO,             NO,             NO,             NO,             NO },
         {   { 1.0f, 0.5f},  NO,             NO,             NO,             NO,             NO },
         {   { 0.5f, 0.0f},  NO,             NO,             NO,             NO,             NO },
         {   { 0.5f, 1.0f},  NO,             NO,             NO,             NO,             NO },
-        
+
         //  Onscreen
         {   { 0.5f, 0.5f},  NO,             NO,             NO,             NO,             NO },
-        
+
         PAN_TEST_TERMINATOR
     };
-    
+
     [self internalRunTests:tests];
 }
 
 - (void)testBasicSelectionWithCallout  {
     // Tests moveIntoView:NO
     // WITH the default callout (implements marginshint)
-    
+
     PanTestData tests[] = {
         //  Coord           showsCallout    impl margins?   moveIntoView    expectMapToPan  calloutOnScreen
         {   {-1.0f, 0.5f},  YES,            YES,            NO,             NO,             NO },
         {   { 0.0f, 0.5f},  YES,            YES,            NO,             NO,             NO },
         {   { 0.5f, 1.0f},  YES,            YES,            NO,             NO,             YES }, // Because annotation was off the bottom of screen, and callout is above annotation
         {   { 0.5f, 0.5f},  YES,            YES,            NO,             NO,             YES },
-        
+
         PAN_TEST_TERMINATOR
     };
-    
+
     [self internalRunTests:tests];
 }
 
 - (void)testSelectionMoveIntoView  {
     // Tests moveIntoView:YES
     // without a callout
-    
+
     // From https://github.com/mapbox/mapbox-gl-native/pull/13727#issuecomment-454028698
     //
     // | Annotation position | Has callout? | Callout implements `marginInsets...`? | Map pans when selected with moveIntoView=YES? |
@@ -304,7 +304,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     // | Partially           | No           | n/a                                   | No                                            |
     // | Onscreen            | No           | n/a                                   | No                                            |
     //
-    
+
     PanTestData tests[] = {
         //  Coord           showsCallout    impl margins?   moveIntoView     expectMapToPan  calloutOnScreen
         //  Offscreen
@@ -312,26 +312,26 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         {   { 2.0f, 0.5f},  NO,             NO,             YES,            YES,            NO },
         {   { 0.5f,-1.0f},  NO,             NO,             YES,            YES,            NO },
         {   { 0.5f, 2.0f},  NO,             NO,             YES,            YES,            NO },
-        
+
         //  Partial
         {   { 0.0f, 0.5f},  NO,             NO,             YES,            NO,             NO },
         {   { 1.0f, 0.5f},  NO,             NO,             YES,            NO,             NO },
         {   { 0.5f, 0.0f},  NO,             NO,             YES,            NO,             NO },
         {   { 0.5f, 1.0f},  NO,             NO,             YES,            NO,             NO },
-        
+
         //  Onscreen
         {   { 0.5f, 0.5f},  NO,             NO,             YES,            NO,             NO },
-        
+
         PAN_TEST_TERMINATOR
     };
-    
+
     [self internalRunTests:tests];
 }
 
 - (void)testSelectionMoveIntoViewWithCallout  {
     // Tests moveIntoView:YES
     // WITH the default callout (implements marginshint)
-    
+
     // From https://github.com/mapbox/mapbox-gl-native/pull/13727#issuecomment-454028698
     //
     // | Annotation position | Has callout? | Callout implements `marginInsets...`? | Map pans when selected with moveIntoView=YES? |
@@ -342,7 +342,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     //
 
     CGFloat offset = kAnnotationRelativeScale.x * 0.5f;
-    
+
     PanTestData tests[] = {
         //  Coord           showsCallout    impl margins?   moveIntoView    expectMapToPan  calloutOnScreen
         //  Offscreen
@@ -350,16 +350,16 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         {   { 2.0f, 0.5f},  YES,            YES,            YES,            YES,            YES },
         {   { 0.5f,-1.0f},  YES,            YES,            YES,            YES,            YES },
         {   { 0.5f, 2.0f},  YES,            YES,            YES,            YES,            YES },
-        
+
         //  Partial
         {   { 0.0f, 0.5f},  YES,            YES,            YES,            YES,            YES },
         {   { 1.0f, 0.5f},  YES,            YES,            YES,            YES,            YES },
         {   { 0.5f, 0.0f},  YES,            YES,            YES,            YES,            YES },
         {   { 0.5f, 1.0f},  YES,            YES,            YES,            YES,            YES },
-        
+
         //  Onscreen
         {   { 0.5f, 0.5f},  YES,            YES,            YES,            NO,             YES },
-        
+
         //  Just at the edge of the screen.
         //  Expects to move, because although onscreen, callout would not be.
         //  However, if the scale is 0.25, then expectToPan should be NO, because
@@ -371,14 +371,14 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
         PAN_TEST_TERMINATOR
     };
-    
+
     [self internalRunTests:tests];
 }
 
 - (void)testSelectionMoveIntoViewWithBasicCallout  {
     // Tests moveIntoView:YES
     // WITH a callout that DOES NOT implement marginshint
-    
+
     // From https://github.com/mapbox/mapbox-gl-native/pull/13727#issuecomment-454028698
     //
     // | Annotation position | Has callout? | Callout implements `marginInsets...`? | Map pans when selected with moveIntoView=YES? |
@@ -409,7 +409,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
         PAN_TEST_TERMINATOR
     };
-    
+
     [self internalRunTests:tests];
 }
 
@@ -503,20 +503,20 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
     [self.mapView setUserTrackingMode:MLNUserTrackingModeFollow animated:NO completionHandler:nil];
     CGRect originalFrame = [self.mapView viewForAnnotation:self.mapView.userLocation].frame;
-    
+
     // Temporarily disable location tracking so we can save the value of
     // the originalFrame in memory
     [self.mapView setUserTrackingMode:MLNUserTrackingModeNone animated:NO completionHandler:nil];
-    
+
     CGPoint offset = CGPointMake(20, 20);
-    
+
     self.mapViewUserLocationAnchorPoint = ^CGPoint (MLNMapView *mapView) {
         return offset;;
     };
-    
+
     [self.mapView setUserTrackingMode:MLNUserTrackingModeFollow animated:NO completionHandler:nil];
     CGRect offsetFrame = [self.mapView viewForAnnotation:self.mapView.userLocation].frame;
-    
+
     XCTAssertEqual(originalFrame.origin.x + offset.x, offsetFrame.origin.x);
     XCTAssertEqual(originalFrame.origin.y + offset.y, offsetFrame.origin.y);
 }
@@ -524,25 +524,25 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 // MARK: - Rotating/zooming
 
 - (void)testSelectingAnnotationWhenMapIsRotated {
-    
+
     CLLocationCoordinate2D coordinates[] = {
         { 40.0, 40.0 },
         { NAN, NAN }
     };
-    
+
     NSArray *annotations = [self internalAddAnnotationsAtCoordinates:coordinates];
     MLNPointAnnotation *annotation = annotations.firstObject;
-    
+
     // Rotate
     CLLocationDirection lastAngle = 0.0;
 
     srand48(0);
     for (NSInteger iter = 0; iter < 10; iter++ ) {
-                
+
         CLLocationDirection angle = (CLLocationDirection)((drand48()*1080.0) - 540.0);
-        
+
         CGPoint anchor = CGPointMake(drand48()*CGRectGetWidth(self.mapView.bounds), drand48()*CGRectGetHeight(self.mapView.bounds));
-        
+
         NSString *activityTitle = [NSString stringWithFormat:@"Rotate to: %0.1f from: %0.1f", angle, lastAngle];
         [XCTContext runActivityNamed:activityTitle
                                block:^(id<XCTActivity>  _Nonnull activity) {
@@ -550,7 +550,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
                                    MLNMapCamera *toCamera = [self.mapView cameraByRotatingToDirection:angle aroundAnchorPoint:anchor];
                                    [self internalTestSelecting:annotation withCamera:toCamera];
                                }];
-        
+
         lastAngle = angle;
     }
 }
@@ -561,17 +561,17 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
         { 0.005, 0.005 },
         { NAN, NAN }
     };
-    
+
     NSArray *annotations = [self internalAddAnnotationsAtCoordinates:coordinates];
     MLNPointAnnotation *annotation = annotations.firstObject;
-    
+
     CGPoint anchor = CGPointMake(CGRectGetMidX(self.mapView.bounds), CGRectGetMidY(self.mapView.bounds));
-    
+
     srand48(0);
     for (NSInteger iter = 0; iter < 10; iter++ ) {
-        
+
         double zoom = (double)(drand48()*14.0);
-        
+
         NSString *activityTitle = [NSString stringWithFormat:@"Zoom to %0.1f", zoom];
         [XCTContext runActivityNamed:activityTitle
                                block:^(id<XCTActivity>  _Nonnull activity) {
@@ -582,21 +582,21 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 }
 
 - (void)testSelectingAnnotationWhenMapIsScaledAndRotated {
-    
+
     CLLocationCoordinate2D coordinates[] = {
         { 0.005, 0.005 },
         { NAN, NAN }
     };
-    
+
     NSArray *annotations = [self internalAddAnnotationsAtCoordinates:coordinates];
     MLNPointAnnotation *annotation = annotations.firstObject;
-    
+
     srand48(0);
     for (NSInteger iter = 0; iter < 10; iter++ ) {
-        
+
         double zoom = (double)(7.0 + drand48()*7.0);
         CLLocationDirection angle = (CLLocationDirection)((drand48()*1080.0) - 540.0);
-        
+
         CGPoint anchor = CGPointMake(drand48()*CGRectGetWidth(self.mapView.bounds), drand48()*CGRectGetHeight(self.mapView.bounds));
 
         NSString *activityTitle = [NSString stringWithFormat:@"Zoom to %0.1f", zoom];
@@ -604,12 +604,12 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
                                block:^(id<XCTActivity>  _Nonnull activity)
          {
              mbgl::CameraOptions currentCameraOptions;
-             
+
              currentCameraOptions.bearing = angle;
              currentCameraOptions.anchor = mbgl::ScreenCoordinate { anchor.x, anchor.y };
              currentCameraOptions.zoom = zoom;
              MLNMapCamera *toCamera = [self.mapView cameraForCameraOptions:currentCameraOptions];
-             
+
              [self internalTestSelecting:annotation withCamera:toCamera];
          }];
     }
@@ -649,7 +649,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
 - (void)internalTestShowingAnnotationsThenSelectingAnimated:(BOOL)animated edgePadding:(UIEdgeInsets)edgeInsets contentInsets:(UIEdgeInsets)contentInsets {
     CLLocationCoordinate2D coordinates[21];
-    
+
     for (int i = 0; i < (int)(sizeof(coordinates)/sizeof(coordinates[0])); i++)
     {
         coordinates[i].latitude = drand48();
@@ -668,17 +668,17 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
                 completionHandler:^{
                     [showCompleted fulfill];
                 }];
-    
+
     [self waitForExpectations:@[showCompleted] timeout:3.5];
-  
+
     // These tests will fail if this isn't here. But this isn't quite what we're
     // seeing in https://github.com/mapbox/mapbox-gl-native/issues/15106
     [self waitForCollisionDetectionToRun];
-    
+
     for (MLNPointAnnotation *point in annotations) {
         [self internalSelectDeselectAnnotation:point];
     }
-    
+
     [self.mapView removeAnnotations:annotations];
     self.mapView.contentInset = UIEdgeInsetsZero;
     [self waitForCollisionDetectionToRun];
@@ -687,63 +687,63 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 - (NSArray*)internalAddAnnotationsAtCoordinates:(CLLocationCoordinate2D*)coordinates
 {
     __block NSMutableArray *annotations = [NSMutableArray array];
-    
+
     [XCTContext runActivityNamed:@"Map setup"
                            block:^(id<XCTActivity>  _Nonnull activity)
      {
-         
+
          NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReuseIdentifer";
-         
+
          CGSize annotationSize = CGSizeMake(40.0, 40.0);
-         
+
          self.viewForAnnotation = ^MLNAnnotationView*(MLNMapView *view, id<MLNAnnotation> annotation2) {
-             
+
              if (![annotation2 isKindOfClass:[MLNPointAnnotation class]]) {
                  return nil;
              }
-             
+
              // No dequeue
              MLNAnnotationView *annotationView = [[MLNAnnotationView alloc] initWithAnnotation:annotation2 reuseIdentifier:MLNTestAnnotationReuseIdentifer];
              annotationView.bounds             = (CGRect){ .origin = CGPointZero, .size = annotationSize };
              annotationView.backgroundColor    = UIColor.redColor;
              annotationView.enabled            = YES;
-             
+
              return annotationView;
          };
-         
+
          CLLocationCoordinate2D *coordinatePtr = coordinates;
          while (!isnan(coordinatePtr->latitude)) {
              CLLocationCoordinate2D coordinate = *coordinatePtr++;
-         
+
              MLNPointAnnotation *annotation = [[MLNPointAnnotation alloc] init];
              annotation.title = NSStringFromSelector(_cmd);
              annotation.coordinate = coordinate;
              [annotations addObject:annotation];
          }
-         
+
          [self.mapView addAnnotations:annotations];
 
      }];
 
     NSArray *copiedAnnotations = [annotations copy];
     annotations = nil;
-    
+
     return copiedAnnotations;
 }
 
 - (void)internalTestSelecting:(MLNPointAnnotation*)point withCamera:(MLNMapCamera*)camera {
-    
+
     // Rotate
     XCTestExpectation *rotationCompleted = [self expectationWithDescription:@"rotationCompleted"];
     [self.mapView setCamera:camera withDuration:0.1 animationTimingFunction:nil completionHandler:^{
         [rotationCompleted fulfill];
     }];
-    
+
     [self waitForExpectations:@[rotationCompleted] timeout:1.5];
-    
+
     // Collision detection may not have completed, if not we may not get our annotation.
     [self waitForCollisionDetectionToRun];
-    
+
     // Look up annotation at point
     [self internalSelectDeselectAnnotation:point];
 }
@@ -753,24 +753,24 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
                            block:^(id<XCTActivity>  _Nonnull activity)
      {
          CGPoint annotationPoint = [self.mapView convertCoordinate:point.coordinate toPointToView:self.mapView];
-         
+
          MLNAnnotationTag tagAtPoint = [self.mapView annotationTagAtPoint:annotationPoint persistingResults:YES];
          if (tagAtPoint != UINT32_MAX)
          {
              id <MLNAnnotation> annotation = [self.mapView annotationWithTag:tagAtPoint];
              XCTAssertNotNil(annotation);
-             
+
              // Select
              XCTestExpectation *selectionCompleted = [self expectationWithDescription:@"Selection completed"];
              [self.mapView selectAnnotation:annotation moveIntoView:NO animateSelection:NO completionHandler:^{
                  [selectionCompleted fulfill];
              }];
-             
+
              [self waitForExpectations:@[selectionCompleted] timeout:0.05];
-             
+
              XCTAssert(self.mapView.selectedAnnotations.count == 1, @"There should only be 1 selected annotation");
              XCTAssertEqualObjects(self.mapView.selectedAnnotations.firstObject, annotation, @"The annotation should be selected");
-             
+
              // Deselect
              [self.mapView deselectAnnotation:annotation animated:NO];
          }
@@ -779,7 +779,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
              XCTFail(@"Should be an annotation at this point: %@", NSStringFromCGPoint(annotationPoint));
          }
      }];
-    
+
 }
 
 // MARK: - Utilities
@@ -790,7 +790,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
 
 - (void)waitFor:(NSTimeInterval)seconds {
     XCTestExpectation *timerExpired = [self expectationWithDescription:@"Timer expires"];
-    
+
     NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                       target:self
                                                     selector:@selector(runRunLoop)
@@ -801,7 +801,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)duration), dispatch_get_main_queue(), ^{
         [timerExpired fulfill];
     });
-    
+
     [self waitForExpectations:@[timerExpired] timeout:seconds + 1.0];
     [timer invalidate];
 }
@@ -819,7 +819,7 @@ static const CGPoint kAnnotationRelativeScale = { 0.05f, 0.125f };
     });
 
     [self waitForExpectations:@[timerExpired, self.renderFinishedExpectation] timeout:5];
-    
+
     self.renderFinishedExpectation = nil;
 }
 

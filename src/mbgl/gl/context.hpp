@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -16,12 +15,10 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/fence.hpp>
 #include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
-#endif
 
 #include <array>
 #include <functional>
@@ -65,10 +62,6 @@ public:
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
-    Framebuffer createFramebuffer(const gfx::Texture&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
-    Framebuffer createFramebuffer(const gfx::Texture&);
-    Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
 
     template <typename Image,
               gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
@@ -89,9 +82,7 @@ public:
 
     void finish();
 
-#if MLN_DRAWABLE_RENDERER
     std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
-#endif
 
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
@@ -116,11 +107,16 @@ public:
 
     extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
+    bool getCleanupOnDestruction() { return cleanupOnDestruction; }
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
-#if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data,
+                                              std::size_t size,
+                                              bool persistent = false,
+                                              bool ssbo = false) override;
+
+    gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -154,7 +150,6 @@ public:
 
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
-#endif
 
     void setDirtyState() override;
 
@@ -165,12 +160,10 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
-#if MLN_DRAWABLE_RENDERER
     std::shared_ptr<gl::Fence> frameInFlightFence;
     std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
     size_t frameNum = 0;
     UniformBufferArrayGL globalUniformBuffers;
-#endif
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;
@@ -214,9 +207,6 @@ private:
 
 public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
 
 private:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,

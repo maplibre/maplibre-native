@@ -19,7 +19,7 @@
     va_start(args, format);
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
-    
+
     NSString *condition = [NSString stringWithFormat:
                            @"`[%@ %@]`",
                            object, NSStringFromSelector(selector)
@@ -42,7 +42,7 @@
               description);
     }
 }
- 
+
 - (void)handleFailureInFunction:(NSString *)functionName
                            file:(NSString *)fileName
                      lineNumber:(NSInteger)line
@@ -74,4 +74,3 @@
     }
 }
 @end
-

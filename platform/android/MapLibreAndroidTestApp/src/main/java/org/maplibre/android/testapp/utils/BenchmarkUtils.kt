@@ -25,12 +25,14 @@ data class BenchmarkRun(
     val styleName: String,
     val styleURL: String,
     val syncRendering: Boolean,
+    val duration: Int
 )
 
 data class BenchmarkRunResult(
     val fps: Double,
     val encodingTimeStore: FrameTimeStore,
-    val renderingTimeStore: FrameTimeStore
+    val renderingTimeStore: FrameTimeStore,
+    val thermalState: Int
 )
 
 data class BenchmarkResult (
@@ -45,6 +47,7 @@ fun jsonPayload(benchmarkResult: BenchmarkResult): JsonObject {
                 addJsonObject {
                     put("styleName", JsonPrimitive(run.first.styleName))
                     put("syncRendering", JsonPrimitive(run.first.syncRendering))
+                    put("thermalState", JsonPrimitive(run.second.thermalState))
                     put("fps", JsonPrimitive(run.second.fps))
                     put("avgEncodingTime", JsonPrimitive(run.second.encodingTimeStore.average()))
                     put("avgRenderingTime", JsonPrimitive(run.second.renderingTimeStore.average()))
@@ -58,6 +61,7 @@ fun jsonPayload(benchmarkResult: BenchmarkResult): JsonObject {
         put("renderer", JsonPrimitive(BuildConfig.FLAVOR))
         put("debugBuild", JsonPrimitive(BuildConfig.DEBUG))
         put("gitRevision", JsonPrimitive(GIT_REVISION))
+        put("timestamp", JsonPrimitive(System.currentTimeMillis()))
     }
 }
 

@@ -23,6 +23,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "native_map_options.hpp"
 #include "bitmap.hpp"
 
 #include <exception>
@@ -38,6 +39,7 @@ namespace android {
 class AndroidRendererFrontend;
 class FileSource;
 class MapRenderer;
+class RenderingStats;
 
 class NativeMapView : public MapObserver {
 public:
@@ -49,8 +51,7 @@ public:
                   const jni::Object<NativeMapView>&,
                   const jni::Object<FileSource>&,
                   const jni::Object<MapRenderer>&,
-                  jni::jfloat,
-                  jni::jboolean);
+                  const jni::Object<NativeMapOptions>&);
 
     virtual ~NativeMapView();
 
@@ -62,7 +63,7 @@ public:
     void onDidFinishLoadingMap() override;
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
     void onWillStartRenderingFrame() override;
-    void onDidFinishRenderingFrame(MapObserver::RenderFrameStatus) override;
+    void onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus&) override;
     void onWillStartRenderingMap() override;
     void onDidFinishRenderingMap(MapObserver::RenderMode) override;
     void onDidBecomeIdle() override;
@@ -199,6 +200,12 @@ public:
 
     jni::jboolean getDebug(JNIEnv&);
 
+    jni::Local<jni::Array<jni::String>> getActionJournalLogFiles(JNIEnv&);
+
+    jni::Local<jni::Array<jni::String>> getActionJournalLog(JNIEnv&);
+
+    void clearActionJournalLog(JNIEnv&);
+
     jni::jboolean isFullyLoaded(JNIEnv&);
 
     jni::jdouble getMetersPerPixelAtLatitude(JNIEnv&, jni::jdouble, jni::jdouble);
@@ -295,9 +302,28 @@ public:
 
     jni::jboolean getTileCacheEnabled(JNIEnv&);
 
+    void setTileLodMinRadius(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodMinRadius(JNIEnv&);
+
+    void setTileLodScale(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodScale(JNIEnv&);
+
+    void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodPitchThreshold(JNIEnv&);
+
+    void setTileLodZoomShift(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodZoomShift(JNIEnv&);
+
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
+
+    jni::jboolean isRenderingStatsViewEnabled(JNIEnv&);
+    void enableRenderingStatsView(JNIEnv&, jni::jboolean);
 
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
@@ -319,7 +345,7 @@ public:
     void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
 private:
-    std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
+    std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM* vm = nullptr;
     jni::WeakReference<jni::Object<NativeMapView>> javaPeer;
@@ -330,9 +356,13 @@ private:
 
     float pixelRatio;
 
+    jni::Global<jni::Object<RenderingStats>> renderingStats;
+
     // Minimum texture size according to OpenGL ES 2.0 specification.
     int width = 64;
     int height = 64;
+
+    static constexpr auto annotationRequestTimeout = std::chrono::milliseconds(200);
 
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;

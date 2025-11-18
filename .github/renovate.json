@@ -1,3 +1,13 @@
 {
-  "enabledManagers": ["gradle-wrapper", "bazel"]
+  "enabledManagers": ["gradle-wrapper", "bazel", "bazel-module", "bazelisk"],
+  "packageRules": [
+    {
+      "matchManagers": ["bazel", "bazel-module"],
+      "groupName": "bazel"
+    }
+  ],
+  "ignoreDeps": ["cxx.rs"],
+  "schedule": "* * 1,15 * *",
+  "dependencyDashboard": true,
+  "minimumReleaseAge": "3 days"
 }
