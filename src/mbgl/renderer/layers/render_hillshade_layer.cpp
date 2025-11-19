@@ -36,6 +36,79 @@ inline const HillshadeLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>
     return static_cast<const HillshadeLayer::Impl&>(*impl);
 }
 
+// Structure to hold processed illumination properties
+struct IlluminationProperties {
+    std::vector<float> directionRadians;
+    std::vector<float> altitudeRadians;
+    std::vector<Color> shadowColors;
+    std::vector<Color> highlightColors;
+    
+    size_t numSources() const {
+        return directionRadians.size();
+    }
+};
+
+// Convert style properties to illumination properties
+// This handles the case where properties can be single values or arrays
+IlluminationProperties getIlluminationProperties(const HillshadePaintProperties::PossiblyEvaluated& evaluated) {
+    IlluminationProperties props;
+    
+    // Get the values from evaluated properties
+    // For now, these are single values - you'll need to update your property definitions
+    // to support arrays when you implement that part
+    float direction = evaluated.get<HillshadeIlluminationDirection>();
+    float altitude = evaluated.get<HillshadeIlluminationAltitude>();
+    Color highlight = evaluated.get<HillshadeHighlightColor>();
+    Color shadow = evaluated.get<HillshadeShadowColor>();
+    
+    // For now, create single-element vectors
+    // When you add array support, these will already be vectors
+    std::vector<float> directions = {direction};
+    std::vector<float> altitudes = {altitude};
+    std::vector<Color> highlights = {highlight};
+    std::vector<Color> shadows = {shadow};
+    
+    // Find the maximum length to ensure all arrays are the same size
+    size_t maxLength = std::max({
+        directions.size(),
+        altitudes.size(),
+        highlights.size(),
+        shadows.size()
+    });
+    
+    // Ensure we don't exceed the maximum supported
+    maxLength = std::min(maxLength, static_cast<size_t>(MAX_ILLUMINATION_SOURCES));
+    
+    // Pad shorter arrays by repeating the last element
+    auto padArray = [maxLength](auto& arr) {
+        if (arr.empty()) arr.push_back(typename std::decay<decltype(arr)>::type::value_type{});
+        while (arr.size() < maxLength) {
+            arr.push_back(arr.back());
+        }
+    };
+    
+    padArray(directions);
+    padArray(altitudes);
+    padArray(highlights);
+    padArray(shadows);
+    
+    // Convert degrees to radians
+    props.directionRadians.reserve(directions.size());
+    for (float deg : directions) {
+        props.directionRadians.push_back(util::deg2radf(deg));
+    }
+    
+    props.altitudeRadians.reserve(altitudes.size());
+    for (float deg : altitudes) {
+        props.altitudeRadians.push_back(util::deg2radf(deg));
+    }
+    
+    props.shadowColors = std::move(shadows);
+    props.highlightColors = std::move(highlights);
+    
+    return props;
+}
+
 } // namespace
 
 RenderHillshadeLayer::RenderHillshadeLayer(Immutable<style::HillshadeLayer::Impl> _impl)
@@ -52,6 +125,24 @@ std::array<float, 2> RenderHillshadeLayer::getLatRange(const UnwrappedTileID& id
     return {{static_cast<float>(latlng0.latitude()), static_cast<float>(latlng1.latitude())}};
 }
 
+// Modified: Now returns illumination properties structure instead of simple array
+IlluminationProperties RenderHillshadeLayer::getIlluminationPropertiesAdjusted(const PaintParameters& parameters) {
+    const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
+    
+    auto illumination = getIlluminationProperties(evaluated);
+    
+    // Adjust azimuths if anchor is viewport
+    if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport) {
+        float bearing = static_cast<float>(parameters.state.getBearing());
+        for (auto& azimuth : illumination.directionRadians) {
+            azimuth -= bearing;
+        }
+    }
+    
+    return illumination;
+}
+
+// Keep old function for backward compatibility during transition
 std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
     float azimuthal = util::deg2radf(evaluated.get<HillshadeIlluminationDirection>());
@@ -175,9 +266,22 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     if (!hillshadePrepareShader) {
         hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);
     }
+    
+    // NEW: Get shader with defines for number of illumination sources
+    // For now, we'll use the default shader. When you implement multiple light sources,
+    // you'll need to determine the number of lights and select the appropriate shader variant
     if (!hillshadeShader) {
+        // TODO: Add shader variant selection based on number of lights
+        // For now, use default (1 light source)
         hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
+        
+        // Future implementation:
+        // const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
+        // auto illumination = getIlluminationProperties(evaluated);
+        // std::string shaderName = HillshadeShaderGroupName + "/lights:" + std::to_string(illumination.numSources());
+        // hillshadeShader = context.getGenericShader(shaders, shaderName);
     }
+    
     if (!hillshadePrepareShader || !hillshadeShader) {
         removeAllDrawables();
         return;
