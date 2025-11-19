@@ -973,6 +973,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_file_source.hpp
 )
 
 

@@ -7858,7 +7858,71 @@ static void *windowScreenContext = &windowScreenContext;
 - (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
     
     MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
+
+    // The URL of the request
     tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
+
+    // The kind of request
+    switch (resource.kind) {
+        case mbgl::Resource::Kind::Style:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindStyle;
+            break;
+        case mbgl::Resource::Kind::Source:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSource;
+            break;
+        case mbgl::Resource::Kind::Tile:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindTile;
+            break;
+        case mbgl::Resource::Kind::Glyphs:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindGlyphs;
+            break;
+        case mbgl::Resource::Kind::SpriteImage:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteImage;
+            break;
+        case mbgl::Resource::Kind::Image:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindImage;
+            break;
+        case mbgl::Resource::Kind::SpriteJSON:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteJSON;
+            break;
+        default:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindUnknown;
+            break;
+    }
+
+    // The loading method
+    if (resource.loadingMethod == mbgl::Resource::LoadingMethod::CacheOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::NetworkOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodNetworkOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::All) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodAll;
+    }
+
+    if (resource.tileData) {
+        auto td = *resource.tileData;
+        MLNTileData *tileData = [[MLNTileData alloc] init];
+        tileData.tileURLTemplate = [NSString stringWithUTF8String:td.urlTemplate.c_str()];
+        tileData.tilePixelRatio = td.pixelRatio;
+        tileData.tileX = td.x;
+        tileData.tileY = td.y;
+        tileData.tileZoom = td.z;
+        tempResult.tileData = tileData;
+    }
+
+    // TODO: Figure out which other properties from resource should be passed along here
+/*
+    Usage usage{Usage::Online};
+    Priority priority{Priority::Regular};
+    std::optional<std::pair<uint64_t, uint64_t>> dataRange = std::nullopt;
+    std::optional<Timestamp> priorModified = std::nullopt;
+    std::optional<Timestamp> priorExpires = std::nullopt;
+    std::optional<std::string> priorEtag = std::nullopt;
+    std::shared_ptr<const std::string> priorData;
+    Duration minimumUpdateInterval{Duration::zero()};
+    StoragePolicy storagePolicy{StoragePolicy::Permanent};
+    */
+
     return tempResult;
     
 }
@@ -7872,7 +7936,10 @@ static void *windowScreenContext = &windowScreenContext;
     }
     [self.pluginProtocols addObject:handler];
 
+    // TODO: Unclear if any of these options are needed for plugins
     mbgl::ResourceOptions resourceOptions;
+
+    // TODO: Unclear if any of the properties on clientOptions need to be set
     mbgl::ClientOptions clientOptions;
     
     // Use weak here so there isn't a retain cycle
@@ -7887,6 +7954,8 @@ static void *windowScreenContext = &windowScreenContext;
         if (strongHandler) {
             
             MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+
+            // TODO: Figure out what other fields in response need to be passed back from requestResource
             MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
             if (response.data) {
                 tempResult.data = std::make_shared<std::string>((const char*)[response.data bytes],
