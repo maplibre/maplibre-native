@@ -367,8 +367,10 @@ class CameraPosition
             override fun createFromParcel(parcel: Parcel): CameraPosition {
                 val bearing = parcel.readDouble()
 
+                // Use deprecated method on Tiramisu to avoid platform bug
+                // https://github.com/maplibre/maplibre-native/issues/1276
                 @Suppress("DEPRECATION")
-                val target = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val target = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
                     parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)
                 } else {
                     parcel.readParcelable(LatLng::class.java.classLoader)
