@@ -340,6 +340,7 @@ jobs:
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
 
       - name: Release (Swift Package Index)
         if: env.make_release
@@ -355,7 +356,7 @@ jobs:
             -d '{"ref":"main","inputs":{
               "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
               "version":"${{ env.version }}",
-              "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
+              "download_url": "https://github.com/maplibre/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"'
 
       - run: npm install
         working-directory: .

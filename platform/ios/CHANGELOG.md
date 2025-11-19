@@ -2,6 +2,11 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.20.1
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+
 ## 6.20.0
 
 - Add configurable threshold for rotate gesture snapping to north ([#3914](https://github.com/maplibre/maplibre-native/pull/3914)).
