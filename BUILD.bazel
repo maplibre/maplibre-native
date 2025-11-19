@@ -192,7 +192,7 @@ cc_library(
 
 string_flag(
     name = "renderer",
-    build_setting_default = "drawable",
+    build_setting_default = "metal",
     values = [
         "drawable",
         "metal",
