@@ -184,21 +184,38 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     observer->onWillStartRenderingFrame();
 
-    PaintParameters parameters{context,
-                               pixelRatio,
-                               backend,
-                               renderTreeParameters.light,
-                               renderTreeParameters.mapMode,
-                               renderTreeParameters.debugOptions,
-                               renderTreeParameters.timePoint,
-                               renderTreeParameters.transformParams,
-                               *staticData,
-                               renderTree.getLineAtlas(),
-                               renderTree.getPatternAtlas(),
-                               frameCount,
-                               updateParameters->tileLodMinRadius,
-                               updateParameters->tileLodScale,
-                               updateParameters->tileLodPitchThreshold};
+    const TransformState& state = renderTreeParameters.transformParams.state;
+    const Size& size = state.getSize();
+    const EdgeInsets& frustumOffset = state.getFrustumOffset();
+    const gfx::ScissorRect scissorRect = {
+        .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
+#if MLN_RENDER_BACKEND_OPENGL
+        .y = static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
+#else
+        .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
+#endif
+        .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
+        .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
+    };
+
+    PaintParameters parameters{
+        context,
+        pixelRatio,
+        backend,
+        renderTreeParameters.light,
+        renderTreeParameters.mapMode,
+        renderTreeParameters.debugOptions,
+        renderTreeParameters.timePoint,
+        renderTreeParameters.transformParams,
+        *staticData,
+        renderTree.getLineAtlas(),
+        renderTree.getPatternAtlas(),
+        frameCount,
+        updateParameters->tileLodMinRadius,
+        updateParameters->tileLodScale,
+        updateParameters->tileLodPitchThreshold,
+        scissorRect,
+    };
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
