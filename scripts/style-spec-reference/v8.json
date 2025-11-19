@@ -34,6 +34,18 @@
         40.7736
       ]
     },
+    "centerAltitude": {
+      "type": "number",
+      "doc": "Default map center altitude in meters above sea level. The style center altitude defines the altitude where the camera is looking at and will be used only if the map has not been positioned by other means (e.g. map options or user interaction).",
+      "example": 123.4,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2980",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2980"
+        }
+      }
+    },
     "zoom": {
       "type": "number",
       "doc": "Default zoom level.  The style zoom will be used only if the map has not been positioned by other means (e.g. map options or user interaction).",
@@ -52,7 +64,58 @@
       "default": 0,
       "units": "degrees",
       "doc": "Default pitch, in degrees. Zero is perpendicular to the surface, for a look straight down at the map, while a greater value like 60 looks ahead towards the horizon. The style pitch will be used only if the map has not been positioned by other means (e.g. map options or user interaction).",
-      "example": 50
+      "example": 50,
+      "sdk-support": {
+        "0-60 degrees": {
+          "js": "0.8.0",
+          "android": "1.0.0",
+          "ios": "1.0.0"
+        },
+        "0-85 degrees": {
+          "js": "2.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/1909",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/1909"
+        },
+        "0-180 degrees": {
+          "js": "5.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/1909",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/1909"
+        }
+      }
+    },
+    "roll": {
+      "type": "number",
+      "default": 0,
+      "units": "degrees",
+      "doc": "Default roll, in degrees. The roll angle is measured counterclockwise about the camera boresight. The style roll will be used only if the map has not been positioned by other means (e.g. map options or user interaction).",
+      "example": 45,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2941",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2941"
+        }
+      }
+    },
+    "state": {
+      "type": "state",
+      "default": {},
+      "doc": "An object used to define default values when using the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.",
+      "example": {
+        "chargerType": {
+          "default": ["CCS", "CHAdeMO", "Type2"]
+        },
+        "minPreferredChargingSpeed": {
+          "default": 50
+        }
+      },
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "light": {
       "type": "light",
@@ -65,7 +128,7 @@
     },
     "sky": {
       "type": "sky",
-      "doc": "The map's sky configuration. **Note:** this definition is still experimental and is under develoment in maplibre-gl-js.",
+      "doc": "The map's sky configuration. **Note:** this definition is still experimental and is under development in maplibre-gl-js.",
       "example": {
         "sky-color": "#199EF3",
         "sky-horizon-blend": 0.5,
@@ -84,9 +147,15 @@
     },
     "projection": {
       "type": "projection",
-      "doc": "The projection configuration. **Note:** this definition is still experimental and is under development in maplibre-gl-js.",
+      "doc": "The projection configuration",
       "example": {
-        "type": "globe"
+        "type": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, "vertical-perspective",
+          12, "mercator"
+        ]
       }
     },
     "terrain": {
@@ -134,8 +203,51 @@
     },
     "glyphs": {
       "type": "string",
-      "doc": "A URL template for loading signed-distance-field glyph sets in PBF format. \nThe URL must include:\n\n - `{fontstack}` - When requesting glyphs, this token is replaced with a comma separated list of fonts from a font stack specified in the text-font property of a symbol layer. \n\n - `{range}` - When requesting glyphs, this token is replaced with a range of 256 Unicode code points. For example, to load glyphs for the Unicode Basic Latin and Basic Latin-1 Supplement blocks, the range would be 0-255. The actual ranges that are loaded are determined at runtime based on what text needs to be displayed.\n\nThis property is required if any layer uses the `text-field` layout property. The URL must be absolute, containing the [scheme, authority and path components](https://en.wikipedia.org/wiki/URL#Syntax).",
-      "example": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf"
+      "doc": "A URL template for loading signed-distance-field glyph sets in PBF format.\n\nIf this property is set, any text in the `text-field` layout property is displayed in the font stack named by the `text-font` layout property based on glyphs located at the URL specified by this property. Otherwise, font faces will be determined by the `text-font` property based on the local environment.\n\nThe URL must include:\n\n - `{fontstack}` - When requesting glyphs, this token is replaced with a comma separated list of fonts from a font stack specified in the `text-font` property of a symbol layer. \n\n - `{range}` - When requesting glyphs, this token is replaced with a range of 256 Unicode code points. For example, to load glyphs for the Unicode Basic Latin and Basic Latin-1 Supplement blocks, the range would be 0-255. The actual ranges that are loaded are determined at runtime based on what text needs to be displayed.\n\nThe URL must be absolute, containing the [scheme, authority and path components](https://en.wikipedia.org/wiki/URL#Syntax).",
+      "example": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.0.16",
+          "android": "0.1.1",
+          "ios": "0.1.0"
+        },
+        "omit to use local fonts": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/3302",
+          "android": "https://github.com/maplibre/maplibre-native/issues/165",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/165"
+        }
+      }
+    },
+    "font-faces": {
+      "type": "array",
+      "value": "fontFaces",
+      "doc": "The `font-faces` property can be used to specify what font files to use for rendering text. Font faces contain information needed to render complex texts such as [Devanagari](https://en.wikipedia.org/wiki/Devanagari), [Khmer](https://en.wikipedia.org/wiki/Khmer_script) among many others.<h2>Unicode range</h2>The optional `unicode-range` property can be used to only use a particular font file for characters within the specified unicode range(s). Its value should be an array of strings, each indicating a start and end of a unicode range, similar to the [CSS descriptor with the same name](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/unicode-range). This allows specifying multiple non-consecutive unicode ranges. When not specified, the default value is `U+0-10FFFF`, meaning the font file will be used for all unicode characters.\n\nRefer to the [Unicode Character Code Charts](https://www.unicode.org/charts/) to see ranges for scripts supported by Unicode. To see what unicode code-points are available in a font, use a tool like [FontDrop](https://fontdrop.info/).\n\n<h2>Font Resolution</h2>For every name in a symbol layer’s [`text-font`](./layers.md/#text-font) array, characters are matched if they are covered one of the by the font files in the corresponding entry of the `font-faces` map. Any still-unmatched characters then fall back to the [`glyphs`](./glyphs.md) URL if provided.\n\n<h2>Supported Fonts</h2>What type of fonts are supported is implementation-defined. Unsupported fonts are ignored.",
+      "example": {
+        "Noto Sans Regular": [{
+          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansKhmer/hinted/ttf/NotoSansKhmer-Regular.ttf",
+          "unicode-range": ["U+1780-17FF"]
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Regular.ttf",
+          "unicode-range": ["U+0900-097F"]
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansMyanmar/hinted/ttf/NotoSansMyanmar-Regular.ttf",
+          "unicode-range": ["U+1000-109F"]
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansEthiopic/hinted/ttf/NotoSansEthiopic-Regular.ttf",
+          "unicode-range": ["U+1200-137F"]
+        }],
+        "Unifont": "https://ftp.gnu.org/gnu/unifont/unifont-15.0.01/unifont-15.0.01.ttf"
+      },
+      "sdk-support": {
+        "basic functionality": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/50",
+          "android": "11.13.0",
+          "ios": "6.18.0"
+        }
+      }
     },
     "transition": {
       "type": "transition",
@@ -149,12 +261,12 @@
       "required": true,
       "type": "array",
       "value": "layer",
-      "doc": "A style's `layers` property lists all the layers available in that style. The type of layer is specified by the `type` property, and must be one of `background`, `fill`, `line`, `symbol`, `raster`, `circle`, `fill-extrusion`, `heatmap`, `hillshade`.\n\nExcept for layers of the `background` type, each layer needs to refer to a source. Layers take the data that they get from a source, optionally filter features, and then define how those features are styled.",
+      "doc": "A style's `layers` property lists all the layers available in that style. The type of layer is specified by the `type` property, and must be one of `background`, `fill`, `line`, `symbol`, `raster`, `circle`, `fill-extrusion`, `heatmap`, `hillshade`, `color-relief`.\n\nExcept for layers of the `background` type, each layer needs to refer to a source. Layers take the data that they get from a source, optionally filter features, and then define how those features are styled.",
       "example": [
         {
           "id": "coastline",
           "source": "maplibre",
-          "source-layer": "contries",
+          "source-layer": "countries",
           "type": "line",
           "paint": {
             "line-color": "#198EC8"
@@ -247,7 +359,33 @@
       "sdk-support": {
         "basic functionality": {
           "android": "9.3.0",
-          "ios": "5.10.0"
+          "ios": "5.10.0",
+          "js": "wontfix"
+        }
+      }
+    },
+    "encoding": {
+      "type": "enum",
+      "values": {
+        "mvt": {
+          "doc": "Mapbox Vector Tiles. See http://github.com/mapbox/vector-tile-spec for more info."
+        },
+        "mlt": {
+          "doc": "MapLibre Vector Tiles. See https://github.com/maplibre/maplibre-tile-spec for more info."
+        }
+      },
+      "default": "mvt",
+      "doc": "The encoding used by this source. Mapbox Vector Tiles encoding is used by default.",
+      "sdk-support": {
+        "mvt": {
+          "android": "supported",
+          "ios": "supported",
+          "js": "supported"
+        },
+        "mlt": {
+          "android": "https://github.com/maplibre/maplibre-native/issues/3721",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3721",
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/6258"
         }
       }
     },
@@ -328,7 +466,8 @@
       "sdk-support": {
         "basic functionality": {
           "android": "9.3.0",
-          "ios": "5.10.0"
+          "ios": "5.10.0",
+          "js": "wontfix"
         }
       }
     },
@@ -403,7 +542,19 @@
         }
       },
       "default": "mapbox",
-      "doc": "The encoding used by this source. Mapbox Terrain RGB is used by default."
+      "doc": "The encoding used by this source. Mapbox Terrain RGB is used by default.",
+      "sdk-support": {
+        "mapbox, terrarium": {
+          "js": "0.43.0",
+          "ios": "6.0.0",
+          "android": "6.0.0"
+        },
+        "custom": {
+          "js": "3.4.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2783",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2783"
+        }
+      }
     },
     "redFactor": {
       "type": "number",
@@ -411,7 +562,9 @@
       "doc": "Value that will be multiplied by the red channel value when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
-          "js": "3.4"
+          "js": "3.4.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2783",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2783"
         }
       }
     },
@@ -421,7 +574,9 @@
       "doc": "Value that will be multiplied by the blue channel value when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
-          "js": "3.4"
+          "js": "3.4.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2783",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2783"
         }
       }
     },
@@ -431,7 +586,9 @@
       "doc": "Value that will be multiplied by the green channel value when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
-          "js": "3.4"
+          "js": "3.4.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2358",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2783"
         }
       }
     },
@@ -441,7 +598,9 @@
       "doc": "Value that will be added to the encoding mix when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
-          "js": "3.4"
+          "js": "3.4.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2783",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2783"
         }
       }
     },
@@ -452,7 +611,8 @@
       "sdk-support": {
         "basic functionality": {
           "android": "9.3.0",
-          "ios": "5.10.0"
+          "ios": "5.10.0",
+          "js": "wontfix"
         }
       }
     },
@@ -505,7 +665,7 @@
     "cluster": {
       "type": "boolean",
       "default": false,
-      "doc": "If the data is a collection of point features, setting this to true clusters the points by radius into groups. Cluster groups become new `Point` features in the source with additional properties:\n * `cluster` Is `true` if the point is a cluster \n * `cluster_id` A unqiue id for the cluster to be used in conjunction with the [cluster inspection methods](https://maplibre.org/maplibre-gl-js/docs/API/classes/GeoJSONSource/#getclusterexpansionzoom)\n * `point_count` Number of original points grouped into this cluster\n * `point_count_abbreviated` An abbreviated point count"
+      "doc": "If the data is a collection of point features, setting this to true clusters the points by radius into groups. Cluster groups become new `Point` features in the source with additional properties:\n\n * `cluster` Is `true` if the point is a cluster \n\n * `cluster_id` A unique id for the cluster to be used in conjunction with the [cluster inspection methods](https://maplibre.org/maplibre-gl-js/docs/API/classes/GeoJSONSource/#getclusterexpansionzoom)\n\n * `point_count` Number of original points grouped into this cluster\n\n * `point_count_abbreviated` An abbreviated point count"
     },
     "clusterRadius": {
       "type": "number",
@@ -523,7 +683,7 @@
     },
     "clusterProperties": {
       "type": "*",
-      "doc": "An object defining custom properties on the generated clusters if clustering is enabled, aggregating values from clustered points. Has the form `{\"property_name\": [operator, map_expression]}`. `operator` is any expression function that accepts at least 2 operands (e.g. `\"+\"` or `\"max\"`) — it accumulates the property value from clusters/points the cluster contains; `map_expression` produces the value of a single point.\n\nExample: `{\"sum\": [\"+\", [\"get\", \"scalerank\"]]}`.\n\nFor more advanced use cases, in place of `operator`, you can use a custom reduce expression that references a special `[\"accumulated\"]` value, e.g.:\n`{\"sum\": [[\"+\", [\"accumulated\"], [\"get\", \"sum\"]], [\"get\", \"scalerank\"]]}`"
+      "doc": "An object defining custom properties on the generated clusters if clustering is enabled, aggregating values from clustered points. Has the form `{\"property_name\": [operator, map_expression]}`. `operator` is any expression function that accepts at least 2 operands (e.g. `\"+\"` or `\"max\"`) — it accumulates the property value from clusters/points the cluster contains; `map_expression` produces the value of a single point.\n\nExample: `{\"sum\": [\"+\", [\"get\", \"scalerank\"]]}`.\n\nFor more advanced use cases, in place of `operator`, you can use a custom reduce expression that references a special `[\"accumulated\"]` value, e.g.:\n\n`{\"sum\": [[\"+\", [\"accumulated\"], [\"get\", \"sum\"]], [\"get\", \"scalerank\"]]}`"
     },
     "lineMetrics": {
       "type": "boolean",
@@ -685,6 +845,21 @@
               "js": "0.43.0",
               "android": "6.0.0",
               "ios": "4.0.0"
+            },
+            "additional methods": {
+              "js": "5.5.0",
+              "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+              "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+            }
+          }
+        },
+        "color-relief": {
+          "doc": "Client-side elevation coloring based on DEM data. The implementation supports Mapbox Terrain RGB, Mapzen Terrarium tiles and custom encodings.",
+          "sdk-support": {
+            "basic functionality": {
+              "js": "5.6.0",
+              "android": "https://github.com/maplibre/maplibre-native/issues/3408",
+              "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
             }
           }
         },
@@ -751,6 +926,7 @@
     "layout_symbol",
     "layout_raster",
     "layout_hillshade",
+    "layout_color-relief",
     "layout_background"
   ],
   "layout_background": {
@@ -1532,7 +1708,9 @@
           "ios": "2.0.0"
         },
         "data-driven styling": {
-          "js": "2.2.0"
+          "js": "2.2.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2754",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2754"
         }
       },
       "expression": {
@@ -1769,7 +1947,9 @@
           "ios": "3.4.0"
         },
         "`viewport-glyph` value": {
-          "js": "2.1.8"
+          "js": "2.1.8",
+          "android": "https://github.com/maplibre/maplibre-native/issues/250",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/250"
         }
       },
       "expression": {
@@ -1813,7 +1993,7 @@
         "Open Sans Regular",
         "Arial Unicode MS Regular"
       ],
-      "doc": "Font stack to use for displaying text.",
+      "doc": "Fonts to use for displaying text. If the `glyphs` root property is specified, this array is joined together and interpreted as a font stack name. Otherwise, it is interpreted as a cascading fallback list of local font names.",
       "requires": [
         "text-field"
       ],
@@ -1827,6 +2007,11 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "local fonts": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/3302",
+          "android": "https://github.com/maplibre/maplibre-native/issues/165",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/165"
         }
       },
       "expression": {
@@ -2092,12 +2277,12 @@
           ]
         }
       ],
-      "doc": "To increase the chance of placing high-priority labels on the map, you can provide an array of `text-anchor` locations, each paired with an offset value. The renderer will attempt to place the label at each location, in order, before moving on to the next location+offset. Use `text-justify: auto` to choose justification based on anchor position. \n\n The length of the array must be even, and must alternate between enum and point entries. i.e., each anchor location must be accompanied by a point, and that point defines the offset when the corresponding anchor location is used. Positive offset values indicate right and down, while negative values indicate left and up. Anchor locations may repeat, allowing the renderer to try multiple offsets to try and place a label using the same anchor. \n\n When present, this property takes precedence over `text-anchor`, `text-variable-anchor`, `text-offset`, and `text-radial-offset`. \n\n ```json \n { \"text-variable-anchor-offset\": [\"top\", [0, 4], \"left\", [3,0], \"bottom\", [1, 1]] } \n ``` \n\n When the renderer chooses the `top` anchor, `[0, 4]` will be used for `text-offset`; the text will be shifted down by 4 ems. \n\n When the renderer chooses the `left` anchor, `[3, 0]` will be used for `text-offset`; the text will be shifted right by 3 ems.",
+      "doc": "To increase the chance of placing high-priority labels on the map, you can provide an array of `text-anchor` locations, each paired with an offset value. The renderer will attempt to place the label at each location, in order, before moving on to the next location+offset. Use `text-justify: auto` to choose justification based on anchor position. \n\n The length of the array must be even, and must alternate between enum and point entries. i.e., each anchor location must be accompanied by a point, and that point defines the offset when the corresponding anchor location is used. Positive offset values indicate right and down, while negative values indicate left and up. Anchor locations may repeat, allowing the renderer to try multiple offsets to try and place a label using the same anchor. \n\n When present, this property takes precedence over `text-anchor`, `text-variable-anchor`, `text-offset`, and `text-radial-offset`. \n\n ```json \n\n { \"text-variable-anchor-offset\": [\"top\", [0, 4], \"left\", [3,0], \"bottom\", [1, 1]] } \n\n ``` \n\n When the renderer chooses the `top` anchor, `[0, 4]` will be used for `text-offset`; the text will be shifted down by 4 ems. \n\n When the renderer chooses the `left` anchor, `[3, 0]` will be used for `text-offset`; the text will be shifted right by 3 ems.",
       "sdk-support": {
         "basic functionality": {
           "js": "3.3.0",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/2358",
-          "android": "https://github.com/maplibre/maplibre-native/issues/2358"
+          "ios": "6.8.0",
+          "android": "11.6.0"
         },
         "data-driven styling": {
           "js": "3.3.0",
@@ -2569,6 +2754,26 @@
       "property-type": "constant"
     }
   },
+  "layout_color-relief": {
+    "visibility": {
+      "type": "enum",
+      "values": {
+        "visible": {
+          "doc": "The layer is shown."
+        },
+        "none": {
+          "doc": "The layer is not shown."
+        }
+      },
+      "default": "visible",
+      "doc": "Whether this layer is displayed.",
+      "sdk-support": {
+        "basic functionality": {
+        }
+      },
+      "property-type": "constant"
+    }
+  },
   "filter": {
     "type": "array",
     "value": "*",
@@ -2693,7 +2898,7 @@
     "default": {
       "type": "*",
       "required": false,
-      "doc": "A value to serve as a fallback function result when a value isn't otherwise available. It is used in the following circumstances:\n* In categorical functions, when the feature value does not match any of the stop domain values.\n* In property and zoom-and-property functions, when a feature does not contain a value for the specified property.\n* In identity functions, when the feature value is not valid for the style property (for example, if the function is being used for a `circle-color` property but the feature property value is not a string or not a valid color).\n* In interval or exponential property and zoom-and-property functions, when the feature value is not numeric.\nIf no default is provided, the style property's default is used in these circumstances."
+      "doc": "A value to serve as a fallback function result when a value isn't otherwise available. It is used in the following circumstances:\n\n* In categorical functions, when the feature value does not match any of the stop domain values.\n\n* In property and zoom-and-property functions, when a feature does not contain a value for the specified property.\n\n* In identity functions, when the feature value is not valid for the style property (for example, if the function is being used for a `circle-color` property but the feature property value is not a string or not a valid color).\n\n* In interval or exponential property and zoom-and-property functions, when the feature value is not numeric.\n\nIf no default is provided, the style property's default is used in these circumstances."
     }
   },
   "function_stop": {
@@ -2719,13 +2924,32 @@
     "values": {
       "let": {
         "doc": "Binds expressions to named variables, which can then be referenced in the result expression using `[\"var\", \"variable_name\"]`.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
-        "example": {
-          "syntax": {
-            "method": ["string", "value", "expression"],
-            "result": "value"
-          },
-          "value": ["let", "someNumber", 500, ["interpolate", ["linear"], ["var", "someNumber"], 274, "#edf8e9", 1551, "#006d2c"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["var_1_name", "var_1_value", "...", "var_n_name", "var_n_value", "expression"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "var_i_name",
+              "type": "string literal",
+              "description": "The name of the i-th variable."
+            },
+            {
+              "name": "var_i_value",
+              "type": "any",
+              "description": "The value of the i-th variable."
+            },
+            {
+              "name": "expression",
+              "type": "any",
+              "description": "The expression within which the named variables can be referenced."
+            }
+          ]
         },
+        "example": ["let", "someNumber", 500, ["interpolate", ["linear"], ["var", "someNumber"], 274, "#edf8e9", 1551, "#006d2c"]],
         "group": "Variable binding",
         "sdk-support": {
           "basic functionality": {
@@ -2737,13 +2961,22 @@
       },
       "var": {
         "doc": "References variable bound using `let`.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "value"
-          },
-          "value": ["var", "density"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["var_name"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "var_name",
+              "type": "string literal",
+              "description": "The name of the variable bound using `let`."
+            }
+          ]
         },
+        "example": ["var", "density"],
         "group": "Variable binding",
         "sdk-support": {
           "basic functionality": {
@@ -2755,13 +2988,29 @@
       },
       "literal": {
         "doc": "Provides a literal array or object value.\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
-        "example": {
-          "syntax": {
-            "method": ["JSON object or array"],
-            "result": "array | object"
-          },
-          "value": ["literal",["DIN Offc Pro Italic", "Arial Unicode MS Regular"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["json_object"],
+              "output-type": "object"
+            },
+            {
+              "parameters": ["json_array"],
+              "output-type": "array"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "json_object",
+              "type": "JSON object"
+            },
+            {
+              "name": "json_array",
+              "type": "JSON array"
+            }
+          ]
         },
+        "example": ["literal", ["DIN Offc Pro Italic", "Arial Unicode MS Regular"]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -2772,14 +3021,40 @@
         }
       },
       "array": {
-        "doc": "Asserts that the input is an array (optionally with a specific item type and length). If, when the input expression is evaluated, it is not of the asserted type, then this assertion will cause the whole expression to be aborted.",
-        "example": {
-          "syntax": {
-            "method": ["value", "string?", "number?"],
-            "result": "array"
-          },
-          "value": ["array", ["literal", ["a", "b", "c"]], "string", 3]
+        "doc": "Asserts that the input is an array (optionally with a specific item type and length). If, when the input expression is evaluated, it is not of the asserted type or length, then this assertion will cause the whole expression to be aborted.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value"],
+              "output-type": "array"
+            },
+            {
+              "parameters": ["type", "value"],
+              "output-type": "array<type>"
+            },
+            {
+              "parameters": ["type", "length", "value"],
+              "output-type": "array<type, length>"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "type": "any"
+            },
+            {
+              "name": "type",
+              "type": "\"string\" | \"number\" | \"boolean\"",
+              "description": "The asserted type of the input array."
+            },
+            {
+              "name": "length",
+              "type": "number literal",
+              "description": "The asserted length of the input array."
+            }
+          ]
         },
+        "example": ["array", "string", 3, ["literal", ["a", "b", "c"]]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -2791,13 +3066,27 @@
       },
       "at": {
         "doc": "Retrieves an item from an array.",
-        "example": {
-          "syntax": {
-            "method": ["value", "number"],
-            "result": "value"
-          },
-          "value": ["at", ["literal", ["a", "b", "c"]], 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["index", "array"],
+              "output-type": "T"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "index",
+              "type": "number",
+              "description": "The index into `array`."
+            },
+            {
+              "name": "array",
+              "type": "array<T>",
+              "description": "The array of items to retrieve the specified item from."
+            }
+          ]
         },
+        "example": ["at", 1, ["literal", ["a", "b", "c"]]],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -2808,14 +3097,42 @@
         }
       },
       "in": {
-        "doc": "Determines whether an item exists in an array or a substring exists in a string.\n\n - [Measure distances](https://maplibre.org/maplibre-gl-js/docs/examples/measure/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value"],
-            "result": "boolean"
-          },
-          "value": ["in", "$type", "Point"]
+        "doc": "Determines whether an item exists in an array or a substring exists in a string.\n\n - [Measure distances](https://maplibre.org/maplibre-gl-js/docs/examples/measure-distances/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["item", "array"],
+              "output-type": "boolean"
+            },
+            {
+              "parameters": ["substring", "string"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "item",
+              "type": "T",
+              "description": "The needle to search for within `array`."
+            },
+            {
+              "name": "array",
+              "type": "array<T>",
+              "description": "The haystack through which to search for `item`."
+            },
+            {
+              "name": "substring",
+              "type": "string",
+              "description": "The needle to search for within `string`."
+            },
+            {
+              "name": "string",
+              "type": "string",
+              "description": "The haystack through which to search for `substring`."
+            }
+          ]
         },
+        "example": ["in", "$type", "Point"],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -2827,13 +3144,46 @@
       },
       "index-of": {
         "doc": "Returns the first position at which an item can be found in an array or a substring can be found in a string, or `-1` if the input cannot be found. Accepts an optional index from where to begin the search. In a string, a UTF-16 surrogate pair counts as a single position.",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "number?"],
-            "result": "number"
-          },
-          "value": ["index-of", "foo", ["baz", "bar", "hello", "foo", "world"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["item", "array", "from_index?"],
+              "output-type": "number"
+            },
+            {
+              "parameters": ["substring", "string", "from_index?"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "item",
+              "type": "T",
+              "description": "The needle to search for within `array`."
+            },
+            {
+              "name": "array",
+              "type": "array<T>",
+              "description": "The haystack through which to search for `item`."
+            },
+            {
+              "name": "substring",
+              "type": "string",
+              "description": "The needle to search for within `string`."
+            },
+            {
+              "name": "string",
+              "type": "string",
+              "description": "The haystack through which to search for `substring`."
+            },
+            {
+              "name": "from_index",
+              "type": "number",
+              "description": "The index from where to begin the search."
+            }
+          ]
         },
+        "example": ["index-of", "foo", ["baz", "bar", "hello", "foo", "world"]],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -2844,14 +3194,42 @@
         }
       },
       "slice": {
-        "doc": "Returns an item from an array or a substring from a string from a specified start index, or between a start index and an end index if set. The return value is inclusive of the start index but not of the end index. In a string, a UTF-16 surrogate pair counts as a single position.",
-        "example": {
-          "syntax": {
-            "method": ["value", "number", "number?"],
-            "result": "value"
-          },
-          "value": ["slice", ["get", "name"], 0, 3]
+        "doc": "Returns a subarray from an array or a substring from a string from a specified start index, or between a start index and an end index if set. The return value is inclusive of the start index but not of the end index. In a string, a UTF-16 surrogate pair counts as a single position.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["array", "start_index", "end_index?"],
+              "output-type": "array<T>"
+            },
+            {
+              "parameters": ["string", "start_index", "end_index?"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "array",
+              "type": "array<T>",
+              "description": "The original array from which to extract the subarray."
+            },
+            {
+              "name": "string",
+              "type": "string",
+              "description": "The original string from which to extract the substring."
+            },
+            {
+              "name": "start_index",
+              "type": "number",
+              "description": "The inclusive index from which `slice` extracts items or characters from the subarray or substring."
+            },
+            {
+              "name": "end_index",
+              "type": "number",
+              "description": "The non-inclusive index up to which `slice` extracts items or characters from the subarray or substring."
+            }
+          ]
         },
+        "example": ["slice", ["get", "name"], 0, 3],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -2862,14 +3240,31 @@
         }
       },
       "case": {
-        "doc": "Selects the first output whose corresponding test condition evaluates to true, or the fallback value otherwise.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/hover-styles/)\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "...", "fallback: value"],
-            "result": "value"
-          },
-          "value": ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.5 ]
+        "doc": "Selects the first output whose corresponding test condition evaluates to true, or the fallback value otherwise.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-hover-effect/)\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["condition_1", "output_1", "...", "condition_n", "output_n", "fallback"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "condition_i",
+              "type": "boolean"
+            },
+            {
+              "name": "output_i",
+              "type": "any"
+            },
+            {
+              "name": "fallback",
+              "type": "any",
+              "description": "The result when no condition evaluates to true."
+            }
+          ]
         },
+        "example": ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.5],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -2880,14 +3275,38 @@
         }
       },
       "match": {
-        "doc": "Selects the output whose label value matches the input value, or the fallback value if no match is found. The input can be any expression (e.g. `[\"get\", \"building_type\"]`). Each label must be either:\n - a single literal value; or\n - an array of literal values, whose values must be all strings or all numbers (e.g. `[100, 101]` or `[\"c\", \"b\"]`). The input matches if any of the values in the array matches, similar to the `\"in\"` operator.\nEach label must be unique. If the input type does not match the type of the labels, the result will be the fallback value.",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "...", "fallback: value"],
-            "result": "value"
-          },
-          "value": ["match", ["get", "building_type"], "residential", "#f00", "commercial", "#0f0", "#000"]
+        "doc": "Selects the output whose label value matches the input value, or the fallback value if no match is found. The input can be any expression (e.g. `[\"get\", \"building_type\"]`). Each label must be either:\n\n - a single literal value; or\n\n - an array of literal values, whose values must be all strings or all numbers (e.g. `[100, 101]` or `[\"c\", \"b\"]`). The input matches if any of the values in the array matches, similar to the `\"in\"` operator.\n\nEach label must be unique. If the input type does not match the type of the labels, the result will be the fallback value.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "label_1", "output_1", "...", "label_n", "output_n", "fallback"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string | number",
+              "description": "Any expression."
+            },
+            {
+              "name": "label_i",
+              "type": "string literal | number literal | array<string literal> | array<number literal>",
+              "description": "The i-th literal value or array of literal values to match the input against."
+            },
+            {
+              "name": "output_i",
+              "type": "any",
+              "description": "The result when the i-th label is the first label to match the input."
+            },
+            {
+              "name": "fallback",
+              "type": "any",
+              "description": "The result when no label matches the input."
+            }
+          ]
         },
+        "example": ["match", ["get", "building_type"], "residential", "#f00", "commercial", "#0f0", "#000"],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -2898,14 +3317,22 @@
         }
       },
       "coalesce": {
-        "doc": "Evaluates each expression in turn until the first non-null value is obtained, and returns that value.\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)",
-        "example": {
-          "syntax": {
-            "method": ["coalesce", "value", "fallback"],
-            "result": "value"
-          },
-          "value": ["coalesce", ["image", ["concat", ["get", "icon"], "_15"]], ["image", "marker_15"] ]
+        "doc": "Evaluates each expression in turn until the first non-null value is obtained, and returns that value.\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/use-a-fallback-image/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["expression_1", "...", "expression_n"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "expression_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["coalesce", ["image", ["concat", ["get", "icon"], "_15"]], ["image", "marker_15"]],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -2916,14 +3343,38 @@
         }
       },
       "step": {
-        "doc": "Produces discrete, stepped results by evaluating a piecewise-constant function defined by pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. Returns the output value of the stop just less than the input, or the first output if the input is less than the first stop.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)",
-        "example": {
-          "syntax": {
-            "method": ["step", "number", "number", "number", "..."],
-            "result": "number"
-          },
-          "value": [ "step", ["get", "point_count"], 20, 100, 30, 750, 40]
+        "doc": "Produces discrete, stepped results by evaluating a piecewise-constant function defined by pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order.\n\nReturns the output value of the stop just less than the input, or the first output if the input is less than the first stop.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/create-and-style-clusters/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "output_0", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number",
+              "description": "Any numeric expression."
+            },
+            {
+              "name": "output_0",
+              "type": "any",
+              "description": "The result when the `input` is less than the first stop."
+            },
+            {
+              "name": "stop_i_input",
+              "type": "number literal",
+              "description": "The value of the i-th stop against which the `input` is compared."
+            },
+            {
+              "name": "stop_i_output",
+              "type": "any",
+              "description": "The result when the i-th stop is the last stop less than the `input`."
+            }
+          ]
         },
+        "example": ["step", ["get", "point_count"], 20, 100, 30, 750, 40],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -2934,14 +3385,38 @@
         }
       },
       "interpolate": {
-        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, or `color`.\n\nInterpolation types:\n\n- `[\"linear\"]`, or an expression returning one of those types: Interpolates linearly between the pair of stops just less than and just greater than the input.\n- `[\"exponential\", base]`: Interpolates exponentially between the stops just less than and just greater than the input. `base` controls the rate at which the output increases: higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.\n- `[\"cubic-bezier\", x1, y1, x2, y2]`: Interpolates using the cubic bezier curve defined by the given control points.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
-        "example": {
-          "syntax": {
-            "method": ["[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]", "number", "number", "number", "..."],
-            "result": "number | array<number> | color"
-          },
-          "value": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.05, ["get", "height"]]
+        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, `color`, `array<color>`, or `projection`.\n\nInterpolation types:\n\n- `[\"linear\"]`, or an expression returning one of those types: Interpolates linearly between the pair of stops just less than and just greater than the input.\n\n- `[\"exponential\", base]`: Interpolates exponentially between the stops just less than and just greater than the input. `base` controls the rate at which the output increases: higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.\n\n- `[\"cubic-bezier\", x1, y1, x2, y2]`: Interpolates using the cubic bezier curve defined by the given control points.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "output-type": "number | array<number> | color | array<color> | projection"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "interpolation_type",
+              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]",
+              "description": "The interpolation type."
+            },
+            {
+              "name": "input",
+              "type": "number",
+              "description": "Any numeric expression."
+            },
+            {
+              "name": "stop_i_input",
+              "type": "number literal",
+              "description": "The value of the i-th stop against which the `input` is compared."
+            },
+            {
+              "name": "stop_i_output",
+              "type": "number | array<number> | color | array<color> | projection",
+              "description": "The output value corresponding to the i-th stop."
+            }
+          ]
         },
+        "example": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.05, ["get", "height"]],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -2952,46 +3427,92 @@
         }
       },
       "interpolate-hcl": {
-        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). Works like `interpolate`, but the output type must be `color`, and the interpolation is performed in the Hue-Chroma-Luminance color space.",
-        "example": {
-          "syntax": {
-            "method": ["[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]", "number", "number", "number", "..."],
-            "result": "color"
-          },
-          "value": ["interpolate-hcl", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"]
+        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). Works like `interpolate`, but the output type must be `color` or `array<color>`, and the interpolation is performed in the Hue-Chroma-Luminance color space.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "output-type": "color | array<color>"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "interpolation_type",
+              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]"
+            },
+            {
+              "name": "input",
+              "type": "number"
+            },
+            {
+              "name": "stop_i_input",
+              "type": "number literal"
+            },
+            {
+              "name": "stop_i_output",
+              "type": "color | array<color>"
+            }
+          ]
         },
+        "example": ["interpolate-hcl", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
-            "js": "0.49.0"
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
           }
         }
       },
       "interpolate-lab": {
-        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). Works like `interpolate`, but the output type must be `color`, and the interpolation is performed in the CIELAB color space.",
-        "example": {
-          "syntax": {
-            "method": ["[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]", "number", "number", "number", "..."],
-            "result": "color"
-          },
-          "value": ["interpolate-lab", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"]
+        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). Works like `interpolate`, but the output type must be `color` or `array<color>`, and the interpolation is performed in the CIELAB color space.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "output-type": "color | array<color>"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "interpolation_type",
+              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]"
+            },
+            {
+              "name": "input",
+              "type": "number"
+            },
+            {
+              "name": "stop_i_input",
+              "type": "number literal"
+            },
+            {
+              "name": "stop_i_output",
+              "type": "color | array<color>"
+            }
+          ]
         },
+        "example": ["interpolate-lab", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
-            "js": "0.49.0"
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
           }
         }
       },
       "ln2": {
-        "doc": "Returns mathematical constant ln(2).",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "number"
-          },
-          "value": ["ln2"]
+        "doc": "Returns the mathematical constant ln(2).",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
         },
+        "example": ["ln2"],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3003,13 +3524,15 @@
       },
       "pi": {
         "doc": "Returns the mathematical constant pi.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "number"
-          },
-          "value": ["pi"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
         },
+        "example": ["pi"],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3021,13 +3544,15 @@
       },
       "e": {
         "doc": "Returns the mathematical constant e.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "number"
-          },
-          "value": ["e"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
         },
+        "example": ["e"],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3039,13 +3564,21 @@
       },
       "typeof": {
         "doc": "Returns a string describing the type of the given value.",
-        "example": {
-          "syntax": {
-            "method": ["value"],
-            "result": "string"
-          },
-          "value": ["typeof", ["get", "name"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["typeof", ["get", "name"]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3057,13 +3590,21 @@
       },
       "string": {
         "doc": "Asserts that the input value is a string. If multiple values are provided, each one is evaluated in order until a string is obtained. If none of the inputs are strings, the expression is an error.",
-        "example": {
-          "syntax": {
-            "method": ["value", "fallback: value", "fallback: value", "..."],
-            "result": "string"
-          },
-          "value": ["string", ["get", "name"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value_1", "...", "value_n"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["string", ["get", "name"]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3075,13 +3616,21 @@
       },
       "number": {
         "doc": "Asserts that the input value is a number. If multiple values are provided, each one is evaluated in order until a number is obtained. If none of the inputs are numbers, the expression is an error.",
-        "example": {
-          "syntax": {
-            "method": ["value", "fallback: value", "fallback: value", "..."],
-            "result": "number"
-          },
-          "value": ["number", ["get", "population"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value_1", "...", "value_n"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["number", ["get", "population"]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3092,14 +3641,22 @@
         }
       },
       "boolean": {
-        "doc": "Asserts that the input value is a boolean. If multiple values are provided, each one is evaluated in order until a boolean is obtained. If none of the inputs are booleans, the expression is an error.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/hover-styles/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "fallback: value", "fallback: value", "..."],
-            "result": "boolean"
-          },
-          "value": ["boolean", ["feature-state", "hover"], false]
+        "doc": "Asserts that the input value is a boolean. If multiple values are provided, each one is evaluated in order until a boolean is obtained. If none of the inputs are booleans, the expression is an error.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-hover-effect/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value_1", "...", "value_n"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["boolean", ["feature-state", "hover"], false],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3111,13 +3668,21 @@
       },
       "object": {
         "doc": "Asserts that the input value is an object. If multiple values are provided, each one is evaluated in order until an object is obtained. If none of the inputs are objects, the expression is an error.",
-        "example": {
-          "syntax": {
-            "method": ["value", "fallback: value", "fallback: value", "..."],
-            "result": "object"
-          },
-          "value": ["object", ["get", "some-property"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value_1", "...", "value_n"],
+              "output-type": "object"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["object", ["get", "some-property"]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3129,13 +3694,21 @@
       },
       "collator": {
         "doc": "Returns a `collator` for use in locale-dependent comparison operations. The `case-sensitive` and `diacritic-sensitive` options default to `false`. The `locale` argument specifies the IETF language tag of the locale to use. If none is provided, the default locale is used. If the requested locale is not available, the `collator` will use a system-defined fallback locale. Use `resolved-locale` to test the results of locale fallback behavior.",
-        "example": {
-          "syntax": {
-            "method": ["collator", "{ \"case-sensitive\": boolean, \"diacritic-sensitive\": boolean, \"locale\": string }"],
-            "result": "collator"
-          },
-          "value": ["collator", {"case-sensitive": true, "diacritic-sensitive": true, "locale": "fr"}]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["options"],
+              "output-type": "collator"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "options",
+              "type": "{ \"case-sensitive\"?: boolean, \"diacritic-sensitive\"?: boolean, \"locale\"?: string }"
+            }
+          ]
         },
+        "example": ["collator", {"case-sensitive": true, "diacritic-sensitive": true, "locale": "fr"}],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3146,14 +3719,26 @@
         }
       },
       "format": {
-        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object that supports the following properties:\n- `\"text-font\"`: Overrides the font stack specified by the root layout property.\n- `\"text-color\"`: Overrides the color specified by the root paint property.\n- `\"font-scale\"`: Applies a scaling factor on `text-size` as specified by the root layout property.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "{ \"text-font\": string, \"text-color\": color, \"font-scale\": number }", "..."],
-            "result": "formatted"
-          },
-          "value": ["format", ["upcase", ["get", "FacilityName"]], {"font-scale": 0.8}, "\n", {}, ["downcase", ["get", "Comments"]], {"font-scale": 0.6}]
+        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object that supports the following properties:\n\n- `\"text-font\"`: Overrides the font stack specified by the root layout property.\n\n- `\"text-color\"`: Overrides the color specified by the root paint property.\n\n- `\"font-scale\"`: Applies a scaling factor on `text-size` as specified by the root layout property.\n\n- `\"vertical-align\"`: Aligns vertically text section or image in relation to the row it belongs to. Possible values are: \n\t- `\"bottom\"` *default*: align the bottom of this section with the bottom of other sections.\n<img alt=\"Visual representation of bottom alignment\" src=\"https://github.com/user-attachments/assets/0474a2fd-a4b2-417c-9187-7a13a28695bc\"/>\n\t- `\"center\"`: align the center of this section with the center of other sections.\n<img alt=\"Visual representation of center alignment\" src=\"https://github.com/user-attachments/assets/92237455-be6d-4c5d-b8f6-8127effc1950\"/>\n\t- `\"top\"`: align the top of this section with the top of other sections.\n<img alt=\"Visual representation of top alignment\" src=\"https://github.com/user-attachments/assets/45dccb28-d977-4abb-a006-4ea9792b7c53\"/>\n\t- Refer to [the design proposal](https://github.com/maplibre/maplibre-style-spec/issues/832) for more details.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "style_overrides_1?", "...", "input_n", "style_overrides_n?"],
+              "output-type": "formatted"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "string | image"
+            },
+            {
+              "name": "style_overrides_i",
+              "type": "{ \"text-font\"?: string, \"text-color\"?: color, \"font-scale\"?: number, \"vertical-align\"?: \"bottom\" | \"center\" | \"top\" }"
+            }
+          ]
         },
+        "example": ["format", ["upcase", ["get", "FacilityName"]], {"font-scale": 0.8}, "\n\n", {}, ["downcase", ["get", "Comments"]], {"font-scale": 0.6, "vertical-align": "center"}],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3176,6 +3761,11 @@
             "android": "7.3.0",
             "ios": "4.10.0"
           },
+          "vertical-align": {
+            "js": "5.1.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/3055",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/3055"
+          },
           "image": {
             "js": "1.6.0",
             "android": "8.6.0",
@@ -3184,14 +3774,22 @@
         }
       },
       "image": {
-        "doc": "Returns an `image` type for use in `icon-image`, `*-pattern` entries and as a section in the `format` expression. If set, the `image` argument will check that the requested image exists in the style and will return either the resolved image name or `null`, depending on whether or not the image is currently in the style. This validation process is synchronous and requires the image to have been added to the style before requesting it in the `image` argument.\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)",
-        "example": {
-          "syntax": {
-            "method": ["value"],
-            "result": "image"
-          },
-          "value": ["image", "marker_15"]
+        "doc": "Returns an `image` type for use in `icon-image`, `*-pattern` entries and as a section in the `format` expression. If set, the `image` argument will check that the requested image exists in the style and will return either the resolved image name or `null`, depending on whether or not the image is currently in the style. This validation process is synchronous and requires the image to have been added to the style before requesting it in the `image` argument.\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/use-a-fallback-image/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["image_name"],
+              "output-type": "image"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "image_name",
+              "type": "string"
+            }
+          ]
         },
+        "example": ["image", "marker_15"],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3201,31 +3799,80 @@
           }
         }
       },
-      "number-format": {
-        "doc": "Converts the input number into a string representation using the providing formatting rules. If set, the `locale` argument specifies the locale to use, as a BCP 47 language tag. If set, the `currency` argument specifies an ISO 4217 code to use for currency-style formatting. If set, the `min-fraction-digits` and `max-fraction-digits` arguments specify the minimum and maximum number of fractional digits to include.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
-        "example": {
-          "syntax": {
-            "method": ["number", "{ \"locale\": string, \"currency\": string, \"min-fraction-digits\": number, \"max-fraction-digits\": number }"],
-            "result": "string"
-          },
-          "value": ["number-format", ["get", "mag"], {"min-fraction-digits": 1, "max-fraction-digits": 1}]
+      "global-state": {
+        "doc": "Retrieves a property value from global state that can be set with platform-specific APIs. Defaults can be provided using the [`state`](https://maplibre.org/maplibre-style-spec/root/#state) root property. Returns `null` if no value nor default value is set for the retrieved property.",
+        "group": "Lookup",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string literal",
+              "description": "The name of the global state property to retrieve."
+            }
+          ]
         },
+        "example": ["global-state", "someProperty"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "https://github.com/maplibre/maplibre-gl-js/issues/4964",
+            "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+          }
+        }
+      },
+      "number-format": {
+        "doc": "Converts the input number into a string representation using the providing formatting rules. If set, the `locale` argument specifies the locale to use, as a BCP 47 language tag. If set, the `currency` argument specifies an ISO 4217 code to use for currency-style formatting. If set, the `min-fraction-digits` and `max-fraction-digits` arguments specify the minimum and maximum number of fractional digits to include.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "format_options"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            },
+            {
+              "name": "format_options",
+              "type": "{ \"locale\"?: string, \"currency\"?: string, \"min-fraction-digits\"?: number, \"max-fraction-digits\"?: number }"
+            }
+          ]
+        },
+        "example": ["number-format", ["get", "mag"], {"min-fraction-digits": 1, "max-fraction-digits": 1}],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
-            "js": "0.54.0"
+            "js": "0.54.0",
+            "android": "8.4.0",
+            "ios": "supported"
           }
         }
       },
       "to-string": {
-        "doc": "Converts the input value to a string. If the input is `null`, the result is `\"\"`. If the input is a boolean, the result is `\"true\"` or `\"false\"`. If the input is a number, it is converted to a string as specified by the [\"NumberToString\" algorithm](https://tc39.github.io/ecma262/#sec-tostring-applied-to-the-number-type) of the ECMAScript Language Specification. If the input is a color, it is converted to a string of the form `\"rgba(r,g,b,a)\"`, where `r`, `g`, and `b` are numerals ranging from 0 to 255, and `a` ranges from 0 to 1. Otherwise, the input is converted to a string in the format specified by the [`JSON.stringify`](https://tc39.github.io/ecma262/#sec-json.stringify) function of the ECMAScript Language Specification.\n\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)",
-        "example": {
-          "syntax": {
-            "method": ["value"],
-            "result": "string"
-          },
-          "value": ["to-string", ["get", "mag"]]
+        "doc": "Converts the input value to a string. If the input is `null`, the result is `\"\"`. If the input is a boolean, the result is `\"true\"` or `\"false\"`. If the input is a number, it is converted to a string as specified by the [\"NumberToString\" algorithm](https://tc39.github.io/ecma262/#sec-tostring-applied-to-the-number-type) of the ECMAScript Language Specification. If the input is a color, it is converted to a string of the form `\"rgba(r,g,b,a)\"`, where `r`, `g`, and `b` are numerals ranging from 0 to 255, and `a` ranges from 0 to 1. Otherwise, the input is converted to a string in the format specified by the [`JSON.stringify`](https://tc39.github.io/ecma262/#sec-json.stringify) function of the ECMAScript Language Specification.\n\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-time-slider/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["to-string", ["get", "mag"]],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3237,13 +3884,21 @@
       },
       "to-number": {
         "doc": "Converts the input value to a number, if possible. If the input is `null` or `false`, the result is 0. If the input is `true`, the result is 1. If the input is a string, it is converted to a number as specified by the [\"ToNumber Applied to the String Type\" algorithm](https://tc39.github.io/ecma262/#sec-tonumber-applied-to-the-string-type) of the ECMAScript Language Specification. If multiple values are provided, each one is evaluated in order until the first successful conversion is obtained. If none of the inputs can be converted, the expression is an error.",
-        "example": {
-          "syntax": {
-            "method": ["value", "fallback: value", "fallback: value", "..."],
-            "result": "number"
-          },
-          "value": ["to-number", "someProperty"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value_1", "...", "value_n"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["to-number", "someProperty"],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3254,14 +3909,22 @@
         }
       },
       "to-boolean": {
-        "doc": "Converts the input value to a boolean. The result is `false` when then input is an empty string, 0, `false`, `null`, or `NaN`; otherwise it is `true`.",
-        "example": {
-          "syntax": {
-            "method": ["value"],
-            "result": "boolean"
-          },
-          "value": ["to-boolean", "someProperty"]
+        "doc": "Converts the input value to a boolean. The result is `false` when the input is an empty string, 0, `false`, `null`, or `NaN`; otherwise it is `true`.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["to-boolean", "someProperty"],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3273,13 +3936,21 @@
       },
       "to-rgba": {
         "doc": "Returns a four-element array containing the input color's red, green, blue, and alpha components, in that order.",
-        "example": {
-          "syntax": {
-            "method": ["color"],
-            "result": "array"
-          },
-          "value": ["to-rgba", "#ff0000"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["color"],
+              "output-type": "array"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "color",
+              "type": "color"
+            }
+          ]
         },
+        "example": ["to-rgba", "#ff0000"],
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
@@ -3291,13 +3962,21 @@
       },
       "to-color": {
         "doc": "Converts the input value to a color. If multiple values are provided, each one is evaluated in order until the first successful conversion is obtained. If none of the inputs can be converted, the expression is an error.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "fallback: value", "fallback: value", "..."],
-            "result": "color"
-          },
-          "value": ["to-color", "#edf8e9"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["value_1", "...", "value_n"],
+              "output-type": "color"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "value_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["to-color", "#edf8e9"],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3309,13 +3988,29 @@
       },
       "rgb": {
         "doc": "Creates a color value from red, green, and blue components, which must range between 0 and 255, and an alpha component of 1. If any component is out of range, the expression is an error.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number", "number"],
-            "result": "color"
-          },
-          "value": ["rgb", 255, 0, 0]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["red", "green", "blue"],
+              "output-type": "color"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "red",
+              "type": "number"
+            },
+            {
+              "name": "green",
+              "type": "number"
+            },
+            {
+              "name": "blue",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["rgb", 255, 0, 0],
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
@@ -3327,13 +4022,33 @@
       },
       "rgba": {
         "doc": "Creates a color value from red, green, blue components, which must range between 0 and 255, and an alpha component which must range between 0 and 1. If any component is out of range, the expression is an error.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number", "number", "number"],
-            "result": "color"
-          },
-          "value": ["rgba", 255, 0, 0, 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["red", "green", "blue", "alpha"],
+              "output-type": "color"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "red",
+              "type": "number"
+            },
+            {
+              "name": "green",
+              "type": "number"
+            },
+            {
+              "name": "blue",
+              "type": "number"
+            },
+            {
+              "name": "alpha",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["rgba", 255, 0, 0, 1],
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
@@ -3344,14 +4059,28 @@
         }
       },
       "get": {
-        "doc": "Retrieves a property value from the current feature's properties, or from another object if a second argument is provided. Returns null if the requested property is missing.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)\n - [Extrude polygons for 3D indoor mapping](https://maplibre.org/maplibre-gl-js/docs/examples/3d-extrusion-floorplan/)",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "value"
-          },
-          "value": ["get", "someProperty"]
+        "doc": "Retrieves a property value from the current feature's properties, or from another object if a second argument is provided. Returns null if the requested property is missing.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)\n\n - [Extrude polygons for 3D indoor mapping](https://maplibre.org/maplibre-gl-js/docs/examples/extrude-polygons-for-3d-indoor-mapping/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name", "object?"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string",
+              "description": "The name of the property to retrieve the value of."
+            },
+            {
+              "name": "object",
+              "type": "object",
+              "description": "The object to retrieve the value from."
+            }
+          ]
         },
+        "example": ["get", "someProperty"],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3362,14 +4091,28 @@
         }
       },
       "has": {
-        "doc": "Tests for the presence of an property value in the current feature's properties, or from another object if a second argument is provided.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "boolean"
-          },
-          "value": ["has", "someProperty"]
+        "doc": "Tests for the presence of a property value in the current feature's properties, or from another object if a second argument is provided.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/create-and-style-clusters/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name", "object?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string",
+              "description": "The name of the property to test for the presence of."
+            },
+            {
+              "name": "object",
+              "type": "object",
+              "description": "The object in which to test for the presence of the `property_name` property."
+            }
+          ]
         },
+        "example": ["has", "someProperty"],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3381,13 +4124,21 @@
       },
       "length": {
         "doc": "Gets the length of an array or string. In a string, a UTF-16 surrogate pair counts as a single position.",
-        "example": {
-          "syntax": {
-            "method": ["array"],
-            "result": "number"
-          },
-          "value": ["length", ["get", "myArray"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["array_or_string"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "array_or_string",
+              "type": "array | string"
+            }
+          ]
         },
+        "example": ["length", ["get", "myArray"]],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3399,13 +4150,15 @@
       },
       "properties": {
         "doc": "Gets the feature properties object.  Note that in some cases, it may be more efficient to use [\"get\", \"property_name\"] directly.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "value"
-          },
-          "value": ["properties"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "object"
+            }
+          ]
         },
+        "example": ["properties"],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -3416,30 +4169,42 @@
         }
       },
       "feature-state": {
-        "doc": "Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. When `source.promoteId` is not provided, features are identified by their `id` attribute, which must be an integer or a string that can be cast to an integer. When `source.promoteId` is provided, features are identified by their `promoteId` property, which may be a number, string, or any primitive data type. Note that [\"feature-state\"] can only be used with paint properties that support data-driven styling.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/hover-styles/)",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "value"
-          },
-          "value": ["feature-state", "hover"]
+        "doc": "Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. When `source.promoteId` is not provided, features are identified by their `id` attribute, which must be an integer or a string that can be cast to an integer. When `source.promoteId` is provided, features are identified by their `promoteId` property, which may be a number, string, or any primitive data type. Note that [\"feature-state\"] can only be used with paint properties that support data-driven styling.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-hover-effect/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string"
+            }
+          ]
         },
+        "example": ["feature-state", "hover"],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
-            "js": "0.46.0"
+            "js": "0.46.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/1698",
+            "android": "https://github.com/maplibre/maplibre-native/issues/1698"
           }
         }
       },
       "geometry-type": {
-        "doc": "Gets the feature's geometry type: `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "string"
-          },
-          "value": ["==", ["geometry-type"], "Polygon"]
+        "doc": "Returns the feature's simple geometry type: `Point`, `LineString`, or `Polygon`. `MultiPoint`, `MultiLineString`, and `MultiPolygon` are returned as `Point`, `LineString`, and `Polygon`, respectively.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "string"
+            }
+          ]
         },
+        "example": ["==", ["geometry-type"], "Polygon"],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -3451,13 +4216,15 @@
       },
       "id": {
         "doc": "Gets the feature's id, if it has one.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "value"
-          },
-          "value": ["id"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "any"
+            }
+          ]
         },
+        "example": ["id"],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -3469,13 +4236,15 @@
       },
       "zoom": {
         "doc": "Gets the current zoom level.  Note that in style layout and paint properties, [\"zoom\"] may only appear as the input to a top-level \"step\" or \"interpolate\" expression.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "number"
-          },
-          "value": ["interpolate",["linear"],["zoom"],15,0,15.05,["get","height"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
         },
+        "example": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.05, ["get", "height"]],
         "group": "Zoom",
         "sdk-support": {
           "basic functionality": {
@@ -3487,13 +4256,15 @@
       },
       "heatmap-density": {
         "doc": "Gets the kernel density estimation of a pixel in a heatmap layer, which is a relative measure of how many data points are crowded around a particular pixel. Can only be used in the `heatmap-color` property.",
-        "example": {
-          "syntax": {
-            "method": [],
-            "result": "number"
-          },
-          "value": ["heatmap-density"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
         },
+        "example": ["heatmap-density"],
         "group": "Heatmap",
         "sdk-support": {
           "basic functionality": {
@@ -3503,15 +4274,37 @@
           }
         }
       },
+      "elevation": {
+        "doc": "Gets the elevation of a pixel (in meters above the vertical datum reference of the `raster-dem` tiles) from a `raster-dem` source. Can only be used in the `color-relief-color` property of a `color-relief` layer.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
+        },
+        "example": ["elevation"],
+        "group": "Color Relief",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.6.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/3408",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+          }
+        }
+      },
       "line-progress": {
         "doc": "Gets the progress along a gradient line. Can only be used in the `line-gradient` property.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["line-progress", 0.5]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "number"
+            }
+          ]
         },
+        "example": ["line-progress"],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -3523,29 +4316,41 @@
       },
       "accumulated": {
         "doc": "Gets the value of a cluster property accumulated so far. Can only be used in the `clusterProperties` option of a clustered GeoJSON source.",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "value"
-          },
-          "value": ["accumulated", "sum"]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "any"
+            }
+          ]
         },
+        "example": ["accumulated"],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
-            "js": "0.53.0"
+            "js": "0.53.0",
+            "ios": "supported",
+            "android": "supported"
           }
         }
       },
       "+": {
         "doc": "Returns the sum of the inputs.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number", "..."],
-            "result": "number"
-          },
-          "value": ["+", 2, 3]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["+", 2, 3],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3557,13 +4362,21 @@
       },
       "*": {
         "doc": "Returns the product of the inputs.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number", "..."],
-            "result": "number"
-          },
-          "value": ["*", 2, 3]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["*", 2, 3],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3575,13 +4388,36 @@
       },
       "-": {
         "doc": "For two inputs, returns the result of subtracting the second input from the first. For a single input, returns the result of subtracting it from 0.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number?"],
-            "result": "number"
-          },
-          "value": ["-", 10]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "input_2"],
+              "output-type": "number"
+            },
+            {
+              "parameters": ["single_input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_1",
+              "type": "number",
+              "description": "The number from which to subtract `input_2`."
+            },
+            {
+              "name": "input_2",
+              "type": "number",
+              "description": "The number to subtract from `input_1`."
+            },
+            {
+              "name": "single_input",
+              "type": "number",
+              "description": "The number to subtract from 0."
+            }
+          ]
         },
+        "example": ["-", 10],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3593,13 +4429,27 @@
       },
       "/": {
         "doc": "Returns the result of floating point division of the first input by the second.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
-        "example": {
-          "syntax": {
-            "method": ["number", "number"],
-            "result": "number"
-          },
-          "value": ["/", ["get", "population"], ["get", "sq-km"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "input_2"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_1",
+              "type": "number",
+              "description": "The dividend."
+            },
+            {
+              "name": "input_2",
+              "type": "number",
+              "description": "The divisor."
+            }
+          ]
         },
+        "example": ["/", ["get", "population"], ["get", "sq-km"]],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3611,13 +4461,27 @@
       },
       "%": {
         "doc": "Returns the remainder after integer division of the first input by the second.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number"],
-            "result": "number"
-          },
-          "value": ["%", 10, 3]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "input_2"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_1",
+              "type": "number",
+              "description": "The dividend."
+            },
+            {
+              "name": "input_2",
+              "type": "number",
+              "description": "The divisor."
+            }
+          ]
         },
+        "example": ["%", 10, 3],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3629,13 +4493,27 @@
       },
       "^": {
         "doc": "Returns the result of raising the first input to the power specified by the second.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number"],
-            "result": "number"
-          },
-          "value": ["^", 2, 3]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "input_2"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_1",
+              "type": "number",
+              "description": "The base."
+            },
+            {
+              "name": "input_2",
+              "type": "number",
+              "description": "The exponent."
+            }
+          ]
         },
+        "example": ["^", 2, 3],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3647,13 +4525,22 @@
       },
       "sqrt": {
         "doc": "Returns the square root of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["sqrt", 9]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number",
+              "description": "The radicand."
+            }
+          ]
         },
+        "example": ["sqrt", 9],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3665,13 +4552,21 @@
       },
       "log10": {
         "doc": "Returns the base-ten logarithm of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["log10", 8]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["log10", 8],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3683,13 +4578,21 @@
       },
       "ln": {
         "doc": "Returns the natural logarithm of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["ln", 8]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["ln", 8],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3701,13 +4604,21 @@
       },
       "log2": {
         "doc": "Returns the base-two logarithm of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["log2", 8]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["log2", 8],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3719,13 +4630,21 @@
       },
       "sin": {
         "doc": "Returns the sine of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["sin", 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["sin", 1],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3737,13 +4656,21 @@
       },
       "cos": {
         "doc": "Returns the cosine of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["cos", 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["cos", 1],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3755,13 +4682,21 @@
       },
       "tan": {
         "doc": "Returns the tangent of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["tan", 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["tan", 1],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3773,13 +4708,21 @@
       },
       "asin": {
         "doc": "Returns the arcsine of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["asin", 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["asin", 1],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3791,13 +4734,21 @@
       },
       "acos": {
         "doc": "Returns the arccosine of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["acos", 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["acos", 1],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3809,13 +4760,21 @@
       },
       "atan": {
         "doc": "Returns the arctangent of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["atan", 1]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["atan", 1],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3827,13 +4786,21 @@
       },
       "min": {
         "doc": "Returns the minimum value of the inputs.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number", "..."],
-            "result": "number"
-          },
-          "value": ["min", 1, 2]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["min", 1, 2],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3845,13 +4812,21 @@
       },
       "max": {
         "doc": "Returns the maximum value of the inputs.",
-        "example": {
-          "syntax": {
-            "method": ["number", "number", "..."],
-            "result": "number"
-          },
-          "value": ["max", 1, 2]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["max", 1, 2],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3863,13 +4838,21 @@
       },
       "round": {
         "doc": "Rounds the input to the nearest integer. Halfway values are rounded away from zero. For example, `[\"round\", -1.5]` evaluates to -2.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["round", 1.5]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["round", 1.5],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3881,13 +4864,21 @@
       },
       "abs": {
         "doc": "Returns the absolute value of the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["abs", -1.5]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["abs", -1.5],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3899,13 +4890,21 @@
       },
       "ceil": {
         "doc": "Returns the smallest integer that is greater than or equal to the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["ceil", 1.5]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["ceil", 1.5],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3917,13 +4916,21 @@
       },
       "floor": {
         "doc": "Returns the largest integer that is less than or equal to the input.",
-        "example": {
-          "syntax": {
-            "method": ["number"],
-            "result": "number"
-          },
-          "value": ["floor", 1.5]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "number"
+            }
+          ]
         },
+        "example": ["floor", 1.5],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3935,13 +4942,21 @@
       },
       "distance": {
         "doc": "Returns the shortest distance in meters between the evaluated feature and the input geometry. The input value can be a valid GeoJSON of type `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`, `Feature`, or `FeatureCollection`. Distance values returned may vary in precision due to loss in precision from encoding geometries, particularly below zoom level 13.",
-        "example": {
-          "syntax": {
-            "method": ["GeoJSON geometry"],
-            "result": "number"
-          },
-          "value": ["distance", { "type": "Point", "coordinates": [0, 0]}]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["geojson"],
+              "output-type": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "geojson",
+              "type": "GeoJSON object"
+            }
+          ]
         },
+        "example": ["distance", {"type": "Point", "coordinates": [0, 0]}],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3952,14 +4967,31 @@
         }
       },
       "==": {
-        "doc": "Returns `true` if the input values are equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Add multiple geometries from one GeoJSON source](https://maplibre.org/maplibre-gl-js/docs/examples/multiple-geometries/)\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)\n - [Display buildings in 3D](https://maplibre.org/maplibre-gl-js/docs/examples/3d-buildings/)\n - [Filter symbols by toggling a list](https://maplibre.org/maplibre-gl-js/docs/examples/filter-markers/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "collator?"],
-            "result": "boolean"
-          },
-          "value": ["==", "$type", "Polygon"]
+        "doc": "Returns `true` if the input values are equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Add multiple geometries from one GeoJSON source](https://maplibre.org/maplibre-gl-js/docs/examples/multiple-geometries/)\n\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)\n\n - [Display buildings in 3D](https://maplibre.org/maplibre-gl-js/docs/examples/display-buildings-in-3d/)\n\n - [Filter symbols by toggling a list](https://maplibre.org/maplibre-gl-js/docs/examples/filter-symbols-by-toggling-a-list/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "input_2", "collator?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_1",
+              "type": "any"
+            },
+            {
+              "name": "input_2",
+              "type": "any"
+            },
+            {
+              "name": "collator",
+              "type": "collator",
+              "description": "Options for locale-dependent comparison."
+            }
+          ]
         },
+        "example": ["==", "$type", "Polygon"],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -3975,14 +5007,31 @@
         }
       },
       "!=": {
-        "doc": "Returns `true` if the input values are not equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "collator?"],
-            "result": "boolean"
-          },
-          "value": ["!=", "cluster", true]
+        "doc": "Returns `true` if the input values are not equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "input_2", "collator?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_1",
+              "type": "any"
+            },
+            {
+              "name": "input_2",
+              "type": "any"
+            },
+            {
+              "name": "collator",
+              "type": "collator",
+              "description": "Options for locale-dependent comparison."
+            }
+          ]
         },
+        "example": ["!=", "cluster", true],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -3999,13 +5048,34 @@
       },
       ">": {
         "doc": "Returns `true` if the first input is strictly greater than the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
-        "example": {
-            "syntax": {
-              "method": ["value", "value", "collator?"],
-              "result": "boolean"
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["string_1", "string_2", "collator?"],
+              "output-type": "boolean"
             },
-            "value": [">", ["get", "mag"], 2]
+            {
+              "parameters": ["number_1", "number_2", "collator?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "string_i",
+              "type": "string"
+            },
+            {
+              "name": "number_i",
+              "type": "number"
+            },
+            {
+              "name": "collator",
+              "type": "collator",
+              "description": "Options for locale-dependent comparison."
+            }
+          ]
         },
+        "example": [">", ["get", "mag"], 2],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4021,14 +5091,35 @@
         }
       },
       "<": {
-        "doc": "Returns `true` if the first input is strictly less than the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "collator?"],
-            "result": "boolean"
-          },
-          "value": ["<", ["get", "mag"], 2]
+        "doc": "Returns `true` if the first input is strictly less than the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["string_1", "string_2", "collator?"],
+              "output-type": "boolean"
+            },
+            {
+              "parameters": ["number_1", "number_2", "collator?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "string_i",
+              "type": "string"
+            },
+            {
+              "name": "number_i",
+              "type": "number"
+            },
+            {
+              "name": "collator",
+              "type": "collator",
+              "description": "Options for locale-dependent comparison."
+            }
+          ]
         },
+        "example": ["<", ["get", "mag"], 2],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4044,14 +5135,35 @@
         }
       },
       ">=": {
-        "doc": "Returns `true` if the first input is greater than or equal to the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "collator?"],
-            "result": "boolean"
-          },
-          "value": [">=", ["get", "mag"], 6]
+        "doc": "Returns `true` if the first input is greater than or equal to the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["string_1", "string_2", "collator?"],
+              "output-type": "boolean"
+            },
+            {
+              "parameters": ["number_1", "number_2", "collator?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "string_i",
+              "type": "string"
+            },
+            {
+              "name": "number_i",
+              "type": "number"
+            },
+            {
+              "name": "collator",
+              "type": "collator",
+              "description": "Options for locale-dependent comparison."
+            }
+          ]
         },
+        "example": [">=", ["get", "mag"], 6],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4068,13 +5180,34 @@
       },
       "<=": {
         "doc": "Returns `true` if the first input is less than or equal to the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
-        "example": {
-            "syntax": {
-              "method": ["value", "value", "collator?"],
-              "result": "boolean"
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["string_1", "string_2", "collator?"],
+              "output-type": "boolean"
             },
-            "value": ["<=", ["get", "mag"], 6]
+            {
+              "parameters": ["number_1", "number_2", "collator?"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "string_i",
+              "type": "string"
+            },
+            {
+              "name": "number_i",
+              "type": "number"
+            },
+            {
+              "name": "collator",
+              "type": "collator",
+              "description": "Options for locale-dependent comparison."
+            }
+          ]
         },
+        "example": ["<=", ["get", "mag"], 6],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4090,14 +5223,22 @@
         }
       },
       "all": {
-        "doc": "Returns `true` if all the inputs are `true`, `false` otherwise. The inputs are evaluated in order, and evaluation is short-circuiting: once an input expression evaluates to `false`, the result is `false` and no further input expressions are evaluated.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
-        "example": {
-          "syntax": {
-            "method": ["boolean", "boolean", "..."],
-            "result": "boolean"
-          },
-          "value": ["all", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]]
+        "doc": "Returns `true` if all the inputs are `true`, `false` otherwise. The inputs are evaluated in order, and evaluation is short-circuiting: once an input expression evaluates to `false`, the result is `false` and no further input expressions are evaluated.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "boolean"
+            }
+          ]
         },
+        "example": ["all", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4109,13 +5250,21 @@
       },
       "any": {
         "doc": "Returns `true` if any of the inputs are `true`, `false` otherwise. The inputs are evaluated in order, and evaluation is short-circuiting: once an input expression evaluates to `true`, the result is `true` and no further input expressions are evaluated.",
-        "example": {
-          "syntax": {
-            "method": ["boolean", "boolean", "..."],
-            "result": "boolean"
-          },
-          "value": ["any", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "boolean"
+            }
+          ]
         },
+        "example": ["any", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4126,14 +5275,22 @@
         }
       },
       "!": {
-        "doc": "Logical negation. Returns `true` if the input is `false`, and `false` if the input is `true`.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)",
-        "example": {
-          "syntax": {
-            "method": ["value", "value", "collator?"],
-            "result": "boolean"
-          },
-          "value": ["!", ["has", "point_count"]]
+        "doc": "Logical negation. Returns `true` if the input is `false`, and `false` if the input is `true`.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/create-and-style-clusters/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "boolean"
+            }
+          ]
         },
+        "example": ["!", ["has", "point_count"]],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4144,14 +5301,22 @@
         }
       },
       "within": {
-        "doc": "Returns `true` if the evaluated feature is fully contained inside a boundary of the input geometry, `false` otherwise. The input value can be a valid GeoJSON of type `Polygon`, `MultiPolygon`, `Feature`, or `FeatureCollection`. Supported features for evaluation:\n- `Point`: Returns `false` if a point is on the boundary or falls outside the boundary.\n- `LineString`: Returns `false` if any part of a line falls outside the boundary, the line intersects the boundary, or a line's endpoint is on the boundary.",
-        "example": {
-          "syntax": {
-            "method": ["GeoJSON geometry"],
-            "result": "boolean"
-          },
-          "value": ["within", {"type": "Polygon","coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]]}]
+        "doc": "Returns `true` if the evaluated feature is fully contained inside a boundary of the input geometry, `false` otherwise. The input value can be a valid GeoJSON of type `Polygon`, `MultiPolygon`, `Feature`, or `FeatureCollection`. Supported features for evaluation:\n\n- `Point`: Returns `false` if a point is on the boundary or falls outside the boundary.\n\n- `LineString`: Returns `false` if any part of a line falls outside the boundary, the line intersects the boundary, or a line's endpoint is on the boundary.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["geojson"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "geojson",
+              "type": "GeoJSON object"
+            }
+          ]
         },
+        "example": ["within", {"type": "Polygon", "coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]]}],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4162,31 +5327,48 @@
         }
       },
       "is-supported-script": {
-        "doc": "Returns `true` if the input string is expected to render legibly. Returns `false` if the input string contains sections that cannot be rendered without potential loss of meaning (e.g. Indic scripts that require complex text shaping, or right-to-left scripts if the the `mapbox-gl-rtl-text` plugin is not in use in MapLibre GL JS).",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "boolean"
-          },
-          "value": ["is-supported-script", "दिल्ली"]
+        "doc": "Returns `true` if the input string is expected to render legibly. Returns `false` if the input string contains sections that cannot be rendered without potential loss of meaning (e.g. Indic scripts that require complex text shaping, or right-to-left scripts if the `mapbox-gl-rtl-text` plugin is not in use in MapLibre GL JS).",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "boolean"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            }
+          ]
         },
+        "example": ["is-supported-script", "दिल्ली"],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
-            "android": "6.6.0"
+            "android": "6.6.0",
+            "ios": "supported"
           }
         }
       },
       "upcase": {
         "doc": "Returns the input string converted to uppercase. Follows the Unicode Default Case Conversion algorithm and the locale-insensitive case mappings in the Unicode Character Database.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "string"
-          },
-          "value": ["upcase", ["get", "name"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            }
+          ]
         },
+        "example": ["upcase", ["get", "name"]],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -4198,13 +5380,21 @@
       },
       "downcase": {
         "doc": "Returns the input string converted to lowercase. Follows the Unicode Default Case Conversion algorithm and the locale-insensitive case mappings in the Unicode Character Database.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)",
-        "example": {
-          "syntax": {
-            "method": ["string"],
-            "result": "string"
-          },
-          "value": ["downcase", ["get", "name"]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            }
+          ]
         },
+        "example": ["downcase", ["get", "name"]],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -4215,14 +5405,22 @@
         }
       },
       "concat": {
-        "doc": "Returns a `string` consisting of the concatenation of the inputs. Each input is converted to a string as if by `to-string`.\n\n - [Add a generated icon to the map](https://maplibre.org/maplibre-gl-js/docs/examples/add-image-missing-generated/)\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)\n - [Variable label placement](https://maplibre.org/maplibre-gl-js/docs/examples/variable-label-placement/)",
-        "example": {
-          "syntax": {
-            "method": ["string", "string", "..."],
-            "result": "string"
-          },
-          "value": ["concat", "square-rgb-", ["get", "color"]]
+        "doc": "Returns a `string` consisting of the concatenation of the inputs. Each input is converted to a string as if by `to-string`.\n\n - [Add a generated icon to the map](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-generated-icon-to-the-map/)\n\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-time-slider/)\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)\n\n - [Variable label placement](https://maplibre.org/maplibre-gl-js/docs/examples/variable-label-placement/)",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input_1", "...", "input_n"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input_i",
+              "type": "any"
+            }
+          ]
         },
+        "example": ["concat", "square-rgb-", ["get", "color"]],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -4234,16 +5432,24 @@
       },
       "resolved-locale": {
         "doc": "Returns the IETF language tag of the locale being used by the provided `collator`. This can be used to determine the default system locale, or to determine if a requested locale was successfully loaded.",
-        "example": {
-          "syntax": {
-            "method": ["collator"],
-            "result": "string"
-          },
-          "value": ["resolved-locale", [
-            "collator",
-            {"case-sensitive": true, "diacritic-sensitive": false, "locale": "de"}
-          ]]
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["collator"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "collator",
+              "type": "collator"
+            }
+          ]
         },
+        "example": ["resolved-locale", [
+          "collator",
+          {"case-sensitive": true, "diacritic-sensitive": false, "locale": "de"}
+        ]],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -4442,7 +5648,7 @@
         ]
       },
       "transition": true,
-      "doc": "How to blend the the sky color and the horizon color. Where 1 is blending the color at the middle of the sky and 0 is not blending at all and using the sky color only."
+      "doc": "How to blend the sky color and the horizon color. Where 1 is blending the color at the middle of the sky and 0 is not blending at all and using the sky color only."
     },
     "atmosphere-blend": {
       "type": "number",
@@ -4467,7 +5673,9 @@
       "required": true,
       "sdk-support": {
         "basic functionality": {
-          "js": "2.2.0"
+          "js": "2.2.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/252",
+          "android": "https://github.com/maplibre/maplibre-native/issues/252"
         }
       }
     },
@@ -4478,23 +5686,25 @@
       "default": 1.0,
       "sdk-support": {
         "basic functionality": {
-          "js": "2.2.0"
+          "js": "2.2.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/252",
+          "android": "https://github.com/maplibre/maplibre-native/issues/252"
         }
       }
     }
   },
   "projection": {
     "type": {
-      "type": "enum",
-      "doc": "The projection type.",
+      "type": "projectionDefinition",
+      "doc": "The projection definition type. Can be specified as a string, a transition state, or an expression.",
       "default": "mercator",
-      "values": {
-        "mercator": {
-          "doc": "The Mercator projection."
-        },
-        "globe": {
-          "doc": "The globe projection."
-        }
+      "property-type": "data-constant",
+      "transition": false,
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
       }
     }
   },
@@ -4507,6 +5717,7 @@
     "paint_symbol",
     "paint_raster",
     "paint_hillshade",
+    "paint_color-relief",
     "paint_background"
   ],
   "paint_fill": {
@@ -4911,7 +6122,8 @@
       "sdk-support": {
         "basic functionality": {
           "js": "0.50.0",
-          "ios": "4.7.0"
+          "ios": "4.7.0",
+          "android": "7.0.0"
         }
       },
       "expression": {
@@ -5159,7 +6371,7 @@
     "line-dasharray": {
       "type": "array",
       "value": "number",
-      "doc": "Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels.",
+      "doc": "Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Zoom-dependent expressions will be evaluated only at integer zoom levels. The only way to create an array value is using `[\"literal\", [...]]`; arrays cannot be read from or derived from feature properties.",
       "minimum": 0,
       "transition": true,
       "units": "line widths",
@@ -5174,15 +6386,20 @@
           "android": "2.0.1",
           "ios": "2.0.0"
         },
-        "data-driven styling": {}
+        "data-driven styling": {
+          "js": "5.8.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/744",
+          "android": "https://github.com/maplibre/maplibre-native/issues/744"
+        }
       },
       "expression": {
         "interpolated": false,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "cross-faded"
+      "property-type": "cross-faded-data-driven"
     },
     "line-pattern": {
       "type": "resolvedImage",
@@ -5795,7 +7012,7 @@
       "minimum": 0,
       "transition": true,
       "units": "pixels",
-      "doc": "Distance of halo to the icon outline. \nThe unit is in pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.",
+      "doc": "Distance of halo to the icon outline. \n\nThe unit is in pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.",
       "requires": [
         "icon-image"
       ],
@@ -6316,17 +7533,49 @@
   },
   "paint_hillshade": {
     "hillshade-illumination-direction": {
-      "type": "number",
+      "type": "numberArray",
       "default": 335,
       "minimum": 0,
       "maximum": 359,
-      "doc": "The direction of the light source used to generate the hillshading with 0 as the top of the viewport if `hillshade-illumination-anchor` is set to `viewport` and due north if `hillshade-illumination-anchor` is set to `map`.",
+      "doc": "The direction of the light source(s) used to generate the hillshading with 0 as the top of the viewport if `hillshade-illumination-anchor` is set to `viewport` and due north if `hillshade-illumination-anchor` is set to `map`. Only when `hillshade-method` is set to `multidirectional` can you specify multiple light sources.",
       "transition": false,
       "sdk-support": {
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "multidirectional": {
+          "js": "5.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "hillshade-illumination-altitude": {
+      "type": "numberArray",
+      "default": 45,
+      "minimum": 0,
+      "maximum": 90,
+      "doc": "The altitude of the light source(s) used to generate the hillshading with 0 as sunset and 90 as noon. Only when `hillshade-method` is set to `multidirectional` can you specify multiple light sources.",
+      "transition": false,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+        },
+        "multidirectional": {
+          "js": "5.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
         }
       },
       "expression": {
@@ -6387,15 +7636,20 @@
       "property-type": "data-constant"
     },
     "hillshade-shadow-color": {
-      "type": "color",
+      "type": "colorArray",
       "default": "#000000",
-      "doc": "The shading color of areas that face away from the light source.",
+      "doc": "The shading color of areas that face away from the light source(s). Only when `hillshade-method` is set to `multidirectional` can you specify multiple light sources.",
       "transition": true,
       "sdk-support": {
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "multidirectional": {
+          "js": "5.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
         }
       },
       "expression": {
@@ -6407,15 +7661,20 @@
       "property-type": "data-constant"
     },
     "hillshade-highlight-color": {
-      "type": "color",
+      "type": "colorArray",
       "default": "#FFFFFF",
-      "doc": "The shading color of areas that faces towards the light source.",
+      "doc": "The shading color of areas that faces towards the light source(s). Only when `hillshade-method` is set to `multidirectional` can you specify multiple light sources.",
       "transition": true,
       "sdk-support": {
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "multidirectional": {
+          "js": "5.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
         }
       },
       "expression": {
@@ -6445,6 +7704,93 @@
         ]
       },
       "property-type": "data-constant"
+    },
+    "hillshade-method": {
+      "type": "enum",
+      "values": {
+        "standard": {
+          "doc": "The legacy hillshade method."
+        },
+        "basic": {
+          "doc": "Basic hillshade. Uses a simple physics model where the reflected light intensity is proportional to the cosine of the angle between the incident light and the surface normal. Similar to GDAL's `gdaldem` default algorithm."
+        },
+        "combined": {
+          "doc": "Hillshade algorithm whose intensity scales with slope. Similar to GDAL's `gdaldem` with `-combined` option."
+        },
+        "igor": {
+          "doc": "Hillshade algorithm which tries to minimize effects on other map features beneath. Similar to GDAL's `gdaldem` with `-igor` option."
+        },
+        "multidirectional": {
+          "doc": "Hillshade with multiple illumination directions. Uses the basic hillshade model with multiple independent light sources."
+        }
+      },
+      "default": "standard",
+      "doc": "The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    }
+  },
+  "paint_color-relief": {
+    "color-relief-opacity": {
+      "type": "number",
+      "default": 1,
+      "minimum": 0,
+      "maximum": 1,
+      "doc": "The opacity at which the color-relief will be drawn.",
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3408",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "color-relief-color": {
+      "type": "color",
+      "doc": "Defines the color of each pixel based on its elevation. Should be an expression that uses `[\"elevation\"]` as input.",
+      "example": [
+        "interpolate",
+        ["linear"],
+        ["elevation"],
+        0, "black",
+        8849, "white"
+      ],
+      "transition": false,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3408",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+        },
+        "data-driven styling": {}
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "elevation"
+        ]
+      },
+      "property-type": "color-ramp"
     }
   },
   "paint_background": {
