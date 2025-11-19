@@ -405,7 +405,7 @@ MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
         return nil;
     }
 
-    if (options.showsLogo) {
+    if (options.showsLogo && logoImage) {
         [logoImage drawInRect:logoImageRect];
     }
 
