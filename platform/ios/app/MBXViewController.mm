@@ -27,6 +27,7 @@
 #import "PluginLayerExample.h"
 #import "PluginLayerExampleMetalRendering.h"
 #import "MLNPluginStyleLayer.h"
+#import "PluginProtocolExample.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
@@ -281,7 +282,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     [self.mapView addPluginLayerType:[PluginLayerExample class]];
     [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
-
+    [self.mapView addPluginProtocolHandler:[PluginProtocolExample class]];
+    
 }
 
 - (void)viewDidLoad
@@ -2334,6 +2336,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     self.styleURLs = [NSMutableArray array];
 
 
+    /// This is hte same style as above but copied locally and the three instances of the metal plug-in layer added to the style
+    /// Look for "type": "plugin-layer-metal-rendering" in the PluginLayerTestStyle.json for an example of how the layer is defined
+    [self.styleNames addObject:@"MapLibre Basic - Local With Plugin Loader"];
+    NSURL *pluginstyleurl = [NSURL URLWithString:@"pluginProtocol://PluginLayerTestStyle.json"];
+    [self.styleURLs addObject:pluginstyleurl];
 
 
     /// Style that does not require an `apiKey` nor any further configuration
