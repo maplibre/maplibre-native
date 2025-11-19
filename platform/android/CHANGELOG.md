@@ -4,6 +4,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 10.3.6
+
+### 🐞 Bug fixes
+
+- Use deprecated readParcelable on Tiramisu to avoid crash ([#1276](https://github.com/maplibre/maplibre-native/issues/1276)).
+
 ## 10.3.5
 
 ### ✨ Features and improvements
