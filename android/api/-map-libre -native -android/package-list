@@ -1195,6 +1195,7 @@ $dokka.location:org.maplibre.android.maps/MapLibreMap/setAllowConcurrentMultiple
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setCameraPosition/#org.maplibre.android.camera.CameraPosition/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-camera-position.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setDebugActive/#boolean/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-debug-active.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setFocalBearing/#double#float#float#long/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-focal-bearing.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/setFrustumOffset/#android.graphics.RectF/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-frustum-offset.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setGesturesManager/#org.maplibre.android.gestures.AndroidGesturesManager#boolean#boolean/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-gestures-manager.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setInfoWindowAdapter/#org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-info-window-adapter.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setLatLngBoundsForCameraTarget/#org.maplibre.android.geometry.LatLngBounds/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-lat-lng-bounds-for-camera-target.html
@@ -3245,6 +3246,12 @@ $dokka.location:org.maplibre.android.utils/MathUtils/clamp/#double#double#double
 $dokka.location:org.maplibre.android.utils/MathUtils/clamp/#float#float#float/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-math-utils/clamp.html
 $dokka.location:org.maplibre.android.utils/MathUtils/normalize/#double#double#double#double#double/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-math-utils/normalize.html
 $dokka.location:org.maplibre.android.utils/MathUtils/wrap/#double#double#double/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-math-utils/wrap.html
+$dokka.location:org.maplibre.android.utils/PlatformUtils///PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-platform-utils/index.html
+$dokka.location:org.maplibre.android.utils/PlatformUtils/PlatformUtils/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-platform-utils/-platform-utils.html
+$dokka.location:org.maplibre.android.utils/PlatformUtils/isAndroid/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-platform-utils/is-android.html
+$dokka.location:org.maplibre.android.utils/PlatformUtils/isJUnit/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-platform-utils/is-j-unit.html
+$dokka.location:org.maplibre.android.utils/PlatformUtils/isRobolectric/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-platform-utils/is-robolectric.html
+$dokka.location:org.maplibre.android.utils/PlatformUtils/isTest/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-platform-utils/is-test.html
 $dokka.location:org.maplibre.android.utils/ThreadUtils///PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-thread-utils/index.html
 $dokka.location:org.maplibre.android.utils/ThreadUtils/ThreadUtils/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-thread-utils/-thread-utils.html
 $dokka.location:org.maplibre.android.utils/ThreadUtils/checkThread/#java.lang.String/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.utils/-thread-utils/check-thread.html
