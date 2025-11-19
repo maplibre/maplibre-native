@@ -48,6 +48,14 @@ enum class HillshadeIlluminationAnchorType : bool {
     Viewport
 };
 
+enum class HillshadeMethodType : uint8_t {
+    Standard,
+    Basic,
+    Combined,
+    Igor,
+    Multidirectional
+};
+
 enum class TranslateAnchorType : bool {
     Map,
     Viewport

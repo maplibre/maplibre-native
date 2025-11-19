@@ -49,24 +49,14 @@ struct IlluminationProperties {
 };
 
 // Convert style properties to illumination properties
-// This handles the case where properties can be single values or arrays
 IlluminationProperties getIlluminationProperties(const HillshadePaintProperties::PossiblyEvaluated& evaluated) {
     IlluminationProperties props;
     
-    // Get the values from evaluated properties
-    // For now, these are single values - you'll need to update your property definitions
-    // to support arrays when you implement that part
-    float direction = evaluated.get<HillshadeIlluminationDirection>();
-    float altitude = evaluated.get<HillshadeIlluminationAltitude>();
-    Color highlight = evaluated.get<HillshadeHighlightColor>();
-    Color shadow = evaluated.get<HillshadeShadowColor>();
-    
-    // For now, create single-element vectors
-    // When you add array support, these will already be vectors
-    std::vector<float> directions = {direction};
-    std::vector<float> altitudes = {altitude};
-    std::vector<Color> highlights = {highlight};
-    std::vector<Color> shadows = {shadow};
+    // Get the values from evaluated properties (these are now vectors)
+    std::vector<float> directions = evaluated.get<HillshadeIlluminationDirection>();
+    std::vector<float> altitudes = evaluated.get<HillshadeIlluminationAltitude>();
+    std::vector<Color> highlights = evaluated.get<HillshadeHighlightColor>();
+    std::vector<Color> shadows = evaluated.get<HillshadeShadowColor>();
     
     // Find the maximum length to ensure all arrays are the same size
     size_t maxLength = std::max({
