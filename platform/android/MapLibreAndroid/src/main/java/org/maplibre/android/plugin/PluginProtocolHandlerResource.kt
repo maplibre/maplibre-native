@@ -2,7 +2,7 @@ package org.maplibre.android.plugin
 
 class PluginProtocolHandlerResource {
 
-    enum class PluginProtocolHandlerResourceKind {
+    enum class Kind {
         Unknown,
         Style,
         Source,
@@ -13,20 +13,20 @@ class PluginProtocolHandlerResource {
         Image
     };
 
-    enum class PluginProtocolHandlerResourceLoadingMethod {
+    enum class LoadingMethod {
         Unknown,
         CacheOnly,
         NetworkOnly,
         All
     };
 
-    var resourceURL: String = "Test";
+    var resourceURL: String = "";
 
     var kind: Int = 0;
 
-    var resourceKind: PluginProtocolHandlerResourceKind = PluginProtocolHandlerResourceKind.Unknown;
+    var resourceKind: Kind = Kind.Unknown;
 
-    var loadingMethod: PluginProtocolHandlerResourceLoadingMethod = PluginProtocolHandlerResourceLoadingMethod.Unknown;
+    var loadingMethod: LoadingMethod = LoadingMethod.Unknown;
 
     var tileData: TileData? = null;
 

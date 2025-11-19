@@ -6,20 +6,10 @@ public class PluginFileSource {
 
     public boolean canRequestResource(PluginProtocolHandlerResource resource) {
 
-        if (protocolHandler.canRequestResource(resource)) {
-            return true;
-        }
-        return false;
+        return protocolHandler.canRequestResource(resource);
 
     }
-/*
-    public boolean canRequestResource() {
-        if (protocolHandler.canRequestResource(resource)) {
-            return true;
-        }
-        return false;
-    }
-*/
+
     public PluginProtocolHandlerResponse requestResource(PluginProtocolHandlerResource resource) {
         PluginProtocolHandlerResponse response = protocolHandler.requestResource(resource);
         return response;

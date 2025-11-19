@@ -80,7 +80,7 @@ void PluginFileSource::setOnRequestResourceFunction(OnRequestResource requestFun
 PluginFileSource::PluginFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : impl(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
-          "LocalFileSource",
+          "PluginFileSource",
           resourceOptions.clone(),
           clientOptions.clone())) {}
 
