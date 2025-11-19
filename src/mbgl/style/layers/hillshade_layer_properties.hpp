@@ -24,28 +24,38 @@ struct HillshadeExaggeration : PaintProperty<float> {
     static float defaultValue() { return 0.5f; }
 };
 
-struct HillshadeHighlightColor : PaintProperty<Color> {
-    static Color defaultValue() { return Color::white(); }
+struct HillshadeHighlightColor : PaintProperty<std::vector<Color>> {
+    static std::vector<Color> defaultValue() { return {Color::white()}; }
+};
+
+struct HillshadeIlluminationAltitude : PaintProperty<std::vector<float>> {
+    static std::vector<float> defaultValue() { return {45.f}; }
 };
 
 struct HillshadeIlluminationAnchor : PaintProperty<HillshadeIlluminationAnchorType> {
     static HillshadeIlluminationAnchorType defaultValue() { return HillshadeIlluminationAnchorType::Viewport; }
 };
 
-struct HillshadeIlluminationDirection : PaintProperty<float> {
-    static float defaultValue() { return 335.f; }
+struct HillshadeIlluminationDirection : PaintProperty<std::vector<float>> {
+    static std::vector<float> defaultValue() { return {335.f}; }
 };
 
-struct HillshadeShadowColor : PaintProperty<Color> {
-    static Color defaultValue() { return Color::black(); }
+struct HillshadeMethod : PaintProperty<HillshadeMethodType> {
+    static HillshadeMethodType defaultValue() { return HillshadeMethodType::Standard; }
+};
+
+struct HillshadeShadowColor : PaintProperty<std::vector<Color>> {
+    static std::vector<Color> defaultValue() { return {Color::black()}; }
 };
 
 class HillshadePaintProperties : public Properties<
     HillshadeAccentColor,
     HillshadeExaggeration,
     HillshadeHighlightColor,
+    HillshadeIlluminationAltitude,
     HillshadeIlluminationAnchor,
     HillshadeIlluminationDirection,
+    HillshadeMethod,
     HillshadeShadowColor
 > {};
 
