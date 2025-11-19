@@ -87,6 +87,39 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
     return session;
 }
 
+- (NSMutableURLRequest *)willSendRequest:(NSMutableURLRequest *)request {
+
+    if ([self.delegate respondsToSelector:@selector(willSendRequest:)]) {
+        return [self.delegate willSendRequest:request];
+    }
+
+    return request;
+
+}
+
+- (MLNInternalNetworkResponse *)didReceiveResponse:(MLNInternalNetworkResponse *)response {
+
+    if ([self.delegate respondsToSelector:@selector(didReceiveResponse:)]) {
+
+        MLNNetworkResponse *tempResponse = [MLNNetworkResponse responseWithData:response.data
+                                                                    urlResponse:response.response
+                                                                          error:response.error];
+        if (tempResponse) {
+            MLNInternalNetworkResponse *internalResponse = [MLNInternalNetworkResponse responseWithData:tempResponse.data
+                                                                                            urlResponse:tempResponse.response
+                                                                                                  error:tempResponse.error];
+            return internalResponse;
+        } else {
+            return nil;
+        }
+
+    }
+
+    return response;
+
+}
+
+
 - (NSURLSessionConfiguration *)sessionConfiguration {
     NSURLSessionConfiguration *sessionConfig = nil;
     @synchronized (self) {

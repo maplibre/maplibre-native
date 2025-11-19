@@ -102,8 +102,8 @@ jobs:
         variant:
           - impl: dawn
             name: Dawn
-          # - impl: wgpu
-          #   name: wgpu-native
+          - impl: wgpu
+            name: wgpu
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
@@ -134,7 +134,17 @@ jobs:
       - name: Build targets
         run: |
           cmake --build build-macos-webgpu-${{ matrix.variant.impl }} --target \
-            mbgl-render-test-runner
+            mbgl-render-test-runner \
+            mbgl-expression-test \
+            mbgl-test-runner
+
+      - name: Run unit tests
+        id: unit_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/mbgl-test-runner --gtest_filter=-Map.StyleNetworkErrorRetry:LocalGlyphRasterizer.PingFang:LocalGlyphRasterizer.PingFangWithBoldInStyle:LocalGlyphRasterizer.PingFangSemibold:Map.Offline
+
+      - name: Run expression tests
+        id: expression_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/expression-test/mbgl-expression-test
 
       - name: Prepare render test output directory
         run: mkdir -p metrics/macos-webgpu-${{ matrix.variant.impl }}

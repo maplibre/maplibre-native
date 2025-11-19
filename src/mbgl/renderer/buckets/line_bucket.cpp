@@ -54,6 +54,10 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
+    // Ignore empty coordinates.
+    if (coordinates.empty()) {
+        return;
+    }
     gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
         LineBucket::layoutVertex,
@@ -79,7 +83,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     const std::size_t first = [&coordinates, &len] {
         std::size_t i = 0;
         // If the line has duplicate vertices at the start, adjust index to remove them.
-        while (i < len - 1 && coordinates[i] == coordinates[i + 1]) {
+        while (i + 1 < len && coordinates[i] == coordinates[i + 1]) {
             i++;
         }
         return i;
@@ -102,17 +106,16 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         return;
     }
 
-    const auto& props = feature.getProperties();
-    auto clip_start_it = props.find("mapbox_clip_start");
-    auto clip_end_it = props.find("mapbox_clip_end");
-    if (clip_start_it != props.end() && clip_end_it != props.end()) {
+    const auto clip_start = feature.getValue("mapbox_clip_start");
+    const auto clip_end = feature.getValue("mapbox_clip_end");
+    if (clip_start && clip_end) {
         double total_length = 0.0;
         for (std::size_t i = first; i < len - 1; ++i) {
             total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
         }
 
         options.clipDistances = gfx::PolylineGeneratorDistances{
-            *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
+            *numericValue<double>(*clip_start), *numericValue<double>(*clip_end), total_length};
     }
 
     options.joinType = layout.evaluate<LineJoin>(zoom, feature, canonical);

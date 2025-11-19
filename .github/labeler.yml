@@ -40,6 +40,7 @@ build:
     - '**/*.cmake'
     - '**/BUILD.bazel'
     - '**/*.bzl'
+    - CMakePresets.json
 OpenGL:
 - changed-files:
   - any-glob-to-any-file:
