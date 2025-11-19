@@ -93,9 +93,8 @@ void testGenInit() {
     testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     const auto input = std::vector<int>{1, 2, 3};
-    const auto map = TinyUnorderedMap<int, int, Threshold>{input.begin(), input.end(), [](const auto& x) {
-                                                               return std::make_pair(x, 4 - x);
-                                                           }};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{
+        input.begin(), input.end(), [](const auto& x) { return std::make_pair(x, 4 - x); }};
 
     EXPECT_EQ(3, map.size());
     EXPECT_EQ(3, map[1]);
