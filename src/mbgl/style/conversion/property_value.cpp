@@ -62,19 +62,20 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
 }
 
 template <>
-std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(const Convertible& value,
-                                                                             Error& error) const {
-    using namespace mbgl::style::expression;
-    // The expression::ValueConverter<T> is used for the conversion logic.
-    auto result = expression::ValueConverter<std::vector<Color>>::fromExpressionValue(
-        convert::toExpressionValue(value));
+struct Converter<std::vector<Color>> {
+    std::optional<std::vector<Color>> operator()(const Convertible& value, Error& error) const {
+        using namespace mbgl::style::expression;
+        // The expression::ValueConverter<T> is used for the conversion logic.
+        auto result = expression::ValueConverter<std::vector<Color>>::fromExpressionValue(
+            convert::toExpressionValue(value));
 
-    if (!result) {
-        error.message = "Value must be a color or an array of colors.";
+        if (!result) {
+            error.message = "Value must be a color or an array of colors.";
+        }
+
+        return result;
     }
-
-    return result;
-}
+};
 
 template std::optional<PropertyValue<bool>> Converter<PropertyValue<bool>>::operator()(conversion::Convertible const&,
                                                                                        conversion::Error&,
