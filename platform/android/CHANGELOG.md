@@ -4,7 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-## 10.3.6
+## 10.3.7
 
 ### 🐞 Bug fixes
 

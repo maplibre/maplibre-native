@@ -130,7 +130,7 @@ jobs:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           release_name: ${{steps.prepare_release.outputs.version_tag }}
           body_path: ${{ steps.prepare_release.outputs.release_notes }}
-          draft: false
+          draft: true
           prerelease: false
 
       - name: Upload aar
