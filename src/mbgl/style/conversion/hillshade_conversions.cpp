@@ -1,3 +1,4 @@
+// File: src/mbgl/style/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/value.hpp>
@@ -9,11 +10,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-// ============================================================================
-// Expression Value Converters
-// ============================================================================
-
-// ValueConverter for std::vector<float> (numberArray)
+// ValueConverter for std::vector<float>
 template <>
 std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpressionValue(const Value& value) {
     if (value.is<std::vector<Value>>()) {
@@ -21,27 +18,20 @@ std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpres
         std::vector<float> result;
         result.reserve(values.size());
         for (const auto& v : values) {
-            if (!v.is<double>() && !v.is<int64_t>() && !v.is<uint64_t>()) {
-                return std::nullopt;
-            }
-            result.push_back(v.is<double>() ? static_cast<float>(v.get<double>())
-                           : v.is<int64_t>() ? static_cast<float>(v.get<int64_t>())
-                           : static_cast<float>(v.get<uint64_t>()));
+            if (!v.is<double>()) return std::nullopt;
+            result.push_back(static_cast<float>(v.get<double>()));
         }
         return result;
     }
     
-    if (value.is<double>() || value.is<int64_t>() || value.is<uint64_t>()) {
-        float f = value.is<double>() ? static_cast<float>(value.get<double>())
-                : value.is<int64_t>() ? static_cast<float>(value.get<int64_t>())
-                : static_cast<float>(value.get<uint64_t>());
-        return std::vector<float>{f};
+    if (value.is<double>()) {
+        return std::vector<float>{static_cast<float>(value.get<double>())};
     }
     
     return std::nullopt;
 }
 
-// ValueConverter for std::vector<Color> (colorArray)
+// ValueConverter for std::vector<Color>
 template <>
 std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpressionValue(const Value& value) {
     if (value.is<std::vector<Value>>()) {
@@ -50,27 +40,21 @@ std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpres
         result.reserve(values.size());
         for (const auto& v : values) {
             auto color = ValueConverter<Color>::fromExpressionValue(v);
-            if (!color) {
-                return std::nullopt;
-            }
+            if (!color) return std::nullopt;
             result.push_back(*color);
         }
         return result;
     }
     
     auto color = ValueConverter<Color>::fromExpressionValue(value);
-    if (!color) {
-        return std::nullopt;
-    }
+    if (!color) return std::nullopt;
     return std::vector<Color>{*color};
 }
 
-// ValueConverter for HillshadeMethodType enum
+// ValueConverter for HillshadeMethodType
 template <>
 std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpressionValue(const Value& value) {
-    if (!value.is<std::string>()) {
-        return std::nullopt;
-    }
+    if (!value.is<std::string>()) return std::nullopt;
     
     const auto& str = value.get<std::string>();
     if (str == "standard") return HillshadeMethodType::Standard;
@@ -84,10 +68,6 @@ std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpr
 
 } // namespace expression
 } // namespace style
-
-// ============================================================================
-// Enum String Conversions
-// ============================================================================
 
 // Enum toString for HillshadeMethodType
 template <>
