@@ -37,69 +37,6 @@ inline const HillshadeLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>
     return static_cast<const HillshadeLayer::Impl&>(*impl);
 }
 
-// Structure to hold processed illumination properties
-struct IlluminationProperties {
-    std::vector<float> directionRadians;
-    std::vector<float> altitudeRadians;
-    std::vector<Color> shadowColors;
-    std::vector<Color> highlightColors;
-    
-    size_t numSources() const {
-        return directionRadians.size();
-    }
-};
-
-// Convert style properties to illumination properties
-IlluminationProperties getIlluminationProperties(const HillshadePaintProperties::PossiblyEvaluated& evaluated) {
-    IlluminationProperties props;
-    
-    // Get the values from evaluated properties (these are now vectors)
-    std::vector<float> directions = evaluated.get<HillshadeIlluminationDirection>();
-    std::vector<float> altitudes = evaluated.get<HillshadeIlluminationAltitude>();
-    std::vector<Color> highlights = evaluated.get<HillshadeHighlightColor>();
-    std::vector<Color> shadows = evaluated.get<HillshadeShadowColor>();
-    
-    // Find the maximum length to ensure all arrays are the same size
-    size_t maxLength = std::max({
-        directions.size(),
-        altitudes.size(),
-        highlights.size(),
-        shadows.size()
-    });
-    
-    // Ensure we don't exceed the maximum supported
-    maxLength = std::min(maxLength, static_cast<size_t>(shaders::MAX_ILLUMINATION_SOURCES));
-    
-    // Pad shorter arrays by repeating the last element
-    auto padArray = [maxLength](auto& arr) {
-        if (arr.empty()) arr.push_back(typename std::decay<decltype(arr)>::type::value_type{});
-        while (arr.size() < maxLength) {
-            arr.push_back(arr.back());
-        }
-    };
-    
-    padArray(directions);
-    padArray(altitudes);
-    padArray(highlights);
-    padArray(shadows);
-    
-    // Convert degrees to radians
-    props.directionRadians.reserve(directions.size());
-    for (float deg : directions) {
-        props.directionRadians.push_back(util::deg2radf(deg));
-    }
-    
-    props.altitudeRadians.reserve(altitudes.size());
-    for (float deg : altitudes) {
-        props.altitudeRadians.push_back(util::deg2radf(deg));
-    }
-    
-    props.shadowColors = std::move(shadows);
-    props.highlightColors = std::move(highlights);
-    
-    return props;
-}
-
 } // namespace
 
 RenderHillshadeLayer::RenderHillshadeLayer(Immutable<style::HillshadeLayer::Impl> _impl)
