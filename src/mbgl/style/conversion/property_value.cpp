@@ -2,6 +2,7 @@
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/conversion/rotation.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+#include <mbgl/style/conversion.hpp>
 
 namespace mbgl {
 namespace style {
@@ -58,6 +59,21 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
         error.message = "expected a literal expression";
         return std::nullopt;
     }
+}
+
+template <>
+std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(const Convertible& value,
+                                                                             Error& error) const {
+    using namespace mbgl::style::expression;
+    // The expression::ValueConverter<T> is used for the conversion logic.
+    auto result = expression::ValueConverter<std::vector<Color>>::fromExpressionValue(
+        convert::toExpressionValue(value));
+
+    if (!result) {
+        error.message = "Value must be a color or an array of colors.";
+    }
+
+    return result;
 }
 
 template std::optional<PropertyValue<bool>> Converter<PropertyValue<bool>>::operator()(conversion::Convertible const&,
