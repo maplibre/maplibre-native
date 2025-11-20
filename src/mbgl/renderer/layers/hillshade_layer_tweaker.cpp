@@ -201,7 +201,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #endif
             .latrange = getLatRange(tileID),
             .exaggeration = evaluated.get<HillshadeExaggeration>(),
-            .method = methodToInt(evaluated.get<HillshadeMethod>()),
+            .method = methodToInt(evaluated.get<style::HillshadeMethod>()),
             .num_lights = static_cast<int32_t>(illumination.numSources()),
             .pad0 = 0.0f,
             .pad1 = 0.0f,
