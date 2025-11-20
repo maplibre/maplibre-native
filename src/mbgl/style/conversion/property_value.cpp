@@ -67,7 +67,7 @@ struct Converter<std::vector<Color>> {
         using namespace mbgl::style::expression;
         // The expression::ValueConverter<T> is used for the conversion logic.
         auto result = expression::ValueConverter<std::vector<Color>>::fromExpressionValue(
-            convert::toExpressionValue(value));
+            toExpressionValue(value))
 
         if (!result) {
             error.message = "Value must be a color or an array of colors.";
