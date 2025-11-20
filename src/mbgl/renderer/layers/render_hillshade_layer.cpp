@@ -18,6 +18,7 @@
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
