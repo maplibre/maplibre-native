@@ -78,7 +78,7 @@ BufferResource::BufferResource(
         const auto frameCount = backend.getMaxFrames();
         totalSize = bufferWindowSize * frameCount;
 
-        bufferWindowVersions = std::vector<VersionType>(frameCount, 0);
+        bufferWindowVersions = std::vector<VersionType>(frameCount, VersionType{});
     }
 
     const auto bufferInfo = vk::BufferCreateInfo()
