@@ -3,6 +3,8 @@
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/geo.hpp>
+#include <mbgl/annotation/annotation.hpp>
+#include <mbgl/style/image.hpp>
 
 #include <exception>
 #include <memory>
@@ -62,6 +64,9 @@ public:
 
     void setPadding(const mbgl::EdgeInsets&);
     mbgl::EdgeInsets getPadding() const;
+
+    void addAnnotationImage(std::unique_ptr<style::Image>);
+    void addAnnotation(const Annotation&);
 
     style::Style& getStyle();
     const style::Style& getStyle() const;
