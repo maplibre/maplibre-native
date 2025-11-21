@@ -288,11 +288,11 @@ private:
 
 - (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations {
     MLNLogDebug(@"Adding: %lu annotations", annotations.count);
-    
+
     if (!_annotationsToInstall) {
         _annotationsToInstall = [NSMutableArray array];
     }
-    
+
     [_annotationsToInstall addObjectsFromArray:annotations];
 }
 
@@ -300,11 +300,11 @@ private:
 {
     MLNLogDebug(@"install: %lu annotations", annotations.count);
     if ( ! annotations) return;
-    
+
     for (id <MLNAnnotation> annotation in annotations)
     {
         MLNAssert([annotation conformsToProtocol:@protocol(MLNAnnotation)], @"annotation should conform to MLNAnnotation");
-        
+
         if ([annotation isKindOfClass:[MLNMultiPoint class]])
         {
             MLNMultiPoint *multiPoint = (MLNMultiPoint *)annotation;
@@ -319,7 +319,7 @@ private:
             NSString *symbolName;
             NSValue *annotationValue = [NSValue valueWithNonretainedObject:annotation];
             MLNAnnotationImage *annotationImage;
-            
+
             if ([self.delegate respondsToSelector:@selector(mapSnapshotter:imageForAnnotation:)]) {
                 annotationImage = [self.delegate mapSnapshotter:self imageForAnnotation:annotation];
             }
@@ -327,16 +327,16 @@ private:
                 // doesn't support no icon point for snapshotter
                 continue;
             }
-            
+
             symbolName = annotationImage.styleIconIdentifier;
             if ( ! symbolName)
             {
                 symbolName = [MLNSnapshotterAnnotationSpritePrefix stringByAppendingString:annotationImage.reuseIdentifier];
                 annotationImage.styleIconIdentifier = symbolName;
             }
-            
+
             [self installAnnotationImage:annotationImage];
-            
+
             _mbglMapSnapshotter->addAnnotation(mbgl::SymbolAnnotation {
                 MLNPointFromLocationCoordinate2D(annotation.coordinate),
                 symbolName.UTF8String
@@ -835,7 +835,7 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
     if (!MLNCoordinateBoundsIsEmpty(options.coordinateBounds)) {
         _mbglMapSnapshotter->setRegion(MLNLatLngBoundsFromCoordinateBounds(options.coordinateBounds));
     }
-    
+
     // Annotations
     if (_annotationsToInstall) {
         [self installAnnotations:_annotationsToInstall];
@@ -863,7 +863,7 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
         MLNColor *color = [self.delegate mapSnapshotter:self strokeColorForShapeAnnotation:annotation];
         return color.mgl_color;
     }
-    
+
     return mbgl::Color::white();
 }
 
@@ -881,7 +881,7 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
     if ([self.delegate respondsToSelector:@selector(mapSnapshotter:lineWidthForPolylineAnnotation:)]) {
         return [self.delegate mapSnapshotter:self lineWidthForPolylineAnnotation:annotation];
     }
-    
+
     return 3.0;
 }
 

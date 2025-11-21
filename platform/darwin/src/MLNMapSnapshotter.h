@@ -14,7 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MLNMapSnapshotterDelegate;
 @protocol MLNAnnotation;
 
-
 /**
  An overlay that is placed within a ``MLNMapSnapshot``.
  To access this object, use ``MLNMapSnapshotter/startWithOverlayHandler:completionHandler:``.
@@ -256,7 +255,6 @@ MLN_EXPORT
  */
 - (instancetype)initWithOptions:(MLNMapSnapshotOptions *)options NS_DESIGNATED_INITIALIZER;
 
-
 /**
  Adds an annotation to the snapshotter.
 
@@ -288,7 +286,6 @@ MLN_EXPORT
     individual annotation object.
  */
 - (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
-
 
 /**
  Starts the snapshot creation and executes the specified block with the result.
@@ -408,7 +405,6 @@ MLN_EXPORT
 
 - (void)mapSnapshotter:(MLNMapSnapshotter *)snapshotter didFailLoadingImageNamed:(NSString *)name;
 
-
 /**
  Returns an annotation image object to mark the given point annotation object on
  the map.
@@ -426,7 +422,7 @@ MLN_EXPORT
     `nil` if you want to display the default marker image or an annotation view.
 */
 - (nullable MLNAnnotationImage *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
-                      imageForAnnotation:(id<MLNAnnotation>)annotation;
+                             imageForAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Returns the alpha value to use when rendering a shape annotation.
@@ -443,7 +439,8 @@ MLN_EXPORT
  @param annotation The annotation being rendered.
  @return An alpha value between `0` and `1.0`.
  */
-- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter alphaForShapeAnnotation:(MLNShape *)annotation;
+- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+    alphaForShapeAnnotation:(MLNShape *)annotation;
 
 /**
  Returns the color to use when rendering the outline of a shape annotation.
@@ -461,7 +458,8 @@ MLN_EXPORT
  TODO: Annotation models, learn how to modify the outline color of an
  ``MLNShape`` object that has been added to your map as an annotation.
  */
-- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter strokeColorForShapeAnnotation:(MLNShape *)annotation;
+- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+    strokeColorForShapeAnnotation:(MLNShape *)annotation;
 
 /**
  Returns the color to use when rendering the fill of a polygon annotation.
@@ -479,7 +477,8 @@ MLN_EXPORT
  TODO: Add a polygon annotation, learn how to modify the color of a an
  ``MLNPolygon`` at runtime.
  */
-- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
+- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+    fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
 
 /**
  Returns the line width in points to use when rendering the outline of a
@@ -495,7 +494,8 @@ MLN_EXPORT
  TODO: Add a line annotation from GeoJSON, learn how to modify the
  line width of an ``MLNPolylineFeature`` on your map.
  */
-- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
+- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+    lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
 
 @end
 

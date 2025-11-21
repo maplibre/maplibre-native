@@ -209,14 +209,10 @@ public:
     }
 
     mbgl::EdgeInsets getPadding() const { return regionInsets; }
-    
-    void addAnnotationImage(std::unique_ptr<style::Image> image) {
-        map.addAnnotationImage(std::move(image));
-    }
-    
-    void addAnnotation(const Annotation& annotation) {
-        map.addAnnotation(annotation);
-    }
+
+    void addAnnotationImage(std::unique_ptr<style::Image> image) { map.addAnnotationImage(std::move(image)); }
+
+    void addAnnotation(const Annotation& annotation) { map.addAnnotation(annotation); }
 
     void snapshot(MapSnapshotter::Callback callback) {
         if (!callback) {

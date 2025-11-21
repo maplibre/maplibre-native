@@ -361,8 +361,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         }
     }];
-    
-    
+
+
     // Use MLNMapSnapshotter to capture a snapshot image of the map after it's loaded
     CGRect snapshotRect = CGRectMake(0, 0, 300, 300);
     MLNMapCamera *camera = [MLNMapCamera cameraLookingAtCenterCoordinate:CLLocationCoordinate2DMake(0, 0) altitude:100000 pitch:0 heading:0];
@@ -373,7 +373,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     _snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
     _snapshotter.delegate = self;
-    
+
     CLLocationCoordinate2D polylineCoordinates[] = {
         CLLocationCoordinate2DMake(-50, -100),
         CLLocationCoordinate2DMake(-50, 100),
@@ -381,11 +381,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     };
     MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates count:3];
     [_snapshotter addAnnotation:polyline];
-    
+
     MLNPointAnnotation *pointAnnotaiton = [[MLNPointAnnotation alloc] init];
     pointAnnotaiton.coordinate = CLLocationCoordinate2DMake(30, -0);
     [_snapshotter addAnnotation:pointAnnotaiton];
-    
+
     CLLocationCoordinate2D polygonCoordinates[] = {
         CLLocationCoordinate2DMake(0, -50),
         CLLocationCoordinate2DMake(0, 50),
@@ -410,8 +410,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         }];
     });
-    
-    
+
+
 }
 
 

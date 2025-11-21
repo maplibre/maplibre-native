@@ -64,7 +64,7 @@ public:
 
     void setPadding(const mbgl::EdgeInsets&);
     mbgl::EdgeInsets getPadding() const;
-    
+
     void addAnnotationImage(std::unique_ptr<style::Image>);
     void addAnnotation(const Annotation&);
 
