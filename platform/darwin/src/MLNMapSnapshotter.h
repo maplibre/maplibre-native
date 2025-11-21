@@ -6,7 +6,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MLNAnnotationImage;
+@class MLNShape;
+@class MLNPolyline;
+@class MLNPolygon;
+
 @protocol MLNMapSnapshotterDelegate;
+@protocol MLNAnnotation;
+
 
 /**
  An overlay that is placed within a ``MLNMapSnapshot``.
@@ -249,6 +256,40 @@ MLN_EXPORT
  */
 - (instancetype)initWithOptions:(MLNMapSnapshotOptions *)options NS_DESIGNATED_INITIALIZER;
 
+
+/**
+ Adds an annotation to the snapshotter.
+
+ > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, ``MLNMultiPolyline``, and
+    ``MLNPointCollection`` objects cannot be added to the map view at this time.
+    Any multipoint, multipolyline, multipolygon, shape or point collection
+    object that is specified is silently ignored.
+
+ @param annotation The annotation object to add to the receiver. This object
+    must conform to the ``MLNAnnotation`` protocol. The map view retains the
+    annotation object.
+
+ #### Related examples
+ - TODO: add a line annotation from GeoJSON.
+ */
+- (void)addAnnotation:(id<MLNAnnotation>)annotation;
+
+/**
+ Adds an array of annotations to the snapshotter.
+
+ > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
+    cannot be added to the map view at this time. Nor can ``MLNMultiPoint``
+    objects that are not instances of ``MLNPolyline`` or ``MLNPolyline``. Any
+    multipoint, multipolyline, multipolygon, or shape collection objects that
+    are specified are silently ignored.
+
+ @param annotations An array of annotation objects. Each object in the array
+    must conform to the ``MLNAnnotation`` protocol. The map view retains each
+    individual annotation object.
+ */
+- (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
+
+
 /**
  Starts the snapshot creation and executes the specified block with the result.
 
@@ -366,6 +407,95 @@ MLN_EXPORT
 - (void)mapSnapshotter:(MLNMapSnapshotter *)snapshotter didFinishLoadingStyle:(MLNStyle *)style;
 
 - (void)mapSnapshotter:(MLNMapSnapshotter *)snapshotter didFailLoadingImageNamed:(NSString *)name;
+
+
+/**
+ Returns an annotation image object to mark the given point annotation object on
+ the map.
+
+ Implement this method to mark a point annotation with a static image.
+
+ Static annotation images use less memory and draw more quickly than annotation
+ views. On the other hand, annotation views are compatible with UIKit, Core
+ Animation, and other Cocoa Touch frameworks.
+
+ @param snapshotter The snapshotter that has just loaded a style.
+ @param annotation The object representing the annotation that is about to be
+    displayed.
+ @return The annotation image object to display for the given annotation or
+    `nil` if you want to display the default marker image or an annotation view.
+*/
+- (nullable MLNAnnotationImage *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+                      imageForAnnotation:(id<MLNAnnotation>)annotation;
+
+/**
+ Returns the alpha value to use when rendering a shape annotation.
+
+ A value of `0.0` results in a completely transparent shape. A value of `1.0`,
+ the default, results in a completely opaque shape.
+
+ This method sets the opacity of an entire shape, inclusive of its stroke and
+ fill. To independently set the values for stroke or fill, specify an alpha
+ component in the color returned by `-mapSnapshotter:strokeColorForShapeAnnotation:` or
+ `-mapSnapshotter:fillColorForPolygonAnnotation:`.
+
+ @param snapshotter The snapshotter that has just loaded a style.
+ @param annotation The annotation being rendered.
+ @return An alpha value between `0` and `1.0`.
+ */
+- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter alphaForShapeAnnotation:(MLNShape *)annotation;
+
+/**
+ Returns the color to use when rendering the outline of a shape annotation.
+
+ The default stroke color is UIColor.whiteColor.
+
+ Opacity may be set by specifying an alpha component. The default alpha value is
+ `1.0` and results in a completely opaque stroke.
+
+ @param snapshotter The snapshotter that has just loaded a style.
+ @param annotation The annotation being rendered.
+ @return A color to use for the shape outline.
+
+ #### Related examples
+ TODO: Annotation models, learn how to modify the outline color of an
+ ``MLNShape`` object that has been added to your map as an annotation.
+ */
+- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter strokeColorForShapeAnnotation:(MLNShape *)annotation;
+
+/**
+ Returns the color to use when rendering the fill of a polygon annotation.
+
+ The default fill color is the UIColor.whiteColor.
+
+ Opacity may be set by specifying an alpha component. The default alpha value is
+ `1.0` and results in a completely opaque shape.
+
+ @param snapshotter The snapshotter that has just loaded a style.
+ @param annotation The annotation being rendered.
+ @return The polygon’s interior fill color.
+
+ #### Related examples
+ TODO: Add a polygon annotation, learn how to modify the color of a an
+ ``MLNPolygon`` at runtime.
+ */
+- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
+
+/**
+ Returns the line width in points to use when rendering the outline of a
+ polyline annotation.
+
+ By default, the polyline is outlined with a line `3.0` points wide.
+
+ @param snapshotter The snapshotter that has just loaded a style.
+ @param annotation The annotation being rendered.
+ @return A line width for the polyline, measured in points.
+
+ #### Related examples
+ TODO: Add a line annotation from GeoJSON, learn how to modify the
+ line width of an ``MLNPolylineFeature`` on your map.
+ */
+- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
 
 @end
 
