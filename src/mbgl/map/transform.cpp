@@ -432,6 +432,14 @@ void Transform::setMaxPitch(const double maxPitch) {
     state.setMaxPitch(util::deg2rad(maxPitch));
 }
 
+void Transform::setFrustumOffset(const EdgeInsets& frustumOffset) {
+    state.setFrustumOffset(frustumOffset);
+}
+
+EdgeInsets Transform::getFrustumOffset() {
+    return state.getFrustumOffset();
+}
+
 // MARK: - Bearing
 
 void Transform::rotateBy(const ScreenCoordinate& first,
