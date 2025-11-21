@@ -26,9 +26,10 @@ enum FileSourceType : uint8_t {
     Network,
     Mbtiles,
     Pmtiles,
-    ResourceLoader ///< %Resource loader acts as a proxy and has logic
+    ResourceLoader, ///< %Resource loader acts as a proxy and has logic
     /// for request delegation to Asset, Cache, and other
     /// file sources.
+    Custom // These are the plugin file resource types
 };
 
 // TODO: Rename to ResourceProvider to avoid confusion with

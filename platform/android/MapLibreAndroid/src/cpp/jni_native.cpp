@@ -37,6 +37,7 @@
 #include "native_map_options.hpp"
 #include "rendering_stats.hpp"
 #include "util/tile_server_options.hpp"
+#include "plugin/plugin_file_source.hpp"
 #ifndef MBGL_MODULE_OFFLINE_DISABLE
 #include "offline/offline_manager.hpp"
 #include "offline/offline_region.hpp"
@@ -106,6 +107,11 @@ void registerNatives(JavaVM* vm) {
     Marker::registerNative(env);
     Polygon::registerNative(env);
     Polyline::registerNative(env);
+
+    // Plugins
+    PluginProtocolHandlerResource::registerNative(env);
+    PluginProtocolHandlerResponse::registerNative(env);
+    PluginFileSource::registerNative(env);
 
     // Map
     MapRenderer::registerNative(env);

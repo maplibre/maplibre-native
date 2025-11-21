@@ -25,7 +25,7 @@
 #include "style/light.hpp"
 #include "native_map_options.hpp"
 #include "bitmap.hpp"
-
+#include "plugin/plugin_file_source.hpp"
 #include <exception>
 #include <string>
 #include <jni.h>
@@ -327,6 +327,10 @@ public:
 
     void setFrustumOffset(JNIEnv&, const jni::Object<RectF>&);
 
+    // Plugins
+    void addPluginFileSource(JNIEnv &,
+                             const jni::Object<mbgl::android::PluginFileSource>&);
+
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
     void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
@@ -368,6 +372,9 @@ private:
 
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;
+
+    // List of plugin file source
+    std::vector<std::shared_ptr<mbgl::android::PluginFileSourceContainer>> _pluginFileSources;
 };
 
 } // namespace android
