@@ -161,9 +161,9 @@ jobs:
 
       - name: Prepare MavenCentral release
         env:
-          GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
+          GPG_KEY_CONTENTS: ${{ secrets.SIGNING_PRIVATE_KEY }}
         run: |
-          echo "${GPG_KEY_CONTENTS}" | base64 -d > signing-key.gpg
+          echo "${SIGNING_PRIVATE_KEY}" | base64 -d > signing-key.gpg
         shell: bash
 
       - name: Publish to MavenCentral
