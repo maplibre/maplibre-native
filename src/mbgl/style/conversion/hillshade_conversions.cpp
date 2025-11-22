@@ -1,28 +1,12 @@
 // File: src/mbgl/style/conversion/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/expression/value.hpp>
-#include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
 
 namespace mbgl {
 namespace style {
-namespace conversion {
-
-// ValueTypeToExpressionType specializations
-template <>
-expression::type::Type valueTypeToExpressionType<std::vector<Color>>() {
-    return expression::type::Array(expression::type::Color);
-}
-
-template <>
-expression::type::Type valueTypeToExpressionType<HillshadeMethodType>() {
-    return expression::type::String;
-}
-
-} // namespace conversion
-
 namespace expression {
 
 // ValueConverter for std::vector<float>
