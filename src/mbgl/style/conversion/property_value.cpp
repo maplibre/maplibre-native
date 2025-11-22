@@ -64,25 +64,23 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
 template <>
 struct Converter<std::vector<Color>> {
     std::optional<std::vector<Color>> operator()(const Convertible& value, Error& error) const {
-        using namespace mbgl::style::expression;
+        if (!isArray(value)) {
+            // Try single color
+            auto color = convert<Color>(value, error);
+            if (!color) return std::nullopt;
+            return std::vector<Color>{*color};
+        }
         
-        // Use the general conversion utility to convert the raw JSON/Convertible
-        // into the expression system's Value type. This avoids the constructor error.
-        auto converted_value = mbgl::style::conversion::convert<Value>(value, error);
-
-        if (!converted_value) {
-            // Error is set inside convert<Value>
-            return std::nullopt;
+        std::vector<Color> result;
+        auto length = arrayLength(value);
+        result.reserve(length);
+        
+        for (std::size_t i = 0; i < length; ++i) {
+            auto color = convert<Color>(arrayMember(value, i), error);
+            if (!color) return std::nullopt;
+            result.push_back(*color);
         }
-
-        // Use the ValueConverter specialization (which should be in hillshade_conversions.cpp)
-        // to convert the expression::Value into the required C++ type.
-        auto result = expression::ValueConverter<std::vector<Color>>::fromExpressionValue(*converted_value);
-
-        if (!result) {
-            error.message = "Value must be a color or an array of colors.";
-        }
-
+        
         return result;
     }
 };
