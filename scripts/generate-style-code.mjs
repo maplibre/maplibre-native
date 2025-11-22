@@ -250,8 +250,9 @@ function defaultValue(property) {
     return `{${formatNumber({type: 'number'}, property.default)}}`;
   case 'colorArray':
     // Default is a single color string, parse it and wrap in a vector
-    const colorArray = parseCSSColor(property.default).join(', ');
-    switch (colorArray) {
+    const colorArray = parseCSSColor(property.default);
+    const colorStr = colorArray.join(', ');
+    switch (colorStr) {
       case '0, 0, 0, 0':
         return '{{}}';
       case '0, 0, 0, 1':
@@ -259,7 +260,7 @@ function defaultValue(property) {
       case '1, 1, 1, 1':
         return '{Color::white()}';
       default:
-        return `{{ ${colorArray} }}`;
+        return `{{Color{${colorStr}}}}`;
     }
   case 'formatted':
   case 'string':
