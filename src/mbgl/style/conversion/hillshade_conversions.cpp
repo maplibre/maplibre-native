@@ -12,13 +12,13 @@ namespace conversion {
 
 // ValueTypeToExpressionType specializations
 template <>
-type::Type valueTypeToExpressionType<std::vector<Color>>() {
-    return type::Array(type::Color); // Variable-length array of colors
+expression::type::Type valueTypeToExpressionType<std::vector<Color>>() {
+    return expression::type::Array(expression::type::Color);
 }
 
 template <>
-type::Type valueTypeToExpressionType<HillshadeMethodType>() {
-    return type::String;
+expression::type::Type valueTypeToExpressionType<HillshadeMethodType>() {
+    return expression::type::String;
 }
 
 } // namespace conversion
@@ -82,8 +82,9 @@ std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpr
 }
 
 } // namespace expression
+} // namespace style
 
-// Enum toString for HillshadeMethodType
+// Enum specializations at mbgl namespace level
 template <>
 const char* Enum<style::HillshadeMethodType>::toString(style::HillshadeMethodType t) {
     switch (t) {
@@ -106,5 +107,4 @@ std::optional<style::HillshadeMethodType> Enum<style::HillshadeMethodType>::toEn
     return std::nullopt;
 }
 
-} // namespace style
 } // namespace mbgl
