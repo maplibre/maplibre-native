@@ -647,7 +647,7 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
     }
     if (property == Property::LineDasharray) {
         Error error;
-        const auto& typedValue = convert<PropertyValue<std::vector<float>>>(value, error, false, false);
+        const auto& typedValue = convert<PropertyValue<std::vector<float>>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
