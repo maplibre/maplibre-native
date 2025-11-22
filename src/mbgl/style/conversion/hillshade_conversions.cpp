@@ -1,6 +1,5 @@
 // File: src/mbgl/style/conversion/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion/function.hpp>
 #include <mbgl/style/conversion/constant.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/type.hpp>
@@ -9,6 +8,30 @@
 #include <mbgl/util/enum.hpp>
 
 namespace mbgl {
+
+// Enum specializations FIRST (before they're used)
+template <>
+const char* Enum<style::HillshadeMethodType>::toString(style::HillshadeMethodType t) {
+    switch (t) {
+        case style::HillshadeMethodType::Standard: return "standard";
+        case style::HillshadeMethodType::Basic: return "basic";
+        case style::HillshadeMethodType::Combined: return "combined";
+        case style::HillshadeMethodType::Igor: return "igor";
+        case style::HillshadeMethodType::Multidirectional: return "multidirectional";
+    }
+    return "standard";
+}
+
+template <>
+std::optional<style::HillshadeMethodType> Enum<style::HillshadeMethodType>::toEnum(const std::string& s) {
+    if (s == "standard") return style::HillshadeMethodType::Standard;
+    if (s == "basic") return style::HillshadeMethodType::Basic;
+    if (s == "combined") return style::HillshadeMethodType::Combined;
+    if (s == "igor") return style::HillshadeMethodType::Igor;
+    if (s == "multidirectional") return style::HillshadeMethodType::Multidirectional;
+    return std::nullopt;
+}
+
 namespace style {
 namespace expression {
 
@@ -85,7 +108,7 @@ namespace conversion {
 template <>
 struct Converter<HillshadeMethodType> {
     std::optional<HillshadeMethodType> operator()(const Convertible& value, Error& error) const {
-        std::optional<std::string> string = toString(value);
+        std::optional<std::string> string = conversion::toString(value);
         if (!string) {
             error.message = "value must be a string";
             return std::nullopt;
@@ -101,37 +124,6 @@ struct Converter<HillshadeMethodType> {
     }
 };
 
-// Explicit instantiations for convertFunctionToExpression
-template std::optional<PropertyExpression<std::vector<Color>>> 
-convertFunctionToExpression<std::vector<Color>>(const Convertible&, Error&, bool);
-
-template std::optional<PropertyExpression<HillshadeMethodType>> 
-convertFunctionToExpression<HillshadeMethodType>(const Convertible&, Error&, bool);
-
 } // namespace conversion
 } // namespace style
-
-// Enum specializations
-template <>
-const char* Enum<style::HillshadeMethodType>::toString(style::HillshadeMethodType t) {
-    switch (t) {
-        case style::HillshadeMethodType::Standard: return "standard";
-        case style::HillshadeMethodType::Basic: return "basic";
-        case style::HillshadeMethodType::Combined: return "combined";
-        case style::HillshadeMethodType::Igor: return "igor";
-        case style::HillshadeMethodType::Multidirectional: return "multidirectional";
-    }
-    return "standard";
-}
-
-template <>
-std::optional<style::HillshadeMethodType> Enum<style::HillshadeMethodType>::toEnum(const std::string& s) {
-    if (s == "standard") return style::HillshadeMethodType::Standard;
-    if (s == "basic") return style::HillshadeMethodType::Basic;
-    if (s == "combined") return style::HillshadeMethodType::Combined;
-    if (s == "igor") return style::HillshadeMethodType::Igor;
-    if (s == "multidirectional") return style::HillshadeMethodType::Multidirectional;
-    return std::nullopt;
-}
-
 } // namespace mbgl
