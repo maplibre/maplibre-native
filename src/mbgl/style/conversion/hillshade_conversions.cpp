@@ -1,7 +1,8 @@
-// File: src/mbgl/style/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
+#include <mbgl/style/conversion/function.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/value.hpp>
+#include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
@@ -10,7 +11,18 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-// ValueConverter for std::vector<float>
+// ValueTypeToExpressionType specializations
+template <>
+type::Type valueTypeToExpressionType<std::vector<Color>>() {
+    return type::Array(type::Color, type::Value);
+}
+
+template <>
+type::Type valueTypeToExpressionType<HillshadeMethodType>() {
+    return type::String;
+}
+
+// ValueConverter specializations
 template <>
 std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpressionValue(const Value& value) {
     if (value.is<std::vector<Value>>()) {
@@ -31,7 +43,6 @@ std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpres
     return std::nullopt;
 }
 
-// ValueConverter for std::vector<Color>
 template <>
 std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpressionValue(const Value& value) {
     if (value.is<std::vector<Value>>()) {
@@ -51,7 +62,6 @@ std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpres
     return std::vector<Color>{*color};
 }
 
-// ValueConverter for HillshadeMethodType
 template <>
 std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpressionValue(const Value& value) {
     if (!value.is<std::string>()) return std::nullopt;
@@ -67,9 +77,41 @@ std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpr
 }
 
 } // namespace expression
+
+namespace conversion {
+
+// Converter for HillshadeMethodType
+template <>
+struct Converter<HillshadeMethodType> {
+    std::optional<HillshadeMethodType> operator()(const Convertible& value, Error& error) const {
+        if (!isString(value)) {
+            error.message = "value must be a string";
+            return std::nullopt;
+        }
+        
+        auto str = toString(value);
+        if (str == "standard") return HillshadeMethodType::Standard;
+        if (str == "basic") return HillshadeMethodType::Basic;
+        if (str == "combined") return HillshadeMethodType::Combined;
+        if (str == "igor") return HillshadeMethodType::Igor;
+        if (str == "multidirectional") return HillshadeMethodType::Multidirectional;
+        
+        error.message = "invalid hillshade-method value";
+        return std::nullopt;
+    }
+};
+
+// convertFunctionToExpression specializations
+template std::optional<PropertyExpression<std::vector<Color>>> 
+convertFunctionToExpression<std::vector<Color>>(const Convertible&, Error&, bool);
+
+template std::optional<PropertyExpression<HillshadeMethodType>> 
+convertFunctionToExpression<HillshadeMethodType>(const Convertible&, Error&, bool);
+
+} // namespace conversion
 } // namespace style
 
-// Enum toString for HillshadeMethodType
+// Enum toString/toEnum for HillshadeMethodType
 template <>
 const char* Enum<style::HillshadeMethodType>::toString(style::HillshadeMethodType t) {
     switch (t) {
