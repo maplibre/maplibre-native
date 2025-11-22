@@ -45,27 +45,6 @@ type::Type valueTypeToExpressionType<HillshadeMethodType>() {
     return type::String;
 }
 
-// ValueConverter specializations
-template <>
-std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpressionValue(const Value& value) {
-    if (value.is<std::vector<Value>>()) {
-        const auto& values = value.get<std::vector<Value>>();
-        std::vector<float> result;
-        result.reserve(values.size());
-        for (const auto& v : values) {
-            if (!v.is<double>()) return std::nullopt;
-            result.push_back(static_cast<float>(v.get<double>()));
-        }
-        return result;
-    }
-    
-    if (value.is<double>()) {
-        return std::vector<float>{static_cast<float>(value.get<double>())};
-    }
-    
-    return std::nullopt;
-}
-
 template <>
 std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpressionValue(const Value& value) {
     if (value.is<std::vector<Value>>()) {
