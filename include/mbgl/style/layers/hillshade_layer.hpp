@@ -33,11 +33,17 @@ public:
     void setHillshadeExaggerationTransition(const TransitionOptions&);
     TransitionOptions getHillshadeExaggerationTransition() const;
 
-    static PropertyValue<Color> getDefaultHillshadeHighlightColor();
-    const PropertyValue<Color>& getHillshadeHighlightColor() const;
-    void setHillshadeHighlightColor(const PropertyValue<Color>&);
+    static PropertyValue<std::vector<Color>> getDefaultHillshadeHighlightColor();
+    const PropertyValue<std::vector<Color>>& getHillshadeHighlightColor() const;
+    void setHillshadeHighlightColor(const PropertyValue<std::vector<Color>>&);
     void setHillshadeHighlightColorTransition(const TransitionOptions&);
     TransitionOptions getHillshadeHighlightColorTransition() const;
+
+    static PropertyValue<std::vector<float>> getDefaultHillshadeIlluminationAltitude();
+    const PropertyValue<std::vector<float>>& getHillshadeIlluminationAltitude() const;
+    void setHillshadeIlluminationAltitude(const PropertyValue<std::vector<float>>&);
+    void setHillshadeIlluminationAltitudeTransition(const TransitionOptions&);
+    TransitionOptions getHillshadeIlluminationAltitudeTransition() const;
 
     static PropertyValue<HillshadeIlluminationAnchorType> getDefaultHillshadeIlluminationAnchor();
     const PropertyValue<HillshadeIlluminationAnchorType>& getHillshadeIlluminationAnchor() const;
@@ -45,15 +51,21 @@ public:
     void setHillshadeIlluminationAnchorTransition(const TransitionOptions&);
     TransitionOptions getHillshadeIlluminationAnchorTransition() const;
 
-    static PropertyValue<float> getDefaultHillshadeIlluminationDirection();
-    const PropertyValue<float>& getHillshadeIlluminationDirection() const;
-    void setHillshadeIlluminationDirection(const PropertyValue<float>&);
+    static PropertyValue<std::vector<float>> getDefaultHillshadeIlluminationDirection();
+    const PropertyValue<std::vector<float>>& getHillshadeIlluminationDirection() const;
+    void setHillshadeIlluminationDirection(const PropertyValue<std::vector<float>>&);
     void setHillshadeIlluminationDirectionTransition(const TransitionOptions&);
     TransitionOptions getHillshadeIlluminationDirectionTransition() const;
 
-    static PropertyValue<Color> getDefaultHillshadeShadowColor();
-    const PropertyValue<Color>& getHillshadeShadowColor() const;
-    void setHillshadeShadowColor(const PropertyValue<Color>&);
+    static PropertyValue<HillshadeMethodType> getDefaultHillshadeMethod();
+    const PropertyValue<HillshadeMethodType>& getHillshadeMethod() const;
+    void setHillshadeMethod(const PropertyValue<HillshadeMethodType>&);
+    void setHillshadeMethodTransition(const TransitionOptions&);
+    TransitionOptions getHillshadeMethodTransition() const;
+
+    static PropertyValue<std::vector<Color>> getDefaultHillshadeShadowColor();
+    const PropertyValue<std::vector<Color>>& getHillshadeShadowColor() const;
+    void setHillshadeShadowColor(const PropertyValue<std::vector<Color>>&);
     void setHillshadeShadowColorTransition(const TransitionOptions&);
     TransitionOptions getHillshadeShadowColorTransition() const;
 
