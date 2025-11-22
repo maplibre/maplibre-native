@@ -44,21 +44,5 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 176);
 
-// Keep these for the prepare shader (unchanged)
-struct alignas(16) HillshadePrepareTilePropsUBO {
-    /*  0 */ std::array<float, 4> unpack;
-    /* 16 */ std::array<float, 2> dimension;
-    /* 24 */ float zoom;
-    /* 28 */ float maxzoom;
-    /* 32 */
-};
-static_assert(sizeof(HillshadePrepareTilePropsUBO) == 32);
-
-struct alignas(16) HillshadePrepareDrawableUBO {
-    /*  0 */ std::array<float, 4 * 4> matrix;
-    /* 64 */
-};
-static_assert(sizeof(HillshadePrepareDrawableUBO) == 64);
-
 } // namespace shaders
 } // namespace mbgl
