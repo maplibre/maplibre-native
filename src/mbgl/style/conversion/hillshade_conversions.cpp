@@ -109,13 +109,13 @@ namespace conversion {
 template <>
 struct Converter<HillshadeMethodType> {
     std::optional<HillshadeMethodType> operator()(const Convertible& value, Error& error) const {
-        if (!isString(value)) {
+        std::optional<std::string> string = toString(value);
+        if (!string) {
             error.message = "value must be a string";
             return std::nullopt;
         }
         
-        const std::string str = *toString(value);
-        std::optional<HillshadeMethodType> result = Enum<HillshadeMethodType>::toEnum(str);
+        std::optional<HillshadeMethodType> result = Enum<HillshadeMethodType>::toEnum(*string);
         if (!result) {
             error.message = "value must be a valid hillshade method";
             return std::nullopt;
