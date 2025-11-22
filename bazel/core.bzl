@@ -344,7 +344,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/conversion/position.cpp",
     "src/mbgl/style/conversion/property_value.cpp",
     "src/mbgl/style/conversion/hillshade_conversions.cpp",
-    "src/mbgl/style/conversion/color_relief_conversions.cpp",
     "src/mbgl/style/conversion/rotation.cpp",
     "src/mbgl/style/conversion/source.cpp",
     "src/mbgl/style/conversion/source_options.cpp",

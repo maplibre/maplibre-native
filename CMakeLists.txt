@@ -682,7 +682,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/hillshade_conversions.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/color_relief_conversions.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source_options.cpp
