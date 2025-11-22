@@ -1,7 +1,5 @@
 // File: src/mbgl/style/conversion/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/types.hpp>
@@ -10,7 +8,7 @@
 
 namespace mbgl {
 
-// Enum specializations FIRST (before they're used)
+// Enum specializations
 template <>
 const char* Enum<style::HillshadeMethodType>::toString(style::HillshadeMethodType t) {
     switch (t) {
@@ -102,29 +100,5 @@ std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpr
 }
 
 } // namespace expression
-
-namespace conversion {
-
-// Converter for HillshadeMethodType
-template <>
-struct Converter<HillshadeMethodType> {
-    std::optional<HillshadeMethodType> operator()(const Convertible& value, Error& error) const {
-        std::optional<std::string> string = toString(value);
-        if (!string) {
-            error.message = "value must be a string";
-            return std::nullopt;
-        }
-        
-        std::optional<HillshadeMethodType> result = Enum<HillshadeMethodType>::toEnum(*string);
-        if (!result) {
-            error.message = "value must be a valid hillshade method";
-            return std::nullopt;
-        }
-        
-        return *result;
-    }
-};
-
-} // namespace conversion
 } // namespace style
 } // namespace mbgl
