@@ -3,7 +3,6 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 #include <mbgl/style/layers/color_relief_layer_properties.hpp>
-#include <mbgl/gfx/texture.hpp>
 
 namespace mbgl {
 
