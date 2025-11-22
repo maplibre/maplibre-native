@@ -1,6 +1,5 @@
 // File: src/mbgl/style/conversion/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion/function.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/types.hpp>
@@ -101,16 +100,5 @@ std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpr
 }
 
 } // namespace expression
-
-namespace conversion {
-
-// Explicit instantiations for convertFunctionToExpression
-template std::optional<PropertyExpression<std::vector<Color>>> 
-convertFunctionToExpression<std::vector<Color>>(const Convertible&, Error&, bool);
-
-template std::optional<PropertyExpression<HillshadeMethodType>> 
-convertFunctionToExpression<HillshadeMethodType>(const Convertible&, Error&, bool);
-
-} // namespace conversion
 } // namespace style
 } // namespace mbgl
