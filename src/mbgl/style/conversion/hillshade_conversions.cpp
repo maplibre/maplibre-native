@@ -1,6 +1,7 @@
 // File: src/mbgl/style/conversion/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/conversion/constant.hpp>
+#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/types.hpp>
@@ -108,13 +109,13 @@ namespace conversion {
 template <>
 struct Converter<HillshadeMethodType> {
     std::optional<HillshadeMethodType> operator()(const Convertible& value, Error& error) const {
-        std::optional<std::string> string = toString(value);
-        if (!string) {
+        if (!isString(value)) {
             error.message = "value must be a string";
             return std::nullopt;
         }
         
-        std::optional<HillshadeMethodType> result = Enum<HillshadeMethodType>::toEnum(*string);
+        const std::string str = *toString(value);
+        std::optional<HillshadeMethodType> result = Enum<HillshadeMethodType>::toEnum(str);
         if (!result) {
             error.message = "value must be a valid hillshade method";
             return std::nullopt;
