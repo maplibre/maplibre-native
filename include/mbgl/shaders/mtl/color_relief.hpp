@@ -95,31 +95,31 @@ float4 getColorForElevation(float elevation,
     // Binary search for the correct elevation range
     int low = 0;
     int high = numStops - 1;
-    
+
     while (low < high) {
         int mid = (low + high) / 2;
-        float midElevation = getElevation(float2((float(mid) + 0.5) / float(numStops), 0.5), 
+        float midElevation = getElevation(float2((float(mid) + 0.5) / float(numStops), 0.5),
                                          elevationStops, stops_sampler, float4(1.0, 1.0, 1.0, 1.0));
-        
+
         if (elevation < midElevation) {
             high = mid;
         } else {
             low = mid + 1;
         }
     }
-    
+
     // Get the two surrounding stops
     int idx1 = max(low - 1, 0);
     int idx2 = min(low, numStops - 1);
-    
-    float elev1 = getElevation(float2((float(idx1) + 0.5) / float(numStops), 0.5), 
+
+    float elev1 = getElevation(float2((float(idx1) + 0.5) / float(numStops), 0.5),
                               elevationStops, stops_sampler, float4(1.0, 1.0, 1.0, 1.0));
-    float elev2 = getElevation(float2((float(idx2) + 0.5) / float(numStops), 0.5), 
+    float elev2 = getElevation(float2((float(idx2) + 0.5) / float(numStops), 0.5),
                               elevationStops, stops_sampler, float4(1.0, 1.0, 1.0, 1.0));
-    
+
     float4 color1 = colorStops.sample(stops_sampler, float2((float(idx1) + 0.5) / float(numStops), 0.5));
     float4 color2 = colorStops.sample(stops_sampler, float2((float(idx2) + 0.5) / float(numStops), 0.5));
-    
+
     // Interpolate between the two colors
     float t = (elev2 - elev1) > 0.0 ? clamp((elevation - elev1) / (elev2 - elev1), 0.0, 1.0) : 0.0;
     return mix(color1, color2, t);
@@ -142,17 +142,17 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Get elevation at this pixel
     float elevation = getElevation(in.pos, image, image_sampler, tileProps.unpack);
-    
+
     // Look up color from color ramp
-    float4 color = getColorForElevation(elevation, 
+    float4 color = getColorForElevation(elevation,
                                        tileProps.color_ramp_size,
                                        elevationStops,
                                        colorStops,
                                        stops_sampler);
-    
+
     // Apply opacity
     color.a *= props.opacity;
-    
+
     return half4(color);
 }
 )";

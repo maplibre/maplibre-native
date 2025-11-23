@@ -24,11 +24,11 @@ out vec2 v_pos;
 
 void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
-    
+
     highp vec2 epsilon = 1.0 / u_dimension;
     float scale = (u_dimension.x - 2.0) / u_dimension.x;
     v_pos = (a_pos / 8192.0) * scale + epsilon;
-    
+
     // Handle poles
     if (a_pos.y < -32767.5) v_pos.y = 0.0;
     if (a_pos.y > 32766.5) v_pos.y = 1.0;
@@ -73,13 +73,13 @@ float getElevationStop(int stop) {
 
 void main() {
     float el = getElevation(v_pos);
-    
+
     // Binary search for color stops
     int r = (u_color_ramp_size - 1);
     int l = 0;
     float el_l = getElevationStop(l);
     float el_r = getElevationStop(r);
-    
+
     while(r - l > 1) {
         int m = (r + l) / 2;
         float el_m = getElevationStop(m);
@@ -91,10 +91,10 @@ void main() {
             el_l = el_m;
         }
     }
-    
+
     float x = (float(l) + (el - el_l) / (el_r - el_l) + 0.5) / float(u_color_ramp_size);
     fragColor = u_opacity * texture(u_color_stops, vec2(x, 0.0));
-    
+
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
 #endif

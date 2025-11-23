@@ -94,7 +94,7 @@ void standard_hillshade(vec2 deriv)
 
 // Based on GDALHillshadeAlg(). (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L908)
 // GDAL's output ranges from black to white, and is gray in the middle.
-// The output of this function ranges from hillshade-shadow-color to hillshade-highlight-color, and 
+// The output of this function ranges from hillshade-shadow-color to hillshade-highlight-color, and
 // is transparent in the middle. To match GDAL's output, make hillshade-highlight-color white,
 // hillshade-shadow color black, and the background color gray.
 void basic_hillshade(vec2 deriv)
@@ -126,14 +126,14 @@ void multidirectional_hillshade(vec2 deriv)
     for(int i = 0; i < NUM_ILLUMINATION_SOURCES; i++)
     {
         if (i >= u_num_lights) break;
-        
+
         float cos_alt = cos(u_altitudes[i]);
         float sin_alt = sin(u_altitudes[i]);
         float cos_az = -cos(u_azimuths[i]);
         float sin_az = -sin(u_azimuths[i]);
         float cang = (sin_alt - (deriv.y*cos_az*cos_alt - deriv.x*sin_az*cos_alt)) / sqrt(1.0 + dot(deriv, deriv));
         float shade = clamp(cang, 0.0, 1.0);
-        
+
         if(shade > 0.5)
         {
             fragColor += u_highlights[i]*(2.0*shade - 1.0)/float(u_num_lights);
@@ -147,7 +147,7 @@ void multidirectional_hillshade(vec2 deriv)
 
 // Based on GDALHillshadeCombinedAlg(). (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L1084)
 // GDAL's version only calculates shading.
-// This version also adds highlighting. To match GDAL's output, make hillshade-highlight-color transparent. 
+// This version also adds highlighting. To match GDAL's output, make hillshade-highlight-color transparent.
 void combined_hillshade(vec2 deriv)
 {
     deriv = deriv * u_exaggeration * 2.0;
@@ -160,13 +160,13 @@ void combined_hillshade(vec2 deriv)
     cang = clamp(cang, 0.0, PI/2.0);
     float shade = cang* atan(length(deriv)) * 4.0/PI/PI;
     float highlight = (PI/2.0-cang)* atan(length(deriv)) * 4.0/PI/PI;
-    
+
     fragColor = u_shadows[0]*shade + u_highlights[0]*highlight;
 }
 
 // Based on GDALHillshadeIgorAlg() (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L849).
 // GDAL's version only calculates shading.
-// This version also adds highlighting. To match GDAL's output, make hillshade-highlight-color transparent. 
+// This version also adds highlighting. To match GDAL's output, make hillshade-highlight-color transparent.
 void igor_hillshade(vec2 deriv)
 {
     deriv = deriv * u_exaggeration * 2.0;
@@ -181,12 +181,12 @@ void igor_hillshade(vec2 deriv)
 
 void main() {
     vec4 pixel = texture(u_image, v_pos);
-    
+
     // We divide the slope by a scale factor based on the cosine of the pixel's approximate latitude
     // to account for mercator projection distortion. see #4807 for details
     float scaleFactor = cos(radians((u_latrange[0] - u_latrange[1]) * (1.0 - v_pos.y) + u_latrange[1]));
     vec2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
-    
+
     switch(u_method)
     {
         case BASIC:
