@@ -1,4 +1,5 @@
 #include <mbgl/renderer/layers/render_color_relief_layer.hpp>
+#include <mbgl/renderer/layers/color_relief_layer_tweaker.hpp>
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
@@ -10,6 +11,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/color_relief_layer_ubo.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
@@ -162,7 +164,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LayerTweaker>(getID(), evaluatedProperties);
+        layerTweaker = std::make_shared<ColorReliefLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
@@ -335,6 +337,24 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
+
+            // Set up tile properties UBO
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
+            shaders::ColorReliefTilePropsUBO tilePropsUBO;
+            
+            // DEM unpack vector (Mapbox Terrain RGB format)
+            tilePropsUBO.unpack = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+            
+            // Texture dimensions
+            const auto& demData = bucket.getDEMData();
+            tilePropsUBO.dimension = {{static_cast<float>(demData.dim), 
+                                       static_cast<float>(demData.dim)}};
+            
+            // Color ramp size
+            tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
+            tilePropsUBO.pad0 = 0.0f;
+            
+            drawableUniforms.set(idColorReliefTilePropsUBO, tilePropsUBO);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
