@@ -24,7 +24,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
     evaluatedPropsUBO.opacity = evaluated.get<style::ColorReliefOpacity>();
 
     auto& layerUniforms = context.mutableUniformBuffers();
-    layerUniforms.set(idColorReliefEvaluatedPropsUBO, evaluatedPropsUBO);
+    layerUniforms.createOrUpdate(idColorReliefEvaluatedPropsUBO, &evaluatedPropsUBO, context);
 
     // Update each drawable
     for (auto& drawable : layerGroup.getDrawables()) {
@@ -35,9 +35,10 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         const UnwrappedTileID tileID = drawable->getTileID()->toUnwrapped();
 
         // Update drawable UBO (transform matrix)
-        auto& drawableUniforms = drawable->mutableUniformBuffers();
         drawableUBO.matrix = parameters.matrixForTile(tileID);
-        drawableUniforms.set(idColorReliefDrawableUBO, drawableUBO);
+        
+        auto& drawableUniforms = drawable->mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idColorReliefDrawableUBO, &drawableUBO, context);
 
         // Tile props UBO is set during drawable creation, doesn't change per frame
     }

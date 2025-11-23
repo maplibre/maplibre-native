@@ -339,7 +339,6 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setLayerTweaker(layerTweaker);
 
             // Set up tile properties UBO
-            auto& drawableUniforms = drawable->mutableUniformBuffers();
             shaders::ColorReliefTilePropsUBO tilePropsUBO;
             
             // DEM unpack vector (Mapbox Terrain RGB format)
@@ -354,7 +353,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
             tilePropsUBO.pad0 = 0.0f;
             
-            drawableUniforms.set(idColorReliefTilePropsUBO, tilePropsUBO);
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
