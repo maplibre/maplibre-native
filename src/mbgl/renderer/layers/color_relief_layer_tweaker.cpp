@@ -36,7 +36,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
 
         // Update drawable UBO (transform matrix)
         drawableUBO.matrix = parameters.matrixForTile(tileID);
-        
+
         auto& drawableUniforms = drawable->mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idColorReliefDrawableUBO, &drawableUBO, context);
 

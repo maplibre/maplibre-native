@@ -15,7 +15,7 @@ public:
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
     ColorReliefPaintProperties::Transitionable paint;
-    
+
     DECLARE_LAYER_TYPE_INFO;
 };
 

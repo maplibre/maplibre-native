@@ -37,7 +37,7 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
     : RenderLayer(makeMutable<ColorReliefLayerProperties>(std::move(_impl))),
       unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
-    
+
     // Initialize color ramp textures
     colorRampSize = 256;
     elevationStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
@@ -58,12 +58,10 @@ void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parame
         staticImmutableCast<ColorReliefLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    passes = (properties->evaluated.get<style::ColorReliefOpacity>() > 0) 
-        ? RenderPass::Translucent
-        : RenderPass::None;
+    passes = (properties->evaluated.get<style::ColorReliefOpacity>() > 0) ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-    
+
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
@@ -84,7 +82,7 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 
 void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStops || !colorStops) return;
-    
+
     auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
     if (colorValue.isUndefined()) {
         colorValue = ColorReliefLayer::getDefaultColorReliefColor();
@@ -93,27 +91,27 @@ void RenderColorReliefLayer::updateColorRamp() {
     // TODO: Parse the expression to extract elevation/color pairs
     // For now, create a simple gradient from blue (low) to red (high)
     // This is a placeholder - you'll need to properly parse the expression
-    
+
     for (uint32_t i = 0; i < colorRampSize; ++i) {
         float t = static_cast<float>(i) / (colorRampSize - 1);
-        
+
         // Simple RGB encoding for elevation (Mapbox Terrain RGB format)
         // elevation = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)
         // For a range of -10000m to +8849m (approx -10000 to +18849), we need values 0 to 288490
         float elevation = -10000.0f + t * 18849.0f;
-        
+
         // Encode elevation in RGB format
         int elevInt = static_cast<int>((elevation + 10000.0f) * 10.0f);
         uint8_t r = (elevInt >> 16) & 0xFF;
         uint8_t g = (elevInt >> 8) & 0xFF;
         uint8_t b = elevInt & 0xFF;
         uint8_t a = 0; // Not used in unpacking
-        
+
         elevationStops->data[i * 4 + 0] = r;
         elevationStops->data[i * 4 + 1] = g;
         elevationStops->data[i * 4 + 2] = b;
         elevationStops->data[i * 4 + 3] = a;
-        
+
         // Simple color gradient: blue -> cyan -> green -> yellow -> red
         Color color;
         if (t < 0.25f) {
@@ -129,13 +127,13 @@ void RenderColorReliefLayer::updateColorRamp() {
             float localT = (t - 0.75f) / 0.25f;
             color = Color{1.0f, 1.0f - localT, 0.0f, 1.0f};
         }
-        
+
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
-    
+
     colorRampChanged = true;
 }
 
@@ -197,21 +195,17 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             elevationStopsTexture = context.createTexture2D();
         }
         elevationStopsTexture->setImage(elevationStops);
-        elevationStopsTexture->setSamplerConfiguration({
-            .filter = gfx::TextureFilterType::Linear,
-            .wrapU = gfx::TextureWrapType::Clamp,
-            .wrapV = gfx::TextureWrapType::Clamp
-        });
+        elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                        .wrapU = gfx::TextureWrapType::Clamp,
+                                                        .wrapV = gfx::TextureWrapType::Clamp});
 
         if (!colorStopsTexture) {
             colorStopsTexture = context.createTexture2D();
         }
         colorStopsTexture->setImage(colorStops);
-        colorStopsTexture->setSamplerConfiguration({
-            .filter = gfx::TextureFilterType::Linear,
-            .wrapU = gfx::TextureWrapType::Clamp,
-            .wrapV = gfx::TextureWrapType::Clamp
-        });
+        colorStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                    .wrapU = gfx::TextureWrapType::Clamp,
+                                                    .wrapV = gfx::TextureWrapType::Clamp});
 
         colorRampChanged = false;
     }
@@ -260,10 +254,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
                 if (const auto& attr = vertexAttrs->set(idColorReliefPosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
-                                         offsetof(HillshadeLayoutVertex, a1),
-                                         0,
-                                         sizeof(HillshadeLayoutVertex),
-                                         gfx::AttributeDataType::Short2);
+                                           offsetof(HillshadeLayoutVertex, a1),
+                                           0,
+                                           sizeof(HillshadeLayoutVertex),
+                                           gfx::AttributeDataType::Short2);
                 }
             }
             return vertexAttrs;
@@ -275,22 +269,20 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             drawable.updateVertexAttributes(buildVertexAttributes(),
-                                          vertices->elements(),
-                                          gfx::Triangles(),
-                                          std::move(indices),
-                                          segments->data(),
-                                          segments->size());
+                                            vertices->elements(),
+                                            gfx::Triangles(),
+                                            std::move(indices),
+                                            segments->data(),
+                                            segments->size());
 
             // Update textures
             std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
             demTexture->setImage(bucket.getDEMData().getImagePtr());
-            demTexture->setSamplerConfiguration({
-                .filter = gfx::TextureFilterType::Linear,
-                .wrapU = gfx::TextureWrapType::Clamp,
-                .wrapV = gfx::TextureWrapType::Clamp
-            });
+            demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                 .wrapU = gfx::TextureWrapType::Clamp,
+                                                 .wrapV = gfx::TextureWrapType::Clamp});
             drawable.setTexture(demTexture, idColorReliefImageTexture);
-            
+
             if (elevationStopsTexture) {
                 drawable.setTexture(elevationStopsTexture, idColorReliefElevationStopsTexture);
             }
@@ -300,7 +292,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
             return true;
         };
-        
+
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
@@ -317,11 +309,9 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         // Bind DEM texture
         std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
         demTexture->setImage(bucket.getDEMData().getImagePtr());
-        demTexture->setSamplerConfiguration({
-            .filter = gfx::TextureFilterType::Linear,
-            .wrapU = gfx::TextureWrapType::Clamp,
-            .wrapV = gfx::TextureWrapType::Clamp
-        });
+        demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                             .wrapU = gfx::TextureWrapType::Clamp,
+                                             .wrapV = gfx::TextureWrapType::Clamp});
         builder->setTexture(demTexture, idColorReliefImageTexture);
 
         // Bind color ramp textures
@@ -340,19 +330,18 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
             // Set up tile properties UBO
             shaders::ColorReliefTilePropsUBO tilePropsUBO;
-            
+
             // DEM unpack vector (Mapbox Terrain RGB format)
             tilePropsUBO.unpack = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
-            
+
             // Texture dimensions
             const auto& demData = bucket.getDEMData();
-            tilePropsUBO.dimension = {{static_cast<float>(demData.dim), 
-                                       static_cast<float>(demData.dim)}};
-            
+            tilePropsUBO.dimension = {{static_cast<float>(demData.dim), static_cast<float>(demData.dim)}};
+
             // Color ramp size
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
             tilePropsUBO.pad0 = 0.0f;
-            
+
             auto& drawableUniforms = drawable->mutableUniformBuffers();
             drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
 
@@ -362,14 +351,13 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-bool RenderColorReliefLayer::queryIntersectsFeature(
-        const GeometryCoordinates&,
-        const GeometryTileFeature&,
-        float,
-        const TransformState&,
-        float,
-        const mat4&,
-        const FeatureState&) const {
+bool RenderColorReliefLayer::queryIntersectsFeature(const GeometryCoordinates&,
+                                                    const GeometryTileFeature&,
+                                                    float,
+                                                    const TransformState&,
+                                                    float,
+                                                    const mat4&,
+                                                    const FeatureState&) const {
     return false;
 }
 

@@ -37,17 +37,17 @@ float getElevationStop(int stop) {
 
 void main() {
     float el = getElevation(v_pos);
-    
+
     // Binary search for color stops
     int r = (u_color_ramp_size - 1);
     int l = 0;
     float el_l = getElevationStop(l);
     float el_r = getElevationStop(r);
-    
-    while(r - l > 1) {
+
+    while (r - l > 1) {
         int m = (r + l) / 2;
         float el_m = getElevationStop(m);
-        if(el < el_m) {
+        if (el < el_m) {
             r = m;
             el_r = el_m;
         } else {
@@ -55,10 +55,10 @@ void main() {
             el_l = el_m;
         }
     }
-    
+
     float x = (float(l) + (el - el_l) / (el_r - el_l) + 0.5) / float(u_color_ramp_size);
     fragColor = u_opacity * texture(u_color_stops, vec2(x, 0.0));
-    
+
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
 #endif

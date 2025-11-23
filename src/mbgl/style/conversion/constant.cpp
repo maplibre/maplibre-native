@@ -78,7 +78,8 @@ template std::optional<CirclePitchScaleType> Converter<CirclePitchScaleType>::op
                                                                                          Error&) const;
 template std::optional<HillshadeIlluminationAnchorType> Converter<HillshadeIlluminationAnchorType>::operator()(
     const Convertible&, Error&) const;
-template std::optional<HillshadeMethodType> Converter<HillshadeMethodType>::operator()(const Convertible&, Error&) const;
+template std::optional<HillshadeMethodType> Converter<HillshadeMethodType>::operator()(const Convertible&,
+                                                                                       Error&) const;
 template std::optional<IconTextFitType> Converter<IconTextFitType>::operator()(const Convertible&, Error&) const;
 template std::optional<LightAnchorType> Converter<LightAnchorType>::operator()(const Convertible&, Error&) const;
 template std::optional<LineCapType> Converter<LineCapType>::operator()(const Convertible&, Error&) const;
@@ -115,24 +116,25 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     return color;
 }
 
-std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(const Convertible& value, Error& error) const {
+std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(const Convertible& value,
+                                                                            Error& error) const {
     if (!isArray(value)) {
         // Try single color
         auto color = convert<Color>(value, error);
         if (!color) return std::nullopt;
         return std::vector<Color>{*color};
     }
-    
+
     std::vector<Color> result;
     auto length = arrayLength(value);
     result.reserve(length);
-    
+
     for (std::size_t i = 0; i < length; ++i) {
         auto color = convert<Color>(arrayMember(value, i), error);
         if (!color) return std::nullopt;
         result.push_back(*color);
     }
-    
+
     return result;
 }
 

@@ -50,9 +50,9 @@ private:
     // Color ramp data
     uint32_t colorRampSize = 256;
     bool colorRampChanged = true;
-    std::shared_ptr<PremultipliedImage> elevationStops;  // Elevation values for each stop
-    std::shared_ptr<PremultipliedImage> colorStops;      // RGB colors for each stop
-    
+    std::shared_ptr<PremultipliedImage> elevationStops; // Elevation values for each stop
+    std::shared_ptr<PremultipliedImage> colorStops;     // RGB colors for each stop
+
     // GPU textures
     std::shared_ptr<gfx::Texture2D> elevationStopsTexture;
     std::shared_ptr<gfx::Texture2D> colorStopsTexture;

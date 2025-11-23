@@ -12,11 +12,16 @@ namespace mbgl {
 template <>
 const char* Enum<style::HillshadeMethodType>::toString(style::HillshadeMethodType t) {
     switch (t) {
-        case style::HillshadeMethodType::Standard: return "standard";
-        case style::HillshadeMethodType::Basic: return "basic";
-        case style::HillshadeMethodType::Combined: return "combined";
-        case style::HillshadeMethodType::Igor: return "igor";
-        case style::HillshadeMethodType::Multidirectional: return "multidirectional";
+        case style::HillshadeMethodType::Standard:
+            return "standard";
+        case style::HillshadeMethodType::Basic:
+            return "basic";
+        case style::HillshadeMethodType::Combined:
+            return "combined";
+        case style::HillshadeMethodType::Igor:
+            return "igor";
+        case style::HillshadeMethodType::Multidirectional:
+            return "multidirectional";
     }
     return "standard";
 }
@@ -58,7 +63,7 @@ std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpres
         }
         return result;
     }
-    
+
     auto color = ValueConverter<Color>::fromExpressionValue(value);
     if (!color) return std::nullopt;
     return std::vector<Color>{*color};
@@ -67,14 +72,14 @@ std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpres
 template <>
 std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpressionValue(const Value& value) {
     if (!value.is<std::string>()) return std::nullopt;
-    
+
     const auto& str = value.get<std::string>();
     if (str == "standard") return HillshadeMethodType::Standard;
     if (str == "basic") return HillshadeMethodType::Basic;
     if (str == "combined") return HillshadeMethodType::Combined;
     if (str == "igor") return HillshadeMethodType::Igor;
     if (str == "multidirectional") return HillshadeMethodType::Multidirectional;
-    
+
     return std::nullopt;
 }
 
