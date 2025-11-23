@@ -12,7 +12,6 @@ namespace mbgl {
 using namespace shaders;
 
 void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    auto& context = parameters.context;
     const auto& props = static_cast<const style::ColorReliefLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
 
@@ -23,25 +22,23 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
     // Update evaluated properties UBO
     evaluatedPropsUBO.opacity = evaluated.get<style::ColorReliefOpacity>();
 
-    auto& layerUniforms = context.mutableUniformBuffers();
-    layerUniforms.createOrUpdate(idColorReliefEvaluatedPropsUBO, &evaluatedPropsUBO, context);
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.createOrUpdate(idColorReliefEvaluatedPropsUBO, &evaluatedPropsUBO, parameters.context); // Use parameters.context
 
-    // Update each drawable
-    for (auto& drawable : layerGroup.getDrawables()) {
-        if (!drawable || !drawable->getTileID()) {
-            continue;
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID()) {
+            return;
         }
 
-        const UnwrappedTileID tileID = drawable->getTileID()->toUnwrapped();
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        // Update drawable UBO (transform matrix)
-        drawableUBO.matrix = parameters.matrixForTile(tileID);
+        drawableUBO.matrix = util::cast<float>(parameters.matrixForTile(tileID));
 
-        auto& drawableUniforms = drawable->mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idColorReliefDrawableUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idColorReliefDrawableUBO, &drawableUBO, parameters.context);
 
         // Tile props UBO is set during drawable creation, doesn't change per frame
-    }
+    });
 }
 
 } // namespace mbgl
