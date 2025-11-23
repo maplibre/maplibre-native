@@ -49,7 +49,7 @@ struct LineColor : DataDrivenPaintProperty<Color, attributes::color, uniforms::c
     static Color defaultValue() { return Color::black(); }
 };
 
-struct LineDasharray : CrossFadedDataDrivenPaintProperty<std::vector<float>, attributes::dasharray, uniforms::dasharray> {
+struct LineDasharray : CrossFadedPaintProperty<std::vector<float>> {
     static std::vector<float> defaultValue() { return {}; }
 };
 
