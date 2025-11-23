@@ -1,45 +1,40 @@
 #include <mbgl/renderer/layers/render_color_relief_layer.hpp>
-#include <mbgl/renderer/buckets/raster_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/mat3.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/shaders/color_relief_layer_ubo.hpp>
+#include <mbgl/style/layers/color_relief_layer_impl.hpp>
 
 namespace mbgl {
 
 using namespace style;
 
-inline const ColorReliefLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+namespace {
+
+inline const ColorReliefLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == ColorReliefLayer::Impl::staticTypeInfo());
     return static_cast<const ColorReliefLayer::Impl&>(*impl);
 }
 
-RenderColorReliefLayer::RenderColorReliefLayer(Immutable<style::ColorReliefLayer::Impl> _impl)
+} // namespace
+
+RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl> _impl)
     : RenderLayer(makeMutable<ColorReliefLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paintProperties()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
 
 RenderColorReliefLayer::~RenderColorReliefLayer() = default;
 
 void RenderColorReliefLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paintProperties().transitioned(parameters, std::move(unevaluated));
+    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
 void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = staticImmutableCast<ColorReliefLayerProperties>(evaluatedProperties);
-    
-    auto evaluated_ = unevaluated.evaluate(parameters);
+    const auto previousProperties = staticImmutableCast<ColorReliefLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<ColorReliefLayerProperties>(
+        staticImmutableCast<ColorReliefLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    passes = evaluated_.get<ColorReliefOpacity>() > 0.0f
+    passes = (properties->evaluated.get<style::ColorReliefOpacity>() > 0) 
         ? RenderPass::Translucent
         : RenderPass::None;
-
-    properties->evaluated = std::move(evaluated_);
-    properties->renderPasses = makeMutable<RenderPass>(passes);
+    properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 }
 
@@ -52,16 +47,15 @@ bool RenderColorReliefLayer::hasCrossfade() const {
 }
 
 void RenderColorReliefLayer::markContextDestroyed() {
-    // Color ramp textures will be recreated as needed
+    // Nothing to clean up yet
 }
 
 void RenderColorReliefLayer::prepare(const LayerPrepareParameters&) {
-    // TODO: Prepare color ramp textures
+    // TODO: Prepare rendering resources
 }
 
 void RenderColorReliefLayer::render(PaintParameters&) {
     // TODO: Implement rendering
-    // This will be implemented once shader infrastructure is in place
 }
 
 bool RenderColorReliefLayer::queryIntersectsFeature(
@@ -76,17 +70,8 @@ bool RenderColorReliefLayer::queryIntersectsFeature(
 }
 
 void RenderColorReliefLayer::updateColorRamp() {
-    const auto& evaluated_ = staticImmutableCast<ColorReliefLayerProperties>(evaluatedProperties)->evaluated;
-    const auto& colorRampValue = evaluated_.get<ColorReliefColor>();
-    
-    if (!colorRampValue.getValue()) {
-        colorRampSize = 0;
-        return;
-    }
-
-    // TODO: Parse expression and prepare color ramp data
-    // For now, just set a default size
-    colorRampSize = 256;
+    // TODO: Implement color ramp texture generation
+    // Similar to heatmap's updateColorRamp()
 }
 
 } // namespace mbgl
