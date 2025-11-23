@@ -29,7 +29,7 @@ uniform sampler2D u_image;
 #define NUM_ILLUMINATION_SOURCES 1
 #endif
 
-layout (std140) uniform HillshadeTilePropsUBO {
+layout(std140) uniform HillshadeTilePropsUBO {
     highp vec2 u_latrange;
     highp float u_exaggeration;
     highp int u_method;
@@ -39,10 +39,10 @@ layout (std140) uniform HillshadeTilePropsUBO {
     highp float u_pad2;
 };
 
-layout (std140) uniform HillshadeEvaluatedPropsUBO {
+layout(std140) uniform HillshadeEvaluatedPropsUBO {
     highp vec4 u_accent;
-    highp vec4 u_altitudes;  // Up to 4 altitude values
-    highp vec4 u_azimuths;   // Up to 4 azimuth values
+    highp vec4 u_altitudes;                            // Up to 4 altitude values
+    highp vec4 u_azimuths;                             // Up to 4 azimuth values
     highp vec4 u_shadows[NUM_ILLUMINATION_SOURCES];    // Shadow colors
     highp vec4 u_highlights[NUM_ILLUMINATION_SOURCES]; // Highlight colors
 };
@@ -55,14 +55,12 @@ layout (std140) uniform HillshadeEvaluatedPropsUBO {
 #define MULTIDIRECTIONAL 3
 #define BASIC 4
 
-float get_aspect(vec2 deriv)
-{
+float get_aspect(vec2 deriv) {
     return deriv.x != 0.0 ? atan(deriv.y, -deriv.x) : PI / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
 }
 
 // MapLibre's legacy hillshade algorithm
-void standard_hillshade(vec2 deriv)
-{
+void standard_hillshade(vec2 deriv) {
     // We add PI to make this property match the global light object, which adds PI/2 to the light's azimuthal
     // position property to account for 0deg corresponding to north/the top of the viewport in the style spec
     // and the original shader was written to accept (-illuminationDirection - 90) as the azimuthal.
@@ -92,90 +90,83 @@ void standard_hillshade(vec2 deriv)
     fragColor = accent_color * (1.0 - shade_color.a) + shade_color;
 }
 
-// Based on GDALHillshadeAlg(). (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L908)
-// GDAL's output ranges from black to white, and is gray in the middle.
-// The output of this function ranges from hillshade-shadow-color to hillshade-highlight-color, and
-// is transparent in the middle. To match GDAL's output, make hillshade-highlight-color white,
-// hillshade-shadow color black, and the background color gray.
-void basic_hillshade(vec2 deriv)
-{
+// Based on GDALHillshadeAlg().
+// (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L908) GDAL's output
+// ranges from black to white, and is gray in the middle. The output of this function ranges from hillshade-shadow-color
+// to hillshade-highlight-color, and is transparent in the middle. To match GDAL's output, make
+// hillshade-highlight-color white, hillshade-shadow color black, and the background color gray.
+void basic_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
     float azimuth = u_azimuths[0] + PI;
     float cos_az = cos(azimuth);
     float sin_az = sin(azimuth);
     float cos_alt = cos(u_altitudes[0]);
     float sin_alt = sin(u_altitudes[0]);
-    float cang = (sin_alt - (deriv.y*cos_az*cos_alt - deriv.x*sin_az*cos_alt)) / sqrt(1.0 + dot(deriv, deriv));
+    float cang = (sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(deriv, deriv));
     float shade = clamp(cang, 0.0, 1.0);
-    if(shade > 0.5)
-    {
-        fragColor = u_highlights[0]*(2.0*shade - 1.0);
-    }
-    else
-    {
-        fragColor = u_shadows[0]*(1.0 - 2.0*shade);
+    if (shade > 0.5) {
+        fragColor = u_highlights[0] * (2.0 * shade - 1.0);
+    } else {
+        fragColor = u_shadows[0] * (1.0 - 2.0 * shade);
     }
 }
 
 // This function applies the basic_hillshade algorithm across multiple independent light sources.
 // The final color is the average of the contribution from each light source.
-void multidirectional_hillshade(vec2 deriv)
-{
+void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
-    fragColor = vec4(0,0,0,0);
-    for(int i = 0; i < NUM_ILLUMINATION_SOURCES; i++)
-    {
+    fragColor = vec4(0, 0, 0, 0);
+    for (int i = 0; i < NUM_ILLUMINATION_SOURCES; i++) {
         if (i >= u_num_lights) break;
 
         float cos_alt = cos(u_altitudes[i]);
         float sin_alt = sin(u_altitudes[i]);
         float cos_az = -cos(u_azimuths[i]);
         float sin_az = -sin(u_azimuths[i]);
-        float cang = (sin_alt - (deriv.y*cos_az*cos_alt - deriv.x*sin_az*cos_alt)) / sqrt(1.0 + dot(deriv, deriv));
+        float cang = (sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) /
+                     sqrt(1.0 + dot(deriv, deriv));
         float shade = clamp(cang, 0.0, 1.0);
 
-        if(shade > 0.5)
-        {
-            fragColor += u_highlights[i]*(2.0*shade - 1.0)/float(u_num_lights);
-        }
-        else
-        {
-            fragColor += u_shadows[i]*(1.0 - 2.0*shade)/float(u_num_lights);
+        if (shade > 0.5) {
+            fragColor += u_highlights[i] * (2.0 * shade - 1.0) / float(u_num_lights);
+        } else {
+            fragColor += u_shadows[i] * (1.0 - 2.0 * shade) / float(u_num_lights);
         }
     }
 }
 
-// Based on GDALHillshadeCombinedAlg(). (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L1084)
-// GDAL's version only calculates shading.
-// This version also adds highlighting. To match GDAL's output, make hillshade-highlight-color transparent.
-void combined_hillshade(vec2 deriv)
-{
+// Based on GDALHillshadeCombinedAlg().
+// (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L1084) GDAL's
+// version only calculates shading. This version also adds highlighting. To match GDAL's output, make
+// hillshade-highlight-color transparent.
+void combined_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
     float azimuth = u_azimuths[0] + PI;
     float cos_az = cos(azimuth);
     float sin_az = sin(azimuth);
     float cos_alt = cos(u_altitudes[0]);
     float sin_alt = sin(u_altitudes[0]);
-    float cang = acos((sin_alt - (deriv.y*cos_az*cos_alt - deriv.x*sin_az*cos_alt)) / sqrt(1.0 + dot(deriv, deriv)));
-    cang = clamp(cang, 0.0, PI/2.0);
-    float shade = cang* atan(length(deriv)) * 4.0/PI/PI;
-    float highlight = (PI/2.0-cang)* atan(length(deriv)) * 4.0/PI/PI;
+    float cang = acos((sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) /
+                      sqrt(1.0 + dot(deriv, deriv)));
+    cang = clamp(cang, 0.0, PI / 2.0);
+    float shade = cang * atan(length(deriv)) * 4.0 / PI / PI;
+    float highlight = (PI / 2.0 - cang) * atan(length(deriv)) * 4.0 / PI / PI;
 
-    fragColor = u_shadows[0]*shade + u_highlights[0]*highlight;
+    fragColor = u_shadows[0] * shade + u_highlights[0] * highlight;
 }
 
-// Based on GDALHillshadeIgorAlg() (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L849).
-// GDAL's version only calculates shading.
-// This version also adds highlighting. To match GDAL's output, make hillshade-highlight-color transparent.
-void igor_hillshade(vec2 deriv)
-{
+// Based on GDALHillshadeIgorAlg()
+// (https://github.com/OSGeo/gdal/blob/ad4280be5aee202eea412c075e4591878aaeb018/apps/gdaldem_lib.cpp#L849). GDAL's
+// version only calculates shading. This version also adds highlighting. To match GDAL's output, make
+// hillshade-highlight-color transparent.
+void igor_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
     float aspect = get_aspect(deriv);
     float azimuth = u_azimuths[0] + PI;
-    float slope_strength = atan(length(deriv)) * 2.0/PI;
+    float slope_strength = atan(length(deriv)) * 2.0 / PI;
     float aspect_strength = 1.0 - abs(mod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
     float shadow_strength = slope_strength * aspect_strength;
-    float highlight_strength = slope_strength * (1.0-aspect_strength);
+    float highlight_strength = slope_strength * (1.0 - aspect_strength);
     fragColor = u_shadows[0] * shadow_strength + u_highlights[0] * highlight_strength;
 }
 
@@ -187,8 +178,7 @@ void main() {
     float scaleFactor = cos(radians((u_latrange[0] - u_latrange[1]) * (1.0 - v_pos.y) + u_latrange[1]));
     vec2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
 
-    switch(u_method)
-    {
+    switch (u_method) {
         case BASIC:
             basic_hillshade(deriv);
             break;
