@@ -4,8 +4,15 @@
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 #include <mbgl/style/layers/color_relief_layer_properties.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/util/image.hpp>
+#include <memory>
+
+namespace mbgl {
+namespace gfx {
+class Texture2D;
+class ShaderProgramBase;
+} // namespace gfx
+} // namespace mbgl
 
 namespace mbgl {
 
