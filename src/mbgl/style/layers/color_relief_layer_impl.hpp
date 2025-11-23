@@ -7,13 +7,17 @@
 namespace mbgl {
 namespace style {
 
-bool ColorReliefLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
-    return false;
-}
+class ColorReliefLayer::Impl : public Layer::Impl {
+public:
+    using Layer::Impl::Impl;
 
-void ColorReliefLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-    // No layout properties for color-relief
-}
+    bool hasLayoutDifference(const Layer::Impl&) const override;
+    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
+
+    ColorReliefPaintProperties::Transitionable paint;
+    
+    DECLARE_LAYER_TYPE_INFO;
+};
 
 } // namespace style
 } // namespace mbgl
