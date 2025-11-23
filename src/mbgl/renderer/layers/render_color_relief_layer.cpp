@@ -4,7 +4,6 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/mat3.hpp>
