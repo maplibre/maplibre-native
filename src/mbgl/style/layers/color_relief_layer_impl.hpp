@@ -1,4 +1,8 @@
-#include <mbgl/style/layers/color_relief_layer_impl.hpp>
+#pragma once
+
+#include <mbgl/style/layer_impl.hpp>
+#include <mbgl/style/layers/color_relief_layer.hpp>
+#include <mbgl/style/layers/color_relief_layer_properties.hpp>
 
 namespace mbgl {
 namespace style {
