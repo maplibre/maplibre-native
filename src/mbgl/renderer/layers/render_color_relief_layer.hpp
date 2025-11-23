@@ -39,9 +39,7 @@ private:
     style::ColorReliefPaintProperties::Unevaluated unevaluated;
     style::ColorReliefPaintProperties::PossiblyEvaluated evaluated;
 
-    // Color ramp data - textures for elevation stops and colors
-    std::optional<gfx::Texture> colorRampTexture;
-    std::optional<gfx::Texture> elevationStopsTexture;
+    // Color ramp data
     int32_t colorRampSize = 0;
     bool colorRampChanged = true;
 };
