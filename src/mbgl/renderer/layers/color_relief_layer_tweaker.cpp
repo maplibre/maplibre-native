@@ -13,7 +13,7 @@ using namespace shaders;
 
 void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
-    const auto& props = static_cast<const ColorReliefLayerProperties&>(*evaluatedProperties);
+    const auto& props = static_cast<const style::ColorReliefLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
 
     if (layerGroup.empty()) {
