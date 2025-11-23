@@ -166,6 +166,10 @@ template std::optional<PropertyExpression<TextTransformType>> convertFunctionToE
     const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<TranslateAnchorType>> convertFunctionToExpression<TranslateAnchorType>(
     const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<std::vector<Color>>> 
+convertFunctionToExpression<std::vector<Color>>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<HillshadeMethodType>> 
+convertFunctionToExpression<HillshadeMethodType>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Formatted>> convertFunctionToExpression<Formatted>(const Convertible&,
                                                                                              Error&,
                                                                                              bool);

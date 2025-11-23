@@ -47,6 +47,11 @@ struct Converter<Color> {
 };
 
 template <>
+struct Converter<std::vector<Color>> {
+    std::optional<std::vector<Color>> operator()(const Convertible& value, Error& error) const;
+};
+
+template <>
 struct Converter<Padding> {
     std::optional<Padding> operator()(const Convertible& value, Error& error) const;
 };

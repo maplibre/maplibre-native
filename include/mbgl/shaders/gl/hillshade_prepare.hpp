@@ -50,11 +50,12 @@ float getElevation(vec2 coord, float bias) {
     // Convert encoded elevation value to meters
     vec4 data = texture(u_image, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, u_unpack) / 4.0;
+    return dot(data, u_unpack);
 }
 
 void main() {
     vec2 epsilon = 1.0 / u_dimension;
+    float tileSize = u_dimension.x - 2.0;
 
     // queried pixels:
     // +-----------+
@@ -81,27 +82,28 @@ void main() {
     float h = getElevation(v_pos + vec2(0, epsilon.y), 0.0);
     float i = getElevation(v_pos + vec2(epsilon.x, epsilon.y), 0.0);
 
-    // here we divide the x and y slopes by 8 * pixel size
+    // Here we divide the x and y slopes by 8 * pixel size
     // where pixel size (aka meters/pixel) is:
     // circumference of the world / (pixels per tile * number of tiles)
-    // which is equivalent to: 8 * 40075016.6855785 / (512 * pow(2, u_zoom))
-    // which can be reduced to: pow(2, 19.25619978527 - u_zoom)
-    // we want to vertically exaggerate the hillshading though, because otherwise
-    // it is barely noticeable at low zooms. to do this, we multiply this by some
-    // scale factor pow(2, (u_zoom - u_maxzoom) * a) where a is an arbitrary value
-    // Here we use a=0.3 which works out to the expression below. see
-    // nickidlugash's awesome breakdown for more info
+    // which is equivalent to: 8 * 40075016.6855785 / (tileSize * pow(2, u_zoom))
+    // which can be reduced to: pow(2, 28.25619978527 - u_zoom) / tileSize.
+    // We want to vertically exaggerate the hillshading because otherwise
+    // it is barely noticeable at low zooms. To do this, we multiply this by
+    // a scale factor that is a function of zooms below 15, which is an arbitrary
+    // cutoff and may need to change in the future. The scale factor is a function
+    // of this zoom, so that at lower zooms, the hillshading is exaggerated more.
+    // see nickidlugash's awesome breakdown for more info
     // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
     float exaggeration = u_zoom < 2.0 ? 0.4 : u_zoom < 4.5 ? 0.35 : 0.3;
 
     vec2 deriv = vec2(
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
-    ) /  pow(2.0, (u_zoom - u_maxzoom) * exaggeration + 19.2562 - u_zoom);
+    ) * tileSize / pow(2.0, (u_zoom - u_maxzoom) * exaggeration + 28.2562 - u_zoom);
 
     fragColor = clamp(vec4(
-        deriv.x / 2.0 + 0.5,
-        deriv.y / 2.0 + 0.5,
+        deriv.x / 8.0 + 0.5,
+        deriv.y / 8.0 + 0.5,
         1.0,
         1.0), 0.0, 1.0);
 

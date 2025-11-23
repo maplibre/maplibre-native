@@ -77,6 +77,9 @@ layerCapabilities['hillshade']      = defaults.require('Source')
                                               .require('Pass3D')
                                               .set('TileKind', 'RasterDEM')
                                               .finalize();
+layerCapabilities['color-relief']   = defaults.require('Source')
+                                              .set('TileKind', 'RasterDEM')
+                                              .finalize();
 layerCapabilities['symbol']         = defaults.require('Source')
                                               .require('Layout')
                                               .require('FadingTiles')
