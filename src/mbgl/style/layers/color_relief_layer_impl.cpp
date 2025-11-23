@@ -3,12 +3,12 @@
 namespace mbgl {
 namespace style {
 
-const LayerTypeInfo* ColorReliefLayer::Impl::getTypeInfo() const noexcept {
-    return ColorReliefLayer::Impl::staticTypeInfo();
-}
-
 bool ColorReliefLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
     return false;
+}
+
+void ColorReliefLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
+    // No layout properties for color-relief
 }
 
 } // namespace style
