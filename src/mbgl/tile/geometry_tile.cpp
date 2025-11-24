@@ -199,33 +199,32 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       mode(parameters.mode),
       showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision),
       isSynchronous(parameters.isSynchronous) {
-          if (isSynchronous) {
-              worker = std::make_unique<GeometryTileWorker>(
-                      *this,
-                      parameters.threadPool,
-                      id_,
-                      sourceID,
-                      obsolete,
-                      parameters.mode,
-                      parameters.pixelRatio,
-                      parameters.debugOptions & MapDebugOptions::Collision,
-                      parameters.dynamicTextureAtlas,
-                      parameters.glyphManager->getFontFaces());
-          } else {
-              workerActor = std::make_unique<Actor<GeometryTileWorker>>(
-                      parameters.threadPool, // Scheduler reference for the Actor retainer
-                      ActorRef<GeometryTile>(*this, mailbox),
-                      parameters.threadPool,
-                      id_,
-                      sourceID,
-                      obsolete,
-                      parameters.mode,
-                      parameters.pixelRatio,
-                      parameters.debugOptions & MapDebugOptions::Collision,
-                      parameters.dynamicTextureAtlas,
-                      parameters.glyphManager->getFontFaces());
-          }
-      }
+    if (isSynchronous) {
+        worker = std::make_unique<GeometryTileWorker>(*this,
+                                                      parameters.threadPool,
+                                                      id_,
+                                                      sourceID,
+                                                      obsolete,
+                                                      parameters.mode,
+                                                      parameters.pixelRatio,
+                                                      parameters.debugOptions & MapDebugOptions::Collision,
+                                                      parameters.dynamicTextureAtlas,
+                                                      parameters.glyphManager->getFontFaces());
+    } else {
+        workerActor = std::make_unique<Actor<GeometryTileWorker>>(
+            parameters.threadPool, // Scheduler reference for the Actor retainer
+            ActorRef<GeometryTile>(*this, mailbox),
+            parameters.threadPool,
+            id_,
+            sourceID,
+            obsolete,
+            parameters.mode,
+            parameters.pixelRatio,
+            parameters.debugOptions & MapDebugOptions::Collision,
+            parameters.dynamicTextureAtlas,
+            parameters.glyphManager->getFontFaces());
+    }
+}
 
 GeometryTile::~GeometryTile() {
     MLN_TRACE_FUNC();
@@ -470,17 +469,13 @@ void GeometryTile::onImagesAvailable(ImageMap images,
     MLN_TRACE_FUNC();
 
     if (isSynchronous) {
-        worker->onImagesAvailable(
-                std::move(images),
-                std::move(patterns),
-                std::move(versionMap),
-                imageCorrelationID);
+        worker->onImagesAvailable(std::move(images), std::move(patterns), std::move(versionMap), imageCorrelationID);
     } else {
         workerActor->self().invoke(&GeometryTileWorker::onImagesAvailable,
-                          std::move(images),
-                          std::move(patterns),
-                          std::move(versionMap),
-                          imageCorrelationID);
+                                   std::move(images),
+                                   std::move(patterns),
+                                   std::move(versionMap),
+                                   imageCorrelationID);
     }
 }
 

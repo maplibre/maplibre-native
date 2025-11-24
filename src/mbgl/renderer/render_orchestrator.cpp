@@ -185,20 +185,20 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     evaluationParameters.zoomChanged = zoomChanged;
 
     TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
-                                        .debugOptions = updateParameters->debugOptions,
-                                        .transformState = updateParameters->transformState,
-                                        .fileSource = updateParameters->fileSource,
-                                        .mode = updateParameters->mode,
-                                        .annotationManager = updateParameters->annotationManager,
-                                        .imageManager = imageManager,
-                                        .glyphManager = glyphManager,
-                                        .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
-                                        .threadPool = threadPool,
-                                        .tileLodMinRadius = updateParameters->tileLodMinRadius,
-                                        .tileLodScale = updateParameters->tileLodScale,
-                                        .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
-                                        .tileLodZoomShift = updateParameters->tileLodZoomShift,
-                                        .dynamicTextureAtlas = dynamicTextureAtlas};
+                                  .debugOptions = updateParameters->debugOptions,
+                                  .transformState = updateParameters->transformState,
+                                  .fileSource = updateParameters->fileSource,
+                                  .mode = updateParameters->mode,
+                                  .annotationManager = updateParameters->annotationManager,
+                                  .imageManager = imageManager,
+                                  .glyphManager = glyphManager,
+                                  .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
+                                  .threadPool = threadPool,
+                                  .tileLodMinRadius = updateParameters->tileLodMinRadius,
+                                  .tileLodScale = updateParameters->tileLodScale,
+                                  .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
+                                  .tileLodZoomShift = updateParameters->tileLodZoomShift,
+                                  .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);

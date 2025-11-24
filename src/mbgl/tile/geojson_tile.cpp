@@ -25,14 +25,15 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
     assert(data_);
     data = std::move(data_);
     if (needsRelayout) reset();
-    data->getTile(id.canonical,
-                  [this, self = weakFactory.makeWeakPtr(), capturedData = data.get()](TileFeatures features) {
-                      // If the data has changed, a new request is being processed, ignore this one
-                      if (auto guard = self.lock(); self && data.get() == capturedData) {
-                          setData(std::make_unique<GeoJSONTileData>(std::move(features)));
-                      }
-                  },
-                  isSynchronous);
+    data->getTile(
+        id.canonical,
+        [this, self = weakFactory.makeWeakPtr(), capturedData = data.get()](TileFeatures features) {
+            // If the data has changed, a new request is being processed, ignore this one
+            if (auto guard = self.lock(); self && data.get() == capturedData) {
+                setData(std::make_unique<GeoJSONTileData>(std::move(features)));
+            }
+        },
+        isSynchronous);
 }
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {

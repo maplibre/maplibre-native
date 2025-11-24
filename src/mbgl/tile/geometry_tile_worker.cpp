@@ -458,7 +458,8 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
         if (isSynchronous) {
             parent->getImages(std::make_pair(pendingImageDependencies, ++imageCorrelationID));
         } else {
-            parentActor->invoke(&GeometryTile::getImages, std::make_pair(pendingImageDependencies, ++imageCorrelationID));
+            parentActor->invoke(&GeometryTile::getImages,
+                                std::make_pair(pendingImageDependencies, ++imageCorrelationID));
         }
     }
 }
@@ -636,21 +637,20 @@ void GeometryTileWorker::finalizeLayout() {
                                    << id.canonical.y << " Time");
 
     if (isSynchronous) {
-        parent->onLayout(
-                std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                             std::move(featureIndex),
-                                                             std::move(glyphAtlas),
-                                                             std::move(imageAtlas),
-                                                             dynamicTextureAtlas),
-                correlationID);
+        parent->onLayout(std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                                      std::move(featureIndex),
+                                                                      std::move(glyphAtlas),
+                                                                      std::move(imageAtlas),
+                                                                      dynamicTextureAtlas),
+                         correlationID);
     } else {
         parentActor->invoke(&GeometryTile::onLayout,
-                 std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                              std::move(featureIndex),
-                                                              std::move(glyphAtlas),
-                                                              std::move(imageAtlas),
-                                                              dynamicTextureAtlas),
-                 correlationID);
+                            std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                                         std::move(featureIndex),
+                                                                         std::move(glyphAtlas),
+                                                                         std::move(imageAtlas),
+                                                                         dynamicTextureAtlas),
+                            correlationID);
     }
 }
 
