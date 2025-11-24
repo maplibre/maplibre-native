@@ -81,72 +81,67 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
     updateRenderTileIDs();
 }
 
+// TEMPORARY TEST VERSION OF updateColorRamp()
+// This removes all expression evaluation and just creates a simple gradient
+// Use this to test if the rendering pipeline works at all
+
 void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStops || !colorStops) return;
 
-    // Get the color property value
-    auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
-    if (colorValue.isUndefined()) {
-        colorValue = ColorReliefLayer::getDefaultColorReliefColor();
-    }
+    Log::Info(Event::Render, "=== TEST updateColorRamp() - Hardcoded gradient ===");
 
-    // Get the expression from the color ramp property
-    const auto* expr = &colorValue.getExpression();
-    if (!expr) {
-        // No expression - fill with default color
-        Color defaultColor = Color::black();
-        for (uint32_t i = 0; i < colorRampSize; ++i) {
-            float t = static_cast<float>(i) / (colorRampSize - 1);
-            float elevation = -11000.0f + t * 20000.0f;
-            
-            auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
-            elevData[i] = elevation;
-            
-            colorStops->data[i * 4 + 0] = static_cast<uint8_t>(defaultColor.r * 255);
-            colorStops->data[i * 4 + 1] = static_cast<uint8_t>(defaultColor.g * 255);
-            colorStops->data[i * 4 + 2] = static_cast<uint8_t>(defaultColor.b * 255);
-            colorStops->data[i * 4 + 3] = static_cast<uint8_t>(defaultColor.a * 255);
-        }
-        colorRampChanged = true;
-        return;
-    }
-
-    // Define elevation range for sampling
-    // This range matches the typical DEM encoding range and covers:
-    // - Mariana Trench (~-11000m) to Mount Everest (~8849m)
-    // Both Terrain-RGB (Mapbox) and Terrarium (Mapzen) encodings support this range
-    const float minElevation = -11000.0f;  // meters (below sea level, bathymetry)
-    const float maxElevation = 9000.0f;    // meters (above sea level)
-
-    // Sample the color ramp across the elevation range
+    // Create a simple red-to-blue gradient
+    // If this shows up in the render, then the problem is expression evaluation
+    // If this doesn't show up, then the problem is in the rendering/shader
+    
     for (uint32_t i = 0; i < colorRampSize; ++i) {
-        // Calculate elevation for this sample
         float t = static_cast<float>(i) / (colorRampSize - 1);
-        float elevation = minElevation + t * (maxElevation - minElevation);
-
-        // Create evaluation context with this elevation
-        expression::EvaluationContext context(0.0f);  // zoom = 0
-        context.elevation = elevation;
-
-        // Evaluate the expression to get the color for this elevation
-        Color color = Color::black();
-        auto result = expr->evaluate(context);
-        if (result) {
-            color = *expression::fromExpressionValue<Color>(*result);
-        }
-
-        // Store elevation as raw float in R channel (shader expects GL_R32F texture)
+        
+        // Create red (0m) to blue (8000m) gradient
+        float elevation = t * 8000.0f;
+        
+        // Store elevation (though this won't work with RGBA8 texture, but try anyway)
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
         elevData[i] = elevation;
-
-        // Store color in RGBA format
+        
+        // Red -> Yellow -> Green -> Cyan -> Blue gradient
+        Color color;
+        if (t < 0.25f) {
+            // Red to Yellow
+            float tt = t / 0.25f;
+            color = Color(1.0f, tt, 0.0f, 1.0f);
+        } else if (t < 0.5f) {
+            // Yellow to Green  
+            float tt = (t - 0.25f) / 0.25f;
+            color = Color(1.0f - tt, 1.0f, 0.0f, 1.0f);
+        } else if (t < 0.75f) {
+            // Green to Cyan
+            float tt = (t - 0.5f) / 0.25f;
+            color = Color(0.0f, 1.0f, tt, 1.0f);
+        } else {
+            // Cyan to Blue
+            float tt = (t - 0.75f) / 0.25f;
+            color = Color(0.0f, 1.0f - tt, 1.0f, 1.0f);
+        }
+        
+        // Store color - THIS SHOULD WORK
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
+    // Log first and last colors to verify
+    Log::Info(Event::Render, "First color (0m): R=%d G=%d B=%d A=%d",
+             colorStops->data[0], colorStops->data[1], colorStops->data[2], colorStops->data[3]);
+    
+    int last = (colorRampSize - 1) * 4;
+    Log::Info(Event::Render, "Last color (8000m): R=%d G=%d B=%d A=%d",
+             colorStops->data[last], colorStops->data[last+1], colorStops->data[last+2], colorStops->data[last+3]);
+
     colorRampChanged = true;
+    
+    Log::Info(Event::Render, "=== TEST updateColorRamp() DONE ===");
 }
 
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
