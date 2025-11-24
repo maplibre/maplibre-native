@@ -38,7 +38,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -73,13 +73,13 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
           persist-credentials: false
 
       - name: Cache Bazel
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -142,7 +142,7 @@ jobs:
           zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ios-render-test
           retention-days: 3
@@ -169,7 +169,7 @@ jobs:
           zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ios-cpp-unit-tests
           retention-days: 3
@@ -190,7 +190,7 @@ jobs:
 
       - name: Upload size test as artifact (Bloaty)
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ios-size-test-files
           retention-days: 3
@@ -201,7 +201,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -230,7 +230,7 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
@@ -247,7 +247,7 @@ jobs:
           (github.event_name == 'push' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         if: env.make_release
         with:
           node-version-file: ".nvmrc"
@@ -293,7 +293,7 @@ jobs:
           cat changelog_for_version.md
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -320,7 +320,7 @@ jobs:
       - name: Release (GitHub) - Create Draft
         if: env.make_release
         id: github_release
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         with:
           name: ios-v${{ env.version }}
           files: |
@@ -370,7 +370,7 @@ jobs:
 
       - name: Publish release (remove draft)
         if: env.make_release
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         with:
           tag_name: ios-v${{ env.version }}
           name: ios-v${{ env.version }}
@@ -388,7 +388,7 @@ jobs:
     runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
