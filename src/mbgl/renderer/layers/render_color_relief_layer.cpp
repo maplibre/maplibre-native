@@ -17,6 +17,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/expression.hpp>
+#include <mbgl/style/conversion/color_ramp_property_value.hpp>
 #include <mbgl/util/premultiply.hpp>
 
 namespace mbgl {
@@ -83,14 +84,13 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStops || !colorStops) return;
 
-    auto colorProperty = unevaluated.get<ColorReliefColor>();
+    // Get the color property value  
+    const auto& colorValue = unevaluated.get<ColorReliefColor>().getValue();
     
     // Define elevation range for sampling
     // This range matches the typical DEM encoding range and covers:
     // - Mariana Trench (~-11000m) to Mount Everest (~8849m)
-    // Both Terrain-RGB (Mapbox) and Terrarium (Mapzen) encodings support this range:
-    // - Terrain-RGB: -10000m to +17895m (via -10000 + ((R*256*256 + G*256 + B) * 0.1))
-    // - Terrarium: -11000m to +6553.5m (via (R*256 + G + B/256) - 32768)
+    // Both Terrain-RGB (Mapbox) and Terrarium (Mapzen) encodings support this range
     const float minElevation = -11000.0f;  // meters (below sea level, bathymetry)
     const float maxElevation = 9000.0f;    // meters (above sea level)
     
@@ -104,11 +104,21 @@ void RenderColorReliefLayer::updateColorRamp() {
         expression::EvaluationContext context(0.0f);  // zoom = 0
         context.elevation = elevation;
         
-        // Evaluate the expression to get the color for this elevation
-        Color color = colorProperty.evaluate(context);
+        // Evaluate to get color - use match to handle different property value types
+        Color color = colorValue.match(
+            [&](const Color& constantColor) {
+                return constantColor;
+            },
+            [&](const auto& expression) -> Color {
+                auto result = expression.evaluate(context);
+                if (result) {
+                    return expression::fromExpressionValue<Color>(*result);
+                }
+                return Color::black();
+            }
+        );
         
         // Store elevation as raw float in R channel (shader expects GL_R32F texture)
-        // We'll store it as float bytes for now, but the texture should be uploaded as GL_R32F
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
         elevData[i] = elevation;
         
