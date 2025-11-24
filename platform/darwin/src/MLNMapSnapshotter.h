@@ -259,12 +259,12 @@ MLN_EXPORT
  Adds an annotation to the snapshotter.
 
  > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, ``MLNMultiPolyline``, and
-    ``MLNPointCollection`` objects cannot be added to the map view at this time.
+    ``MLNPointCollection`` objects cannot be added to the snapshotter at this time.
     Any multipoint, multipolyline, multipolygon, shape or point collection
     object that is specified is silently ignored.
 
  @param annotation The annotation object to add to the receiver. This object
-    must conform to the ``MLNAnnotation`` protocol. The map view retains the
+    must conform to the ``MLNAnnotation`` protocol. The snapshotter retains the
     annotation object.
 
  #### Related examples
@@ -276,13 +276,13 @@ MLN_EXPORT
  Adds an array of annotations to the snapshotter.
 
  > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
-    cannot be added to the map view at this time. Nor can ``MLNMultiPoint``
+    cannot be added to the snapshotter at this time. Nor can ``MLNMultiPoint``
     objects that are not instances of ``MLNPolyline`` or ``MLNPolyline``. Any
     multipoint, multipolyline, multipolygon, or shape collection objects that
     are specified are silently ignored.
 
  @param annotations An array of annotation objects. Each object in the array
-    must conform to the ``MLNAnnotation`` protocol. The map view retains each
+    must conform to the ``MLNAnnotation`` protocol. The snapshotter retains each
     individual annotation object.
  */
 - (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;

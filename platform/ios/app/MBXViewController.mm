@@ -361,57 +361,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         }
     }];
-
-
-    // Use MLNMapSnapshotter to capture a snapshot image of the map after it's loaded
-    CGRect snapshotRect = CGRectMake(0, 0, 300, 300);
-    MLNMapCamera *camera = [MLNMapCamera cameraLookingAtCenterCoordinate:CLLocationCoordinate2DMake(0, 0) altitude:100000 pitch:0 heading:0];
-
-    MLNMapSnapshotOptions *options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:[NSURL URLWithString:@"https://maptiles.stg-myteksi.com/v1/styles/basic.json"] camera:camera size:snapshotRect.size];
-    options.scale = [UIScreen mainScreen].scale;
-    options.showsAttribution = NO;
-
-    _snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
-    _snapshotter.delegate = self;
-
-    CLLocationCoordinate2D polylineCoordinates[] = {
-        CLLocationCoordinate2DMake(-50, -100),
-        CLLocationCoordinate2DMake(-50, 100),
-        CLLocationCoordinate2DMake(-30, 50),
-    };
-    MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates count:3];
-    [_snapshotter addAnnotation:polyline];
-
-    MLNPointAnnotation *pointAnnotaiton = [[MLNPointAnnotation alloc] init];
-    pointAnnotaiton.coordinate = CLLocationCoordinate2DMake(30, -0);
-    [_snapshotter addAnnotation:pointAnnotaiton];
-
-    CLLocationCoordinate2D polygonCoordinates[] = {
-        CLLocationCoordinate2DMake(0, -50),
-        CLLocationCoordinate2DMake(0, 50),
-        CLLocationCoordinate2DMake(30, 50),
-        CLLocationCoordinate2DMake(30, -50),
-        CLLocationCoordinate2DMake(0, -50),
-    };
-    MLNPolygon *polygon = [MLNPolygon polygonWithCoordinates:polygonCoordinates count:5];
-    [_snapshotter addAnnotation:polygon];
-
-    // Ensure snapshot when map has finished loading its style
-    __weak typeof(self) weakSelf = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [weakSelf.snapshotter startWithCompletionHandler:^(MLNMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-            if (snapshot && !error) {
-                UIImage *image = snapshot.image;
-                // For demonstration, save the image to Photos or use as needed
-                // UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
-                NSLog(@"Snapshot captured: %@", image);
-            } else {
-                NSLog(@"Snapshot error: %@", error);
-            }
-        }];
-    });
-
-
 }
 
 
