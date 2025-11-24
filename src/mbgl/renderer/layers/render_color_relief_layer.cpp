@@ -89,6 +89,7 @@ void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStops || !colorStops) return;
 
     Log::Info(Event::Render, "=== TEST updateColorRamp() - Hardcoded gradient ===");
+    Log::Info(Event::Render, "Color ramp size: " + std::to_string(colorRampSize));
 
     // Create a simple red-to-blue gradient
     // If this shows up in the render, then the problem is expression evaluation
@@ -129,21 +130,37 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
+        
+        // Log every 64th stop to see the progression
+        if (i % 64 == 0 || i == colorRampSize - 1) {
+            std::string stopInfo = "Stop " + std::to_string(i) + ": " +
+                                   "elevation=" + std::to_string(elevation) + "m, " +
+                                   "color=(" + std::to_string(colorStops->data[i * 4 + 0]) + "," +
+                                   std::to_string(colorStops->data[i * 4 + 1]) + "," +
+                                   std::to_string(colorStops->data[i * 4 + 2]) + "," +
+                                   std::to_string(colorStops->data[i * 4 + 3]) + ")";
+            Log::Info(Event::Render, stopInfo);
+        }
     }
 
     // Log first and last colors to verify
-    Log::Info(Event::Render, "First color (0m): R=%d G=%d B=%d A=%d",
-             colorStops->data[0], colorStops->data[1], colorStops->data[2], colorStops->data[3]);
+    std::string firstColor = "First color (0m): R=" + std::to_string(colorStops->data[0]) +
+                             " G=" + std::to_string(colorStops->data[1]) +
+                             " B=" + std::to_string(colorStops->data[2]) +
+                             " A=" + std::to_string(colorStops->data[3]);
+    Log::Info(Event::Render, firstColor);
     
     int last = (colorRampSize - 1) * 4;
-    Log::Info(Event::Render, "Last color (8000m): R=%d G=%d B=%d A=%d",
-             colorStops->data[last], colorStops->data[last+1], colorStops->data[last+2], colorStops->data[last+3]);
+    std::string lastColor = "Last color (8000m): R=" + std::to_string(colorStops->data[last]) +
+                            " G=" + std::to_string(colorStops->data[last+1]) +
+                            " B=" + std::to_string(colorStops->data[last+2]) +
+                            " A=" + std::to_string(colorStops->data[last+3]);
+    Log::Info(Event::Render, lastColor);
 
     colorRampChanged = true;
     
     Log::Info(Event::Render, "=== TEST updateColorRamp() DONE ===");
 }
-
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
 
 void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
