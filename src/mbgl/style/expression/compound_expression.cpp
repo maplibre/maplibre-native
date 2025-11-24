@@ -369,6 +369,19 @@ const auto& heatmapDensityCompoundExpression() {
     return signature;
 }
 
+const auto& elevationCompoundExpression() {
+    static auto signature = detail::makeSignature("elevation",
+                                                  [](const EvaluationContext& params) -> Result<double> {
+                                                      if (!params.elevation) {
+                                                          return EvaluationError{
+                                                              "The 'elevation' expression is unavailable in the "
+                                                              "current evaluation context."};
+                                                      }
+                                                      return static_cast<double>(*(params.elevation));
+                                                  });
+    return signature;
+}
+
 const auto& lineProgressCompoundExpression() {
     static auto signature = detail::makeSignature("line-progress",
                                                   [](const EvaluationContext& params) -> Result<double> {
@@ -1007,6 +1020,7 @@ constexpr const auto compoundExpressionRegistry =
         {"rgb", rgbCompoundExpression},
         {"zoom", zoomCompoundExpression},
         {"heatmap-density", heatmapDensityCompoundExpression},
+        {"elevation", elevationCompoundExpression},
         {"line-progress", lineProgressCompoundExpression},
         {"accumulated", accumulatedCompoundExpression},
         {"has", hasContextCompoundExpression},

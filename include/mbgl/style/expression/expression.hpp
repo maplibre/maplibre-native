@@ -51,6 +51,15 @@ public:
           feature(feature_),
           colorRampParameter(std::move(colorRampParameter_)) {}
 
+    EvaluationContext(std::optional<float> zoom_,
+                  GeometryTileFeature const* feature_,
+                  std::optional<double> colorRampParameter_,
+                  std::optional<float> elevation_) noexcept
+    : zoom(std::move(zoom_)),
+      feature(feature_),
+      colorRampParameter(std::move(colorRampParameter_)),
+      elevation(std::move(elevation_)) {}
+
     EvaluationContext& withFormattedSection(const Value* formattedSection_) noexcept {
         formattedSection = formattedSection_;
         return *this;
@@ -71,10 +80,16 @@ public:
         return *this;
     };
 
+    EvaluationContext& withElevation(float elevation_) noexcept {
+        elevation = elevation_;
+        return *this;
+    };
+
     std::optional<float> zoom;
     std::optional<mbgl::Value> accumulated;
     GeometryTileFeature const* feature = nullptr;
     std::optional<double> colorRampParameter;
+    std::optional<float> elevation;
     // Contains formatted section object, std::unordered_map<std::string, Value>.
     const Value* formattedSection = nullptr;
     const FeatureState* featureState = nullptr;
