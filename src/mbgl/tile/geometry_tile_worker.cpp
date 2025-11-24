@@ -580,12 +580,12 @@ void GeometryTileWorker::finalizeLayout() {
                                    << id.canonical.y << " Time");
 
     parent.invoke(&GeometryTile::onLayout,
-                        std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                                     std::move(featureIndex),
-                                                                     std::move(glyphAtlas),
-                                                                     std::move(imageAtlas),
-                                                                     dynamicTextureAtlas),
-                        correlationID);
+                  std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                               std::move(featureIndex),
+                                                               std::move(glyphAtlas),
+                                                               std::move(imageAtlas),
+                                                               dynamicTextureAtlas),
+                  correlationID);
 }
 
 } // namespace mbgl
