@@ -107,27 +107,58 @@ void RenderColorReliefLayer::updateColorRamp() {
     // Log the expression type to see what we're actually getting
     Log::Info(Event::Render, "Expression kind: " + std::to_string(static_cast<int>(expr->getKind())));
     
-    // The expression might be wrapped - try to find the Interpolate expression
+    // The expression might be wrapped - recursively search for the Interpolate expression
     const expression::Interpolate* interpolate = nullptr;
     
-    if (expr->getKind() == expression::Kind::Interpolate) {
-        interpolate = static_cast<const expression::Interpolate*>(expr);
-    } else {
-        // Expression is wrapped, need to unwrap it
-        // Try to find Interpolate by visiting children
-        expr->eachChild([&](const expression::Expression& child) {
-            if (!interpolate && child.getKind() == expression::Kind::Interpolate) {
-                interpolate = static_cast<const expression::Interpolate*>(&child);
-            }
-        });
-    }
+    std::function<void(const expression::Expression&)> findInterpolate;
+    findInterpolate = [&](const expression::Expression& e) {
+        if (interpolate) return; // Already found
+        
+        if (e.getKind() == expression::Kind::Interpolate) {
+            interpolate = static_cast<const expression::Interpolate*>(&e);
+            Log::Info(Event::Render, "Found Interpolate expression");
+        } else {
+            // Recursively search children
+            e.eachChild([&](const expression::Expression& child) {
+                findInterpolate(child);
+            });
+        }
+    };
+    
+    findInterpolate(*expr);
     
     if (!interpolate) {
-        Log::Error(Event::Render, "Could not find Interpolate expression!");
+        Log::Error(Event::Render, "Could not find Interpolate expression in tree!");
+        // Fall back to sampling approach
+        const float minElevation = -11000.0f;
+        const float maxElevation = 9000.0f;
+
+        for (uint32_t i = 0; i < colorRampSize; ++i) {
+            float t = static_cast<float>(i) / (colorRampSize - 1);
+            float elevation = minElevation + t * (maxElevation - minElevation);
+
+            expression::EvaluationContext context(0.0f);
+            context.elevation = elevation;
+
+            Color color = Color::black();
+            auto result = expr->evaluate(context);
+            if (result) {
+                color = *expression::fromExpressionValue<Color>(*result);
+            }
+
+            auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
+            elevData[i] = elevation;
+
+            colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
+            colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
+            colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
+            colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
+        }
+        colorRampChanged = true;
         return;
     }
 
-    Log::Info(Event::Render, "Found Interpolate expression");
+    Log::Info(Event::Render, "Using Interpolate expression with " + std::to_string(interpolate->getStopCount()) + " stops");
     
     std::vector<double> elevationValues;
     std::vector<Color> colors;
@@ -212,24 +243,9 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
-    // Log first and last colors
-    std::string firstColor = "First color: R=" + std::to_string(colorStops->data[0]) +
-                             " G=" + std::to_string(colorStops->data[1]) +
-                             " B=" + std::to_string(colorStops->data[2]) +
-                             " A=" + std::to_string(colorStops->data[3]);
-    Log::Info(Event::Render, firstColor);
-    
-    int last = (colorRampSize - 1) * 4;
-    std::string lastColor = "Last color: R=" + std::to_string(colorStops->data[last]) +
-                            " G=" + std::to_string(colorStops->data[last+1]) +
-                            " B=" + std::to_string(colorStops->data[last+2]) +
-                            " A=" + std::to_string(colorStops->data[last+3]);
-    Log::Info(Event::Render, lastColor);
-
     colorRampChanged = true;
     Log::Info(Event::Render, "updateColorRamp complete");
 }
-
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
 
 void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
