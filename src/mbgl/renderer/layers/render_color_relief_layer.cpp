@@ -90,26 +90,51 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     Log::Info(Event::Render, "updateColorRamp: Getting color property");
     
-    // Try to get the expression from evaluated properties first
-    const auto& evaluatedColor = evaluated.get<ColorReliefColor>();
-    
-    // Sample the expression across a reasonable elevation range
-    const float minElevation = 0.0f;
-    const float maxElevation = 2500.0f;
-    
-    Log::Info(Event::Render, "Sampling color ramp from " + std::to_string(minElevation) + 
-              "m to " + std::to_string(maxElevation) + "m");
+    // Get the color property value
+    auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
+    if (colorValue.isUndefined()) {
+        Log::Warning(Event::Render, "colorValue is undefined, using default");
+        colorValue = ColorReliefLayer::getDefaultColorReliefColor();
+    }
 
-    // Test at specific elevations
+    // Get the expression from the color ramp property
+    const auto* expr = &colorValue.getExpression();
+    if (!expr) {
+        Log::Error(Event::Render, "Expression is null!");
+        return;
+    }
+
+    // Log expression kind
+    Log::Info(Event::Render, "Expression kind: " + std::to_string(static_cast<int>(expr->getKind())));
+
+    // Test evaluation at specific elevations from the style (400, 1000, 2000)
+    Log::Info(Event::Render, "Testing expression evaluation:");
     for (float testElev : {400.0f, 1000.0f, 2000.0f}) {
         expression::EvaluationContext context(0.0f);
         context.elevation = testElev;
         
-        auto color = evaluatedColor.evaluate(context);
-        Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
-                 std::to_string(int(color.r*255)) + " G=" + std::to_string(int(color.g*255)) + 
-                 " B=" + std::to_string(int(color.b*255)));
+        auto result = expr->evaluate(context);
+        if (result) {
+            auto colorOpt = expression::fromExpressionValue<Color>(*result);
+            if (colorOpt) {
+                Color c = *colorOpt;
+                Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
+                         std::to_string(int(c.r*255)) + " G=" + std::to_string(int(c.g*255)) + 
+                         " B=" + std::to_string(int(c.b*255)) + " A=" + std::to_string(int(c.a*255)));
+            } else {
+                Log::Warning(Event::Render, "  At " + std::to_string(testElev) + "m: Could not convert to Color");
+            }
+        } else {
+            Log::Warning(Event::Render, "  At " + std::to_string(testElev) + "m: Evaluation returned null");
+        }
     }
+
+    // Sample from 0-3000m to cover the style's 400-2000m range with margin
+    const float minElevation = 0.0f;
+    const float maxElevation = 3000.0f;
+    
+    Log::Info(Event::Render, "Sampling " + std::to_string(colorRampSize) + " points from " + 
+              std::to_string(minElevation) + "m to " + std::to_string(maxElevation) + "m");
 
     for (uint32_t i = 0; i < colorRampSize; ++i) {
         float t = static_cast<float>(i) / (colorRampSize - 1);
@@ -118,8 +143,14 @@ void RenderColorReliefLayer::updateColorRamp() {
         expression::EvaluationContext context(0.0f);
         context.elevation = elevation;
 
-        // Use evaluated property's evaluate method
-        Color color = evaluatedColor.evaluate(context);
+        Color color = Color::black();
+        auto result = expr->evaluate(context);
+        if (result) {
+            auto colorOpt = expression::fromExpressionValue<Color>(*result);
+            if (colorOpt) {
+                color = *colorOpt;
+            }
+        }
 
         // Store elevation as raw float
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
@@ -132,12 +163,15 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
-    // Log samples at key elevations
-    Log::Info(Event::Render, "Sample at 0m: R=" + std::to_string(colorStops->data[0]));
-    int mid = 127 * 4;
-    Log::Info(Event::Render, "Sample at ~1250m: R=" + std::to_string(colorStops->data[mid]));
+    // Log samples
+    Log::Info(Event::Render, "Sample 0 (0m): R=" + std::to_string(colorStops->data[0]) + 
+              " G=" + std::to_string(colorStops->data[1]) + " B=" + std::to_string(colorStops->data[2]));
+    int mid = 85 * 4; // ~1000m
+    Log::Info(Event::Render, "Sample 85 (~1000m): R=" + std::to_string(colorStops->data[mid]) +
+              " G=" + std::to_string(colorStops->data[mid+1]) + " B=" + std::to_string(colorStops->data[mid+2]));
     int last = 255 * 4;
-    Log::Info(Event::Render, "Sample at 2500m: R=" + std::to_string(colorStops->data[last]));
+    Log::Info(Event::Render, "Sample 255 (3000m): R=" + std::to_string(colorStops->data[last]) +
+              " G=" + std::to_string(colorStops->data[last+1]) + " B=" + std::to_string(colorStops->data[last+2]));
 
     colorRampChanged = true;
     Log::Info(Event::Render, "updateColorRamp complete");
