@@ -81,86 +81,97 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
     updateRenderTileIDs();
 }
 
-// TEMPORARY TEST VERSION OF updateColorRamp()
-// This removes all expression evaluation and just creates a simple gradient
-// Use this to test if the rendering pipeline works at all
-
 void RenderColorReliefLayer::updateColorRamp() {
-    if (!elevationStops || !colorStops) return;
+    if (!elevationStops || !colorStops) {
+        Log::Warning(Event::Render, "elevationStops or colorStops is null!");
+        return;
+    }
 
-    Log::Info(Event::Render, "=== TEST updateColorRamp() - Hardcoded gradient ===");
-    Log::Info(Event::Render, "Color ramp size: " + std::to_string(colorRampSize));
-
-    // Create a simple red-to-blue gradient
-    // If this shows up in the render, then the problem is expression evaluation
-    // If this doesn't show up, then the problem is in the rendering/shader
+    Log::Info(Event::Render, "updateColorRamp: Getting color property");
     
+    // Get the color property value
+    auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
+    if (colorValue.isUndefined()) {
+        Log::Warning(Event::Render, "colorValue is undefined, using default");
+        colorValue = ColorReliefLayer::getDefaultColorReliefColor();
+    }
+
+    // Get the expression from the color ramp property
+    const auto* expr = &colorValue.getExpression();
+    if (!expr) {
+        Log::Error(Event::Render, "Expression is null!");
+        // Fill with black as fallback
+        for (uint32_t i = 0; i < colorRampSize; ++i) {
+            float t = static_cast<float>(i) / (colorRampSize - 1);
+            float elevation = -11000.0f + t * 20000.0f;
+            
+            auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
+            elevData[i] = elevation;
+            
+            Color defaultColor = Color::black();
+            colorStops->data[i * 4 + 0] = static_cast<uint8_t>(defaultColor.r * 255);
+            colorStops->data[i * 4 + 1] = static_cast<uint8_t>(defaultColor.g * 255);
+            colorStops->data[i * 4 + 2] = static_cast<uint8_t>(defaultColor.b * 255);
+            colorStops->data[i * 4 + 3] = static_cast<uint8_t>(defaultColor.a * 255);
+        }
+        colorRampChanged = true;
+        return;
+    }
+
+    Log::Info(Event::Render, "Sampling color ramp with expression");
+
+    // Define elevation range for sampling
+    const float minElevation = -11000.0f;  // meters
+    const float maxElevation = 9000.0f;    // meters
+
+    // Sample the color ramp across the elevation range
     for (uint32_t i = 0; i < colorRampSize; ++i) {
         float t = static_cast<float>(i) / (colorRampSize - 1);
-        
-        // Create red (0m) to blue (8000m) gradient
-        float elevation = t * 8000.0f;
-        
-        // Store elevation (though this won't work with RGBA8 texture, but try anyway)
+        float elevation = minElevation + t * (maxElevation - minElevation);
+
+        // Create evaluation context with this elevation
+        expression::EvaluationContext context(0.0f);
+        context.elevation = elevation;
+
+        // Evaluate the expression to get the color for this elevation
+        Color color = Color::black();
+        auto result = expr->evaluate(context);
+        if (result) {
+            auto colorOpt = expression::fromExpressionValue<Color>(*result);
+            if (colorOpt) {
+                color = *colorOpt;
+            }
+        }
+
+        // Store elevation as raw float
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
         elevData[i] = elevation;
-        
-        // Red -> Yellow -> Green -> Cyan -> Blue gradient
-        Color color;
-        if (t < 0.25f) {
-            // Red to Yellow
-            float tt = t / 0.25f;
-            color = Color(1.0f, tt, 0.0f, 1.0f);
-        } else if (t < 0.5f) {
-            // Yellow to Green  
-            float tt = (t - 0.25f) / 0.25f;
-            color = Color(1.0f - tt, 1.0f, 0.0f, 1.0f);
-        } else if (t < 0.75f) {
-            // Green to Cyan
-            float tt = (t - 0.5f) / 0.25f;
-            color = Color(0.0f, 1.0f, tt, 1.0f);
-        } else {
-            // Cyan to Blue
-            float tt = (t - 0.75f) / 0.25f;
-            color = Color(0.0f, 1.0f - tt, 1.0f, 1.0f);
-        }
-        
-        // Store color - THIS SHOULD WORK
+
+        // Store color in RGBA format
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
-        
-        // Log every 64th stop to see the progression
-        if (i % 64 == 0 || i == colorRampSize - 1) {
-            std::string stopInfo = "Stop " + std::to_string(i) + ": " +
-                                   "elevation=" + std::to_string(elevation) + "m, " +
-                                   "color=(" + std::to_string(colorStops->data[i * 4 + 0]) + "," +
-                                   std::to_string(colorStops->data[i * 4 + 1]) + "," +
-                                   std::to_string(colorStops->data[i * 4 + 2]) + "," +
-                                   std::to_string(colorStops->data[i * 4 + 3]) + ")";
-            Log::Info(Event::Render, stopInfo);
-        }
     }
 
-    // Log first and last colors to verify
-    std::string firstColor = "First color (0m): R=" + std::to_string(colorStops->data[0]) +
+    // Log first and last colors
+    std::string firstColor = "First color: R=" + std::to_string(colorStops->data[0]) +
                              " G=" + std::to_string(colorStops->data[1]) +
                              " B=" + std::to_string(colorStops->data[2]) +
                              " A=" + std::to_string(colorStops->data[3]);
     Log::Info(Event::Render, firstColor);
     
     int last = (colorRampSize - 1) * 4;
-    std::string lastColor = "Last color (8000m): R=" + std::to_string(colorStops->data[last]) +
+    std::string lastColor = "Last color: R=" + std::to_string(colorStops->data[last]) +
                             " G=" + std::to_string(colorStops->data[last+1]) +
                             " B=" + std::to_string(colorStops->data[last+2]) +
                             " A=" + std::to_string(colorStops->data[last+3]);
     Log::Info(Event::Render, lastColor);
 
     colorRampChanged = true;
-    
-    Log::Info(Event::Render, "=== TEST updateColorRamp() DONE ===");
+    Log::Info(Event::Render, "updateColorRamp complete");
 }
+
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
 
 void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
