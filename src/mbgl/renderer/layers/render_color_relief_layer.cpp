@@ -90,147 +90,36 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     Log::Info(Event::Render, "updateColorRamp: Getting color property");
     
-    // Get the color property value
-    auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
-    if (colorValue.isUndefined()) {
-        Log::Warning(Event::Render, "colorValue is undefined, using default");
-        colorValue = ColorReliefLayer::getDefaultColorReliefColor();
-    }
-
-    // Get the expression from the color ramp property
-    const auto* expr = &colorValue.getExpression();
-    if (!expr) {
-        Log::Error(Event::Render, "Expression is null!");
-        return;
-    }
-
-    // Log the expression type to see what we're actually getting
-    Log::Info(Event::Render, "Expression kind: " + std::to_string(static_cast<int>(expr->getKind())));
+    // Try to get the expression from evaluated properties first
+    const auto& evaluatedColor = evaluated.get<ColorReliefColor>();
     
-    // The expression might be wrapped - recursively search for the Interpolate expression
-    const expression::Interpolate* interpolate = nullptr;
+    // Sample the expression across a reasonable elevation range
+    const float minElevation = 0.0f;
+    const float maxElevation = 2500.0f;
     
-    std::function<void(const expression::Expression&)> findInterpolate;
-    findInterpolate = [&](const expression::Expression& e) {
-        if (interpolate) return; // Already found
-        
-        if (e.getKind() == expression::Kind::Interpolate) {
-            interpolate = static_cast<const expression::Interpolate*>(&e);
-            Log::Info(Event::Render, "Found Interpolate expression");
-        } else {
-            // Recursively search children
-            e.eachChild([&](const expression::Expression& child) {
-                findInterpolate(child);
-            });
-        }
-    };
-    
-    findInterpolate(*expr);
-    
-    if (!interpolate) {
-        Log::Error(Event::Render, "Could not find Interpolate expression in tree!");
-        // Fall back to sampling approach
-        const float minElevation = -11000.0f;
-        const float maxElevation = 9000.0f;
+    Log::Info(Event::Render, "Sampling color ramp from " + std::to_string(minElevation) + 
+              "m to " + std::to_string(maxElevation) + "m");
 
-        for (uint32_t i = 0; i < colorRampSize; ++i) {
-            float t = static_cast<float>(i) / (colorRampSize - 1);
-            float elevation = minElevation + t * (maxElevation - minElevation);
-
-            expression::EvaluationContext context(0.0f);
-            context.elevation = elevation;
-
-            Color color = Color::black();
-            auto result = expr->evaluate(context);
-            if (result) {
-                color = *expression::fromExpressionValue<Color>(*result);
-            }
-
-            auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
-            elevData[i] = elevation;
-
-            colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
-            colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
-            colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
-            colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
-        }
-        colorRampChanged = true;
-        return;
-    }
-
-    Log::Info(Event::Render, "Using Interpolate expression with " + std::to_string(interpolate->getStopCount()) + " stops");
-    
-    std::vector<double> elevationValues;
-    std::vector<Color> colors;
-    
-    // Extract stops directly from the interpolate expression (like GL JS does)
-    interpolate->eachStop([&](double elevation, const expression::Expression& colorExpr) {
-        elevationValues.push_back(elevation);
-        
-        // Evaluate the color expression for this stop
+    // Test at specific elevations
+    for (float testElev : {400.0f, 1000.0f, 2000.0f}) {
         expression::EvaluationContext context(0.0f);
-        context.elevation = elevation;
+        context.elevation = testElev;
         
-        auto result = colorExpr.evaluate(context);
-        if (result) {
-            auto colorOpt = expression::fromExpressionValue<Color>(*result);
-            if (colorOpt) {
-                colors.push_back(*colorOpt);
-            } else {
-                colors.push_back(Color::black());
-            }
-        } else {
-            colors.push_back(Color::black());
-        }
-    });
-
-    if (elevationValues.empty()) {
-        Log::Error(Event::Render, "No stops found in interpolate expression!");
-        return;
+        auto color = evaluatedColor.evaluate(context);
+        Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
+                 std::to_string(int(color.r*255)) + " G=" + std::to_string(int(color.g*255)) + 
+                 " B=" + std::to_string(int(color.b*255)));
     }
-
-    Log::Info(Event::Render, "Extracted " + std::to_string(elevationValues.size()) + " stops from expression");
-
-    // Now sample these stops across our 256-element texture
-    const float minElev = elevationValues.front();
-    const float maxElev = elevationValues.back();
-    
-    Log::Info(Event::Render, "Elevation range: " + std::to_string(minElev) + "m to " + std::to_string(maxElev) + "m");
 
     for (uint32_t i = 0; i < colorRampSize; ++i) {
         float t = static_cast<float>(i) / (colorRampSize - 1);
-        float elevation = minElev + t * (maxElev - minElev);
+        float elevation = minElevation + t * (maxElevation - minElevation);
 
-        // Find the two stops that bracket this elevation
-        size_t lowerIdx = 0;
-        for (size_t j = 0; j < elevationValues.size(); ++j) {
-            if (elevationValues[j] <= elevation) {
-                lowerIdx = j;
-            } else {
-                break;
-            }
-        }
-        
-        size_t upperIdx = std::min(lowerIdx + 1, elevationValues.size() - 1);
-        
-        // Interpolate color between the two stops
-        Color color;
-        if (lowerIdx == upperIdx) {
-            color = colors[lowerIdx];
-        } else {
-            float stopT = (elevation - elevationValues[lowerIdx]) / 
-                         (elevationValues[upperIdx] - elevationValues[lowerIdx]);
-            stopT = std::clamp(stopT, 0.0f, 1.0f);
-            
-            const Color& c1 = colors[lowerIdx];
-            const Color& c2 = colors[upperIdx];
-            color = Color(
-                c1.r + stopT * (c2.r - c1.r),
-                c1.g + stopT * (c2.g - c1.g),
-                c1.b + stopT * (c2.b - c1.b),
-                c1.a + stopT * (c2.a - c1.a)
-            );
-        }
+        expression::EvaluationContext context(0.0f);
+        context.elevation = elevation;
+
+        // Use evaluated property's evaluate method
+        Color color = evaluatedColor.evaluate(context);
 
         // Store elevation as raw float
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
@@ -243,9 +132,17 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
+    // Log samples at key elevations
+    Log::Info(Event::Render, "Sample at 0m: R=" + std::to_string(colorStops->data[0]));
+    int mid = 127 * 4;
+    Log::Info(Event::Render, "Sample at ~1250m: R=" + std::to_string(colorStops->data[mid]));
+    int last = 255 * 4;
+    Log::Info(Event::Render, "Sample at 2500m: R=" + std::to_string(colorStops->data[last]));
+
     colorRampChanged = true;
     Log::Info(Event::Render, "updateColorRamp complete");
 }
+
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
 
 void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
