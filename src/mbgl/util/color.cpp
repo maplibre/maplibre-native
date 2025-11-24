@@ -6,7 +6,32 @@
 namespace mbgl {
 
 std::optional<Color> Color::parse(const std::string& s) {
-    const auto css_color = CSSColorParser::parse(s);
+    std::string colorString = s; // Use a mutable copy of the input string
+
+    // --- START: NEW LOGIC to support #RGBA (4-digit hex) ---
+    // Check for the 4-digit hex format: #RGBA (length 5, including '#')
+    if (colorString.length() == 5 && colorString[0] == '#') {
+        std::string expandedColor = "#";
+        // R (Red): colorString[1] is doubled
+        expandedColor += colorString[1];
+        expandedColor += colorString[1];
+        // G (Green): colorString[2] is doubled
+        expandedColor += colorString[2];
+        expandedColor += colorString[2];
+        // B (Blue): colorString[3] is doubled
+        expandedColor += colorString[3];
+        expandedColor += colorString[3];
+        // A (Alpha): colorString[4] is doubled
+        expandedColor += colorString[4];
+        expandedColor += colorString[4];
+
+        // Replace the original string with the expanded string (e.g., "#F00C" becomes "#FF0000CC")
+        colorString = std::move(expandedColor);
+    }
+    // --- END: NEW LOGIC to support #RGBA (4-digit hex) ---
+
+    // Pass the potentially expanded string to the existing parser
+    const auto css_color = CSSColorParser::parse(colorString);
 
     // Premultiply the color.
     if (css_color) {
@@ -15,12 +40,6 @@ std::optional<Color> Color::parse(const std::string& s) {
     } else {
         return {};
     }
-}
-
-std::string Color::stringify() const {
-    std::array<double, 4> array = toArray();
-    return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
-           util::toString(array[3]) + ")";
 }
 
 std::array<double, 4> Color::toArray() const {
