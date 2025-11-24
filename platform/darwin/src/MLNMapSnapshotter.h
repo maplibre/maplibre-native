@@ -445,7 +445,7 @@ MLN_EXPORT
 /**
  Returns the color to use when rendering the outline of a shape annotation.
 
- The default stroke color is UIColor.whiteColor.
+ The default stroke color is MLNColor.whiteColor.
 
  Opacity may be set by specifying an alpha component. The default alpha value is
  `1.0` and results in a completely opaque stroke.
@@ -458,13 +458,13 @@ MLN_EXPORT
  TODO: Annotation models, learn how to modify the outline color of an
  ``MLNShape`` object that has been added to your map as an annotation.
  */
-- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+- (MLNColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
     strokeColorForShapeAnnotation:(MLNShape *)annotation;
 
 /**
  Returns the color to use when rendering the fill of a polygon annotation.
 
- The default fill color is the UIColor.whiteColor.
+ The default fill color is the MLNColor.whiteColor.
 
  Opacity may be set by specifying an alpha component. The default alpha value is
  `1.0` and results in a completely opaque shape.
@@ -477,7 +477,7 @@ MLN_EXPORT
  TODO: Add a polygon annotation, learn how to modify the color of a an
  ``MLNPolygon`` at runtime.
  */
-- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
+- (MLNColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
     fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
 
 /**
