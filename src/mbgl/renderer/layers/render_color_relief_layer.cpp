@@ -17,6 +17,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/expression.hpp>
+#include <mbgl/style/expression/interpolate.hpp>
 #include <mbgl/style/conversion/color_ramp_property_value.hpp>
 #include <mbgl/util/premultiply.hpp>
 
@@ -100,47 +101,88 @@ void RenderColorReliefLayer::updateColorRamp() {
     const auto* expr = &colorValue.getExpression();
     if (!expr) {
         Log::Error(Event::Render, "Expression is null!");
-        // Fill with black as fallback
-        for (uint32_t i = 0; i < colorRampSize; ++i) {
-            float t = static_cast<float>(i) / (colorRampSize - 1);
-            float elevation = -11000.0f + t * 20000.0f;
-            
-            auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
-            elevData[i] = elevation;
-            
-            Color defaultColor = Color::black();
-            colorStops->data[i * 4 + 0] = static_cast<uint8_t>(defaultColor.r * 255);
-            colorStops->data[i * 4 + 1] = static_cast<uint8_t>(defaultColor.g * 255);
-            colorStops->data[i * 4 + 2] = static_cast<uint8_t>(defaultColor.b * 255);
-            colorStops->data[i * 4 + 3] = static_cast<uint8_t>(defaultColor.a * 255);
-        }
-        colorRampChanged = true;
         return;
     }
 
-    Log::Info(Event::Render, "Sampling color ramp with expression");
+    // Check if it's an Interpolate expression
+    if (expr->getKind() != expression::Kind::Interpolate) {
+        Log::Error(Event::Render, "Expression is not an Interpolate type!");
+        return;
+    }
 
-    // Define elevation range for sampling
-    const float minElevation = -11000.0f;  // meters
-    const float maxElevation = 9000.0f;    // meters
-
-    // Sample the color ramp across the elevation range
-    for (uint32_t i = 0; i < colorRampSize; ++i) {
-        float t = static_cast<float>(i) / (colorRampSize - 1);
-        float elevation = minElevation + t * (maxElevation - minElevation);
-
-        // Create evaluation context with this elevation
+    const auto* interpolate = static_cast<const expression::Interpolate*>(expr);
+    
+    std::vector<double> elevationValues;
+    std::vector<Color> colors;
+    
+    // Extract stops directly from the interpolate expression (like GL JS does)
+    interpolate->eachStop([&](double elevation, const expression::Expression& colorExpr) {
+        elevationValues.push_back(elevation);
+        
+        // Evaluate the color expression for this stop
         expression::EvaluationContext context(0.0f);
         context.elevation = elevation;
-
-        // Evaluate the expression to get the color for this elevation
-        Color color = Color::black();
-        auto result = expr->evaluate(context);
+        
+        auto result = colorExpr.evaluate(context);
         if (result) {
             auto colorOpt = expression::fromExpressionValue<Color>(*result);
             if (colorOpt) {
-                color = *colorOpt;
+                colors.push_back(*colorOpt);
+            } else {
+                colors.push_back(Color::black());
             }
+        } else {
+            colors.push_back(Color::black());
+        }
+    });
+
+    if (elevationValues.empty()) {
+        Log::Error(Event::Render, "No stops found in interpolate expression!");
+        return;
+    }
+
+    Log::Info(Event::Render, "Extracted " + std::to_string(elevationValues.size()) + " stops from expression");
+
+    // Now sample these stops across our 256-element texture
+    // This ensures the entire elevation range is covered
+    const float minElev = elevationValues.front();
+    const float maxElev = elevationValues.back();
+    
+    Log::Info(Event::Render, "Elevation range: " + std::to_string(minElev) + "m to " + std::to_string(maxElev) + "m");
+
+    for (uint32_t i = 0; i < colorRampSize; ++i) {
+        float t = static_cast<float>(i) / (colorRampSize - 1);
+        float elevation = minElev + t * (maxElev - minElev);
+
+        // Find the two stops that bracket this elevation
+        size_t lowerIdx = 0;
+        for (size_t j = 0; j < elevationValues.size(); ++j) {
+            if (elevationValues[j] <= elevation) {
+                lowerIdx = j;
+            } else {
+                break;
+            }
+        }
+        
+        size_t upperIdx = std::min(lowerIdx + 1, elevationValues.size() - 1);
+        
+        // Interpolate color between the two stops
+        Color color;
+        if (lowerIdx == upperIdx) {
+            color = colors[lowerIdx];
+        } else {
+            float stopT = (elevation - elevationValues[lowerIdx]) / 
+                         (elevationValues[upperIdx] - elevationValues[lowerIdx]);
+            stopT = std::clamp(stopT, 0.0f, 1.0f);
+            
+            const Color& c1 = colors[lowerIdx];
+            const Color& c2 = colors[upperIdx];
+            color = Color(
+                c1.r + stopT * (c2.r - c1.r),
+                c1.g + stopT * (c2.g - c1.g),
+                c1.b + stopT * (c2.b - c1.b),
+                c1.a + stopT * (c2.a - c1.a)
+            );
         }
 
         // Store elevation as raw float
