@@ -42,14 +42,14 @@ layout(std140) uniform ColorReliefTilePropsUBO {
     highp vec4 u_unpack;
     highp vec2 u_dimension;
     int u_color_ramp_size;
-    float pad0;
+    float pad_tile0;
 };
 
 layout(std140) uniform ColorReliefEvaluatedPropsUBO {
     float u_opacity;
-    float pad0;
-    float pad1;
-    float pad2;
+    float pad_eval0;
+    float pad_eval1;
+    float pad_eval2;
 };
 
 uniform sampler2D u_image;
@@ -108,8 +108,7 @@ void main() {
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
 #endif
-}
-)";
+})";
 };
 
 } // namespace shaders
