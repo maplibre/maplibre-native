@@ -83,51 +83,36 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStops || !colorStops) return;
 
-    auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
-    if (colorValue.isUndefined()) {
-        colorValue = ColorReliefLayer::getDefaultColorReliefColor();
-    }
-
-    // TODO: Parse the expression to extract elevation/color pairs
-    // For now, create a simple gradient from blue (low) to red (high)
-    // This is a placeholder - you'll need to properly parse the expression
-
+    auto colorProperty = unevaluated.get<ColorReliefColor>();
+    
+    // Define elevation range for sampling
+    // This range matches the typical DEM encoding range and covers:
+    // - Mariana Trench (~-11000m) to Mount Everest (~8849m)
+    // Both Terrain-RGB (Mapbox) and Terrarium (Mapzen) encodings support this range:
+    // - Terrain-RGB: -10000m to +17895m (via -10000 + ((R*256*256 + G*256 + B) * 0.1))
+    // - Terrarium: -11000m to +6553.5m (via (R*256 + G + B/256) - 32768)
+    const float minElevation = -11000.0f;  // meters (below sea level, bathymetry)
+    const float maxElevation = 9000.0f;    // meters (above sea level)
+    
+    // Sample the color ramp across the elevation range
     for (uint32_t i = 0; i < colorRampSize; ++i) {
+        // Calculate elevation for this sample
         float t = static_cast<float>(i) / (colorRampSize - 1);
-
-        // Simple RGB encoding for elevation (Mapbox Terrain RGB format)
-        // elevation = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)
-        // For a range of -10000m to +8849m (approx -10000 to +18849), we need values 0 to 288490
-        float elevation = -10000.0f + t * 18849.0f;
-
-        // Encode elevation in RGB format
-        int elevInt = static_cast<int>((elevation + 10000.0f) * 10.0f);
-        uint8_t r = (elevInt >> 16) & 0xFF;
-        uint8_t g = (elevInt >> 8) & 0xFF;
-        uint8_t b = elevInt & 0xFF;
-        uint8_t a = 0; // Not used in unpacking
-
-        elevationStops->data[i * 4 + 0] = r;
-        elevationStops->data[i * 4 + 1] = g;
-        elevationStops->data[i * 4 + 2] = b;
-        elevationStops->data[i * 4 + 3] = a;
-
-        // Simple color gradient: blue -> cyan -> green -> yellow -> red
-        Color color;
-        if (t < 0.25f) {
-            float localT = t / 0.25f;
-            color = Color{0.0f, localT, 1.0f, 1.0f};
-        } else if (t < 0.5f) {
-            float localT = (t - 0.25f) / 0.25f;
-            color = Color{0.0f, 1.0f, 1.0f - localT, 1.0f};
-        } else if (t < 0.75f) {
-            float localT = (t - 0.5f) / 0.25f;
-            color = Color{localT, 1.0f, 0.0f, 1.0f};
-        } else {
-            float localT = (t - 0.75f) / 0.25f;
-            color = Color{1.0f, 1.0f - localT, 0.0f, 1.0f};
-        }
-
+        float elevation = minElevation + t * (maxElevation - minElevation);
+        
+        // Create evaluation context with this elevation
+        expression::EvaluationContext context(0.0f);  // zoom = 0
+        context.elevation = elevation;
+        
+        // Evaluate the expression to get the color for this elevation
+        Color color = colorProperty.evaluate(context);
+        
+        // Store elevation as raw float in R channel (shader expects GL_R32F texture)
+        // We'll store it as float bytes for now, but the texture should be uploaded as GL_R32F
+        auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
+        elevData[i] = elevation;
+        
+        // Store color in RGBA format
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255);
@@ -331,11 +316,12 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             // Set up tile properties UBO
             shaders::ColorReliefTilePropsUBO tilePropsUBO;
 
-            // DEM unpack vector (Mapbox Terrain RGB format)
-            tilePropsUBO.unpack = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+            // Get DEM unpack vector from the actual data (supports both Terrain-RGB and Terrarium)
+            const auto& demData = bucket.getDEMData();
+            const auto unpackVector = demData.getUnpackVector();
+            tilePropsUBO.unpack = {{unpackVector[0], unpackVector[1], unpackVector[2], unpackVector[3]}};
 
             // Texture dimensions
-            const auto& demData = bucket.getDEMData();
             tilePropsUBO.dimension = {{static_cast<float>(demData.dim), static_cast<float>(demData.dim)}};
 
             // Color ramp size

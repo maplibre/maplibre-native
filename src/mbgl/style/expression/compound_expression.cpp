@@ -373,10 +373,10 @@ const auto& elevationCompoundExpression() {
     static auto signature = detail::makeSignature(
         "elevation",
         [](const EvaluationContext& params) -> Result<double> {
+            // Return 0 if elevation is not available (e.g., during parsing)
+            // This allows the expression to be validated without DEM data
             if (!params.elevation) {
-                return EvaluationError{
-                    "The 'elevation' expression is unavailable in the "
-                    "current evaluation context."};
+                return 0.0;  // Changed from error to default value
             }
             return static_cast<double>(*(params.elevation));
         },
