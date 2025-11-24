@@ -16,7 +16,7 @@ layout(std140) uniform ColorReliefTilePropsUBO {
     highp vec4 u_unpack;
     highp vec2 u_dimension;
     int u_color_ramp_size;
-    float pad0;
+    float pad_tile0;
 };
 
 in vec2 a_pos;
