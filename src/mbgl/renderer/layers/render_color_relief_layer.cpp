@@ -84,44 +84,61 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStops || !colorStops) return;
 
-    // Get the color property value  
-    const auto& colorValue = unevaluated.get<ColorReliefColor>().getValue();
-    
+    // Get the color property value
+    auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
+    if (colorValue.isUndefined()) {
+        colorValue = ColorReliefLayer::getDefaultColorReliefColor();
+    }
+
+    // Get the expression from the color ramp property
+    const auto* expr = colorValue.expression.get();
+    if (!expr) {
+        // No expression - fill with default color
+        Color defaultColor = Color::black();
+        for (uint32_t i = 0; i < colorRampSize; ++i) {
+            float t = static_cast<float>(i) / (colorRampSize - 1);
+            float elevation = -11000.0f + t * 20000.0f;
+            
+            auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
+            elevData[i] = elevation;
+            
+            colorStops->data[i * 4 + 0] = static_cast<uint8_t>(defaultColor.r * 255);
+            colorStops->data[i * 4 + 1] = static_cast<uint8_t>(defaultColor.g * 255);
+            colorStops->data[i * 4 + 2] = static_cast<uint8_t>(defaultColor.b * 255);
+            colorStops->data[i * 4 + 3] = static_cast<uint8_t>(defaultColor.a * 255);
+        }
+        colorRampChanged = true;
+        return;
+    }
+
     // Define elevation range for sampling
     // This range matches the typical DEM encoding range and covers:
     // - Mariana Trench (~-11000m) to Mount Everest (~8849m)
     // Both Terrain-RGB (Mapbox) and Terrarium (Mapzen) encodings support this range
     const float minElevation = -11000.0f;  // meters (below sea level, bathymetry)
     const float maxElevation = 9000.0f;    // meters (above sea level)
-    
+
     // Sample the color ramp across the elevation range
     for (uint32_t i = 0; i < colorRampSize; ++i) {
         // Calculate elevation for this sample
         float t = static_cast<float>(i) / (colorRampSize - 1);
         float elevation = minElevation + t * (maxElevation - minElevation);
-        
+
         // Create evaluation context with this elevation
         expression::EvaluationContext context(0.0f);  // zoom = 0
         context.elevation = elevation;
-        
-        // Evaluate to get color - use match to handle different property value types
-        Color color = colorValue.match(
-            [&](const Color& constantColor) {
-                return constantColor;
-            },
-            [&](const auto& expression) -> Color {
-                auto result = expression.evaluate(context);
-                if (result) {
-                    return expression::fromExpressionValue<Color>(*result);
-                }
-                return Color::black();
-            }
-        );
-        
+
+        // Evaluate the expression to get the color for this elevation
+        Color color = Color::black();
+        auto result = expr->evaluate(context);
+        if (result) {
+            color = expression::fromExpressionValue<Color>(*result);
+        }
+
         // Store elevation as raw float in R channel (shader expects GL_R32F texture)
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
         elevData[i] = elevation;
-        
+
         // Store color in RGBA format
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255);
