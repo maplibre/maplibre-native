@@ -132,7 +132,7 @@ void RenderColorReliefLayer::updateColorRamp() {
         Color color = Color::black();
         auto result = expr->evaluate(context);
         if (result) {
-            color = expression::fromExpressionValue<Color>(*result);
+            color = *expression::fromExpressionValue<Color>(*result);
         }
 
         // Store elevation as raw float in R channel (shader expects GL_R32F texture)
