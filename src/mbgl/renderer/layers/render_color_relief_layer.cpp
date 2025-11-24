@@ -395,7 +395,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
             // Color ramp size
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
-            tilePropsUBO.pad0 = 0.0f;
+            tilePropsUBO.pad_tile0 = 0.0f;
 
             auto& drawableUniforms = drawable->mutableUniformBuffers();
             drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
