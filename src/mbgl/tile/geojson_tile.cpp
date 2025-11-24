@@ -31,7 +31,8 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
                       if (auto guard = self.lock(); self && data.get() == capturedData) {
                           setData(std::make_unique<GeoJSONTileData>(std::move(features)));
                       }
-                  });
+                  },
+                  isSynchronous);
 }
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {

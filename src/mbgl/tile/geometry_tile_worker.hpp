@@ -34,8 +34,18 @@ using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(ActorRef<GeometryTileWorker> self,
-                       ActorRef<GeometryTile> parent,
+    GeometryTileWorker(GeometryTile& parent,
+                       const TaggedScheduler& scheduler_,
+                       OverscaledTileID,
+                       std::string,
+                       const std::atomic<bool>&,
+                       MapMode,
+                       float pixelRatio,
+                       bool showCollisionBoxes_,
+                       gfx::DynamicTextureAtlasPtr,
+                       std::shared_ptr<FontFaces> fontFaces);
+    GeometryTileWorker(ActorRef<GeometryTileWorker> selfActor,
+                       ActorRef<GeometryTile> parentActor,
                        const TaggedScheduler& scheduler_,
                        OverscaledTileID,
                        std::string,
@@ -79,8 +89,9 @@ private:
 
     void checkPatternLayout(std::unique_ptr<Layout> layout);
 
-    ActorRef<GeometryTileWorker> self;
-    ActorRef<GeometryTile> parent;
+    std::unique_ptr<ActorRef<GeometryTileWorker>> selfActor;
+    std::unique_ptr<ActorRef<GeometryTile>> parentActor;
+    GeometryTile* parent;
     TaggedScheduler scheduler;
 
     const OverscaledTileID id;
@@ -123,6 +134,8 @@ private:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     std::shared_ptr<FontFaces> fontFaces;
+
+    bool isSynchronous;
 };
 
 } // namespace mbgl

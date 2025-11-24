@@ -24,14 +24,18 @@ namespace mbgl {
 namespace style {
 
 class GeoJSONVTData final : public GeoJSONData {
-    void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn) final {
+    void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn, bool isSynchronous) final {
         assert(fn);
-        sequencedScheduler->scheduleAndReplyValue(
-            util::SimpleIdentity::Empty,
-            [id, geoJSONVT_impl = this->impl]() -> TileFeatures {
-                return geoJSONVT_impl->getTile(id.z, id.x, id.y).features;
-            },
-            fn);
+        if (isSynchronous) {
+            fn(this->impl->getTile(id.z, id.x, id.y).features);
+        } else {
+            sequencedScheduler->scheduleAndReplyValue(
+                util::SimpleIdentity::Empty,
+                [id, geoJSONVT_impl = this->impl]() -> TileFeatures {
+                    return geoJSONVT_impl->getTile(id.z, id.x, id.y).features;
+                },
+                fn);
+        }
     }
 
     Features getChildren(const std::uint32_t) final { return {}; }
@@ -54,7 +58,7 @@ class GeoJSONVTData final : public GeoJSONData {
 };
 
 class SuperclusterData final : public GeoJSONData {
-    void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn) final {
+    void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn, bool) final {
         assert(fn);
         fn(impl.getTile(id.z, id.x, id.y));
     }

@@ -330,7 +330,8 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
     }
     GeoJsonSource source = style.getSourceAs(LOCATION_SOURCE);
     if (source != null) {
-      locationSource.setGeoJson(locationFeature);
+      locationSource.setSynchronous(true);
+      locationSource.setGeoJsonSync(locationFeature);
     }
   }
 

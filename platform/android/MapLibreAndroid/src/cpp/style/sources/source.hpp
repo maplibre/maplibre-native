@@ -58,6 +58,10 @@ public:
 
     void setVolatile(JNIEnv&, jni::Boolean&);
 
+    jni::Local<jni::Boolean> isSynchronous(JNIEnv&);
+
+    void setSynchronous(JNIEnv&, jni::Boolean&);
+
     void setMinimumTileUpdateInterval(JNIEnv&, jni::Long&);
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);

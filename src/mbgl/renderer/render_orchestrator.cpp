@@ -184,7 +184,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
 
-    const TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
+    TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
                                         .debugOptions = updateParameters->debugOptions,
                                         .transformState = updateParameters->transformState,
                                         .fileSource = updateParameters->fileSource,
@@ -410,6 +410,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 updateList[index] = true;
             }
         }
+        tileParameters.isSynchronous = sourceImpl->isSynchronous();
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
 

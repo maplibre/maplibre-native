@@ -193,22 +193,39 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       ImageRequestor(parameters.imageManager),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(parameters.threadPool, // Scheduler reference for the Actor retainer
-             ActorRef<GeometryTile>(*this, mailbox),
-             parameters.threadPool,
-             id_,
-             sourceID,
-             obsolete,
-             parameters.mode,
-             parameters.pixelRatio,
-             parameters.debugOptions & MapDebugOptions::Collision,
-             parameters.dynamicTextureAtlas,
-             parameters.glyphManager->getFontFaces()),
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision),
+      isSynchronous(parameters.isSynchronous) {
+          if (isSynchronous) {
+              worker = std::make_unique<GeometryTileWorker>(
+                      *this,
+                      parameters.threadPool,
+                      id_,
+                      sourceID,
+                      obsolete,
+                      parameters.mode,
+                      parameters.pixelRatio,
+                      parameters.debugOptions & MapDebugOptions::Collision,
+                      parameters.dynamicTextureAtlas,
+                      parameters.glyphManager->getFontFaces());
+          } else {
+              workerActor = std::make_unique<Actor<GeometryTileWorker>>(
+                      parameters.threadPool, // Scheduler reference for the Actor retainer
+                      ActorRef<GeometryTile>(*this, mailbox),
+                      parameters.threadPool,
+                      id_,
+                      sourceID,
+                      obsolete,
+                      parameters.mode,
+                      parameters.pixelRatio,
+                      parameters.debugOptions & MapDebugOptions::Collision,
+                      parameters.dynamicTextureAtlas,
+                      parameters.glyphManager->getFontFaces());
+          }
+      }
 
 GeometryTile::~GeometryTile() {
     MLN_TRACE_FUNC();
@@ -259,8 +276,12 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     pending = true;
 
     ++correlationID;
-    worker.self().invoke(
-        &GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
+    if (isSynchronous) {
+        worker->setData(std::move(data_), imageManager->getAvailableImages(), correlationID);
+    } else {
+        workerActor->self().invoke(
+            &GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
+    }
 }
 
 void GeometryTile::reset() {
@@ -279,7 +300,11 @@ void GeometryTile::reset() {
 
     // Reset the worker to the `NeedsParse` state.
     ++correlationID;
-    worker.self().invoke(&GeometryTileWorker::reset, correlationID);
+    if (isSynchronous) {
+        worker->reset(correlationID);
+    } else {
+        workerActor->self().invoke(&GeometryTileWorker::reset, correlationID);
+    }
 }
 
 std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
@@ -317,8 +342,12 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     }
 
     ++correlationID;
-    worker.self().invoke(
-        &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    if (isSynchronous) {
+        worker->setLayers(std::move(impls), imageManager->getAvailableImages(), correlationID);
+    } else {
+        workerActor->self().invoke(
+            &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    }
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -327,7 +356,11 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
     if (showCollisionBoxes != showCollisionBoxes_) {
         showCollisionBoxes = showCollisionBoxes_;
         ++correlationID;
-        worker.self().invoke(&GeometryTileWorker::setShowCollisionBoxes, showCollisionBoxes, correlationID);
+        if (isSynchronous) {
+            worker->setShowCollisionBoxes(showCollisionBoxes, correlationID);
+        } else {
+            workerActor->self().invoke(&GeometryTileWorker::setShowCollisionBoxes, showCollisionBoxes, correlationID);
+        }
     }
 }
 
@@ -415,7 +448,11 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, [[maybe_unused]] HBShape
         }
     }
 #endif // MLN_TEXT_SHAPING_HARFBUZZ
-    worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap), std::move(results));
+    if (isSynchronous) {
+        worker->onGlyphsAvailable(std::move(glyphMap), std::move(results));
+    } else {
+        workerActor->self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap), std::move(results));
+    }
 }
 
 void GeometryTile::getGlyphs(GlyphDependencies glyphDependencies) {
@@ -432,11 +469,19 @@ void GeometryTile::onImagesAvailable(ImageMap images,
                                      uint64_t imageCorrelationID) {
     MLN_TRACE_FUNC();
 
-    worker.self().invoke(&GeometryTileWorker::onImagesAvailable,
-                         std::move(images),
-                         std::move(patterns),
-                         std::move(versionMap),
-                         imageCorrelationID);
+    if (isSynchronous) {
+        worker->onImagesAvailable(
+                std::move(images),
+                std::move(patterns),
+                std::move(versionMap),
+                imageCorrelationID);
+    } else {
+        workerActor->self().invoke(&GeometryTileWorker::onImagesAvailable,
+                          std::move(images),
+                          std::move(patterns),
+                          std::move(versionMap),
+                          imageCorrelationID);
+    }
 }
 
 void GeometryTile::getImages(ImageRequestPair pair) {

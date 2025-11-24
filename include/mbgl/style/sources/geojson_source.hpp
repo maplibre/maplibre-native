@@ -46,7 +46,7 @@ public:
                                                const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions());
 
     virtual ~GeoJSONData() = default;
-    virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&) = 0;
+    virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&, bool isSynchronous) = 0;
 
     // SuperclusterData
     virtual Features getChildren(std::uint32_t) = 0;

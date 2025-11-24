@@ -114,7 +114,8 @@ private:
     TaggedScheduler threadPool;
 
     const std::shared_ptr<Mailbox> mailbox;
-    Actor<GeometryTileWorker> worker;
+    std::unique_ptr<Actor<GeometryTileWorker>> workerActor;
+    std::unique_ptr<GeometryTileWorker> worker;
 
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;
@@ -137,6 +138,9 @@ private:
     };
 
     FadeState fadeState = FadeState::Loaded;
+
+protected:
+    bool isSynchronous;
 };
 
 } // namespace mbgl

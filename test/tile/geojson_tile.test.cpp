@@ -58,7 +58,7 @@ public:
     FakeGeoJSONData(TileFeatures features_)
         : features(std::move(features_)) {}
 
-    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn) final {
+    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn, bool) final {
         assert(fn);
         fn(features);
     }

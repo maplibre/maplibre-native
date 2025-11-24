@@ -28,6 +28,8 @@ public:
 
     bool isVolatile() const { return volatileFlag; }
     void setVolatile(bool set) { volatileFlag = set; }
+    bool isSynchronous() const { return synchronousFlag; }
+    void setSynchronous(bool set) { synchronousFlag = set; }
     const SourceType type;
     const std::string id;
 
@@ -36,6 +38,7 @@ protected:
     std::optional<uint8_t> maxOverscaleFactor;
     Duration minimumTileUpdateInterval{Duration::zero()};
     bool volatileFlag = false;
+    bool synchronousFlag = false;
 
     Impl(SourceType, std::string);
     Impl(const Impl&) = default;
