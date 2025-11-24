@@ -104,14 +104,15 @@ void RenderColorReliefLayer::updateColorRamp() {
         return;
     }
 
-    // Log expression kind
-    Log::Info(Event::Render, "Expression kind: " + std::to_string(static_cast<int>(expr->getKind())));
-
     // Test evaluation at specific elevations from the style (400, 1000, 2000)
-    Log::Info(Event::Render, "Testing expression evaluation:");
+    Log::Info(Event::Render, "Testing expression evaluation with correct constructor:");
     for (float testElev : {400.0f, 1000.0f, 2000.0f}) {
-        expression::EvaluationContext context(0.0f);
-        context.elevation = testElev;
+        expression::EvaluationContext context(
+            std::optional<float>(0.0f),     // zoom
+            nullptr,                         // feature
+            std::nullopt,                    // colorRampParameter
+            std::optional<float>(testElev)   // elevation
+        );
         
         auto result = expr->evaluate(context);
         if (result) {
@@ -121,11 +122,7 @@ void RenderColorReliefLayer::updateColorRamp() {
                 Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
                          std::to_string(int(c.r*255)) + " G=" + std::to_string(int(c.g*255)) + 
                          " B=" + std::to_string(int(c.b*255)) + " A=" + std::to_string(int(c.a*255)));
-            } else {
-                Log::Warning(Event::Render, "  At " + std::to_string(testElev) + "m: Could not convert to Color");
             }
-        } else {
-            Log::Warning(Event::Render, "  At " + std::to_string(testElev) + "m: Evaluation returned null");
         }
     }
 
@@ -140,8 +137,12 @@ void RenderColorReliefLayer::updateColorRamp() {
         float t = static_cast<float>(i) / (colorRampSize - 1);
         float elevation = minElevation + t * (maxElevation - minElevation);
 
-        expression::EvaluationContext context(0.0f);
-        context.elevation = elevation;
+        expression::EvaluationContext context(
+            std::optional<float>(0.0f),     // zoom
+            nullptr,                         // feature  
+            std::nullopt,                    // colorRampParameter
+            std::optional<float>(elevation)  // elevation
+        );
 
         Color color = Color::black();
         auto result = expr->evaluate(context);
@@ -163,7 +164,7 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
-    // Log samples
+    // Log samples at key elevations
     Log::Info(Event::Render, "Sample 0 (0m): R=" + std::to_string(colorStops->data[0]) + 
               " G=" + std::to_string(colorStops->data[1]) + " B=" + std::to_string(colorStops->data[2]));
     int mid = 85 * 4; // ~1000m
