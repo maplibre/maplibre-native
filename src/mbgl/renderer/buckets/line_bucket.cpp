@@ -54,6 +54,10 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
+    // Ignore empty coordinates.
+    if (coordinates.empty()) {
+        return;
+    }
     gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
         LineBucket::layoutVertex,

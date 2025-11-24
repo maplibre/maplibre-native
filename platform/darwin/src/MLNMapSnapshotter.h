@@ -79,10 +79,14 @@ MLN_EXPORT
 // MARK: - Configuring the Map
 
 /**
- :nodoc:
  Whether to include the MapLibre logo. Note this is not required.
  */
 @property (nonatomic, readwrite) BOOL showsLogo;
+
+/**
+ Whether to add attribution from the sources on the snapshots. Enabled by default.
+ */
+@property (nonatomic, readwrite) BOOL showsAttribution;
 
 /**
  URL of the map style to snapshot.

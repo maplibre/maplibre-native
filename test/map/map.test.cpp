@@ -38,6 +38,7 @@
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/image.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
@@ -2019,4 +2020,20 @@ TEST(Map, LineLayerDepthDistribution) {
 
     test::checkImage(
         "test/fixtures/map/layer_depth_distribution/line", test.frontend.render(test.map).image, 0.0006, 0.1);
+}
+
+TEST(Map, SetFrustumOffset) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    auto layer = std::make_unique<BackgroundLayer>("background");
+    layer->setBackgroundColor({{1, 0, 0, 1}});
+    test.map.getStyle().addLayer(std::move(layer));
+
+    test::checkImage("test/fixtures/map/setFrustumOffset/before", test.frontend.render(test.map).image, 0.0006, 0.1);
+
+    test.map.setFrustumOffset(EdgeInsets{50, 50, 50, 50});
+
+    test::checkImage("test/fixtures/map/setFrustumOffset/after", test.frontend.render(test.map).image, 0.0006, 0.1);
 }

@@ -3327,6 +3327,16 @@ static void *windowScreenContext = &windowScreenContext;
     return _mbglMap->getTileLodZoomShift();
 }
 
+-(void)setFrustumOffset:(UIEdgeInsets)frustumOffset
+{
+    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustumOffset));
+}
+
+-(UIEdgeInsets)frustumOffset
+{
+    return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue

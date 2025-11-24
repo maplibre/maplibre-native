@@ -639,6 +639,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/gfx/stencil_mode.hpp",
     "include/mbgl/gfx/types.hpp",
     "include/mbgl/gfx/vertex_buffer.hpp",
+    "include/mbgl/gfx/scissor_rect.hpp",
     "include/mbgl/i18n/collator.hpp",
     "include/mbgl/i18n/number_format.hpp",
     "include/mbgl/layermanager/background_layer_factory.hpp",

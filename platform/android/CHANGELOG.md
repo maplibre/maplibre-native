@@ -1,5 +1,32 @@
 # Changelog MapLibre Native for Android
 
+## 12.1.3
+
+- Disable `UnsatisfiedLinkError` during local tests ([#3942](https://github.com/maplibre/maplibre-native/pull/3942)
+
+## 12.1.2
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+
+## 12.1.0
+
+### ✨ Features and improvements
+
+- Add support for parsing MLT-format vector tile sources ([#3246](https://github.com/maplibre/maplibre-native/pull/3246)).
+- Throw exception on `System.loadLibrary` fail ([#3916](https://github.com/maplibre/maplibre-native/pull/3916)).
+- Release allocated compass Bitmap as soon as possible ([#3889](https://github.com/maplibre/maplibre-native/pull/3889)).
+- Apply symbol shader changes from JS  for Metal, Vulkan, and OpenGL ([#3873](https://github.com/maplibre/maplibre-native/pull/3873)).
+- Improve CMake build setup Harfbuzz and Freetype deps ([#3879](https://github.com/maplibre/maplibre-native/pull/3879)).
+
+### 🐞 Bug fixes
+
+- [vulkan] Prevent member variable shadowing in `mbgl::vulkan::ShaderProgram` ([#3886](https://github.com/maplibre/maplibre-native/pull/3886)).
+- Add padding support to MapSnapshotter Android ([#3882](https://github.com/maplibre/maplibre-native/pull/3882)).
+- Fix `requestRenderAndNotify` continuous callback ([#3913](https://github.com/maplibre/maplibre-native/pull/3913)).
+- Add null check to Projection.getContentPadding() ([#3937](https://github.com/maplibre/maplibre-native/pull/3937)).
+- Assume CustomGeometrySource is cancelled when peer is null ([#3933](https://github.com/maplibre/maplibre-native/pull/3933)).
+- Use weak pointer for core layer ([#3931](https://github.com/maplibre/maplibre-native/pull/3931)).
+
 ## 12.0.1
 
 ### ✨ Features and improvements
