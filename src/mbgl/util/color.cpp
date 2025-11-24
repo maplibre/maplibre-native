@@ -6,31 +6,29 @@
 namespace mbgl {
 
 std::optional<Color> Color::parse(const std::string& s) {
-    std::string colorString = s; // Use a mutable copy of the input string
+    std::string colorString = s;
 
-    // --- START: NEW LOGIC to support #RGBA (4-digit hex) ---
+    // --- START: FIX to support #RGBA (4-digit hex) ---
     // Check for the 4-digit hex format: #RGBA (length 5, including '#')
     if (colorString.length() == 5 && colorString[0] == '#') {
         std::string expandedColor = "#";
-        // R (Red): colorString[1] is doubled
+        // R (Red)
         expandedColor += colorString[1];
         expandedColor += colorString[1];
-        // G (Green): colorString[2] is doubled
+        // G (Green)
         expandedColor += colorString[2];
         expandedColor += colorString[2];
-        // B (Blue): colorString[3] is doubled
+        // B (Blue)
         expandedColor += colorString[3];
         expandedColor += colorString[3];
-        // A (Alpha): colorString[4] is doubled
+        // A (Alpha)
         expandedColor += colorString[4];
         expandedColor += colorString[4];
 
-        // Replace the original string with the expanded string (e.g., "#F00C" becomes "#FF0000CC")
         colorString = std::move(expandedColor);
     }
-    // --- END: NEW LOGIC to support #RGBA (4-digit hex) ---
+    // --- END: FIX to support #RGBA (4-digit hex) ---
 
-    // Pass the potentially expanded string to the existing parser
     const auto css_color = CSSColorParser::parse(colorString);
 
     // Premultiply the color.
@@ -40,6 +38,14 @@ std::optional<Color> Color::parse(const std::string& s) {
     } else {
         return {};
     }
+}
+
+// Ensure the implementation of stringify() and toArray() is present!
+
+std::string Color::stringify() const {
+    std::array<double, 4> array = toArray();
+    return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
+           util::toString(array[3]) + ")";
 }
 
 std::array<double, 4> Color::toArray() const {
@@ -60,17 +66,6 @@ mbgl::Value Color::toObject() const {
                                      {"g", static_cast<double>(g)},
                                      {"b", static_cast<double>(b)},
                                      {"a", static_cast<double>(a)}};
-}
-
-mbgl::Value Color::serialize() const {
-    std::array<double, 4> array = toArray();
-    return std::vector<mbgl::Value>{
-        std::string("rgba"),
-        array[0],
-        array[1],
-        array[2],
-        array[3],
-    };
 }
 
 } // namespace mbgl
