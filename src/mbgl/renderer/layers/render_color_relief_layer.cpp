@@ -296,9 +296,114 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         Log::Info(Event::Render, "Setting up drawable for tile");
-        
-        // Continue with the rest of your existing drawable creation code here...
-        // (Keep all the existing code from gfx::VertexAttributeArrayPtr vertexAttrs; onwards)
+
+        gfx::VertexAttributeArrayPtr vertexAttrs;
+        auto buildVertexAttributes = [&] {
+            if (!vertexAttrs) {
+                vertexAttrs = context.createVertexAttributeArray();
+
+                if (const auto& attr = vertexAttrs->set(idColorReliefPosVertexAttribute)) {
+                    attr->setSharedRawData(vertices,
+                                           offsetof(HillshadeLayoutVertex, a1),
+                                           0,
+                                           sizeof(HillshadeLayoutVertex),
+                                           gfx::AttributeDataType::Short2);
+                }
+            }
+            return vertexAttrs;
+        };
+
+        const auto updateExisting = [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                return false;
+            }
+
+            drawable.updateVertexAttributes(buildVertexAttributes(),
+                                            vertices->elements(),
+                                            gfx::Triangles(),
+                                            std::move(indices),
+                                            segments->data(),
+                                            segments->size());
+
+            // Update textures
+            std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
+            demTexture->setImage(bucket.getDEMData().getImagePtr());
+            demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                 .wrapU = gfx::TextureWrapType::Clamp,
+                                                 .wrapV = gfx::TextureWrapType::Clamp});
+            drawable.setTexture(demTexture, idColorReliefImageTexture);
+
+            if (elevationStopsTexture) {
+                drawable.setTexture(elevationStopsTexture, idColorReliefElevationStopsTexture);
+            }
+            if (colorStopsTexture) {
+                drawable.setTexture(colorStopsTexture, idColorReliefColorStopsTexture);
+            }
+
+            return true;
+        };
+
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            Log::Info(Event::Render, "Tile updated (existing drawable)");
+            continue;
+        }
+
+        Log::Info(Event::Render, "Creating new drawable for tile");
+
+        builder->setShader(colorReliefShader);
+        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+        builder->setColorMode(gfx::ColorMode::alphaBlended());
+        builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+        builder->setRenderPass(renderPass);
+        builder->setVertexAttributes(buildVertexAttributes());
+        builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
+        builder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
+
+        // Bind DEM texture
+        std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
+        demTexture->setImage(bucket.getDEMData().getImagePtr());
+        demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                             .wrapU = gfx::TextureWrapType::Clamp,
+                                             .wrapV = gfx::TextureWrapType::Clamp});
+        builder->setTexture(demTexture, idColorReliefImageTexture);
+
+        // Bind color ramp textures
+        if (elevationStopsTexture) {
+            builder->setTexture(elevationStopsTexture, idColorReliefElevationStopsTexture);
+        }
+        if (colorStopsTexture) {
+            builder->setTexture(colorStopsTexture, idColorReliefColorStopsTexture);
+        }
+
+        Log::Info(Event::Render, "Flushing drawable builder");
+        builder->flush(context);
+
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            drawable->setLayerTweaker(layerTweaker);
+
+            // Set up tile properties UBO
+            shaders::ColorReliefTilePropsUBO tilePropsUBO;
+
+            // Get DEM unpack vector from the actual data (supports both Terrain-RGB and Terrarium)
+            const auto& demData = bucket.getDEMData();
+            const auto unpackVector = demData.getUnpackVector();
+            tilePropsUBO.unpack = {{unpackVector[0], unpackVector[1], unpackVector[2], unpackVector[3]}};
+
+            // Texture dimensions
+            tilePropsUBO.dimension = {{static_cast<float>(demData.dim), static_cast<float>(demData.dim)}};
+
+            // Color ramp size
+            tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
+            tilePropsUBO.pad0 = 0.0f;
+
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
+
+            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+            Log::Info(Event::Render, "Drawable added to layer group");
+        }
     }
     
     Log::Info(Event::Render, "=== update() END ===");
