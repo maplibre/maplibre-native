@@ -104,13 +104,30 @@ void RenderColorReliefLayer::updateColorRamp() {
         return;
     }
 
-    // Check if it's an Interpolate expression
-    if (expr->getKind() != expression::Kind::Interpolate) {
-        Log::Error(Event::Render, "Expression is not an Interpolate type!");
+    // Log the expression type to see what we're actually getting
+    Log::Info(Event::Render, "Expression kind: " + std::to_string(static_cast<int>(expr->getKind())));
+    
+    // The expression might be wrapped - try to find the Interpolate expression
+    const expression::Interpolate* interpolate = nullptr;
+    
+    if (expr->getKind() == expression::Kind::Interpolate) {
+        interpolate = static_cast<const expression::Interpolate*>(expr);
+    } else {
+        // Expression is wrapped, need to unwrap it
+        // Try to find Interpolate by visiting children
+        expr->eachChild([&](const expression::Expression& child) {
+            if (!interpolate && child.getKind() == expression::Kind::Interpolate) {
+                interpolate = static_cast<const expression::Interpolate*>(&child);
+            }
+        });
+    }
+    
+    if (!interpolate) {
+        Log::Error(Event::Render, "Could not find Interpolate expression!");
         return;
     }
 
-    const auto* interpolate = static_cast<const expression::Interpolate*>(expr);
+    Log::Info(Event::Render, "Found Interpolate expression");
     
     std::vector<double> elevationValues;
     std::vector<Color> colors;
@@ -144,7 +161,6 @@ void RenderColorReliefLayer::updateColorRamp() {
     Log::Info(Event::Render, "Extracted " + std::to_string(elevationValues.size()) + " stops from expression");
 
     // Now sample these stops across our 256-element texture
-    // This ensures the entire elevation range is covered
     const float minElev = elevationValues.front();
     const float maxElev = elevationValues.back();
     
