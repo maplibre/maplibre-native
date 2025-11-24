@@ -221,8 +221,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 @interface MBXViewController () <UITableViewDelegate,
                                  UITableViewDataSource,
                                  MLNMapViewDelegate,
-                                 MLNComputedShapeSourceDataSource,
-                                 MLNMapSnapshotterDelegate>
+                                 MLNComputedShapeSourceDataSource>
 
 
 @property (nonatomic) IBOutlet MLNMapView *mapView;
@@ -243,8 +242,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 @property (nonatomic) NSMutableArray<UIWindow *> *helperWindows;
 @property (nonatomic) NSMutableArray<UIView *> *contentInsetsOverlays;
 @property (nonatomic, copy) void (^locationBlock)(void);
-@property (nonatomic, strong) MLNMapSnapshotter *snapshotter;
-@property (nonatomic, strong) MLNAnnotationImage *snapshotterANNImage;
 @end
 
 @interface MLNMapView (MBXViewController)
@@ -362,36 +359,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         }
     }];
 }
-
-
-- (nullable MLNAnnotationImage *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
-                             imageForAnnotation:(id<MLNAnnotation>)annotation {
-    if (!_snapshotterANNImage) {
-        UIImage *image = [UIImage imageNamed:@"pin"];
-        _snapshotterANNImage = [MLNAnnotationImage annotationImageWithImage:image reuseIdentifier:@"pin"];
-    }
-    return _snapshotterANNImage;
-}
-
-- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter alphaForShapeAnnotation:(MLNShape *)annotation {
-    return 1.0;
-}
-
-
-- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter strokeColorForShapeAnnotation:(MLNShape *)annotation {
-    return UIColor.blueColor;
-}
-
-- (UIColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter fillColorForPolygonAnnotation:(MLNPolygon *)annotation {
-    return UIColor.redColor;
-}
-
-
-- (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter lineWidthForPolylineAnnotation:(MLNPolyline *)annotation {
-    return 10.0;
-}
-
-
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
