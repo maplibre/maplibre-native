@@ -217,7 +217,8 @@ enum class Dependency : uint32_t {
     Bind = 1 << 4,     // Create variable binding ("let")
     Var = 1 << 5,      // Use variable binding
     Override = 1 << 6, // Property override
-    MaskCount = 7,
+    Elevation = 1 << 7, // Elevation from DEM
+    MaskCount = 8,
     All = (1 << MaskCount) - 1,
 };
 

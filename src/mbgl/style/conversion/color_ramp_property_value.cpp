@@ -25,14 +25,17 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
             return std::nullopt;
         }
         assert(*expression);
-        if (!isFeatureConstant(**expression)) {
+        
+        auto deps = (*expression)->dependencies;
+        if ((deps & Dependency::Feature) && !(deps & Dependency::Elevation)) {
             error.message = "data expressions not supported";
             return std::nullopt;
         }
-        if (!isZoomConstant(**expression)) {
+        if (deps & Dependency::Zoom) {
             error.message = "zoom expressions not supported";
             return std::nullopt;
         }
+        
         return ColorRampPropertyValue(std::move(*expression));
     } else {
         error.message = "color ramp must be an expression";

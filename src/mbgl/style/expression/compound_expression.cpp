@@ -370,15 +370,17 @@ const auto& heatmapDensityCompoundExpression() {
 }
 
 const auto& elevationCompoundExpression() {
-    static auto signature = detail::makeSignature("elevation",
-                                                  [](const EvaluationContext& params) -> Result<double> {
-                                                      if (!params.elevation) {
-                                                          return EvaluationError{
-                                                              "The 'elevation' expression is unavailable in the "
-                                                              "current evaluation context."};
-                                                      }
-                                                      return static_cast<double>(*(params.elevation));
-                                                  });
+    static auto signature = detail::makeSignature(
+        "elevation",
+        [](const EvaluationContext& params) -> Result<double> {
+            if (!params.elevation) {
+                return EvaluationError{
+                    "The 'elevation' expression is unavailable in the "
+                    "current evaluation context."};
+            }
+            return static_cast<double>(*(params.elevation));
+        },
+        Dependency::Elevation);
     return signature;
 }
 
