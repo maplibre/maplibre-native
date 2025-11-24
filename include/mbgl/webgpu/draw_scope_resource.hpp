@@ -13,7 +13,7 @@ public:
     ~DrawScopeResource() override = default;
 
 private:
-    Context& context;
+    [[maybe_unused]] Context& context;
 };
 
 } // namespace webgpu

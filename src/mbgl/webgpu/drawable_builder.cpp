@@ -15,7 +15,7 @@ DrawableBuilder::DrawableBuilder(std::string name_)
 DrawableBuilder::~DrawableBuilder() = default;
 
 std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
-    return std::make_unique<Drawable>(name);
+    return std::make_unique<Drawable>(drawableName);
 }
 
 std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::DrawMode drawMode,

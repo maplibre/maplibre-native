@@ -2,6 +2,13 @@
 
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/util/size.hpp>
+
+#if MLN_WEBGPU_IMPL_DAWN
+#include <webgpu/webgpu.h>
+#elif MLN_WEBGPU_IMPL_WGPU
+#include <webgpu.h>
+#endif
+
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 #include <memory>
 

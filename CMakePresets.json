@@ -19,19 +19,28 @@
         "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
       "name": "macos",
-      "displayName": "macOS",
+      "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-macos",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "CMAKE_OSX_DEPLOYMENT_TARGET": "14.3",
         "CMAKE_BUILD_TYPE": "Debug",
         "MLN_DARWIN_USE_LIBUV": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
@@ -89,7 +98,7 @@
       "inherits": "macos",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "dawn",
+        "MLN_WEBGPU_IMPL_DAWN": "ON",
         "MLN_DARWIN_USE_LIBUV": "ON"
       }
     },
@@ -101,7 +110,7 @@
       "inherits": "macos",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "wgpu",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
         "MLN_DARWIN_USE_LIBUV": "ON"
       }
     },
@@ -122,6 +131,11 @@
         "MLN_WITH_CLANG_TIDY": "OFF",
         "MLN_WITH_WAYLAND": "ON",
         "MLN_WITH_X11": "OFF"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
       }
     },
     {
@@ -149,7 +163,7 @@
       "inherits": "linux",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "dawn",
+        "MLN_WEBGPU_IMPL_DAWN": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
       }
@@ -160,7 +174,7 @@
       "inherits": "linux",
       "cacheVariables": {
         "MLN_WITH_WEBGPU": "ON",
-        "MLN_WEBGPU_IMPL": "wgpu",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
       }
@@ -189,6 +203,11 @@
         "MLN_WITH_EGL": "OFF",
         "MLN_WITH_VULKAN": "OFF",
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {

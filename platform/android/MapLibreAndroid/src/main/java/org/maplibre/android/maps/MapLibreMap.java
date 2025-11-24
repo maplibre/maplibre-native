@@ -117,6 +117,18 @@ public final class MapLibreMap {
     nativeMapView.enableRenderingStatsView(value);
   }
 
+  /**
+   * Frustum offset used to disable rendering of elements at the edge of the screen
+   *
+   * Offset applied to camera frustum and scissor rectangle. The camrea frustum is modified
+   * to avoid loading geometry that's behind UI elements at the top of the screen. The scissor
+   * rectangle is used to avoid shading fragments that are behind UI elements at the edges of
+   * the screen. All values are in logical pixels.
+   */
+  public void setFrustumOffset(@NonNull RectF offset) {
+    nativeMapView.setFrustumOffset(offset);
+  }
+
   public void setSwapBehaviorFlush(boolean flush) {
     nativeMapView.setSwapBehaviorFlush(flush);
   }

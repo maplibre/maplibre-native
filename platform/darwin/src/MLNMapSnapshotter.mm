@@ -146,6 +146,7 @@ private:
         _size = size;
         _camera = camera;
         _showsLogo = YES;
+        _showsAttribution = YES;
 #if TARGET_OS_IPHONE
         _scale = [UIScreen mainScreen].scale;
 #else
@@ -161,6 +162,7 @@ private:
     copy.coordinateBounds = _coordinateBounds;
     copy.scale = _scale;
     copy.showsLogo = _showsLogo;
+    copy.showsAttribution = _showsAttribution;
     return copy;
 }
 
@@ -403,22 +405,24 @@ MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
         return nil;
     }
 
-    if (options.showsLogo) {
+    if (options.showsLogo && logoImage) {
         [logoImage drawInRect:logoImageRect];
     }
 
-    UIImage *currentImage = UIGraphicsGetImageFromCurrentImageContext();
-    CGImageRef attributionImageRef = CGImageCreateWithImageInRect([currentImage CGImage], cropRect);
-    UIImage *attributionImage = [UIImage imageWithCGImage:attributionImageRef];
-    CGImageRelease(attributionImageRef);
+    if (options.showsAttribution) {
+        UIImage *currentImage = UIGraphicsGetImageFromCurrentImageContext();
+        CGImageRef attributionImageRef = CGImageCreateWithImageInRect([currentImage CGImage], cropRect);
+        UIImage *attributionImage = [UIImage imageWithCGImage:attributionImageRef];
+        CGImageRelease(attributionImageRef);
 
-    CIImage *ciAttributionImage = [[CIImage alloc] initWithCGImage:attributionImage.CGImage];
+        CIImage *ciAttributionImage = [[CIImage alloc] initWithCGImage:attributionImage.CGImage];
 
-    UIImage *blurredAttributionBackground = [MLNMapSnapshotter blurredAttributionBackground:ciAttributionImage];
+        UIImage *blurredAttributionBackground = [MLNMapSnapshotter blurredAttributionBackground:ciAttributionImage];
 
-    [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
+        [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
 
-    [MLNMapSnapshotter drawAttributionTextWithStyle:attributionInfoStyle origin:attributionTextPosition attributionInfo:attributionInfo];
+        [MLNMapSnapshotter drawAttributionTextWithStyle:attributionInfoStyle origin:attributionTextPosition attributionInfo:attributionInfo];
+    }
 
     UIImage *compositedImage = UIGraphicsGetImageFromCurrentImageContext();
 
@@ -478,19 +482,21 @@ MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
         return nil;
     }
 
-    if (logoImage) {
+    if (options.showsLogo) {
         [logoImage drawInRect:logoImageRect];
     }
 
-    NSBitmapImageRep *attributionBackground = [[NSBitmapImageRep alloc] initWithFocusedViewRect:attributionBackgroundFrame];
+    if (options.showsAttribution) {
+        NSBitmapImageRep *attributionBackground = [[NSBitmapImageRep alloc] initWithFocusedViewRect:attributionBackgroundFrame];
 
-    CIImage *attributionBackgroundImage = [[CIImage alloc] initWithCGImage:[attributionBackground CGImage]];
+        CIImage *attributionBackgroundImage = [[CIImage alloc] initWithCGImage:[attributionBackground CGImage]];
 
-    NSImage *blurredAttributionBackground = [MLNMapSnapshotter blurredAttributionBackground:attributionBackgroundImage];
+        NSImage *blurredAttributionBackground = [MLNMapSnapshotter blurredAttributionBackground:attributionBackgroundImage];
 
-    [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
+        [blurredAttributionBackground drawInRect:attributionBackgroundFrame];
 
-    [MLNMapSnapshotter drawAttributionTextWithStyle:attributionInfoStyle origin:attributionTextPosition attributionInfo:attributionInfo];
+        [MLNMapSnapshotter drawAttributionTextWithStyle:attributionInfoStyle origin:attributionTextPosition attributionInfo:attributionInfo];
+    }
 
     [compositedImage unlockFocus];
 

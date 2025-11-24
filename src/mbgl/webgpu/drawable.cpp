@@ -69,6 +69,52 @@ std::size_t hashStencilMode(const gfx::StencilMode& mode) {
     return hash;
 }
 
+std::size_t hashPipelineState(const std::vector<WGPUVertexBufferLayout>& vertexLayouts,
+                              const gfx::ColorMode& colorMode,
+                              const gfx::DepthMode& depthMode,
+                              const gfx::StencilMode& stencilMode,
+                              gfx::DrawModeType drawModeType) {
+    std::size_t hash = 0;
+
+    // Hash vertex layouts
+    for (const auto& layout : vertexLayouts) {
+        hash = util::hash(hash, static_cast<uint32_t>(layout.arrayStride));
+        hash = util::hash(hash, static_cast<uint32_t>(layout.stepMode));
+        hash = util::hash(hash, static_cast<uint32_t>(layout.attributeCount));
+        for (uint32_t i = 0; i < layout.attributeCount && i < 16; ++i) {
+            hash = util::hash(hash,
+                              static_cast<uint32_t>(layout.attributes[i].format),
+                              static_cast<uint32_t>(layout.attributes[i].shaderLocation),
+                              static_cast<uint32_t>(layout.attributes[i].offset));
+        }
+    }
+
+    // Hash color mode
+    hash = util::hash(hash, colorMode.mask.r, colorMode.mask.g, colorMode.mask.b, colorMode.mask.a);
+    colorMode.blendFunction.match([&](const auto& blendFunc) {
+        using T = std::decay_t<decltype(blendFunc)>;
+        if constexpr (std::is_same_v<T, gfx::ColorMode::Replace>) {
+            hash = util::hash(hash, 0);
+        } else {
+            hash = util::hash(hash,
+                              static_cast<int>(blendFunc.equation),
+                              static_cast<int>(blendFunc.srcFactor),
+                              static_cast<int>(blendFunc.dstFactor));
+        }
+    });
+
+    // Hash depth mode
+    hash = util::hash(hash, static_cast<int>(depthMode.func), static_cast<int>(depthMode.mask));
+
+    // Hash stencil mode
+    hash = util::hash(hash, hashStencilMode(stencilMode));
+
+    // Hash draw mode
+    hash = util::hash(hash, static_cast<int>(drawModeType));
+
+    return hash;
+}
+
 WGPUVertexFormat wgpuVertexFormatOf(gfx::AttributeDataType type) {
     switch (type) {
         case gfx::AttributeDataType::Byte:
@@ -762,6 +808,10 @@ void Drawable::draw(PaintParameters& parameters) const {
             drawModeType = impl->segments.front()->getMode().type;
         }
 
+        // Compute pipeline state hash for caching
+        const std::size_t pipelineHash = hashPipelineState(
+            vertexLayouts, colorMode, depthMode, stencilMode, drawModeType);
+
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
                                                              vertexLayouts.size(),
@@ -769,7 +819,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                              depthMode,
                                                              stencilMode,
                                                              drawModeType,
-                                                             std::nullopt);
+                                                             pipelineHash);
         if (!impl->pipelineState) {
             Log::Warning(Event::Render,
                          "WebGPU: skipping pipeline creation for drawable '" + getName() + "' (shader='" +
@@ -790,6 +840,12 @@ void Drawable::draw(PaintParameters& parameters) const {
         Log::Warning(Event::Render, "WebGPU: no pipeline available for drawable '" + getName() + "'; draw skipped");
         return;
     }
+
+    wgpuRenderPassEncoderSetScissorRect(renderPassEncoder,
+                                        parameters.scissorRect.x,
+                                        parameters.scissorRect.y,
+                                        parameters.scissorRect.width,
+                                        parameters.scissorRect.height);
 
     uint32_t bufferSlot = 0;
     for (const auto& binding : uniqueBindings) {
