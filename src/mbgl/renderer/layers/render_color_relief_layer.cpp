@@ -91,7 +91,7 @@ void RenderColorReliefLayer::updateColorRamp() {
     }
 
     // Get the expression from the color ramp property
-    const auto* expr = colorValue.expression.get();
+    const auto* expr = &colorValue.getExpression();
     if (!expr) {
         // No expression - fill with default color
         Color defaultColor = Color::black();
