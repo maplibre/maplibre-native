@@ -255,9 +255,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
     Log::Info(Event::Render, "Processing " + std::to_string(renderTiles->size()) + " tiles");
     
+    int tileCount = 0;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-        Log::Info(Event::Render, "Processing tile: " + tileID.toString());
+        Log::Info(Event::Render, "Processing tile #" + std::to_string(tileCount++));
 
         auto* bucket_ = tile.getBucket(*baseImpl);
         if (!bucket_ || !bucket_->hasData()) {
@@ -294,12 +295,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             builder = context.createDrawableBuilder("colorRelief");
         }
 
-        // Rest of the tile processing...
-        Log::Info(Event::Render, "Creating drawable for tile");
+        Log::Info(Event::Render, "Setting up drawable for tile");
         
-        // Continue with the rest of your existing code...
-        
-        Log::Info(Event::Render, "Tile processed successfully");
+        // Continue with the rest of your existing drawable creation code here...
+        // (Keep all the existing code from gfx::VertexAttributeArrayPtr vertexAttrs; onwards)
     }
     
     Log::Info(Event::Render, "=== update() END ===");
