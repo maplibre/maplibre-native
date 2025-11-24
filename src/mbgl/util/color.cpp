@@ -40,12 +40,14 @@ std::optional<Color> Color::parse(const std::string& s) {
     }
 }
 
-// Ensure the implementation of stringify() and toArray() is present!
-
 std::string Color::stringify() const {
     std::array<double, 4> array = toArray();
     return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
            util::toString(array[3]) + ")";
+}
+
+mbgl::Value Color::serialize() const {
+    return toObject();
 }
 
 std::array<double, 4> Color::toArray() const {
