@@ -30,6 +30,7 @@ namespace mbgl {
 using namespace style;
 
 GeometryTileWorker::GeometryTileWorker(GeometryTile& parent_,
+                                       std::weak_ptr<Mailbox> weakMailbox_,
                                        const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,
@@ -38,8 +39,11 @@ GeometryTileWorker::GeometryTileWorker(GeometryTile& parent_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
-                                       std::shared_ptr<FontFaces> fontFaces_)
-    : scheduler(scheduler_),
+                                       std::shared_ptr<FontFaces> fontFaces_,
+                                       bool isSynchronous)
+    : self(!isSynchronous, *this, weakMailbox_),
+      parent(!isSynchronous, parent_, weakMailbox_),
+      scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),
       obsolete(obsolete_),
@@ -47,35 +51,7 @@ GeometryTileWorker::GeometryTileWorker(GeometryTile& parent_,
       pixelRatio(pixelRatio_),
       showCollisionBoxes(showCollisionBoxes_),
       dynamicTextureAtlas(dynamicTextureAtlas_),
-      fontFaces(fontFaces_) {
-    parent = &parent_;
-    isSynchronous = true;
-}
-
-GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> selfActor_,
-                                       ActorRef<GeometryTile> parentActor_,
-                                       const TaggedScheduler& scheduler_,
-                                       OverscaledTileID id_,
-                                       std::string sourceID_,
-                                       const std::atomic<bool>& obsolete_,
-                                       const MapMode mode_,
-                                       const float pixelRatio_,
-                                       const bool showCollisionBoxes_,
-                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
-                                       std::shared_ptr<FontFaces> fontFaces_)
-    : scheduler(scheduler_),
-      id(id_),
-      sourceID(std::move(sourceID_)),
-      obsolete(obsolete_),
-      mode(mode_),
-      pixelRatio(pixelRatio_),
-      showCollisionBoxes(showCollisionBoxes_),
-      dynamicTextureAtlas(dynamicTextureAtlas_),
-      fontFaces(fontFaces_) {
-    selfActor = std::make_unique<ActorRef<GeometryTileWorker>>(selfActor_);
-    parentActor = std::make_unique<ActorRef<GeometryTile>>(parentActor_);
-    isSynchronous = false;
-}
+      fontFaces(fontFaces_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
@@ -177,11 +153,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
                 break;
         }
     } catch (...) {
-        if (isSynchronous) {
-            parent->onError(std::current_exception(), correlationID);
-        } else {
-            parentActor->invoke(&GeometryTile::onError, std::current_exception(), correlationID);
-        }
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
     }
 }
 
@@ -210,11 +182,7 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
                 break;
         }
     } catch (...) {
-        if (isSynchronous) {
-            parent->onError(std::current_exception(), correlationID);
-        } else {
-            parentActor->invoke(&GeometryTile::onError, std::current_exception(), correlationID);
-        }
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
     }
 }
 
@@ -260,11 +228,7 @@ void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_
                 break;
         }
     } catch (...) {
-        if (isSynchronous) {
-            parent->onError(std::current_exception(), correlationID);
-        } else {
-            parentActor->invoke(&GeometryTile::onError, std::current_exception(), correlationID);
-        }
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
     }
 }
 
@@ -294,11 +258,7 @@ void GeometryTileWorker::symbolDependenciesChanged() {
                 break;
         }
     } catch (...) {
-        if (isSynchronous) {
-            parent->onError(std::current_exception(), correlationID);
-        } else {
-            parentActor->invoke(&GeometryTile::onError, std::current_exception(), correlationID);
-        }
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
     }
 }
 
@@ -329,11 +289,7 @@ void GeometryTileWorker::coalesced() {
                 break;
         }
     } catch (...) {
-        if (isSynchronous) {
-            parent->onError(std::current_exception(), correlationID);
-        } else {
-            parentActor->invoke(&GeometryTile::onError, std::current_exception(), correlationID);
-        }
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
     }
 }
 
@@ -341,11 +297,7 @@ void GeometryTileWorker::coalesce() {
     MLN_TRACE_FUNC();
 
     state = Coalescing;
-    if (isSynchronous) {
-        coalesced();
-    } else {
-        selfActor->invoke(&GeometryTileWorker::coalesced);
-    }
+    self.invoke(&GeometryTileWorker::coalesced);
 }
 
 void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults results) {
@@ -441,11 +393,7 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
         }
     }
     if (!pendingGlyphDependencies.glyphs.empty()) {
-        if (isSynchronous) {
-            parent->getGlyphs(pendingGlyphDependencies);
-        } else {
-            parentActor->invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
-        }
+        parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
     }
 }
 
@@ -455,12 +403,7 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
     pendingImageDependencies = imageDependencies;
 
     if (!pendingImageDependencies.empty()) {
-        if (isSynchronous) {
-            parent->getImages(std::make_pair(pendingImageDependencies, ++imageCorrelationID));
-        } else {
-            parentActor->invoke(&GeometryTile::getImages,
-                                std::make_pair(pendingImageDependencies, ++imageCorrelationID));
-        }
+        parent.invoke(&GeometryTile::getImages, std::make_pair(pendingImageDependencies, ++imageCorrelationID));
     }
 }
 
@@ -636,22 +579,13 @@ void GeometryTileWorker::finalizeLayout() {
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
 
-    if (isSynchronous) {
-        parent->onLayout(std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                                      std::move(featureIndex),
-                                                                      std::move(glyphAtlas),
-                                                                      std::move(imageAtlas),
-                                                                      dynamicTextureAtlas),
-                         correlationID);
-    } else {
-        parentActor->invoke(&GeometryTile::onLayout,
-                            std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                                         std::move(featureIndex),
-                                                                         std::move(glyphAtlas),
-                                                                         std::move(imageAtlas),
-                                                                         dynamicTextureAtlas),
-                            correlationID);
-    }
+    parent.invoke(&GeometryTile::onLayout,
+                        std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                                     std::move(featureIndex),
+                                                                     std::move(glyphAtlas),
+                                                                     std::move(imageAtlas),
+                                                                     dynamicTextureAtlas),
+                        correlationID);
 }
 
 } // namespace mbgl

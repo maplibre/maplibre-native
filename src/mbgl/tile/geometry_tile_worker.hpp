@@ -32,9 +32,37 @@ class DynamicTextureAtlas;
 using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
+template <class Object>
+class ActorRefWrapper {
+public:
+    ActorRefWrapper(bool isActor, Object& object_, std::weak_ptr<Mailbox> weakMailbox_) {
+        if (isActor) {
+            actorRef = std::make_unique<ActorRef<Object>>(object_, weakMailbox_);
+        } else {
+            objectRef = &object_;
+        }
+    }
+
+    ActorRefWrapper(const ActorRefWrapper&) = delete;
+
+    template <typename Fn, class... Args>
+    void invoke(Fn fn, Args&&... args) const {
+        if (actorRef) {
+            actorRef->invoke(fn, std::forward<Args>(args)...);
+        } else if (objectRef) {
+            (objectRef->*fn)(std::forward<Args>(args)...);
+        }
+    }
+
+private:
+    Object* objectRef = nullptr;
+    std::unique_ptr<ActorRef<Object>> actorRef;
+};
+
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(GeometryTile& parent,
+    GeometryTileWorker(GeometryTile& parent_,
+                       std::weak_ptr<Mailbox> weakMailbox_,
                        const TaggedScheduler& scheduler_,
                        OverscaledTileID,
                        std::string,
@@ -43,18 +71,8 @@ public:
                        float pixelRatio,
                        bool showCollisionBoxes_,
                        gfx::DynamicTextureAtlasPtr,
-                       std::shared_ptr<FontFaces> fontFaces);
-    GeometryTileWorker(ActorRef<GeometryTileWorker> selfActor,
-                       ActorRef<GeometryTile> parentActor,
-                       const TaggedScheduler& scheduler_,
-                       OverscaledTileID,
-                       std::string,
-                       const std::atomic<bool>&,
-                       MapMode,
-                       float pixelRatio,
-                       bool showCollisionBoxes_,
-                       gfx::DynamicTextureAtlasPtr,
-                       std::shared_ptr<FontFaces> fontFaces);
+                       std::shared_ptr<FontFaces> fontFaces,
+                       bool isSynchronous);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -89,9 +107,8 @@ private:
 
     void checkPatternLayout(std::unique_ptr<Layout> layout);
 
-    std::unique_ptr<ActorRef<GeometryTileWorker>> selfActor;
-    std::unique_ptr<ActorRef<GeometryTile>> parentActor;
-    GeometryTile* parent;
+    ActorRefWrapper<GeometryTileWorker> self;
+    ActorRefWrapper<GeometryTile> parent;
     TaggedScheduler scheduler;
 
     const OverscaledTileID id;
@@ -134,8 +151,6 @@ private:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     std::shared_ptr<FontFaces> fontFaces;
-
-    bool isSynchronous;
 };
 
 } // namespace mbgl
