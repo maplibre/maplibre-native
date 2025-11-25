@@ -228,12 +228,65 @@ class GeoJsonSource : Source {
     }
 
     /**
+     * Updates the GeoJson with a single feature.
+     * The update is performed synchronously or asynchronously, based on the source synchronous flag.
+     *
+     * @param feature the GeoJSON [Feature] to set
+     */
+
+    fun setGeoJson(feature: Feature?) {
+        if (detached) {
+            return
+        }
+        if (isSynchronous) {
+            setGeoJsonSync(feature)
+        } else {
+            setGeoJsonAsync(feature)
+        }
+    }
+
+    /**
+     * Updates the GeoJson with a single geometry.
+     * The update is performed synchronously or asynchronously, based on the source synchronous flag.
+     *
+     * @param geometry the GeoJSON [Geometry] to set
+     */
+
+    fun setGeoJson(geometry: Geometry?) {
+        if (detached) {
+            return
+        }
+        if (isSynchronous) {
+            setGeoJsonSync(geometry)
+        } else {
+            setGeoJsonAsync(geometry)
+        }
+    }
+
+    /**
+     * Updates the GeoJson.
+     * The update is performed synchronously or asynchronously, based on the source synchronous flag.
+     *
+     * @param featureCollection the GeoJSON FeatureCollection
+     */
+    fun setGeoJson(featureCollection: FeatureCollection?) {
+        if (detached) {
+            return
+        }
+        if (isSynchronous) {
+            setGeoJsonSync(featureCollection)
+        } else {
+            setGeoJsonAsync(featureCollection)
+        }
+    }
+
+    /**
      * Updates the GeoJson with a single feature. The update is performed asynchronously,
      * so the data won't be immediately visible or available to query when this method returns.
      *
      * @param feature the GeoJSON [Feature] to set
      */
-    fun setGeoJson(feature: Feature?) {
+    fun setGeoJsonAsync(feature: Feature?) {
         if (detached) {
             return
         }
@@ -247,7 +300,7 @@ class GeoJsonSource : Source {
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
-    fun setGeoJson(geometry: Geometry?) {
+    fun setGeoJsonAsync(geometry: Geometry?) {
         if (detached) {
             return
         }
@@ -261,7 +314,7 @@ class GeoJsonSource : Source {
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
-    fun setGeoJson(featureCollection: FeatureCollection?) {
+    fun setGeoJsonAsync(featureCollection: FeatureCollection?) {
         if (detached) {
             return
         }
