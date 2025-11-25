@@ -94,14 +94,14 @@ void RenderColorReliefLayer::updateColorRamp() {
     // Get the expression from ColorRampPropertyValue
     const mbgl::style::expression::Expression& expr = colorValue.getExpression();
     
-    // FIX 1: Use direct Kind comparison (assuming expression.hpp is included)
-    if (expr.getKind() == mbgl::style::expression::Expression::Kind::Interpolate) {
+    // FIX 1: Use the correct namespace for the Kind enum (mbgl::style::expression::Kind)
+    if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
         // The cast is safe now as the type check passes
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
         
         size_t stopCount = interpolate->getStopCount();
         Log::Info(Event::Render, "Found Interpolate expression with " + 
-                 std::to_string(stopCount) + " stops");
+                     std::to_string(stopCount) + " stops");
         
         elevationStopsVector.reserve(stopCount);
         colorStopsVector.reserve(stopCount);
@@ -117,14 +117,14 @@ void RenderColorReliefLayer::updateColorRamp() {
             colorStopsVector.push_back(color);
             
             Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
-                     "rgba(" + std::to_string(color.r) + ", " +
-                     std::to_string(color.g) + ", " +
-                     std::to_string(color.b) + ", " +
-                     std::to_string(color.a) + ")");
+                      "rgba(" + std::to_string(color.r) + ", " +
+                      std::to_string(color.g) + ", " +
+                      std::to_string(color.b) + ", " +
+                      std::to_string(color.a) + ")");
         }
         
         Log::Info(Event::Render, "Extracted " + std::to_string(elevationStopsVector.size()) + 
-                 " stops from expression");
+                  " stops from expression");
     } else {
         Log::Warning(Event::Render, "Expression is not an Interpolate, using fallback");
     }
@@ -158,9 +158,9 @@ void RenderColorReliefLayer::updateColorRamp() {
     Log::Info(Event::Render, "Final color ramp:");
     Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
     Log::Info(Event::Render, "  Range: " + std::to_string(minElevation) + "m to " + 
-             std::to_string(maxElevation) + "m");
+              std::to_string(maxElevation) + "m");
     
-    // Prepare data for GPU upload (using existing class members)
+    // FIX 2: Prepare data for GPU upload (use existing class members)
     this->elevationStopsData = std::make_shared<std::vector<float>>();
     this->elevationStopsData->reserve(rampSize * 4);  // RGBA
     
@@ -176,12 +176,14 @@ void RenderColorReliefLayer::updateColorRamp() {
         this->elevationStopsData->push_back(1.0f);                      // A = unused
         
         // Color stops (RGBA8 for PremultipliedImage)
-        // FIX 2: Removed .toUnassociated()
-        const auto premultiplied = util::premultiply(colorStopsVector[i]);
-        this->colorStops->data[i * 4 + 0] = static_cast<uint8_t>(premultiplied.r * 255.0f);
-        this->colorStops->data[i * 4 + 1] = static_cast<uint8_t>(premultiplied.g * 255.0f);
-        this->colorStops->data[i * 4 + 2] = static_cast<uint8_t>(premultiplied.b * 255.0f);
-        this->colorStops->data[i * 4 + 3] = static_cast<uint8_t>(premultiplied.a * 255.0f);
+        Color color = colorStopsVector[i];
+        float a = color.a;
+        
+        // FIX 3: Manual premultiplication (Color * Alpha)
+        this->colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * a * 255.0f);
+        this->colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * a * 255.0f);
+        this->colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * a * 255.0f);
+        this->colorStops->data[i * 4 + 3] = static_cast<uint8_t>(a * 255.0f);
     }
     
     // Update class member
