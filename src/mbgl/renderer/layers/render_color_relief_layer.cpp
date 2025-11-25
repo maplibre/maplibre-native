@@ -226,11 +226,23 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             elevationStopsTexture = context.createTexture2D();
         }
         
-        // FIX (CRITICAL): Use gfx::TexturePixelType::Alpha for single-channel R32F texture.
-        elevationStopsTexture->setFormat(gfx::TexturePixelType::Alpha, gfx::TextureChannelDataType::Float);
+        // Use RGBA32F instead of R32F for llvmpipe compatibility
+        elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
         
-        // FIX: Upload the raw float data directly.
-        elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
+        // Convert single-channel data to RGBA format  
+        auto elevationRGBA = std::make_shared<std::vector<float>>(colorRampSize * 4);
+        for (uint32_t i = 0; i < colorRampSize; ++i) {
+            (*elevationRGBA)[i*4 + 0] = (*elevationStopsData)[i];  // R = elevation
+            (*elevationRGBA)[i*4 + 1] = 0.0f;  // G = unused
+            (*elevationRGBA)[i*4 + 2] = 0.0f;  // B = unused  
+            (*elevationRGBA)[i*4 + 3] = 1.0f;  // A = unused
+        }
+        elevationStopsTexture->upload(elevationRGBA->data(), Size{colorRampSize, 1});
+
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            Log::Error(Event::Render, "GL ERROR: " + std::to_string(err));
+        }
 
         Log::Info(Event::Render, "=== TEXTURE DEBUG ===");
         Log::Info(Event::Render, "getPixelStride: " + std::to_string(elevationStopsTexture->getPixelStride()));
