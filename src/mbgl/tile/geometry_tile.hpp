@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/actor/actor.hpp>
+#include <mbgl/actor/optional_actor.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/renderer/image_manager.hpp>
@@ -22,34 +22,6 @@ class RenderLayer;
 class SourceQueryOptions;
 class TileParameters;
 class TileAtlasTextures;
-
-template <class Object>
-class ActorWrapper {
-public:
-    template <class... Args>
-    ActorWrapper(bool isActor, const TaggedScheduler& scheduler, Args&&... args) {
-        if (isActor) {
-            actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
-        } else {
-            object = std::make_unique<Object>(std::forward<Args>(args)...);
-        }
-    }
-
-    ActorWrapper(const ActorWrapper&) = delete;
-
-    template <typename Fn, class... Args>
-    void invoke(Fn fn, Args&&... args) const {
-        if (actor) {
-            actor->self().invoke(fn, std::forward<Args>(args)...);
-        } else if (object) {
-            (object.get()->*fn)(std::forward<Args>(args)...);
-        }
-    }
-
-private:
-    std::unique_ptr<Actor<Object>> actor;
-    std::unique_ptr<Object> object;
-};
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
 public:
@@ -142,7 +114,7 @@ private:
     TaggedScheduler threadPool;
 
     const std::shared_ptr<Mailbox> mailbox;
-    ActorWrapper<GeometryTileWorker> worker;
+    OptionalActor<GeometryTileWorker> worker;
 
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;

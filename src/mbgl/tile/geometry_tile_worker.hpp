@@ -5,7 +5,7 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/actor/actor_ref.hpp>
+#include <mbgl/actor/optional_actor_ref.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/geometry/feature_index.hpp>
@@ -31,33 +31,6 @@ namespace gfx {
 class DynamicTextureAtlas;
 using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
-
-template <class Object>
-class ActorRefWrapper {
-public:
-    ActorRefWrapper(bool isActor, Object& object_, std::weak_ptr<Mailbox> weakMailbox_) {
-        if (isActor) {
-            actorRef = std::make_unique<ActorRef<Object>>(object_, weakMailbox_);
-        } else {
-            objectRef = &object_;
-        }
-    }
-
-    ActorRefWrapper(const ActorRefWrapper&) = delete;
-
-    template <typename Fn, class... Args>
-    void invoke(Fn fn, Args&&... args) const {
-        if (actorRef) {
-            actorRef->invoke(fn, std::forward<Args>(args)...);
-        } else if (objectRef) {
-            (objectRef->*fn)(std::forward<Args>(args)...);
-        }
-    }
-
-private:
-    Object* objectRef = nullptr;
-    std::unique_ptr<ActorRef<Object>> actorRef;
-};
 
 class GeometryTileWorker {
 public:
@@ -107,8 +80,8 @@ private:
 
     void checkPatternLayout(std::unique_ptr<Layout> layout);
 
-    ActorRefWrapper<GeometryTileWorker> self;
-    ActorRefWrapper<GeometryTile> parent;
+    OptionalActorRef<GeometryTileWorker> self;
+    OptionalActorRef<GeometryTile> parent;
     TaggedScheduler scheduler;
 
     const OverscaledTileID id;

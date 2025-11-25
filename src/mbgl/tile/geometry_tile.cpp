@@ -193,7 +193,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       ImageRequestor(parameters.imageManager),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(!parameters.isSynchronous,
+      worker(parameters.isSynchronous,
              parameters.threadPool, // Scheduler reference for the Actor retainer
              *this,
              mailbox,
@@ -262,7 +262,7 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     pending = true;
 
     ++correlationID;
-    worker.invoke(&GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(&GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
 }
 
 void GeometryTile::reset() {
@@ -281,7 +281,7 @@ void GeometryTile::reset() {
 
     // Reset the worker to the `NeedsParse` state.
     ++correlationID;
-    worker.invoke(&GeometryTileWorker::reset, correlationID);
+    worker.self().invoke(&GeometryTileWorker::reset, correlationID);
 }
 
 std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
@@ -319,7 +319,7 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     }
 
     ++correlationID;
-    worker.invoke(&GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(&GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -328,7 +328,7 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
     if (showCollisionBoxes != showCollisionBoxes_) {
         showCollisionBoxes = showCollisionBoxes_;
         ++correlationID;
-        worker.invoke(&GeometryTileWorker::setShowCollisionBoxes, showCollisionBoxes, correlationID);
+        worker.self().invoke(&GeometryTileWorker::setShowCollisionBoxes, showCollisionBoxes, correlationID);
     }
 }
 
@@ -416,7 +416,7 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, [[maybe_unused]] HBShape
         }
     }
 #endif // MLN_TEXT_SHAPING_HARFBUZZ
-    worker.invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap), std::move(results));
+    worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap), std::move(results));
 }
 
 void GeometryTile::getGlyphs(GlyphDependencies glyphDependencies) {
@@ -433,11 +433,11 @@ void GeometryTile::onImagesAvailable(ImageMap images,
                                      uint64_t imageCorrelationID) {
     MLN_TRACE_FUNC();
 
-    worker.invoke(&GeometryTileWorker::onImagesAvailable,
-                  std::move(images),
-                  std::move(patterns),
-                  std::move(versionMap),
-                  imageCorrelationID);
+    worker.self().invoke(&GeometryTileWorker::onImagesAvailable,
+                          std::move(images),
+                          std::move(patterns),
+                          std::move(versionMap),
+                          imageCorrelationID);
 }
 
 void GeometryTile::getImages(ImageRequestPair pair) {
