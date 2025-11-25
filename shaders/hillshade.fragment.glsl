@@ -93,7 +93,6 @@ void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
     fragColor = vec4(0, 0, 0, 0);
     for (int i = 0; i < NUM_ILLUMINATION_SOURCES; i++) {
-        if (i >= u_num_lights) break;
 
         float cos_alt = cos(u_altitudes[i]);
         float sin_alt = sin(u_altitudes[i]);
