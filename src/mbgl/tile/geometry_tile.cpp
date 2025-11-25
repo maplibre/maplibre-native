@@ -211,8 +211,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision),
-      isSynchronous(parameters.isSynchronous) {}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
     MLN_TRACE_FUNC();

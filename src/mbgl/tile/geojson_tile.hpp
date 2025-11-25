@@ -19,7 +19,7 @@ public:
                 std::shared_ptr<style::GeoJSONData>,
                 TileObserver* observer = nullptr);
 
-    void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout = false);
+    void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout, bool isSynchronous);
 
     void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&) override;
 

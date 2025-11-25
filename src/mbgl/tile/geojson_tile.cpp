@@ -16,10 +16,10 @@ GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
                          std::shared_ptr<style::GeoJSONData> data_,
                          TileObserver* observer_)
     : GeometryTile(overscaledTileID, std::move(sourceID_), parameters, observer_) {
-    updateData(std::move(data_), false /*needsRelayout*/);
+    updateData(std::move(data_), false /*needsRelayout*/, parameters.isSynchronous);
 }
 
-void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool needsRelayout) {
+void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool needsRelayout, bool isSynchronous) {
     MLN_TRACE_FUNC();
 
     assert(data_);

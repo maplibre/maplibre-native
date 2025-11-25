@@ -165,9 +165,6 @@ private:
     };
 
     FadeState fadeState = FadeState::Loaded;
-
-protected:
-    bool isSynchronous;
 };
 
 } // namespace mbgl
