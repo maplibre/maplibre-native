@@ -34,7 +34,9 @@ void main() {
     if (a_pos.y > 32766.5) v_pos.y = 1.0;
 }
 )";
-    static constexpr const char* fragment = R"(layout(std140) uniform ColorReliefDrawableUBO {
+    static constexpr const char* fragment = R"(out vec4 fragColor;
+
+layout(std140) uniform ColorReliefDrawableUBO {
     highp mat4 u_matrix;
 };
 
@@ -79,24 +81,18 @@ vec4 getColorStop(int stop) {
 void main() {
     // --- TEMPORARY DEBUG CODE START ---
 
-    // 1. Sample the middle of the u_elevation_stops texture (a 1D texture)
-    //    We know the data should contain non-zero values here (up to 3000m).
+    // Sample the middle of the u_elevation_stops texture.
     vec4 raw_data = texture(u_elevation_stops, vec2(0.5, 0.0));
     
-    // 2. Normalize the values to the display range [0.0, 1.0].
-    //    We'll assume the max possible elevation stop is 3000.0 based on your logs.
-    //    This scaling is essential because values over 1.0 (e.g., 1000.0 meters) 
-    //    will just render as pure white (saturated).
+    // Normalize the values to the display range [0.0, 1.0].
+    // Using 3000.0 (the max elevation from your logs) as a normalization factor.
     float normalize_factor = 1.0 / 3000.0;
     
-    // 3. Output the raw R, G, B, A components of the sampled vec4, scaled down.
-    //    The screen will now be colored based on which channel contains the data.
-    gl_FragColor = raw_data * normalize_factor; 
+    // Output the raw R, G, B, A components of the sampled vec4, scaled down.
+    // The screen's color will reveal which channel contains the data.
+    fragColor = raw_data * normalize_factor; // <--- Correct assignment for GLES 3.0
 
     // --- TEMPORARY DEBUG CODE END ---
-
-    // ** IMPORTANT: Remove this debug code and restore your original main() 
-    //    functionality after the test.
 })";
 };
 
