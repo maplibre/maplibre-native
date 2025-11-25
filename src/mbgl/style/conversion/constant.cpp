@@ -262,8 +262,13 @@ template std::optional<std::array<double, 3>> Converter<std::array<double, 3>>::
 std::optional<std::vector<float>> Converter<std::vector<float>>::operator()(const Convertible& value,
                                                                             Error& error) const {
     if (!isArray(value)) {
-        error.message = "value must be an array";
-        return std::nullopt;
+        // Try single number - wrap in array
+        std::optional<float> number = toNumber(value);
+        if (!number) {
+            error.message = "value must be a number or an array of numbers";
+            return std::nullopt;
+        }
+        return std::vector<float>{*number};
     }
 
     std::vector<float> result;
