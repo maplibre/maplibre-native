@@ -101,7 +101,7 @@ TEST(GeoJSONTile, Issue7648) {
         test.loop.runOnce();
     }
 
-    tile.updateData(data);
+    tile.updateData(data, false, false);
     while (!tile.isComplete()) {
         test.loop.runOnce();
     }
