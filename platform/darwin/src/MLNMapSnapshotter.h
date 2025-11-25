@@ -266,9 +266,6 @@ MLN_EXPORT
  @param annotation The annotation object to add to the receiver. This object
     must conform to the ``MLNAnnotation`` protocol. The snapshotter retains the
     annotation object.
-
- #### Related examples
- - TODO: add a line annotation from GeoJSON.
  */
 - (void)addAnnotation:(id<MLNAnnotation>)annotation;
 
@@ -454,9 +451,6 @@ MLN_EXPORT
  @param annotation The annotation being rendered.
  @return A color to use for the shape outline.
 
- #### Related examples
- TODO: Annotation models, learn how to modify the outline color of an
- ``MLNShape`` object that has been added to your map as an annotation.
  */
 - (MLNColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
     strokeColorForShapeAnnotation:(MLNShape *)annotation;
@@ -473,9 +467,6 @@ MLN_EXPORT
  @param annotation The annotation being rendered.
  @return The polygon’s interior fill color.
 
- #### Related examples
- TODO: Add a polygon annotation, learn how to modify the color of a an
- ``MLNPolygon`` at runtime.
  */
 - (MLNColor *)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
     fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
@@ -490,9 +481,6 @@ MLN_EXPORT
  @param annotation The annotation being rendered.
  @return A line width for the polyline, measured in points.
 
- #### Related examples
- TODO: Add a line annotation from GeoJSON, learn how to modify the
- line width of an ``MLNPolylineFeature`` on your map.
  */
 - (CGFloat)mapSnapshotter:(MLNMapSnapshotter *)snapshotter
     lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
