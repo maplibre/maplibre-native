@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## 12.2.0
+
+### ✨ Features and improvements
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+
+### 🐞 Bug fixes
+
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+- Use deprecated readParcelable on Tiramisu to avoid crash ([#3950](https://github.com/maplibre/maplibre-native/pull/3950)).
+- Handle `BufferResource::version` overflow ([#3962](https://github.com/maplibre/maplibre-native/pull/3962)).
+
 ## 12.1.3
 
 - Disable `UnsatisfiedLinkError` during local tests ([#3942](https://github.com/maplibre/maplibre-native/pull/3942)
