@@ -215,15 +215,14 @@ void RenderColorReliefLayer::updateColorRamp() {
         (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
         (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
 
-        // --- Color Stops (Premultiplied) ---
+        // --- Color Stops (Straight Alpha)
         Color color = colorStopsVector[i];
-        float a = color.a;
-        
-        // Manual premultiplication (Color * Alpha) for the PremultipliedImage
-        colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * a * 255.0f);
-        colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * a * 255.0f);
-        colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * a * 255.0f);
-        colorStops->data[i * 4 + 3] = static_cast<uint8_t>(a * 255.0f);
+
+        // Store colors WITHOUT premultiplication for proper interpolation
+        colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255.0f);
+        colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255.0f);
+        colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255.0f);
+        colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255.0f);
     }
     
     colorRampChanged = true;
