@@ -68,7 +68,7 @@ float getElevation(vec2 coord) {
 float getElevationStop(int stop) {
     // Elevation stops are plain float values, not terrain-RGB encoded
     float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_elevation_stops, vec2(x, 0.0)).g;
+    return texture(u_elevation_stops, vec2(x, 0.0)).r; 
 }
 
 vec4 getColorStop(int stop) {
@@ -77,21 +77,37 @@ vec4 getColorStop(int stop) {
 }
 
 void main() {
-    // --- TEMPORARY ALPHA CHANNEL DEBUG CODE ---
+    float el = getElevation(v_pos);
 
-    // 1. Sample the middle of the u_elevation_stops texture.
-    vec4 raw_data = texture(u_elevation_stops, vec2(0.5, 0.0));
-    
-    // 2. Explicitly pull the Alpha channel value.
-    float elevation_value = raw_data.a; // <-- Checking Alpha
+    // Binary search for color stops
+    int r = (u_color_ramp_size - 1);
+    int l = 0;
 
-    // 3. Normalize the value to the display range [0.0, 1.0].
-    float normalize_factor = elevation_value / 3000.0;
-    
-    // 4. Output the normalized elevation value as grayscale (R=G=B)
-    fragColor = vec4(normalize_factor, normalize_factor, normalize_factor, 1.0); 
+    while (r - l > 1) {
+        int m = (r + l) / 2;
+        float el_m = getElevationStop(m);
+        if (el < el_m) {
+            r = m;
+        } else {
+            l = m;
+        }
+    }
 
-    // --- TEMPORARY ALPHA CHANNEL DEBUG CODE END ---
+    // Get elevation values for interpolation
+    float el_l = getElevationStop(l);
+    float el_r = getElevationStop(r);
+
+    // Get colors for interpolation
+    vec4 color_l = getColorStop(l);
+    vec4 color_r = getColorStop(r);
+
+    // Interpolate between the two colors
+    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
+    fragColor = u_opacity * mix(color_l, color_r, t);
+
+#ifdef OVERDRAW_INSPECTOR
+    fragColor = vec4(1.0);
+#endif
 })";
 };
 
