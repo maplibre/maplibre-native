@@ -373,12 +373,16 @@ const auto& elevationCompoundExpression() {
     static auto signature = detail::makeSignature(
         "elevation",
         [](const EvaluationContext& params) -> Result<double> {
-            // Return 0 if elevation is not available (e.g., during parsing)
-            // This allows the expression to be validated without DEM data
-            if (!params.elevation) {
-                return 0.0;  // Changed from error to default value
+            // For color-relief, elevation is passed via colorRampParameter
+            if (params.colorRampParameter) {
+                return *(params.colorRampParameter);
             }
-            return static_cast<double>(*(params.elevation));
+            // For 3D terrain, elevation is passed directly
+            if (params.elevation) {
+                return static_cast<double>(*(params.elevation));
+            }
+            // During parsing/validation, return 0
+            return 0.0;
         },
         Dependency::Elevation);
     return signature;
