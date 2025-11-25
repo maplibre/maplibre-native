@@ -97,36 +97,16 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorValue = ColorReliefLayer::getDefaultColorReliefColor();
     }
 
-    // Get the expression from the color ramp property
-    const auto* expr = &colorValue.getExpression();
-    if (!expr) {
-        Log::Error(Event::Render, "Expression is null!");
-        return;
-    }
-
-    // Test evaluation at specific elevations from the style (400, 1000, 2000)
-    Log::Info(Event::Render, "Testing expression evaluation with correct constructor:");
+    // Test evaluation at specific elevations using the ColorRampPropertyValue::evaluate method
+    Log::Info(Event::Render, "Testing ColorRampPropertyValue::evaluate:");
     for (float testElev : {400.0f, 1000.0f, 2000.0f}) {
-        expression::EvaluationContext context(
-            std::optional<float>(0.0f),     // zoom
-            nullptr,                         // feature
-            std::nullopt,                    // colorRampParameter
-            std::optional<float>(testElev)   // elevation
-        );
-        
-        auto result = expr->evaluate(context);
-        if (result) {
-            auto colorOpt = expression::fromExpressionValue<Color>(*result);
-            if (colorOpt) {
-                Color c = *colorOpt;
-                Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
-                         std::to_string(int(c.r*255)) + " G=" + std::to_string(int(c.g*255)) + 
-                         " B=" + std::to_string(int(c.b*255)) + " A=" + std::to_string(int(c.a*255)));
-            }
-        }
+        Color c = colorValue.evaluate(static_cast<double>(testElev));
+        Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
+                 std::to_string(int(c.r*255)) + " G=" + std::to_string(int(c.g*255)) + 
+                 " B=" + std::to_string(int(c.b*255)) + " A=" + std::to_string(int(c.a*255)));
     }
 
-    // Sample from 0-3000m to cover the style's 400-2000m range with margin
+    // Sample from 0-3000m
     const float minElevation = 0.0f;
     const float maxElevation = 3000.0f;
     
@@ -137,21 +117,8 @@ void RenderColorReliefLayer::updateColorRamp() {
         float t = static_cast<float>(i) / (colorRampSize - 1);
         float elevation = minElevation + t * (maxElevation - minElevation);
 
-        expression::EvaluationContext context(
-            std::optional<float>(0.0f),     // zoom
-            nullptr,                         // feature  
-            std::nullopt,                    // colorRampParameter
-            std::optional<float>(elevation)  // elevation
-        );
-
-        Color color = Color::black();
-        auto result = expr->evaluate(context);
-        if (result) {
-            auto colorOpt = expression::fromExpressionValue<Color>(*result);
-            if (colorOpt) {
-                color = *colorOpt;
-            }
-        }
+        // Use ColorRampPropertyValue::evaluate directly!
+        Color color = colorValue.evaluate(static_cast<double>(elevation));
 
         // Store elevation as raw float
         auto* elevData = reinterpret_cast<float*>(elevationStops->data.get());
