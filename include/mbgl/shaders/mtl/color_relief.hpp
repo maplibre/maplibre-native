@@ -26,16 +26,16 @@ struct alignas(16) ColorReliefTilePropsUBO {
     /*  0 */ float4 unpack;
     /* 16 */ float2 dimension;
     /* 24 */ int32_t color_ramp_size;
-    /* 28 */ float pad0;
+    /* 28 */ float pad_tile0;
     /* 32 */
 };
 static_assert(sizeof(ColorReliefTilePropsUBO) == 2 * 16, "wrong size");
 
 struct alignas(16) ColorReliefEvaluatedPropsUBO {
     /*  0 */ float opacity;
-    /*  4 */ float pad0;
-    /*  8 */ float pad1;
-    /* 12 */ float pad2;
+    /*  4 */ float pad_eval0;
+    /*  8 */ float pad_eval1;
+    /* 12 */ float pad_eval2;
     /* 16 */
 };
 static_assert(sizeof(ColorReliefEvaluatedPropsUBO) == 16, "wrong size");
@@ -81,48 +81,23 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
+// Get elevation from DEM texture
 float getElevation(float2 coord, texture2d<float, access::sample> image, sampler image_sampler, float4 unpack) {
     float4 data = image.sample(image_sampler, coord) * 255.0;
     data.a = -1.0;
     return dot(data, unpack);
 }
 
-float4 getColorForElevation(float elevation,
-                           int numStops,
-                           texture2d<float, access::sample> elevationStops,
-                           texture2d<float, access::sample> colorStops,
-                           sampler stops_sampler) {
-    // Binary search for the correct elevation range
-    int low = 0;
-    int high = numStops - 1;
+// Get elevation stop value from texture (raw float, not encoded)
+float getElevationStop(int index, int numStops, texture2d<float, access::sample> elevationStops, sampler stops_sampler) {
+    float x = (float(index) + 0.5) / float(numStops);
+    return elevationStops.sample(stops_sampler, float2(x, 0.5)).r;
+}
 
-    while (low < high) {
-        int mid = (low + high) / 2;
-        float midElevation = getElevation(float2((float(mid) + 0.5) / float(numStops), 0.5),
-                                         elevationStops, stops_sampler, float4(1.0, 1.0, 1.0, 1.0));
-
-        if (elevation < midElevation) {
-            high = mid;
-        } else {
-            low = mid + 1;
-        }
-    }
-
-    // Get the two surrounding stops
-    int idx1 = max(low - 1, 0);
-    int idx2 = min(low, numStops - 1);
-
-    float elev1 = getElevation(float2((float(idx1) + 0.5) / float(numStops), 0.5),
-                              elevationStops, stops_sampler, float4(1.0, 1.0, 1.0, 1.0));
-    float elev2 = getElevation(float2((float(idx2) + 0.5) / float(numStops), 0.5),
-                              elevationStops, stops_sampler, float4(1.0, 1.0, 1.0, 1.0));
-
-    float4 color1 = colorStops.sample(stops_sampler, float2((float(idx1) + 0.5) / float(numStops), 0.5));
-    float4 color2 = colorStops.sample(stops_sampler, float2((float(idx2) + 0.5) / float(numStops), 0.5));
-
-    // Interpolate between the two colors
-    float t = (elev2 - elev1) > 0.0 ? clamp((elevation - elev1) / (elev2 - elev1), 0.0, 1.0) : 0.0;
-    return mix(color1, color2, t);
+// Get color stop from texture
+float4 getColorStop(int index, int numStops, texture2d<float, access::sample> colorStops, sampler stops_sampler) {
+    float x = (float(index) + 0.5) / float(numStops);
+    return colorStops.sample(stops_sampler, float2(x, 0.5));
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
@@ -140,15 +115,35 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
-    // Get elevation at this pixel
-    float elevation = getElevation(in.pos, image, image_sampler, tileProps.unpack);
+    // Get elevation at this pixel from DEM
+    float el = getElevation(in.pos, image, image_sampler, tileProps.unpack);
 
-    // Look up color from color ramp
-    float4 color = getColorForElevation(elevation,
-                                       tileProps.color_ramp_size,
-                                       elevationStops,
-                                       colorStops,
-                                       stops_sampler);
+    // Binary search to find surrounding elevation stops
+    int l = 0;
+    int r = tileProps.color_ramp_size - 1;
+    
+    while (r - l > 1) {
+        int m = (r + l) / 2;
+        float el_m = getElevationStop(m, tileProps.color_ramp_size, elevationStops, stops_sampler);
+        
+        if (el < el_m) {
+            r = m;
+        } else {
+            l = m;
+        }
+    }
+
+    // Get the elevation values at the stops
+    float el_l = getElevationStop(l, tileProps.color_ramp_size, elevationStops, stops_sampler);
+    float el_r = getElevationStop(r, tileProps.color_ramp_size, elevationStops, stops_sampler);
+
+    // Get the colors at the stops
+    float4 color_l = getColorStop(l, tileProps.color_ramp_size, colorStops, stops_sampler);
+    float4 color_r = getColorStop(r, tileProps.color_ramp_size, colorStops, stops_sampler);
+
+    // Interpolate
+    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
+    float4 color = mix(color_l, color_r, t);
 
     // Apply opacity
     color.a *= props.opacity;
