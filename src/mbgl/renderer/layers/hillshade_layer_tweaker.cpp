@@ -38,6 +38,20 @@ IlluminationProperties getIlluminationProperties(const HillshadePaintProperties:
     std::vector<Color> highlights = evaluated.get<HillshadeHighlightColor>();
     std::vector<Color> shadows = evaluated.get<HillshadeShadowColor>();
 
+    // ADD DEBUG LOGGING:
+    std::cout << "DEBUG - Altitudes: ";
+    for (auto v : altitudes) std::cout << v << " ";
+    std::cout << "\n";
+
+    std::cout << "DEBUG - Directions: ";
+    for (auto v : directions) std::cout << v << " ";
+    std::cout << "\n";
+
+    std::cout << "DEBUG - Highlights: ";
+    for (const auto& c : highlights) 
+        std::cout << "(" << c.r << "," << c.g << "," << c.b << "," << c.a << ") ";
+    std::cout << "\n";
+
     // Find the maximum length to ensure all arrays are the same size
     size_t maxLength = std::max({directions.size(), altitudes.size(), highlights.size(), shadows.size()});
 
