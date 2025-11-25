@@ -41,35 +41,24 @@ vec4 getColorStop(int stop) {
 }
 
 void main() {
-    float el = getElevation(v_pos);
+    // --- TEMPORARY DEBUG CODE START ---
 
-    // Binary search for color stops
-    int r = (u_color_ramp_size - 1);
-    int l = 0;
+    // 1. Sample the middle of the u_elevation_stops texture (a 1D texture)
+    //    We know the data should contain non-zero values here (up to 3000m).
+    vec4 raw_data = texture(u_elevation_stops, vec2(0.5, 0.0));
+    
+    // 2. Normalize the values to the display range [0.0, 1.0].
+    //    We'll assume the max possible elevation stop is 3000.0 based on your logs.
+    //    This scaling is essential because values over 1.0 (e.g., 1000.0 meters) 
+    //    will just render as pure white (saturated).
+    float normalize_factor = 1.0 / 3000.0;
+    
+    // 3. Output the raw R, G, B, A components of the sampled vec4, scaled down.
+    //    The screen will now be colored based on which channel contains the data.
+    gl_FragColor = raw_data * normalize_factor; 
 
-    while (r - l > 1) {
-        int m = (r + l) / 2;
-        float el_m = getElevationStop(m);
-        if (el < el_m) {
-            r = m;
-        } else {
-            l = m;
-        }
-    }
+    // --- TEMPORARY DEBUG CODE END ---
 
-    // Get elevation values for interpolation
-    float el_l = getElevationStop(l);
-    float el_r = getElevationStop(r);
-
-    // Get colors for interpolation
-    vec4 color_l = getColorStop(l);
-    vec4 color_r = getColorStop(r);
-
-    // Interpolate between the two colors
-    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
-    fragColor = u_opacity * mix(color_l, color_r, t);
-
-#ifdef OVERDRAW_INSPECTOR
-    fragColor = vec4(1.0);
-#endif
+    // ** IMPORTANT: Remove this debug code and restore your original main() 
+    //    functionality after the test.
 }
