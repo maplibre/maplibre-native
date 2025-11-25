@@ -262,7 +262,8 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     pending = true;
 
     ++correlationID;
-    worker.self().invoke(&GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(
+        &GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
 }
 
 void GeometryTile::reset() {
@@ -319,7 +320,8 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     }
 
     ++correlationID;
-    worker.self().invoke(&GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(
+        &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -434,10 +436,10 @@ void GeometryTile::onImagesAvailable(ImageMap images,
     MLN_TRACE_FUNC();
 
     worker.self().invoke(&GeometryTileWorker::onImagesAvailable,
-                          std::move(images),
-                          std::move(patterns),
-                          std::move(versionMap),
-                          imageCorrelationID);
+                         std::move(images),
+                         std::move(patterns),
+                         std::move(versionMap),
+                         imageCorrelationID);
 }
 
 void GeometryTile::getImages(ImageRequestPair pair) {
