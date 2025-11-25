@@ -44,7 +44,7 @@ namespace style {
 namespace expression {
 
 namespace {
-const auto requiredProps = std::array<std::string_view, 4>{"zoom", "heatmap-density", "line-progress", "accumulated"};
+const auto requiredProps = std::array<std::string_view, 5>{"zoom", "heatmap-density", "line-progress", "accumulated", "elevation"};
 
 bool isConstant(const Expression& expression) {
     const auto kind = expression.getKind();
