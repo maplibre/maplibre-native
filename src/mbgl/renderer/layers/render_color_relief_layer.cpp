@@ -42,7 +42,8 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
 
     // Initialize color ramp data
     colorRampSize = 256;
-    elevationStopsData = std::make_shared<std::vector<float>>(colorRampSize);
+    // FIX 1: Initialize elevationStops (PremultipliedImage) to hold colorRampSize floats (4 bytes each).
+    elevationStops = std::make_shared<PremultipliedImage>(Size{colorRampSize * sizeof(float), 1});
     colorStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
 }
 
@@ -83,8 +84,9 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 }
 
 void RenderColorReliefLayer::updateColorRamp() {
-    if (!elevationStopsData || !colorStops) {
-        Log::Warning(Event::Render, "elevationStopsData or colorStops is null!");
+    // FIX 2: Check the correct member name 'elevationStops'
+    if (!elevationStops || !colorStops) {
+        Log::Warning(Event::Render, "elevationStops or colorStops is null!");
         return;
     }
 
@@ -113,6 +115,9 @@ void RenderColorReliefLayer::updateColorRamp() {
     Log::Info(Event::Render, "Sampling " + std::to_string(colorRampSize) + " points from " + 
               std::to_string(minElevation) + "m to " + std::to_string(maxElevation) + "m");
 
+    // FIX 3: Use a temporary vector to hold the calculated float elevation stops
+    std::vector<float> tempElevationData(colorRampSize); 
+
     for (uint32_t i = 0; i < colorRampSize; ++i) {
         float t = static_cast<float>(i) / (colorRampSize - 1);
         float elevation = minElevation + t * (maxElevation - minElevation);
@@ -121,7 +126,8 @@ void RenderColorReliefLayer::updateColorRamp() {
         Color color = colorValue.evaluate(static_cast<double>(elevation));
 
         // Store elevation as raw float - FIXED!
-        (*elevationStopsData)[i] = elevation;
+        // FIX 4: Store in the temporary vector
+        tempElevationData[i] = elevation;
 
         // Store color in RGBA format
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255);
@@ -130,18 +136,22 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
+    // FIX 5: Copy temporary elevation data to the PremultipliedImage raw data (elevationStops)
+    std::memcpy(elevationStops->data.get(), tempElevationData.data(), colorRampSize * sizeof(float)); 
+
     // Log samples at key elevations
-    Log::Info(Event::Render, "Sample 0 (0m): Elev=" + std::to_string((*elevationStopsData)[0]) + 
+    // FIX 6, 7, 8: Use tempElevationData for logging
+    Log::Info(Event::Render, "Sample 0 (0m): Elev=" + std::to_string(tempElevationData[0]) + 
               "m, R=" + std::to_string(colorStops->data[0]) + 
               " G=" + std::to_string(colorStops->data[1]) + 
               " B=" + std::to_string(colorStops->data[2]));
     int mid = 85;
-    Log::Info(Event::Render, "Sample 85 (~1000m): Elev=" + std::to_string((*elevationStopsData)[mid]) + 
+    Log::Info(Event::Render, "Sample 85 (~1000m): Elev=" + std::to_string(tempElevationData[mid]) + 
               "m, R=" + std::to_string(colorStops->data[mid*4]) +
               " G=" + std::to_string(colorStops->data[mid*4+1]) + 
               " B=" + std::to_string(colorStops->data[mid*4+2]));
     int last = 255;
-    Log::Info(Event::Render, "Sample 255 (3000m): Elev=" + std::to_string((*elevationStopsData)[last]) + 
+    Log::Info(Event::Render, "Sample 255 (3000m): Elev=" + std::to_string(tempElevationData[last]) + 
               "m, R=" + std::to_string(colorStops->data[last*4]) +
               " G=" + std::to_string(colorStops->data[last*4+1]) + 
               " B=" + std::to_string(colorStops->data[last*4+2]));
@@ -215,7 +225,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     const auto staticDataSegments = RenderStaticData::rasterSegments();
 
     // Update color ramp textures if changed
-    if (colorRampChanged && elevationStopsData && colorStops) {
+    // FIX 9: Check the correct member name 'elevationStops'
+    if (colorRampChanged && elevationStops && colorStops) {
         Log::Info(Event::Render, "Updating color ramp textures");
         
         if (!elevationStopsTexture) {
@@ -223,14 +234,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             elevationStopsTexture = context.createTexture2D();
         }
         
-        // Create a temporary Image wrapper for float data
-        // NOTE: This assumes 4 bytes per float. We need R32F format, not RGBA8.
-        // You may need to use a different upload method for float textures.
-        // Check if your Texture2D class has an upload() method that accepts raw data.
-        auto elevationImage = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
-        std::memcpy(elevationImage->data.get(), elevationStopsData->data(), colorRampSize * sizeof(float));
-        
-        elevationStopsTexture->setImage(elevationImage);
+        // FIX 10: Use elevationStops directly, which now holds the raw float data.
+        elevationStopsTexture->setImage(elevationStops);
         elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
                                                         .wrapV = gfx::TextureWrapType::Clamp});
