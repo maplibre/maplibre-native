@@ -52,6 +52,8 @@ size_t Texture2D::getPixelStride() const noexcept {
             return 1 * numChannels();
         case gfx::TextureChannelDataType::HalfFloat:
             return 2 * numChannels();
+        case gfx::TextureChannelDataType::Float:
+            return 4 * numChannels();
         default:
             return 0;
     }

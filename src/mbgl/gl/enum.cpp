@@ -412,6 +412,8 @@ platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixel
             switch (value) {
                 case gfx::TexturePixelType::RGBA:
                     return GL_RGBA32F;
+                case gfx::TexturePixelType::Alpha:
+                    return GL_R32F;
                 default:
                     break;
             }
