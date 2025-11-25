@@ -94,8 +94,9 @@ void RenderColorReliefLayer::updateColorRamp() {
     // Get the expression from ColorRampPropertyValue
     const mbgl::style::expression::Expression& expr = colorValue.getExpression();
     
-    // Check if it's an Interpolate expression
-    if (expr.getKind() == mbgl::style::expression::Expression::Kind::Interpolate) {
+    // FIX 1: Use the modern helper to check expression type
+    if (mbgl::style::expression::is<mbgl::style::expression::Interpolate>(expr)) {
+        // The cast is safe now as the type check passes
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
         
         size_t stopCount = interpolate->getStopCount();
@@ -110,7 +111,7 @@ void RenderColorReliefLayer::updateColorRamp() {
             elevationStopsVector.push_back(static_cast<float>(elevation));
         });
         
-        // Now evaluate colors using PropertyValue::evaluate (we know this works!)
+        // Now evaluate colors using PropertyValue::evaluate
         for (float elevation : elevationStopsVector) {
             Color color = colorValue.evaluate(elevation);
             colorStopsVector.push_back(color);
@@ -159,12 +160,15 @@ void RenderColorReliefLayer::updateColorRamp() {
     Log::Info(Event::Render, "  Range: " + std::to_string(minElevation) + "m to " + 
              std::to_string(maxElevation) + "m");
     
-    // Prepare data for GPU upload (use class member names)
+    // FIX 2: Prepare data for GPU upload (use existing class members)
     this->elevationStopsData = std::make_shared<std::vector<float>>();
-    this->colorStopsData = std::make_shared<std::vector<float>>();
     this->elevationStopsData->reserve(rampSize * 4);  // RGBA
-    this->colorStopsData->reserve(rampSize * 4);       // RGBA
     
+    // Re-initialize and size the existing colorStops PremultipliedImage (RGBA8 data)
+    // The PremultipliedImage is expected to be a `PremultipliedImage` of size `rampSize x 1` with 4 channels (RGBA)
+    this->colorStops = std::make_shared<PremultipliedImage>(Size{rampSize, 1});
+    this->colorStops->resize({rampSize, 1}); 
+
     for (uint32_t i = 0; i < rampSize; ++i) {
         // Elevation stops (RGBA format for llvmpipe compatibility)
         this->elevationStopsData->push_back(elevationStopsVector[i]);  // R = elevation
@@ -172,11 +176,13 @@ void RenderColorReliefLayer::updateColorRamp() {
         this->elevationStopsData->push_back(0.0f);                      // B = unused
         this->elevationStopsData->push_back(1.0f);                      // A = unused
         
-        // Color stops (RGBA)
-        this->colorStopsData->push_back(colorStopsVector[i].r);
-        this->colorStopsData->push_back(colorStopsVector[i].g);
-        this->colorStopsData->push_back(colorStopsVector[i].b);
-        this->colorStopsData->push_back(colorStopsVector[i].a);
+        // Color stops (RGBA8 for PremultipliedImage)
+        // Convert to unassociated color, premultiply, and store as 8-bit bytes.
+        const auto premultiplied = util::premultiply(colorStopsVector[i].toUnassociated());
+        this->colorStops->data[i * 4 + 0] = static_cast<uint8_t>(premultiplied.r * 255.0f);
+        this->colorStops->data[i * 4 + 1] = static_cast<uint8_t>(premultiplied.g * 255.0f);
+        this->colorStops->data[i * 4 + 2] = static_cast<uint8_t>(premultiplied.b * 255.0f);
+        this->colorStops->data[i * 4 + 3] = static_cast<uint8_t>(premultiplied.a * 255.0f);
     }
     
     // Update class member
@@ -187,8 +193,8 @@ void RenderColorReliefLayer::updateColorRamp() {
     elevationStopsTexture->upload(this->elevationStopsData->data(), Size{rampSize, 1});
     
     // Upload color stops texture  
-    colorStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
-    colorStopsTexture->upload(this->colorStopsData->data(), Size{rampSize, 1});
+    // The colorStopsTexture->setImage(colorStops) is performed in the update() loop, so no
+    // direct upload here is necessary, unlike the broken code that followed.
 }
 
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
