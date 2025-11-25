@@ -135,9 +135,11 @@ public abstract class Source {
   }
 
   /**
-   * Retrieve whether or not the fetched tiles for the given source should be synchronously updated on the render thread
+   * Retrieve whether or not the fetched tiles for the given source
+   * should be synchronously updated on the render thread
    *
-   @return true if tiles are synchronously updated on the render thread, false if they will be async updated. Default value is false.
+   @return true if tiles are synchronously updated on the render thread,
+   false if they will be async updated. Default value is false.
    */
   @NonNull
   public Boolean isSynchronous() {
@@ -145,7 +147,8 @@ public abstract class Source {
   }
 
   /**
-   * Set a flag defining whether or not the fetched tiles for the given source should be synchronously updated on the render thread
+   * Set a flag defining whether or not the fetched tiles for the given source
+   * should be synchronously updated on the render thread
    *
    * @param value current setting for synchronous.
    */
@@ -165,7 +168,7 @@ public abstract class Source {
   /**
    * Retrieve the minimum tile update interval, which is used to throttle the tile update network requests.
    *
-   * @return the update interval in milliseconds, default valuse is 0.
+   * @return the update interval in milliseconds, default value is 0.
    */
   @NonNull
   public Long getMinimumTileUpdateInterval() {
