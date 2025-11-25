@@ -1,5 +1,3 @@
-out vec4 fragColor;
-
 layout(std140) uniform ColorReliefDrawableUBO {
     highp mat4 u_matrix;
 };

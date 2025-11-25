@@ -34,9 +34,7 @@ void main() {
     if (a_pos.y > 32766.5) v_pos.y = 1.0;
 }
 )";
-    static constexpr const char* fragment = R"(out vec4 fragColor;
-
-layout(std140) uniform ColorReliefDrawableUBO {
+    static constexpr const char* fragment = R"(layout(std140) uniform ColorReliefDrawableUBO {
     highp mat4 u_matrix;
 };
 
