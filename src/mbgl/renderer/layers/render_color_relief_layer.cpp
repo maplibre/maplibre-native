@@ -306,27 +306,20 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         // Use RGBA32F instead of R32F for llvmpipe compatibility
         elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
         
-        // Convert single-channel data to RGBA format  
-        auto elevationRGBA = std::make_shared<std::vector<float>>(colorRampSize * 4);
-        for (uint32_t i = 0; i < colorRampSize; ++i) {
-            (*elevationRGBA)[i*4 + 0] = (*elevationStopsData)[i];  // R = elevation
-            (*elevationRGBA)[i*4 + 1] = 0.0f;  // G = unused
-            (*elevationRGBA)[i*4 + 2] = 0.0f;  // B = unused  
-            (*elevationRGBA)[i*4 + 3] = 1.0f;  // A = unused
-        }
-        elevationStopsTexture->upload(elevationRGBA->data(), Size{colorRampSize, 1});
+        // elevationStopsData is already in RGBA format, upload it directly
+        elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
 
         Log::Info(Event::Render, "=== TEXTURE DEBUG ===");
         Log::Info(Event::Render, "getPixelStride: " + std::to_string(elevationStopsTexture->getPixelStride()));
         Log::Info(Event::Render, "getDataSize: " + std::to_string(elevationStopsTexture->getDataSize()));
-        Log::Info(Event::Render, "Expected data size: " + std::to_string(colorRampSize * 4));
+        Log::Info(Event::Render, "Expected data size: " + std::to_string(colorRampSize * 4 * sizeof(float)));
         Log::Info(Event::Render, "First 4 floats: " + 
                 std::to_string((*elevationStopsData)[0]) + ", " +
                 std::to_string((*elevationStopsData)[1]) + ", " +
                 std::to_string((*elevationStopsData)[2]) + ", " +
                 std::to_string((*elevationStopsData)[3]));
         
-        // Set sampler state (already correct)
+        // Set sampler state
         elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
                                                         .wrapV = gfx::TextureWrapType::Clamp});
@@ -348,7 +341,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         // Log texture binding info
         Log::Info(Event::Render, "Texture binding plan:");
         Log::Info(Event::Render, "  u_image (DEM) -> texture unit 0");
-        Log::Info(Event::Render, "  u_elevation_stops (R32F) -> texture unit 1");
+        Log::Info(Event::Render, "  u_elevation_stops (RGBA32F) -> texture unit 1");
         Log::Info(Event::Render, "  u_color_stops (RGBA8) -> texture unit 2");
         Log::Info(Event::Render, "UBO values:");
         Log::Info(Event::Render, "  u_color_ramp_size: " + std::to_string(colorRampSize));
