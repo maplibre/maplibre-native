@@ -239,11 +239,6 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         }
         elevationStopsTexture->upload(elevationRGBA->data(), Size{colorRampSize, 1});
 
-        GLenum err = glGetError();
-        if (err != GL_NO_ERROR) {
-            Log::Error(Event::Render, "GL ERROR: " + std::to_string(err));
-        }
-
         Log::Info(Event::Render, "=== TEXTURE DEBUG ===");
         Log::Info(Event::Render, "getPixelStride: " + std::to_string(elevationStopsTexture->getPixelStride()));
         Log::Info(Event::Render, "getDataSize: " + std::to_string(elevationStopsTexture->getDataSize()));
