@@ -381,8 +381,10 @@ const auto& elevationCompoundExpression() {
             if (params.elevation) {
                 return static_cast<double>(*(params.elevation));
             }
-            // During parsing/validation, return 0
-            return 0.0;
+            // Return error to prevent parse-time optimization
+            return EvaluationError{
+                "The 'elevation' expression is unavailable in the current evaluation context."
+            };
         },
         Dependency::Elevation);
     return signature;
