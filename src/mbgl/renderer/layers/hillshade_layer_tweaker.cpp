@@ -10,6 +10,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/util/geo.hpp>
+#include <iostream>
 
 namespace mbgl {
 
