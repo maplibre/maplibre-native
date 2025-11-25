@@ -119,7 +119,7 @@ void RenderColorReliefLayer::updateColorRamp() {
     // Get the expression from ColorRampPropertyValue
     const mbgl::style::expression::Expression& expr = colorValue.getExpression();
 
-    // FIX 1: Use the correct namespace for Kind enum
+    // Fix 1: Use the correct namespace for Kind enum
     if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
         
@@ -142,7 +142,8 @@ void RenderColorReliefLayer::updateColorRamp() {
             // Set the necessary elevation field for the ["elevation"] input to resolve
             context.withElevation(elevation); 
 
-            EvaluationResult result = expr.evaluate(context);
+            // FIX: Qualified the type name to fix compilation error
+            expression::EvaluationResult result = expr.evaluate(context); 
             
             Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
 
@@ -155,7 +156,7 @@ void RenderColorReliefLayer::updateColorRamp() {
             
             colorStopsVector.push_back(color);
             
-            Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
+            Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
                       "rgba(" + std::to_string(color.r) + ", " +
                       std::to_string(color.g) + ", " +
                       std::to_string(color.b) + ", " +
@@ -196,11 +197,12 @@ void RenderColorReliefLayer::updateColorRamp() {
     }
 
     Log::Info(Event::Render, "Final color ramp:");
-    Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
-    Log::Info(Event::Render, "  Range: " + std::to_string(elevationStopsVector.front()) + "m to " + 
+    Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
+    Log::Info(Event::Render, "  Range: " + std::to_string(elevationStopsVector.front()) + "m to " + 
               std::to_string(elevationStopsVector.back()) + "m");
     
     // Resize and prepare structures
+    // Correctly using the original member `elevationStopsData` which is a shared_ptr to vector<float>
     elevationStopsData->resize(rampSize * 4); // We use RGBA float for LLVM compatibility
     colorStops->resize({rampSize, 1}); 
     this->colorRampSize = rampSize;
@@ -208,16 +210,16 @@ void RenderColorReliefLayer::updateColorRamp() {
     for (uint32_t i = 0; i < rampSize; ++i) {
         // --- Elevation Stops ---
         // Store elevation in the R channel of an RGBA float vector
-        (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
-        (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
-        (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
-        (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
+        (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
+        (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
+        (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
+        (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
 
         // --- Color Stops (Premultiplied) ---
         Color color = colorStopsVector[i];
         float a = color.a;
         
-        // FIX 3: Manual premultiplication (Color * Alpha) for the PremultipliedImage
+        // Manual premultiplication (Color * Alpha) for the PremultipliedImage
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * a * 255.0f);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * a * 255.0f);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * a * 255.0f);
