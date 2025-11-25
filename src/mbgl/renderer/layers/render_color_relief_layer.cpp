@@ -94,8 +94,8 @@ void RenderColorReliefLayer::updateColorRamp() {
     // Get the expression from ColorRampPropertyValue
     const mbgl::style::expression::Expression& expr = colorValue.getExpression();
     
-    // FIX 1: Use the modern helper to check expression type
-    if (mbgl::style::expression::is<mbgl::style::expression::Interpolate>(expr)) {
+    // FIX 1: Use direct Kind comparison (assuming expression.hpp is included)
+    if (expr.getKind() == mbgl::style::expression::Expression::Kind::Interpolate) {
         // The cast is safe now as the type check passes
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
         
@@ -160,12 +160,11 @@ void RenderColorReliefLayer::updateColorRamp() {
     Log::Info(Event::Render, "  Range: " + std::to_string(minElevation) + "m to " + 
              std::to_string(maxElevation) + "m");
     
-    // FIX 2: Prepare data for GPU upload (use existing class members)
+    // Prepare data for GPU upload (using existing class members)
     this->elevationStopsData = std::make_shared<std::vector<float>>();
     this->elevationStopsData->reserve(rampSize * 4);  // RGBA
     
     // Re-initialize and size the existing colorStops PremultipliedImage (RGBA8 data)
-    // The PremultipliedImage is expected to be a `PremultipliedImage` of size `rampSize x 1` with 4 channels (RGBA)
     this->colorStops = std::make_shared<PremultipliedImage>(Size{rampSize, 1});
     this->colorStops->resize({rampSize, 1}); 
 
@@ -177,8 +176,8 @@ void RenderColorReliefLayer::updateColorRamp() {
         this->elevationStopsData->push_back(1.0f);                      // A = unused
         
         // Color stops (RGBA8 for PremultipliedImage)
-        // Convert to unassociated color, premultiply, and store as 8-bit bytes.
-        const auto premultiplied = util::premultiply(colorStopsVector[i].toUnassociated());
+        // FIX 2: Removed .toUnassociated()
+        const auto premultiplied = util::premultiply(colorStopsVector[i]);
         this->colorStops->data[i * 4 + 0] = static_cast<uint8_t>(premultiplied.r * 255.0f);
         this->colorStops->data[i * 4 + 1] = static_cast<uint8_t>(premultiplied.g * 255.0f);
         this->colorStops->data[i * 4 + 2] = static_cast<uint8_t>(premultiplied.b * 255.0f);
@@ -192,9 +191,7 @@ void RenderColorReliefLayer::updateColorRamp() {
     elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
     elevationStopsTexture->upload(this->elevationStopsData->data(), Size{rampSize, 1});
     
-    // Upload color stops texture  
-    // The colorStopsTexture->setImage(colorStops) is performed in the update() loop, so no
-    // direct upload here is necessary, unlike the broken code that followed.
+    // Color stops texture upload is assumed to be handled in the update() loop
 }
 
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
