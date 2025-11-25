@@ -231,6 +231,16 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         
         // FIX: Upload the raw float data directly.
         elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
+
+        Log::Info(Event::Render, "=== TEXTURE DEBUG ===");
+        Log::Info(Event::Render, "getPixelStride: " + std::to_string(elevationStopsTexture->getPixelStride()));
+        Log::Info(Event::Render, "getDataSize: " + std::to_string(elevationStopsTexture->getDataSize()));
+        Log::Info(Event::Render, "Expected data size: " + std::to_string(colorRampSize * 4));
+        Log::Info(Event::Render, "First 4 floats: " + 
+                std::to_string((*elevationStopsData)[0]) + ", " +
+                std::to_string((*elevationStopsData)[1]) + ", " +
+                std::to_string((*elevationStopsData)[2]) + ", " +
+                std::to_string((*elevationStopsData)[3]));
         
         // Set sampler state (already correct)
         elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
