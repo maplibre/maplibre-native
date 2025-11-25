@@ -377,14 +377,13 @@ const auto& elevationCompoundExpression() {
             if (params.colorRampParameter) {
                 return *(params.colorRampParameter);
             }
-            // For 3D terrain, elevation is passed directly
+            // For 3D terrain, elevation is passed directly  
             if (params.elevation) {
                 return static_cast<double>(*(params.elevation));
             }
-            // Return error to prevent parse-time optimization
-            return EvaluationError{
-                "The 'elevation' expression is unavailable in the current evaluation context."
-            };
+            // During parsing/validation, return a valid value to allow parsing to succeed
+            // The Dependency::Elevation flag prevents this from being optimized to a constant
+            return 0.0;
         },
         Dependency::Elevation);
     return signature;
