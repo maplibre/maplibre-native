@@ -64,12 +64,10 @@ std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpres
         std::vector<float> result;
         result.reserve(values.size());
         for (const auto& v : values) {
-            if (!v.is<double>() && !v.is<uint64_t>() && !v.is<int64_t>()) {
+            if (!v.is<double>()) {
                 return std::nullopt;
             }
-            result.push_back(v.is<double>() ? static_cast<float>(v.get<double>())
-                           : v.is<uint64_t>() ? static_cast<float>(v.get<uint64_t>())
-                           : static_cast<float>(v.get<int64_t>()));
+            result.push_back(static_cast<float>(v.get<double>()));
         }
         return result;
     }
@@ -77,12 +75,6 @@ std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpres
     // Handle single number - wrap in array
     if (value.is<double>()) {
         return std::vector<float>{static_cast<float>(value.get<double>())};
-    }
-    if (value.is<uint64_t>()) {
-        return std::vector<float>{static_cast<float>(value.get<uint64_t>())};
-    }
-    if (value.is<int64_t>()) {
-        return std::vector<float>{static_cast<float>(value.get<int64_t>())};
     }
     
     return std::nullopt;
