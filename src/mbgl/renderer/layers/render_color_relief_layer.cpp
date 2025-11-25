@@ -156,7 +156,7 @@ void RenderColorReliefLayer::updateColorRamp() {
             
             colorStopsVector.push_back(color);
             
-            Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
+            Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
                       "rgba(" + std::to_string(color.r) + ", " +
                       std::to_string(color.g) + ", " +
                       std::to_string(color.b) + ", " +
@@ -197,8 +197,8 @@ void RenderColorReliefLayer::updateColorRamp() {
     }
 
     Log::Info(Event::Render, "Final color ramp:");
-    Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
-    Log::Info(Event::Render, "  Range: " + std::to_string(elevationStopsVector.front()) + "m to " + 
+    Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
+    Log::Info(Event::Render, "  Range: " + std::to_string(elevationStopsVector.front()) + "m to " + 
               std::to_string(elevationStopsVector.back()) + "m");
     
     // Resize and prepare structures
@@ -210,10 +210,10 @@ void RenderColorReliefLayer::updateColorRamp() {
     for (uint32_t i = 0; i < rampSize; ++i) {
         // --- Elevation Stops ---
         // Store elevation in the R channel of an RGBA float vector
-        (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
-        (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
-        (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
-        (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
+        (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
+        (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
+        (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
+        (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
 
         // --- Color Stops (Premultiplied) ---
         Color color = colorStopsVector[i];
