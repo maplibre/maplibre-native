@@ -146,8 +146,6 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         return;
     }
 
-    propertiesUpdated = true;
-    
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
