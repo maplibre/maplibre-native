@@ -86,17 +86,41 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 }
 
 void RenderColorReliefLayer::updateColorRamp() {
+    // Ensure data structures are initialized
+    if (!elevationStopsData || !colorStops) {
+        Log::Warning(Event::Render, "elevationStopsData or colorStops is null!");
+        return;
+    }
+    
+    Log::Info(Event::Render, "updateColorRamp: Getting color property");
+    
+    // Get the color property value
     auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
+    if (colorValue.isUndefined()) {
+        Log::Warning(Event::Render, "colorValue is undefined, using default");
+        // This is a placeholder; ensure ColorReliefLayer::getDefaultColorReliefColor() exists
+        // colorValue = ColorReliefLayer::getDefaultColorReliefColor();
+    }
+
+    // Test evaluation at specific elevations (Retaining from your working version)
+    Log::Info(Event::Render, "Testing ColorRampPropertyValue::evaluate:");
+    for (float testElev : {400.0f, 1000.0f, 2000.0f}) {
+        Color c = colorValue.evaluate(static_cast<double>(testElev));
+        Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
+                 std::to_string(int(c.r*255)) + " G=" + std::to_string(int(c.g*255)) + 
+                 " B=" + std::to_string(int(c.b*255)) + " A=" + std::to_string(int(c.a*255)));
+    }
+
+    // Start of Expression Parsing Logic
     
     std::vector<float> elevationStopsVector;
     std::vector<Color> colorStopsVector;
-    
+
     // Get the expression from ColorRampPropertyValue
     const mbgl::style::expression::Expression& expr = colorValue.getExpression();
-    
-    // FIX 1: Use the correct namespace for the Kind enum (mbgl::style::expression::Kind)
+
+    // FIX 1: Use the correct namespace for Kind enum
     if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
-        // The cast is safe now as the type check passes
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
         
         size_t stopCount = interpolate->getStopCount();
@@ -111,9 +135,24 @@ void RenderColorReliefLayer::updateColorRamp() {
             elevationStopsVector.push_back(static_cast<float>(elevation));
         });
         
-        // Now evaluate colors using PropertyValue::evaluate
+        // FIX 2: Manually create and use EvaluationContext to ensure elevation value is seen
         for (float elevation : elevationStopsVector) {
-            Color color = colorValue.evaluate(elevation);
+            
+            mbgl::style::expression::EvaluationContext context;
+            // Set the necessary elevation field for the ["elevation"] input to resolve
+            context.withElevation(elevation); 
+
+            EvaluationResult result = expr.evaluate(context);
+            
+            Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
+
+            if (result && result->is<Color>()) {
+                color = result->get<Color>();
+            } else {
+                 // Log the failure to aid future debugging
+                Log::Warning(Event::Render, "Expression evaluation failed for elevation " + std::to_string(elevation));
+            }
+            
             colorStopsVector.push_back(color);
             
             Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
@@ -125,17 +164,14 @@ void RenderColorReliefLayer::updateColorRamp() {
         
         Log::Info(Event::Render, "Extracted " + std::to_string(elevationStopsVector.size()) + 
                   " stops from expression");
+
     } else {
-        Log::Warning(Event::Render, "Expression is not an Interpolate, using fallback");
-    }
-    
-    // Fallback: sample a range if no stops extracted
-    if (elevationStopsVector.empty()) {
-        Log::Info(Event::Render, "Using fallback sampling (-500m to 9000m, 256 samples)");
-        
+        // Fallback: If not an Interpolate (mimics your working hardcoded sampling)
+        Log::Warning(Event::Render, "Expression is not an Interpolate, using fallback sampling");
+
+        const uint32_t numSamples = 256;
         const float minElevation = -500.0f;
         const float maxElevation = 9000.0f;
-        const uint32_t numSamples = 256;
         
         elevationStopsVector.reserve(numSamples);
         colorStopsVector.reserve(numSamples);
@@ -145,55 +181,51 @@ void RenderColorReliefLayer::updateColorRamp() {
             float elevation = minElevation + t * (maxElevation - minElevation);
             elevationStopsVector.push_back(elevation);
             
-            Color color = colorValue.evaluate(elevation);
+            // Safe to use the wrapper here, as no expression variable dependency is active
+            Color color = colorValue.evaluate(static_cast<double>(elevation));
             colorStopsVector.push_back(color);
         }
     }
     
-    // Now use elevationStopsVector and colorStopsVector
-    const uint32_t rampSize = elevationStopsVector.size();
-    float minElevation = elevationStopsVector.front();
-    float maxElevation = elevationStopsVector.back();
+    // --- Data Population and Texture Setup ---
     
+    const uint32_t rampSize = elevationStopsVector.size();
+    if (rampSize == 0) {
+        Log::Error(Event::Render, "Color ramp has zero size after evaluation!");
+        return;
+    }
+
     Log::Info(Event::Render, "Final color ramp:");
     Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
-    Log::Info(Event::Render, "  Range: " + std::to_string(minElevation) + "m to " + 
-              std::to_string(maxElevation) + "m");
+    Log::Info(Event::Render, "  Range: " + std::to_string(elevationStopsVector.front()) + "m to " + 
+              std::to_string(elevationStopsVector.back()) + "m");
     
-    // FIX 2: Prepare data for GPU upload (use existing class members)
-    this->elevationStopsData = std::make_shared<std::vector<float>>();
-    this->elevationStopsData->reserve(rampSize * 4);  // RGBA
-    
-    // Re-initialize and size the existing colorStops PremultipliedImage (RGBA8 data)
-    this->colorStops = std::make_shared<PremultipliedImage>(Size{rampSize, 1});
-    this->colorStops->resize({rampSize, 1}); 
+    // Resize and prepare structures
+    elevationStopsData->resize(rampSize * 4); // We use RGBA float for LLVM compatibility
+    colorStops->resize({rampSize, 1}); 
+    this->colorRampSize = rampSize;
 
     for (uint32_t i = 0; i < rampSize; ++i) {
-        // Elevation stops (RGBA format for llvmpipe compatibility)
-        this->elevationStopsData->push_back(elevationStopsVector[i]);  // R = elevation
-        this->elevationStopsData->push_back(0.0f);                      // G = unused
-        this->elevationStopsData->push_back(0.0f);                      // B = unused
-        this->elevationStopsData->push_back(1.0f);                      // A = unused
-        
-        // Color stops (RGBA8 for PremultipliedImage)
+        // --- Elevation Stops ---
+        // Store elevation in the R channel of an RGBA float vector
+        (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
+        (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
+        (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
+        (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
+
+        // --- Color Stops (Premultiplied) ---
         Color color = colorStopsVector[i];
         float a = color.a;
         
-        // FIX 3: Manual premultiplication (Color * Alpha)
-        this->colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * a * 255.0f);
-        this->colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * a * 255.0f);
-        this->colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * a * 255.0f);
-        this->colorStops->data[i * 4 + 3] = static_cast<uint8_t>(a * 255.0f);
+        // FIX 3: Manual premultiplication (Color * Alpha) for the PremultipliedImage
+        colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * a * 255.0f);
+        colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * a * 255.0f);
+        colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * a * 255.0f);
+        colorStops->data[i * 4 + 3] = static_cast<uint8_t>(a * 255.0f);
     }
     
-    // Update class member
-    this->colorRampSize = rampSize;
-    
-    // Upload elevation stops texture
-    elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
-    elevationStopsTexture->upload(this->elevationStopsData->data(), Size{rampSize, 1});
-    
-    // Color stops texture upload is assumed to be handled in the update() loop
+    colorRampChanged = true;
+    Log::Info(Event::Render, "updateColorRamp complete");
 }
 
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
