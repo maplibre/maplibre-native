@@ -17,7 +17,7 @@ jobs:
       - name: Create Release
         run: |
           gh release create android-testapp-${{ github.sha }} \
-            --draft=false \
+            --draft=true \
             --prerelease=false \
             --latest=false \
             --title android-testapp-${{ github.sha }}
@@ -58,8 +58,18 @@ jobs:
       - name: Upload debug symbols to sentry
         run: sentry-cli debug-files upload MapLibreAndroidTestApp
 
-      - name: Upload Linux artifact
+      - name: Upload test app
         run: |
           gh release upload android-testapp-${{ github.sha }} MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  finish-android-testapp-release:
+    needs: [android-build-testapp]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Finalize release (set draft=false)
+        run: |
+          gh release edit android-testapp-${{ github.sha }} --draft=false
         env:
           GH_TOKEN: ${{ github.token }}
