@@ -41,18 +41,19 @@ vec4 getColorStop(int stop) {
 }
 
 void main() {
-    // --- TEMPORARY DEBUG CODE START ---
+    // --- TEMPORARY ALPHA CHANNEL DEBUG CODE ---
 
-    // Sample the middle of the u_elevation_stops texture.
+    // 1. Sample the middle of the u_elevation_stops texture.
     vec4 raw_data = texture(u_elevation_stops, vec2(0.5, 0.0));
     
-    // Normalize the values to the display range [0.0, 1.0].
-    // Using 3000.0 (the max elevation from your logs) as a normalization factor.
-    float normalize_factor = 1.0 / 3000.0;
-    
-    // Output the raw R, G, B, A components of the sampled vec4, scaled down.
-    // The screen's color will reveal which channel contains the data.
-    fragColor = raw_data * normalize_factor; // <--- Correct assignment for GLES 3.0
+    // 2. Explicitly pull the Alpha channel value.
+    float elevation_value = raw_data.a; // <-- Checking Alpha
 
-    // --- TEMPORARY DEBUG CODE END ---
+    // 3. Normalize the value to the display range [0.0, 1.0].
+    float normalize_factor = elevation_value / 3000.0;
+    
+    // 4. Output the normalized elevation value as grayscale (R=G=B)
+    fragColor = vec4(normalize_factor, normalize_factor, normalize_factor, 1.0); 
+
+    // --- TEMPORARY ALPHA CHANNEL DEBUG CODE END ---
 }
