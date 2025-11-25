@@ -20,8 +20,8 @@
 #include <mbgl/style/expression/interpolate.hpp>
 #include <mbgl/style/conversion/color_ramp_property_value.hpp>
 #include <mbgl/util/premultiply.hpp>
-#include <vector> // Added for std::vector
-#include <cstring> // Added for std::memcpy
+#include <vector> 
+#include <cstring> 
 
 namespace mbgl {
 
@@ -226,10 +226,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             elevationStopsTexture = context.createTexture2D();
         }
         
-        // FIX 2 (CRITICAL): Correctly set format for a single-channel float texture (R32F)
-        elevationStopsTexture->setFormat(gfx::TexturePixelType::Red, gfx::TextureChannelDataType::Float);
+        // FIX (CRITICAL): Use gfx::TexturePixelType::Alpha for single-channel R32F texture.
+        elevationStopsTexture->setFormat(gfx::TexturePixelType::Alpha, gfx::TextureChannelDataType::Float);
         
-        // FIX 3: Upload the raw float data directly using the overload that takes raw data and size.
+        // FIX: Upload the raw float data directly.
         elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
         
         // Set sampler state (already correct)
