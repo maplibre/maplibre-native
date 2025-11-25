@@ -1,4 +1,3 @@
-// File: src/mbgl/style/conversion/hillshade_conversions.cpp
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/type.hpp>
@@ -41,11 +40,6 @@ namespace expression {
 
 // valueTypeToExpressionType specializations
 template <>
-type::Type valueTypeToExpressionType<std::vector<float>>() {
-    return type::Array(type::Number);
-}
-
-template <>
 type::Type valueTypeToExpressionType<std::vector<Color>>() {
     return type::Array(type::Color);
 }
@@ -56,29 +50,6 @@ type::Type valueTypeToExpressionType<HillshadeMethodType>() {
 }
 
 // ValueConverter specializations for runtime expression evaluation
-
-template <>
-std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpressionValue(const Value& value) {
-    if (value.is<std::vector<Value>>()) {
-        const auto& values = value.get<std::vector<Value>>();
-        std::vector<float> result;
-        result.reserve(values.size());
-        for (const auto& v : values) {
-            if (!v.is<double>()) {
-                return std::nullopt;
-            }
-            result.push_back(static_cast<float>(v.get<double>()));
-        }
-        return result;
-    }
-
-    // Handle single number - wrap in array
-    if (value.is<double>()) {
-        return std::vector<float>{static_cast<float>(value.get<double>())};
-    }
-    
-    return std::nullopt;
-}
 
 template <>
 std::optional<std::vector<Color>> ValueConverter<std::vector<Color>>::fromExpressionValue(const Value& value) {
