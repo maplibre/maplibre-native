@@ -177,6 +177,13 @@ void main() {
     float scaleFactor = cos(radians((u_latrange[0] - u_latrange[1]) * (1.0 - v_pos.y) + u_latrange[1]));
     vec2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
 
+    // === TEMPORARY DEBUG: Visualize altitude value ===
+    // If altitude is 0 rad -> GREEN, if 1.57 rad (90°) -> RED
+    float debugAlt = u_altitudes[0] / 1.57;  // Normalize to 0-1
+    fragColor = vec4(debugAlt, 1.0 - debugAlt, 0.0, 1.0);
+    return;  // Exit early for debug
+    // === END DEBUG ===
+
     switch (u_method) {
         case BASIC:
             basic_hillshade(deriv);
