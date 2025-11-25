@@ -20,6 +20,7 @@
 #include <mbgl/style/expression/interpolate.hpp>
 #include <mbgl/style/conversion/color_ramp_property_value.hpp>
 #include <mbgl/util/premultiply.hpp>
+#include <vector> // Required for std::vector
 
 namespace mbgl {
 
@@ -43,7 +44,8 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
     // Initialize color ramp data
     colorRampSize = 256;
     // FIX 1: Initialize elevationStops (PremultipliedImage) to hold colorRampSize floats (4 bytes each).
-    elevationStops = std::make_shared<PremultipliedImage>(Size{colorRampSize * sizeof(float), 1});
+    // FIX 2: Explicitly cast the size calculation to uint32_t to resolve the narrowing error.
+    elevationStops = std::make_shared<PremultipliedImage>(Size{static_cast<uint32_t>(colorRampSize * sizeof(float)), 1});
     colorStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
 }
 
@@ -84,7 +86,7 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 }
 
 void RenderColorReliefLayer::updateColorRamp() {
-    // FIX 2: Check the correct member name 'elevationStops'
+    // FIX (from previous turn): Check the correct member name 'elevationStops'
     if (!elevationStops || !colorStops) {
         Log::Warning(Event::Render, "elevationStops or colorStops is null!");
         return;
@@ -115,7 +117,7 @@ void RenderColorReliefLayer::updateColorRamp() {
     Log::Info(Event::Render, "Sampling " + std::to_string(colorRampSize) + " points from " + 
               std::to_string(minElevation) + "m to " + std::to_string(maxElevation) + "m");
 
-    // FIX 3: Use a temporary vector to hold the calculated float elevation stops
+    // FIX (from previous turn): Use a temporary vector to hold the calculated float elevation stops
     std::vector<float> tempElevationData(colorRampSize); 
 
     for (uint32_t i = 0; i < colorRampSize; ++i) {
@@ -125,8 +127,7 @@ void RenderColorReliefLayer::updateColorRamp() {
         // Evaluate color at this elevation
         Color color = colorValue.evaluate(static_cast<double>(elevation));
 
-        // Store elevation as raw float - FIXED!
-        // FIX 4: Store in the temporary vector
+        // FIX (from previous turn): Store in the temporary vector
         tempElevationData[i] = elevation;
 
         // Store color in RGBA format
@@ -136,11 +137,11 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255);
     }
 
-    // FIX 5: Copy temporary elevation data to the PremultipliedImage raw data (elevationStops)
+    // FIX (from previous turn): Copy temporary elevation data to the PremultipliedImage raw data (elevationStops)
     std::memcpy(elevationStops->data.get(), tempElevationData.data(), colorRampSize * sizeof(float)); 
 
     // Log samples at key elevations
-    // FIX 6, 7, 8: Use tempElevationData for logging
+    // FIX (from previous turn): Use tempElevationData for logging
     Log::Info(Event::Render, "Sample 0 (0m): Elev=" + std::to_string(tempElevationData[0]) + 
               "m, R=" + std::to_string(colorStops->data[0]) + 
               " G=" + std::to_string(colorStops->data[1]) + 
@@ -225,7 +226,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     const auto staticDataSegments = RenderStaticData::rasterSegments();
 
     // Update color ramp textures if changed
-    // FIX 9: Check the correct member name 'elevationStops'
+    // FIX (from previous turn): Renamed 'elevationStopsData' to 'elevationStops' and using it directly as the data source.
     if (colorRampChanged && elevationStops && colorStops) {
         Log::Info(Event::Render, "Updating color ramp textures");
         
@@ -234,7 +235,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             elevationStopsTexture = context.createTexture2D();
         }
         
-        // FIX 10: Use elevationStops directly, which now holds the raw float data.
+        // FIX (from previous turn): Use elevationStops directly, which now holds the raw float data.
         elevationStopsTexture->setImage(elevationStops);
         elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
