@@ -43,8 +43,8 @@ layout(std140) uniform HillshadeEvaluatedPropsUBO {
     highp vec4 u_accent;
     highp vec4 u_altitudes;                            // Up to 4 altitude values
     highp vec4 u_azimuths;                             // Up to 4 azimuth values
-    highp vec4 u_shadows[NUM_ILLUMINATION_SOURCES];    // Shadow colors
-    highp vec4 u_highlights[NUM_ILLUMINATION_SOURCES]; // Highlight colors
+    highp vec4 u_shadows[4];                           // Shadow colors
+    highp vec4 u_highlights[4];                        // Highlight colors
 };
 
 #define PI 3.141592653589793
@@ -128,9 +128,9 @@ void multidirectional_hillshade(vec2 deriv) {
         float shade = clamp(cang, 0.0, 1.0);
 
         if (shade > 0.5) {
-            fragColor += u_highlights[i] * (2.0 * shade - 1.0) / float(u_num_lights);
+            fragColor += u_highlights[i] * (2.0 * shade - 1.0) / float(NUM_ILLUMINATION_SOURCES);
         } else {
-            fragColor += u_shadows[i] * (1.0 - 2.0 * shade) / float(u_num_lights);
+            fragColor += u_shadows[i] * (1.0 - 2.0 * shade) / float(NUM_ILLUMINATION_SOURCES);
         }
     }
 }
