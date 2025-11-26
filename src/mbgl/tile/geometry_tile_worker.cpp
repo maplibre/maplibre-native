@@ -40,9 +40,9 @@ GeometryTileWorker::GeometryTileWorker(GeometryTile& parent_,
                                        const bool showCollisionBoxes_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
                                        std::shared_ptr<FontFaces> fontFaces_,
-                                       bool isSynchronous)
-    : self(isSynchronous, *this, weakMailbox_),
-      parent(isSynchronous, parent_, weakMailbox_),
+                                       bool runSynchronously)
+    : self(runSynchronously, *this, weakMailbox_),
+      parent(runSynchronously, parent_, weakMailbox_),
       scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),

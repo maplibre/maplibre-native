@@ -45,7 +45,7 @@ public:
                        bool showCollisionBoxes_,
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
-                       bool isSynchronous);
+                       bool runSynchronously);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,

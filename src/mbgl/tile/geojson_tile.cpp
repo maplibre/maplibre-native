@@ -16,10 +16,10 @@ GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
                          std::shared_ptr<style::GeoJSONData> data_,
                          TileObserver* observer_)
     : GeometryTile(overscaledTileID, std::move(sourceID_), parameters, observer_) {
-    updateData(std::move(data_), false /*needsRelayout*/, parameters.isSynchronous);
+    updateData(std::move(data_), false /*needsRelayout*/, parameters.isUpdateSynchronous);
 }
 
-void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool needsRelayout, bool isSynchronous) {
+void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool needsRelayout, bool runSynchronously) {
     MLN_TRACE_FUNC();
 
     assert(data_);
@@ -33,7 +33,7 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
                 setData(std::make_unique<GeoJSONTileData>(std::move(features)));
             }
         },
-        isSynchronous);
+        runSynchronously);
 }
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {

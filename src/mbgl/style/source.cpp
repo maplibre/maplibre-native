@@ -40,14 +40,14 @@ void Source::setVolatile(bool set) noexcept {
     observer->onSourceChanged(*this);
 }
 
-bool Source::isSynchronous() const noexcept {
-    return baseImpl->isSynchronous();
+bool Source::isUpdateSynchronous() const noexcept {
+    return baseImpl->isUpdateSynchronous();
 }
 
-void Source::setSynchronous(bool set) noexcept {
+void Source::setUpdateSynchronous(bool set) noexcept {
     if (isVolatile() == set) return;
     auto newImpl = createMutable();
-    newImpl->setSynchronous(set);
+    newImpl->setUpdateSynchronous(set);
     baseImpl = std::move(newImpl);
     observer->onSourceChanged(*this);
 }

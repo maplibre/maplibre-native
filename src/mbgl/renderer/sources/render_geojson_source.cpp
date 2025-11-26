@@ -95,7 +95,7 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
             for (const auto& pair : tilePyramid.getTiles()) {
                 if (pair.first.canonical.z <= maxZ) {
                     static_cast<GeoJSONTile*>(pair.second.get())
-                        ->updateData(data_, needsRelayout, parameters.isSynchronous);
+                        ->updateData(data_, needsRelayout, parameters.isUpdateSynchronous);
                 }
             }
         }

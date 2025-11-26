@@ -410,7 +410,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 updateList[index] = true;
             }
         }
-        tileParameters.isSynchronous = sourceImpl->isSynchronous();
+        tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
 

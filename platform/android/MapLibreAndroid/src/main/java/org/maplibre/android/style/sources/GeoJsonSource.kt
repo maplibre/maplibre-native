@@ -238,7 +238,7 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isSynchronous) {
+        if (isUpdateSynchronous) {
             setGeoJsonSync(feature)
         } else {
             setGeoJsonAsync(feature)
@@ -256,7 +256,7 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isSynchronous) {
+        if (isUpdateSynchronous) {
             setGeoJsonSync(geometry)
         } else {
             setGeoJsonAsync(geometry)
@@ -273,7 +273,7 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isSynchronous) {
+        if (isUpdateSynchronous) {
             setGeoJsonSync(featureCollection)
         } else {
             setGeoJsonAsync(featureCollection)

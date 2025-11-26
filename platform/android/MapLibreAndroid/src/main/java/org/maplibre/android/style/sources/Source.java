@@ -142,8 +142,8 @@ public abstract class Source {
    false if they will be async updated. Default value is false.
    */
   @NonNull
-  public Boolean isSynchronous() {
-    return nativeIsSynchronous();
+  public Boolean isUpdateSynchronous() {
+    return nativeIsUpdateSynchronous();
   }
 
   /**
@@ -152,8 +152,8 @@ public abstract class Source {
    *
    * @param value current setting for synchronous.
    */
-  public void setSynchronous(Boolean value) {
-    nativeSetSynchronous(value);
+  public void setUpdateSynchronous(Boolean value) {
+    nativeSetUpdateSynchronous(value);
   }
 
   /**
@@ -215,10 +215,10 @@ public abstract class Source {
 
   @NonNull
   @Keep
-  protected native Boolean nativeIsSynchronous();
+  protected native Boolean nativeIsUpdateSynchronous();
 
   @Keep
-  protected native void nativeSetSynchronous(@NonNull Boolean value);
+  protected native void nativeSetUpdateSynchronous(@NonNull Boolean value);
 
   @Keep
   protected native void nativeSetMinimumTileUpdateInterval(@NonNull Long interval);

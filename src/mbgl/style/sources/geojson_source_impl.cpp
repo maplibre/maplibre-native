@@ -24,9 +24,9 @@ namespace mbgl {
 namespace style {
 
 class GeoJSONVTData final : public GeoJSONData {
-    void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn, bool isSynchronous) final {
+    void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn, bool runSynchronously) final {
         assert(fn);
-        if (isSynchronous) {
+        if (runSynchronously) {
             fn(this->impl->getTile(id.z, id.x, id.y).features);
         } else {
             sequencedScheduler->scheduleAndReplyValue(
