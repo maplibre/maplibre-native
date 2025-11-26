@@ -242,6 +242,14 @@ void GeoJSONSource::setCollectionSync(jni::JNIEnv& env, const jni::Object<JNITyp
     setAsync(converterFn);
 }
 
+jboolean GeoJSONSource::isUpdateSynchronous(jni::JNIEnv&) {
+    return source.as<style::GeoJSONSource>()->isUpdateSynchronous();
+}
+
+void GeoJSONSource::setUpdateSynchronous(jni::JNIEnv&, jni::jboolean value) {
+    source.as<style::GeoJSONSource>()->setUpdateSynchronous(value);
+}
+
 void GeoJSONSource::registerNative(jni::JNIEnv& env) {
     // Lookup the class
     static auto& javaClass = jni::Class<GeoJSONSource>::Singleton(env);
@@ -269,7 +277,9 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::querySourceFeatures, "querySourceFeatures"),
         METHOD(&GeoJSONSource::getClusterChildren, "nativeGetClusterChildren"),
         METHOD(&GeoJSONSource::getClusterLeaves, "nativeGetClusterLeaves"),
-        METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom"));
+        METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom"),
+        METHOD(&GeoJSONSource::isUpdateSynchronous, "nativeIsUpdateSynchronous"),
+        METHOD(&GeoJSONSource::setUpdateSynchronous, "nativeSetUpdateSynchronous"));
 }
 
 void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<GeoJSONDataCallback> callback) {

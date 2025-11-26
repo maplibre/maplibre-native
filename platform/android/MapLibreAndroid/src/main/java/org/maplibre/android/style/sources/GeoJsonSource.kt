@@ -238,7 +238,7 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isUpdateSynchronous) {
+        if (isUpdateSynchronous()) {
             setGeoJsonSync(feature)
         } else {
             setGeoJsonAsync(feature)
@@ -256,7 +256,7 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isUpdateSynchronous) {
+        if (isUpdateSynchronous()) {
             setGeoJsonSync(geometry)
         } else {
             setGeoJsonAsync(geometry)
@@ -273,7 +273,7 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isUpdateSynchronous) {
+        if (isUpdateSynchronous()) {
             setGeoJsonSync(featureCollection)
         } else {
             setGeoJsonAsync(featureCollection)
@@ -575,6 +575,29 @@ class GeoJsonSource : Source {
         return nativeGetClusterExpansionZoom(cluster)
     }
 
+    /**
+     * Retrieve whether or not the fetched tiles for the given source
+     * should be synchronously updated on the render thread
+     *
+     * @return true if tiles are synchronously updated on the render thread,
+     * false if they will be async updated. Default value is false.
+     */
+    fun isUpdateSynchronous(): Boolean {
+        checkThread()
+        return nativeIsUpdateSynchronous();
+    }
+
+    /**
+     * Set a flag defining whether or not the fetched tiles for the given source
+     * should be synchronously updated on the render thread
+     *
+     * @param value current setting for synchronous.
+     */
+    fun setUpdateSynchronous(value: Boolean) {
+        checkThread()
+        nativeSetUpdateSynchronous(value);
+    }
+
     @Keep
     protected external fun initialize(layerId: String?, options: Any?)
 
@@ -619,6 +642,12 @@ class GeoJsonSource : Source {
 
     @Keep
     private external fun nativeGetClusterExpansionZoom(feature: Feature): Int
+
+    @Keep
+    private external fun nativeIsUpdateSynchronous(): Boolean
+
+    @Keep
+    private external fun nativeSetUpdateSynchronous(value: Boolean)
 
     @Keep
     @Throws(Throwable::class)

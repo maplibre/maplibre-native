@@ -123,5 +123,17 @@ Mutable<Source::Impl> GeoJSONSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
 }
 
+bool GeoJSONSource::isUpdateSynchronous() const noexcept {
+    return baseImpl->isUpdateSynchronous();
+}
+
+void GeoJSONSource::setUpdateSynchronous(bool set) noexcept {
+    if (isUpdateSynchronous() == set) return;
+    auto newImpl = createMutable();
+    newImpl->setUpdateSynchronous(set);
+    baseImpl = std::move(newImpl);
+    observer->onSourceChanged(*this);
+}
+
 } // namespace style
 } // namespace mbgl

@@ -89,6 +89,9 @@ private:
     template <class JNIType>
     void setCollectionSync(jni::JNIEnv&, const jni::Object<JNIType>&);
 
+    jboolean isUpdateSynchronous(jni::JNIEnv&);
+    void setUpdateSynchronous(jni::JNIEnv&, jni::jboolean);
+
 }; // class GeoJSONSource
 
 } // namespace android

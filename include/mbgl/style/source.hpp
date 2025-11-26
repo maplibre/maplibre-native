@@ -80,9 +80,6 @@ public:
     bool isVolatile() const noexcept;
     void setVolatile(bool) noexcept;
 
-    bool isUpdateSynchronous() const noexcept;
-    void setUpdateSynchronous(bool) noexcept;
-
     // Private implementation
     /// @cond FALSE
 

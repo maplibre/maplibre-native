@@ -196,14 +196,6 @@ void Source::setVolatile(JNIEnv& env, jni::Boolean& value) {
     source.setVolatile(jni::Unbox(env, value));
 }
 
-jni::Local<jni::Boolean> Source::isUpdateSynchronous(jni::JNIEnv& env) {
-    return jni::Box(env, jni::jboolean(source.isUpdateSynchronous()));
-}
-
-void Source::setUpdateSynchronous(JNIEnv& env, jni::Boolean& value) {
-    source.setUpdateSynchronous(jni::Unbox(env, value));
-}
-
 void Source::setMinimumTileUpdateInterval(JNIEnv& env, jni::Long& interval) {
     source.setMinimumTileUpdateInterval(Milliseconds(jni::Unbox(env, interval)));
 }
@@ -249,8 +241,6 @@ void Source::registerNative(jni::JNIEnv& env) {
         METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
         METHOD(&Source::isVolatile, "nativeIsVolatile"),
         METHOD(&Source::setVolatile, "nativeSetVolatile"),
-        METHOD(&Source::isUpdateSynchronous, "nativeIsUpdateSynchronous"),
-        METHOD(&Source::setUpdateSynchronous, "nativeSetUpdateSynchronous"),
         METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
         METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
 
