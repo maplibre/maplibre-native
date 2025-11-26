@@ -555,13 +555,23 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
+    
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
         return std::nullopt;
     }
     omitFirstStop(*stops);
-
-    auto expr = step(type, makeInput(true), std::move(*stops));
+    
+    // NEW: For array types, create step with item type  
+    type::Type exprType = type;
+    type.match(
+        [&](const type::Array& arr) {
+            exprType = arr.itemType;
+        },
+        [](const auto&) {}
+    );
+    
+    auto expr = step(exprType, makeInput(true), std::move(*stops));
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
@@ -572,6 +582,7 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
+    
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
         return std::nullopt;
@@ -580,8 +591,17 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     if (!base) {
         return std::nullopt;
     }
-
-    auto expr = interpolate(type, exponential(*base), makeInput(true), std::move(*stops));
+    
+    // NEW: For array types, create interpolation with item type
+    type::Type exprType = type;
+    type.match(
+        [&](const type::Array& arr) {
+            exprType = arr.itemType;
+        },
+        [](const auto&) {}
+    );
+    
+    auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
