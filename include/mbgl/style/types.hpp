@@ -50,10 +50,10 @@ enum class HillshadeIlluminationAnchorType : bool {
 
 enum class HillshadeMethodType : uint8_t {
     Standard,
-    Basic,
     Combined,
     Igor,
     Multidirectional
+    Basic,
 };
 
 enum class TranslateAnchorType : bool {
