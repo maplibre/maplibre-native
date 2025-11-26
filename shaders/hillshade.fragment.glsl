@@ -1,10 +1,6 @@
 in vec2 v_pos;
 uniform sampler2D u_image;
 
-#ifndef NUM_ILLUMINATION_SOURCES
-#define NUM_ILLUMINATION_SOURCES 1
-#endif
-
 layout(std140) uniform HillshadeTilePropsUBO {
     highp vec2 u_latrange;
     highp float u_exaggeration;
@@ -72,7 +68,7 @@ void basic_hillshade(vec2 deriv) {
 void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
     fragColor = vec4(0, 0, 0, 0);
-    for (int i = 0; i < NUM_ILLUMINATION_SOURCES; i++) {
+    for (int i = 0; i < u_num_lights; i++) {
         float altitude = (i == 0) ? u_altitudes.x : 
                         (i == 1) ? u_altitudes.y :
                         (i == 2) ? u_altitudes.z : u_altitudes.w;
@@ -89,9 +85,9 @@ void multidirectional_hillshade(vec2 deriv) {
         float shade = clamp(cang, 0.0, 1.0);
 
         if (shade > 0.5) {
-            fragColor += u_highlights[i] * (2.0 * shade - 1.0) / float(NUM_ILLUMINATION_SOURCES);
+            fragColor += u_highlights[i] * (2.0 * shade - 1.0) / float(u_num_lights);
         } else {
-            fragColor += u_shadows[i] * (1.0 - 2.0 * shade) / float(NUM_ILLUMINATION_SOURCES);
+            fragColor += u_shadows[i] * (1.0 - 2.0 * shade) / float(u_num_lights);
         }
     }
 }
