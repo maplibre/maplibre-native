@@ -52,8 +52,8 @@ enum class HillshadeMethodType : uint8_t {
     Standard,
     Combined,
     Igor,
-    Multidirectional
-    Basic,
+    Multidirectional,
+    Basic
 };
 
 enum class TranslateAnchorType : bool {
