@@ -39,6 +39,13 @@ IlluminationProperties getIlluminationProperties(const HillshadePaintProperties:
     std::vector<Color> highlights = evaluated.get<HillshadeHighlightColor>();
     std::vector<Color> shadows = evaluated.get<HillshadeShadowColor>();
 
+    std::cout << "Highlights from evaluated: size=" << highlights.size();
+    if (!highlights.empty()) {
+        std::cout << " first=(" << highlights[0].r << "," << highlights[0].g 
+                << "," << highlights[0].b << "," << highlights[0].a << ")";
+    }
+    std::cout << "\n";
+
     // ADD THIS DEBUG FIRST:
     std::cout << "=== ARRAY SIZES ===" << "\n";
     std::cout << "Directions size: " << directions.size() << "\n";
