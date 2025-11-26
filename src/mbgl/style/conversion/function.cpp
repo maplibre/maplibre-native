@@ -223,7 +223,14 @@ bool interpolatable(type::Type type) noexcept {
                       [&](const type::ColorType&) { return true; },
                       [&](const type::PaddingType&) { return true; },
                       [&](const type::VariableAnchorOffsetCollectionType&) { return true; },
-                      [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
+                      [&](const type::Array& array) { 
+                          // Arrays are interpolatable if they have a fixed size and item type is Number,
+                          // OR if the item type itself is interpolatable (e.g., Array<Color>)
+                          if (array.N && array.itemType == type::Number) {
+                              return true;
+                          }
+                          return interpolatable(array.itemType);
+                      },
                       [&](const auto&) { return false; });
 }
 
