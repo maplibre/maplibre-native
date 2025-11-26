@@ -173,6 +173,11 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
+    std::cout << "Current map zoom: " << parameters.state.getZoom() << "\n";
+    std::cout << "Evaluated highlight color: (" << evaluated.get<HillshadeHighlightColor>()[0].r 
+            << "," << evaluated.get<HillshadeHighlightColor>()[0].g 
+            << "," << evaluated.get<HillshadeHighlightColor>()[0].b << ")\n";
+
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
