@@ -238,6 +238,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             .pad1 = 0.0f,
             .pad2 = 0.0f
         };
+        std::cout << "TilePropsUBO - num_lights: " << tilePropsUBO.num_lights << "\n";
 
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);
