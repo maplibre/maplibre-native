@@ -7,7 +7,6 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/util/logging.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -44,7 +43,6 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
 
     // Initialize color ramp data
     colorRampSize = 256;
-    // Initialization aligns with the updated header
     elevationStopsData = std::make_shared<std::vector<float>>(colorRampSize);
     colorStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
 }
@@ -88,44 +86,25 @@ void RenderColorReliefLayer::prepare(const LayerPrepareParameters& params) {
 void RenderColorReliefLayer::updateColorRamp() {
     // Ensure data structures are initialized
     if (!elevationStopsData || !colorStops) {
-        Log::Warning(Event::Render, "elevationStopsData or colorStops is null!");
         return;
     }
-    
-    Log::Info(Event::Render, "updateColorRamp: Getting color property");
     
     // Get the color property value
     auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
     if (colorValue.isUndefined()) {
-        Log::Warning(Event::Render, "colorValue is undefined, using default");
-        // This is a placeholder; ensure ColorReliefLayer::getDefaultColorReliefColor() exists
-        // colorValue = ColorReliefLayer::getDefaultColorReliefColor();
+        return;
     }
 
-    // Test evaluation at specific elevations (Retaining from your working version)
-    Log::Info(Event::Render, "Testing ColorRampPropertyValue::evaluate:");
-    for (float testElev : {400.0f, 1000.0f, 2000.0f}) {
-        Color c = colorValue.evaluate(static_cast<double>(testElev));
-        Log::Info(Event::Render, "  At " + std::to_string(testElev) + "m: R=" + 
-                 std::to_string(int(c.r*255)) + " G=" + std::to_string(int(c.g*255)) + 
-                 " B=" + std::to_string(int(c.b*255)) + " A=" + std::to_string(int(c.a*255)));
-    }
-
-    // Start of Expression Parsing Logic
-    
     std::vector<float> elevationStopsVector;
     std::vector<Color> colorStopsVector;
 
     // Get the expression from ColorRampPropertyValue
     const mbgl::style::expression::Expression& expr = colorValue.getExpression();
 
-    // Fix 1: Use the correct namespace for Kind enum
     if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
         
         size_t stopCount = interpolate->getStopCount();
-        Log::Info(Event::Render, "Found Interpolate expression with " + 
-                     std::to_string(stopCount) + " stops");
         
         elevationStopsVector.reserve(stopCount);
         colorStopsVector.reserve(stopCount);
@@ -135,41 +114,24 @@ void RenderColorReliefLayer::updateColorRamp() {
             elevationStopsVector.push_back(static_cast<float>(elevation));
         });
         
-        // FIX 2: Manually create and use EvaluationContext to ensure elevation value is seen
+        // Evaluate expression at each elevation to get colors
         for (float elevation : elevationStopsVector) {
-            
             mbgl::style::expression::EvaluationContext context;
-            // Set the necessary elevation field for the ["elevation"] input to resolve
-            context.withElevation(elevation); 
+            context.withElevation(elevation);
 
-            // FIX: Qualified the type name to fix compilation error
-            expression::EvaluationResult result = expr.evaluate(context); 
+            expression::EvaluationResult result = expr.evaluate(context);
             
             Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
 
             if (result && result->is<Color>()) {
                 color = result->get<Color>();
-            } else {
-                 // Log the failure to aid future debugging
-                Log::Warning(Event::Render, "Expression evaluation failed for elevation " + std::to_string(elevation));
             }
             
             colorStopsVector.push_back(color);
-            
-            Log::Info(Event::Render, "  Stop at " + std::to_string(elevation) + "m: " +
-                      "rgba(" + std::to_string(color.r) + ", " +
-                      std::to_string(color.g) + ", " +
-                      std::to_string(color.b) + ", " +
-                      std::to_string(color.a) + ")");
         }
-        
-        Log::Info(Event::Render, "Extracted " + std::to_string(elevationStopsVector.size()) + 
-                  " stops from expression");
 
     } else {
-        // Fallback: If not an Interpolate (mimics your working hardcoded sampling)
-        Log::Warning(Event::Render, "Expression is not an Interpolate, using fallback sampling");
-
+        // Fallback: Sample the color ramp uniformly
         const uint32_t numSamples = 256;
         const float minElevation = -500.0f;
         const float maxElevation = 9000.0f;
@@ -182,43 +144,30 @@ void RenderColorReliefLayer::updateColorRamp() {
             float elevation = minElevation + t * (maxElevation - minElevation);
             elevationStopsVector.push_back(elevation);
             
-            // Safe to use the wrapper here, as no expression variable dependency is active
             Color color = colorValue.evaluate(static_cast<double>(elevation));
             colorStopsVector.push_back(color);
         }
     }
     
-    // --- Data Population and Texture Setup ---
-    
     const uint32_t rampSize = elevationStopsVector.size();
     if (rampSize == 0) {
-        Log::Error(Event::Render, "Color ramp has zero size after evaluation!");
         return;
     }
 
-    Log::Info(Event::Render, "Final color ramp:");
-    Log::Info(Event::Render, "  Size: " + std::to_string(rampSize) + " stops");
-    Log::Info(Event::Render, "  Range: " + std::to_string(elevationStopsVector.front()) + "m to " + 
-              std::to_string(elevationStopsVector.back()) + "m");
-    
     // Resize and prepare structures
-    // Correctly using the original member `elevationStopsData` which is a shared_ptr to vector<float>
-    elevationStopsData->resize(rampSize * 4); // We use RGBA float for LLVM compatibility
+    elevationStopsData->resize(rampSize * 4); // RGBA float for compatibility
     colorStops->resize({rampSize, 1}); 
     this->colorRampSize = rampSize;
 
     for (uint32_t i = 0; i < rampSize; ++i) {
-        // --- Elevation Stops ---
         // Store elevation in the R channel of an RGBA float vector
         (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
         (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
         (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
         (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
 
-        // --- Color Stops (Straight Alpha)
+        // Store colors without premultiplication for proper interpolation
         Color color = colorStopsVector[i];
-
-        // Store colors WITHOUT premultiplication for proper interpolation
         colorStops->data[i * 4 + 0] = static_cast<uint8_t>(color.r * 255.0f);
         colorStops->data[i * 4 + 1] = static_cast<uint8_t>(color.g * 255.0f);
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255.0f);
@@ -226,7 +175,6 @@ void RenderColorReliefLayer::updateColorRamp() {
     }
     
     colorRampChanged = true;
-    Log::Info(Event::Render, "updateColorRamp complete");
 }
 
 static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
@@ -237,22 +185,16 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                     const std::shared_ptr<UpdateParameters>&,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
-    Log::Info(Event::Render, "=== update() START ===");
-    
     if (!renderTiles || renderTiles->empty()) {
-        Log::Info(Event::Render, "No render tiles, removing drawables");
         removeAllDrawables();
         return;
     }
-    Log::Info(Event::Render, "Render tiles count: " + std::to_string(renderTiles->size()));
 
     // Set up layer group
     if (!layerGroup) {
-        Log::Info(Event::Render, "Creating layer group");
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
-            Log::Error(Event::Render, "Failed to create layer group!");
             return;
         }
     }
@@ -260,26 +202,21 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!layerTweaker) {
-        Log::Info(Event::Render, "Creating layer tweaker");
         layerTweaker = std::make_shared<ColorReliefLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
     if (!colorReliefShader) {
-        Log::Info(Event::Render, "Getting shader: " + ColorReliefShaderGroupName);
         colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName);
     }
 
     if (!colorReliefShader) {
-        Log::Error(Event::Render, "Failed to get shader!");
         removeAllDrawables();
         return;
     }
-    Log::Info(Event::Render, "Shader obtained successfully");
 
     auto renderPass = RenderPass::Translucent;
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
-        Log::Info(Event::Render, "Render pass check failed");
         return;
     }
 
@@ -287,7 +224,6 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     if (!staticDataSharedVertices) {
-        Log::Info(Event::Render, "Creating static data vertices");
         staticDataSharedVertices = std::make_shared<ColorReliefVertexVector>(RenderStaticData::rasterVertices());
     }
     const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
@@ -295,75 +231,41 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
     // Update color ramp textures if changed
     if (colorRampChanged && elevationStopsData && colorStops) {
-        Log::Info(Event::Render, "Updating color ramp textures");
-        
         if (!elevationStopsTexture) {
-            Log::Info(Event::Render, "Creating elevation stops texture");
             elevationStopsTexture = context.createTexture2D();
         }
         
         // Use RGBA32F instead of R32F for llvmpipe compatibility
         elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
-        
-        // elevationStopsData is already in RGBA format, upload it directly
         elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
-
-        Log::Info(Event::Render, "=== TEXTURE DEBUG ===");
-        Log::Info(Event::Render, "getPixelStride: " + std::to_string(elevationStopsTexture->getPixelStride()));
-        Log::Info(Event::Render, "getDataSize: " + std::to_string(elevationStopsTexture->getDataSize()));
-        Log::Info(Event::Render, "Expected data size: " + std::to_string(colorRampSize * 4 * sizeof(float)));
-        Log::Info(Event::Render, "First 4 floats: " + 
-                std::to_string((*elevationStopsData)[0]) + ", " +
-                std::to_string((*elevationStopsData)[1]) + ", " +
-                std::to_string((*elevationStopsData)[2]) + ", " +
-                std::to_string((*elevationStopsData)[3]));
-        
-        // Set sampler state
         elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
                                                         .wrapV = gfx::TextureWrapType::Clamp});
 
         if (!colorStopsTexture) {
-            Log::Info(Event::Render, "Creating color stops texture");
             colorStopsTexture = context.createTexture2D();
         }
         
-        // The color stops texture is correctly handled by PremultipliedImage
         colorStopsTexture->setImage(colorStops);
         colorStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
                                                     .wrapU = gfx::TextureWrapType::Clamp,
                                                     .wrapV = gfx::TextureWrapType::Clamp});
 
         colorRampChanged = false;
-        Log::Info(Event::Render, "Color ramp textures updated");
-        
-        // Log texture binding info
-        Log::Info(Event::Render, "Texture binding plan:");
-        Log::Info(Event::Render, "  u_image (DEM) -> texture unit 0");
-        Log::Info(Event::Render, "  u_elevation_stops (RGBA32F) -> texture unit 1");
-        Log::Info(Event::Render, "  u_color_stops (RGBA8) -> texture unit 2");
-        Log::Info(Event::Render, "UBO values:");
-        Log::Info(Event::Render, "  u_color_ramp_size: " + std::to_string(colorRampSize));
     }
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    Log::Info(Event::Render, "Processing " + std::to_string(renderTiles->size()) + " tiles");
-    
-    int tileCount = 0;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-        Log::Info(Event::Render, "Processing tile #" + std::to_string(tileCount++));
 
         auto* bucket_ = tile.getBucket(*baseImpl);
         if (!bucket_ || !bucket_->hasData()) {
-            Log::Info(Event::Render, "Tile has no bucket data, skipping");
             removeTile(renderPass, tileID);
             continue;
         }
 
         auto& bucket = static_cast<HillshadeBucket&>(*bucket_);
-        Log::Info(Event::Render, "Bucket found with data");
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -386,11 +288,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (!builder) {
-            Log::Info(Event::Render, "Creating drawable builder");
             builder = context.createDrawableBuilder("colorRelief");
         }
-
-        Log::Info(Event::Render, "Setting up drawable for tile");
 
         gfx::VertexAttributeArrayPtr vertexAttrs;
         auto buildVertexAttributes = [&] {
@@ -439,11 +338,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            Log::Info(Event::Render, "Tile updated (existing drawable)");
             continue;
         }
-
-        Log::Info(Event::Render, "Creating new drawable for tile");
 
         builder->setShader(colorReliefShader);
         builder->setDepthType(gfx::DepthMaskType::ReadOnly);
@@ -454,7 +350,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
         builder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
-        // Bind DEM texture to unit 0
+        // Bind DEM texture
         std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
         demTexture->setImage(bucket.getDEMData().getImagePtr());
         demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
@@ -462,22 +358,15 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                              .wrapV = gfx::TextureWrapType::Clamp});
         builder->setTexture(demTexture, idColorReliefImageTexture);
 
-        // Bind color ramp textures to units 1 and 2
+        // Bind color ramp textures
         if (elevationStopsTexture) {
             builder->setTexture(elevationStopsTexture, idColorReliefElevationStopsTexture);
-            Log::Info(Event::Render, "Bound elevation stops texture");
-        } else {
-            Log::Warning(Event::Render, "elevationStopsTexture is null!");
         }
         
         if (colorStopsTexture) {
             builder->setTexture(colorStopsTexture, idColorReliefColorStopsTexture);
-            Log::Info(Event::Render, "Bound color stops texture");
-        } else {
-            Log::Warning(Event::Render, "colorStopsTexture is null!");
         }
 
-        Log::Info(Event::Render, "Flushing drawable builder");
         builder->flush(context);
 
         for (auto& drawable : builder->clearDrawables()) {
@@ -487,35 +376,20 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             // Set up tile properties UBO
             shaders::ColorReliefTilePropsUBO tilePropsUBO;
 
-            // Get DEM unpack vector from the actual data (supports both Terrain-RGB and Terrarium)
             const auto& demData = bucket.getDEMData();
             const auto unpackVector = demData.getUnpackVector();
             tilePropsUBO.unpack = {{unpackVector[0], unpackVector[1], unpackVector[2], unpackVector[3]}};
-
-            // Texture dimensions
             tilePropsUBO.dimension = {{static_cast<float>(demData.dim), static_cast<float>(demData.dim)}};
-
-            // Color ramp size
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
             tilePropsUBO.pad_tile0 = 0.0f;
-
-            Log::Info(Event::Render, "TilePropsUBO values:");
-            Log::Info(Event::Render, "  u_unpack: [" + std::to_string(unpackVector[0]) + ", " +
-                     std::to_string(unpackVector[1]) + ", " + std::to_string(unpackVector[2]) + ", " +
-                     std::to_string(unpackVector[3]) + "]");
-            Log::Info(Event::Render, "  u_dimension: " + std::to_string(demData.dim) + " x " + std::to_string(demData.dim));
-            Log::Info(Event::Render, "  u_color_ramp_size: " + std::to_string(colorRampSize));
 
             auto& drawableUniforms = drawable->mutableUniformBuffers();
             drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
-            Log::Info(Event::Render, "Drawable added to layer group");
         }
     }
-    
-    Log::Info(Event::Render, "=== update() END ===");
 }
 
 bool RenderColorReliefLayer::queryIntersectsFeature(const GeometryCoordinates&,
