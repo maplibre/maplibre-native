@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <utility>
+#include <iostream>
 
 namespace mbgl {
 namespace style {
@@ -396,6 +397,7 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         if (!e) {
             return std::nullopt;
         }
+        std::cout << "Parsed stop at zoom " << *t << ", expression kind: " << static_cast<int>((*e)->getKind()) << "\n";
         stops.emplace(*t, std::move(*e));
     }
     return {std::move(stops)};
@@ -613,6 +615,9 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
     
+    // ADD THIS DEBUG:
+    std::cout << "Created interpolate expression with type: " << exprType << "\n";
+    std::cout << "Expression kind: " << static_cast<int>(expr->getKind()) << "\n";
     // For array types with camera functions, return the interpolation directly
     // The value.cpp wrapping will convert Color -> std::vector<Color>
     if (isArrayType && !def) {
