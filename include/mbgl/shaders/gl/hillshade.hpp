@@ -91,23 +91,31 @@ void basic_hillshade(vec2 deriv) {
 
 void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
-
-    // --- START: COMBINED LOGGING (Light Data) ---
-    // Red: u_num_lights (max 4.0)
-    float log_r = float(u_num_lights) / 4.0;
-    // Green: First Altitude (u_altitudes.x) in radians (max PI/2)
-    float log_g = u_altitudes.x / (PI / 2.0);
-    // Blue: First Azimuth (u_azimuths.x) in radians (max 2*PI)
-    float log_b = u_azimuths.x / (2.0 * PI);
-
-    // Set fragColor to the encoded log data (Expected Purplish-Pink)
-    fragColor = vec4(log_r, log_g, log_b, 1.0);
+    fragColor = vec4(0, 0, 0, 0); // Start accumulating light contributions
     
-    // CRITICAL: Stop execution here to see the debug color.
-    return;
-    // --- END: COMBINED LOGGING ---
+    for (int i = 0; i < u_num_lights; i++) {
+        // This is the core logic that needs to be right for all 4 lights:
+        float altitude = (i == 0) ? u_altitudes.x : 
+                        (i == 1) ? u_altitudes.y :
+                        (i == 2) ? u_altitudes.z : u_altitudes.w;
+        float azimuth = (i == 0) ? u_azimuths.x : 
+                       (i == 1) ? u_azimuths.y :
+                       (i == 2) ? u_azimuths.z : u_azimuths.w;
+        
+        float cos_alt = cos(altitude);
+        float sin_alt = sin(altitude);
+        float cos_az = -cos(azimuth);
+        float sin_az = -sin(azimuth);
+        float cang = (sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) /
+                     sqrt(1.0 + dot(deriv, deriv));
+        float shade = clamp(cang, 0.0, 1.0);
 
-    // ... (rest of the function is skipped by 'return;')
+        if (shade > 0.5) {
+            fragColor += u_highlights[i] * (2.0 * shade - 1.0) / float(u_num_lights);
+        } else {
+            fragColor += u_shadows[i] * (1.0 - 2.0 * shade) / float(u_num_lights);
+        }
+    }
 }
 
 void combined_hillshade(vec2 deriv) {
