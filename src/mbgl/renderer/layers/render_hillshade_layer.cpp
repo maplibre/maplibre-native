@@ -79,6 +79,8 @@ void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
 }
 
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    std::cout << "PropertyEvaluationParameters zoom: " << parameters.z << "\n"; 
+    
     const auto previousProperties = staticImmutableCast<HillshadeLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<HillshadeLayerProperties>(
         staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
