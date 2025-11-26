@@ -92,7 +92,7 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     std::cout << "Highlight property isConstant: " << highlightProp.isConstant() << "\n";
     std::cout << "Highlight property isDataDriven: " << highlightProp.isDataDriven() << "\n";
     // Try to see if we can get the expression
-    std::cout << "Expression type: " << highlightProp.getExpression() << "\n";
+    // std::cout << "Expression type: " << highlightProp.getExpression() << "\n";
 
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
