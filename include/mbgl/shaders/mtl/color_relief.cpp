@@ -1,17 +1,20 @@
 #include <mbgl/shaders/mtl/color_relief.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{colorReliefUBOCount + 0, gfx::AttributeDataType::Short2, "pos"},
-    AttributeInfo{colorReliefUBOCount + 1, gfx::AttributeDataType::Short2, "texture_pos"},
+using ColorReliefShaderSource = ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal>;
+
+const std::array<AttributeInfo, 2> ColorReliefShaderSource::attributes = {
+    AttributeInfo{colorReliefUBOCount + 0, gfx::AttributeDataType::Short2, idColorReliefPosVertexAttribute},
+    AttributeInfo{colorReliefUBOCount + 1, gfx::AttributeDataType::Short2, idColorReliefTexturePosVertexAttribute},
 };
 
-const std::array<TextureInfo, 3> ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "image"},
-    TextureInfo{1, "elevationStops"},
-    TextureInfo{2, "colorStops"},
+const std::array<TextureInfo, 3> ColorReliefShaderSource::textures = {
+    TextureInfo{0, idColorReliefImageTexture},
+    TextureInfo{1, idColorReliefElevationStopsTexture},
+    TextureInfo{2, idColorReliefColorStopsTexture},
 };
 
 } // namespace shaders
