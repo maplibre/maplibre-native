@@ -93,12 +93,9 @@ void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
     fragColor = vec4(0, 0, 0, 0);
     
-    // TEMP DEBUG: Output number of lights as color
-    // fragColor = vec4(float(u_num_lights) / 4.0, 0.0, 0.0, 1.0);
-    // return;
-    
+    // Use constant loop bound, check u_num_lights inside
     for (int i = 0; i < 4; i++) {
-        if (i >= u_num_lights) break;
+        if (i >= u_num_lights) break;  // Early exit if fewer lights
         float altitude = (i == 0) ? u_altitudes.x : 
                         (i == 1) ? u_altitudes.y :
                         (i == 2) ? u_altitudes.z : u_altitudes.w;
