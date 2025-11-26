@@ -87,12 +87,12 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
         staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    // ADD THIS:
-    const auto& highlightProp = unevaluated.get<HillshadeHighlightColor>();
-    std::cout << "Highlight property isConstant: " << highlightProp.isConstant() << "\n";
-    std::cout << "Highlight property isDataDriven: " << highlightProp.isDataDriven() << "\n";
-    // Try to see if we can get the expression
-    // std::cout << "Expression type: " << highlightProp.getExpression() << "\n";
+    // Check the evaluated color
+    const auto& highlights = properties->evaluated.get<HillshadeHighlightColor>();
+    if (!highlights.empty()) {
+        std::cout << "Evaluated highlight at zoom " << parameters.z << ": (" 
+                  << highlights[0].r << "," << highlights[0].g << "," << highlights[0].b << ")\n";
+    }
 
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
