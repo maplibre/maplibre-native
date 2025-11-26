@@ -244,6 +244,7 @@ template <typename T>
 std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValue(const Value& value) {
     return value.match(
         [&](const std::vector<Value>& v) -> std::optional<std::vector<T>> {
+            // Handle array values
             std::vector<T> result;
             result.reserve(v.size());
             for (const Value& item : v) {
@@ -255,7 +256,14 @@ std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValu
             }
             return result;
         },
-        [&](const auto&) { return std::optional<std::vector<T>>(); });
+        [&](const auto&) -> std::optional<std::vector<T>> {
+            // NEW: Try to convert as single value of type T and wrap in vector
+            std::optional<T> convertedItem = ValueConverter<T>::fromExpressionValue(value);
+            if (convertedItem) {
+                return std::vector<T>{*convertedItem};
+            }
+            return std::nullopt;
+        });
 }
 
 Value ValueConverter<Position>::toExpressionValue(const mbgl::style::Position& value) {
