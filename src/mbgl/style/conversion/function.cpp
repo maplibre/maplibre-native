@@ -273,45 +273,7 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
             }
             return literal(*result);
         },
-        [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
-            // Handle single values for array properties (e.g., zoom function stops)
-            if (!isArray(value)) {
-                return array.itemType.match(
-                    [&](const type::NumberType&) -> std::optional<std::unique_ptr<Expression>> {
-                        std::optional<float> number = toNumber(value);
-                        if (!number) {
-                            error.message = "value must be a number or an array of numbers";
-                            return std::nullopt;
-                        }
-                        std::vector<expression::Value> result{static_cast<double>(*number)};
-                        return literal(result);
-                    },
-                    [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
-                        auto color = convert<Color>(value, error);
-                        if (!color) {
-                            error.message = "value must be a color or an array of colors";
-                            return std::nullopt;
-                        }
-                        std::vector<expression::Value> result;
-                        result.emplace_back(*color);
-                        return literal(result);
-                    },
-                    [&](const type::StringType&) -> std::optional<std::unique_ptr<Expression>> {
-                        auto string = convert<std::string>(value, error);
-                        if (!string) {
-                            error.message = "value must be a string or an array of strings";
-                            return std::nullopt;
-                        }
-                        std::vector<expression::Value> result;
-                        result.emplace_back(*string);
-                        return literal(result);
-                    },
-                    [&](const auto&) -> std::optional<std::unique_ptr<Expression>> {
-                        error.message = "value must be an array";
-                        return std::nullopt;
-                    });
-            }
-            
+        [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {           
             // Handle array values
             if (array.N && arrayLength(value) != *array.N) {
                 error.message = "value must be an array of length " + util::toString(*array.N);
