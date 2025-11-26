@@ -4,7 +4,6 @@ precision highp float;
 
 in vec2 v_pos;
 uniform sampler2D u_image;
-
 layout (std140) uniform HillshadePrepareTilePropsUBO {
     highp vec4 u_unpack;
     highp vec2 u_dimension;
@@ -23,7 +22,7 @@ void main() {
     vec2 epsilon = 1.0 / u_dimension;
     float tileSize = u_dimension.x - 2.0;
 
-    // queried pixels:
+    // queried pixels (using Sobel operator kernel):
     // +-----------+
     // |   |   |   |
     // | a | b | c |
@@ -47,18 +46,12 @@ void main() {
     float g = getElevation(v_pos + vec2(-epsilon.x, epsilon.y), 0.0);
     float h = getElevation(v_pos + vec2(0, epsilon.y), 0.0);
     float i = getElevation(v_pos + vec2(epsilon.x, epsilon.y), 0.0);
-
-    // Here we divide the x and y slopes by 8 * pixel size
-    // where pixel size (aka meters/pixel) is:
-    // circumference of the world / (pixels per tile * number of tiles)
-    // which is equivalent to: 8 * 40075016.6855785 / (tileSize * pow(2, u_zoom))
-    // which can be reduced to: pow(2, 28.25619978527 - u_zoom) / tileSize.
-    // We want to vertically exaggerate the hillshading because otherwise
-    // it is barely noticeable at low zooms. To do this, we multiply this by
-    // a scale factor that is a function of zooms below 15, which is an arbitrary
-    // cutoff and may need to change in the future. The scale factor is a function
-    // of this zoom, so that at lower zooms, the hillshading is exaggerated more.
-    // see nickidlugash's awesome breakdown for more info
+    
+    // Convert the raw pixel-space derivative (slope) into world-space slope.
+    // The conversion factor is: tileSize / (8 * meters_per_pixel).
+    // meters_per_pixel is calculated as pow(2.0, 28.2562 - u_zoom).
+    // The exaggeration factor is applied to scale the effect at lower zooms.
+    // See nickidlugash's awesome breakdown for more info
     // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
     float exaggeration = u_zoom < 2.0 ? 0.4 : u_zoom < 4.5 ? 0.35 : 0.3;
 
@@ -66,13 +59,15 @@ void main() {
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
     ) * tileSize / pow(2.0, (u_zoom - u_maxzoom) * exaggeration + 28.2562 - u_zoom);
-
+    
+    // Encode the derivative into the color channels (r and g)
+    // The derivative is scaled from world-space slope to the range [0, 1] for texture storage.
+    // The maximum possible world-space derivative is assumed to be 4 (hence division by 8.0).
     fragColor = clamp(vec4(
         deriv.x / 8.0 + 0.5,
         deriv.y / 8.0 + 0.5,
         1.0,
         1.0), 0.0, 1.0);
-
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
 #endif

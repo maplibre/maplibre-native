@@ -15,14 +15,16 @@ enum {
     hillshadePrepareUBOCount
 };
 
+// Redefined Metal structs to match the memory layout from hillshade_prepare_layer_ubo.hpp
+
 struct alignas(16) HillshadePrepareDrawableUBO {
-    /*  0 */ float4x4 matrix;
+    /* 0 */ float4x4 matrix;
     /* 64 */
 };
 static_assert(sizeof(HillshadePrepareDrawableUBO) == 4 * 16, "wrong size");
 
 struct alignas(16) HillshadePrepareTilePropsUBO {
-    /*  0 */ float4 unpack;
+    /* 0 */ float4 unpack;
     /* 16 */ float2 dimension;
     /* 24 */ float zoom;
     /* 28 */ float maxzoom;
@@ -75,7 +77,7 @@ float getElevation(float2 coord, float bias, texture2d<float, access::sample> im
     // Convert encoded elevation value to meters
     float4 data = image.sample(image_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, unpack) / 4.0;
+    return dot(data, unpack);
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
@@ -87,8 +89,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
     float2 epsilon = 1.0 / tileProps.dimension;
+    float tileSize = tileProps.dimension.x - 2.0;
 
-    // queried pixels:
+    // queried pixels (using Sobel operator kernel):
     // +-----------+
     // |   |   |   |
     // | a | b | c |
@@ -102,7 +105,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // | g | h | i |
     // |   |   |   |
     // +-----------+
-
     float a = getElevation(in.pos + float2(-epsilon.x, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
     float b = getElevation(in.pos + float2(0, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
     float c = getElevation(in.pos + float2(epsilon.x, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
@@ -113,24 +115,26 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float h = getElevation(in.pos + float2(0, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
     float i = getElevation(in.pos + float2(epsilon.x, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
 
-    // here we divide the x and y slopes by 8 * pixel size
+    // Here we divide the x and y slopes by 8 * pixel size
     // where pixel size (aka meters/pixel) is:
     // circumference of the world / (pixels per tile * number of tiles)
-    // which is equivalent to: 8 * 40075016.6855785 / (512 * pow(2, u_zoom))
-    // which can be reduced to: pow(2, 19.25619978527 - u_zoom)
-    // we want to vertically exaggerate the hillshading though, because otherwise
-    // it is barely noticeable at low zooms. to do this, we multiply this by some
-    // scale factor pow(2, (u_zoom - u_maxzoom) * a) where a is an arbitrary value
-    // Here we use a=0.3 which works out to the expression below. see
-    // nickidlugash's awesome breakdown for more info
+    // which is equivalent to: 8 * 40075016.6855785 / (tileSize * pow(2, u_zoom))
+    // which can be reduced to: pow(2, 28.25619978527 - u_zoom) / tileSize.
+    // We want to vertically exaggerate the hillshading because otherwise
+    // it is barely noticeable at low zooms. To do this, we multiply this by
+    // a scale factor that is a function of zooms below 15, which is an arbitrary
+    // cutoff and may need to change in the future. The scale factor is a function
+    // of this zoom, so that at lower zooms, the hillshading is exaggerated more.
+    // See nickidlugash's awesome breakdown for more info
     // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
     float exaggeration = tileProps.zoom < 2.0 ? 0.4 : tileProps.zoom < 4.5 ? 0.35 : 0.3;
 
     float2 deriv = float2(
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
-    ) /  pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 19.2562 - tileProps.zoom);
+    ) * tileSize / pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 28.2562 - tileProps.zoom); 
 
+    // Encode the derivative into the color channels
     float4 color = clamp(float4(
         deriv.x / 2.0 + 0.5,
         deriv.y / 2.0 + 0.5,
