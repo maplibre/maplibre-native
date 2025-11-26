@@ -593,14 +593,16 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
 
-    std::cout << "=== convertExponentialFunction called ===\n";  // ADD THIS
+    std::cout << "=== convertExponentialFunction called ===" << std::endl;  // Use endl
     
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
+        std::cout << "ERROR: convertStops returned nullopt" << std::endl;  // Add this too
         return std::nullopt;
     }
     auto base = convertBase(value, error);
     if (!base) {
+        std::cout << "ERROR: convertBase returned nullopt" << std::endl;  // And this
         return std::nullopt;
     }
     
@@ -609,6 +611,7 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     bool isArrayType = false;
     type.match(
         [&](const type::Array& arr) {
+            std::cout << "Matched Array type!" << std::endl;  // Add this
             exprType = arr.itemType;
             isArrayType = true;
         },
@@ -617,9 +620,8 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
     
-    // ADD THIS DEBUG:
-    std::cout << "Is array type: " << isArrayType << "\n";
-    std::cout << "Expression kind: " << static_cast<int>(expr->getKind()) << "\n";
+    std::cout << "Is array type: " << isArrayType << std::endl;  // Use endl
+    std::cout << "Expression kind: " << static_cast<int>(expr->getKind()) << std::endl;
     // For array types with camera functions, return the interpolation directly
     // The value.cpp wrapping will convert Color -> std::vector<Color>
     if (isArrayType && !def) {
