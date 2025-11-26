@@ -25,7 +25,7 @@ struct alignas(16) ColorReliefTilePropsUBO {
     /* 0 */ float4 unpack;
     /* 16 */ float2 dimension;
     /* 24 */ int u_color_ramp_size;
-    /* 28 */ float padding; // Added for alignment
+    /* 28 */ float padding;
     /* 32 */
 };
 static_assert(sizeof(ColorReliefTilePropsUBO) == 2 * 16, "wrong size");
