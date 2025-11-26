@@ -191,6 +191,11 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         for (int i = 0; i < 4; i++) std::cout << evaluatedPropsUBO.altitudes[i] << " ";
         std::cout << "\n";
 
+        // ADD THIS NEW DEBUG:
+        std::cout << "UBO packed - Azimuths in radians: ";
+        for (int i = 0; i < 4; i++) std::cout << evaluatedPropsUBO.azimuths[i] << " ";
+        std::cout << "\n";
+
         parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }
