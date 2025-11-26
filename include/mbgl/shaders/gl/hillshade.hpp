@@ -166,17 +166,9 @@ void main() {
     float scaleFactor = cos(radians((u_latrange[0] - u_latrange[1]) * (1.0 - v_pos.y) + u_latrange[1]));
     vec2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
 
-    // --- START: DEBUGGING u_method ---
-    // Max method value is 4 (BASIC). We'll normalize by 4.0.
-    float method_norm = float(u_method) / 4.0; 
-    
-    // Set Red channel to the normalized method value (e.g., MULTIDIRECTIONAL = 3/4 = 0.75)
-    // Set Green channel to the normalized method value as a double-check.
-    fragColor = vec4(method_norm, method_norm, 0.0, 1.0); 
-    
-    // Crucial: Skip the method selection logic to display the debug color.
-    return;
-    // --- END: DEBUGGING u_method ---
+    // --- START: FORCING MULTIDIRECTIONAL ---
+    multidirectional_hillshade(deriv);
+    // --- END: FORCING MULTIDIRECTIONAL ---
 
     switch (u_method) {
         case BASIC:
