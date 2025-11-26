@@ -17,21 +17,22 @@ enum {
 };
 
 struct alignas(16) HillshadeDrawableUBO {
-    /*  0 */ float4x4 matrix;
+    /* 0 */ float4x4 matrix;
     /* 64 */
 };
 static_assert(sizeof(HillshadeDrawableUBO) == 4 * 16, "wrong size");
 
 struct alignas(16) HillshadeTilePropsUBO {
-    /*  0 */ float2 latrange;
-    /*  8 */ float2 light;
+    /* 0 */ float latrange;
+    /* 4 */ float padding;
+    /* 8 */ float2 light;
     /* 16 */
 };
 static_assert(sizeof(HillshadeTilePropsUBO) == 16, "wrong size");
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) HillshadeEvaluatedPropsUBO {
-    /*  0 */ float4 highlight;
+    /* 0 */ float4 highlight;
     /* 16 */ float4 shadow;
     /* 32 */ float4 accent;
     /* 48 */

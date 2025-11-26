@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/shaders/color_relief_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
@@ -11,30 +10,31 @@ constexpr auto colorReliefShaderPrelude = R"(
 
 enum {
     idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
-    idColorReliefTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
-    idColorReliefEvaluatedPropsUBO = drawableReservedUBOCount,
+    idColorReliefTilePropsUBO = drawableReservedUBOCount,
+    idColorReliefEvaluatedPropsUBO = idDrawableReservedFragmentOnlyUBO,
     colorReliefUBOCount
 };
 
 struct alignas(16) ColorReliefDrawableUBO {
-    /*  0 */ float4x4 matrix;
+    /* 0 */ float4x4 matrix;
     /* 64 */
 };
 static_assert(sizeof(ColorReliefDrawableUBO) == 4 * 16, "wrong size");
 
 struct alignas(16) ColorReliefTilePropsUBO {
-    /*  0 */ float4 unpack;
+    /* 0 */ float4 unpack;
     /* 16 */ float2 dimension;
-    /* 24 */ int32_t color_ramp_size;
-    /* 28 */ float pad_tile0;
+    /* 24 */ int u_color_ramp_size;
+    /* 28 */ float padding; // Added for alignment
     /* 32 */
 };
 static_assert(sizeof(ColorReliefTilePropsUBO) == 2 * 16, "wrong size");
 
+/// Evaluated properties that do not depend on the tile
 struct alignas(16) ColorReliefEvaluatedPropsUBO {
-    /*  0 */ float opacity;
-    /*  4 */ float pad_eval0;
-    /*  8 */ float pad_eval1;
+    /* 0 */ float u_opacity;
+    /* 4 */ float pad_eval0;
+    /* 8 */ float pad_eval1;
     /* 12 */ float pad_eval2;
     /* 16 */
 };
@@ -57,75 +57,71 @@ struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 pos [[attribute(colorReliefUBOCount + 0)]];
-    short2 texture_pos [[attribute(colorReliefUBOCount + 1)]];
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float2 pos;
+    float2 v_pos;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const ColorReliefDrawableUBO* drawableVector [[buffer(idColorReliefDrawableUBO)]]) {
+                                device const ColorReliefDrawableUBO& drawable [[buffer(idColorReliefDrawableUBO)]],
+                                device const ColorReliefTilePropsUBO& tileProps [[buffer(idColorReliefTilePropsUBO)]]) {
 
-    device const ColorReliefDrawableUBO& drawable = drawableVector[uboIndex];
+    FragmentStage out;
+    out.position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
-    const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
-    float2 pos = float2(vertx.texture_pos) / 8192.0;
-    pos.y = 1.0 - pos.y;
+    float2 epsilon = 1.0 / tileProps.dimension;
+    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    out.v_pos = (float2(vertx.pos) / 8192.0) * scale + epsilon;
 
-    return {
-        .position    = position,
-        .pos         = pos,
-    };
+    // Handle poles
+    if (vertx.pos.y < -32767.5) out.v_pos.y = 0.0;
+    if (vertx.pos.y > 32766.5) out.v_pos.y = 1.0;
+
+    return out;
 }
 
-// Get elevation from DEM texture
-float getElevation(float2 coord, texture2d<float, access::sample> image, sampler image_sampler, float4 unpack) {
+float getElevation(float2 coord, texture2d<float, access::sample> image, sampler image_sampler, device const ColorReliefTilePropsUBO& tileProps) {
+    // Convert encoded elevation value to meters
     float4 data = image.sample(image_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, unpack);
+    return dot(data, tileProps.unpack);
 }
 
-// Get elevation stop value from texture (raw float, not encoded)
-float getElevationStop(int index, int numStops, texture2d<float, access::sample> elevationStops, sampler stops_sampler) {
-    float x = (float(index) + 0.5) / float(numStops);
-    return elevationStops.sample(stops_sampler, float2(x, 0.5)).r;
+float getElevationStop(int stop, texture2d<float, access::sample> elevationStops, sampler elevationStops_sampler, device const ColorReliefTilePropsUBO& tileProps) {
+    // Elevation stops are plain float values, not terrain-RGB encoded
+    float x = (float(stop) + 0.5) / float(tileProps.u_color_ramp_size);
+    return elevationStops.sample(elevationStops_sampler, float2(x, 0.0)).r;
 }
 
-// Get color stop from texture
-float4 getColorStop(int index, int numStops, texture2d<float, access::sample> colorStops, sampler stops_sampler) {
-    float x = (float(index) + 0.5) / float(numStops);
-    return colorStops.sample(stops_sampler, float2(x, 0.5));
+float4 getColorStop(int stop, texture2d<float, access::sample> colorStops, sampler colorStops_sampler, device const ColorReliefTilePropsUBO& tileProps) {
+    float x = (float(stop) + 0.5) / float(tileProps.u_color_ramp_size);
+    return colorStops.sample(colorStops_sampler, float2(x, 0.0));
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                            device const ColorReliefTilePropsUBO* tilePropsVector [[buffer(idColorReliefTilePropsUBO)]],
+                            device const ColorReliefTilePropsUBO& tileProps [[buffer(idColorReliefTilePropsUBO)]],
                             device const ColorReliefEvaluatedPropsUBO& props [[buffer(idColorReliefEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
-                            texture2d<float, access::sample> elevationStops [[texture(1)]],
-                            texture2d<float, access::sample> colorStops [[texture(2)]],
                             sampler image_sampler [[sampler(0)]],
-                            sampler stops_sampler [[sampler(1)]]) {
+                            texture2d<float, access::sample> elevationStops [[texture(1)]],
+                            sampler elevationStops_sampler [[sampler(1)]],
+                            texture2d<float, access::sample> colorStops [[texture(2)]],
+                            sampler colorStops_sampler [[sampler(2)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
 
-    device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
+    float el = getElevation(in.v_pos, image, image_sampler, tileProps);
 
-    // Get elevation at this pixel from DEM
-    float el = getElevation(in.pos, image, image_sampler, tileProps.unpack);
-
-    // Binary search to find surrounding elevation stops
+    // Binary search for color stops
+    int r = (tileProps.u_color_ramp_size - 1);
     int l = 0;
-    int r = tileProps.color_ramp_size - 1;
-    
+
     while (r - l > 1) {
         int m = (r + l) / 2;
-        float el_m = getElevationStop(m, tileProps.color_ramp_size, elevationStops, stops_sampler);
-        
+        float el_m = getElevationStop(m, elevationStops, elevationStops_sampler, tileProps);
         if (el < el_m) {
             r = m;
         } else {
@@ -133,20 +129,17 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         }
     }
 
-    // Get the elevation values at the stops
-    float el_l = getElevationStop(l, tileProps.color_ramp_size, elevationStops, stops_sampler);
-    float el_r = getElevationStop(r, tileProps.color_ramp_size, elevationStops, stops_sampler);
+    // Get elevation values for interpolation
+    float el_l = getElevationStop(l, elevationStops, elevationStops_sampler, tileProps);
+    float el_r = getElevationStop(r, elevationStops, elevationStops_sampler, tileProps);
 
-    // Get the colors at the stops
-    float4 color_l = getColorStop(l, tileProps.color_ramp_size, colorStops, stops_sampler);
-    float4 color_r = getColorStop(r, tileProps.color_ramp_size, colorStops, stops_sampler);
+    // Get colors for interpolation
+    float4 color_l = getColorStop(l, colorStops, colorStops_sampler, tileProps);
+    float4 color_r = getColorStop(r, colorStops, colorStops_sampler, tileProps);
 
-    // Interpolate
+    // Interpolate between the two colors
     float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
-    float4 color = mix(color_l, color_r, t);
-
-    // Apply opacity
-    color.a *= props.opacity;
+    float4 color = props.u_opacity * mix(color_l, color_r, t);
 
     return half4(color);
 }
