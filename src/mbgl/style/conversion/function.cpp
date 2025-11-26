@@ -357,45 +357,47 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         error.message = "function value must specify stops";
         return std::nullopt;
     }
-
     if (!isArray(*stopsValue)) {
         error.message = "function stops must be an array";
         return std::nullopt;
     }
-
     if (arrayLength(*stopsValue) == 0) {
         error.message = "function must have at least one stop";
         return std::nullopt;
     }
 
+    // NEW: For array output types, parse stops as the item type
+    type::Type stopType = type;
+    type.match(
+        [&](const type::Array& arr) {
+            stopType = arr.itemType;
+        },
+        [](const auto&) {}
+    );
+
     std::map<double, std::unique_ptr<Expression>> stops;
     for (std::size_t i = 0; i < arrayLength(*stopsValue); ++i) {
         const auto& stopValue = arrayMember(*stopsValue, i);
-
         if (!isArray(stopValue)) {
             error.message = "function stop must be an array";
             return std::nullopt;
         }
-
         if (arrayLength(stopValue) != 2) {
             error.message = "function stop must have two elements";
             return std::nullopt;
         }
-
         std::optional<float> t = convert<float>(arrayMember(stopValue, 0), error);
         if (!t) {
             return std::nullopt;
         }
-
+        // Use stopType instead of type
         std::optional<std::unique_ptr<Expression>> e = convertLiteral(
-            type, arrayMember(stopValue, 1), error, convertTokens);
+            stopType, arrayMember(stopValue, 1), error, convertTokens);
         if (!e) {
             return std::nullopt;
         }
-
         stops.emplace(*t, std::move(*e));
     }
-
     return {std::move(stops)};
 }
 
