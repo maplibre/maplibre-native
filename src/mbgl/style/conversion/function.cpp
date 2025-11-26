@@ -592,6 +592,8 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
+
+    std::cout << "=== convertExponentialFunction called ===\n";  // ADD THIS
     
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
