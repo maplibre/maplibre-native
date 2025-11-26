@@ -564,14 +564,22 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     
     // NEW: For array types, create step with item type  
     type::Type exprType = type;
+    bool isArrayType = false;
     type.match(
         [&](const type::Array& arr) {
             exprType = arr.itemType;
+            isArrayType = true;
         },
         [](const auto&) {}
     );
     
     auto expr = step(exprType, makeInput(true), std::move(*stops));
+    
+    // For array types with camera functions, return the step directly
+    if (isArrayType && !def) {
+        return expr;
+    }
+    
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
@@ -594,14 +602,23 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     
     // NEW: For array types, create interpolation with item type
     type::Type exprType = type;
+    bool isArrayType = false;
     type.match(
         [&](const type::Array& arr) {
             exprType = arr.itemType;
+            isArrayType = true;
         },
         [](const auto&) {}
     );
     
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
+    
+    // For array types with camera functions, return the interpolation directly
+    // The value.cpp wrapping will convert Color -> std::vector<Color>
+    if (isArrayType && !def) {
+        return expr;
+    }
+    
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
