@@ -24,6 +24,7 @@
 #include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <iostream>
 
 namespace mbgl {
 
