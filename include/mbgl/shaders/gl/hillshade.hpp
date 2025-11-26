@@ -91,10 +91,8 @@ void basic_hillshade(vec2 deriv) {
 
 void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
-    fragColor = vec4(0, 0, 0, 0); // Start accumulating light contributions
-    
+    fragColor = vec4(0, 0, 0, 0);
     for (int i = 0; i < u_num_lights; i++) {
-        // This is the core logic that needs to be right for all 4 lights:
         float altitude = (i == 0) ? u_altitudes.x : 
                         (i == 1) ? u_altitudes.y :
                         (i == 2) ? u_altitudes.z : u_altitudes.w;
@@ -151,9 +149,24 @@ void main() {
     float scaleFactor = cos(radians((u_latrange[0] - u_latrange[1]) * (1.0 - v_pos.y) + u_latrange[1]));
     vec2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
 
-    // --- START: FORCING MULTIDIRECTIONAL ---
-    multidirectional_hillshade(deriv);
-
+    switch (u_method) {
+        case BASIC:
+            basic_hillshade(deriv);
+            break;
+        case COMBINED:
+            combined_hillshade(deriv);
+            break;
+        case IGOR:
+            igor_hillshade(deriv);
+            break;
+        case MULTIDIRECTIONAL:
+            multidirectional_hillshade(deriv);
+            break;
+        case STANDARD:
+        default:
+            standard_hillshade(deriv);
+            break;
+    }
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
