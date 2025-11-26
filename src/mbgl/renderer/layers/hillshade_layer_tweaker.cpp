@@ -80,6 +80,16 @@ IlluminationProperties getIlluminationProperties(const HillshadePaintProperties:
     padArray(highlights);
     padArray(shadows);
 
+    // ADD THIS DEBUG:
+    std::cout << "AFTER PADDING:" << "\n";
+    std::cout << "Directions size: " << directions.size() << " - ";
+    for (auto v : directions) std::cout << v << " ";
+    std::cout << "\n";
+
+    std::cout << "Altitudes size: " << altitudes.size() << " - ";
+    for (auto v : altitudes) std::cout << v << " ";
+    std::cout << "\n";
+
     // Convert degrees to radians
     props.directionRadians.reserve(directions.size());
     for (float deg : directions) {
