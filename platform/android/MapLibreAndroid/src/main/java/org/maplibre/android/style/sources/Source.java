@@ -146,7 +146,7 @@ public abstract class Source {
   /**
    * Retrieve the minimum tile update interval, which is used to throttle the tile update network requests.
    *
-   * @return the update interval in milliseconds, default value is 0.
+   * @return the update interval in milliseconds, default valuse is 0.
    */
   @NonNull
   public Long getMinimumTileUpdateInterval() {
