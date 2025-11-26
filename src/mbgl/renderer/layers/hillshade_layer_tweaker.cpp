@@ -10,7 +10,6 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/util/geo.hpp>
-#include <iostream>
 
 namespace mbgl {
 
@@ -39,35 +38,6 @@ IlluminationProperties getIlluminationProperties(const HillshadePaintProperties:
     std::vector<Color> highlights = evaluated.get<HillshadeHighlightColor>();
     std::vector<Color> shadows = evaluated.get<HillshadeShadowColor>();
 
-    std::cout << "Highlights from evaluated: size=" << highlights.size();
-    if (!highlights.empty()) {
-        std::cout << " first=(" << highlights[0].r << "," << highlights[0].g 
-                << "," << highlights[0].b << "," << highlights[0].a << ")";
-    }
-    std::cout << "\n";
-
-    // ADD THIS DEBUG FIRST:
-    std::cout << "=== ARRAY SIZES ===" << "\n";
-    std::cout << "Directions size: " << directions.size() << "\n";
-    std::cout << "Altitudes size: " << altitudes.size() << "\n";
-    std::cout << "Highlights size: " << highlights.size() << "\n";
-    std::cout << "Shadows size: " << shadows.size() << "\n";
-    std::cout << "===================" << "\n";
-
-    // ADD DEBUG LOGGING:
-    std::cout << "DEBUG - Altitudes: ";
-    for (auto v : altitudes) std::cout << v << " ";
-    std::cout << "\n";
-
-    std::cout << "DEBUG - Directions: ";
-    for (auto v : directions) std::cout << v << " ";
-    std::cout << "\n";
-
-    std::cout << "DEBUG - Highlights: ";
-    for (const auto& c : highlights) 
-        std::cout << "(" << c.r << "," << c.g << "," << c.b << "," << c.a << ") ";
-    std::cout << "\n";
-
     // Find the maximum length to ensure all arrays are the same size
     size_t maxLength = std::max({directions.size(), altitudes.size(), highlights.size(), shadows.size()});
 
@@ -86,16 +56,6 @@ IlluminationProperties getIlluminationProperties(const HillshadePaintProperties:
     padArray(altitudes);
     padArray(highlights);
     padArray(shadows);
-
-    // ADD THIS DEBUG:
-    std::cout << "AFTER PADDING:" << "\n";
-    std::cout << "Directions size: " << directions.size() << " - ";
-    for (auto v : directions) std::cout << v << " ";
-    std::cout << "\n";
-
-    std::cout << "Altitudes size: " << altitudes.size() << " - ";
-    for (auto v : altitudes) std::cout << v << " ";
-    std::cout << "\n";
 
     // Convert degrees to radians
     props.directionRadians.reserve(directions.size());
@@ -173,11 +133,6 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
-    std::cout << "Current map zoom: " << parameters.state.getZoom() << "\n";
-    std::cout << "Evaluated highlight color: (" << evaluated.get<HillshadeHighlightColor>()[0].r 
-            << "," << evaluated.get<HillshadeHighlightColor>()[0].g 
-            << "," << evaluated.get<HillshadeHighlightColor>()[0].b << ")\n";
-
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
@@ -197,16 +152,6 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
         const HillshadeEvaluatedPropsUBO evaluatedPropsUBO = packEvaluatedProps(illumination,
                                                                                 evaluated.get<HillshadeAccentColor>());
-
-        // ADD THIS DEBUG:
-        std::cout << "UBO packed - Altitudes in radians: ";
-        for (int i = 0; i < 4; i++) std::cout << evaluatedPropsUBO.altitudes[i] << " ";
-        std::cout << "\n";
-
-        // ADD THIS NEW DEBUG:
-        std::cout << "UBO packed - Azimuths in radians: ";
-        for (int i = 0; i < 4; i++) std::cout << evaluatedPropsUBO.azimuths[i] << " ";
-        std::cout << "\n";
 
         parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
@@ -251,7 +196,6 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             .pad1 = 0.0f,
             .pad2 = 0.0f
         };
-        std::cout << "TilePropsUBO - num_lights: " << tilePropsUBO.num_lights << "\n";
 
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

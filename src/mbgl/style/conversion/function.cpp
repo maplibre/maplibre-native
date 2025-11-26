@@ -14,7 +14,6 @@
 
 #include <cassert>
 #include <utility>
-#include <iostream>
 
 namespace mbgl {
 namespace style {
@@ -374,7 +373,7 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         return std::nullopt;
     }
 
-    // NEW: For array output types, parse stops as the item type
+    // For array output types, parse stops as the item type
     type::Type stopType = type;
     type.match(
         [&](const type::Array& arr) {
@@ -398,13 +397,11 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         if (!t) {
             return std::nullopt;
         }
-        // Use stopType instead of type
         std::optional<std::unique_ptr<Expression>> e = convertLiteral(
             stopType, arrayMember(stopValue, 1), error, convertTokens);
         if (!e) {
             return std::nullopt;
         }
-        std::cout << "Parsed stop at zoom " << *t << ", kind: " << static_cast<int>((*e)->getKind()) << "\n";
         stops.emplace(*t, std::move(*e));
     }
     return {std::move(stops)};
@@ -571,7 +568,7 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
     
-    // NEW: For array types, create step with item type  
+    // For array types, create step with item type  
     type::Type exprType = type;
     bool isArrayType = false;
     type.match(
@@ -599,26 +596,21 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
-
-    std::cout << "=== convertExponentialFunction called ===" << std::endl;  // Use endl
     
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
-        std::cout << "ERROR: convertStops returned nullopt" << std::endl;  // Add this too
         return std::nullopt;
     }
     auto base = convertBase(value, error);
     if (!base) {
-        std::cout << "ERROR: convertBase returned nullopt" << std::endl;  // And this
         return std::nullopt;
     }
     
-    // NEW: For array types, create interpolation with item type
+    // For array types, create interpolation with item type
     type::Type exprType = type;
     bool isArrayType = false;
     type.match(
         [&](const type::Array& arr) {
-            std::cout << "Matched Array type!" << std::endl;  // Add this
             exprType = arr.itemType;
             isArrayType = true;
         },
@@ -627,8 +619,6 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
     
-    std::cout << "Is array type: " << isArrayType << std::endl;  // Use endl
-    std::cout << "Expression kind: " << static_cast<int>(expr->getKind()) << std::endl;
     // For array types with camera functions, return the interpolation directly
     // The value.cpp wrapping will convert Color -> std::vector<Color>
     if (isArrayType && !def) {

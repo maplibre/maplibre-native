@@ -24,7 +24,6 @@
 #include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <iostream>
 
 namespace mbgl {
 
@@ -80,19 +79,10 @@ void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
 }
 
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    std::cout << "PropertyEvaluationParameters zoom: " << parameters.z << "\n"; 
-    
     const auto previousProperties = staticImmutableCast<HillshadeLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<HillshadeLayerProperties>(
         staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
-
-    // Check the evaluated color
-    const auto& highlights = properties->evaluated.get<HillshadeHighlightColor>();
-    if (!highlights.empty()) {
-        std::cout << "Evaluated highlight at zoom " << parameters.z << ": (" 
-                  << highlights[0].r << "," << highlights[0].g << "," << highlights[0].b << ")\n";
-    }
 
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
