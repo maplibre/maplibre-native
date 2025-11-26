@@ -91,27 +91,25 @@ void basic_hillshade(vec2 deriv) {
 
 void multidirectional_hillshade(vec2 deriv) {
     deriv = deriv * u_exaggeration * 2.0;
-    fragColor = vec4(0, 0, 0, 0);
+    // Setting fragColor to (0,0,0,0) is fine, but it's immediately overwritten by the debug color below.
 
     // --- START: LOGGING CODE ---
-    // Encode u_num_lights (max 4) into the Red channel.
-    // Normalized value will be (num_lights / 4.0).
+    // ... (Your logging calculations remain the same)
     float log_r = float(u_num_lights) / 4.0;
-    
-    // Encode the altitude of the first light (u_altitudes.x) into the Green channel.
-    // Altitudes are in [0, PI/2], so we normalize by (PI/2).
     float log_g = u_altitudes.x / (PI / 2.0);
-
-    // Encode the azimuth of the first light (u_azimuths.x) into the Blue channel.
-    // Azimuths are in [0, 2*PI], so we normalize by (2*PI).
     float log_b = u_azimuths.x / (2.0 * PI);
 
     // Temporarily set fragColor to the encoded log data for inspection
-    // **REMOVE THIS BLOCK TO SEE THE ACTUAL HILLSHADE**
     fragColor = vec4(log_r, log_g, log_b, 1.0);
+    
+    // 🔥 CRITICAL FIX: Exit the function immediately.
+    // This stops the hillshade calculation below from overwriting your debug color.
+    return;
     // --- END: LOGGING CODE ---
 
+    // The code below this line will NOT execute now, guaranteeing you see the solid debug color.
     for (int i = 0; i < u_num_lights; i++) {
+        // ... (Original hillshade calculation)
         float altitude = (i == 0) ? u_altitudes.x : 
                         (i == 1) ? u_altitudes.y :
                         (i == 2) ? u_altitudes.z : u_altitudes.w;
