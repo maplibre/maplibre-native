@@ -205,7 +205,6 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
         case 'enum':
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
-        case 'color-ramp': // ADDED
             return '@"%@", [MLNColor redColor]';
         case 'padding':
             return paddingTestValue();
@@ -271,24 +270,24 @@ global.mbglTestValue = function (property, layerType) {
             return `mbgl::style::${type}Type::${value}`;
         }
         case 'color':
-            return 'mbgl::Color::red()';
+            return '{ 1, 0, 0, 1 }';
         case 'padding':
-            return 'mbgl::Padding{1, 1, 1, 1}';
+            return '{ 1, 1, 1, 1 }';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
-                    return '{{1.0, 2.0}}';
+                    return '{1, 2}';
                 case 'font':
-                    return `{"${_.startCase(propertyName)}", "${_.startCase(_.reverse(propertyName.split('')).join(''))}"}`;
+                    return `{ "${_.startCase(propertyName)}", "${_.startCase(_.reverse(propertyName.split('')).join(''))}" }`;
                 case 'padding':
-                    return 'mbgl::Padding{1, 1, 1, 1}';
+                    return '{ 1, 1, 1, 1 }';
                 case 'offset':
                 case 'translate':
-                    return 'mbgl::TranslateAnchorType::Viewport';
+                    return '{ 1, 1 }';
                 case 'anchor':
-                    return 'mbgl::SymbolAnchorType::Top';
+                    return '{ mbgl::style::SymbolAnchorType::Top, mbgl::style::SymbolAnchorType::Bottom }';
                 case 'mode':
-                    return '{{mbgl::style::WritingModeType::Horizontal, mbgl::style::WritingModeType::Vertical}}';
+                    return '{ mbgl::style::TextWritingModeType::Horizontal, mbgl::style::TextWritingModeType::Vertical }';
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -297,31 +296,60 @@ global.mbglTestValue = function (property, layerType) {
     }
 };
 
-global.testHelperMessage = function (property, layerType, isFunction) {
-    let fnSuffix = isFunction ? 'Function' : 'Constant';
+global.mbglExpressionTestValue = function (property, layerType) {
+    let propertyName = originalPropertyName(property);
+    switch (property.type) {
+        case 'enum':
+            return `"${_.last(_.keys(property.values))}"`;
+        case 'color':
+            return 'mbgl::Color(1, 0, 0, 1)';
+        case 'array':
+            switch (arrayType(property)) {
+                case 'anchor':
+                    return `{"top", "bottom"}`;
+                case 'mode':
+                    return `{"horizontal", "vertical"}`;
+                default:
+                    break;
+            }
+        default:
+            return global.mbglTestValue(property, layerType);
+    }
+};
 
+global.testGetterImplementation = function (property, layerType, isFunction) {
+    let helperMsg = testHelperMessage(property, layerType, isFunction);
+    let value = `[MLNRuntimeStylingHelper ${helperMsg}]`;
+    if (property.type === 'enum') {
+        if (isFunction) {
+            return `XCTAssertEqualObjects(gLayer.${objCName(property)}, ${value});`;
+        }
+        return `XCTAssert([gLayer.${objCName(property)} isKindOfClass:[MLNConstantStyleValue class]]);
+    XCTAssertEqualObjects(gLayer.${objCName(property)}, ${value});`;
+    }
+    return `XCTAssertEqualObjects(gLayer.${objCName(property)}, ${value});`;
+};
+
+global.testHelperMessage = function (property, layerType, isFunction) {
+    let fnSuffix = isFunction ? 'Function' : '';
     switch (property.type) {
         case 'boolean':
-            return `testBool${fnSuffix}:@(${property.default ? 'false' : 'true'})`;
+            return 'testBool' + fnSuffix;
         case 'number':
-            return `testNumber${fnSuffix}:@1`;
+            return 'testNumber' + fnSuffix;
         case 'formatted':
-            return `testFormatted${fnSuffix}:@"${_.startCase(originalPropertyName(property))}"`;
         case 'string':
         case 'resolvedImage':
-            return `testString${fnSuffix}:@"${_.startCase(originalPropertyName(property))}"`;
-        case 'enum': {
+        case 'variableAnchorOffsetCollection':
+            return 'testString' + fnSuffix;
+        case 'enum':
             let objCType = global.objCType(layerType, property.name);
             let objCEnum = `${objCType}${camelize(Object.keys(property.values)[Object.keys(property.values).length-1])}`;
             return `testEnum${fnSuffix}:${objCEnum} type:@encode(${objCType})`;
-        }
         case 'color':
-        case 'color-ramp': // ADDED
             return 'testColor' + fnSuffix;
         case 'padding':
             return 'testPaddingType' + fnSuffix;
-        case 'variableAnchorOffsetCollection':
-            return `testVariableAnchorOffsetCollection${fnSuffix}:@[[NSValue valueWithMLNTextAnchor:MLNTextAnchorTop], [NSValue valueWithCGVector:CGVectorMake(1, 2)]]`;
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -341,71 +369,223 @@ global.testHelperMessage = function (property, layerType, isFunction) {
     }
 };
 
-const describeValue = (value, property, layerType) => {
-    const formatNumber = (num) => num.toLocaleString().replace('-', '\u2212');
-    const describeArray = () => {
-        const isOffset = arrayType(property) === 'offset';
-        const isTranslate = arrayType(property) === 'translate';
-        const isPadding = arrayType(property) === 'padding';
-        const isRadial = arrayType(property) === 'radial';
-        const isPosition = arrayType(property) === 'position';
-        const isDashArray = arrayType(property) === 'dasharray';
-        const isFont = arrayType(property) === 'font';
-        const isMode = arrayType(property) === 'mode';
-        if (isOffset || isTranslate) {
-            let description = 'an `NSValue` object containing a `CGVector` struct set to' +
-                ` a horizontal value of ${formatNumber(value[0])} and a vertical value of ${formatNumber(value[1])}`;
-            if (property.units) {
-                description += ` ${property.units.replace(/pixel/, 'point')}`;
+global.propertyDoc = function (propertyName, property, layerType, kind) {
+    // Match references to other property names & values.
+    // Requires the format 'When `foo` is set to `bar`,'.
+    let doc = property.doc.replace(/`([^`]+?)` is set to `([^`]+?)`(?: or `([^`]+?)`)?/g, function (m, peerPropertyName, propertyValue, secondPropertyValue, offset, str) {
+        let otherProperty = camelizeWithLeadingLowercase(peerPropertyName);
+        let otherValue = objCType(layerType, peerPropertyName) + camelize(propertyValue);
+        if (propertyValue === 'true' || propertyValue === 'false') {
+            otherValue = propertyValue === 'true' ? 'YES' : 'NO';
+        }
+        if (property.type == 'array' && kind == 'light') {
+            otherValue = propertyValue;
+        }
+        const firstPropertyValue = '`' + `${otherProperty}` + '` is set to `' + `${otherValue}` + '`';
+        if (secondPropertyValue) {
+            return firstPropertyValue + ' or `' +
+                objCType(layerType, peerPropertyName) + camelize(secondPropertyValue) +
+                '`';
+        } else {
+            return firstPropertyValue;
+        }
+    });
+    // Match references to our own property values.
+    // Requires the format 'is equivalent to `bar`'.
+    doc = doc.replace(/is equivalent to `(.+?)`/g, function(m, propertyValue, offset, str) {
+        propertyValue = objCType(layerType, propertyName) + camelize(propertyValue);
+        return 'is equivalent to `' + propertyValue + '`';
+    });
+    // Format everything else: our property name & its possible values.
+    // Requires symbols to be surrounded by backticks.
+    doc = doc.replace(/`(.+?)`/g, function (m, symbol, offset, str) {
+        if (kind === 'enum') {
+            let layoutProperties = spec[`layout_${layerType}`] || [];
+            let paintProperties = spec[`paint_${layerType}`] || [];
+            if (symbol in layoutProperties || symbol in paintProperties) {
+                return '``MLN' + camelize(layerType) + 'StyleLayer/' + camelizeWithLeadingLowercase(symbol) + '``';
             }
-            return description;
         }
-        if (isPadding) {
-            let units = property.units || '';
-            if (units) { units = ` ${units}`.replace(/pixel/, 'point'); }
-            if (value.every(num => num === 0)) {
-                return 'an `NSValue` object containing `UIEdgeInsetsZero`';
+        if ('values' in property && Object.keys(property.values).indexOf(symbol) !== -1) {
+            let objCType = global.objCType(layerType, property.name);
+            return '`' + `${objCType}${camelize(symbol)}` + '`';
+        }
+        if (str.substr(offset - 4, 3) !== 'CSS') {
+            symbol = camelizeWithLeadingLowercase(symbol);
+        }
+        return '`' + symbol + '`';
+    });
+    // Format references to units.
+    if ('units' in property) {
+        if (!property.units.match(/s$/)) {
+            property.units += 's';
+        }
+        doc += `\n\nThis property is measured in ${property.units}.`;
+    }
+    doc = doc.replace(/(p)ixel/gi, '$1oint').replace(/(\d)px\b/g, '$1pt');
+    if (kind !== 'enum') {
+        if ('default' in property) {
+            doc += `\n\nThe default value of this property is ${propertyDefault(property, layerType)}.`;
+            if (!property.required && kind != 'light') {
+                doc += ' Set this property to `nil` to reset it to the default value.';
             }
-            if (value.length === 1) {
-                return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' +
-                    ` ${formatNumber(value[0])}${units} on all sides`;
+        }
+        if ('requires' in property) {
+            doc += '\n\n' + propertyReqs(property, spec[`${kind}_${layerType}`], layerType);
+        }
+        if ('original' in property) {
+            let anchor;
+            switch (kind) {
+                case 'layout':
+                    anchor = `layout-${layerType}-${property.original}`;
+                    break;
+                case 'paint':
+                    anchor = `paint-${property.original}`;
+                    break;
             }
-            return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' +
-                ` ${formatNumber(value[0])}${units} on the top, ${formatNumber(value[3])}${units} on the left, ${formatNumber(value[2])}${units} on the bottom, and ${formatNumber(value[1])}${units} on the right`;
+            doc += `\n\nThis attribute corresponds to the <a href="https://maplibre.org/maplibre-style-spec/#${anchor}"><code>${property.original}</code></a> layout property in the MapLibre Style Spec.`;
         }
-        if (isPosition || isRadial) {
-            return 'an array of three numbers specifying a [radial, azimuthal, polar] position, such as' +
-                ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
+        doc += '\n\nYou can set this property to an expression containing any of the following:\n\n';
+        doc += `* Constant ${describeType(property)} values`;
+        if ('minimum' in property) {
+            if ('maximum' in property) {
+                doc += ` between ${formatNumber(property.minimum)} and ${formatNumber(property.maximum)} inclusive`;
+            } else {
+                doc += ` no less than ${formatNumber(property.minimum)}`;
+            }
+        } else if ('maximum' in property) {
+            doc += ` no greater than ${formatNumber(property.maximum)}`;
         }
-        if (isDashArray) {
-            return 'an array of numbers, measured in points, that specifies the lengths of the alternating dashes and gaps that make up the line';
+        doc += '\n';
+        if (property.type === 'enum') {
+            doc += '* Any of the following constant string values:\n';
+            doc += Object.keys(property.values).map(value => '  * `' + value + '`: ' + property.values[value].doc).join('\n') + '\n';
+        } else if (property.type === 'array' && property.value === 'enum') {
+            doc += '* Constant array, in which each element is any of the following constant string values:\n';
+            doc += Object.keys(property.values).map(value => '  * `' + value + '`: ' + property.values[value].doc).join('\n') + '\n';
         }
-        if (isFont) {
-            return 'an array of font names';
+        if (property.type === 'formatted') {
+            doc += '* Formatted expressions.\n';
         }
-        if (isMode) {
-            return 'an array of text writing modes';
+        doc += '* Predefined functions, including mathematical and string operators\n' +
+            '* Conditional expressions\n' +
+            '* Variable assignments and references to assigned variables\n';
+        const inputVariable = property.expression && property['property-type'] === 'color-ramp' ?
+            '$' + camelizeWithLeadingLowercase(property.expression.parameters[0]) : '$zoomLevel';
+        if (isDataDriven(property)) {
+            doc += `* Interpolation and step functions applied to the \`${inputVariable}\` variable and/or feature attributes\n`;
+        } else if (property.expression && property.expression.interpolated) {
+            doc += `* Interpolation and step functions applied to the \`${inputVariable}\` variable\n\n` +
+                'This property does not support applying interpolation or step functions to feature attributes.';
+        } else {
+            doc += `* Step functions applied to the \`${inputVariable}\` variable\n\n` +
+                `This property does not support applying interpolation functions to the \`${inputVariable}\` variable or applying interpolation or step functions to feature attributes.`;
+        }
+    }
+    return doc;
+};
+
+global.propertyExample = function (property) {
+    return property.examples;
+};
+
+global.isDataDriven = function (property) {
+  return property['property-type'] === 'data-driven' || property['property-type'] === 'cross-faded-data-driven';
+};
+
+global.propertyReqs = function (property, propertiesByName, type) {
+    return 'This property is only applied to the style if ' + property.requires.map(function (req) {
+        if (typeof req === 'string') {
+            return '`' + camelizeWithLeadingLowercase(req) + '` is non-`nil`';
+        } else if ('!' in req) {
+            return '`' + camelizeWithLeadingLowercase(req['!']) + '` is set to `nil`';
+        } else {
+            let name = Object.keys(req)[0];
+            if (name === 'source')
+                return 'the data source requirements are met';
+            return '`' + camelizeWithLeadingLowercase(name) + '` is set to an expression that evaluates to ' + describeValue(req[name], propertiesByName[name], type);
+        }
+    }).join(', and ') + '. Otherwise, it is ignored.';
+};
+
+global.parseColor = function (str) {
+    let color = colorParser.parseCSSColor(str);
+    return {
+        r: color[0] / 255,
+        g: color[1] / 255,
+        b: color[2] / 255,
+        a: color[3],
+    };
+};
+
+global.describeType = function (property) {
+    switch (property.type) {
+        case 'boolean':
+            return 'Boolean';
+        case 'number':
+            return 'numeric';
+        case 'formatted':
+        case 'string':
+        case 'resolvedImage':
+            return 'string';
+        case 'enum':
+            return '`MLN' + camelize(property.name) + '`';
+        case 'color':
+            return '`UIColor`';
+        case 'padding':
+            return '`UIEdgeInsets`';
+        case 'array':
+            switch (arrayType(property)) {
+                case 'padding':
+                    return '`UIEdgeInsets`';
+                case 'offset':
+                case 'translate':
+                    return '`CGVector`';
+                case 'position':
+                    return '``MLNSphericalPosition``';
+                case 'anchor':
+                    return '``MLNTextAnchor`` array';
+                case 'mode':
+                    return '``MLNTextWritingMode`` array';
+                default:
+                    return 'array';
+            }
+            break;
+        case 'variableAnchorOffsetCollection':
+            return 'interleaved `MLNTextAnchor` and `CGVector` array';
+        default:
+            throw new Error(`unknown type for ${property.name}`);
+    }
+}
+
+global.describeValue = function (value, property, layerType) {
+    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum' && property.type !== 'padding') {
+        switch (value[0]) {
+            case 'interpolate': {
+                let curveType = value[1][0];
+                let minimum = describeValue(value[3 + value.length % 2], property, layerType);
+                let maximum = describeValue(_.last(value), property, layerType);
+                return `${curveType.match(/^[aeiou]/i) ? 'an' : 'a'} ${curveType} interpolation expression ranging from ${minimum} to ${maximum}`;
+            }
+            default:
+                throw new Error(`No description available for ${value[0]} expression in ${property.name} of ${layerType}.`);
+        }
+    }
+
+    const describePadding = () => {
+        let units = property.units || '';
+        if (units) {
+            units = ` ${units}`.replace(/pixel/, 'point');
         }
 
-        switch (arrayType(property)) {
-            case 'dasharray':
-                return 'the array `' + value.join('`, `') + '`';
-            case 'font':
-                return 'the array `' + value.map(val => `'${val}'`).join('`, `') + '`';
-            case 'offset':
-                return 'the array `' + value.join('`, `') + '`';
-            case 'translate':
-                return 'the array `' + value.join('`, `') + '`';
-            case 'anchor':
-                return 'the array `' + value.join('`, `') + '`';
-            case 'mode':
-                return 'the array `' + value.join('`, `') + '`';
-            case 'padding':
-                return 'the array `' + value.join('`, `') + '`';
-            default:
-                return 'the array `' + value.join('`, `') + '`';
+        if (value.every(num => num === 0)) {
+            return 'an `NSValue` object containing `UIEdgeInsetsZero`';
         }
-    };
+        if (value.length === 1) {
+            return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on all sides`;
+        }
+        return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on the top, ${formatNumber(value[3])}${units} on the left, ${formatNumber(value[2])}${units} on the bottom, and ${formatNumber(value[1])}${units} on the right`;
+    }
 
     switch (property.type) {
         case 'boolean':
@@ -414,18 +594,61 @@ const describeValue = (value, property, layerType) => {
             return 'the float ' + '`' + formatNumber(value) + '`';
         case 'formatted':
         case 'string':
-            return 'the string `' + value + '`';
         case 'resolvedImage':
+            if (value === '') {
+                return 'the empty string';
+            }
             return 'the string `' + value + '`';
         case 'enum':
-            return 'the enum value `' + global.objCType(layerType, property.name) + global.camelize(value) + '`';
+            let displayValue;
+            if (Array.isArray(value)) {
+                let separator = (value.length === 2) ? ' ' : ', ';
+                displayValue = value.map((possibleValue, i) => {
+                    let conjunction = '';
+                    if (value.length === 2 && i === 0) conjunction = 'either ';
+                    if (i === value.length - 1) conjunction = 'or ';
+                    let objCType = global.objCType(layerType, property.name);
+                    return `${conjunction}\`${objCType}${camelize(possibleValue)}\``;
+                }).join(separator);
+            } else {
+                displayValue = `\`${value}\``;
+            }
+            return displayValue;
         case 'color':
-        case 'color-ramp':
-            return 'the color `' + value + '`';
+            let color = parseColor(value);
+            if (!color) {
+                throw new Error(`unrecognized color format in default value of ${property.name}`);
+            }
+            if (color.r === 0 && color.g === 0 && color.b === 0 && color.a === 0) {
+                return '`UIColor.clearColor`';
+            }
+            if (color.r === 0 && color.g === 0 && color.b === 0 && color.a === 1) {
+                return '`UIColor.blackColor`';
+            }
+            if (color.r === 1 && color.g === 1 && color.b === 1 && color.a === 1) {
+                return '`UIColor.whiteColor`';
+            }
+            return 'a `UIColor`' + ` object whose RGB value is ${formatNumber(color.r)}, ${formatNumber(color.g)}, ${formatNumber(color.b)} and whose alpha value is ${formatNumber(color.a)}`;
+
         case 'padding':
-            return describeArray();
+            return describePadding();
+
         case 'array':
-            return describeArray();
+            let units = property.units || '';
+            if (units) {
+                units = ` ${units}`.replace(/pixel/, 'point');
+            }
+            switch (arrayType(property)) {
+                case 'padding':
+                    return describePadding();
+                case 'offset':
+                case 'translate':
+                    return 'an `NSValue` object containing a `CGVector` struct set to' + ` ${formatNumber(value[0])}${units} rightward and ${formatNumber(value[1])}${units} downward`;
+                case 'position':
+                    return 'an ``MLNSphericalPosition`` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
+                default:
+                    return 'the array `' + value.join('`, `') + '`';
+            }
         case 'variableAnchorOffsetCollection':
             return 'array of interleaved `MLNTextAnchor` and `CGVector` values';
         default:
@@ -455,39 +678,111 @@ global.enumName = function (property) {
 
 global.propertyType = function (property) {
     switch (property.type) {
-        case 'boolean': return 'NSNumber *';
-        case 'number': return 'NSNumber *';
+        case 'boolean':
+            return 'NSNumber *';
+        case 'number':
+            return 'NSNumber *';
         case 'formatted':
         case 'string':
-        case 'resolvedImage': return 'NSString *';
-        case 'enum': return 'NSValue *';
+        case 'resolvedImage':
+            return 'NSString *';
+        case 'enum':
+            return 'NSValue *';
         case 'color':
-        case 'color-ramp': // ADDED
             return 'MLNColor *';
-        case 'padding': return 'NSValue *';
+        case 'padding':
+            return 'NSValue *';
         case 'array':
             switch (arrayType(property)) {
-                case 'dasharray': return 'NSArray<NSNumber *> *';
-                case 'font': return 'NSArray<NSString *> *';
-                case 'padding': return 'NSValue *';
+                case 'dasharray':
+                    return 'NSArray<NSNumber *> *';
+                case 'font':
+                    return 'NSArray<NSString *> *';
+                case 'padding':
+                case 'position':
                 case 'offset':
-                case 'translate': return 'NSValue *';
+                case 'translate':
+                    return 'NSValue *';
                 case 'anchor':
-                case 'mode': return 'NSValue *';
-                default: throw new Error(`unknown array type for ${property.name}`);
+                case 'mode':
+                    return 'NSArray<NSValue *> *';
+                default:
+                    throw new Error(`unknown array type for ${property.name}`);
             }
-        case 'variableAnchorOffsetCollection': return 'NSArray<NSValue *> *';
-        default: throw new Error(`unknown type for ${property.name}`);
+        case 'variableAnchorOffsetCollection':
+            return 'NSArray<NSValue *> *';
+        default:
+            throw new Error(`unknown type for ${property.name}`);
+    }
+};
+
+global.isInterpolatable = function (property) {
+    const type = property.type === 'array' ? property.value : property.type;
+    return type !== 'boolean' &&
+        type !== 'enum' &&
+        type !== 'string' &&
+        type !== 'resolvedImage' &&
+        type !== 'formatted';
+};
+
+global.valueTransformerArguments = function (property) {
+    let objCType = propertyType(property);
+    switch (property.type) {
+        case 'boolean':
+            return ['bool', objCType];
+        case 'number':
+            return ['float', objCType];
+        case 'formatted':
+            return ['mbgl::style::expression::Formatted', objCType];
+        case 'resolvedImage':
+            return ['mbgl::style::expression::Image', objCType];
+        case 'string':
+            return ['std::string', objCType];
+        case 'enum':
+            return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
+        case 'color':
+            return ['mbgl::Color', objCType];
+        case 'padding':
+            return ['mbgl::Padding', objCType];
+        case 'variableAnchorOffsetCollection':
+            return ['mbgl::VariableAnchorOffsetCollection', objCType];
+        case 'array':
+            switch (arrayType(property)) {
+                case 'dasharray':
+                    return ['std::vector<float>', objCType, 'float'];
+                case 'font':
+                    return ['std::vector<std::string>', objCType, 'std::string'];
+                case 'padding':
+                    return ['std::array<float, 4>', objCType];
+                case 'position':
+                    return ['mbgl::style::Position', objCType];
+                case 'offset':
+                case 'translate':
+                    return ['std::array<float, 2>', objCType];
+                case 'anchor':
+                    return ['std::vector<mbgl::style::SymbolAnchorType>', objCType, 'mbgl::style::SymbolAnchorType', 'MLNTextAnchor'];
+                case 'mode':
+                    return ['std::vector<mbgl::style::TextWritingModeType>', objCType, 'mbgl::style::TextWritingModeType', 'MLNTextWritingMode'];
+                default:
+                    throw new Error(`unknown array type for ${property.name}`);
+            }
+        default:
+            throw new Error(`unknown type for ${property.name}`);
     }
 };
 
 global.mbglType = function(property) {
     switch (property.type) {
-        case 'boolean': return 'bool';
-        case 'number': return 'float';
-        case 'formatted': return 'mbgl::style::expression::Formatted';
-        case 'resolvedImage': return 'mbgl::style::expression::Image';
-        case 'string': return 'std::string';
+        case 'boolean':
+            return 'bool';
+        case 'number':
+            return 'float';
+        case 'formatted':
+            return 'mbgl::style::expression::Formatted';
+        case 'resolvedImage':
+            return 'mbgl::style::expression::Image';
+        case 'string':
+            return 'std::string';
         case 'enum': {
             let type = camelize(originalPropertyName(property));
             if (property['light-property']) {
@@ -505,100 +800,125 @@ global.mbglType = function(property) {
             return `mbgl::style::${type}Type`;
         }
         case 'color':
-        case 'color-ramp': // ADDED
             return 'mbgl::Color';
-        case 'padding': return 'mbgl::Padding';
-        case 'variableAnchorOffsetCollection': return 'mbgl::VariableAnchorOffsetCollection';
+        case 'padding':
+            return 'mbgl::Padding';
+        case 'variableAnchorOffsetCollection':
+            return 'mbgl::VariableAnchorOffsetCollection';
         case 'array':
             switch (arrayType(property)) {
-                case 'dasharray': return 'std::vector<float>';
-                case 'font': return 'std::vector<std::string>';
-                case 'padding': return 'mbgl::Padding';
+                case 'dasharray':
+                    return 'std::vector<float>';
+                case 'font':
+                    return 'std::vector<std::string>';
+                case 'padding':
+                    return 'std::array<float, 4>';
                 case 'offset':
-                case 'translate': return 'mbgl::style::TranslateAnchorType';
-                case 'anchor': return 'mbgl::style::SymbolAnchorType';
-                case 'mode': return 'std::vector<mbgl::style::WritingModeType>';
-                default: throw new Error(`unknown array type for ${property.name}`);
+                case 'translate':
+                    return 'std::array<float, 2>';
+                case 'position':
+                    return 'mbgl::style::Position';
+                case 'anchor':
+                    return 'std::vector<mbgl::style::SymbolAnchorType>';
+                case 'mode':
+                    return 'std::vector<mbgl::style::TextWritingModeType>';
+                default:
+                    throw new Error(`unknown array type for ${property.name}`);
             }
-        default: throw new Error(`unknown type for ${property.name}`);
+        default:
+            throw new Error(`unknown type for ${property.name}`);
     }
 };
 
-const root = path.join(import.meta.dirname, "../..")
-const outLocation = args.values.out ? args.values.out : root;
-
-const layerH = readAndCompile(`platform/darwin/src/MLNStyleLayer.h.ejs`, root);
-const layerPrivateH = readAndCompile(`platform/darwin/src/MLNStyleLayer_Private.h.ejs`, root);
-const layerM = readAndCompile(`platform/darwin/src/MLNStyleLayer.mm.ejs`, root);
-const lightH = readAndCompile(`platform/darwin/src/MLNLight.h.ejs`, root);
-const lightM = readAndCompile(`platform/darwin/src/MLNLight.mm.ejs`, root);
-
-const collator = new Intl.Collator("en-US");
-
-// Add this mock property that our SDF line shader needs so that it gets added to the list of
-// "data driven" properties.
-spec.paint_line['line-floor-width'] = {
-  "type": "number",
-  "default": 1,
-  "property-type": "data-driven"
+global.initLayer = function (layerType) {
+    if (layerType == "background") {
+       return `_layer = new mbgl::style::${camelize(layerType)}Layer(identifier.UTF8String);`
+    } else {
+        return `_layer = new mbgl::style::${camelize(layerType)}Layer(identifier.UTF8String, source.identifier.UTF8String);`
+    }
 };
 
-const layers = Object.keys(spec.layer.type.values).map((type) => {
+global.setSourceLayer = function() {
+    return `_layer->setSourceLayer(sourceLayer.UTF8String);`
+};
 
-    /** @type {any[]} */
-    const layoutProperties = Object.keys(spec[`layout_${type}`]).reduce((/** @type {any} **/ memo, name) => {
+const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
+  var property = spec['light'][name];
+  property.name = name;
+  property['light-property'] = true;
+  memo.push(property);
+  return memo;
+}, []);
+
+const lightDoc = spec['light-cocoa-doc'];
+const lightType = 'light';
+
+const root = path.dirname(path.dirname(path.dirname(import.meta.dirname)));
+const outLocation = args.out ? args.out : root;
+
+const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
+const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
+const layerM = readAndCompile('platform/darwin/src/MLNStyleLayer.mm.ejs', root);
+const testLayers = readAndCompile('platform/darwin/test/MLNStyleLayerTests.mm.ejs', root);
+
+const lightH = readAndCompile('platform/darwin/src/MLNLight.h.ejs', root);
+const lightM = readAndCompile('platform/darwin/src/MLNLight.mm.ejs', root);
+const testLight = readAndCompile('platform/darwin/test/MLNLightTest.mm.ejs', root);
+writeIfModified(`platform/darwin/src/MLNLight.h`, duplicatePlatformDecls(
+    lightH({ properties: lightProperties, doc: lightDoc, type: lightType })), outLocation);
+writeIfModified(`platform/darwin/src/MLNLight.mm`,
+    lightM({ properties: lightProperties, doc: lightDoc, type: lightType }), outLocation);
+writeIfModified(`platform/darwin/test/MLNLightTest.mm`,
+    testLight({ properties: lightProperties, doc: lightDoc, type: lightType }), outLocation);
+
+const layers = _(spec.layer.type.values).map((value, layerType) => {
+    const layoutProperties = Object.keys(spec[`layout_${layerType}`]).reduce((memo, name) => {
         if (name !== 'visibility') {
-            spec[`layout_${type}`][name].name = name;
-            memo.push(spec[`layout_${type}`][name]);
+            spec[`layout_${layerType}`][name].name = name;
+            memo.push(spec[`layout_${layerType}`][name]);
         }
         return memo;
     }, []);
 
-    // JSON doesn't have a defined order. We're going to sort them alphabetically
-    // to get a deterministic order.
-    layoutProperties.sort((a, b) => collator.compare(a.name, b.name));
-
-    /** @type {any[]} */
-    const paintProperties = Object.keys(spec[`paint_${type}`]).reduce((/** @type {any} **/ memo, name) => {
-        spec[`paint_${type}`][name].name = name;
-        memo.push(spec[`paint_${type}`][name]);
+    const paintProperties = Object.keys(spec[`paint_${layerType}`]).reduce((memo, name) => {
+        spec[`paint_${layerType}`][name].name = name;
+        memo.push(spec[`paint_${layerType}`][name]);
         return memo;
     }, []);
 
-    // JSON doesn't have a defined order. We're going to sort them alphabetically
-    // to get a deterministic order.
-    paintProperties.sort((a, b) => collator.compare(a.name, b.name));
-
     return {
-        type: type,
-        layoutProperties: layoutProperties,
-        paintProperties: paintProperties,
-        doc: spec.layer.type.values[type].doc,
-        layoutPropertiesByName: spec[`layout_${type}`],
-        paintPropertiesByName: spec[`paint_${type}`],
+        doc: spec.layer.type.values[layerType].doc,
+        examples: spec.layer.type.values[layerType].examples,
+        type: layerType,
+        layoutProperties: _.sortBy(layoutProperties, ['name']),
+        paintProperties: _.sortBy(paintProperties, ['name']),
     };
-});
+}).sortBy(['type']).value();
 
 function duplicatePlatformDecls(src) {
-    // Duplicate `MLNColor` declarations for `NSColor` on macOS.
-    src = src.replace(/(\/\*\*(?:\*[^\/]|[^*])*?\b(?:MLN|NS|UI)Color\b[\s\S]*?\*\/)(\s*.+?;)/g,
+    // Look for a documentation comment that contains “MLNColor” or “UIColor”
+    // and the subsequent function, method, or property declaration. Try not to
+    // match greedily.
+    return src.replace(/(\/\*\*(?:\*[^\/]|[^*])*?\b(?:MLN|NS|UI)Color\b[\s\S]*?\*\/)(\s*.+?;)/g,
                        (match, comment, decl) => {
-        let macosComment = comment.replace(/\bcolor\b/g, 'color')
-            .replace(/\bMLNColor\b/g, 'NSColor');
-        return `\\
+        let macosComment = comment.replace(/\b(?:MLN|UI)Color\b/g, 'NSColor')
+            // Use the correct indefinite article.
+            .replace(/\ba(\s+`?NSColor)\b/gi, 'an$1');
+        let iosDecl = decl.replace(/\bMLNColor\b/g, 'UIColor');
+        let macosDecl = decl.replace(/\b(?:MLN|UI)Color\b/g, 'NSColor');
+        return `\
 #if TARGET_OS_IPHONE
-${comment}${decl}
+${comment}${iosDecl}
 #else
-${macosComment}${decl}
+${macosComment}${macosDecl}
 #endif`;
-    });
-
-    // Duplicate `UIEdgeInsets` declarations for `NSEdgeInsets` on macOS.
-    return src.replace(/(\/\*\*(?:\*[^\/]|[^*])*?\bUI(EdgeInsets(?:Zero)?)\b[\s\S]*?\*\/)(\s*.+?;)/g,
+    })
+        // Do the same for CGVector-typed properties.
+        .replace(/(\/\*\*(?:\*[^\/]|[^*])*?\b(?:CGVector|UIEdgeInsets(?:Zero)?)\b[\s\S]*?\*\/)(\s*.+?;)/g,
                        (match, comment, decl) => {
         let macosComment = comment.replace(/\bdownward\b/g, 'upward')
             .replace(/\bUI(EdgeInsets(?:Zero)?)\b/g, 'NS$1');
-        return `\\
+        return `\
 #if TARGET_OS_IPHONE
 ${comment}${decl}
 #else
@@ -627,24 +947,7 @@ for (var layer of layers) {
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}_Private.h`,
         duplicatePlatformDecls(layerPrivateH(layer)),  outLocation);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.mm`,
-        layerM(layer), outLocation);
+        layerM(layer),  outLocation);
+    writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
+        testLayers(layer), outLocation);
 }
-
-// Light
-/** @type {any[]} **/
-const lightProperties = Object.keys(spec[`light`]).reduce((/** @type {any} **/ memo, name) => {
-  var property = spec[`light`][name];
-  property.name = name;
-  property['light-property'] = true;
-  memo.push(property);
-  return memo;
-}, []);
-
-// JSON doesn't have a defined order. We're going to sort them alphabetically
-// to get a deterministic order.
-lightProperties.sort((a, b) => collator.compare(a.name, b.name));
-
-writeIfModified(`platform/darwin/src/${prefix}Light.h`,
-    duplicatePlatformDecls(lightH({properties: lightProperties})), outLocation);
-writeIfModified(`platform/darwin/src/${prefix}Light.mm`,
-    lightM({properties: lightProperties, renamedPropertiesByLayerType}), outLocation);
