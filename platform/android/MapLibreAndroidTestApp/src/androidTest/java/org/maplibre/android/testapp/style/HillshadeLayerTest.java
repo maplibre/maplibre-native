@@ -92,9 +92,22 @@ public class HillshadeLayerTest extends BaseLayerTest {
     assertNull(layer.getHillshadeIlluminationDirection().getValue());
 
     // Set and Get
-    Float propertyValue = 0.3f;
+    Float[] propertyValue = new Float[] {1.0f, 2.0f};
     layer.setProperties(hillshadeIlluminationDirection(propertyValue));
     assertEquals(layer.getHillshadeIlluminationDirection().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testHillshadeIlluminationAltitudeAsConstant() {
+    Timber.i("hillshade-illumination-altitude");
+    assertNotNull(layer);
+    assertNull(layer.getHillshadeIlluminationAltitude().getValue());
+
+    // Set and Get
+    Float[] propertyValue = new Float[] {1.0f, 2.0f};
+    layer.setProperties(hillshadeIlluminationAltitude(propertyValue));
+    assertEquals(layer.getHillshadeIlluminationAltitude().getValue(), propertyValue);
   }
 
   @Test
@@ -155,20 +168,9 @@ public class HillshadeLayerTest extends BaseLayerTest {
     assertNull(layer.getHillshadeShadowColor().getValue());
 
     // Set and Get
-    String propertyValue = "rgba(255,128,0,0.7)";
+    String[] propertyValue = new String[] {"rgba(255,0,0,1)", "rgba(0,0,255,1)"};
     layer.setProperties(hillshadeShadowColor(propertyValue));
     assertEquals(layer.getHillshadeShadowColor().getValue(), propertyValue);
-  }
-
-  @Test
-  @UiThreadTest
-  public void testHillshadeShadowColorAsIntConstant() {
-    Timber.i("hillshade-shadow-color");
-    assertNotNull(layer);
-
-    // Set and Get
-    layer.setProperties(hillshadeShadowColor(Color.argb(127, 255, 127, 0)));
-    assertEquals(layer.getHillshadeShadowColorAsInt(), Color.argb(127, 255, 127, 0));
   }
 
   @Test
@@ -191,20 +193,9 @@ public class HillshadeLayerTest extends BaseLayerTest {
     assertNull(layer.getHillshadeHighlightColor().getValue());
 
     // Set and Get
-    String propertyValue = "rgba(255,128,0,0.7)";
+    String[] propertyValue = new String[] {"rgba(255,0,0,1)", "rgba(0,0,255,1)"};
     layer.setProperties(hillshadeHighlightColor(propertyValue));
     assertEquals(layer.getHillshadeHighlightColor().getValue(), propertyValue);
-  }
-
-  @Test
-  @UiThreadTest
-  public void testHillshadeHighlightColorAsIntConstant() {
-    Timber.i("hillshade-highlight-color");
-    assertNotNull(layer);
-
-    // Set and Get
-    layer.setProperties(hillshadeHighlightColor(Color.argb(127, 255, 127, 0)));
-    assertEquals(layer.getHillshadeHighlightColorAsInt(), Color.argb(127, 255, 127, 0));
   }
 
   @Test
@@ -241,5 +232,18 @@ public class HillshadeLayerTest extends BaseLayerTest {
     // Set and Get
     layer.setProperties(hillshadeAccentColor(Color.argb(127, 255, 127, 0)));
     assertEquals(layer.getHillshadeAccentColorAsInt(), Color.argb(127, 255, 127, 0));
+  }
+
+  @Test
+  @UiThreadTest
+  public void testHillshadeMethodAsConstant() {
+    Timber.i("hillshade-method");
+    assertNotNull(layer);
+    assertNull(layer.getHillshadeMethod().getValue());
+
+    // Set and Get
+    String propertyValue = HILLSHADE_METHOD_STANDARD;
+    layer.setProperties(hillshadeMethod(propertyValue));
+    assertEquals(layer.getHillshadeMethod().getValue(), propertyValue);
   }
 }

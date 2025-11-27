@@ -97,13 +97,25 @@ public class HillshadeLayer extends Layer {
   /**
    * Get the HillshadeIlluminationDirection property
    *
-   * @return property wrapper value around Float
+   * @return property wrapper value around Float[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getHillshadeIlluminationDirection() {
+  public PropertyValue<Float[]> getHillshadeIlluminationDirection() {
     checkThread();
-    return (PropertyValue<Float>) new PropertyValue("hillshade-illumination-direction", nativeGetHillshadeIlluminationDirection());
+    return (PropertyValue<Float[]>) new PropertyValue("hillshade-illumination-direction", nativeGetHillshadeIlluminationDirection());
+  }
+
+  /**
+   * Get the HillshadeIlluminationAltitude property
+   *
+   * @return property wrapper value around Float[]
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float[]> getHillshadeIlluminationAltitude() {
+    checkThread();
+    return (PropertyValue<Float[]>) new PropertyValue("hillshade-illumination-altitude", nativeGetHillshadeIlluminationAltitude());
   }
 
   /**
@@ -154,36 +166,19 @@ public class HillshadeLayer extends Layer {
   /**
    * Get the HillshadeShadowColor property
    *
-   * @return property wrapper value around String
+   * @return property wrapper value around String[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<String> getHillshadeShadowColor() {
+  public PropertyValue<String[]> getHillshadeShadowColor() {
     checkThread();
-    return (PropertyValue<String>) new PropertyValue("hillshade-shadow-color", nativeGetHillshadeShadowColor());
-  }
-
-  /**
-   * The shading color of areas that face away from the light source.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getHillshadeShadowColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getHillshadeShadowColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("hillshade-shadow-color was set as a Function");
-    }
+    return (PropertyValue<String[]>) new PropertyValue("hillshade-shadow-color", nativeGetHillshadeShadowColor());
   }
 
   /**
    * Get the HillshadeShadowColor property transition options
    *
-   * @return transition options for String
+   * @return transition options for String[]
    */
   @NonNull
   public TransitionOptions getHillshadeShadowColorTransition() {
@@ -194,7 +189,7 @@ public class HillshadeLayer extends Layer {
   /**
    * Set the HillshadeShadowColor property transition options
    *
-   * @param options transition options for String
+   * @param options transition options for String[]
    */
   public void setHillshadeShadowColorTransition(@NonNull TransitionOptions options) {
     checkThread();
@@ -204,36 +199,19 @@ public class HillshadeLayer extends Layer {
   /**
    * Get the HillshadeHighlightColor property
    *
-   * @return property wrapper value around String
+   * @return property wrapper value around String[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<String> getHillshadeHighlightColor() {
+  public PropertyValue<String[]> getHillshadeHighlightColor() {
     checkThread();
-    return (PropertyValue<String>) new PropertyValue("hillshade-highlight-color", nativeGetHillshadeHighlightColor());
-  }
-
-  /**
-   * The shading color of areas that faces towards the light source.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getHillshadeHighlightColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getHillshadeHighlightColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("hillshade-highlight-color was set as a Function");
-    }
+    return (PropertyValue<String[]>) new PropertyValue("hillshade-highlight-color", nativeGetHillshadeHighlightColor());
   }
 
   /**
    * Get the HillshadeHighlightColor property transition options
    *
-   * @return transition options for String
+   * @return transition options for String[]
    */
   @NonNull
   public TransitionOptions getHillshadeHighlightColorTransition() {
@@ -244,7 +222,7 @@ public class HillshadeLayer extends Layer {
   /**
    * Set the HillshadeHighlightColor property transition options
    *
-   * @param options transition options for String
+   * @param options transition options for String[]
    */
   public void setHillshadeHighlightColorTransition(@NonNull TransitionOptions options) {
     checkThread();
@@ -301,9 +279,25 @@ public class HillshadeLayer extends Layer {
     nativeSetHillshadeAccentColorTransition(options.getDuration(), options.getDelay());
   }
 
+  /**
+   * Get the HillshadeMethod property
+   *
+   * @return property wrapper value around String
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<String> getHillshadeMethod() {
+    checkThread();
+    return (PropertyValue<String>) new PropertyValue("hillshade-method", nativeGetHillshadeMethod());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetHillshadeIlluminationDirection();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetHillshadeIlluminationAltitude();
 
   @NonNull
   @Keep
@@ -352,6 +346,10 @@ public class HillshadeLayer extends Layer {
 
   @Keep
   private native void nativeSetHillshadeAccentColorTransition(long duration, long delay);
+
+  @NonNull
+  @Keep
+  private native Object nativeGetHillshadeMethod();
 
   @Override
   @Keep
