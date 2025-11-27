@@ -2,16 +2,17 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
-#include <mbgl/shaders/color_relief_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-constexpr auto colorReliefShaderPrelude = R"(\n
+constexpr auto colorReliefShaderPrelude = R"(
+
 #define idColorReliefDrawableUBO        idDrawableReservedVertexOnlyUBO
 #define idColorReliefTilePropsUBO       idDrawableReservedFragmentOnlyUBO
 #define idColorReliefEvaluatedPropsUBO  layerUBOStartId
-\n)";
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Vulkan> {
@@ -24,132 +25,97 @@ struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto prelude = colorReliefShaderPrelude;
 
     static constexpr auto vertex = R"(
+
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-// Push Constant for UBO index (Vulkan pattern)
-layout(push_constant) uniform Constants {
-    int ubo_index;
-} constant;
-
-// Matches ColorReliefDrawableUBO
-struct ColorReliefDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefDrawableUBO) uniform ColorReliefDrawableUBO {
     mat4 matrix;
-};
+} drawable;
 
-// Drawable UBO Vector (Readonly Buffer)
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefDrawableUBO) readonly buffer ColorReliefDrawableUBOVector {
-    ColorReliefDrawableUBO drawable_ubo[];
-} drawableVector;
-
-// Matches ColorReliefTilePropsUBO
-struct ColorReliefTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefTilePropsUBO) uniform ColorReliefTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     int color_ramp_size;
     float pad_tile0;
-};
-
-// Tile Props UBO Vector (Readonly Buffer)
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefTilePropsUBO) readonly buffer ColorReliefTilePropsUBOVector {
-    ColorReliefTilePropsUBO tileProps_ubo[];
-} tilePropsVector;
+} tileProps;
 
 layout(location = 0) out vec2 frag_position;
 
 void main() {
-    const ColorReliefDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-    const ColorReliefTilePropsUBO tileProps = tilePropsVector.tileProps_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
-
-    highp vec2 a_pos = vec2(in_texture_position);
+    applySurfaceTransform();
 
     highp vec2 epsilon = 1.0 / tileProps.dimension;
     float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    frag_position = (a_pos / 8192.0) * scale + epsilon;
+    frag_position = (vec2(in_position) / 8192.0) * scale + epsilon;
 
-    // Handle poles
-    if (a_pos.y < -32767.5) frag_position.y = 0.0;
-    if (a_pos.y > 32766.5) frag_position.y = 1.0;
+    // Handle poles (use in_position to match GLSL a_pos)
+    if (float(in_position.y) < -32767.5) frag_position.y = 0.0;
+    if (float(in_position.y) > 32766.5) frag_position.y = 1.0;
 }
-)"_glsl;
+)";
 
     static constexpr auto fragment = R"(
-#if defined(GL_ES) && defined(VULKAN)
-precision highp float;
-#endif
-
-// Push Constant for UBO index (Vulkan pattern)
-layout(push_constant) uniform Constants {
-    int ubo_index;
-} constant;
-
-// Matches ColorReliefTilePropsUBO
-struct ColorReliefTilePropsUBO {
-    vec4 unpack;
-    vec2 dimension;
-    int color_ramp_size;
-    float pad_tile0;
-};
-
-// Tile Props UBO Vector (Readonly Buffer)
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefTilePropsUBO) readonly buffer ColorReliefTilePropsUBOVector {
-    ColorReliefTilePropsUBO tileProps_ubo[];
-} tilePropsVector;
-
-// Matches ColorReliefEvaluatedPropsUBO
-struct ColorReliefEvaluiefEvaluatedPropsUBO {
-    float opacity;
-    float pad_eval0;
-    float pad_eval1;
-    float pad_eval2;
-};
-
-// Evaluated Props UBO Vector (Readonly Buffer)
-layout(std140, set = LAYER_SET_INDEX, binding = idColorReliefEvaluatedPropsUBO) readonly buffer ColorReliefEvaluatedPropsUBOVector {
-    ColorReliefEvaluatedPropsUBO props_ubo[];
-} propsVector;
-
-
-layout(set = BINDINGS_SET_INDEX, binding = 0) uniform sampler2D u_image;
-layout(set = BINDINGS_SET_INDEX, binding = 1) uniform sampler2D u_elevation_stops;
-layout(set = BINDINGS_SET_INDEX, binding = 2) uniform sampler2D u_color_stops;
 
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-float getElevation(vec2 coord, const vec4 unpack) {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefTilePropsUBO) uniform ColorReliefTilePropsUBO {
+    vec4 unpack;
+    vec2 dimension;
+    int color_ramp_size;
+    float pad_tile0;
+} tileProps;
+
+layout(set = LAYER_SET_INDEX, binding = idColorReliefEvaluatedPropsUBO) uniform ColorReliefEvaluatedPropsUBO {
+    float opacity;
+    float pad_eval0;
+    float pad_eval1;
+    float pad_eval2;
+} props;
+
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D elevation_stops_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D color_stops_sampler;
+
+float getElevation(vec2 coord) {
     // Convert encoded elevation value to meters
-    vec4 data = texture(u_image, coord) * 255.0;
+    vec4 data = texture(image_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, unpack);
+    return dot(data, tileProps.unpack);
 }
 
-float getElevationStop(int stop, const int color_ramp_size) {
+float getElevationStop(int stop) {
     // Elevation stops are plain float values, not terrain-RGB encoded
-    float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return texture(u_elevation_stops, vec2(x, 0.0)).r;
+    float x = (float(stop) + 0.5) / float(tileProps.color_ramp_size);
+    return texture(elevation_stops_sampler, vec2(x, 0.0)).r;
 }
 
-vec4 getColorStop(int stop, const int color_ramp_size) {
-    float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return texture(u_color_stops, vec2(x, 0.0));
+vec4 getColorStop(int stop) {
+    float x = (float(stop) + 0.5) / float(tileProps.color_ramp_size);
+    return texture(color_stops_sampler, vec2(x, 0.0));
 }
 
 void main() {
-    const ColorReliefTilePropsUBO tileProps = tilePropsVector.tileProps_ubo[constant.ubo_index];
-    const ColorReliefEvaluatedPropsUBO props = propsVector.props_ubo[constant.ubo_index];
-    
-    float el = getElevation(frag_position, tileProps.unpack);
 
-    // Binary search for color stops
-    int r = (tileProps.color_ramp_size - 1);
+#if defined(OVERDRAW_INSPECTOR)
+    out_color = vec4(1.0);
+    return;
+#endif
+
+    float el = getElevation(frag_position);
+
+    // Binary search to find surrounding elevation stops (l and r indices)
+    int r = tileProps.color_ramp_size - 1;
     int l = 0;
 
+    // Perform binary search
     while (r - l > 1) {
         int m = (r + l) / 2;
-        float el_m = getElevationStop(m, tileProps.color_ramp_size);
+        float el_m = getElevationStop(m);
+        
         if (el < el_m) {
             r = m;
         } else {
@@ -157,21 +123,19 @@ void main() {
         }
     }
 
-    // Get elevation values for interpolation
-    float el_l = getElevationStop(l, tileProps.color_ramp_size);
-    float el_r = getElevationStop(r, tileProps.color_ramp_size);
+    // Get elevation values and colors at the stops
+    float el_l = getElevationStop(l);
+    float el_r = getElevationStop(r);
 
-    // Get color values for interpolation
-    vec4 color_l = getColorStop(l, tileProps.color_ramp_size);
-    vec4 color_r = getColorStop(r, tileProps.color_ramp_size);
+    vec4 color_l = getColorStop(l);
+    vec4 color_r = getColorStop(r);
 
-    // Interpolate
-    float t = (el - el_l) / (el_r - el_l);
-    vec4 color = mix(color_l, color_r, t);
-
-    out_color = color * props.opacity;
+    // Interpolate color based on elevation
+    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
+    
+    out_color = props.opacity * mix(color_l, color_r, t);
 }
-)"_glsl;
+)";
 };
 
 } // namespace shaders

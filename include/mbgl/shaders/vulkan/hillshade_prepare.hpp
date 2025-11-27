@@ -2,7 +2,6 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
-#include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp> // Include the UBO definition
 
 namespace mbgl {
 namespace shaders {
@@ -10,7 +9,7 @@ namespace shaders {
 constexpr auto hillshadePrepareShaderPrelude = R"(
 
 #define idHillshadePrepareDrawableUBO       idDrawableReservedVertexOnlyUBO
-#define idHillshadePrepareTilePropsUBO      drawableReservedUBOCount // Next available UBO index
+#define idHillshadePrepareTilePropsUBO      drawableReservedUBOCount
 
 )";
 
@@ -28,78 +27,60 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(push_constant) uniform Constants {
-    int ubo_index;
-} constant;
-
-// Matches HillshadePrepareDrawableUBO
-struct HillshadePrepareDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareDrawableUBO) uniform HillshadePrepareDrawableUBO {
     mat4 matrix;
-};
+} drawable;
 
-// Matches HillshadePrepareTilePropsUBO
-struct HillshadePrepareTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareTilePropsUBO) uniform HillshadePrepareTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     float zoom;
     float maxzoom;
-};
-
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareDrawableUBO) readonly buffer HillshadePrepareDrawableUBOVector {
-    HillshadePrepareDrawableUBO drawable_ubo[];
-} drawableVector;
-
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareTilePropsUBO) readonly buffer HillshadePrepareTilePropsUBOVector {
-    HillshadePrepareTilePropsUBO tileProps_ubo[];
-} tilePropsVector;
+} tileProps;
 
 layout(location = 0) out vec2 frag_position;
 
 void main() {
-    const HillshadePrepareDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-    const HillshadePrepareTilePropsUBO tileProps = tilePropsVector.tileProps_ubo[constant.ubo_index];
 
-    gl_Position = drawable.matrix * vec4(in_position, 0, 1);
+    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    applySurfaceTransform();
 
-    vec2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    frag_position = (vec2(in_texture_position) / 8192.0) * scale + epsilon;
+    const vec2 epsilon = vec2(1.0) / tileProps.dimension;
+    const float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    frag_position = in_texture_position / 8192.0 * scale + epsilon;
 }
 )";
+
     static constexpr auto fragment = R"(
 
 layout(location = 0) in vec2 frag_position;
+layout(location = 0) out vec4 out_color;
 
-layout(set = TEXTURE_SET_INDEX, binding = 0) uniform sampler2D u_image;
-
-layout(push_constant) uniform Constants {
-    int ubo_index;
-} constant;
-
-// Matches HillshadePrepareTilePropsUBO
-struct HillshadePrepareTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareTilePropsUBO) uniform HillshadePrepareTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     float zoom;
     float maxzoom;
-};
+} tileProps;
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareTilePropsUBO) readonly buffer HillshadePrepareTilePropsUBOVector {
-    HillshadePrepareTilePropsUBO tileProps_ubo[];
-} tilePropsVector;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
-float getElevation(vec2 coord, float bias) {
-    const HillshadePrepareTilePropsUBO tileProps = tilePropsVector.tileProps_ubo[constant.ubo_index];
+float getElevation(vec2 coord, float bias, sampler2D image_sampler, vec4 unpack) {
     // Convert encoded elevation value to meters
-    vec4 data = texture(u_image, coord) * 255.0;
+    vec4 data = texture(image_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, tileProps.unpack);
+    return dot(data, unpack);
 }
 
 void main() {
-    const HillshadePrepareTilePropsUBO tileProps = tilePropsVector.tileProps_ubo[constant.ubo_index];
-    vec2 epsilon = 1.0 / tileProps.dimension;
-    float tileSize = tileProps.dimension.x - 2.0;
+
+#if defined(OVERDRAW_INSPECTOR)
+    out_color = vec4(1.0);
+    return;
+#endif
+
+    const vec2 epsilon = 1.0 / tileProps.dimension;
+    const float tileSize = tileProps.dimension.x - 2.0;
 
     // queried pixels (using Sobel operator kernel):
     // +-----------+
@@ -116,15 +97,15 @@ void main() {
     // |   |   |   |
     // +-----------+
 
-    float a = getElevation(frag_position + vec2(-epsilon.x, -epsilon.y), 0.0);
-    float b = getElevation(frag_position + vec2(0, -epsilon.y), 0.0);
-    float c = getElevation(frag_position + vec2(epsilon.x, -epsilon.y), 0.0);
-    float d = getElevation(frag_position + vec2(-epsilon.x, 0), 0.0);
-  //float e = getElevation(frag_position, 0.0);
-    float f = getElevation(frag_position + vec2(epsilon.x, 0), 0.0);
-    float g = getElevation(frag_position + vec2(-epsilon.x, epsilon.y), 0.0);
-    float h = getElevation(frag_position + vec2(0, epsilon.y), 0.0);
-    float i = getElevation(frag_position + vec2(epsilon.x, epsilon.y), 0.0);
+    float a = getElevation(frag_position + vec2(-epsilon.x, -epsilon.y), 0.0, image_sampler, tileProps.unpack);
+    float b = getElevation(frag_position + vec2(0, -epsilon.y), 0.0, image_sampler, tileProps.unpack);
+    float c = getElevation(frag_position + vec2(epsilon.x, -epsilon.y), 0.0, image_sampler, tileProps.unpack);
+    float d = getElevation(frag_position + vec2(-epsilon.x, 0), 0.0, image_sampler, tileProps.unpack);
+  //float e = getElevation(frag_position, 0.0, image_sampler, tileProps.unpack);
+    float f = getElevation(frag_position + vec2(epsilon.x, 0), 0.0, image_sampler, tileProps.unpack);
+    float g = getElevation(frag_position + vec2(-epsilon.x, epsilon.y), 0.0, image_sampler, tileProps.unpack);
+    float h = getElevation(frag_position + vec2(0, epsilon.y), 0.0, image_sampler, tileProps.unpack);
+    float i = getElevation(frag_position + vec2(epsilon.x, epsilon.y), 0.0, image_sampler, tileProps.unpack);
 
     // Convert the raw pixel-space derivative (slope) into world-space slope.
     // The conversion factor is: tileSize / (8 * meters_per_pixel).
@@ -135,18 +116,16 @@ void main() {
     vec2 deriv = vec2(
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
-    ) * tileSize / pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 28.2562 - tileProps.zoom); 
+    ) * tileSize / pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 28.2562 - tileProps.zoom);
 
     // Encode the derivative into the color channels (r and g)
     // The derivative is scaled from world-space slope to the range [0, 1] for texture storage.
-    fragColor = clamp(vec4(
+    // The maximum possible world-space derivative is assumed to be 4 (hence division by 8.0).
+    out_color = clamp(vec4(
         deriv.x / 8.0 + 0.5,
         deriv.y / 8.0 + 0.5,
         1.0,
         1.0), 0.0, 1.0);
-#ifdef OVERDRAW_INSPECTOR
-    fragColor = vec4(1.0);
-#endif
 }
 )";
 };
