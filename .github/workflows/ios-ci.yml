@@ -261,7 +261,9 @@ jobs:
 
       - name: Build XCFramework (Static)
         # for now, just build it TODO: make a static framework release
-        run: bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
+        run: |
+          bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
+          echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.static)" >> "$GITHUB_ENV"
 
       - name: Create .zip with debug symbols
         if: env.make_release
@@ -317,8 +319,11 @@ jobs:
         if: env.make_release
         run: |
           cp ${{ env.xcframework }} MapLibre.dynamic.xcframework.zip
+          cp ${{ env.xcframework_static }} MapLibre.static.xcframework.zip
           chmod +w MapLibre.dynamic.xcframework.zip
+          chmod +w MapLibre.static.xcframework.zip
           zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
+          zip MapLibre.static.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
 
       - name: Release (GitHub) - Create Draft
@@ -329,6 +334,7 @@ jobs:
           name: ios-v${{ env.version }}
           files: |
             MapLibre.dynamic.xcframework.zip
+            MapLibre.static.xcframework.zip
             ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ github.event.inputs.release == 'pre' }}
@@ -360,7 +366,7 @@ jobs:
             -d '{"ref":"main","inputs":{
               "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
               "version":"${{ env.version }}",
-              "download_url": "https://github.com/maplibre/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"'
+              "download_url": "https://github.com/maplibre/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"}}'
 
       - run: npm install
         working-directory: .
