@@ -23,13 +23,11 @@ public:
 
     std::optional<std::string> getAttribution() const final;
 
-    bool isUpdateSynchronous() const final { return updateSynchronouslyFlag; }
-    void setUpdateSynchronous(bool set) final { updateSynchronouslyFlag = set; }
+    bool isUpdateSynchronous() const final;
 
 private:
     Immutable<GeoJSONOptions> options;
     std::shared_ptr<GeoJSONData> data;
-    bool updateSynchronouslyFlag = false;
 };
 
 } // namespace style

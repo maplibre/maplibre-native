@@ -144,8 +144,7 @@ GeoJSONSource::Impl::Impl(std::string id_, Immutable<GeoJSONOptions> options_)
 GeoJSONSource::Impl::Impl(const GeoJSONSource::Impl& other, std::shared_ptr<GeoJSONData> data_)
     : Source::Impl(other),
       options(other.options),
-      data(std::move(data_)),
-      updateSynchronouslyFlag(other.updateSynchronouslyFlag) {}
+      data(std::move(data_)) {}
 
 GeoJSONSource::Impl::~Impl() = default;
 
@@ -159,6 +158,10 @@ std::weak_ptr<GeoJSONData> GeoJSONSource::Impl::getData() const {
 
 std::optional<std::string> GeoJSONSource::Impl::getAttribution() const {
     return {};
+}
+
+bool GeoJSONSource::Impl::isUpdateSynchronous() const {
+    return options->synchronousUpdate;
 }
 
 } // namespace style

@@ -318,8 +318,7 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   }
 
   private void addLocationSource() {
-    locationSource = layerSourceProvider.generateSource(locationFeature);
-    locationSource.setUpdateSynchronous(true);
+    locationSource = layerSourceProvider.generateSource(locationFeature, true);
     style.addSource(locationSource);
   }
 

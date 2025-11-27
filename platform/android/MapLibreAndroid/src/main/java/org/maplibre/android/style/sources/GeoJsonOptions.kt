@@ -131,4 +131,9 @@ class GeoJsonOptions : HashMap<String?, Any?>() {
         this["clusterProperties"] = properties
         return this
     }
+
+    fun withSynchronousUpdate(value: Boolean): GeoJsonOptions {
+        this["synchronousUpdate"] = value
+        return this
+    }
 }

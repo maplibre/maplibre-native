@@ -28,10 +28,10 @@ public:
 
     bool isVolatile() const { return volatileFlag; }
     void setVolatile(bool set) { volatileFlag = set; }
-    virtual bool isUpdateSynchronous() const { return false; }
-    virtual void setUpdateSynchronous(bool) {}
     const SourceType type;
     const std::string id;
+
+    virtual bool isUpdateSynchronous() const { return false; }
 
 protected:
     std::optional<uint8_t> prefetchZoomDelta;

@@ -229,7 +229,7 @@ class GeoJsonSource : Source {
 
     /**
      * Updates the GeoJson with a single feature.
-     * The update is performed synchronously or asynchronously, based on the source synchronous flag.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
      *
      * @param feature the GeoJSON [Feature] to set
      */
@@ -238,16 +238,17 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isUpdateSynchronous()) {
-            setGeoJsonSync(feature)
+        checkThread()
+        if (nativeIsUpdateSynchronous()) {
+            nativeSetFeatureSync(feature)
         } else {
-            setGeoJsonAsync(feature)
+            nativeSetFeature(feature)
         }
     }
 
     /**
      * Updates the GeoJson with a single geometry.
-     * The update is performed synchronously or asynchronously, based on the source synchronous flag.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
@@ -256,16 +257,17 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isUpdateSynchronous()) {
-            setGeoJsonSync(geometry)
+        checkThread()
+        if (nativeIsUpdateSynchronous()) {
+            nativeSetGeometrySync(geometry)
         } else {
-            setGeoJsonAsync(geometry)
+            nativeSetGeometry(geometry)
         }
     }
 
     /**
      * Updates the GeoJson.
-     * The update is performed synchronously or asynchronously, based on the source synchronous flag.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
@@ -273,61 +275,37 @@ class GeoJsonSource : Source {
         if (detached) {
             return
         }
-        if (isUpdateSynchronous()) {
-            setGeoJsonSync(featureCollection)
-        } else {
-            setGeoJsonAsync(featureCollection)
-        }
-    }
-
-    /**
-     * Updates the GeoJson with a single feature. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
-     *
-     * @param feature the GeoJSON [Feature] to set
-     */
-    fun setGeoJsonAsync(feature: Feature?) {
-        if (detached) {
-            return
-        }
         checkThread()
-        nativeSetFeature(feature)
-    }
-
-    /**
-     * Updates the GeoJson with a single geometry. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
-     *
-     * @param geometry the GeoJSON [Geometry] to set
-     */
-    fun setGeoJsonAsync(geometry: Geometry?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetGeometry(geometry)
-    }
-
-    /**
-     * Updates the GeoJson. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
-     *
-     * @param featureCollection the GeoJSON FeatureCollection
-     */
-    fun setGeoJsonAsync(featureCollection: FeatureCollection?) {
-        if (detached) {
-            return
-        }
-        checkThread()
+        var featureCollection = featureCollection
         if (featureCollection != null && featureCollection.features() != null) {
             val features = featureCollection.features()
             val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
+            featureCollection = FeatureCollection.fromFeatures(featuresCopy)
+        }
+        if (nativeIsUpdateSynchronous()) {
+            nativeSetFeatureCollectionSync(featureCollection)
         } else {
             nativeSetFeatureCollection(featureCollection)
         }
     }
 
+    /**
+     * Updates the GeoJson.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     *
+     * @param json the raw GeoJson FeatureCollection string
+     */
+    fun setGeoJson(json: String) {
+        if (detached) {
+            return
+        }
+        checkThread()
+        if (nativeIsUpdateSynchronous()) {
+            nativeSetGeoJsonStringSync(json)
+        } else {
+            nativeSetGeoJsonString(json)
+        }
+    }
 
     /**
      * Updates the GeoJson with a single feature. The update is performed synchronously,
@@ -335,6 +313,7 @@ class GeoJsonSource : Source {
      *
      * @param feature the GeoJSON [Feature] to set
      */
+    @Deprecated("use {@link #setGeoJson(Feature} instead.")
     fun setGeoJsonSync(feature: Feature?) {
         if (detached) {
             return
@@ -349,6 +328,7 @@ class GeoJsonSource : Source {
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
+    @Deprecated("use {@link #setGeoJson(Geometry} instead.")
     fun setGeoJsonSync(geometry: Geometry?) {
         if (detached) {
             return
@@ -363,6 +343,7 @@ class GeoJsonSource : Source {
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
+    @Deprecated("use {@link #setGeoJson(FeatureCollection} instead.")
     fun setGeoJsonSync(featureCollection: FeatureCollection?) {
         if (detached) {
             return
@@ -378,25 +359,12 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
-     *
-     * @param json the raw GeoJson FeatureCollection string
-     */
-    fun setGeoJson(json: String) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetGeoJsonString(json)
-    }
-
-    /**
      * Updates the GeoJson. The update is performed synchronously,
      * so the data will be immediately visible and available to query when this method returns.
      *
      * @param json the raw GeoJson FeatureCollection string
      */
+    @Deprecated("use {@link #setGeoJson(String} instead.")
     fun setGeoJsonSync(json: String) {
         if (detached) {
             return
@@ -573,29 +541,6 @@ class GeoJsonSource : Source {
     fun getClusterExpansionZoom(cluster: Feature): Int {
         checkThread()
         return nativeGetClusterExpansionZoom(cluster)
-    }
-
-    /**
-     * Retrieve whether or not the fetched tiles for the given source
-     * should be synchronously updated on the render thread
-     *
-     * @return true if tiles are synchronously updated on the render thread,
-     * false if they will be async updated. Default value is false.
-     */
-    fun isUpdateSynchronous(): Boolean {
-        checkThread()
-        return nativeIsUpdateSynchronous();
-    }
-
-    /**
-     * Set a flag defining whether or not the fetched tiles for the given source
-     * should be synchronously updated on the render thread
-     *
-     * @param value current setting for synchronous.
-     */
-    fun setUpdateSynchronous(value: Boolean) {
-        checkThread()
-        nativeSetUpdateSynchronous(value);
     }
 
     @Keep

@@ -35,6 +35,9 @@ struct GeoJSONOptions {
     using ClusterProperties = std::map<std::string, ClusterExpression>;
     ClusterProperties clusterProperties;
 
+    // Update options
+    bool synchronousUpdate = false;
+
     static Immutable<GeoJSONOptions> defaultOptions();
 };
 class GeoJSONData {
@@ -77,8 +80,6 @@ public:
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     bool isUpdateSynchronous() const noexcept;
-    void setUpdateSynchronous(bool) noexcept;
-
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
