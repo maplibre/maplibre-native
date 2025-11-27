@@ -2,7 +2,7 @@ module(name = "maplibre")
 
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "rules_apple", version = "4.2.0")
+bazel_dep(name = "rules_apple", version = "4.3.2")
 bazel_dep(name = "rules_swift", version = "3.3.0")
 bazel_dep(name = "rules_xcodeproj", version = "3.3.0")
 bazel_dep(name = "aspect_rules_js", version = "2.8.1")
@@ -81,12 +81,6 @@ git_override(
     module_name = "cxx.rs",
     remote = "https://github.com/dtolnay/cxx.git",
     tag = "1.0.157",
-)
-
-git_override(
-    module_name = "rules_apple",
-    commit = "5005493",
-    remote = "https://github.com/louwers/rules_apple.git",
 )
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
