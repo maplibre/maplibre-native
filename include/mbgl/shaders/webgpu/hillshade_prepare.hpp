@@ -70,7 +70,7 @@ struct HillshadePrepareTilePropsUBO {
 fn getElevation(coord: vec2<f32>) -> f32 {
     var data = textureSample(dem_texture, texture_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, tileProps.unpack) / 4.0;
+    return dot(data, tileProps.unpack);
 }
 
 @fragment
@@ -80,6 +80,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 #endif
 
     let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
+    let tileSize = tileProps.dimension.x - 2.0;
 
     let a = getElevation(in.tex_coord + vec2<f32>(-epsilon.x, -epsilon.y));
     let b = getElevation(in.tex_coord + vec2<f32>(0.0, -epsilon.y));
@@ -98,12 +99,12 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         exaggeration = 0.4;
     }
 
-    let denom = pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 19.2562 - tileProps.zoom);
+    let denom = pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 28.2562 - tileProps.zoom);
     let deriv = vec2<f32>((c + f + f + i) - (a + d + d + g),
-                          (g + h + h + i) - (a + b + b + c)) / denom;
+                          (g + h + h + i) - (a + b + b + c)) * tileSize / denom;
 
-    let color = clamp(vec4<f32>(deriv.x / 2.0 + 0.5,
-                                 deriv.y / 2.0 + 0.5,
+    let color = clamp(vec4<f32>(deriv.x / 8.0 + 0.5,
+                                 deriv.y / 8.0 + 0.5,
                                  1.0,
                                  1.0),
                       vec4<f32>(0.0, 0.0, 0.0, 0.0),
