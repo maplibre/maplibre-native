@@ -154,7 +154,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
         }
         geoJSONOptions->lineMetrics = value.boolValue;
     }
-    
+
     if (NSNumber *value = options[MLNShapeSourceOptionSynchronousUpdate]) {
         if (![value isKindOfClass:[NSNumber class]]) {
             [NSException raise:NSInvalidArgumentException

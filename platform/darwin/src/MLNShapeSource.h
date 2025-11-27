@@ -164,8 +164,8 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionSimp
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLineDistanceMetrics;
 
 /**
- An `NSNumber` object containing a Boolean flag defining whether or not the fetched tiles for the given source
- should be synchronously updated on the render thread. The default value is `NO`.
+ An `NSNumber` object containing a Boolean flag defining whether or not the fetched tiles for the
+ given source should be synchronously updated on the render thread. The default value is `NO`.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionSynchronousUpdate;
 
