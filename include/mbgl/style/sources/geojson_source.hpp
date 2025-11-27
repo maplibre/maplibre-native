@@ -80,6 +80,7 @@ public:
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     bool isUpdateSynchronous() const noexcept;
+
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
