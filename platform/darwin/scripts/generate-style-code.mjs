@@ -647,7 +647,10 @@ global.describeValue = function (value, property, layerType) {
             return 'a `UIColor`' + ` object whose RGB value is ${formatNumber(color.r)}, ${formatNumber(color.g)}, ${formatNumber(color.b)} and whose alpha value is ${formatNumber(color.a)}`;
 
         case 'numberArray':
-            return 'an array containing the numeric values `' + value.map(formatNumber).join('`, `') + '`';
+            if (Array.isArray(value)) {
+                return 'an array containing the numeric values `' + value.map(formatNumber).join('`, `') + '`';
+            }
+            return 'an array of numeric values';
         case 'colorArray':
             return 'an array of `UIColor` objects';
 
