@@ -944,7 +944,7 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryPointAnnotations(JNIEnv& env, 
     };
 
     // Assume only points for now
-    mbgl::AnnotationIDs ids = rendererFrontend->queryPointAnnotations(box);
+    mbgl::AnnotationIDs ids = rendererFrontend->queryPointAnnotations(box, annotationRequestTimeout);
 
     // Convert result
     std::vector<jlong> longIds(ids.begin(), ids.end());
@@ -964,7 +964,7 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryShapeAnnotations(JNIEnv& env, 
         {RectF::getRight(env, rect), RectF::getBottom(env, rect)},
     };
 
-    mbgl::AnnotationIDs ids = rendererFrontend->queryShapeAnnotations(box);
+    mbgl::AnnotationIDs ids = rendererFrontend->queryShapeAnnotations(box, annotationRequestTimeout);
 
     // Convert result
     std::vector<jlong> longIds(ids.begin(), ids.end());
@@ -1320,6 +1320,14 @@ void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
     map->enableRenderingStatsView(value);
 }
 
+void NativeMapView::setFrustumOffset(JNIEnv& env, const jni::Object<RectF>& padding) {
+    mbgl::EdgeInsets offset = {RectF::getTop(env, padding),
+                               RectF::getLeft(env, padding),
+                               RectF::getBottom(env, padding),
+                               RectF::getRight(env, padding)};
+    map->setFrustumOffset(offset);
+}
+
 // Static methods //
 
 void NativeMapView::registerNative(jni::JNIEnv& env) {
@@ -1442,7 +1450,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
         METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
         METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
-        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"));
+        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
+        METHOD(&NativeMapView::setFrustumOffset, "nativeSetFrustumOffset"));
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};

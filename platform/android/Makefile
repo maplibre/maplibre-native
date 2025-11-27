@@ -59,7 +59,7 @@ MLN_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.bu
 # Generate code based on the style specification
 .PHONY: android-style-code
 android-style-code:
-	node scripts/generate-style-code.js
+	node scripts/generate-style-code.mjs
 style-code: android-style-code
 
 define ANDROID_RULES

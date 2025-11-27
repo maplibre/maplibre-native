@@ -14,7 +14,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
@@ -27,7 +27,7 @@ jobs:
             vendor/maplibre-native-base/deps/geometry.hpp/include \
             vendor/maplibre-native-base/deps/geojson.hpp/include \
             vendor/metal-cpp \
-            vendor/maplibre-native-base/extras/expected-lite/include
+            vendor/expected-lite/include
 
       - name: Create Release
         if: github.event_name == 'workflow_dispatch'
@@ -45,7 +45,7 @@ jobs:
     needs: [create-release]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
@@ -57,17 +57,17 @@ jobs:
 
       - name: Build mbgl-core for macOS
         run: |
-          cmake --preset macos -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
-          cmake --build build-macos --target mbgl-core
+          cmake --preset macos-metal -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
+          cmake --build build-macos-metal --target mbgl-core
 
       - name: Rename artifact
         run: |
-          cp build-macos/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
-          cp build-macos/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
 
       - name: Upload macOS artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: macos-metal-build
           path: |
@@ -97,7 +97,7 @@ jobs:
           - renderer: vulkan
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload Linux artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}-build
           path: |
@@ -145,7 +145,7 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload Windows artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: windows-${{ matrix.renderer }}-build
           path: |

@@ -32,22 +32,23 @@
     [super viewDidLoad];
 
     // Start snapshotters
-    topLeftSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewTL coordinates:CLLocationCoordinate2DMake(37.7184, -122.4365)];
-    topCenterSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewTM coordinates:CLLocationCoordinate2DMake(38.8936, -77.0146)];
-    topRightSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewTR coordinates:CLLocationCoordinate2DMake(-13.1356, -74.2442)];
+    topLeftSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewTL coordinates:CLLocationCoordinate2DMake(37.7184, -122.4365) hideAttribution:YES];
+    topCenterSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewTM coordinates:CLLocationCoordinate2DMake(38.8936, -77.0146) hideAttribution:NO];
+    topRightSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewTR coordinates:CLLocationCoordinate2DMake(-13.1356, -74.2442) hideAttribution:YES];
 
-    bottomLeftSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewBL coordinates:CLLocationCoordinate2DMake(52.5072, 13.4247)];
-    bottomCenterSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewBM coordinates:CLLocationCoordinate2DMake(60.2118, 24.6754)];
-    bottomRightSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewBR coordinates:CLLocationCoordinate2DMake(31.2780, 121.4286)];
+    bottomLeftSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewBL coordinates:CLLocationCoordinate2DMake(52.5072, 13.4247) hideAttribution:NO];
+    bottomCenterSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewBM coordinates:CLLocationCoordinate2DMake(60.2118, 24.6754) hideAttribution:YES];
+    bottomRightSnapshotter = [self startSnapshotterForImageView:_snapshotImageViewBR coordinates:CLLocationCoordinate2DMake(31.2780, 121.4286) hideAttribution:NO];
 }
 
-- (MLNMapSnapshotter*) startSnapshotterForImageView:(UIImageView*) imageView coordinates:(CLLocationCoordinate2D) coordinates  {
+- (MLNMapSnapshotter*) startSnapshotterForImageView:(UIImageView*) imageView coordinates:(CLLocationCoordinate2D) coordinates hideAttribution:(BOOL) hideAttribution {
     // Create snapshot options
     MLNMapCamera* mapCamera = [[MLNMapCamera alloc] init];
     mapCamera.pitch = 20;
     mapCamera.centerCoordinate = coordinates;
-    MLNMapSnapshotOptions* options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:[[MLNStyle predefinedStyle:@"Hybrid"] url] camera:mapCamera size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height)];
+    MLNMapSnapshotOptions* options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:[NSURL URLWithString:@"https://tiles.openfreemap.org/styles/liberty"] camera:mapCamera size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height)];
     options.zoomLevel = 10;
+    options.showsAttribution = !hideAttribution;
 
     // Create and start the snapshotter
     __weak UIImageView *weakImageView = imageView;

@@ -7,8 +7,9 @@
 namespace mbgl {
 namespace style {
 
-struct RasterDEMOptions {
-    std::optional<Tileset::DEMEncoding> encoding = std::nullopt;
+struct SourceOptions {
+    std::optional<Tileset::RasterEncoding> rasterEncoding = std::nullopt;
+    std::optional<Tileset::VectorEncoding> vectorEncoding = std::nullopt;
 };
 
 // NOTE: Any derived class must invalidate `weakFactory` in the destructor
@@ -17,7 +18,7 @@ public:
     RasterDEMSource(std::string id,
                     variant<std::string, Tileset> urlOrTileset,
                     uint16_t tileSize,
-                    std::optional<RasterDEMOptions> options = std::nullopt);
+                    std::optional<SourceOptions> options = std::nullopt);
     ~RasterDEMSource() override;
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
@@ -25,7 +26,7 @@ protected:
     void setTilesetOverrides(Tileset& tileset) override;
 
 private:
-    std::optional<RasterDEMOptions> options;
+    std::optional<SourceOptions> options;
 };
 
 template <>

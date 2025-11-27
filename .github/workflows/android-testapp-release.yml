@@ -10,14 +10,14 @@ jobs:
   create-android-testapp-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           persist-credentials: false
 
       - name: Create Release
         run: |
           gh release create android-testapp-${{ github.sha }} \
-            --draft=false \
+            --draft=true \
             --prerelease=false \
             --latest=false \
             --title android-testapp-${{ github.sha }}
@@ -43,7 +43,7 @@ jobs:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -58,8 +58,20 @@ jobs:
       - name: Upload debug symbols to sentry
         run: sentry-cli debug-files upload MapLibreAndroidTestApp
 
-      - name: Upload Linux artifact
+      - name: Upload test app
         run: |
           gh release upload android-testapp-${{ github.sha }} MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  finish-android-testapp-release:
+    needs: [android-build-testapp]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+
+      - name: Finalize release (set draft=false)
+        run: |
+          gh release edit android-testapp-${{ github.sha }} --draft=false
         env:
           GH_TOKEN: ${{ github.token }}

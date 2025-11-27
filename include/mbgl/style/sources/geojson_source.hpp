@@ -82,6 +82,7 @@ protected:
 private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
+    std::atomic<uint64_t> requestGeneration{0};
     std::shared_ptr<Scheduler> sequencedScheduler;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`
