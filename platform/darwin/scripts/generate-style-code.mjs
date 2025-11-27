@@ -206,6 +206,10 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
             return '@"%@", [MLNColor redColor]';
+        case 'numberArray':
+            return '@"{1, 2}"';
+        case 'colorArray':
+            return '@"%@", @[[MLNColor redColor], [MLNColor blueColor]]';
         case 'padding':
             return paddingTestValue();
         case 'variableAnchorOffsetCollection':
@@ -271,6 +275,10 @@ global.mbglTestValue = function (property, layerType) {
         }
         case 'color':
             return '{ 1, 0, 0, 1 }';
+        case 'numberArray':
+            return '{1, 2}';
+        case 'colorArray':
+            return '{ { 1, 0, 0, 1 }, { 0, 0, 1, 1 } }';
         case 'padding':
             return '{ 1, 1, 1, 1 }';
         case 'array':
@@ -348,6 +356,10 @@ global.testHelperMessage = function (property, layerType, isFunction) {
             return `testEnum${fnSuffix}:${objCEnum} type:@encode(${objCType})`;
         case 'color':
             return 'testColor' + fnSuffix;
+        case 'numberArray':
+            return 'testNumberArray' + fnSuffix;
+        case 'colorArray':
+            return 'testColorArray' + fnSuffix;
         case 'padding':
             return 'testPaddingType' + fnSuffix;
         case 'array':
@@ -532,6 +544,10 @@ global.describeType = function (property) {
             return '`MLN' + camelize(property.name) + '`';
         case 'color':
             return '`UIColor`';
+        case 'numberArray':
+            return 'numeric array';
+        case 'colorArray':
+            return '`UIColor` array';
         case 'padding':
             return '`UIEdgeInsets`';
         case 'array':
@@ -630,6 +646,11 @@ global.describeValue = function (value, property, layerType) {
             }
             return 'a `UIColor`' + ` object whose RGB value is ${formatNumber(color.r)}, ${formatNumber(color.g)}, ${formatNumber(color.b)} and whose alpha value is ${formatNumber(color.a)}`;
 
+        case 'numberArray':
+            return 'an array containing the numeric values `' + value.map(formatNumber).join('`, `') + '`';
+        case 'colorArray':
+            return 'an array of `UIColor` objects';
+
         case 'padding':
             return describePadding();
 
@@ -690,6 +711,10 @@ global.propertyType = function (property) {
             return 'NSValue *';
         case 'color':
             return 'MLNColor *';
+        case 'numberArray':
+            return 'NSArray<NSNumber *> *';
+        case 'colorArray':
+            return 'NSArray<MLNColor *> *';
         case 'padding':
             return 'NSValue *';
         case 'array':
@@ -742,6 +767,10 @@ global.valueTransformerArguments = function (property) {
             return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
             return ['mbgl::Color', objCType];
+        case 'numberArray':
+            return ['std::vector<float>', objCType, 'float'];
+        case 'colorArray':
+            return ['std::vector<mbgl::Color>', objCType, 'mbgl::Color'];
         case 'padding':
             return ['mbgl::Padding', objCType];
         case 'variableAnchorOffsetCollection':
@@ -801,6 +830,10 @@ global.mbglType = function(property) {
         }
         case 'color':
             return 'mbgl::Color';
+        case 'numberArray':
+            return 'std::vector<float>';
+        case 'colorArray':
+            return 'std::vector<mbgl::Color>';
         case 'padding':
             return 'mbgl::Padding';
         case 'variableAnchorOffsetCollection':
@@ -896,7 +929,7 @@ const layers = _(spec.layer.type.values).map((value, layerType) => {
 }).sortBy(['type']).value();
 
 function duplicatePlatformDecls(src) {
-    // Look for a documentation comment that contains “MLNColor” or “UIColor”
+    // Look for a documentation comment that contains "MLNColor" or "UIColor"
     // and the subsequent function, method, or property declaration. Try not to
     // match greedily.
     return src.replace(/(\/\*\*(?:\*[^\/]|[^*])*?\b(?:MLN|NS|UI)Color\b[\s\S]*?\*\/)(\s*.+?;)/g,
