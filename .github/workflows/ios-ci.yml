@@ -252,12 +252,16 @@ jobs:
         with:
           node-version-file: ".nvmrc"
 
-      - name: Build XCFramework
+      - name: Build XCFramework (Dynamic)
         if: env.make_release
         run: |
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
             --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+
+      - name: Build XCFramework (Static)
+        # for now, just build it TODO: make a static framework release
+        run: bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
 
       - name: Create .zip with debug symbols
         if: env.make_release
