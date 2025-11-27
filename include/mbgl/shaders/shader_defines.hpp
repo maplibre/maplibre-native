@@ -452,6 +452,7 @@ enum {
 
 enum {
     idColorReliefPosVertexAttribute,
+    idColorReliefTexturePosVertexAttribute,
     colorReliefVertexAttributeCount
 };
 
