@@ -313,7 +313,7 @@ class GeoJsonSource : Source {
      *
      * @param feature the GeoJSON [Feature] to set
      */
-    @Deprecated("use {@link #setGeoJson(Feature} instead.")
+    @Deprecated("use {@link #setGeoJson(Feature)} instead.")
     fun setGeoJsonSync(feature: Feature?) {
         if (detached) {
             return
@@ -328,7 +328,7 @@ class GeoJsonSource : Source {
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
-    @Deprecated("use {@link #setGeoJson(Geometry} instead.")
+    @Deprecated("use {@link #setGeoJson(Geometry)} instead.")
     fun setGeoJsonSync(geometry: Geometry?) {
         if (detached) {
             return
@@ -343,7 +343,7 @@ class GeoJsonSource : Source {
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
-    @Deprecated("use {@link #setGeoJson(FeatureCollection} instead.")
+    @Deprecated("use {@link #setGeoJson(FeatureCollection)} instead.")
     fun setGeoJsonSync(featureCollection: FeatureCollection?) {
         if (detached) {
             return
@@ -364,7 +364,7 @@ class GeoJsonSource : Source {
      *
      * @param json the raw GeoJson FeatureCollection string
      */
-    @Deprecated("use {@link #setGeoJson(String} instead.")
+    @Deprecated("use {@link #setGeoJson(String)} instead.")
     fun setGeoJsonSync(json: String) {
         if (detached) {
             return
@@ -590,9 +590,6 @@ class GeoJsonSource : Source {
 
     @Keep
     private external fun nativeIsUpdateSynchronous(): Boolean
-
-    @Keep
-    private external fun nativeSetUpdateSynchronous(value: Boolean)
 
     @Keep
     @Throws(Throwable::class)
