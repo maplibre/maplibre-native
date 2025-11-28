@@ -67,23 +67,6 @@ new_git_repository(
     remote = "https://github.com/tinyobjloader/tinyobjloader.git",
 )
 
-new_git_repository(
-    name = "maplibre-navigation-ios",
-    build_file = "platform/ios/vendor/maplibre-navigation-ios/maplibre-navigation-ios.BUILD",
-    #tag = "4.0.0",
-    commit = "f91faffa1aa03be16fc588dc5076b7811d1c5166",
-    patch_args = ["-p1"],
-    patches = ["platform/ios/vendor/maplibre-navigation-ios/maplibre-navigation-ios.patch"],
-    remote = "https://github.com/maplibre/maplibre-navigation-ios.git",
-)
-
-local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository")
-
-local_repository(
-    name = "maplibre-native",
-    path = "./",
-)
-
 swift_deps = use_extension("@rules_swift_package_manager//:extensions.bzl", "swift_deps")
 swift_deps.from_package(
     resolved = "platform/ios/app-swift/Package.resolved",
@@ -92,11 +75,7 @@ swift_deps.from_package(
 use_repo(
     swift_deps,
     "swift_package",
-    "swiftpkg_mapbox_directions_swift",
     "swiftpkg_sentry_cocoa",
-    "swiftpkg_solar",
-    "swiftpkg_swiftformat",
-    "swiftpkg_turf_swift",
 )
 
 darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_rule.bzl", "darwin_config")

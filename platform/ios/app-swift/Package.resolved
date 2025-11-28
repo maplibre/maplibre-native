@@ -1,57 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "mapbox-directions-swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/flitsmeister/mapbox-directions-swift",
-      "state" : {
-        "revision" : "6c19ecc4e1324887ae3250802b8d13d8d8b3ff2d",
-        "version" : "0.23.3"
-      }
-    },
-    {
-      "identity" : "polyline",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/raphaelmor/Polyline",
-      "state" : {
-        "revision" : "353f80378dcd8f17eefe8550090c6b1ae3c9da23",
-        "version" : "5.1.0"
-      }
-    },
-    {
       "identity" : "sentry-cocoa",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "156495496cb101e2f0a6b059f12dafcff1912197",
-        "version" : "8.54.0"
-      }
-    },
-    {
-      "identity" : "solar",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ceeK/Solar.git",
-      "state" : {
-        "revision" : "c2b96f2d5fb7f835b91cefac5e83101f54643901",
-        "version" : "3.0.1"
-      }
-    },
-    {
-      "identity" : "swiftformat",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nicklockwood/SwiftFormat.git",
-      "state" : {
-        "revision" : "b83a8f132ff5430f3b6ff7d912baa407caea9e29",
-        "version" : "0.57.2"
-      }
-    },
-    {
-      "identity" : "turf-swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mapbox/turf-swift.git",
-      "state" : {
-        "revision" : "213050191cfcb3d5aa76e1fa90c6ff1e182a42ca",
-        "version" : "2.8.0"
+        "revision" : "8627bbc0e663238d516b541d8fc7edd62a627fde",
+        "version" : "8.57.3"
       }
     }
   ],

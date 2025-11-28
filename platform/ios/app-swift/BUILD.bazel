@@ -32,8 +32,7 @@ swift_library(
     module_name = "Sources",
     tags = ["manual"],
     deps = [
-        #"//platform:ios-sdk",
-        "@maplibre-navigation-ios",
+        "//platform:ios-sdk",
         "@swiftpkg_sentry_cocoa//:Sentry",
     ],
 )

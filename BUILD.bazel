@@ -144,7 +144,6 @@ cc_library(
         "//vendor:eternal",
         "//vendor:expected-lite",
         "//vendor:maplibre-native-base",
-        "//vendor/maplibre-tile-spec/cpp:mlt_cpp",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",
@@ -155,6 +154,7 @@ cc_library(
         "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
+        "//vendor/maplibre-tile-spec/cpp:mlt_cpp",
     ] + select({
         "@platforms//os:ios": [
             "//vendor:ghc_filesystem",
@@ -192,7 +192,7 @@ cc_library(
 
 string_flag(
     name = "renderer",
-    build_setting_default = "metal",
+    build_setting_default = "drawable",
     values = [
         "drawable",
         "metal",
