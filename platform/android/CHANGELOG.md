@@ -1,5 +1,10 @@
 # Changelog MapLibre Native for Android
 
+## 12.3.0-pre0
+
+- Disable icon scaling with offsets [#3928](https://github.com/maplibre/maplibre-native/pull/3928).
+- Modify the transform implementation to allow for concurrent animations [#3487](https://github.com/maplibre/maplibre-native/pull/3487).
+
 ## 12.2.0
 
 ### ✨ Features and improvements
