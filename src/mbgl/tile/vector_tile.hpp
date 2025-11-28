@@ -15,7 +15,7 @@ public:
                const TileParameters&,
                const Tileset&,
                TileObserver* observer = nullptr);
-    virtual ~VectorTile() override;
+    ~VectorTile() override;
 
     void setNecessity(TileNecessity) final;
     void setUpdateParameters(const TileUpdateParameters&) final;
