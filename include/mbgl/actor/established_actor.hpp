@@ -31,7 +31,8 @@ public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
     template <typename U = Object, class... Args>
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
-        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...> || std::is_constructible_v<U, std::weak_ptr<Mailbox>, Args...>)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...> ||
+                 std::is_constructible_v<U, std::weak_ptr<Mailbox>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
@@ -40,7 +41,8 @@ public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
     template <typename U = Object, class... Args>
     EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
-        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...> || std::is_constructible_v<U, std::weak_ptr<Mailbox>, Args...>)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...> ||
+                 std::is_constructible_v<U, std::weak_ptr<Mailbox>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
@@ -75,7 +77,7 @@ private:
     {
         new (&parent.objectStorage) Object(parent.mailbox, std::forward<Args>(args_)...);
     }
-    
+
     // Enabled for Objects with a constructor taking ActorRef<Object> as the first parameter
     template <typename U = Object, class... Args>
     void emplaceObject(Args&&... args_)
