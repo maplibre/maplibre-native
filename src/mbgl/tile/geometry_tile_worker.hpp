@@ -34,8 +34,9 @@ using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(GeometryTile& parent_,
-                       std::weak_ptr<Mailbox> weakMailbox_,
+    GeometryTileWorker(std::weak_ptr<Mailbox> selfMailbox_,
+                       GeometryTile& parent_,
+                       std::weak_ptr<Mailbox> parentMailbox_,
                        const TaggedScheduler& scheduler_,
                        OverscaledTileID,
                        std::string,

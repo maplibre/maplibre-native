@@ -29,8 +29,9 @@ namespace mbgl {
 
 using namespace style;
 
-GeometryTileWorker::GeometryTileWorker(GeometryTile& parent_,
-                                       std::weak_ptr<Mailbox> weakMailbox_,
+GeometryTileWorker::GeometryTileWorker(std::weak_ptr<Mailbox> selfMailbox_,
+                                       GeometryTile& parent_,
+                                       std::weak_ptr<Mailbox> parentMailbox_,
                                        const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,
@@ -41,8 +42,8 @@ GeometryTileWorker::GeometryTileWorker(GeometryTile& parent_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
                                        std::shared_ptr<FontFaces> fontFaces_,
                                        bool runSynchronously)
-    : self(runSynchronously, *this, weakMailbox_),
-      parent(runSynchronously, parent_, weakMailbox_),
+    : self(runSynchronously, *this, selfMailbox_),
+      parent(runSynchronously, parent_, parentMailbox_),
       scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),

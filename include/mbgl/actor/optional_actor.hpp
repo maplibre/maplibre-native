@@ -13,7 +13,7 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, Scheduler& scheduler, Args&&... args) {
         if (syncObject) {
-            object = std::make_unique<Object>(std::forward<Args>(args)...);
+            object = std::make_unique<Object>(std::shared_ptr<Mailbox>(nullptr), std::forward<Args>(args)...);
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
         }
@@ -22,7 +22,7 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, const TaggedScheduler& scheduler, Args&&... args) {
         if (syncObject) {
-            object = std::make_unique<Object>(std::forward<Args>(args)...);
+            object = std::make_unique<Object>(std::shared_ptr<Mailbox>(nullptr), std::forward<Args>(args)...);
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
         }
@@ -31,7 +31,7 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, std::shared_ptr<Scheduler> scheduler, Args&&... args) {
         if (syncObject) {
-            object = std::make_unique<Object>(std::forward<Args>(args)...);
+            object = std::make_unique<Object>(std::shared_ptr<Mailbox>(nullptr), std::forward<Args>(args)...);
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
         }
