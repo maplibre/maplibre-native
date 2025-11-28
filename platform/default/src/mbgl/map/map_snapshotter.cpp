@@ -210,6 +210,10 @@ public:
 
     mbgl::EdgeInsets getPadding() const { return regionInsets; }
 
+    void addAnnotationImage(std::unique_ptr<style::Image> image) { map.addAnnotationImage(std::move(image)); }
+
+    void addAnnotation(const Annotation& annotation) { map.addAnnotation(annotation); }
+
     void snapshot(MapSnapshotter::Callback callback) {
         if (!callback) {
             Log::Error(Event::General, "MapSnapshotter::Callback is not set");
@@ -364,6 +368,14 @@ void MapSnapshotter::setPadding(const mbgl::EdgeInsets& insets) {
 
 mbgl::EdgeInsets MapSnapshotter::getPadding() const {
     return impl->getPadding();
+}
+
+void MapSnapshotter::addAnnotationImage(std::unique_ptr<style::Image> image) {
+    impl->addAnnotationImage(std::move(image));
+}
+
+void MapSnapshotter::addAnnotation(const Annotation& annotation) {
+    impl->addAnnotation(annotation);
 }
 
 style::Style& MapSnapshotter::getStyle() {

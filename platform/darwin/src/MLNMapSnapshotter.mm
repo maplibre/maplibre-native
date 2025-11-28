@@ -18,11 +18,20 @@
 #import "MLNRendererConfiguration.h"
 #import "MLNMapSnapshotter_Private.h"
 #import "MLNSettings_Private.h"
+#import "MLNShape.h"
+#import "MLNPolyline.h"
+#import "MLNPolygon.h"
+#import "MLNMultiPoint_Private.h"
+#import "MLNShapeCollection.h"
+#import "MLNPointCollection.h"
+#import "MLNAnnotationImage_Private.h"
 
 #if TARGET_OS_IPHONE
 #import "UIImage+MLNAdditions.h"
+#import "UIColor+MLNAdditions.h"
 #else
 #import "NSImage+MLNAdditions.h"
+#import "NSColor+MLNAdditions.h"
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreImage/CIContext.h>
 #import <CoreImage/CIFilter.h>
@@ -33,6 +42,7 @@
 
 const CGPoint MLNLogoImagePosition = CGPointMake(8, 8);
 const CGFloat MLNSnapshotterMinimumPixelSize = 64;
+NSString * const MLNSnapshotterAnnotationSpritePrefix = @"org.maplibre.sprites.";
 
 MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions, MLNImage *mglImage, mbgl::MapSnapshotter::PointForFn pointForFn, mbgl::MapSnapshotter::LatLngForFn latLngForFn, MLNMapSnapshotOptions *options, MLNMapSnapshotOverlayHandler overlayHandler);
 MLNMapSnapshot *MLNSnapshotWithDecoratedImage(MLNImage *mglImage, MLNMapSnapshotOptions *options, mbgl::MapSnapshotter::Attributions attributions, mbgl::MapSnapshotter::PointForFn pointForFn, mbgl::MapSnapshotter::LatLngForFn latLngForFn, MLNMapSnapshotOverlayHandler overlayHandler, NSError * _Nullable *outError);
@@ -224,7 +234,7 @@ private:
 
 @end
 
-@interface MLNMapSnapshotter()
+@interface MLNMapSnapshotter() <MLNMultiPointDelegate>
 @property (nonatomic) BOOL loading;
 @property (nonatomic) BOOL terminated;
 @end
@@ -232,6 +242,8 @@ private:
 @implementation MLNMapSnapshotter {
     std::unique_ptr<mbgl::MapSnapshotter> _mbglMapSnapshotter;
     std::unique_ptr<MLNMapSnapshotterDelegateHost> _delegateHost;
+    NSMutableArray<id<MLNAnnotation>> *_annotationsToInstall;
+    NSMutableSet<NSString *> *_installedImages;
 }
 
 - (void)dealloc {
@@ -251,6 +263,7 @@ private:
     self = [super init];
     if (self) {
         self.options = options;
+        _installedImages = [NSMutableSet set];
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
 #else
@@ -264,6 +277,79 @@ private:
 {
     [self cancel];
     self.terminated = YES;
+}
+
+- (void)addAnnotation:(id<MLNAnnotation>)annotation
+{
+    MLNLogDebug(@"Adding annotation: %@", annotation);
+    if ( ! annotation) return;
+    return [self addAnnotations:@[annotation]];
+}
+
+- (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations {
+    MLNLogDebug(@"Adding: %lu annotations", annotations.count);
+
+    if (!_annotationsToInstall) {
+        _annotationsToInstall = [NSMutableArray array];
+    }
+
+    [_annotationsToInstall addObjectsFromArray:annotations];
+}
+
+- (void)installAnnotations:(NSArray<id<MLNAnnotation>> *)annotations
+{
+    MLNLogDebug(@"install: %lu annotations", annotations.count);
+    if ( ! annotations) return;
+
+    for (id <MLNAnnotation> annotation in annotations)
+    {
+        MLNAssert([annotation conformsToProtocol:@protocol(MLNAnnotation)], @"annotation should conform to MLNAnnotation");
+
+        if ([annotation isKindOfClass:[MLNMultiPoint class]])
+        {
+            MLNMultiPoint *multiPoint = (MLNMultiPoint *)annotation;
+            if (!multiPoint.pointCount) {
+                continue;
+            }
+            _mbglMapSnapshotter->addAnnotation([multiPoint annotationObjectWithDelegate:self]);
+        } else if (! [annotation isKindOfClass:[MLNMultiPolyline class]]
+                   && ![annotation isKindOfClass:[MLNMultiPolygon class]]
+                   && ![annotation isKindOfClass:[MLNShapeCollection class]]
+                   && ![annotation isKindOfClass:[MLNPointCollection class]]) {
+            NSString *symbolName;
+            NSValue *annotationValue = [NSValue valueWithNonretainedObject:annotation];
+            MLNAnnotationImage *annotationImage;
+
+            if ([self.delegate respondsToSelector:@selector(mapSnapshotter:imageForAnnotation:)]) {
+                annotationImage = [self.delegate mapSnapshotter:self imageForAnnotation:annotation];
+            }
+            if (!annotationImage) {
+                // doesn't support no icon point for snapshotter
+                continue;
+            }
+
+            symbolName = annotationImage.styleIconIdentifier;
+            if ( ! symbolName)
+            {
+                symbolName = [MLNSnapshotterAnnotationSpritePrefix stringByAppendingString:annotationImage.reuseIdentifier];
+                annotationImage.styleIconIdentifier = symbolName;
+            }
+
+            [self installAnnotationImage:annotationImage];
+
+            _mbglMapSnapshotter->addAnnotation(mbgl::SymbolAnnotation {
+                MLNPointFromLocationCoordinate2D(annotation.coordinate),
+                symbolName.UTF8String
+            });
+        }
+    }
+}
+
+- (void)installAnnotationImage:(MLNAnnotationImage *)annotationImage {
+    NSString *iconIdentifier = annotationImage.styleIconIdentifier;
+    if (![_installedImages containsObject:iconIdentifier]) {
+        _mbglMapSnapshotter->addAnnotationImage([annotationImage.image mgl_styleImageWithIdentifier:iconIdentifier]);
+    }
 }
 
 - (void)startWithCompletionHandler:(MLNMapSnapshotCompletionHandler)completion
@@ -749,6 +835,11 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
     if (!MLNCoordinateBoundsIsEmpty(options.coordinateBounds)) {
         _mbglMapSnapshotter->setRegion(MLNLatLngBoundsFromCoordinateBounds(options.coordinateBounds));
     }
+
+    // Annotations
+    if (_annotationsToInstall) {
+        [self installAnnotations:_annotationsToInstall];
+    }
 }
 
 - (MLNStyle *)style {
@@ -756,6 +847,42 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
         return nil;
     }
     return [[MLNStyle alloc] initWithRawStyle:&_mbglMapSnapshotter->getStyle() stylable:self];
+}
+
+- (double)alphaForShapeAnnotation:(MLNShape *)annotation
+{
+    if ([self.delegate respondsToSelector:@selector(mapSnapshotter:alphaForShapeAnnotation:)]) {
+        return [self.delegate mapSnapshotter:self alphaForShapeAnnotation:annotation];
+    }
+    return 1.0;
+}
+
+- (mbgl::Color)strokeColorForShapeAnnotation:(MLNShape *)annotation
+{
+    if ([self.delegate respondsToSelector:@selector(mapSnapshotter:strokeColorForShapeAnnotation:)]) {
+        MLNColor *color = [self.delegate mapSnapshotter:self strokeColorForShapeAnnotation:annotation];
+        return color.mgl_color;
+    }
+
+    return mbgl::Color::white();
+}
+
+- (mbgl::Color)fillColorForPolygonAnnotation:(MLNPolygon *)annotation
+{
+    if ([self.delegate respondsToSelector:@selector(mapSnapshotter:fillColorForPolygonAnnotation:)]){
+        MLNColor *color = [self.delegate mapSnapshotter:self fillColorForPolygonAnnotation:annotation];
+        return color.mgl_color;
+    }
+    return mbgl::Color::white();
+}
+
+- (CGFloat)lineWidthForPolylineAnnotation:(MLNPolyline *)annotation
+{
+    if ([self.delegate respondsToSelector:@selector(mapSnapshotter:lineWidthForPolylineAnnotation:)]) {
+        return [self.delegate mapSnapshotter:self lineWidthForPolylineAnnotation:annotation];
+    }
+
+    return 3.0;
 }
 
 @end
