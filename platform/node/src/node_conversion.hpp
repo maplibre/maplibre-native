@@ -121,6 +121,18 @@ public:
             return {Nan::To<std::int32_t>(value).ToChecked()};
         } else if (value->IsNumber()) {
             return {Nan::To<double>(value).ToChecked()};
+        } else if (value->IsArray()) {
+            v8::Local<v8::Array> array = value.As<v8::Array>();
+            std::vector<Value> result;
+            result.reserve(array->Length());
+            for (uint32_t i = 0; i < array->Length(); ++i) {
+                v8::Local<v8::Value> item = Nan::Get(array, i).ToLocalChecked();
+                auto converted = toValue(item);
+                if (converted) {
+                    result.push_back(*converted);
+                }
+            }
+            return {result};
         } else {
             return {};
         }
