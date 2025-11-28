@@ -2,7 +2,11 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-# 6.21.0
+## 6.21.1
+
+- Include static XCFramework in GitHub release.
+
+## 6.21.0
 
 - Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
 - Support hiding attribution on iOS ([#3952](https://github.com/maplibre/maplibre-native/pull/3952)).
