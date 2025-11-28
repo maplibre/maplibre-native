@@ -3,6 +3,7 @@
 import PackageDescription
 
 // dummy package to fetch dependencies via bazel `rules_swift_package_manager``
+// https://github.com/cgrindel/rules_swift_package_manager?tab=readme-ov-file#4-run-swift-package-update
 
 let package = Package(
     name: "maplibre-swift",

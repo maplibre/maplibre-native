@@ -61,4 +61,5 @@ env_info_plist = rule(
         "output": attr.output(mandatory = True),
         "vars": attr.string_list(mandatory = True),
     },
+    doc = "Pull environment variables and add them to the provided plist",
 )
