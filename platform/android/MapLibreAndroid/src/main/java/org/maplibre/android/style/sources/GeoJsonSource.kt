@@ -230,6 +230,7 @@ class GeoJsonSource : Source {
     /**
      * Updates the GeoJson with a single feature.
      * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param feature the GeoJSON [Feature] to set
      */
@@ -249,6 +250,7 @@ class GeoJsonSource : Source {
     /**
      * Updates the GeoJson with a single geometry.
      * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
@@ -268,6 +270,7 @@ class GeoJsonSource : Source {
     /**
      * Updates the GeoJson.
      * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
@@ -292,6 +295,7 @@ class GeoJsonSource : Source {
     /**
      * Updates the GeoJson.
      * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param json the raw GeoJson FeatureCollection string
      */
@@ -313,7 +317,7 @@ class GeoJsonSource : Source {
      *
      * @param feature the GeoJSON [Feature] to set
      */
-    @Deprecated("use {@link #setGeoJson(Feature)} instead.")
+    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
     fun setGeoJsonSync(feature: Feature?) {
         if (detached) {
             return
@@ -328,7 +332,7 @@ class GeoJsonSource : Source {
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
-    @Deprecated("use {@link #setGeoJson(Geometry)} instead.")
+    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
     fun setGeoJsonSync(geometry: Geometry?) {
         if (detached) {
             return
@@ -343,7 +347,7 @@ class GeoJsonSource : Source {
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
-    @Deprecated("use {@link #setGeoJson(FeatureCollection)} instead.")
+    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
     fun setGeoJsonSync(featureCollection: FeatureCollection?) {
         if (detached) {
             return
@@ -364,7 +368,7 @@ class GeoJsonSource : Source {
      *
      * @param json the raw GeoJson FeatureCollection string
      */
-    @Deprecated("use {@link #setGeoJson(String)} instead.")
+    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
     fun setGeoJsonSync(json: String) {
         if (detached) {
             return
