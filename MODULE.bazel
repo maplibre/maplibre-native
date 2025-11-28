@@ -78,6 +78,7 @@ swift_deps.from_package(
 use_repo(
     swift_deps,
     "swift_package",
+    "swiftpkg_polyline",
     "swiftpkg_sentry_cocoa",
 )
 

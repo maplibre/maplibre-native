@@ -10,6 +10,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v12)],
     dependencies: [
+        .package(url: "https://github.com/raphaelmor/Polyline", from: "5.1.0"),
         .package(url: "https://github.com/getsentry/sentry-cocoa", from: "8.54.0"),
     ]
 )

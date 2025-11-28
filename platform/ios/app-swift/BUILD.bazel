@@ -34,6 +34,7 @@ swift_library(
     tags = ["manual"],
     deps = [
         "//platform:ios-sdk",
+        "@swiftpkg_polyline//:Polyline",
         "@swiftpkg_sentry_cocoa//:Sentry",
     ],
 )

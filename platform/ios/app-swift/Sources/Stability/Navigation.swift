@@ -1,4 +1,5 @@
 import MapLibre
+import Polyline
 
 @objc public protocol NavigationLocationManagerDelegate: AnyObject {
     @objc func progressDidChange(currentDistance: Double, remainingDistance: Double)
@@ -149,8 +150,6 @@ class NavigationRoute {
     deinit {
         mapView?.showsUserLocation = false
         mapView?.locationManager = nil
-
-        // TODO: remove source/layer/destination annotation
     }
 
     private func load(json: [String: Any]) {
@@ -165,7 +164,7 @@ class NavigationRoute {
         destination = CLLocationCoordinate2D(latitude: destinationJson.last!, longitude: destinationJson.first!)
 
         // route geometry
-        let geometry = Geometry.decodePolyline(from: routeJson["geometry"] as! String)!
+        let geometry: [LocationCoordinate2D] = decodePolyline(routeJson["geometry"] as! String, precision: 1e6)!
 
         loadGeometry(from: geometry)
 
