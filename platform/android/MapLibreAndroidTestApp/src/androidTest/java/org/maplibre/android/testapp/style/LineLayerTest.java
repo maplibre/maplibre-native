@@ -557,6 +557,19 @@ public class LineLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testLineDasharrayAsExpression() {
+    Timber.i("line-dasharray-expression");
+    assertNotNull(layer);
+    assertNull(layer.getLineDasharray().getExpression());
+
+    // Set and Get
+    Expression expression = array(Expression.get("undefined"));
+    layer.setProperties(lineDasharray(expression));
+    assertEquals(layer.getLineDasharray().getExpression(), expression);
+  }
+
+  @Test
+  @UiThreadTest
   public void testLinePatternTransition() {
     Timber.i("line-patternTransitionOptions");
     assertNotNull(layer);
