@@ -6371,7 +6371,7 @@
     "line-dasharray": {
       "type": "array",
       "value": "number",
-      "doc": "Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Zoom-dependent expressions will be evaluated only at integer zoom levels. The only way to create an array value is using `[\"literal\", [...]]`; arrays cannot be read from or derived from feature properties.",
+      "doc": "Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels.",
       "minimum": 0,
       "transition": true,
       "units": "line widths",
@@ -6386,20 +6386,15 @@
           "android": "2.0.1",
           "ios": "2.0.0"
         },
-        "data-driven styling": {
-          "js": "5.8.0",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/744",
-          "android": "https://github.com/maplibre/maplibre-native/issues/744"
-        }
+        "data-driven styling": {}
       },
       "expression": {
         "interpolated": false,
         "parameters": [
-          "zoom",
-          "feature"
+          "zoom"
         ]
       },
-      "property-type": "cross-faded-data-driven"
+      "property-type": "cross-faded"
     },
     "line-pattern": {
       "type": "resolvedImage",
