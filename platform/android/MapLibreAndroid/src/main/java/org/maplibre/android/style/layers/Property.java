@@ -648,42 +648,6 @@ public final class Property {
   @Retention(RetentionPolicy.SOURCE)
   public @interface HILLSHADE_ILLUMINATION_ANCHOR {}
 
-  // HILLSHADE_METHOD: The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
-
-  /**
-   * The legacy hillshade method.
-   */
-  public static final String HILLSHADE_METHOD_STANDARD = "standard";
-  /**
-   * Basic hillshade. Uses a simple physics model where the reflected light intensity is proportional to the cosine of the angle between the incident light and the surface normal. Similar to GDAL's {@link GDALDEM} default algorithm.
-   */
-  public static final String HILLSHADE_METHOD_BASIC = "basic";
-  /**
-   * Hillshade algorithm whose intensity scales with slope. Similar to GDAL's {@link GDALDEM} with -combined option.
-   */
-  public static final String HILLSHADE_METHOD_COMBINED = "combined";
-  /**
-   * Hillshade algorithm which tries to minimize effects on other map features beneath. Similar to GDAL's {@link GDALDEM} with -igor option.
-   */
-  public static final String HILLSHADE_METHOD_IGOR = "igor";
-  /**
-   * Hillshade with multiple illumination directions. Uses the basic hillshade model with multiple independent light sources.
-   */
-  public static final String HILLSHADE_METHOD_MULTIDIRECTIONAL = "multidirectional";
-
-  /**
-   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
-   */
-  @StringDef({
-      HILLSHADE_METHOD_STANDARD,
-      HILLSHADE_METHOD_BASIC,
-      HILLSHADE_METHOD_COMBINED,
-      HILLSHADE_METHOD_IGOR,
-      HILLSHADE_METHOD_MULTIDIRECTIONAL,
-    })
-  @Retention(RetentionPolicy.SOURCE)
-  public @interface HILLSHADE_METHOD {}
-
   // ANCHOR: Whether extruded geometries are lit relative to the map or viewport.
 
   /**
