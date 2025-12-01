@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 12.2.1
+
+### 🐞 Bug fixes
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
 ## 12.2.0
 
 ### ✨ Features and improvements
