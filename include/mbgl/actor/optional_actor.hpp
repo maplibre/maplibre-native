@@ -13,39 +13,55 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, Scheduler& scheduler, Args&&... args) {
         if (syncObject) {
-            object = std::make_unique<Object>(std::shared_ptr<Mailbox>(nullptr), std::forward<Args>(args)...);
+            createObject(std::forward<Args>(args)...);
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
+            selfRef = OptionalActorRef(actor->self());
         }
     }
 
     template <class... Args>
     OptionalActor(bool syncObject, const TaggedScheduler& scheduler, Args&&... args) {
         if (syncObject) {
-            object = std::make_unique<Object>(std::shared_ptr<Mailbox>(nullptr), std::forward<Args>(args)...);
+            createObject(std::forward<Args>(args)...);
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
+            selfRef = OptionalActorRef(actor->self());
         }
     }
 
     template <class... Args>
     OptionalActor(bool syncObject, std::shared_ptr<Scheduler> scheduler, Args&&... args) {
         if (syncObject) {
-            object = std::make_unique<Object>(std::shared_ptr<Mailbox>(nullptr), std::forward<Args>(args)...);
+            createObject(std::forward<Args>(args)...);
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
+            selfRef = OptionalActorRef(actor->self());
         }
     }
 
     OptionalActor(const OptionalActor&) = delete;
-
-    OptionalActorRef<Object> self() {
-        return OptionalActorRef(object, actor ? std::make_unique<ActorRef<Object>>(actor->self()) : nullptr);
+    
+    ~OptionalActor() {
+        if (object) {
+            object->~Object();
+            std::free(object);
+        }
     }
 
+    OptionalActorRef<Object> self() { return selfRef; }
+    
 private:
-    std::unique_ptr<Object> object;
+    template <class... Args>
+    void createObject(Args&&... args) {
+        void* buffer = std::aligned_alloc(alignof(Object), sizeof(Object));
+        selfRef = OptionalActorRef(reinterpret_cast<Object&>(*buffer));
+        object = new (buffer) Object(selfRef, std::forward<Args>(args)...);
+    }
+    
+    Object* object = nullptr;
     std::unique_ptr<Actor<Object>> actor;
+    OptionalActorRef<Object> selfRef;
 };
 
 } // namespace mbgl

@@ -9,20 +9,23 @@ class TaggedScheduler;
 template <class Object>
 class OptionalActorRef {
 public:
+    OptionalActorRef() = default;
+    
     OptionalActorRef(bool syncRef, Object& object, std::weak_ptr<Mailbox> weakMailbox) {
         if (syncRef) {
             objectRef = &object;
         } else {
-            actorRef = std::make_unique<ActorRef<Object>>(object, weakMailbox);
+            actorRef = std::make_optional<ActorRef<Object>>(object, weakMailbox);
         }
     }
-
-    OptionalActorRef(const std::unique_ptr<Object>& object, std::unique_ptr<ActorRef<Object>> actorRef_) {
-        objectRef = object.get();
-        actorRef = std::move(actorRef_);
+    
+    explicit OptionalActorRef(Object& object) {
+        objectRef = &object;
     }
-
-    OptionalActorRef(const OptionalActorRef&) = delete;
+    
+    explicit OptionalActorRef(ActorRef<Object> actorRef_) {
+        actorRef = actorRef_;
+    }
 
     template <typename Fn, class... Args>
     void invoke(Fn fn, Args&&... args) const {
@@ -35,7 +38,7 @@ public:
 
 private:
     Object* objectRef = nullptr;
-    std::unique_ptr<ActorRef<Object>> actorRef;
+    std::optional<ActorRef<Object>> actorRef;
 };
 
 } // namespace mbgl
