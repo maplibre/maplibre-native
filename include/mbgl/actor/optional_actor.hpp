@@ -45,7 +45,7 @@ public:
 
     OptionalActor(const OptionalActor&) = delete;
 
-    OptionalActorRef<Object> self() { return selfRef; }
+    const OptionalActorRef<Object>& self() { return selfRef; }
 
 private:
     class SyncObject {
@@ -64,6 +64,8 @@ private:
             new (&objectStorage) Object(std::forward<Args>(args)...);
         }
 
+        SyncObject(const SyncObject&) = delete;
+        
         ~SyncObject() { self().~Object(); }
 
         Object& self() { return reinterpret_cast<Object&>(objectStorage); }
