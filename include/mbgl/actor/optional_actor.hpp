@@ -41,7 +41,7 @@ public:
     }
 
     OptionalActor(const OptionalActor&) = delete;
-    
+
     ~OptionalActor() {
         if (object) {
             object->~Object();
@@ -50,7 +50,7 @@ public:
     }
 
     OptionalActorRef<Object> self() { return selfRef; }
-    
+
 private:
     template <class... Args>
     void createObject(Args&&... args) {
@@ -58,7 +58,7 @@ private:
         selfRef = OptionalActorRef(reinterpret_cast<Object&>(*buffer));
         object = new (buffer) Object(selfRef, std::forward<Args>(args)...);
     }
-    
+
     Object* object = nullptr;
     std::unique_ptr<Actor<Object>> actor;
     OptionalActorRef<Object> selfRef;

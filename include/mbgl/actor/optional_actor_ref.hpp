@@ -10,7 +10,7 @@ template <class Object>
 class OptionalActorRef {
 public:
     OptionalActorRef() = default;
-    
+
     OptionalActorRef(bool syncRef, Object& object, std::weak_ptr<Mailbox> weakMailbox) {
         if (syncRef) {
             objectRef = &object;
@@ -18,14 +18,10 @@ public:
             actorRef = std::make_optional<ActorRef<Object>>(object, weakMailbox);
         }
     }
-    
-    explicit OptionalActorRef(Object& object) {
-        objectRef = &object;
-    }
-    
-    explicit OptionalActorRef(ActorRef<Object> actorRef_) {
-        actorRef = actorRef_;
-    }
+
+    explicit OptionalActorRef(Object& object) { objectRef = &object; }
+
+    explicit OptionalActorRef(ActorRef<Object> actorRef_) { actorRef = actorRef_; }
 
     template <typename Fn, class... Args>
     void invoke(Fn fn, Args&&... args) const {
