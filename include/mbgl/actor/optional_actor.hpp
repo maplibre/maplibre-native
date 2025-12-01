@@ -52,19 +52,19 @@ private:
     public:
         template <class... Args>
         SyncObject(Args&&... args)
-            requires(std::is_constructible_v<Object, OptionalActorRef<Object>, Args...>) {
+            requires(std::is_constructible_v<Object, OptionalActorRef<Object>, Args...>)
+        {
             new (&objectStorage) Object(OptionalActorRef(self()), std::forward<Args>(args)...);
         }
 
         template <class... Args>
         SyncObject(Args&&... args)
-            requires(std::is_constructible_v<Object, Args...>) {
+            requires(std::is_constructible_v<Object, Args...>)
+        {
             new (&objectStorage) Object(std::forward<Args>(args)...);
         }
 
-        ~SyncObject() {
-            self().~Object();
-        }
+        ~SyncObject() { self().~Object(); }
 
         Object& self() { return reinterpret_cast<Object&>(objectStorage); }
 
