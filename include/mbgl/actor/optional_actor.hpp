@@ -65,7 +65,7 @@ private:
         }
 
         SyncObject(const SyncObject&) = delete;
-        
+
         ~SyncObject() { self().~Object(); }
 
         Object& self() { return reinterpret_cast<Object&>(objectStorage); }
