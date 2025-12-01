@@ -40,8 +40,8 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
                                        const bool showCollisionBoxes_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
                                        std::shared_ptr<FontFaces> fontFaces_)
-    : self(self_),
-      parent(parent_),
+    : self(std::move(self_)),
+      parent(std::move(parent_)),
       scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),

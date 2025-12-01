@@ -34,8 +34,8 @@ using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self_,
-                       OptionalActorRef<GeometryTile> parent_,
+    GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self,
+                       OptionalActorRef<GeometryTile> parent,
                        const TaggedScheduler& scheduler_,
                        OverscaledTileID,
                        std::string,
