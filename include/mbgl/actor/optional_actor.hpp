@@ -13,7 +13,8 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, Scheduler& scheduler, Args&&... args) {
         if (syncObject) {
-            createObject(std::forward<Args>(args)...);
+            object = std::make_unique<SyncObject>(std::forward<Args>(args)...);
+            selfRef = OptionalActorRef(object->self());
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
             selfRef = OptionalActorRef(actor->self());
@@ -23,7 +24,8 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, const TaggedScheduler& scheduler, Args&&... args) {
         if (syncObject) {
-            createObject(std::forward<Args>(args)...);
+            object = std::make_unique<SyncObject>(std::forward<Args>(args)...);
+            selfRef = OptionalActorRef(object->self());
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
             selfRef = OptionalActorRef(actor->self());
@@ -33,7 +35,8 @@ public:
     template <class... Args>
     OptionalActor(bool syncObject, std::shared_ptr<Scheduler> scheduler, Args&&... args) {
         if (syncObject) {
-            createObject(std::forward<Args>(args)...);
+            object = std::make_unique<SyncObject>(std::forward<Args>(args)...);
+            selfRef = OptionalActorRef(object->self());
         } else {
             actor = std::make_unique<Actor<Object>>(scheduler, std::forward<Args>(args)...);
             selfRef = OptionalActorRef(actor->self());
@@ -42,24 +45,34 @@ public:
 
     OptionalActor(const OptionalActor&) = delete;
 
-    ~OptionalActor() {
-        if (object) {
-            object->~Object();
-            std::free(object);
-        }
-    }
-
     OptionalActorRef<Object> self() { return selfRef; }
 
 private:
-    template <class... Args>
-    void createObject(Args&&... args) {
-        void* buffer = std::aligned_alloc(alignof(Object), sizeof(Object));
-        selfRef = OptionalActorRef(reinterpret_cast<Object&>(*buffer));
-        object = new (buffer) Object(selfRef, std::forward<Args>(args)...);
-    }
+    class SyncObject {
+    public:
+        template <class... Args>
+        SyncObject(Args&&... args)
+            requires(std::is_constructible_v<Object, OptionalActorRef<Object>, Args...>) {
+            new (&objectStorage) Object(OptionalActorRef(self()), std::forward<Args>(args)...);
+        }
 
-    Object* object = nullptr;
+        template <class... Args>
+        SyncObject(Args&&... args)
+            requires(std::is_constructible_v<Object, Args...>) {
+            new (&objectStorage) Object(std::forward<Args>(args)...);
+        }
+
+        ~SyncObject() {
+            self().~Object();
+        }
+
+        Object& self() { return reinterpret_cast<Object&>(objectStorage); }
+
+    private:
+        std::aligned_storage_t<sizeof(Object)> objectStorage;
+    };
+
+    std::unique_ptr<SyncObject> object;
     std::unique_ptr<Actor<Object>> actor;
     OptionalActorRef<Object> selfRef;
 };
