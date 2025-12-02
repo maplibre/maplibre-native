@@ -29,7 +29,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/getrss.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/sqlite3_test_fs.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/stub_file_source.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/delayed_file_source.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/test.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/util.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/asset_file_source.test.cpp
