@@ -87,7 +87,7 @@ TEST(GeoJSONTile, SynchronousUpdate) {
     tileParameters.isUpdateSynchronous = true;
     GeoJSONTile tile(OverscaledTileID(0, 0, 0), "source", tileParameters, data);
     Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
-            staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
     tile.setLayers(layers);
     ASSERT_TRUE(tile.isComplete());
