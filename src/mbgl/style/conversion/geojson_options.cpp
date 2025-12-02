@@ -101,6 +101,16 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
         }
     }
 
+    const auto synchronousUpdateValue = objectMember(value, "synchronousUpdate");
+    if (synchronousUpdateValue) {
+        if (toBool(*synchronousUpdateValue)) {
+            options.synchronousUpdate = *toBool(*synchronousUpdateValue);
+        } else {
+            error.message = "GeoJSON source synchronousUpdate value must be a boolean";
+            return std::nullopt;
+        }
+    }
+
     const auto clusterProperties = objectMember(value, "clusterProperties");
     if (clusterProperties) {
         if (!isObject(*clusterProperties)) {

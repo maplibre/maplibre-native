@@ -42,7 +42,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -80,7 +81,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -119,7 +121,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -158,7 +161,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -197,7 +201,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -236,7 +241,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -274,7 +280,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -308,7 +315,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val layerSet: Set<String> = HashSet()
@@ -343,7 +351,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -390,7 +399,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -436,7 +446,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -478,7 +489,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -520,7 +532,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -562,7 +575,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -604,7 +618,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -678,7 +693,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -762,7 +778,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -824,7 +841,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
@@ -886,7 +904,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -928,7 +947,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -973,7 +993,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1017,7 +1038,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1062,7 +1084,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1109,7 +1132,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1155,7 +1179,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1202,7 +1227,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1247,7 +1273,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1295,7 +1322,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1332,7 +1360,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(locationSource)
         val bitmapProvider = Mockito.mock(
@@ -1368,7 +1397,8 @@ class LocationLayerControllerTest : BaseTest() {
             sourceProvider.generateSource(
                 ArgumentMatchers.any(
                     Feature::class.java
-                )
+                ),
+                ArgumentMatchers.eq(true)
             )
         ).thenReturn(
             Mockito.mock(
