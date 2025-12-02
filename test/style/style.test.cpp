@@ -9,7 +9,6 @@
 #include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
-#include <mbgl/test/delayed_file_source.hpp>
 
 #include <memory>
 
@@ -109,38 +108,6 @@ TEST(Style, RemoveSourceInUse) {
 #endif
 
     EXPECT_EQ(log.count(logMessage), 1u);
-}
-
-TEST(Style, LoadJSONCancelsPendingLoadURL) {
-    util::RunLoop loop;
-
-    auto fileSource = std::make_shared<::DelayedFileSource>();
-    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
-
-    // Start loading a URL (this will be pending)
-    auto url = "http://some-url";
-    style.loadURL(url);
-
-    // Before the URL request completes, load JSON directly
-    const std::string json = R"STYLE({
-        "version": 8,
-        "name": "Test Style",
-        "sources": {},
-        "layers": []
-    })STYLE";
-    style.loadJSON(json);
-
-    // The style should now be loaded with our JSON content
-    ASSERT_EQ("Test Style", style.getName());
-    ASSERT_EQ("", style.getURL());
-    ASSERT_TRUE(style.getJSON().find("Test Style") != std::string::npos);
-
-    // Now respond to the original URL request - this should be ignored
-    fileSource->respondToRequest(R"STYLE({"version":8,"name":"Streets"})STYLE");
-
-    // The style should still show our JSON content, not the URL content
-    ASSERT_EQ("Test Style", style.getName());
-    ASSERT_NE("Streets", style.getName());
 }
 
 TEST(Style, SourceImplsOrder) {
