@@ -300,6 +300,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
         self.mapView.showsUserHeadingIndicator = YES;
         self.mapView.showsScale = YES;
+        self.mapView.showsLogoView = YES;
+        self.mapView.showsCompassView = YES;
+        self.mapView.showsAttributionButton = YES;
         self.zoomLevelOrnamentEnabled = NO;
         self.frameTimeGraphEnabled = NO;
     } else {
@@ -2498,7 +2501,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             break;
 
         case MLNTileOperationCancelled:
-            NSLog(@"Pending work on tile %@", tileStr);
+            NSLog(@"Pending work cancelled on tile %@", tileStr);
             break;
 
         case MLNTileOperationNullOp:

@@ -8,6 +8,7 @@
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <array>
@@ -60,7 +61,8 @@ public:
                     uint64_t frameCount,
                     double tileLodMinRadius,
                     double tileLodScale,
-                    double tileLodPitchThreshold);
+                    double tileLodPitchThreshold,
+                    const gfx::ScissorRect&);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -130,13 +132,15 @@ public:
 #if MLN_RENDER_BACKEND_OPENGL
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
 #else
-    static constexpr float depthEpsilon = 1.0f / (1 << 12);
+    static constexpr float depthEpsilon = 1.0f / (1 << 11);
 #endif
     static constexpr int maxStencilValue = 255;
 
     double tileLodMinRadius;
     double tileLodScale;
     double tileLodPitchThreshold;
+
+    gfx::ScissorRect scissorRect;
 };
 
 } // namespace mbgl

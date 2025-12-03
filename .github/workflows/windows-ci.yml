@@ -2,16 +2,18 @@ name: windows-ci
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - windows-*.*.x
-    tags:
-      - windows-*
+  # temporarily disabled
+  # https://github.com/maplibre/maplibre-native/issues/3670
+  # push:
+  #   branches:
+  #     - main
+  #     - windows-*.*.x
+  #   tags:
+  #     - windows-*
 
-  pull_request:
-    branches:
-      - '*'
+  # pull_request:
+  #   branches:
+  #     - '*'
 
 env:
   SCCACHE_GHA_ENABLED: "true"
@@ -35,15 +37,15 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Get all Windows files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -60,11 +62,12 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           sparse-checkout: |
             platform/windows/vendor
             platform/windows/Get-VendorPackages.ps1
+          persist-credentials: false
 
       - name: Get vcpkg commit id
         run: |
@@ -73,7 +76,7 @@ jobs:
 
       - name: Restore vcpkg binary cache
         id: vcpkg-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -85,7 +88,7 @@ jobs:
           git submodule sync --recursive
           git submodule update --init --force --depth=1 --recursive platform/windows/vendor/vcpkg
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
 
       - name: Acquire/Build Maplibre Native Core Dependencies
@@ -99,7 +102,7 @@ jobs:
 
       - name: Save vcpkg binary cache
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -115,18 +118,19 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           languages: cpp
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
-      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - name: Initialize sccache
         run: |
@@ -139,7 +143,7 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
 
       - name: Restore vcpkg binary cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -163,7 +167,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           category: "/language:cpp"
 
@@ -227,7 +231,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: render-test-result-${{ matrix.renderer }}
           path: |
@@ -251,11 +255,12 @@ jobs:
           git config --system core.longpaths true
           git config --system core.autocrlf input
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
           msystem: ${{ matrix.msystem }}
           update: true
@@ -274,11 +279,11 @@ jobs:
             libuv:p
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           languages: cpp
 
-      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - name: Initialize sccache
         run: |
@@ -303,7 +308,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           category: "/language:cpp"
 
@@ -367,7 +372,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: render-test-result-${{ matrix.renderer }}
           path: |

@@ -14,7 +14,9 @@
 
 namespace mbgl {
 
-static GlyphManagerObserver nullObserver;
+namespace {
+GlyphManagerObserver nullObserver;
+}
 
 GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer_)
     : observer(&nullObserver),

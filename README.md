@@ -171,6 +171,10 @@ There is an [npm package](https://www.npmjs.com/package/@maplibre/maplibre-gl-na
 
 Please check out the [`maplibre/maplibre-native-qt` repository](https://github.com/maplibre/maplibre-native-qt) to learn how to intergrate MapLibre Native with a Qt project.
 
+## Compose Multiplatform
+
+[MapLibre Compose](https://github.com/maplibre/maplibre-compose) wraps MapLibre Native for various platforms that [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) supports. As of August 2025, iOS and Android are supported, with web and desktop partially supported.
+
 ## Other Platforms
 
 MapLibre Native can also be built on [Linux](platform/linux/README.md), [Windows](platform/windows/README.md) and [macOS](platform/macos/README.md).

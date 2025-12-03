@@ -1,6 +1,7 @@
 #import <XCTest/XCTest.h>
 
 #import <Mapbox.h>
+#import "MLNVectorTileSource.h"
 #import "MLNTileSource_Private.h"
 #import "MLNGeometry_Private.h"
 
@@ -12,9 +13,13 @@
 
 @implementation MLNTileSetTests
 
-- (void)testTileSetFromTileURLTemplates {
+namespace {
     // a tile set that provides an mbgl tile set
     NSArray *tileURLTemplates = @[@"tile.1", @"tile.2", @"tile.3"];
+
+}
+
+- (void)testTileSetFromTileURLTemplates {
     mbgl::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, nil);
 
     // has the correct URL templates
@@ -120,23 +125,61 @@
 
     // the scheme is reflected by the mbgl tileset
     XCTAssertEqual(tileSet.scheme, mbgl::Tileset::Scheme::TMS);
+}
 
-    // when the dem encoding is changed using an NSNumber
+- (void)testTileSetFromTileURLTemplatesRasterEncodings {
+    mbgl::Tileset tileSet;
+
+    // when the DEM encoding is changed using an NSNumber
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
         MLNTileSourceOptionDEMEncoding: @(MLNDEMEncodingTerrarium),
     });
 
     // the encoding is reflected by the mbgl tileset
-    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::DEMEncoding::Terrarium);
+    XCTAssertEqual(tileSet.rasterEncoding, mbgl::Tileset::RasterEncoding::Terrarium);
+    XCTAssertFalse(tileSet.vectorEncoding);
 
-    // when the dem encoding is changed using an NSValue
+    // when the raster encoding is changed using an NSValue
     MLNDEMEncoding terrarium = MLNDEMEncodingTerrarium;
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
         MLNTileSourceOptionDEMEncoding: [NSValue value:&terrarium withObjCType:@encode(MLNDEMEncoding)],
     });
 
     // the encoding is reflected by the mbgl tileset
-    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::DEMEncoding::Terrarium);
+    XCTAssertEqual(tileSet.rasterEncoding, mbgl::Tileset::RasterEncoding::Terrarium);
+    XCTAssertFalse(tileSet.vectorEncoding);
+}
+
+- (void)testTileSetFromTileURLTemplatesVectorEncodings {
+    mbgl::Tileset tileSet;
+
+    // when the raster encoding is changed using an NSNumber
+    tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
+        MLNVectorTileSourceOptionEncoding: @(MLNVectorTileSourceEncodingMapbox),
+    });
+
+    // the encoding is reflected by the mbgl tileset
+    XCTAssertEqual(tileSet.vectorEncoding, mbgl::Tileset::VectorEncoding::Mapbox);
+    XCTAssertFalse(tileSet.rasterEncoding);
+
+    // when the raster encoding is changed using an NSNumber
+    tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
+        MLNVectorTileSourceOptionEncoding: @(MLNVectorTileSourceEncodingMLT),
+    });
+
+    // the encoding is reflected by the mbgl tileset
+    XCTAssertEqual(tileSet.vectorEncoding, mbgl::Tileset::VectorEncoding::MLT);
+    XCTAssertFalse(tileSet.rasterEncoding);
+
+    // when the raster encoding is changed using an NSValue
+    MLNVectorTileSourceEncoding mlt = MLNVectorTileSourceEncodingMLT;
+    tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
+        MLNVectorTileSourceOptionEncoding: [NSValue value:&mlt withObjCType:@encode(MLNVectorTileSourceEncoding)],
+    });
+
+    // the encoding is reflected by the mbgl tileset
+    XCTAssertEqual(tileSet.vectorEncoding, mbgl::Tileset::VectorEncoding::MLT);
+    XCTAssertFalse(tileSet.rasterEncoding);
 }
 
 - (void)testInvalidTileSet {

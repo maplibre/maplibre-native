@@ -59,39 +59,35 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Linux_GCC11
-            os: ubuntu-24.04
-            build_type: RelWithDebInfo
-            qt_version: 6.8.1
-            qt_target: desktop
-            compiler: ""
           - name: Linux_GCC14
             os: ubuntu-24.04
             build_type: RelWithDebInfo
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             compiler: "gcc-14"
           - name: macOS
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             deployment_target: 12.0
             deployment_arch: "x86_64;arm64"
             compiler: ""
-          - name: macOS_LLVM
-            os: macos-14
-            build_type: RelWithDebInfo
-            qt_version: 6.8.1
-            qt_target: desktop
-            deployment_target: 12.0
-            deployment_arch: "arm64"
-            compiler: "llvm"
+          # disabled due to https://github.com/llvm/llvm-project/issues/77653
+          # https://github.com/maplibre/maplibre-native/pull/3879#issuecomment-3406495279
+          # - name: macOS_LLVM
+          #   os: macos-14
+          #   build_type: RelWithDebInfo
+          #   qt_version: 6.9.1
+          #   qt_target: desktop
+          #   deployment_target: 12.0
+          #   deployment_arch: "arm64"
+          #   compiler: "llvm"
           - name: win64_msvc2022
             os: windows-2022
             build_type: "RelWithDebInfo"
             compiler_type: x64
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             qt_arch: win64_msvc2022_64
             qt_tools: ""
@@ -104,15 +100,18 @@ jobs:
       QT_VERSION: ${{ matrix.qt_version }}
 
     steps:
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           path: source
-          fetch-depth: 0
-          submodules: true
+          submodules: recursive
+          persist-credentials: false
 
       - name: Install test dependencies
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install \
@@ -130,13 +129,13 @@ jobs:
 
       - name: Install compiler (Linux)
         id: install_compiler
-        if: runner.os == 'Linux' && matrix.compiler != ''
-        uses: rlalik/setup-cpp-compiler@master
+        if: runner.os == 'Linux'
+        uses: rlalik/setup-cpp-compiler@e312c52f6d9664049d97c75ab084c895d9733c0c # master
         with:
           compiler: ${{ matrix.compiler }}
 
       - name: Setup compiler (Linux)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         env:
           CC: ${{ steps.install_compiler.outputs.cc }}
           CXX: ${{ steps.install_compiler.outputs.cxx }}
@@ -164,21 +163,21 @@ jobs:
 
       - name: Setup Xcode
         if: runner.os == 'macOS'
-        uses: maxim-lobanov/setup-xcode@v1
+        uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
         with:
           xcode-version: latest-stable
 
       - name: Setup MSVC
         if: matrix.qt_arch == 'win64_msvc2022_64'
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: ${{ matrix.compiler_type }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v6
+        uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
 
       - name: Download Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@d325aaf2a8baeeda41ad0b5d39f84a6af9bcf005 # v4.3.0
         with:
           aqtversion: ==3.1.*
           version: ${{ env.QT_VERSION }}
@@ -189,10 +188,15 @@ jobs:
           extra: --base https://mirrors.ocf.berkeley.edu/qt/
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1
+        uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
           max-size: 200M
+
+      - name: Print cmake version
+        run: |
+          cmake --version
+          which cmake
 
       - name: Build maplibre-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
@@ -205,15 +209,12 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
             -DCMAKE_OSX_ARCHITECTURES="${DEPLOYMENT_ARCH}" \
-            -DMLN_WITH_QT=ON
+            -DMLN_WITH_QT=ON \
+            -DMLN_WITH_OPENGL=ON
           ninja
 
       - name: Build maplibre-native (Linux, Qt6)
-        if: runner.os == 'Linux' && matrix.compiler == ''
-        uses: ./source/.github/actions/qt6-build
-
-      - name: Build maplibre-native (Linux, Qt6, custom compiler)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         run: |
           mkdir build && cd build
           qt-cmake ../source/ \
@@ -221,11 +222,12 @@ jobs:
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
-            -DMLN_WITH_QT=ON
+            -DMLN_WITH_QT=ON \
+            -DMLN_WITH_OPENGL=ON
           ninja
 
-      - name: Build maplibre-native (Linux, Qt6, custom compiler, internal libraries)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+      - name: Build maplibre-native (Linux, Qt6, internal libraries)
+        if: runner.os == 'Linux'
         run: |
           mkdir build-internal && cd build-internal
           qt-cmake ../source/ \
@@ -235,12 +237,13 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
             -DMLN_WITH_QT=ON \
             -DMLN_QT_WITH_INTERNAL_ICU=ON \
-            -DMLN_QT_WITH_INTERNAL_SQLITE=ON
+            -DMLN_QT_WITH_INTERNAL_SQLITE=ON \
+            -DMLN_WITH_OPENGL=ON
           ninja
 
       - name: Run tests (Linux)
-        if: runner.os == 'Linux' && matrix.compiler != ''
-        uses: coactions/setup-xvfb@v1
+        if: runner.os == 'Linux'
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: ctest --output-on-failure
           working-directory: build
@@ -257,5 +260,6 @@ jobs:
             -DCMAKE_CONFIGURATION_TYPES="${BUILD_TYPE}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache.exe" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe" \
-            -DMLN_WITH_QT=ON
+            -DMLN_WITH_QT=ON \
+            -DMLN_WITH_OPENGL=ON
           ninja.exe

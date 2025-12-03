@@ -6,7 +6,9 @@
 namespace mbgl {
 namespace style {
 
-static SourceObserver nullObserver;
+namespace {
+SourceObserver nullObserver;
+}
 
 Source::Source(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),

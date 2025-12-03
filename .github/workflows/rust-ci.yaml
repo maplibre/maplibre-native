@@ -24,23 +24,27 @@ jobs:
           - os: windows-latest
           - os: ubuntu-latest
     steps:
-      - uses: taiki-e/install-action@v2
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with: { tool: just }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          persist-credentials: false
       - run: just -v ci-test
 
   msrv:
     name: Rust tests MSRV (Minimal Supported Rust Version)
     runs-on: ubuntu-latest
     steps:
-      - uses: taiki-e/install-action@v2
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with: { tool: just }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          persist-credentials: false
       - name: Read crate metadata
         id: metadata
         run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
         with:
           toolchain: ${{ steps.metadata.outputs.rust-version }}
       - run: just ci-test-msrv

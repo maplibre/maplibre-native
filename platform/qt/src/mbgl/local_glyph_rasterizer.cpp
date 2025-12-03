@@ -40,13 +40,8 @@ LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fon
 LocalGlyphRasterizer::~LocalGlyphRasterizer() {}
 
 bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) {
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     return impl->isConfigured() && impl->metrics->inFont(glyphID.complex.code) &&
            util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
-#else
-    return impl->isConfigured() && impl->metrics->inFont(glyphID) &&
-           util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
-#endif
 }
 
 Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
@@ -58,11 +53,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
         return glyph;
     }
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID.complex.code);
-#else
-    glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID);
-#endif
     glyph.metrics.height = impl->metrics->height();
     glyph.metrics.left = 3;
     glyph.metrics.top = -8;
@@ -77,11 +68,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     painter.setRenderHints(QPainter::TextAntialiasing);
 
     // Render at constant baseline, to align with glyphs that are rendered by node-fontnik.
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     painter.drawText(QPointF(0, 20), QString(QChar(glyphID.complex.code)));
-#else
-    painter.drawText(QPointF(0, 20), QString(QChar(glyphID)));
-#endif
 
     auto img = std::make_unique<uint8_t[]>(image.sizeInBytes());
     memcpy(img.get(), image.constBits(), image.sizeInBytes());

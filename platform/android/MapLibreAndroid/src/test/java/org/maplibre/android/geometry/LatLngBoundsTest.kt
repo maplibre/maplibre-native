@@ -10,8 +10,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.maplibre.android.BaseTest
 
-class LatLngBoundsTest {
+class LatLngBoundsTest : BaseTest() {
     private var latLngBounds: LatLngBounds? = null
 
     @Before

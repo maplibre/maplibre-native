@@ -31,6 +31,8 @@ public:
     const SourceType type;
     const std::string id;
 
+    virtual bool isUpdateSynchronous() const { return false; }
+
 protected:
     std::optional<uint8_t> prefetchZoomDelta;
     std::optional<uint8_t> maxOverscaleFactor;

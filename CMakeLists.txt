@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
@@ -8,9 +8,11 @@ option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
 option(MLN_WITH_GLFW "Set up targets for GLFW platform" ON)
 option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
-option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
+option(MLN_WITH_OPENGL "Build with OpenGL renderer" OFF)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
+option(MLN_WITH_METAL "Build with Metal renderer" OFF)
+option(MLN_WITH_WEBGPU "Build with WebGPU renderer" OFF)
 option(MLN_WITH_PMTILES "Build with PMTiles support" ON)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
@@ -20,26 +22,8 @@ option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CORE_INCLUDE_DEPS "Include depdendencies in static build of core" OFF)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 
-if (MLN_LEGACY_RENDERER)
-    message(FATAL "The legacy renderer is no longer supported")
-endif()
-
-if (MLN_DRAWABLE_RENDERER)
-    message(FATAL "Do not pass MLN_DRAWABLE_RENDERER, the drawable renderer is now the default")
-endif()
-
-if (MLN_WITH_CLANG_TIDY)
-    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
-    if(NOT CLANG_TIDY_COMMAND)
-        message(FATAL_ERROR "ENABLE_CLANG_TIDY is ON but clang-tidy is not found!")
-    else()
-        message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
-    endif()
-    # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized),
-    # that's why we need to disable this `unknown-warning-option` here.
-    # We could check if current compiler supports particular flag before enabling it.
-    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-unknown-warning-option;--extra-arg=-Wno-pragmas")
-endif()
+include(cmake/validate-backend-options.cmake)
+include(cmake/clang-tidy.cmake)
 
 if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
@@ -233,22 +217,31 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/established_actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/mailbox.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/message.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/actor/optional_actor.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/actor/optional_actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/scheduler.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/color_mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/command_encoder.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/debug_group.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/depth_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/draw_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/draw_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/polyline_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_registry.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
@@ -311,9 +304,9 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/light.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/property_value.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/raster_dem_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/assertion.hpp
@@ -486,26 +479,19 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/geometry/line_atlas.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/attribute.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/attribute.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/color_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/cull_face_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/polyline_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/render_pass.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/background_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/circle_layer_factory.cpp
@@ -692,9 +678,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/raster_dem_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/tileset.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/transition_options.cpp
@@ -895,10 +881,15 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_operation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile_data.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/camera.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.hpp
@@ -991,8 +982,8 @@ if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
         PUBLIC
+            MLN_RENDER_BACKEND_OPENGL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND
@@ -1136,8 +1127,8 @@ if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
         PUBLIC
+            MLN_RENDER_BACKEND_METAL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND
@@ -1235,7 +1226,7 @@ if(MLN_WITH_VULKAN)
 
     target_compile_definitions(
         mbgl-core
-        PRIVATE
+        PUBLIC
             MLN_RENDER_BACKEND_VULKAN=1
     )
 
@@ -1326,6 +1317,127 @@ if(MLN_WITH_VULKAN)
     )
 endif()
 
+if(MLN_WITH_WEBGPU)
+    message(STATUS "Configuring WebGPU renderer backend")
+
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC
+            MLN_RENDER_BACKEND_WEBGPU=1
+    )
+
+    list(APPEND
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/wgsl_preprocessor.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/background.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/custom_geometry.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/custom_symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/debug.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/fill_extrusion.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/symbol.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/widevector.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/offscreen_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/tile_layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/layer_group.cpp
+    )
+
+    list(APPEND
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/index_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/collision.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/custom_geometry.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/custom_symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/debug.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/symbol.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/widevector.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/uniform_buffer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/vertex_buffer_resource.hpp
+    )
+
+    list(APPEND
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/index_buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
+    )
+
+    # Include WebGPU vendor configuration (Dawn or wgpu)
+    include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
+
+    # Include Dawn integration when requested
+    if(MLN_WEBGPU_IMPL_DAWN)
+        include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
+        if(TARGET mbgl-vendor-dawn)
+            target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
+        endif()
+    elseif(MLN_WEBGPU_IMPL_WGPU)
+        # Include wgpu-native integration
+        include(${PROJECT_SOURCE_DIR}/vendor/wgpu.cmake)
+        if(TARGET mbgl-vendor-wgpu)
+            target_link_libraries(mbgl-core PRIVATE mbgl-vendor-wgpu)
+            # Add WebGPU-Cpp implementation file (required for wgpu-native backend)
+            list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_cpp_impl.cpp)
+        endif()
+    endif()
+endif()
+
 list(APPEND
     SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
@@ -1359,10 +1471,14 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     )
     include(${PROJECT_SOURCE_DIR}/vendor/freetype.cmake)
     include(${PROJECT_SOURCE_DIR}/vendor/harfbuzz.cmake)
-    set(SHAPE_TARGETS
-        freetype
-        harfbuzz
+
+    target_include_directories(
+        mbgl-core SYSTEM
+        PUBLIC
+            ${PROJECT_SOURCE_DIR}/vendor/freetype/include
+            ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/src
     )
+
 endif()
 
 target_sources(
@@ -1427,10 +1543,12 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
+include(${PROJECT_SOURCE_DIR}/vendor/args.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/rapidjson.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/maplibre-native-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
@@ -1442,6 +1560,11 @@ include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1450,8 +1573,7 @@ endif()
 target_link_libraries(
     mbgl-core
     PRIVATE
-        MapLibreNative::Base::Extras::kdbush.hpp
-        MapLibreNative::Base::supercluster.hpp
+        mbgl-vendor-kdbush
         MapLibreNative::Base::shelf-pack-cpp
         MapLibreNative::Base::geojson-vt-cpp
         MapLibreNative::Base::cheap-ruler-cpp
@@ -1463,16 +1585,19 @@ target_link_libraries(
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
+        mbgl-vendor-supercluster
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+	    mlt-cpp
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
-        ${SHAPE_TARGETS} # from harfbuzz.cmake
+        $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-freetype>
+        $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-harfbuzz>
     PUBLIC
         MapLibreNative::Base
-        MapLibreNative::Base::Extras::expected-lite
-        MapLibreNative::Base::Extras::rapidjson
+        mbgl-vendor-expected-lite
+        mbgl-vendor-rapidjson
         MapLibreNative::Base::geojson.hpp
         MapLibreNative::Base::geometry.hpp
         MapLibreNative::Base::variant
@@ -1484,22 +1609,23 @@ set(EXPORT_TARGETS
     mbgl-core
     maplibre-native-base
     maplibre-native-base-cheap-ruler-cpp
-    maplibre-native-base-extras-filesystem
-    maplibre-native-base-extras-expected-lite
-    maplibre-native-base-extras-kdbush.hpp
-    maplibre-native-base-extras-rapidjson
+    mbgl-vendor-expected-lite
+    mbgl-vendor-kdbush
     maplibre-native-base-geojson-vt-cpp
     maplibre-native-base-geojson.hpp
     maplibre-native-base-geometry.hpp
     maplibre-native-base-jni.hpp
     maplibre-native-base-pixelmatch-cpp
     maplibre-native-base-shelf-pack-cpp
-    maplibre-native-base-supercluster.hpp
+    mbgl-vendor-supercluster
     maplibre-native-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
+    mbgl-vendor-filesystem
+    mbgl-vendor-metal-cpp
+    mbgl-vendor-rapidjson
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
@@ -1507,15 +1633,26 @@ set(EXPORT_TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    mbgl-vendor-metal-cpp
+    mlt-cpp
     unordered_dense
-    ${SHAPE_TARGETS} # from harfbuzz.cmake
 )
 
 if(MLN_USE_RUST)
     list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
 else()
     list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
+endif()
+
+if(MLN_TEXT_SHAPING_HARFBUZZ)
+    list(APPEND EXPORT_TARGETS mbgl-freetype mbgl-harfbuzz)
+endif()
+
+if(TARGET mbgl-vendor-dawn)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-dawn)
+endif()
+
+if(TARGET mbgl-vendor-wgpu)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-wgpu)
 endif()
 
 export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)

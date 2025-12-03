@@ -1,35 +1,52 @@
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
-load(
-    "@rules_swift//swift:swift.bzl",
-    "swift_library",
-)
+load("@rules_apple//apple:resources.bzl", "apple_resource_group")
+load("@rules_swift//swift:swift.bzl", "swift_library")
+load("//platform/ios/bazel:macros.bzl", "env_info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 configure_device_profiles()
 
+apple_resource_group(
+    name = "NavigationRoutes",
+    strip_structured_resources_prefixes = ["Data"],
+    structured_resources = ["Data/Routes"],
+    visibility = ["//visibility:public"],
+)
+
+# add SENTRY_DSN from the environment to the plist
+env_info_plist(
+    name = "info_swift_plist",
+    input = "Info.plist",
+    output = "Info-swift.plist",
+    vars = ["SENTRY_DSN"],
+)
+
 swift_library(
     name = "Sources",
-    srcs = glob(["Sources/*.swift"]),
-    data = glob([
-        "Data/*",
+    srcs = glob(["Sources/**/*.swift"]),
+    data = [":NavigationRoutes"] + glob([
+        "Data/*.geojson",
+        "Data/*.png",
         "Assets.xcassets/*",
     ]),
     module_name = "Sources",
     tags = ["manual"],
     deps = [
         "//platform:ios-sdk",
+        "@swiftpkg_polyline//:Polyline",
+        "@swiftpkg_sentry_cocoa//:Sentry",
     ],
 )
 
 ios_application(
     name = "MapLibreApp",
-    bundle_id = "{}.swiftapp".format(BUNDLE_ID_PREFIX),
+    bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
     families = [
         "iphone",
         "ipad",
     ],
-    infoplists = [":Info.plist"],
+    infoplists = [":Info-swift.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
     resources = [

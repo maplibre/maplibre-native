@@ -45,6 +45,7 @@ public:
 
     std::unique_ptr<gl::ProgramBase<Name>> programBase;
 
+    // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility) We don't want to list every derived class as a friend
     Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL
@@ -55,7 +56,7 @@ public:
             case gfx::Backend::Type::Vulkan: {
                 break;
             }
-#else // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
                 programBase = std::make_unique<gl::ProgramBase<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,

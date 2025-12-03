@@ -15,6 +15,11 @@
 #include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
 #endif
 
+#if MLN_RENDER_BACKEND_WEBGPU
+#include <mbgl/webgpu/context.hpp>
+#include <mbgl/shaders/webgpu/clipping_mask.hpp>
+#endif
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
@@ -58,7 +63,8 @@ PaintParameters::PaintParameters(gfx::Context& context_,
                                  uint64_t frameCount_,
                                  double tileLodMinRadius_,
                                  double tileLodScale_,
-                                 double tileLodPitchThreshold_)
+                                 double tileLodPitchThreshold_,
+                                 const gfx::ScissorRect& scissorRect_)
     : context(context_),
       backend(backend_),
       encoder(context.createCommandEncoder()),
@@ -76,7 +82,8 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       frameCount(frameCount_),
       tileLodMinRadius(tileLodMinRadius_),
       tileLodScale(tileLodScale_),
-      tileLodPitchThreshold(tileLodPitchThreshold_) {
+      tileLodPitchThreshold(tileLodPitchThreshold_),
+      scissorRect(scissorRect_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
 
     if (state.getViewportMode() == ViewportMode::FlippedY) {
@@ -156,7 +163,10 @@ void PaintParameters::clearStencil() {
     vulkanRenderPass.clearStencil();
 
     context.renderingStats().stencilClears++;
-#else // !MLN_RENDER_BACKEND_METAL
+#elif MLN_RENDER_BACKEND_WEBGPU
+    // WebGPU clears stencil through render pass descriptor
+    context.renderingStats().stencilClears++;
+#elif MLN_RENDER_BACKEND_OPENGL
     context.clearStencilBuffer(0b00000000);
 #endif
 }
@@ -176,7 +186,40 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         clearStencil();
     }
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_WEBGPU
+    std::vector<shaders::ClipUBO> tileUBOs;
+    for (const auto& tileRef : *renderTiles) {
+        const auto& tileID = tileRef.get().id;
+
+        const int32_t stencilID = nextStencilID;
+        const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
+        if (result.second) {
+            nextStencilID++;
+        } else {
+            continue;
+        }
+
+        if (tileUBOs.empty()) {
+            tileUBOs.reserve(count);
+        }
+
+        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile(tileID)),
+                                               /* .stencil_ref = */ static_cast<uint32_t>(stencilID),
+                                               /* .pad1 = */ 0,
+                                               /* .pad2 = */ 0,
+                                               /* .pad3 = */ 0});
+    }
+
+    if (!tileUBOs.empty()) {
+#if !defined(NDEBUG)
+        const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
+#endif
+
+        auto& webgpuContext = static_cast<webgpu::Context&>(context);
+        webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        webgpuContext.renderingStats().stencilUpdates++;
+    }
+#elif MLN_RENDER_BACKEND_METAL
     // Assign a stencil ID and build a UBO for each tile in the set
     std::vector<shaders::ClipUBO> tileUBOs;
     for (const auto& tileRef : *renderTiles) {
@@ -247,7 +290,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         vulkanContext.renderingStats().stencilUpdates++;
     }
 
-#else  // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_OPENGL
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
     if (!program) {

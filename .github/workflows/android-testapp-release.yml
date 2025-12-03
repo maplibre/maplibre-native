@@ -1,0 +1,77 @@
+name: android-testapp-release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-android-testapp-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          persist-credentials: false
+
+      - name: Create Release
+        run: |
+          gh release create android-testapp-${{ github.sha }} \
+            --draft=true \
+            --prerelease=false \
+            --latest=false \
+            --title android-testapp-${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  android-build-testapp:
+    needs: [create-android-testapp-release]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [opengl, vulkan]
+    defaults:
+      run:
+        working-directory: platform/android
+    env:
+      BUILDTYPE: Debug
+      IS_LOCAL_DEVELOPMENT: false
+      MLN_ANDROID_STL: c++_static
+      SENTRY_ORG: maplibre
+      SENTRY_PROJECT: maplibre-android
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-android-ci
+
+      - run: ./gradlew assemble${{ matrix.renderer }}Release
+
+      - name: Install sentry-cli
+        run: curl -sL https://sentry.io/get-cli/ | sh
+
+      - name: Upload debug symbols to sentry
+        run: sentry-cli debug-files upload MapLibreAndroidTestApp
+
+      - name: Upload test app
+        run: |
+          gh release upload android-testapp-${{ github.sha }} MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  finish-android-testapp-release:
+    needs: [android-build-testapp]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+
+      - name: Finalize release (set draft=false)
+        run: |
+          gh release edit android-testapp-${{ github.sha }} --draft=false
+        env:
+          GH_TOKEN: ${{ github.token }}

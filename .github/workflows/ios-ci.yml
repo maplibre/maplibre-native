@@ -38,14 +38,15 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -72,13 +73,13 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Cache Bazel
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -141,7 +142,7 @@ jobs:
           zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ios-render-test
           retention-days: 3
@@ -168,7 +169,7 @@ jobs:
           zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ios-cpp-unit-tests
           retention-days: 3
@@ -189,7 +190,7 @@ jobs:
 
       - name: Upload size test as artifact (Bloaty)
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ios-size-test-files
           retention-days: 3
@@ -200,7 +201,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -229,14 +230,13 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - name: VERSION file changed
         id: version-file-ios-changed
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files: platform/ios/VERSION
 
@@ -247,17 +247,23 @@ jobs:
           (github.event_name == 'push' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         if: env.make_release
         with:
           node-version-file: ".nvmrc"
 
-      - name: Build XCFramework
+      - name: Build XCFramework (Dynamic)
         if: env.make_release
         run: |
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
             --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+
+      - name: Build XCFramework (Static)
+        # for now, just build it TODO: make a static framework release
+        run: |
+          bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
+          echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.static)" >> "$GITHUB_ENV"
 
       - name: Create .zip with debug symbols
         if: env.make_release
@@ -293,7 +299,7 @@ jobs:
           cat changelog_for_version.md
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -313,32 +319,38 @@ jobs:
         if: env.make_release
         run: |
           cp ${{ env.xcframework }} MapLibre.dynamic.xcframework.zip
+          cp ${{ env.xcframework_static }} MapLibre.static.xcframework.zip
           chmod +w MapLibre.dynamic.xcframework.zip
+          chmod +w MapLibre.static.xcframework.zip
           zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
+          zip MapLibre.static.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
 
-      - name: Release (GitHub)
+      - name: Release (GitHub) - Create Draft
         if: env.make_release
         id: github_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         with:
           name: ios-v${{ env.version }}
           files: |
             MapLibre.dynamic.xcframework.zip
+            MapLibre.static.xcframework.zip
             ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
+          draft: true
 
       # needed to trigger workflow for Swift Package Index release
       - name: Generate token
         if: env.make_release
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
         id: generate_token
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
 
       - name: Release (Swift Package Index)
         if: env.make_release
@@ -354,7 +366,7 @@ jobs:
             -d '{"ref":"main","inputs":{
               "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
               "version":"${{ env.version }}",
-              "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
+              "download_url": "https://github.com/maplibre/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"}}'
 
       - run: npm install
         working-directory: .
@@ -366,6 +378,14 @@ jobs:
         env:
          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish release (remove draft)
+        if: env.make_release
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        with:
+          tag_name: ios-v${{ env.version }}
+          name: ios-v${{ env.version }}
+          draft: false
+
       - name: Write release notifications
         if: env.make_release && github.repository_owner == 'maplibre'
         env:
@@ -375,13 +395,12 @@ jobs:
 
   ios-build-cmake:
     needs: pre_job
-    runs-on: macos-latest
+    runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - name: Configure build with CMake
         run: cmake --preset ios

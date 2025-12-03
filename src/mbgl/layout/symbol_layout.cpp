@@ -27,13 +27,15 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+
 template <class Property>
-static bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
+bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
     return layout.get<Property>().match([](const typename Property::Type& t) { return !t.empty(); },
                                         [](const auto&) { return true; });
 }
+} // namespace
 
-namespace {
 expression::Value sectionOptionsToValue(const SectionOptions& options) {
     std::unordered_map<std::string, expression::Value> result;
     // TODO: Data driven properties that can be overridden on per section basis.
@@ -108,7 +110,9 @@ GlyphIDType getCharGlyphIDType(char16_t ch,
     return GlyphIDType::FontPBF;
 }
 
-} // namespace
+} // namespace mbgl
+
+namespace mbgl {
 
 SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                            const std::vector<Immutable<style::LayerProperties>>& layers,

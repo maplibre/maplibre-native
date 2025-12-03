@@ -193,8 +193,9 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       ImageRequestor(parameters.imageManager),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(parameters.threadPool, // Scheduler reference for the Actor retainer
-             ActorRef<GeometryTile>(*this, mailbox),
+      worker(parameters.isUpdateSynchronous,
+             parameters.threadPool, // Scheduler reference for the Actor retainer
+             OptionalActorRef<GeometryTile>(parameters.isUpdateSynchronous, *this, mailbox),
              parameters.threadPool,
              id_,
              sourceID,
