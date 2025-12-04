@@ -163,7 +163,7 @@ jobs:
         env:
           SIGNING_PRIVATE_KEY: ${{ secrets.SIGNING_PRIVATE_KEY }}
         run: |
-          echo "${SIGNING_PRIVATE_KEY}" | base64 -d > signing-key.gpg
+          echo "${SIGNING_PRIVATE_KEY}" > signing-key.gpg
         shell: bash
 
       - name: Publish to MavenCentral
