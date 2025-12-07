@@ -129,17 +129,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
     // Kernel density estimation with a Gaussian kernel of size 5x5
     const float d = -0.5 * 3.0 * 3.0 * dot(in.extrude, in.extrude);
     const float val = in.weight * props.intensity * GAUSS_COEF * exp(d);
 
-    return half4(val, 1.0, 1.0, 1.0);
+    return PrecisionFloat4(val, 1.0, 1.0, 1.0);
 }
 )";
 };

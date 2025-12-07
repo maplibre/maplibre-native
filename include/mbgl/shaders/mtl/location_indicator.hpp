@@ -52,9 +52,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LocationIndicatorDrawableUBO& drawable [[buffer(idLocationIndicatorUBO)]]) {
-    return half4(drawable.color);
+    return PrecisionFloat4(drawable.color);
 }
 )";
 };
@@ -91,14 +91,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LocationIndicatorDrawableUBO& drawable [[buffer(idLocationIndicatorUBO)]],
                             texture2d<float, access::sample> colorTexture [[texture(0)]]) {
 
     constexpr sampler sampler2d(coord::normalized, filter::linear);
     const float4 color = colorTexture.sample(sampler2d, in.uv);
 
-    return half4(color);
+    return PrecisionFloat4(color);
 }
 )";
 };

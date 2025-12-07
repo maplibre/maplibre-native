@@ -83,7 +83,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
 
     float alpha = 0.5;
 
@@ -100,7 +100,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
         color *= 0.1;
     }
 
-    return half4(color);
+    return PrecisionFloat4(color);
 }
 )";
 };
@@ -168,7 +168,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const CollisionTilePropsUBO& tileProps [[buffer(idCollisionTilePropsUBO)]]) {
 
     float alpha = 0.5;
@@ -194,7 +194,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float distance_to_edge = abs(extrude_length - radius);
     float opacity_t = smoothstep(-stroke_width, 0.0, -distance_to_edge);
 
-    return half4(opacity_t * color);
+    return PrecisionFloat4(opacity_t * color);
 }
 )";
 };

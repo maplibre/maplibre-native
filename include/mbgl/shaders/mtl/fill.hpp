@@ -168,7 +168,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    half4 color;
+    PrecisionFloat4 color;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
@@ -184,7 +184,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color    = PrecisionFloat4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity  = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
@@ -192,16 +192,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0, 1.0, 1.0, 1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
-    const half4 color = half4(props.color);
+    const PrecisionFloat4 color = PrecisionFloat4(props.color);
 #else
-    const half4 color = in.color;
+    const PrecisionFloat4 color = in.color;
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
@@ -210,7 +210,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = in.opacity;
 #endif
 
-    return half4(color * opacity);
+    return PrecisionFloat4(color * opacity);
 }
 )";
 };
@@ -238,7 +238,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 pos;
 #if !defined(HAS_UNIFORM_u_outline_color)
-    half4 outline_color;
+    PrecisionFloat4 outline_color;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
@@ -257,7 +257,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = position,
         .pos            = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
 #if !defined(HAS_UNIFORM_u_outline_color)
-        .outline_color  = half4(unpack_mix_color(vertx.outline_color, drawable.outline_color_t)),
+        .outline_color  = PrecisionFloat4(unpack_mix_color(vertx.outline_color, drawable.outline_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
@@ -265,10 +265,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
 //   TODO: Cause metal line primitive only support draw 1 pixel width line
@@ -278,9 +278,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //    float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
 #if defined(HAS_UNIFORM_u_outline_color)
-    const half4 color = half4(props.outline_color);
+    const PrecisionFloat4 color = PrecisionFloat4(props.outline_color);
 #else
-    const half4 color = in.outline_color;
+    const PrecisionFloat4 color = in.outline_color;
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
@@ -289,7 +289,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = in.opacity;
 #endif
 
-    return half4(color * opacity);
+    return PrecisionFloat4(color * opacity);
 }
 )";
 };
@@ -327,10 +327,10 @@ struct FragmentStage {
     float2 v_pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    half4 pattern_from;
+    PrecisionFloat4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    half4 pattern_to;
+    PrecisionFloat4 pattern_to;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
@@ -378,10 +378,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from   = half4(pattern_from),
+        .pattern_from   = PrecisionFloat4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to     = half4(pattern_to),
+        .pattern_to     = PrecisionFloat4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
@@ -389,14 +389,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
                             device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0, 1.0, 1.0, 1.0);
 #endif
 
     device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
@@ -432,7 +432,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
-    return half4(mix(color1, color2, props.fade) * opacity);
+    return PrecisionFloat4(mix(color1, color2, props.fade) * opacity);
 }
 )";
 };
@@ -471,10 +471,10 @@ struct FragmentStage {
     float2 v_pos;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    half4 pattern_from;
+    PrecisionFloat4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    half4 pattern_to;
+    PrecisionFloat4 pattern_to;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
@@ -529,10 +529,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos          = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from   = half4(pattern_from),
+        .pattern_from   = PrecisionFloat4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to     = half4(pattern_to),
+        .pattern_to     = PrecisionFloat4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(opacity),
@@ -540,14 +540,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
                             device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
     device const FillOutlinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillOutlinePatternTilePropsUBO;
@@ -587,7 +587,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     //float dist = length(in.v_pos - in.position.xy);
     //float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
-    return half4(mix(color1, color2, props.fade) * opacity);
+    return PrecisionFloat4(mix(color1, color2, props.fade) * opacity);
 }
 )";
 };
@@ -659,7 +659,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 
     // Calculate the distance of the pixel from the line in pixels.
@@ -670,7 +670,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
 
-    return half4(props.outline_color * (alpha * props.opacity));
+    return PrecisionFloat4(props.outline_color * (alpha * props.opacity));
 }
 )";
 };

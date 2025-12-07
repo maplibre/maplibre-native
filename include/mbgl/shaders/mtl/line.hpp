@@ -310,12 +310,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                             device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                             device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
@@ -347,7 +347,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
-    return half4(color * (alpha * opacity));
+    return PrecisionFloat4(color * (alpha * opacity));
 }
 )";
 };
@@ -483,11 +483,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_blur)
@@ -514,7 +514,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     constexpr sampler sampler2d(coord::normalized, filter::linear);
     const float4 color = gradientTexture.sample(sampler2d, float2(in.lineprogress, 0.5));
 
-    return half4(color * (alpha * opacity));
+    return PrecisionFloat4(color * (alpha * opacity));
 }
 )";
 };
@@ -573,10 +573,10 @@ struct FragmentStage {
     half opacity;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    half4 pattern_from;
+    PrecisionFloat4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    half4 pattern_to;
+    PrecisionFloat4 pattern_to;
 #endif
 };
 
@@ -662,15 +662,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .opacity      = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from = half4(vertx.pattern_from),
+        .pattern_from = PrecisionFloat4(vertx.pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to   = half4(vertx.pattern_to),
+        .pattern_to   = PrecisionFloat4(vertx.pattern_to),
 #endif
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const LineTilePropsUnionUBO* tilePropsVector [[buffer(idLineTilePropsUBO)]],
@@ -680,7 +680,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler image0_sampler [[sampler(0)]]) {
 
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
     device const LinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].linePatternTilePropsUBO;
@@ -751,7 +751,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     const float4 color = mix(image0.sample(image0_sampler, pos_a), image0.sample(image0_sampler, pos_b), tileProps.fade);
 
-    return half4(color * alpha * opacity);
+    return PrecisionFloat4(color * alpha * opacity);
 }
 )";
 };
@@ -916,7 +916,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const LineTilePropsUnionUBO* tilePropsVector [[buffer(idLineTilePropsUBO)]],
@@ -926,7 +926,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler image0_sampler [[sampler(0)]]) {
 
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
     device const LineSDFTilePropsUBO& tileProps = tilePropsVector[uboIndex].lineSDFTilePropsUBO;
@@ -972,7 +972,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0) *
                         smoothstep(0.5 - tileProps.sdfgamma / floorwidth, 0.5 + tileProps.sdfgamma / floorwidth, sdfdist);
 
-    return half4(color * (alpha * opacity));
+    return PrecisionFloat4(color * (alpha * opacity));
 }
 )";
 };

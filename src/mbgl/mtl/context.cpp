@@ -113,6 +113,12 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
 
+    // Intel Mac GPUs (GPUFamilyMac2) have limited half-precision support compared to Apple Silicon.
+    // Use float4 on Intel Macs, half4 on Apple Silicon for better compatibility.
+    if (backend.supportsAppleGPU()) {
+        addDefine(std::make_pair("USE_HALF_FLOAT", "1"));
+    }
+
     observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     const auto nsDefines = NS::Dictionary::dictionary(

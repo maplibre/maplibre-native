@@ -106,7 +106,7 @@ float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::samp
     return colorStops.sample(stops_sampler, float2(x, 0.0));
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const ColorReliefTilePropsUBO* tilePropsVector [[buffer(idColorReliefTilePropsUBO)]],
                             device const ColorReliefEvaluatedPropsUBO& props [[buffer(idColorReliefEvaluatedPropsUBO)]],
@@ -116,7 +116,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler image_sampler [[sampler(0)]],
                             sampler stops_sampler [[sampler(1)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0, 1.0, 1.0, 1.0);
 #endif
 
     device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
@@ -154,7 +154,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     float4 fragColor = props.opacity * mix(color_l, color_r, t);
 
-    return half4(fragColor);
+    return PrecisionFloat4(fragColor);
 }
 )";
 };

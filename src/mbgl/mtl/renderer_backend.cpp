@@ -45,8 +45,11 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     assert(commandQueue);
 #if TARGET_OS_SIMULATOR
     baseVertexInstanceDrawingSupported = true;
+    hasAppleGPUFamily = true;
 #else
+    // Apple Silicon GPUs support GPUFamilyApple3+, Intel Mac GPUs are GPUFamilyMac2
     baseVertexInstanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
+    hasAppleGPUFamily = device->supportsFamily(MTL::GPUFamilyApple3);
 #endif
 }
 

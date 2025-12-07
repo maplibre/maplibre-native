@@ -7,6 +7,30 @@ constexpr auto prelude = R"(
 #include <metal_stdlib>
 using namespace metal;
 
+// Precision type definitions for GPU compatibility
+// Apple Silicon uses half precision, Intel Mac uses float precision
+#ifdef USE_HALF_FLOAT
+// Apple Silicon - use native half precision for better performance
+using PrecisionFloat = half;
+using PrecisionFloat2 = half2;
+using PrecisionFloat3 = half3;
+using PrecisionFloat4 = half4;
+#define PRECISION_FLOAT(x) half(x)
+#define PRECISION_FLOAT2(x, y) half2(x, y)
+#define PRECISION_FLOAT3(x, y, z) half3(x, y, z)
+#define PRECISION_FLOAT4(x, y, z, w) half4(x, y, z, w)
+#else
+// Intel Mac - use full 32-bit precision for compatibility
+using PrecisionFloat = float;
+using PrecisionFloat2 = float2;
+using PrecisionFloat3 = float3;
+using PrecisionFloat4 = float4;
+#define PRECISION_FLOAT(x) float(x)
+#define PRECISION_FLOAT2(x, y) float2(x, y)
+#define PRECISION_FLOAT3(x, y, z) float3(x, y, z)
+#define PRECISION_FLOAT4(x, y, z, w) float4(x, y, z, w)
+#endif
+
 // The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
 // in a byte (-128..127). We scale regular normals up to length 63, but there are also
 // "special" normals that have a bigger length (of up to 126 in this case).

@@ -55,13 +55,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const CustomGeometryDrawableUBO& drawable [[buffer(idCustomGeometryDrawableUBO)]],
                             texture2d<float, access::sample> colorTexture [[texture(0)]]) {
     constexpr sampler sampler2d(coord::normalized, filter::linear);
     const float4 color = colorTexture.sample(sampler2d, in.uv) * drawable.color;
 
-    return half4(color);
+    return PrecisionFloat4(color);
 }
 )";
 };

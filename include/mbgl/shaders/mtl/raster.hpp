@@ -89,14 +89,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const RasterEvaluatedPropsUBO& props [[buffer(idRasterEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             texture2d<float, access::sample> image1 [[texture(1)]],
                             sampler image0_sampler [[sampler(0)]],
                             sampler image1_sampler [[sampler(1)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
     // read and cross-fade colors from the main and parent tiles
@@ -129,7 +129,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float3 high_vec = float3(props.brightness_low, props.brightness_low, props.brightness_low);
     float3 low_vec = float3(props.brightness_high, props.brightness_high, props.brightness_high);
 
-    return half4(half3(mix(high_vec, low_vec, rgb) * color.a), color.a);
+    return PrecisionFloat4(PrecisionFloat3(mix(high_vec, low_vec, rgb) * color.a), color.a);
 }
 )";
 };

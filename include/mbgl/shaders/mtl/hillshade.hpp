@@ -99,7 +99,7 @@ float get_aspect(float2 deriv) {
 }
 
 // MapLibre's legacy hillshade algorithm (Method 0: STANDARD)
-void standard_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread half4& fragColor) {
+void standard_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread PrecisionFloat4& fragColor) {
     float azimuth = props.azimuths.x + PI;
     float slope = atan(0.625 * length(deriv));
     float aspect = get_aspect(deriv);
@@ -117,11 +117,11 @@ void standard_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tilePr
     float shade = abs(glMod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
     float4 shade_color = mix(props.shadows[0], props.highlights[0], shade) * sin(scaledSlope) * clamp(intensity * 2.0, 0.0, 1.0);
     
-    fragColor = half4(accent_color * (1.0 - shade_color.a) + shade_color);
+    fragColor = PrecisionFloat4(accent_color * (1.0 - shade_color.a) + shade_color);
 }
 
 // Basic directional hillshade (Method 4: BASIC)
-void basic_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread half4& fragColor) {
+void basic_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread PrecisionFloat4& fragColor) {
     deriv = deriv * tileProps.exaggeration * 2.0;
     float azimuth = props.azimuths.x + PI;
     float cos_az = cos(azimuth);
@@ -135,14 +135,14 @@ void basic_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps
     
     // Blend shadow and highlight based on intensity
     if (shade > 0.5) {
-        fragColor = half4(props.highlights[0] * (2.0 * shade - 1.0));
+        fragColor = PrecisionFloat4(props.highlights[0] * (2.0 * shade - 1.0));
     } else {
-        fragColor = half4(props.shadows[0] * (1.0 - 2.0 * shade));
+        fragColor = PrecisionFloat4(props.shadows[0] * (1.0 - 2.0 * shade));
     }
 }
 
 // Multidirectional hillshade (Method 3: MULTIDIRECTIONAL)
-void multidirectional_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread half4& fragColor) {
+void multidirectional_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread PrecisionFloat4& fragColor) {
     deriv = deriv * tileProps.exaggeration * 2.0;
     float4 total_color = float4(0, 0, 0, 0);
 
@@ -172,11 +172,11 @@ void multidirectional_hillshade(float2 deriv, device const HillshadeTilePropsUBO
         }
     }
     
-    fragColor = half4(total_color);
+    fragColor = PrecisionFloat4(total_color);
 }
 
 // Combined shadow and highlight method (Method 1: COMBINED)
-void combined_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread half4& fragColor) {
+void combined_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread PrecisionFloat4& fragColor) {
     // Only supports one light source (index 0)
     deriv = deriv * tileProps.exaggeration * 2.0;
     float azimuth = props.azimuths.x + PI;
@@ -194,11 +194,11 @@ void combined_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tilePr
     float shade = cang * atan(length(deriv)) * 4.0 / PI / PI;
     float highlight = (PI / 2.0 - cang) * atan(length(deriv)) * 4.0 / PI / PI;
     
-    fragColor = half4(props.shadows[0] * shade + props.highlights[0] * highlight);
+    fragColor = PrecisionFloat4(props.shadows[0] * shade + props.highlights[0] * highlight);
 }
 
 // Igor's shadow/highlight method (Method 2: IGOR)
-void igor_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread half4& fragColor) {
+void igor_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps, device const HillshadeEvaluatedPropsUBO& props, thread PrecisionFloat4& fragColor) {
     // Only supports one light source (index 0)
     deriv = deriv * tileProps.exaggeration * 2.0;
     float aspect = get_aspect(deriv);
@@ -213,21 +213,21 @@ void igor_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps,
     float shadow_strength = slope_strength * aspect_strength;
     float highlight_strength = slope_strength * (1.0 - aspect_strength);
     
-    fragColor = half4(props.shadows[0] * shadow_strength + props.highlights[0] * highlight_strength);
+    fragColor = PrecisionFloat4(props.shadows[0] * shadow_strength + props.highlights[0] * highlight_strength);
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const HillshadeTilePropsUBO* tilePropsVector [[buffer(idHillshadeTilePropsUBO)]],
                             device const HillshadeEvaluatedPropsUBO& props [[buffer(idHillshadeEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return half4(1.0);
+    return PrecisionFloat4(1.0);
 #endif
 
     device const HillshadeTilePropsUBO& tileProps = tilePropsVector[uboIndex];
-    thread half4 fragColor;
+    thread PrecisionFloat4 fragColor;
 
     float4 pixel = image.sample(image_sampler, in.pos);
 
