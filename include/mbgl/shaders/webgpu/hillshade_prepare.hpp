@@ -91,15 +91,19 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let h = getElevation(in.tex_coord + vec2<f32>(0.0, epsilon.y));
     let i = getElevation(in.tex_coord + vec2<f32>(epsilon.x, epsilon.y));
 
-    var exaggeration = 0.3;
+    var exaggerationFactor = 0.3;
     if (tileProps.zoom < 4.5) {
-        exaggeration = 0.35;
+        exaggerationFactor = 0.35;
     }
     if (tileProps.zoom < 2.0) {
-        exaggeration = 0.4;
+        exaggerationFactor = 0.4;
+    }
+    var exaggeration = 0.0;
+    if (tileProps.zoom < 15.0) {
+        exaggeration = (tileProps.zoom - 15.0) * exaggerationFactor;
     }
 
-    let denom = pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 28.2562 - tileProps.zoom);
+    let denom = pow(2.0, exaggeration + (28.2562 - tileProps.zoom));
     let deriv = vec2<f32>((c + f + f + i) - (a + d + d + g),
                           (g + h + h + i) - (a + b + b + c)) * tileSize / denom;
 
