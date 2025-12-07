@@ -123,5 +123,9 @@ Mutable<Source::Impl> GeoJSONSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
 }
 
+bool GeoJSONSource::isUpdateSynchronous() const noexcept {
+    return baseImpl->isUpdateSynchronous();
+}
+
 } // namespace style
 } // namespace mbgl

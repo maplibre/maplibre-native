@@ -29,8 +29,8 @@ namespace mbgl {
 
 using namespace style;
 
-GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
-                                       ActorRef<GeometryTile> parent_,
+GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self_,
+                                       OptionalActorRef<GeometryTile> parent_,
                                        const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,

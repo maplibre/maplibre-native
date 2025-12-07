@@ -2,6 +2,20 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.21.2
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
+## 6.21.1
+
+- Include static XCFramework in GitHub release.
+
+## 6.21.0
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+- Support hiding attribution on iOS ([#3952](https://github.com/maplibre/maplibre-native/pull/3952)).
+- Support extra annotations for snapshotter for iOS ([#3963](https://github.com/maplibre/maplibre-native/pull/3963)).
+
 ## 6.20.1
 
 - Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).

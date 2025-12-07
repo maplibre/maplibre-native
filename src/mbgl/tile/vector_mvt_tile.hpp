@@ -17,6 +17,8 @@ public:
                   const Tileset&,
                   TileObserver* observer = nullptr);
 
+    ~VectorMVTTile() override;
+
     void setData(const std::shared_ptr<const std::string>& data) override;
 };
 
