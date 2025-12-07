@@ -102,7 +102,9 @@ void main() {
     vec4 color_r = getColorStop(r);
 
     // Interpolate between the two colors
-    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
+    // Guard against division by zero when el_r == el_l
+    float denom = el_r - el_l;
+    float t = (abs(denom) < 0.0001) ? 0.0 : clamp((el - el_l) / denom, 0.0, 1.0);
     fragColor = u_opacity * mix(color_l, color_r, t);
 
 #ifdef OVERDRAW_INSPECTOR

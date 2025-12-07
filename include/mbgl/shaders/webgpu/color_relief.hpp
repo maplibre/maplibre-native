@@ -146,7 +146,12 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let color_r = getColorStop(r, tileProps.color_ramp_size);
 
     // Interpolate color based on elevation
-    let t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
+    // Guard against division by zero when el_r == el_l
+    let denom = el_r - el_l;
+    var t: f32 = 0.0;
+    if (abs(denom) >= 0.0001) {
+        t = clamp((el - el_l) / denom, 0.0, 1.0);
+    }
     let final_color = mix(color_l, color_r, t);
 
     return vec4<f32>(final_color.rgb, final_color.a * props.opacity);

@@ -88,7 +88,7 @@ void RenderColorReliefLayer::updateColorRamp() {
     if (!elevationStopsData || !colorStops) {
         return;
     }
-    
+
     // Get the color property value
     auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
     if (colorValue.isUndefined()) {
@@ -99,7 +99,17 @@ void RenderColorReliefLayer::updateColorRamp() {
     std::vector<Color> colorStopsVector;
 
     // Get the expression from ColorRampPropertyValue
-    const mbgl::style::expression::Expression& expr = colorValue.getExpression();
+    // Note: getExpression() dereferences the internal pointer, so we must ensure isUndefined() is false first
+    const mbgl::style::expression::Expression* exprPtr = nullptr;
+    try {
+        exprPtr = &colorValue.getExpression();
+    } catch (...) {
+        return;
+    }
+    if (!exprPtr) {
+        return;
+    }
+    const mbgl::style::expression::Expression& expr = *exprPtr;
 
     if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
@@ -116,17 +126,21 @@ void RenderColorReliefLayer::updateColorRamp() {
         
         // Evaluate expression at each elevation to get colors
         for (float elevation : elevationStopsVector) {
-            mbgl::style::expression::EvaluationContext context;
-            context.withElevation(elevation);
-
-            expression::EvaluationResult result = expr.evaluate(context);
-            
             Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
 
-            if (result && result->is<Color>()) {
-                color = result->get<Color>();
+            try {
+                mbgl::style::expression::EvaluationContext context;
+                context.withElevation(elevation);
+
+                expression::EvaluationResult result = expr.evaluate(context);
+
+                if (result && result->is<Color>()) {
+                    color = result->get<Color>();
+                }
+            } catch (...) {
+                // If evaluation fails, use the default transparent black
             }
-            
+
             colorStopsVector.push_back(color);
         }
 
@@ -320,8 +334,12 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                             segments->size());
 
             // Update textures
+            auto demImagePtr = bucket.getDEMData().getImagePtr();
+            if (!demImagePtr || !demImagePtr->valid()) {
+                return false;
+            }
             std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
-            demTexture->setImage(bucket.getDEMData().getImagePtr());
+            demTexture->setImage(demImagePtr);
             demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
                                                  .wrapU = gfx::TextureWrapType::Clamp,
                                                  .wrapV = gfx::TextureWrapType::Clamp});
@@ -351,8 +369,12 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
         // Bind DEM texture
+        auto demImagePtr = bucket.getDEMData().getImagePtr();
+        if (!demImagePtr || !demImagePtr->valid()) {
+            continue;  // Skip this tile if DEM data is not ready
+        }
         std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
-        demTexture->setImage(bucket.getDEMData().getImagePtr());
+        demTexture->setImage(demImagePtr);
         demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
                                              .wrapU = gfx::TextureWrapType::Clamp,
                                              .wrapV = gfx::TextureWrapType::Clamp});

@@ -131,8 +131,10 @@ void main() {
     vec4 color_r = getColorStop(r);
 
     // Interpolate color based on elevation
-    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
-    
+    // Guard against division by zero when el_r == el_l
+    float denom = el_r - el_l;
+    float t = (abs(denom) < 0.0001) ? 0.0 : clamp((el - el_l) / denom, 0.0, 1.0);
+
     out_color = props.opacity * mix(color_l, color_r, t);
 }
 )";

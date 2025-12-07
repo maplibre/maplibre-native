@@ -148,8 +148,10 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float4 color_r = getColorStop(r, tileProps.color_ramp_size, colorStops, stops_sampler);
 
     // 4. Interpolate color based on elevation
-    float t = clamp((el - el_l) / (el_r - el_l), 0.0, 1.0);
-    
+    // Guard against division by zero when el_r == el_l
+    float denom = el_r - el_l;
+    float t = (abs(denom) < 0.0001) ? 0.0 : clamp((el - el_l) / denom, 0.0, 1.0);
+
     float4 fragColor = props.opacity * mix(color_l, color_r, t);
 
     return half4(fragColor);
