@@ -128,7 +128,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // 1. Get elevation at this pixel from DEM
     float el = getElevation(in.pos, image, image_sampler, tileProps.unpack);
+    
+    // DEBUG: Return elevation as grayscale
+    float normalized = (el + 500.0) / 9500.0; // Normalize to ~0-1 range
+    return half4(half3(normalized), 1.0);
 
+    // Rest of shader is commented out for debugging
+    /*
     // 2. Binary search to find surrounding elevation stops (l and r indices)
     int r = tileProps.color_ramp_size - 1;
     int l = 0;
@@ -162,6 +168,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     color *= props.opacity;
     fragColor = half4(color);
     return fragColor;
+    */
 }
 )";
 };
