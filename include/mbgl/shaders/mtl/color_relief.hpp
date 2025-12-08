@@ -126,15 +126,25 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+                            device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                            device const ColorReliefTilePropsUBO* tilePropsVector [[buffer(idColorReliefTilePropsUBO)]],
+                            device const ColorReliefEvaluatedPropsUBO& props [[buffer(idColorReliefEvaluatedPropsUBO)]],
+                            texture2d<float, access::sample> image [[texture(0)]],
+                            texture2d<float, access::sample> elevationStops [[texture(1)]],
+                            texture2d<float, access::sample> colorStops [[texture(2)]],
+                            sampler image_sampler [[sampler(0)]],
+                            sampler elevation_stops_sampler [[sampler(1)]],
+                            sampler color_stops_sampler [[sampler(2)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
+
+    device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
+
     // 1. Get elevation at this pixel from DEM
     float el = getElevation(in.pos, image, image_sampler, tileProps.unpack);
-    
-    // DEBUG: Return elevation as grayscale
-    float normalized = (el + 500.0) / 9500.0; // Normalize to ~0-1 range
-    return half4(half3(normalized), 1.0);
 
-    // Rest of shader is commented out for debugging
-    /*
     // 2. Binary search to find surrounding elevation stops (l and r indices)
     int r = tileProps.color_ramp_size - 1;
     int l = 0;
@@ -168,7 +178,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     color *= props.opacity;
     fragColor = half4(color);
     return fragColor;
-    */
 }
 )";
 };
