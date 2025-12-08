@@ -319,6 +319,14 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                            sizeof(HillshadeLayoutVertex),
                                            gfx::AttributeDataType::Short2);
                 }
+                
+                if (const auto& attr = vertexAttrs->set(idColorReliefTexturePosVertexAttribute)) {
+                    attr->setSharedRawData(vertices,
+                                           offsetof(HillshadeLayoutVertex, a2),
+                                           0,
+                                           sizeof(HillshadeLayoutVertex),
+                                           gfx::AttributeDataType::Short2);
+                }
             }
             return vertexAttrs;
         };
