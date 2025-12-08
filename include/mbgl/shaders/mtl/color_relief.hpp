@@ -159,7 +159,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     thread half4 fragColor;
     float4 color = mix(color_l, color_r, t);
-    color.a *= props.opacity;
+    color *= props.opacity;
     fragColor = half4(color);
     return fragColor;
 }
