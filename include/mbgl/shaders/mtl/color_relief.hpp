@@ -66,12 +66,8 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const ColorReliefDrawableUBO* drawableVector [[buffer(idColorReliefDrawableUBO)]],
-                                device const ColorReliefTilePropsUBO* tilePropsVector [[buffer(idColorReliefTilePropsUBO)]]) {
-
-    device const ColorReliefDrawableUBO& drawable = drawableVector[uboIndex];
-    device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
+                                device const ColorReliefDrawableUBO& drawable [[buffer(idColorReliefDrawableUBO)]],
+                                device const ColorReliefTilePropsUBO& tileProps [[buffer(idColorReliefTilePropsUBO)]]) {
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
     
