@@ -229,7 +229,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
-    mbgl::Log::Info(mbgl::Event::Render, "ColorRelief shader loaded, renderTiles count: %lu", renderTiles->size());
+    mbgl::Log::Info(mbgl::Event::Render, "ColorRelief shader loaded, renderTiles count: " + std::to_string(renderTiles->size()));
 
     auto renderPass = RenderPass::Translucent;
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
