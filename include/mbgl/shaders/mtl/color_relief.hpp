@@ -128,6 +128,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
+    // TEMP: force a solid color to verify pipeline output
+    return half4(1.0, 0.0, 1.0, 1.0);
+
     // 1. Get elevation at this pixel from DEM
     float el = getElevation(in.pos, image, image_sampler, tileProps.unpack);
 
