@@ -2123,7 +2123,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ### [JSON for Modern C++](https://github.com/nlohmann/json) by Niels Lohmann
 
 ```
-MIT License 
+MIT License
 
 Copyright (c) 2013-2022 Niels Lohmann
 
