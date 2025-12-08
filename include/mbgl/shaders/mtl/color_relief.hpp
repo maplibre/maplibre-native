@@ -94,16 +94,16 @@ float getElevation(float2 coord, texture2d<float, access::sample> image, sampler
 }
 
 // Function to get the elevation value at a specific color ramp stop
-float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler stops_sampler) {
+float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler elevation_sampler) {
     // Elevation stops are plain float values, read from the R channel
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return elevationStops.sample(stops_sampler, float2(x, 0.0)).r;
+    return elevationStops.sample(elevation_sampler, float2(x, 0.0)).r;
 }
 
 // Function to get the color value at a specific color ramp stop
-float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::sample> colorStops, sampler stops_sampler) {
+float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::sample> colorStops, sampler color_sampler) {
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return colorStops.sample(stops_sampler, float2(x, 0.0));
+    return colorStops.sample(color_sampler, float2(x, 0.0));
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
@@ -114,7 +114,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             texture2d<float, access::sample> elevationStops [[texture(1)]],
                             texture2d<float, access::sample> colorStops [[texture(2)]],
                             sampler image_sampler [[sampler(0)]],
-                            sampler stops_sampler [[sampler(1)]]) {
+                            sampler elevation_stops_sampler [[sampler(1)]],
+                            sampler color_stops_sampler [[sampler(2)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -131,8 +132,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // Perform binary search
     while (r - l > 1) {
         int m = (r + l) / 2;
-        float el_m = getElevationStop(m, tileProps.color_ramp_size, elevationStops, stops_sampler);
-        
+        float el_m = getElevationStop(m, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler);
+
         if (el < el_m) {
             r = m;
         } else {
@@ -141,11 +142,11 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     // 3. Get the elevation values and colors at the stops
-    float el_l = getElevationStop(l, tileProps.color_ramp_size, elevationStops, stops_sampler);
-    float el_r = getElevationStop(r, tileProps.color_ramp_size, elevationStops, stops_sampler);
+    float el_l = getElevationStop(l, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler);
+    float el_r = getElevationStop(r, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler);
 
-    float4 color_l = getColorStop(l, tileProps.color_ramp_size, colorStops, stops_sampler);
-    float4 color_r = getColorStop(r, tileProps.color_ramp_size, colorStops, stops_sampler);
+    float4 color_l = getColorStop(l, tileProps.color_ramp_size, colorStops, color_stops_sampler);
+    float4 color_r = getColorStop(r, tileProps.color_ramp_size, colorStops, color_stops_sampler);
 
     // 4. Interpolate color based on elevation
     // Guard against division by zero when el_r == el_l
