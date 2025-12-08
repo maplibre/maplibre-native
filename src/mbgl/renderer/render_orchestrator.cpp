@@ -184,21 +184,21 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
 
-    const TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
-                                        .debugOptions = updateParameters->debugOptions,
-                                        .transformState = updateParameters->transformState,
-                                        .fileSource = updateParameters->fileSource,
-                                        .mode = updateParameters->mode,
-                                        .annotationManager = updateParameters->annotationManager,
-                                        .imageManager = imageManager,
-                                        .glyphManager = glyphManager,
-                                        .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
-                                        .threadPool = threadPool,
-                                        .tileLodMinRadius = updateParameters->tileLodMinRadius,
-                                        .tileLodScale = updateParameters->tileLodScale,
-                                        .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
-                                        .tileLodZoomShift = updateParameters->tileLodZoomShift,
-                                        .dynamicTextureAtlas = dynamicTextureAtlas};
+    TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
+                                  .debugOptions = updateParameters->debugOptions,
+                                  .transformState = updateParameters->transformState,
+                                  .fileSource = updateParameters->fileSource,
+                                  .mode = updateParameters->mode,
+                                  .annotationManager = updateParameters->annotationManager,
+                                  .imageManager = imageManager,
+                                  .glyphManager = glyphManager,
+                                  .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
+                                  .threadPool = threadPool,
+                                  .tileLodMinRadius = updateParameters->tileLodMinRadius,
+                                  .tileLodScale = updateParameters->tileLodScale,
+                                  .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
+                                  .tileLodZoomShift = updateParameters->tileLodZoomShift,
+                                  .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);
@@ -410,6 +410,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 updateList[index] = true;
             }
         }
+        tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
 
@@ -428,12 +429,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     // Prepare. Update all matrices and generate data that we should upload to the GPU.
-    for (const auto& entry : renderSources) {
+    for (const auto& [name, renderSource] : renderSources) {
         MLN_TRACE_ZONE(prepare source);
-        if (entry.second->isEnabled()) {
-            entry.second->prepare({.transform = renderTreeParameters->transformParams,
+        if (renderSource->isEnabled()) {
+            renderSource->prepare({.transform = renderTreeParameters->transformParams,
                                    .debugOptions = updateParameters->debugOptions,
-                                   .imageManager = *imageManager});
+                                   .imageManager = *imageManager,
+                                   .sourceName = name});
         }
     }
 

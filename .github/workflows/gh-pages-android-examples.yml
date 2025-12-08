@@ -17,13 +17,13 @@ jobs:
         shell: bash
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
 
       - name: Generate documentation
         run: make mkdocs-build
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.7.3
+        uses: JamesIves/github-pages-deploy-action@4a3abc783e1a24aeb44c16e869ad83caf6b4cc23 # v4.7.4
         with:
           branch: gh-pages
           folder: platform/android/site

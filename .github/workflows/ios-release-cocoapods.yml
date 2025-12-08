@@ -14,9 +14,9 @@ jobs:
         working-directory: platform/ios
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found

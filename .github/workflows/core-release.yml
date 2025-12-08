@@ -6,12 +6,15 @@ permissions:
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/core-release.yml
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
@@ -21,11 +24,16 @@ jobs:
             include \
             vendor/maplibre-native-base/include \
             vendor/maplibre-native-base/deps/variant/include \
-            vendor/maplibre-native-base/deps/geometry.hpp/include
+            vendor/maplibre-native-base/deps/geometry.hpp/include \
+            vendor/maplibre-native-base/deps/geojson.hpp/include \
+            vendor/metal-cpp \
+            vendor/expected-lite/include
+
       - name: Create Release
+        if: github.event_name == 'workflow_dispatch'
         run: |
           gh release create core-${{ github.sha }} \
-            --draft=false \
+            --draft=true \
             --prerelease=false \
             --latest=false \
             --title "core-${{ github.sha }}" \
@@ -37,20 +45,40 @@ jobs:
     needs: [create-release]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
+      - run: brew install webp libuv
+
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
+        with:
+          tool: armerge@2
+
       - name: Build mbgl-core for macOS
         run: |
-          cmake --preset macos-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset macos-core
+          cmake --preset macos-metal -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
+          cmake --build build-macos-metal --target mbgl-core
 
       - name: Rename artifact
-        run: cp build-macos/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
+        run: |
+          cp build-macos-metal/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
+          cp build-macos-metal/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-macos-arm64-metal.a
 
-      - name: Upload macOS artifact
-        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-macos-arm64-metal.a
+      - name: Upload macOS artifacts
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: macos-metal-build
+          path: |
+            libmaplibre-native-core-macos-arm64-metal.a
+            libmaplibre-native-core-amalgam-macos-arm64-metal.a
+
+      - name: Upload macOS artifacts (release)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-macos-arm64-metal.a
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-amalgam-macos-arm64-metal.a
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -69,24 +97,38 @@ jobs:
           - renderer: vulkan
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
+      - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
+        with:
+          tool: armerge@2
+
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset linux-${{ matrix.renderer }}-core
+          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core
 
       - name: Rename artifact
         run: |
           cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
           cp build-linux-${{ matrix.renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
 
-      - name: Upload Linux artifact
+      - name: Upload Linux artifacts
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}-build
+          path: |
+            libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+            libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+
+      - name: Upload Linux artifacts (release)
+        if: github.event_name == 'workflow_dispatch'
         run: |
           gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
           gh release upload core-${{ github.sha }} libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
@@ -103,11 +145,11 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Build mbgl-core for Windows
         run: |
@@ -118,6 +160,15 @@ jobs:
         run: Copy-Item build-windows-${{ matrix.renderer }}/mbgl-core.lib maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
 
       - name: Upload Windows artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: windows-${{ matrix.renderer }}-build
+          path: |
+            maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
+
+      - name: Upload Windows artifact (release)
+        if: github.event_name == 'workflow_dispatch'
         run: gh release upload core-${{ github.sha }} maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
         env:
           GH_TOKEN: ${{ github.token }}

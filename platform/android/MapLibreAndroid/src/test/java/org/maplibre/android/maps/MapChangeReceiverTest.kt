@@ -7,6 +7,7 @@ import org.maplibre.android.maps.MapView.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -15,7 +16,7 @@ import org.mockito.MockitoAnnotations
 /**
  * Tests integration of MapChangeDispatcher and see if events are correctly forwarded.
  */
-class MapChangeReceiverTest {
+class MapChangeReceiverTest : BaseTest() {
     private var mapChangeEventManager: MapChangeReceiver? = null
 
     @Mock

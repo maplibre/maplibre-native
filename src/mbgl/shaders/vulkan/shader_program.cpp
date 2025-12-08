@@ -49,7 +49,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         defineStr += "#define USE_SURFACE_TRANSFORM";
     }
 
-    observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+    observer.onPreCompileShader(shaderID, gfx::Backend::Type::Vulkan, defineStr);
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
@@ -61,8 +61,9 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         glslang::TShader glslShader(language);
 
         const auto preamble = defineStr + "\n" + prelude;
-        const char* shaderData = data.data();
-        const int shaderDataSize = static_cast<int>(data.size());
+        const std::string shaderStr = std::string("#version ") + std::to_string(defaultVersion) + "\n" + data.data();
+        const char* shaderData = shaderStr.data();
+        const int shaderDataSize = static_cast<int>(shaderStr.size());
 
         glslShader.setPreamble(preamble.c_str());
         glslShader.setStringsWithLengths(&shaderData, &shaderDataSize, 1);
@@ -115,7 +116,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     backend.setDebugName(vertexShader.get(), shaderName + ".vert");
     backend.setDebugName(fragmentShader.get(), shaderName + ".frag");
 
-    observer.onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+    observer.onPostCompileShader(shaderID, gfx::Backend::Type::Vulkan, defineStr);
 }
 
 ShaderProgram::~ShaderProgram() noexcept {
@@ -123,7 +124,7 @@ ShaderProgram::~ShaderProgram() noexcept {
         return;
     }
 
-    context.enqueueDeletion([pipelines = std::move(pipelines)](auto&) mutable { pipelines.reset(); });
+    context.enqueueDeletion([ptr = std::move(pipelines)](auto&) mutable { ptr.reset(); });
 }
 
 const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelineInfo) {

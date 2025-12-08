@@ -142,3 +142,29 @@ add_test(
         ${PROJECT_SOURCE_DIR}/test/storage/server.js
         $<TARGET_FILE:mbgl-test-runner>
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
+find_program(ARMERGE NAMES armerge)
+
+if(NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    message(STATUS "Found armerge: ${ARMERGE}")
+    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
+    set(STATIC_LIBS "")
+
+    find_static_library(STATIC_LIBS NAMES png)
+    find_static_library(STATIC_LIBS NAMES jpeg)
+    find_static_library(STATIC_LIBS NAMES webp)
+    find_static_library(STATIC_LIBS NAMES uv uv_a)
+
+    add_custom_command(
+        TARGET mbgl-core
+        POST_BUILD
+        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+            $<TARGET_FILE:mbgl-core>
+            $<TARGET_FILE:mbgl-freetype>
+            $<TARGET_FILE:mbgl-vendor-csscolorparser>
+            $<TARGET_FILE:mbgl-harfbuzz>
+            $<TARGET_FILE:mbgl-vendor-parsedate>
+            ${STATIC_LIBS}
+    )
+
+endif()

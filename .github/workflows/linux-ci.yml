@@ -24,21 +24,25 @@ permissions:
   contents: read          # needed for CodeQL
   security-events: write  # needed for CodeQL
 
+env:
+  EGL_PLATFORM: surfaceless
+
 jobs:
   pre_job:
     runs-on: ubuntu-22.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
 
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -53,57 +57,59 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [vulkan, drawable, drawable-rust]
-    runs-on: ubuntu-22.04
+        variant:
+          - renderer: vulkan
+            rust: false
+          - renderer: opengl
+            rust: false
+          - renderer: opengl
+            rust: true
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           languages: cpp
-
-      - name: Get latest CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - if: matrix.renderer == 'drawable-rust'
-        run: |
-          echo "renderer_flag_cmake=DMLN_WITH_OPENGL=ON -DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
-          cargo install cxxbridge-cmd --version 1.0.157 --locked
+      - run: cargo install armerge@2.2.0
+      # TODO: use below once
+      # https://github.com/tux3/armerge/issues/14
+      # is fixed
 
-      - if: matrix.renderer == 'drawable'
-        run: |
-          echo "-DMLN_WITH_OPENGL=ON" >> "$GITHUB_ENV"
+      # - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
+      #   with:
+      #     tool: armerge@2
 
-      - if: matrix.renderer == 'vulkan'
-        run: echo renderer_flag_cmake="-DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
+      - if: matrix.variant.rust
+        run: cargo install cxxbridge-cmd --version 1.0.157 --locked
 
-      - name: Install sccache
+      - uses: ./.github/actions/install-sccache
+
+      - name: Install ctcache
         run: |
-          curl -LO https://github.com/mozilla/sccache/releases/download/v0.10.0/sccache-v0.10.0-x86_64-unknown-linux-musl.tar.gz
-          tar -xzf sccache-v0.10.0-x86_64-unknown-linux-musl.tar.gz
-          sudo mv sccache-v0.10.0-x86_64-unknown-linux-musl/sccache /usr/bin/sccache
-          sudo chmod +x /usr/bin/sccache
-          rm -rf sccache-v0.10.0-x86_64-unknown-linux-musl
+          # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
+          git clone https://github.com/louwers/ctcache.git
+          cd ctcache
+          cd ..
+          mv ctcache /usr/local/bin
 
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
 
-      - name: Build MapLibre Native Core
+      - name: Build MapLibre Native
         env:
           CI: 1
         run: |
@@ -118,12 +124,26 @@ jobs:
             export SCCACHE_S3_NO_CREDENTIALS=1
           fi
 
-          cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON \
+          # ctcache configuration
+          export CTCACHE_HOST=34.229.50.221
+          export CTCACHE_PORT=5000
+          export CTCACHE_PROTO=http
+
+          if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
+            echo "setting CTCACHE_AUTH_KEY"
+            export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
+          else
+            # do not write to cache if CTCACHE_AUTH_KEY not set
+            export CTCACHE_HOST_READ_ONLY=1
+          fi
+
+          cmake --preset linux-${{ matrix.variant.renderer }} \
+            -DMLN_WITH_CLANG_TIDY=ON \
+            -DCLANG_TIDY_COMMAND=/usr/local/bin/ctcache/clang-tidy \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-            -DMLN_WITH_COVERAGE=ON \
-            ${{ env.renderer_flag_cmake }}
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+            -DMLN_WITH_COVERAGE=ON
+          cmake --build build-linux-${{ matrix.variant.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
 
@@ -131,93 +151,90 @@ jobs:
         run: sccache --show-stats
 
       - name: Upload mbgl-render as artifact
-        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: mbgl-render
           path: |
-            build/bin/mbgl-render
+            build-linux-${{ matrix.variant.renderer }}/bin/mbgl-render
 
       - name: Upload mbgl-benchmark-runner as artifact
-        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: mbgl-benchmark-runner
           path: |
-            build/mbgl-benchmark-runner
+            build-linux-${{ matrix.variant.renderer }}/mbgl-benchmark-runner
 
       - name: Upload mbgl-render & mbgl-benchmark-runner to S3
-        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+        if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         run: |
-          aws s3 cp build/bin/mbgl-render s3://maplibre-native/mbgl-render-main
-          aws s3 cp build/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
+          aws s3 cp build-linux-${{ matrix.variant.renderer }}/bin/mbgl-render s3://maplibre-native/mbgl-render-main
+          aws s3 cp build-linux-${{ matrix.variant.renderer }}/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
 
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
         with:
           category: "/language:cpp"
 
       # unit tests
 
-      - run: chmod +x build/mbgl-test-runner
+      - run: chmod +x build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       - name: Run C++ tests
-        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
-        run: xvfb-run -a build/mbgl-test-runner
+        continue-on-error: ${{ matrix.variant.renderer == 'vulkan' }}
+        run: xvfb-run -a build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
       # render tests
 
-      - run: chmod +x build/mbgl-render-test-runner
+      - run: chmod +x build-linux-${{ matrix.variant.renderer }}/mbgl-render-test-runner
 
       - name: Run render test
         id: render_test
         run: |
-          renderer="${{ matrix.renderer }}"
+          renderer="${{ matrix.variant.renderer }}"
           if [[ "$renderer" == *-rust ]]; then
             renderer=${renderer%-rust}
           fi
-          xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
+          xvfb-run -a build-linux-${{ matrix.variant.renderer }}/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: render-test-result-${{ matrix.renderer }}
+          name: render-test-result-${{ matrix.variant.renderer }}
           path: |
-            metrics/linux-${{ matrix.renderer }}.html
+            metrics/linux-${{ matrix.variant.renderer }}.html
 
       # expression tests
 
-      - run: chmod +x build/expression-test/mbgl-expression-test
+      - run: chmod +x build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
       - name: Run expression test
-        run: build/expression-test/mbgl-expression-test
-
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
+        run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-coverage:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
       - name: Cache Bazel
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         with:
           node-version-file: '.nvmrc'
 
@@ -233,11 +250,11 @@ jobs:
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //render-test:render-test //expression-test:test
+            //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
@@ -251,6 +268,11 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
       - name: Mark result as failed
         if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1

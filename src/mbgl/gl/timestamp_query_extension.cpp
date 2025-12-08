@@ -54,12 +54,12 @@ std::unique_ptr<TimestampQueryLoader> &singleton() {
 
 void glGenQueries(GLsizei n, GLuint *ids) {
     assert(singleton() && singleton()->glGenQueries);
-    return singleton()->glGenQueries(n, ids);
+    singleton()->glGenQueries(n, ids);
 }
 
 void glDeleteQueries(GLsizei n, const GLuint *ids) {
     assert(singleton() && singleton()->glDeleteQueries);
-    return singleton()->glDeleteQueries(n, ids);
+    singleton()->glDeleteQueries(n, ids);
 }
 
 GLboolean glIsQuery(GLuint id) {
@@ -69,47 +69,47 @@ GLboolean glIsQuery(GLuint id) {
 
 void glBeginQuery(GLenum target, GLuint id) {
     assert(singleton() && singleton()->glBeginQuery);
-    return singleton()->glBeginQuery(target, id);
+    singleton()->glBeginQuery(target, id);
 }
 
 void glEndQuery(GLenum target) {
     assert(singleton() && singleton()->glEndQuery);
-    return singleton()->glEndQuery(target);
+    singleton()->glEndQuery(target);
 }
 
 void glQueryCounter(GLuint id, GLenum target) {
     assert(singleton() && singleton()->glQueryCounter);
-    return singleton()->glQueryCounter(id, target);
+    singleton()->glQueryCounter(id, target);
 }
 
 void glGetQueryiv(GLenum target, GLenum pname, GLint *params) {
     assert(singleton() && singleton()->glGetQueryiv);
-    return singleton()->glGetQueryiv(target, pname, params);
+    singleton()->glGetQueryiv(target, pname, params);
 }
 
 void glGetQueryObjectiv(GLuint id, GLenum pname, GLint *params) {
     assert(singleton() && singleton()->glGetQueryObjectiv);
-    return singleton()->glGetQueryObjectiv(id, pname, params);
+    singleton()->glGetQueryObjectiv(id, pname, params);
 }
 
 void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint *params) {
     assert(singleton() && singleton()->glGetQueryObjectuiv);
-    return singleton()->glGetQueryObjectuiv(id, pname, params);
+    singleton()->glGetQueryObjectuiv(id, pname, params);
 }
 
 void glGetQueryObjecti64v(GLuint id, GLenum pname, GLint64 *params) {
     assert(singleton() && singleton()->glGetQueryObjecti64v);
-    return singleton()->glGetQueryObjecti64v(id, pname, params);
+    singleton()->glGetQueryObjecti64v(id, pname, params);
 }
 
 void glGetQueryObjectui64v(GLuint id, GLenum pname, GLuint64 *params) {
     assert(singleton() && singleton()->glGetQueryObjectui64v);
-    return singleton()->glGetQueryObjectui64v(id, pname, params);
+    singleton()->glGetQueryObjectui64v(id, pname, params);
 }
 
 void glGetInteger64v(GLenum pname, GLint64 *data) {
     assert(singleton() && singleton()->glGetInteger64v);
-    return singleton()->glGetInteger64v(pname, data);
+    singleton()->glGetInteger64v(pname, data);
 }
 
 void loadTimeStampQueryExtension(const GlContexsLoader &loadExtension) {

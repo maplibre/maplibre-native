@@ -18,36 +18,22 @@
     "@aws-sdk/client-s3": "^3.556.0",
     "@mapbox/flow-remove-types": "^2.0.0",
     "@mapbox/mvt-fixtures": "3.10.0",
-    "@octokit/plugin-retry": "^7.1.0",
     "@octokit/rest": "^20.1.0",
-    "@types/argparse": "^2.0.16",
     "@types/ejs": "^3.1.5",
     "@types/node": "^22.9.0",
-    "argparse": "^2.0.1",
     "csscolorparser": "^1.0.3",
-    "d3-queue": "3.0.7",
-    "diff": "5.2.0",
     "ejs": "^3.1.10",
-    "esm": "~3.2.25",
     "express": "^4.19.2",
-    "json-stringify-pretty-compact": "^4.0.0",
-    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "lodash.template": "4.5.0",
-    "mapbox-gl-styles": "2.0.2",
-    "pixelmatch": "^5.3.0",
-    "pngjs": "^7.0.0",
-    "pretty-bytes": "^6.1.1",
-    "request": "^2.88.0",
-    "semver": "^7.6.0",
-    "shuffle-seed": "1.1.6",
-    "st": "3.0.0",
-    "tape": "^5.7.5",
-    "typescript": "^5.4.5",
-    "xcode": "^3.0.1"
+    "@mapbox/mapbox-gl-styles": "2.1.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "copy-style-spec": "cp node_modules/@maplibre/maplibre-gl-style-spec/dist/latest.json scripts/style-spec-reference/v8.json"
   },
-  "type": "module"
+  "type": "module",
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  }
 }

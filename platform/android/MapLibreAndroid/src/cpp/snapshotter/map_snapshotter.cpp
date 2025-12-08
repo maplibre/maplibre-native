@@ -24,7 +24,12 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
                                const jni::Object<LatLngBounds>& region,
                                const jni::Object<CameraPosition>& position,
                                jni::jboolean _showLogo,
-                               const jni::String& _localIdeographFontFamily)
+                               jni::jboolean _showAttribution,
+                               const jni::String& _localIdeographFontFamily,
+                               jni::jfloat paddingLeft,
+                               jni::jfloat paddingTop,
+                               jni::jfloat paddingRight,
+                               jni::jfloat paddingBottom)
     : javaPeer(_env, _obj),
       pixelRatio(_pixelRatio) {
     // Get a reference to the JavaVM for callbacks
@@ -39,6 +44,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
     auto size = mbgl::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
     showLogo = _showLogo;
+    showAttribution = _showAttribution;
 
     // Create the core snapshotter
     snapshotter = std::make_unique<mbgl::MapSnapshotter>(
@@ -55,6 +61,10 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
     }
 
     if (region) {
+        snapshotter->setPadding({static_cast<double>(paddingTop),
+                                 static_cast<double>(paddingLeft),
+                                 static_cast<double>(paddingBottom),
+                                 static_cast<double>(paddingRight)});
         snapshotter->setRegion(LatLngBounds::getLatLngBounds(_env, region));
     }
 
@@ -94,7 +104,7 @@ void MapSnapshotter::start(JNIEnv& env) {
         } else {
             // Create the wrapper
             auto mapSnapshot = android::MapSnapshot::New(
-                *_env, std::move(image), pixelRatio, attributions, showLogo, pointForFn, latLngForFn);
+                *_env, std::move(image), pixelRatio, attributions, showLogo, showAttribution, pointForFn, latLngForFn);
 
             // invoke callback
             static auto onSnapshotReady = javaClass.GetMethod<void(jni::Object<MapSnapshot>)>(*_env, "onSnapshotReady");
@@ -134,6 +144,11 @@ void MapSnapshotter::setCameraPosition(JNIEnv& env, const jni::Object<CameraPosi
 
 void MapSnapshotter::setRegion(JNIEnv& env, const jni::Object<LatLngBounds>& region) {
     snapshotter->setRegion(LatLngBounds::getLatLngBounds(env, region));
+}
+
+void MapSnapshotter::setPadding(JNIEnv&, jni::jint left, jni::jint top, jni::jint right, jni::jint bottom) {
+    snapshotter->setPadding(
+        {static_cast<double>(top), static_cast<double>(left), static_cast<double>(bottom), static_cast<double>(right)});
 }
 
 // Private methods //
@@ -327,7 +342,12 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
                                                           const jni::Object<LatLngBounds>&,
                                                           const jni::Object<CameraPosition>&,
                                                           jni::jboolean,
-                                                          const jni::String&>,
+                                                          jni::jboolean,
+                                                          const jni::String&,
+                                                          jni::jfloat,
+                                                          jni::jfloat,
+                                                          jni::jfloat,
+                                                          jni::jfloat>,
                                             "nativeInitialize",
                                             "finalize",
                                             METHOD(&MapSnapshotter::setStyleUrl, "setStyleUrl"),
@@ -342,6 +362,7 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
                                             METHOD(&MapSnapshotter::setSize, "setSize"),
                                             METHOD(&MapSnapshotter::setCameraPosition, "setCameraPosition"),
                                             METHOD(&MapSnapshotter::setRegion, "setRegion"),
+                                            METHOD(&MapSnapshotter::setPadding, "setPadding"),
                                             METHOD(&MapSnapshotter::start, "nativeStart"),
                                             METHOD(&MapSnapshotter::cancel, "nativeCancel"));
 }

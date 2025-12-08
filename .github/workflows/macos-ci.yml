@@ -8,12 +8,15 @@ on:
     paths:
       - 'platform/macos/**'
       - 'platform/darwin/**'
+      - 'platform/glfw/**'
       - '.github/workflows/macos-ci.yml'
       - 'bin/**'
       - 'include/**'
       - 'platform/default/**'
+      - 'render-test/**'
       - 'src/**'
       - 'vendor/**'
+      - 'metrics/**'
       - '.gitmodules'
       - '!**/*.md'
       - 'WORKSPACE'
@@ -21,6 +24,9 @@ on:
       - '.bazelrc'
       - '.bazelversion'
       - 'pnpm-lock.yaml'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'cmake/**'
 
   pull_request:
     branches:
@@ -28,12 +34,15 @@ on:
     paths:
       - 'platform/macos/**'
       - 'platform/darwin/**'
+      - 'platform/glfw/**'
       - '.github/workflows/macos-ci.yml'
       - 'bin/**'
       - 'include/**'
       - 'platform/default/**'
+      - 'render-test/**'
       - 'src/**'
       - 'vendor/**'
+      - 'metrics/**'
       - '.gitmodules'
       - '!**/*.md'
       - 'WORKSPACE'
@@ -41,6 +50,9 @@ on:
       - '.bazelrc'
       - '.bazelversion'
       - 'pnpm-lock.yaml'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'cmake/**'
 
 concurrency:
   # cancel jobs on PRs only
@@ -49,21 +61,21 @@ concurrency:
 
 jobs:
   build:
-    name: MacOS CI Tests
-    runs-on: [macos-14]
+    name: MacOS Metal CI Tests
+    runs-on: [macos-15]
     defaults:
       run:
         working-directory: platform/macos
         shell: bash
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Cache Bazel
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -80,3 +92,70 @@ jobs:
 
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+
+  webgpu-cmake:
+    name: macOS WebGPU (${{ matrix.variant.name }})
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - impl: dawn
+            name: Dawn
+          - impl: wgpu
+            name: wgpu
+
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install dependencies
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+        run: |
+          brew install cmake ninja pkg-config python@3.11 go glfw libuv icu4c jpeg-turbo webp libpng ccache
+          brew link --overwrite python@3.11
+
+      - name: Configure environment
+        run: |
+          {
+            echo "PKG_CONFIG_PATH=$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix libuv)/lib/pkgconfig:${PKG_CONFIG_PATH}"
+            echo "PATH=$(brew --prefix python@3.11)/bin:$(brew --prefix go)/bin:$PATH"
+            echo "CC=clang"
+            echo "CXX=clang++"
+          } >> "$GITHUB_ENV"
+
+      - name: Configure build
+        run: cmake --preset macos-webgpu-${{ matrix.variant.impl }}
+
+      - name: Build targets
+        run: |
+          cmake --build build-macos-webgpu-${{ matrix.variant.impl }} --target \
+            mbgl-render-test-runner \
+            mbgl-expression-test \
+            mbgl-test-runner
+
+      - name: Run unit tests
+        id: unit_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/mbgl-test-runner --gtest_filter=-Map.StyleNetworkErrorRetry:LocalGlyphRasterizer.PingFang:LocalGlyphRasterizer.PingFangWithBoldInStyle:LocalGlyphRasterizer.PingFangSemibold:Map.Offline
+
+      - name: Run expression tests
+        id: expression_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/expression-test/mbgl-expression-test
+
+      - name: Prepare render test output directory
+        run: mkdir -p metrics/macos-webgpu-${{ matrix.variant.impl }}
+
+      - name: Run WebGPU render tests
+        id: render_test
+        run: build-macos-webgpu-${{ matrix.variant.impl }}/mbgl-render-test-runner --manifestPath metrics/macos-webgpu-${{ matrix.variant.impl }}.json
+
+      - name: Upload render report
+        if: always() && steps.render_test.outcome == 'failure'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: macos-webgpu-${{ matrix.variant.impl }}-render-report
+          path: metrics/macos-webgpu-${{ matrix.variant.impl }}.html

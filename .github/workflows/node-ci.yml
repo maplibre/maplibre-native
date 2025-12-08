@@ -74,16 +74,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-22.04
+          - runs-on: ubuntu-24.04
             arch: x86_64
-          - runs-on: MapLibre_Native_Ubuntu_22_04_ARM_8_core
+          - runs-on: ubuntu-24.04-arm
             arch: arm64
-          - runs-on: macos-14
-            arch: arm64
-          - runs-on: macos-14-large
+          - runs-on: macos-15-intel
             arch: x86_64
+          - runs-on: macos-15
+            arch: arm64
           - runs-on: windows-2022
             arch: x86_64
+          - runs-on: windows-11-arm
+            arch: arm64
     continue-on-error: true
     env:
       BUILDTYPE: "Release"
@@ -94,11 +96,14 @@ jobs:
         shell: bash
 
     steps:
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
-          submodules: true
-          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -136,7 +141,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -144,23 +149,21 @@ jobs:
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Set up msvc dev cmd (Windows)
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
+      - name: Set up msvc dev cmd (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
 
-      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
-      - name: Remove Strawberry Perl from PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
-          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Setup cmake
-        if: ${{contains(runner.name, 'GitHub Actions')}}
-        uses: jwlawson/actions-setup-cmake@v2
+      - name: Set up msvc dev cmd (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
         with:
-          cmake-version: '3.31'
+          arch: amd64_arm64
+
+      - name: Test VSCMD_ARG_TGT_ARCH Environment
+        if: runner.os == 'Windows'
+        run: |
+          echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
+        shell: cmd
 
       - name: cmake version
         run: |
@@ -168,27 +171,29 @@ jobs:
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: hendrikmuhs/ccache-action@v1
+        uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@v1
+        uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
           variant: "sccache"
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
@@ -197,17 +202,12 @@ jobs:
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake --preset macos-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake --preset macos-metal-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_C_COMPILER=gcc-12 \
-            -DMLN_WITH_NODE=ON
+          cmake --preset linux-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Get vcpkg commit id
         if: runner.os == 'Windows'
@@ -218,23 +218,28 @@ jobs:
 
       - name: Restore vcpkg binary cache
         if: runner.os == 'Windows'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
 
-      - name: Configure maplibre-native (Windows)
-        if: runner.os == 'Windows'
+      - name: Configure maplibre-native (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         shell: pwsh
         env:
           VCPKG_INSTALL_OPTIONS: "--debug"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
-          cmake . -B build `
-            -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DMLN_WITH_NODE=ON
+          cmake --preset windows-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: Configure maplibre-native (Windows arm64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
+        run: |
+          cmake --preset windows-arm64-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -254,7 +259,7 @@ jobs:
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
@@ -270,8 +275,8 @@ jobs:
         working-directory: platform/node
         run: npm test
 
-      - name: Test (Windows)
-        if: runner.os == 'Windows'
+      - name: Test (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         shell: pwsh
         working-directory: platform/node
         env:
@@ -279,9 +284,20 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
         run: |
           (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v131 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v137 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
           npm test
 
+      - name: Test (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        working-directory: platform/node
+        env:
+          LIBGL_ALWAYS_SOFTWARE: true
+          GALLIUM_DRIVER: llvmpipe
+        run: |
+          (Invoke-WebRequest https://api.github.com/repos/mmozeiko/build-mesa/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa-llvmpipe-arm64-.+\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v137 .\mesa3d.7z opengl32.dll libGLESv2.dll
+          npm test
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
         working-directory: platform/node

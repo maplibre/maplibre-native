@@ -15,8 +15,9 @@ import io.mockk.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 
-class IndicatorLocationLayerRendererTest {
+class IndicatorLocationLayerRendererTest : BaseTest() {
 
     private val style: Style = mockk(relaxUnitFun = true)
     private val layerSourceProvider: LayerSourceProvider = mockk(relaxUnitFun = true)

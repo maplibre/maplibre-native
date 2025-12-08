@@ -12,13 +12,14 @@ jobs:
     outputs:
       should_run: ${{ !steps.parent_workflow.outputs.was_skipped_or_cancelled }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           sparse-checkout: |
             .github
             .nvmrc
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         with:
           node-version-file: '.nvmrc'
 
@@ -37,7 +38,9 @@ jobs:
     if: needs.pre_job.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
@@ -46,7 +49,7 @@ jobs:
 
       - name: Upload coverage report
         if: '!cancelled()'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
           override_commit: ${{ github.event.workflow_run.head_sha }}
           override_pr: ${{ github.event.workflow_run.pull_requests[0].number }}

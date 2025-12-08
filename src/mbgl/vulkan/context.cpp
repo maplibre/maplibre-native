@@ -41,7 +41,9 @@ constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
 constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
-static uint32_t glslangRefCount = 0;
+namespace {
+uint32_t glslangRefCount = 0;
+}
 
 class RenderbufferResource : public gfx::RenderbufferResource {
 public:
@@ -558,6 +560,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
 
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
+    clipping.pipelineInfo.setScissorRect(
+        {0, 0, clipping.pipelineInfo.viewExtent.width, clipping.pipelineInfo.viewExtent.height});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
@@ -568,7 +572,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
     const float rad = renderableResource.getRotation();
-    const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    const mat4 rotationMat = {
+        std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref, dispatcher);

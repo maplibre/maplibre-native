@@ -135,9 +135,20 @@ public class BitmapUtils {
     if (bitmap == null) {
       return null;
     }
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-    return stream.toByteArray();
+
+    try {
+      ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+      return stream.toByteArray();
+    } finally {
+      // If drawable is not a BitMapDrawable, getBitmapFromDrawable() allocated
+      // a Bitmap. Release early as recommended by
+      // https://developer.android.com/reference/android/graphics/Bitmap#recycle()
+      // see also https://github.com/maplibre/maplibre-native/issues/3864
+      if (!(drawable instanceof BitmapDrawable)) {
+        bitmap.recycle();
+      }
+    }
   }
 
   /**

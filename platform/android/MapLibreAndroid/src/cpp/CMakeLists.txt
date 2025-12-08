@@ -205,10 +205,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.hpp
     )
-    target_compile_definitions(
-        maplibre
-            PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
 endif()
 
 if(MLN_WITH_VULKAN)
@@ -216,10 +212,6 @@ if(MLN_WITH_VULKAN)
         maplibre PRIVATE
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.hpp
-    )
-    target_compile_definitions(
-        maplibre
-            PRIVATE MLN_RENDER_BACKEND_VULKAN=1
     )
 endif()
 

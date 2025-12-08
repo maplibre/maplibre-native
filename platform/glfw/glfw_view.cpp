@@ -222,6 +222,13 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwSetErrorCallback(glfwError);
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
+#if defined(MLN_RENDER_BACKEND_WEBGPU)
+#ifdef __linux__
+    // Force X11 platform for WebGPU compatibility (Dawn doesn't support Wayland yet)
+    // For now, always use X11 when WebGPU might be used
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+#endif
+#endif
 
     if (!glfwInit()) {
         mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize glfw");
@@ -288,7 +295,10 @@ GLFWView::GLFWView(bool fullscreen_,
 
     // "... applications will typically want to set the swap interval to one"
     // https://www.glfw.org/docs/latest/quick.html#quick_swap_buffers
+
+#if defined(MLN_RENDER_BACKEND_OPENGL)
     glfwSwapInterval(1);
+#endif
 
     glfwGetWindowSize(window, &width, &height);
 

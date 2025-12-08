@@ -100,6 +100,8 @@ Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
+        glUseProgram(0);
+
         for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
             globalUniformBuffers.set(i, nullptr);
         }
@@ -108,6 +110,7 @@ Context::~Context() noexcept {
 
         // Delete all pooled resources while the context is still valid
         texturePool.reset();
+        uboAllocator.reset();
 
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
@@ -460,6 +463,7 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
+    setScissorTest({0, 0, 0, 0});
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
@@ -492,7 +496,7 @@ void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
 void Context::setDirtyState() {
     MLN_TRACE_FUNC();
 
-    // Note: does not set viewport/scissorTest/bindFramebuffer to dirty
+    // Note: does not set viewport/bindFramebuffer to dirty
     // since they are handled separately in the view object.
     stencilFunc.setDirty();
     stencilMask.setDirty();
@@ -515,6 +519,7 @@ void Context::setDirtyState() {
     cullFace.setDirty();
     cullFaceSide.setDirty();
     cullFaceWinding.setDirty();
+    scissorTest.setDirty();
     program.setDirty();
     lineWidth.setDirty();
     activeTextureUnit.setDirty();
@@ -637,6 +642,10 @@ void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
     // Context::setDepthMode.
     cullFaceSide = mode.side;
     cullFaceWinding = mode.winding;
+}
+
+void Context::setScissorTest(const gfx::ScissorRect& rect) {
+    scissorTest = rect;
 }
 
 void Context::setDepthMode(const gfx::DepthMode& depth) {

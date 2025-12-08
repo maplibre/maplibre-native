@@ -21,16 +21,18 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+        with:
+          persist-credentials: false
 
       - name: Generate token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
         id: generate_token
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -45,12 +47,12 @@ jobs:
 
       - name: Check if test files exist (otherwise the parent workflow was skipped)
         id: check_files
-        uses: andstor/file-existence-action@v3.0.0
+        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
         with:
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -74,13 +76,13 @@ jobs:
 
       - name: Generate another token (previous one could have expired)
         if: always()
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
         id: generate_token_2
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         if: always()
         with:
           token: ${{ steps.generate_token_2.outputs.token }}

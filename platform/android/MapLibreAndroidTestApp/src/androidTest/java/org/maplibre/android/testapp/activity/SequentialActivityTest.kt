@@ -21,6 +21,9 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
             FeatureOverviewActivity::class.java,
             org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity::class.java,
             org.maplibre.android.testapp.activity.telemetry.PerformanceMeasurementActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.LongRunningActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.UserMapActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.NavigationMapActivity::class.java,
 
             // need style updates
             org.maplibre.android.testapp.activity.turf.MapSnapshotterWithinExpression::class.java,
