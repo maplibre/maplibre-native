@@ -98,7 +98,11 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
 
     // No NSMutableDictionary?
     const auto& programDefines = programParameters.getDefines();
-    const auto numDefines = programDefines.size() + additionalDefines.size();
+    
+    // Intel Mac GPUs (GPUFamilyMac2) have limited half-precision support compared to Apple Silicon.
+    // Use float4 on Intel Macs, half4 on Apple Silicon for better compatibility.
+    const auto numAdditionalDefines = additionalDefines.size() + (backend.supportsAppleGPU() ? 1 : 0);
+    const auto numDefines = programDefines.size() + numAdditionalDefines;
 
     std::string defineStr;
     std::vector<const NS::Object*> rawDefines;
@@ -113,10 +117,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
 
-    // Intel Mac GPUs (GPUFamilyMac2) have limited half-precision support compared to Apple Silicon.
-    // Use float4 on Intel Macs, half4 on Apple Silicon for better compatibility.
     if (backend.supportsAppleGPU()) {
-        addDefine(std::make_pair("USE_HALF_FLOAT", "1"));
+        addDefine(std::make_pair(std::string("USE_HALF_FLOAT"), std::string("1")));
     }
 
     observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
