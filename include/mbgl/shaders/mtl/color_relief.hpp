@@ -11,8 +11,8 @@ constexpr auto colorReliefShaderPrelude = R"(
 
 enum {
     idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
-    idColorReliefTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
-    idColorReliefEvaluatedPropsUBO = drawableReservedUBOCount,
+    idColorReliefTilePropsUBO = drawableReservedUBOCount,
+    idColorReliefEvaluatedPropsUBO,
     colorReliefUBOCount
 };
 
@@ -97,13 +97,13 @@ float getElevation(float2 coord, texture2d<float, access::sample> image, sampler
 float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler elevation_sampler) {
     // Elevation stops are plain float values, stored in the R channel
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return elevationStops.sample(elevation_sampler, float2(x, 0.0)).r;
+    return elevationStops.sample(elevation_sampler, float2(x, 0.5)).r;
 }
 
 // Function to get the color value at a specific color ramp stop
 float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::sample> colorStops, sampler color_sampler) {
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return colorStops.sample(color_sampler, float2(x, 0.0));
+    return colorStops.sample(color_sampler, float2(x, 0.5));
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],

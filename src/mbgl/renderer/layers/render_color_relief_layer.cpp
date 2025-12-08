@@ -381,8 +381,35 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         // Bind DEM texture
         auto demImagePtr = bucket.getDEMData().getImagePtr();
         if (!demImagePtr || !demImagePtr->valid()) {
+            mbgl::Log::Warning(mbgl::Event::Render, "ColorRelief: DEM image not valid for tile");
             continue;  // Skip this tile if DEM data is not ready
         }
+
+        const auto& demData = bucket.getDEMData();
+        mbgl::Log::Info(mbgl::Event::Render,
+            "ColorRelief DEM: dim=" + std::to_string(demData.dim) +
+            ", stride=" + std::to_string(demData.stride) +
+            ", imageSize=" + std::to_string(demImagePtr->size.width) + "x" + std::to_string(demImagePtr->size.height) +
+            ", colorRampSize=" + std::to_string(colorRampSize));
+
+        // Sample a few pixels from the DEM to verify data
+        if (demImagePtr->data) {
+            const auto* pixels = reinterpret_cast<const uint8_t*>(demImagePtr->data.get());
+            // Sample center pixel
+            size_t centerIdx = (demImagePtr->size.height / 2) * demImagePtr->size.width * 4 + (demImagePtr->size.width / 2) * 4;
+            uint8_t r = pixels[centerIdx], g = pixels[centerIdx+1], b = pixels[centerIdx+2], a = pixels[centerIdx+3];
+            const auto unpackVector = demData.getUnpackVector();
+            float elevation = r * unpackVector[0] + g * unpackVector[1] + b * unpackVector[2] - unpackVector[3];
+            mbgl::Log::Info(mbgl::Event::Render,
+                "ColorRelief DEM center pixel: R=" + std::to_string(r) +
+                " G=" + std::to_string(g) +
+                " B=" + std::to_string(b) +
+                " A=" + std::to_string(a) +
+                " -> elevation=" + std::to_string(elevation) + "m" +
+                ", unpack=[" + std::to_string(unpackVector[0]) + "," + std::to_string(unpackVector[1]) +
+                "," + std::to_string(unpackVector[2]) + "," + std::to_string(unpackVector[3]) + "]");
+        }
+
         std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
         demTexture->setImage(demImagePtr);
         demTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
@@ -394,7 +421,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         if (elevationStopsTexture) {
             builder->setTexture(elevationStopsTexture, idColorReliefElevationStopsTexture);
         }
-        
+
         if (colorStopsTexture) {
             builder->setTexture(colorStopsTexture, idColorReliefColorStopsTexture);
         }
@@ -408,7 +435,6 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             // Set up tile properties UBO
             shaders::ColorReliefTilePropsUBO tilePropsUBO;
 
-            const auto& demData = bucket.getDEMData();
             const auto unpackVector = demData.getUnpackVector();
             tilePropsUBO.unpack = {{unpackVector[0], unpackVector[1], unpackVector[2], unpackVector[3]}};
             // Use stride (dim + 2) for dimension, as the texture includes a 1-pixel border
