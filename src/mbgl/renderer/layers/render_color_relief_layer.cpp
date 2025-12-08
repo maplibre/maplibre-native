@@ -129,8 +129,8 @@ void RenderColorReliefLayer::updateColorRamp() {
             Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
 
             try {
-                mbgl::style::expression::EvaluationContext context;
-                context.withElevation(elevation);
+                // Create evaluation context with elevation as color ramp parameter
+                expression::EvaluationContext context(std::nullopt, nullptr, static_cast<double>(elevation));
 
                 expression::EvaluationResult result = expr.evaluate(context);
 
