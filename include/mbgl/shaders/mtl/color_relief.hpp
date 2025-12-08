@@ -107,8 +107,7 @@ float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::samp
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                            device const ColorReliefTilePropsUBO* tilePropsVector [[buffer(idColorReliefTilePropsUBO)]],
+                            device const ColorReliefTilePropsUBO& tileProps [[buffer(idColorReliefTilePropsUBO)]],
                             device const ColorReliefEvaluatedPropsUBO& props [[buffer(idColorReliefEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             texture2d<float, access::sample> elevationStops [[texture(1)]],
@@ -119,8 +118,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
-
-    device const ColorReliefTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
     // 1. Get elevation at this pixel from DEM
     float el = getElevation(in.pos, image, image_sampler, tileProps.unpack);
