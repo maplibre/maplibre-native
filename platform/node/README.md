@@ -19,13 +19,11 @@ Run:
 npm install @maplibre/maplibre-gl-native
 ```
 
-Further platforms might work [with additional libraries installed](https://github.com/maplibre/maplibre-native/tree/main/platform/linux#prerequisites).
+## License
 
-## Testing
+@maplibre/maplibre-gl-native is available under the BSD 2-Clause License. Refer to the [full list of licenses](https://github.com/maplibre/maplibre-native/blob/main/LICENSES.core.md).
 
-```
-npm test
-```
+MapLibre Native is based in part of the work of the [FreeType](https://freetype.org/) Team.
 
 ## Rendering a map tile
 
