@@ -99,11 +99,9 @@ float getElevation(float2 coord, texture2d<float, access::sample> image, sampler
 
 // Function to get the elevation value at a specific color ramp stop
 float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler elevation_sampler, float4 unpack) {
-    // Elevation stops are terrain-RGB encoded, need to decode them
+    // Elevation stops are plain float values, stored in the R channel
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    float4 data = elevationStops.sample(elevation_sampler, float2(x, 0.0)) * 255.0;
-    data.a = -1.0;
-    return dot(data, unpack);
+    return elevationStops.sample(elevation_sampler, float2(x, 0.0)).r;
 }
 
 // Function to get the color value at a specific color ramp stop
