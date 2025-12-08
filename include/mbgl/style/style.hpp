@@ -71,9 +71,6 @@ public:
     void addLayer(std::unique_ptr<Layer>, const std::optional<std::string>& beforeLayerID = std::nullopt);
     std::unique_ptr<Layer> removeLayer(const std::string& layerID);
 
-    // Style loading control
-    void cancelPendingRequests();
-
     // Private implementation
     class Impl;
     const std::unique_ptr<Impl> impl;
