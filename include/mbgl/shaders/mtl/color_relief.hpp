@@ -157,9 +157,11 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float denom = el_r - el_l;
     float t = (abs(denom) < 0.0001) ? 0.0 : clamp((el - el_l) / denom, 0.0, 1.0);
 
-    float4 fragColor = props.opacity * mix(color_l, color_r, t);
-
-    return half4(fragColor);
+    thread half4 fragColor;
+    float4 color = mix(color_l, color_r, t);
+    color.a *= props.opacity;
+    fragColor = half4(color);
+    return fragColor;
 }
 )";
 };
