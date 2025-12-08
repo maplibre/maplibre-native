@@ -84,6 +84,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     if (float(vertx.pos.y) < -32767.5) pos.y = 0.0;
     if (float(vertx.pos.y) > 32766.5) pos.y = 1.0;
 
+    pos.y = 1.0 - pos.y; // Flip Y for Metal texture coordinates
+
     return {
         .position    = position,
         .pos         = pos,
