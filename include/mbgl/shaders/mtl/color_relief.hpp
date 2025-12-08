@@ -98,10 +98,12 @@ float getElevation(float2 coord, texture2d<float, access::sample> image, sampler
 }
 
 // Function to get the elevation value at a specific color ramp stop
-float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler elevation_sampler) {
-    // Elevation stops are plain float values, read from the R channel
+float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::sample> elevationStops, sampler elevation_sampler, float4 unpack) {
+    // Elevation stops are terrain-RGB encoded, need to decode them
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return elevationStops.sample(elevation_sampler, float2(x, 0.0)).r;
+    float4 data = elevationStops.sample(elevation_sampler, float2(x, 0.0)) * 255.0;
+    data.a = -1.0;
+    return dot(data, unpack);
 }
 
 // Function to get the color value at a specific color ramp stop
@@ -136,7 +138,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // Perform binary search
     while (r - l > 1) {
         int m = (r + l) / 2;
-        float el_m = getElevationStop(m, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler);
+        float el_m = getElevationStop(m, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler, tileProps.unpack);
 
         if (el < el_m) {
             r = m;
@@ -146,8 +148,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     // 3. Get the elevation values and colors at the stops
-    float el_l = getElevationStop(l, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler);
-    float el_r = getElevationStop(r, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler);
+    float el_l = getElevationStop(l, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler, tileProps.unpack);
+    float el_r = getElevationStop(r, tileProps.color_ramp_size, elevationStops, elevation_stops_sampler, tileProps.unpack);
 
     float4 color_l = getColorStop(l, tileProps.color_ramp_size, colorStops, color_stops_sampler);
     float4 color_r = getColorStop(r, tileProps.color_ramp_size, colorStops, color_stops_sampler);
