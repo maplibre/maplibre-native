@@ -225,9 +225,11 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!colorReliefShader) {
+        mbgl::Log::Error(mbgl::Event::Render, "ColorRelief shader failed to load");
         removeAllDrawables();
         return;
     }
+    mbgl::Log::Info(mbgl::Event::Render, "ColorRelief shader loaded, renderTiles count: %lu", renderTiles->size());
 
     auto renderPass = RenderPass::Translucent;
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
