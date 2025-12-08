@@ -1,3 +1,4 @@
+#include <chrono>
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/fixture_log_observer.hpp>
@@ -9,7 +10,7 @@
 #include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
-#include <mbgl/test/delayed_file_source.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include <memory>
 
@@ -114,11 +115,17 @@ TEST(Style, RemoveSourceInUse) {
 TEST(Style, LoadJSONCancelsPendingLoadURL) {
     util::RunLoop loop;
 
-    auto fileSource = std::make_shared<::DelayedFileSource>();
+    auto fileSource = std::make_shared<::StubFileSource>(
+        ResourceOptions::Default(), ClientOptions(), StubFileSource::ResponseType::Manual);
     Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
 
     // Start loading a URL (this will be pending)
     auto url = "http://some-url";
+    fileSource->styleResponse = [](const Resource&) {
+        Response result;
+        result.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/style_vector.json"));
+        return result;
+    };
     style.loadURL(url);
 
     // Before the URL request completes, load JSON directly
@@ -135,8 +142,7 @@ TEST(Style, LoadJSONCancelsPendingLoadURL) {
     ASSERT_EQ("", style.getURL());
     ASSERT_TRUE(style.getJSON().find("Test Style") != std::string::npos);
 
-    // Now respond to the original URL request - this should be ignored
-    fileSource->respondToRequest(R"STYLE({"version":8,"name":"Streets"})STYLE");
+    fileSource->respondToAll();
 
     // The style should still show our JSON content, not the URL content
     ASSERT_EQ("Test Style", style.getName());

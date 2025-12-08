@@ -29,7 +29,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/getrss.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/sqlite3_test_fs.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/stub_file_source.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/delayed_file_source.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/test.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/util.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/asset_file_source.test.cpp
@@ -255,7 +254,7 @@ if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
-if (WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Linux OR MLN_WITH_WEBGPU)
+if (WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Linux OR MLN_WITH_WEBGPU OR CMAKE_SYSTEM_NAME STREQUAL Darwin)
     target_compile_definitions(
         mbgl-test
         PRIVATE USE_CPP_TEST_SERVER

@@ -63,8 +63,7 @@ StubFileSource::~StubFileSource() = default;
 std::unique_ptr<AsyncRequest> StubFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<StubFileRequest>(*this);
     if (type == ResponseType::Synchronous) {
-        std::optional<Response> res = response(resource);
-        if (res) {
+        if (const std::optional<Response> res = response(resource)) {
             callback(*res);
         }
     } else {
@@ -77,6 +76,18 @@ void StubFileSource::remove(AsyncRequest* req) {
     auto it = pending.find(req);
     if (it != pending.end()) {
         pending.erase(it);
+    }
+}
+void StubFileSource::respondToAll() {
+    if (type != ResponseType::Manual) {
+        throw std::runtime_error("this method can only be called with ResponseType::Manual");
+    }
+    for (const auto& [key, value] : pending) {
+        auto& [resource, responseFunction, callback] = value;
+        if (const std::optional<Response> res = responseFunction(resource)) {
+            callback(*res);
+        }
+        pending.erase(key);
     }
 }
 
