@@ -78,12 +78,12 @@ float getElevation(float2 coord, float bias, texture2d<float, access::sample> im
     return dot(data, unpack);
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const HillshadePrepareTilePropsUBO& tileProps [[buffer(idHillshadePrepareTilePropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
     float2 epsilon = 1.0 / tileProps.dimension;
@@ -134,7 +134,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
         1.0,
         1.0), 0.0, 1.0);
 
-    return PrecisionFloat4(color);
+    return half4(color);
 }
 )";
 };

@@ -99,14 +99,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
-    return PrecisionFloat4(image.sample(image_sampler, float2(in.tex)));
+    return half4(image.sample(image_sampler, float2(in.tex)));
 }
 )";
 };

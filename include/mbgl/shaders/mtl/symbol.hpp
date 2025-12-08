@@ -205,14 +205,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const SymbolTilePropsUBO* tilePropsVector [[buffer(idSymbolTilePropsUBO)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(idSymbolEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
     device const SymbolTilePropsUBO& tileProps = tilePropsVector[uboIndex];
@@ -223,7 +223,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float opacity = in.opacity; // fade_opacity is baked in for this case
 #endif
 
-    return PrecisionFloat4(image.sample(image_sampler, float2(in.tex)) * opacity);
+    return half4(image.sample(image_sampler, float2(in.tex)) * opacity);
 }
 )";
 };
@@ -269,10 +269,10 @@ struct FragmentStage {
     float4 position [[position, invariant]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    PrecisionFloat4 fill_color;
+    half4 fill_color;
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    PrecisionFloat4 halo_color;
+    half4 halo_color;
 #endif
 
     half2 tex;
@@ -376,10 +376,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position     = position,
 #if !defined(HAS_UNIFORM_u_fill_color)
-        .fill_color   = PrecisionFloat4(unpack_mix_color(vertx.fill_color, drawable.fill_color_t)),
+        .fill_color   = half4(unpack_mix_color(vertx.fill_color, drawable.fill_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-        .halo_color   = PrecisionFloat4(unpack_mix_color(vertx.halo_color, drawable.halo_color_t)),
+        .halo_color   = half4(unpack_mix_color(vertx.halo_color, drawable.halo_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
         .halo_width   = half(unpack_mix_float(vertx.halo_width, drawable.halo_width_t)),
@@ -397,27 +397,27 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const SymbolTilePropsUBO* tilePropsVector [[buffer(idSymbolTilePropsUBO)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(idSymbolEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
     device const SymbolTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_fill_color)
-    const PrecisionFloat4 fill_color = PrecisionFloat4(tileProps.is_text ? props.text_fill_color : props.icon_fill_color);
+    const half4 fill_color = half4(tileProps.is_text ? props.text_fill_color : props.icon_fill_color);
 #else
-    const PrecisionFloat4 fill_color = in.fill_color;
+    const half4 fill_color = in.fill_color;
 #endif
 #if defined(HAS_UNIFORM_u_halo_color)
-    const PrecisionFloat4 halo_color = PrecisionFloat4(tileProps.is_text ? props.text_halo_color : props.icon_halo_color);
+    const half4 halo_color = half4(tileProps.is_text ? props.text_halo_color : props.icon_halo_color);
 #else
-    const PrecisionFloat4 halo_color = in.halo_color;
+    const half4 halo_color = in.halo_color;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
     const float opacity = tileProps.is_text ? props.text_opacity : props.icon_opacity;
@@ -441,7 +441,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
     const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
     const float gammaScaled = gamma * in.gamma_scale;
-    const PrecisionFloat4 color = tileProps.is_halo ? halo_color : fill_color;
+    const half4 color = tileProps.is_halo ? halo_color : fill_color;
     const float fillInnerEdge = (256.0 - 64.0) / 256.0;
     const float haloInnerEdge = fillInnerEdge + haloGamma * tileProps.gamma_scale;
     const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
@@ -454,7 +454,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
         alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
     }
 
-    return PrecisionFloat4(color * (alpha * opacity * in.fade_opacity));
+    return half4(color * (alpha * opacity * in.fade_opacity));
 }
 )";
 };
@@ -502,10 +502,10 @@ struct FragmentStage {
     float4 position [[position, invariant]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    PrecisionFloat4 fill_color;
+    half4 fill_color;
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    PrecisionFloat4 halo_color;
+    half4 halo_color;
 #endif
 
     half2 tex;
@@ -637,7 +637,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const SymbolTilePropsUBO* tilePropsVector [[buffer(idSymbolTilePropsUBO)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(idSymbolEvaluatedPropsUBO)]],
@@ -646,20 +646,20 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler glyph_sampler [[sampler(0)]],
                             sampler icon_sampler [[sampler(1)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
     device const SymbolTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_fill_color)
-    const PrecisionFloat4 fill_color = PrecisionFloat4(tileProps.is_text ? props.text_fill_color : props.icon_fill_color);
+    const half4 fill_color = half4(tileProps.is_text ? props.text_fill_color : props.icon_fill_color);
 #else
-    const PrecisionFloat4 fill_color = in.fill_color;
+    const half4 fill_color = in.fill_color;
 #endif
 #if defined(HAS_UNIFORM_u_halo_color)
-    const PrecisionFloat4 halo_color = PrecisionFloat4(tileProps.is_text ? props.text_halo_color : props.icon_halo_color);
+    const half4 halo_color = half4(tileProps.is_text ? props.text_halo_color : props.icon_halo_color);
 #else
-    const PrecisionFloat4 halo_color = in.halo_color;
+    const half4 halo_color = in.halo_color;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
     const half opacity = half(tileProps.is_text ? props.text_opacity : props.icon_opacity);
@@ -679,7 +679,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     if (in.is_icon) {
         const float alpha = opacity * in.fade_opacity;
-        return PrecisionFloat4(icon_image.sample(icon_sampler, float2(in.tex)) * alpha);
+        return half4(icon_image.sample(icon_sampler, float2(in.tex)) * alpha);
     }
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
@@ -688,7 +688,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
     const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
     const float gammaScaled = gamma * in.gamma_scale;
-    const PrecisionFloat4 color = tileProps.is_halo ? halo_color : fill_color;
+    const half4 color = tileProps.is_halo ? halo_color : fill_color;
     const float fillInnerEdge = (256.0 - 64.0) / 256.0;
     const float haloInnerEdge = fillInnerEdge + haloGamma * tileProps.gamma_scale;
     const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
@@ -701,7 +701,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
         alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
     }
 
-    return PrecisionFloat4(color * (alpha * opacity * in.fade_opacity));
+    return half4(color * (alpha * opacity * in.fade_opacity));
 }
 )";
 };

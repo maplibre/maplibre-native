@@ -105,13 +105,13 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const BackgroundPropsUBO& props [[buffer(idBackgroundPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
-    return PrecisionFloat4(props.color * props.opacity);
+    return half4(props.color * props.opacity);
 }
 )";
 };
@@ -164,13 +164,13 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const GlobalPaintParamsUBO& paintParamsUBO [[buffer(idGlobalPaintParamsUBO)]],
                             device const BackgroundPatternPropsUBO& props [[buffer(idBackgroundPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0);
+    return half4(1.0);
 #endif
 
     const float2 texsize = paintParamsUBO.pattern_atlas_texsize;
@@ -179,9 +179,9 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float4 color1 = image.sample(image_sampler, pos);
     const float2 imagecoord_b = glMod(float2(in.pos_b), 1.0);
     const float2 pos2 = mix(props.pattern_tl_b / texsize, props.pattern_br_b / texsize, imagecoord_b);
-    const float4 color2 = image.sample(image_sampler, in.pos2);
+    const float4 color2 = image.sample(image_sampler, pos2);
 
-    return PrecisionFloat4(mix(color1, color2, props.mix) * props.opacity);
+    return half4(mix(color1, color2, props.mix) * props.opacity);
 }
 )";
 };

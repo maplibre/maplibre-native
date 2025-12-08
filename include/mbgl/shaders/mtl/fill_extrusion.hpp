@@ -93,11 +93,11 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    PrecisionFloat4 color;
+    half4 color;
 };
 
 struct FragmentOutput {
-    PrecisionFloat4 color [[color(0)]];
+    half4 color [[color(0)]];
     //float depth [[depth(less)]]; // Write depth value if it's less than what's already there
 };
 
@@ -127,7 +127,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(OVERDRAW_INSPECTOR)
     return {
         .position = position,
-        .color    = PrecisionFloat4(1.0),
+        .color    = half4(1.0),
     };
 #endif
 
@@ -174,7 +174,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position = position,
-        .color    = PrecisionFloat4(vcolor * props.opacity),
+        .color    = half4(vcolor * props.opacity),
     };
 }
 
@@ -222,15 +222,15 @@ struct FragmentStage {
     float2 pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    PrecisionFloat4 pattern_from;
+    half4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    PrecisionFloat4 pattern_to;
+    half4 pattern_to;
 #endif
 };
 
 struct FragmentOutput {
-    PrecisionFloat4 color [[color(0)]];
+    half4 color [[color(0)]];
     //float depth [[depth(less)]]; // Write depth value if it's less than what's already there
 };
 
@@ -319,10 +319,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = position,
         .lighting       = lighting,
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from   = PrecisionFloat4(pattern_from),
+        .pattern_from   = half4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_to     = PrecisionFloat4(pattern_to),
+        .pattern_to     = half4(pattern_to),
 #endif
         .pos_a          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos),
         .pos_b          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos),
@@ -336,7 +336,7 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
                                      texture2d<float, access::sample> image0 [[texture(0)]],
                                      sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return {PrecisionFloat4(1.0)/*, in.position.z*/};
+    return {half4(1.0)/*, in.position.z*/};
 #endif
 
     device const FillExtrusionTilePropsUBO& tileProps = tilePropsVector[uboIndex];
@@ -365,7 +365,7 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
     const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
-    return {PrecisionFloat4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};
+    return {half4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};
 }
 )";
 };

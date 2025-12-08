@@ -64,14 +64,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const DebugUBO& debug [[buffer(idDebugUBO)]],
                             texture2d<float, access::sample> overlay [[texture(0)]],
                             sampler overlay_sampler [[sampler(0)]]) {
 
     float4 overlay_color = overlay.sample(overlay_sampler, in.uv);
     float4 color = mix(debug.color, overlay_color, overlay_color.a);
-    return PrecisionFloat4(color);
+    return half4(color);
 }
 )";
 };

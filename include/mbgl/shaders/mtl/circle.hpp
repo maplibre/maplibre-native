@@ -97,7 +97,7 @@ struct FragmentStage {
     float antialiasblur;
 
 #if !defined(HAS_UNIFORM_u_color)
-    PrecisionFloat4 color;
+    half4 color;
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
     float radius;
@@ -109,7 +109,7 @@ struct FragmentStage {
     half opacity;
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-    PrecisionFloat4 stroke_color;
+    half4 stroke_color;
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
     half stroke_width;
@@ -179,7 +179,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .antialiasblur  = antialiasblur,
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color          = PrecisionFloat4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
         .radius         = radius,
@@ -191,7 +191,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-        .stroke_color   = PrecisionFloat4(unpack_mix_color(vertx.stroke_color, drawable.stroke_color_t)),
+        .stroke_color   = half4(unpack_mix_color(vertx.stroke_color, drawable.stroke_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
         .stroke_width   = half(stroke_width),
@@ -202,16 +202,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
-    return PrecisionFloat4(1.0, 1.0, 1.0, 1.0);
+    return half4(1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
-    const PrecisionFloat4 color = PrecisionFloat4(props.color);
+    const half4 color = half4(props.color);
 #else
-    const PrecisionFloat4 color = in.color;
+    const half4 color = in.color;
 #endif
 #if defined(HAS_UNIFORM_u_radius)
     const float radius = props.radius;
@@ -229,9 +229,9 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float opacity = in.opacity;
 #endif
 #if defined(HAS_UNIFORM_u_stroke_color)
-    const PrecisionFloat4 stroke_color = PrecisionFloat4(props.stroke_color);
+    const half4 stroke_color = half4(props.stroke_color);
 #else
-    const PrecisionFloat4 stroke_color = in.stroke_color;
+    const half4 stroke_color = in.stroke_color;
 #endif
 #if defined(HAS_UNIFORM_u_stroke_width)
     const float stroke_width = props.stroke_width;
@@ -250,7 +250,7 @@ PrecisionFloat4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float color_t = (stroke_width < 0.01) ? 0.0 :
         smoothstep(antialiased_blur, 0.0, extrude_length - radius / (radius + stroke_width));
 
-    return PrecisionFloat4(opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t));
+    return half4(opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t));
 }
 )";
 };
