@@ -77,6 +77,10 @@ vec4 getColorStop(int stop) {
 }
 
 void main() {
+    // TEMP: force a solid color to verify pipeline/backend
+    fragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    return;
+
     float el = getElevation(v_pos);
 
     // Binary search for color stops
