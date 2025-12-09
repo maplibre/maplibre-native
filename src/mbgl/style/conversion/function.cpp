@@ -228,6 +228,11 @@ bool interpolatable(type::Type type) noexcept {
                           if (array.N && array.itemType == type::Number) {
                               return true;
                           }
+                          // Variable-length Number arrays (like line-dasharray) are not interpolatable
+                          // because interpolating between different dasharray patterns doesn't make semantic sense
+                          if (!array.N && array.itemType == type::Number) {
+                              return false;
+                          }
                           return interpolatable(array.itemType);
                       },
                       [&](const auto&) { return false; });
