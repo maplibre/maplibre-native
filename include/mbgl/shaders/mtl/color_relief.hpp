@@ -12,8 +12,8 @@ constexpr auto colorReliefShaderPrelude = R"(
 enum {
     idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idColorReliefTilePropsUBO = drawableReservedUBOCount,
-    idColorReliefEvaluatedPropsUBO,
-    colorReliefUBOCount
+    idColorReliefEvaluatedPropsUBO = drawableReservedUBOCount + 1,
+    colorReliefUBOCount = drawableReservedUBOCount + 2
 };
 
 struct alignas(16) ColorReliefDrawableUBO {
