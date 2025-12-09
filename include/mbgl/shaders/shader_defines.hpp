@@ -81,7 +81,6 @@ enum {
 enum {
     idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idColorReliefTilePropsUBO = drawableReservedUBOCount,
-    idColorReliefEvaluatedPropsUBO,
     colorReliefDrawableUBOCount
 };
 
@@ -204,7 +203,8 @@ enum {
 };
 
 enum {
-    colorReliefUBOCount = getLayerStartValue(colorReliefDrawableUBOCount)
+    idColorReliefEvaluatedPropsUBO = getLayerStartValue(colorReliefDrawableUBOCount),
+    colorReliefUBOCount
 };
 
 enum {
