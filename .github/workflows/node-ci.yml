@@ -106,11 +106,11 @@ jobs:
           persist-credentials: false
 
       - name: Get OS Architecture
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
+        if: runner.os == 'macOS' || runner.os == 'Linux'
         run: uname -m
 
       - name: Install dependencies (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -170,7 +170,7 @@ jobs:
           cmake --version
 
       - name: Set up ccache (MacOS/Linux)
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
+        if: runner.os == 'macOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
@@ -200,7 +200,7 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
 
       - name: Configure maplibre-native (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         run: |
           cmake --preset macos-metal-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
@@ -242,7 +242,7 @@ jobs:
           cmake --preset windows-arm64-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
+        if: runner.os == 'macOS' || runner.os == 'Linux'
         run: |
           cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
@@ -254,15 +254,20 @@ jobs:
       - name: Run render tests on macOS
         id: render_tests
         if: runner.os == 'macOS'
-        continue-on-error: ${{ runner.arch == 'X64' }}
+        continue-on-error: true
         run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
-        if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        if: runner.os == 'macOS' && always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
+          if-no-files-found: ignore
+
+      - name: Fail macOS render tests when required
+        if: runner.os == 'macOS' && steps.render_tests.outcome == 'failure' && runner.arch != 'X64'
+        run: exit 1
 
       - name: Test (Linux)
         working-directory: platform/node
@@ -270,7 +275,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         continue-on-error: true  # flaky on CI
         working-directory: platform/node
         run: npm test
