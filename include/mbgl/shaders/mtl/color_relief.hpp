@@ -70,7 +70,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const ColorReliefTilePropsUBO& tileProps [[buffer(idColorReliefTilePropsUBO)]]) {
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
-    
+
     // Calculate texture coordinate
     float2 epsilon = 1.0 / tileProps.dimension;
     float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
@@ -161,3 +161,4 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
 } // namespace shaders
 } // namespace mbgl
+

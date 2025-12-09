@@ -222,7 +222,7 @@ bool interpolatable(type::Type type) noexcept {
                       [&](const type::ColorType&) { return true; },
                       [&](const type::PaddingType&) { return true; },
                       [&](const type::VariableAnchorOffsetCollectionType&) { return true; },
-                      [&](const type::Array& array) { 
+                      [&](const type::Array& array) {
                           // Arrays are interpolatable if they have a fixed size and item type is Number,
                           // OR if the item type itself is interpolatable (e.g., Array<Color>)
                           if (array.N && array.itemType == type::Number) {
@@ -583,14 +583,14 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
-    
+
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
         return std::nullopt;
     }
     omitFirstStop(*stops);
 
-    // For std::vector<Color> arrays, create step with item type  
+    // For std::vector<Color> arrays, create step with item type
     type::Type exprType = type;
     bool isColorArray = false;
     type.match(
@@ -606,14 +606,14 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
         },
         [](const auto&) {}
     );
-    
+
     auto expr = step(exprType, makeInput(true), std::move(*stops));
-    
+
     // For color arrays with camera functions, return the step directly
     if (isColorArray && !def) {
         return expr;
     }
-    
+
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
@@ -624,7 +624,7 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
-    
+
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
         return std::nullopt;
@@ -633,8 +633,8 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     if (!base) {
         return std::nullopt;
     }
-    
-    // For std::vector<Color> arrays, create interpolation with item type  
+
+    // For std::vector<Color> arrays, create interpolation with item type
     type::Type exprType = type;
     bool isColorArray = false;
     type.match(
@@ -650,14 +650,14 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
         },
         [](const auto&) {}
     );
-    
+
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
-    
+
     // For color arrays with camera functions, return the interpolation directly
     if (isColorArray && !def) {
         return expr;
     }
-    
+
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
@@ -1041,3 +1041,4 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
+

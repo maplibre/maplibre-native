@@ -102,20 +102,20 @@ void standard_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProps) {
     float azimuth = props.azimuths.x + PI;
     float slope = atan(0.625 * length(deriv));
     float aspect = get_aspect(deriv);
-    
+
     float intensity = tileProps.exaggeration;
-    
+
     // Scale the slope exponentially based on intensity
     float base = 1.875 - intensity * 1.75;
     float maxValue = 0.5 * PI;
     float scaledSlope = intensity != 0.5 ? ((pow(base, slope) - 1.0) / (pow(base, maxValue) - 1.0)) * maxValue : slope;
-    
+
     float accent = cos(scaledSlope);
     vec4 accent_color = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
-    
+
     float shade = abs(mod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
     vec4 shade_color = mix(props.shadows[0], props.highlights[0], shade) * sin(scaledSlope) * clamp(intensity * 2.0, 0.0, 1.0);
-    
+
     out_color = accent_color * (1.0 - shade_color.a) + shade_color;
 }
 
@@ -127,11 +127,11 @@ void basic_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProps) {
     float sin_az = sin(azimuth);
     float cos_alt = cos(props.altitudes.x);
     float sin_alt = sin(props.altitudes.x);
-    
+
     // Calculate the cosine of the angle between the light vector and the surface normal
     float cang = (sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(deriv, deriv));
     float shade = clamp(cang, 0.0, 1.0);
-    
+
     // Blend shadow and highlight based on intensity
     if (shade > 0.5) {
         out_color = props.highlights[0] * (2.0 * shade - 1.0);
@@ -155,13 +155,13 @@ void multidirectional_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProp
     for (int i = 0; i < num_lights; i++) {
         float altitude = altitudes[i];
         float azimuth = azimuths[i];
-        
+
         float cos_alt = cos(altitude);
         float sin_alt = sin(altitude);
         // Negate cos/sin azimuth for correct light direction
         float cos_az = -cos(azimuth);
         float sin_az = -sin(azimuth);
-        
+
         // Calculate the cosine of the angle between the light vector and the surface normal
         float cang = (sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(deriv, deriv));
         float shade = clamp(cang, 0.0, 1.0);
@@ -173,7 +173,7 @@ void multidirectional_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProp
             total_color += props.shadows[i] * (1.0 - 2.0 * shade) / float(num_lights);
         }
     }
-    
+
     out_color = total_color;
 }
 
@@ -186,16 +186,16 @@ void combined_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProps) {
     float sin_az = sin(azimuth);
     float cos_alt = cos(props.altitudes.x);
     float sin_alt = sin(props.altitudes.x);
-    
+
     // Calculate the angle between the light vector and the surface normal
     float cang = acos((sin_alt - (deriv.y * cos_az * cos_alt - deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(deriv, deriv)));
-    
+
     cang = clamp(cang, 0.0, PI / 2.0);
-    
+
     // Calculate shade and highlight components from angle and slope magnitude
     float shade = cang * atan(length(deriv)) * 4.0 / PI / PI;
     float highlight = (PI / 2.0 - cang) * atan(length(deriv)) * 4.0 / PI / PI;
-    
+
     out_color = props.shadows[0] * shade + props.highlights[0] * highlight;
 }
 
@@ -205,16 +205,16 @@ void igor_hillshade(vec2 deriv, const HillshadeTilePropsUBO tileProps) {
     deriv = deriv * tileProps.exaggeration * 2.0;
     float aspect = get_aspect(deriv);
     float azimuth = props.azimuths.x + PI;
-    
+
     // Slope strength is magnitude of slope vector, normalized to [0, 1]
     float slope_strength = atan(length(deriv)) * 2.0 / PI;
-    
+
     // Aspect strength is difference between aspect and light azimuth, normalized to [0, 1]
     float aspect_strength = 1.0 - abs(mod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
-    
+
     float shadow_strength = slope_strength * aspect_strength;
     float highlight_strength = slope_strength * (1.0 - aspect_strength);
-    
+
     out_color = props.shadows[0] * shadow_strength + props.highlights[0] * highlight_strength;
 }
 
@@ -231,7 +231,7 @@ void main() {
 
     // Scale the derivative based on the mercator distortion at this latitude
     float scaleFactor = cos(radians((tileProps.latrange[0] - tileProps.latrange[1]) * frag_position.y + tileProps.latrange[1]));
-    
+
     // The derivative is scaled back from [0, 1] texture range to world-space slope
     // Texture range [0, 1] corresponds to slope range [-4, 4]
     vec2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
@@ -255,3 +255,4 @@ void main() {
 
 } // namespace shaders
 } // namespace mbgl
+

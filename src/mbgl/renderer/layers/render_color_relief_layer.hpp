@@ -51,10 +51,10 @@ private:
     // Color ramp data
     uint32_t colorRampSize = 256;
     bool colorRampChanged = true;
-    
+
     // FIX 1: Changed type and name to correctly hold float elevation data
     std::shared_ptr<std::vector<float>> elevationStopsData; // Elevation values for each stop
-    
+
     std::shared_ptr<PremultipliedImage> colorStops;     // RGB colors for each stop
 
     // GPU textures
@@ -70,3 +70,4 @@ private:
 };
 
 } // namespace mbgl
+

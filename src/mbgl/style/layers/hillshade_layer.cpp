@@ -434,7 +434,7 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
                 }
             }
         }
-        
+
         const auto& typedValue = convert<PropertyValue<std::vector<Color>>>(value, error, false, false);
         if (!typedValue) {
             return error;
@@ -469,7 +469,7 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
                 }
             }
         }
-        
+
         const auto& typedValue = convert<PropertyValue<std::vector<float>>>(value, error, false, false);
         if (!typedValue) {
             return error;
@@ -567,3 +567,4 @@ Mutable<Layer::Impl> HillshadeLayer::mutableBaseImpl() const {
 } // namespace mbgl
 
 // clang-format on
+

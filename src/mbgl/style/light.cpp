@@ -73,82 +73,82 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
 
     auto property = static_cast<Property>(it->second);
 
-        
+
     if (property == Property::Anchor) {
         Error error;
         std::optional<PropertyValue<LightAnchorType>> typedValue = convert<PropertyValue<LightAnchorType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-        
+
         setAnchor(*typedValue);
         return std::nullopt;
-        
+
     }
-    
+
     if (property == Property::Color) {
         Error error;
         std::optional<PropertyValue<Color>> typedValue = convert<PropertyValue<Color>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-        
+
         setColor(*typedValue);
         return std::nullopt;
-        
+
     }
-    
+
     if (property == Property::Intensity) {
         Error error;
         std::optional<PropertyValue<float>> typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-        
+
         setIntensity(*typedValue);
         return std::nullopt;
-        
+
     }
-    
+
     if (property == Property::Position) {
         Error error;
         std::optional<PropertyValue<Position>> typedValue = convert<PropertyValue<Position>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-        
+
         setPosition(*typedValue);
         return std::nullopt;
-        
+
     }
-    
+
 
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
-    
+
     if (property == Property::AnchorTransition) {
         setAnchorTransition(*transition);
         return std::nullopt;
     }
-    
+
     if (property == Property::ColorTransition) {
         setColorTransition(*transition);
         return std::nullopt;
     }
-    
+
     if (property == Property::IntensityTransition) {
         setIntensityTransition(*transition);
         return std::nullopt;
     }
-    
+
     if (property == Property::PositionTransition) {
         setPositionTransition(*transition);
         return std::nullopt;
     }
-    
+
 
     return Error { "light doesn't support this property" };
 }
@@ -287,3 +287,4 @@ TransitionOptions Light::getPositionTransition() const {
 
 } // namespace style
 } // namespace mbgl
+

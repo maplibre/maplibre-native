@@ -19,8 +19,8 @@
 #include <mbgl/style/expression/interpolate.hpp>
 #include <mbgl/style/conversion/color_ramp_property_value.hpp>
 #include <mbgl/util/premultiply.hpp>
-#include <vector> 
-#include <cstring> 
+#include <vector>
+#include <cstring>
 
 namespace mbgl {
 
@@ -113,17 +113,17 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
         const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
-        
+
         size_t stopCount = interpolate->getStopCount();
-        
+
         elevationStopsVector.reserve(stopCount);
         colorStopsVector.reserve(stopCount);
-        
+
         // Extract elevation values from stops
         interpolate->eachStop([&](double elevation, const mbgl::style::expression::Expression& /*outputExpr*/) {
             elevationStopsVector.push_back(static_cast<float>(elevation));
         });
-        
+
         // Evaluate expression at each elevation to get colors
         for (float elevation : elevationStopsVector) {
             Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
@@ -149,20 +149,20 @@ void RenderColorReliefLayer::updateColorRamp() {
         const uint32_t numSamples = 256;
         const float minElevation = -500.0f;
         const float maxElevation = 9000.0f;
-        
+
         elevationStopsVector.reserve(numSamples);
         colorStopsVector.reserve(numSamples);
-        
+
         for (uint32_t i = 0; i < numSamples; ++i) {
             float t = static_cast<float>(i) / static_cast<float>(numSamples - 1);
             float elevation = minElevation + t * (maxElevation - minElevation);
             elevationStopsVector.push_back(elevation);
-            
+
             Color color = colorValue.evaluate(static_cast<double>(elevation));
             colorStopsVector.push_back(color);
         }
     }
-    
+
     const uint32_t rampSize = elevationStopsVector.size();
     if (rampSize == 0) {
         return;
@@ -170,7 +170,7 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     // Resize and prepare structures
     elevationStopsData->resize(rampSize * 4); // RGBA float for compatibility
-    colorStops->resize({rampSize, 1}); 
+    colorStops->resize({rampSize, 1});
     this->colorRampSize = rampSize;
 
     for (uint32_t i = 0; i < rampSize; ++i) {
@@ -187,7 +187,7 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStops->data[i * 4 + 2] = static_cast<uint8_t>(color.b * 255.0f);
         colorStops->data[i * 4 + 3] = static_cast<uint8_t>(color.a * 255.0f);
     }
-    
+
     colorRampChanged = true;
 }
 
@@ -250,7 +250,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         if (!elevationStopsTexture) {
             elevationStopsTexture = context.createTexture2D();
         }
-        
+
         // Use RGBA32F instead of R32F for llvmpipe compatibility
         elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
         elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
@@ -261,7 +261,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         if (!colorStopsTexture) {
             colorStopsTexture = context.createTexture2D();
         }
-        
+
         colorStopsTexture->setImage(colorStops);
         colorStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
                                                     .wrapU = gfx::TextureWrapType::Clamp,
@@ -319,7 +319,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                            sizeof(HillshadeLayoutVertex),
                                            gfx::AttributeDataType::Short2);
                 }
-                
+
                 if (const auto& attr = vertexAttrs->set(idColorReliefTexturePosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(HillshadeLayoutVertex, a2),
@@ -462,3 +462,4 @@ bool RenderColorReliefLayer::queryIntersectsFeature(const GeometryCoordinates&,
 }
 
 } // namespace mbgl
+

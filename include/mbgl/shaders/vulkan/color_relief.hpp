@@ -115,7 +115,7 @@ void main() {
     while (r - l > 1) {
         int m = (r + l) / 2;
         float el_m = getElevationStop(m);
-        
+
         if (el < el_m) {
             r = m;
         } else {
@@ -142,3 +142,4 @@ void main() {
 
 } // namespace shaders
 } // namespace mbgl
+

@@ -100,21 +100,21 @@ fn standard_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec
     let azimuth = props.azimuths.x + PI;
     let slope = atan(0.625 * length(deriv));
     let aspect = get_aspect(deriv);
-    
+
     let intensity = tileProps.exaggeration;
-    
+
     let base = 1.875 - intensity * 1.75;
     let maxValue = 0.5 * PI;
     let denom = pow(base, maxValue) - 1.0;
     let useLinear = abs(intensity - 0.5) < 1e-6;
     let scaledSlope = select(((pow(base, slope) - 1.0) / denom) * maxValue, slope, useLinear);
-    
+
     let accent = cos(scaledSlope);
     let accentColor = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
-    
+
     let shade = abs(glMod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
     let shadeColor = mix(props.shadows[0], props.highlights[0], shade) * sin(scaledSlope) * clamp(intensity * 2.0, 0.0, 1.0);
-    
+
     return accentColor * (1.0 - shadeColor.a) + shadeColor;
 }
 
@@ -125,40 +125,40 @@ fn basic_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec4<f
     let sin_az = sin(azimuth);
     let cos_alt = cos(props.altitudes.x);
     let sin_alt = sin(props.altitudes.x);
-    
+
     let cang = (sin_alt - (scaled_deriv.y * cos_az * cos_alt - scaled_deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(scaled_deriv, scaled_deriv));
     let shade = clamp(cang, 0.0, 1.0);
-    
-    return select(props.shadows[0] * (1.0 - 2.0 * shade), 
-                  props.highlights[0] * (2.0 * shade - 1.0), 
+
+    return select(props.shadows[0] * (1.0 - 2.0 * shade),
+                  props.highlights[0] * (2.0 * shade - 1.0),
                   shade > 0.5);
 }
 
 fn multidirectional_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec4<f32> {
     let scaled_deriv = deriv * tileProps.exaggeration * 2.0;
     var total_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-    
+
     let num_lights = min(tileProps.num_lights, 4);
-    
+
     for (var i: i32 = 0; i < num_lights; i = i + 1) {
         let altitude = select(select(select(props.altitudes.x, props.altitudes.y, i == 1), props.altitudes.z, i == 2), props.altitudes.w, i == 3);
         let azimuth = select(select(select(props.azimuths.x, props.azimuths.y, i == 1), props.azimuths.z, i == 2), props.azimuths.w, i == 3);
-        
+
         let cos_alt = cos(altitude);
         let sin_alt = sin(altitude);
         let cos_az = -cos(azimuth);
         let sin_az = -sin(azimuth);
-        
+
         let cang = (sin_alt - (scaled_deriv.y * cos_az * cos_alt - scaled_deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(scaled_deriv, scaled_deriv));
         let shade = clamp(cang, 0.0, 1.0);
-        
+
         if (shade > 0.5) {
             total_color = total_color + props.highlights[i] * (2.0 * shade - 1.0) / f32(num_lights);
         } else {
             total_color = total_color + props.shadows[i] * (1.0 - 2.0 * shade) / f32(num_lights);
         }
     }
-    
+
     return total_color;
 }
 
@@ -169,13 +169,13 @@ fn combined_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec
     let sin_az = sin(azimuth);
     let cos_alt = cos(props.altitudes.x);
     let sin_alt = sin(props.altitudes.x);
-    
+
     let cang = acos((sin_alt - (scaled_deriv.y * cos_az * cos_alt - scaled_deriv.x * sin_az * cos_alt)) / sqrt(1.0 + dot(scaled_deriv, scaled_deriv)));
     let clamped_cang = clamp(cang, 0.0, PI / 2.0);
-    
+
     let shade = clamped_cang * atan(length(scaled_deriv)) * 4.0 / PI / PI;
     let highlight = (PI / 2.0 - clamped_cang) * atan(length(scaled_deriv)) * 4.0 / PI / PI;
-    
+
     return props.shadows[0] * shade + props.highlights[0] * highlight;
 }
 
@@ -183,13 +183,13 @@ fn igor_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec4<f3
     let scaled_deriv = deriv * tileProps.exaggeration * 2.0;
     let aspect = get_aspect(scaled_deriv);
     let azimuth = props.azimuths.x + PI;
-    
+
     let slope_strength = atan(length(scaled_deriv)) * 2.0 / PI;
     let aspect_strength = 1.0 - abs(glMod((aspect + azimuth) / PI + 0.5, 2.0) - 1.0);
-    
+
     let shadow_strength = slope_strength * aspect_strength;
     let highlight_strength = slope_strength * (1.0 - aspect_strength);
-    
+
     return props.shadows[0] * shadow_strength + props.highlights[0] * highlight_strength;
 }
 
@@ -205,9 +205,9 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let latRange = tileProps.latrange;
     let latitude = (latRange.x - latRange.y) * in.tex_coord.y + latRange.y;
     let scaleFactor = cos(radians(latitude));
-    
+
     let deriv = ((pixel.rg * 8.0) - vec2<f32>(4.0, 4.0)) / scaleFactor;
-    
+
     if (tileProps.method == BASIC) {
         return basic_hillshade(deriv, tileProps);
     } else if (tileProps.method == COMBINED) {
@@ -225,3 +225,4 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 
 } // namespace shaders
 } // namespace mbgl
+

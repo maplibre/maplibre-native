@@ -25,7 +25,7 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
             return std::nullopt;
         }
         assert(*expression);
-        
+
         auto deps = (*expression)->dependencies;
         if ((deps & Dependency::Feature) && !(deps & Dependency::Elevation)) {
             error.message = "data expressions not supported";
@@ -35,7 +35,7 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
             error.message = "zoom expressions not supported";
             return std::nullopt;
         }
-        
+
         return ColorRampPropertyValue(std::move(*expression));
     } else {
         error.message = "color ramp must be an expression";
@@ -46,3 +46,4 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
+
