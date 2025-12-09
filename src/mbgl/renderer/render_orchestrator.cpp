@@ -587,9 +587,8 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     };
 
     std::unordered_map<std::string, const RenderLayer*> crossTileSymbolIndexLayers;
-    std::ranges::copy_if(layers,
-                 std::inserter(crossTileSymbolIndexLayers, crossTileSymbolIndexLayers.begin()),
-                 hasCrossTileIndex);
+    std::ranges::copy_if(
+        layers, std::inserter(crossTileSymbolIndexLayers, crossTileSymbolIndexLayers.begin()), hasCrossTileIndex);
 
     if (crossTileSymbolIndexLayers.empty()) {
         return;
@@ -604,11 +603,10 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     // Although symbol query is global, symbol results are only sortable within
     // a bucket For a predictable global sort renderItems, we sort the buckets
     // based on their corresponding tile position
-    std::ranges::sort(
-        bucketQueryData, [](const RetainedQueryData& a, const RetainedQueryData& b) {
-            return std::tie(a.tileID.canonical.z, a.tileID.canonical.y, a.tileID.wrap, a.tileID.canonical.x) <
-                   std::tie(b.tileID.canonical.z, b.tileID.canonical.y, b.tileID.wrap, b.tileID.canonical.x);
-        });
+    std::ranges::sort(bucketQueryData, [](const RetainedQueryData& a, const RetainedQueryData& b) {
+        return std::tie(a.tileID.canonical.z, a.tileID.canonical.y, a.tileID.wrap, a.tileID.canonical.x) <
+               std::tie(b.tileID.canonical.z, b.tileID.canonical.y, b.tileID.wrap, b.tileID.canonical.x);
+    });
 
     for (auto wrappedQueryData : bucketQueryData) {
         auto& queryData = wrappedQueryData.get();

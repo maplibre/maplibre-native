@@ -118,10 +118,10 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     assert(updateParameters);
     const auto zoom = state.getIntegerZoom();
-    const auto tileCover = util::tileCover({.transformState=state,
-                                            .tileLodMinRadius=updateParameters->tileLodMinRadius,
-                                            .tileLodScale=updateParameters->tileLodScale,
-                                            .tileLodPitchThreshold=updateParameters->tileLodPitchThreshold},
+    const auto tileCover = util::tileCover({.transformState = state,
+                                            .tileLodMinRadius = updateParameters->tileLodMinRadius,
+                                            .tileLodScale = updateParameters->tileLodScale,
+                                            .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold},
                                            zoom);
 
     // renderTiles is always empty, we use tileCover instead

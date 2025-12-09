@@ -165,9 +165,7 @@ Frustum Frustum::fromInvProjMatrix(const mat4& invProj, double worldSize, double
     }};
 
     if (flippedY) {
-        std::ranges::for_each(frustumPlanePointIndices, [](vec3i& tri) {
-            std::swap(tri[1], tri[2]);
-        });
+        std::ranges::for_each(frustumPlanePointIndices, [](vec3i& tri) { std::swap(tri[1], tri[2]); });
     }
 
     std::array<vec4, 6> frustumPlanes;

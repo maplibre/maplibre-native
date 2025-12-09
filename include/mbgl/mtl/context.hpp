@@ -127,9 +127,9 @@ public:
                                                   const gfx::Renderable&) const;
 
     bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
-                                              const void* data,
-                                              std::size_t size,
-                                              bool persistent) override;
+                                      const void* data,
+                                      std::size_t size,
+                                      bool persistent) override;
 
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
