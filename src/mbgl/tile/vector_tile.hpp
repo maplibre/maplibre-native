@@ -23,7 +23,7 @@ public:
 
     virtual void setData(const std::shared_ptr<const std::string>&) = 0;
 
-private:
+protected:
     std::unique_ptr<TileLoader<VectorTile>> loader;
 };
 

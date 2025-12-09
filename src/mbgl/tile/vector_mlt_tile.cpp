@@ -16,6 +16,8 @@ VectorMLTTile::VectorMLTTile(const OverscaledTileID& id_,
     : VectorTile(id_, std::move(sourceID_), parameters_, tileset_, observer_) {}
 
 VectorMLTTile::~VectorMLTTile() {
+    loader.reset();
+
     // Don't rely on `~TileLoader` to close, it's not safe to call there.
     // We're still calling a virtual method from a destructor, so any overrides will not be called.
     GeometryTile::cancel();
