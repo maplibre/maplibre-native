@@ -378,17 +378,21 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         return std::nullopt;
     }
 
-    // For variable-length array output types with zoom functions, parse stops as the item type
-    // This allows hillshade color arrays to interpolate via zoom functions
-    // Fixed-size arrays (like translate [x,y]) should use the full type
+    // For std::vector<Color> (hillshade color arrays), parse stops as the item type
+    // This allows zoom function interpolation of individual colors
+    // Other array types (translate, dasharray, etc) use the full type
     type::Type stopType = type;
+    bool isColorArray = false;
     type.match(
         [&](const type::Array& arr) {
-            // Only use item type for variable-length arrays (arr.N is null)
-            // Fixed-size arrays should parse the full array value
-            if (!arr.N) {
-                stopType = arr.itemType;
-            }
+            // Check if this is an array of Color
+            arr.itemType.match(
+                [&](const type::ColorType&) {
+                    stopType = arr.itemType;
+                    isColorArray = true;
+                },
+                [](const auto&) {}
+            );
         },
         [](const auto&) {}
     );
@@ -583,24 +587,27 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
 
-    // For variable-length array types, create step with item type  
+    // For std::vector<Color> arrays, create step with item type  
     type::Type exprType = type;
-    bool isVariableLengthArray = false;
+    bool isColorArray = false;
     type.match(
         [&](const type::Array& arr) {
-            // Only use item type for variable-length arrays
-            if (!arr.N) {
-                exprType = arr.itemType;
-                isVariableLengthArray = true;
-            }
+            // Check if this is an array of Color
+            arr.itemType.match(
+                [&](const type::ColorType&) {
+                    exprType = arr.itemType;
+                    isColorArray = true;
+                },
+                [](const auto&) {}
+            );
         },
         [](const auto&) {}
     );
     
     auto expr = step(exprType, makeInput(true), std::move(*stops));
     
-    // For variable-length array types with camera functions, return the step directly
-    if (isVariableLengthArray && !def) {
+    // For color arrays with camera functions, return the step directly
+    if (isColorArray && !def) {
         return expr;
     }
     
