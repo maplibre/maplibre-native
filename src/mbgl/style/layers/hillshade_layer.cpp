@@ -417,6 +417,24 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
     }
     if (property == Property::HillshadeHighlightColor || property == Property::HillshadeShadowColor) {
         Error error;
+        // These properties accept either a single color or an array
+        // Convert single colors to PropertyValue directly
+        if (!isArray(value) && !isObject(value) && !isUndefined(value)) {
+            auto color = convert<Color>(value, error);
+            if (color) {
+                // Wrap single color in a vector
+                std::vector<Color> vec = {*color};
+                if (property == Property::HillshadeHighlightColor) {
+                    setHillshadeHighlightColor(PropertyValue<std::vector<Color>>(vec));
+                    return std::nullopt;
+                }
+                if (property == Property::HillshadeShadowColor) {
+                    setHillshadeShadowColor(PropertyValue<std::vector<Color>>(vec));
+                    return std::nullopt;
+                }
+            }
+        }
+        
         const auto& typedValue = convert<PropertyValue<std::vector<Color>>>(value, error, false, false);
         if (!typedValue) {
             return error;
@@ -434,6 +452,24 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
     }
     if (property == Property::HillshadeIlluminationAltitude || property == Property::HillshadeIlluminationDirection) {
         Error error;
+        // These properties accept either a single number or an array
+        // Convert single numbers to PropertyValue directly
+        if (!isArray(value) && !isObject(value) && !isUndefined(value)) {
+            auto num = toNumber(value);
+            if (num) {
+                // Wrap single number in a vector
+                std::vector<float> vec = {static_cast<float>(*num)};
+                if (property == Property::HillshadeIlluminationAltitude) {
+                    setHillshadeIlluminationAltitude(PropertyValue<std::vector<float>>(vec));
+                    return std::nullopt;
+                }
+                if (property == Property::HillshadeIlluminationDirection) {
+                    setHillshadeIlluminationDirection(PropertyValue<std::vector<float>>(vec));
+                    return std::nullopt;
+                }
+            }
+        }
+        
         const auto& typedValue = convert<PropertyValue<std::vector<float>>>(value, error, false, false);
         if (!typedValue) {
             return error;
