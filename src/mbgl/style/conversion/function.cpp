@@ -378,32 +378,27 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         return std::nullopt;
     }
 
-    // For array output types, parse stops as the item type
-    type::Type stopType = type;
-    type.match(
-        [&](const type::Array& arr) {
-            stopType = arr.itemType;
-        },
-        [](const auto&) {}
-    );
-
     std::map<double, std::unique_ptr<Expression>> stops;
     for (std::size_t i = 0; i < arrayLength(*stopsValue); ++i) {
         const auto& stopValue = arrayMember(*stopsValue, i);
+
         if (!isArray(stopValue)) {
             error.message = "function stop must be an array";
             return std::nullopt;
         }
+
         if (arrayLength(stopValue) != 2) {
             error.message = "function stop must have two elements";
             return std::nullopt;
         }
+
         std::optional<float> t = convert<float>(arrayMember(stopValue, 0), error);
         if (!t) {
             return std::nullopt;
         }
+
         std::optional<std::unique_ptr<Expression>> e = convertLiteral(
-            stopType, arrayMember(stopValue, 1), error, convertTokens);
+            type, arrayMember(stopValue, 1), error, convertTokens);
         if (!e) {
             return std::nullopt;
         }
@@ -572,25 +567,8 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
         return std::nullopt;
     }
     omitFirstStop(*stops);
-    
-    // For array types, create step with item type  
-    type::Type exprType = type;
-    bool isArrayType = false;
-    type.match(
-        [&](const type::Array& arr) {
-            exprType = arr.itemType;
-            isArrayType = true;
-        },
-        [](const auto&) {}
-    );
-    
-    auto expr = step(exprType, makeInput(true), std::move(*stops));
-    
-    // For array types with camera functions, return the step directly
-    if (isArrayType && !def) {
-        return expr;
-    }
-    
+
+    auto expr = step(type, makeInput(true), std::move(*stops));
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
