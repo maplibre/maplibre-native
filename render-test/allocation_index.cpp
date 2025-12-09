@@ -29,7 +29,7 @@ private:
 };
 
 void addToIndex(std::size_t sz, void* ptr) {
-    std::lock_guard<std::mutex> mlk(indexMutex);
+    std::scoped_lock mlk(indexMutex);
     FlagGuard flk(suppresIndexing);
     allocationsCount++;
     indexedMemorySize += sz;
@@ -38,7 +38,7 @@ void addToIndex(std::size_t sz, void* ptr) {
 }
 
 void removeFromIndex(void* ptr) {
-    std::lock_guard<std::mutex> mlk(indexMutex);
+    std::scoped_lock mlk(indexMutex);
     FlagGuard flk(suppresIndexing);
     auto it = memoryIndex.find(ptr);
     if (it == memoryIndex.end()) return;
@@ -66,7 +66,7 @@ bool AllocationIndex::isActive() {
 
 // static
 void AllocationIndex::reset() {
-    std::lock_guard<std::mutex> mlk(indexMutex);
+    std::scoped_lock mlk(indexMutex);
     FlagGuard flk(suppresIndexing);
     memoryIndex.clear();
     indexedMemorySize = 0;

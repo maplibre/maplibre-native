@@ -206,8 +206,7 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
     std::vector<std::reference_wrapper<const RefIndexedSubfeature>> sortedFeatures(symbolFeatures.begin(),
                                                                                    symbolFeatures.end());
 
-    std::sort(sortedFeatures.begin(),
-              sortedFeatures.end(),
+    std::ranges::sort(sortedFeatures,
               [featureSortOrder](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
                   // Same idea as the non-symbol sort order, but symbol features may
                   // have changed their sort order since their corresponding

@@ -115,7 +115,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                                                      parameters.tileLodScale,
                                                      parameters.tileLodPitchThreshold};
 
-    if (overscaledZoom >= zoomRange.min) {
+    if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
 
         // Make sure we're not reparsing overzoomed raster tiles.

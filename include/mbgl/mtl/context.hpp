@@ -126,7 +126,7 @@ public:
                                                   const gfx::StencilMode&,
                                                   const gfx::Renderable&) const;
 
-    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
                                               std::size_t size,
                                               bool persistent) override;

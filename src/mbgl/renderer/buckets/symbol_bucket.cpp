@@ -6,6 +6,7 @@
 #include <mbgl/text/cross_tile_symbol_index.hpp>
 #include <mbgl/text/placement.hpp>
 
+#include <algorithm>
 #include <utility>
 
 namespace mbgl {
@@ -210,7 +211,7 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
     const float sin = std::sin(angle);
     const float cos = std::cos(angle);
 
-    std::sort(result.begin(), result.end(), [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
+    std::ranges::sort(result, [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
         const auto aRotated = std::lround(sin * a.getAnchor().point.x + cos * a.getAnchor().point.y);
         const auto bRotated = std::lround(sin * b.getAnchor().point.x + cos * b.getAnchor().point.y);
         if (aRotated != bRotated) {

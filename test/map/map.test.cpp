@@ -1794,7 +1794,7 @@ TEST(Map, ObserveTileLifecycle) {
     StubMapObserver observer;
     observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
         if (sourceID != "mapbox") return;
-        std::lock_guard<std::mutex> lock(tileMutex);
+        std::scoped_lock lock(tileMutex);
         tileOps.push_back(TileEntry{id, sourceID, op});
     };
     observer.onPreCompileShaderCallback =
