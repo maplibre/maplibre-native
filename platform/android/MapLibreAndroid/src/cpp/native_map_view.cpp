@@ -60,6 +60,16 @@
 namespace mbgl {
 namespace android {
 
+#define APPLY_PLUGINS(method_call)   \
+    if (vm == nullptr) {             \
+        return;                      \
+    }                                \
+    for (auto plugin : plugins) {    \
+        if (plugin != nullptr) {     \
+            plugin->method_call;     \
+        }                            \
+    }
+
 NativeMapView::NativeMapView(jni::JNIEnv& _env,
                              const jni::Object<NativeMapView>& _obj,
                              const jni::Object<FileSource>& jFileSource,
@@ -100,12 +110,15 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
  * Called through NativeMapView#destroy()
  */
 NativeMapView::~NativeMapView() {
+    APPLY_PLUGINS(onUnload());
     map.reset();
     vm = nullptr;
 }
 
 void NativeMapView::onCameraWillChange(MapObserver::CameraChangeMode mode) {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onCameraWillChange(mode));
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -119,6 +132,8 @@ void NativeMapView::onCameraWillChange(MapObserver::CameraChangeMode mode) {
 void NativeMapView::onCameraIsChanging() {
     assert(vm != nullptr);
 
+    APPLY_PLUGINS(onCameraIsChanging());
+
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onCameraIsChanging = javaClass.GetMethod<void()>(*_env, "onCameraIsChanging");
@@ -130,6 +145,8 @@ void NativeMapView::onCameraIsChanging() {
 
 void NativeMapView::onCameraDidChange(MapObserver::CameraChangeMode mode) {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onCameraDidChange(mode));
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -143,6 +160,8 @@ void NativeMapView::onCameraDidChange(MapObserver::CameraChangeMode mode) {
 void NativeMapView::onWillStartLoadingMap() {
     assert(vm != nullptr);
 
+    APPLY_PLUGINS(onWillStartLoadingMap());
+
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onWillStartLoadingMap = javaClass.GetMethod<void()>(*_env, "onWillStartLoadingMap");
@@ -155,6 +174,8 @@ void NativeMapView::onWillStartLoadingMap() {
 void NativeMapView::onDidFinishLoadingMap() {
     assert(vm != nullptr);
 
+    APPLY_PLUGINS(onDidFinishLoadingMap());
+
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onDidFinishLoadingMap = javaClass.GetMethod<void()>(*_env, "onDidFinishLoadingMap");
@@ -164,20 +185,24 @@ void NativeMapView::onDidFinishLoadingMap() {
     }
 }
 
-void NativeMapView::onDidFailLoadingMap(MapLoadError, const std::string& error) {
+void NativeMapView::onDidFailLoadingMap(MapLoadError error, const std::string& errorMsg) {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onDidFailLoadingMap(error, errorMsg));
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onDidFailLoadingMap = javaClass.GetMethod<void(jni::String)>(*_env, "onDidFailLoadingMap");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onDidFailLoadingMap, jni::Make<jni::String>(*_env, error));
+        weakReference.Call(*_env, onDidFailLoadingMap, jni::Make<jni::String>(*_env, errorMsg));
     }
 }
 
 void NativeMapView::onWillStartRenderingFrame() {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onWillStartRenderingFrame());
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -190,6 +215,8 @@ void NativeMapView::onWillStartRenderingFrame() {
 
 void NativeMapView::onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus& status) {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onDidFinishRenderingFrame(status));
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -213,6 +240,8 @@ void NativeMapView::onDidFinishRenderingFrame(const MapObserver::RenderFrameStat
 void NativeMapView::onWillStartRenderingMap() {
     assert(vm != nullptr);
 
+    APPLY_PLUGINS(onWillStartRenderingMap());
+
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onWillStartRenderingMap = javaClass.GetMethod<void()>(*_env, "onWillStartRenderingMap");
@@ -224,6 +253,8 @@ void NativeMapView::onWillStartRenderingMap() {
 
 void NativeMapView::onDidFinishRenderingMap(MapObserver::RenderMode mode) {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onDidFinishRenderingMap(mode));
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -237,6 +268,8 @@ void NativeMapView::onDidFinishRenderingMap(MapObserver::RenderMode mode) {
 void NativeMapView::onDidBecomeIdle() {
     assert(vm != nullptr);
 
+    APPLY_PLUGINS(onDidBecomeIdle());
+
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onDidBecomeIdle = javaClass.GetMethod<void()>(*_env, "onDidBecomeIdle");
@@ -248,6 +281,8 @@ void NativeMapView::onDidBecomeIdle() {
 
 void NativeMapView::onDidFinishLoadingStyle() {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onDidFinishLoadingStyle());
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -261,6 +296,8 @@ void NativeMapView::onDidFinishLoadingStyle() {
 void NativeMapView::onSourceChanged(mbgl::style::Source& source) {
     assert(vm != nullptr);
 
+    APPLY_PLUGINS(onSourceChanged(source));
+
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onSourceChanged = javaClass.GetMethod<void(jni::String)>(*_env, "onSourceChanged");
@@ -273,6 +310,8 @@ void NativeMapView::onSourceChanged(mbgl::style::Source& source) {
 
 void NativeMapView::onStyleImageMissing(const std::string& imageId) {
     assert(vm != nullptr);
+
+    APPLY_PLUGINS(onStyleImageMissing(imageId));
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
@@ -1328,6 +1367,19 @@ void NativeMapView::setFrustumOffset(JNIEnv& env, const jni::Object<RectF>& padd
     map->setFrustumOffset(offset);
 }
 
+void NativeMapView::registerPlugins(JNIEnv& env, const jni::Array<jni::jlong>& pluginPtrs) {
+    assert(map);
+    jni::NullCheck(env, &pluginPtrs);
+    auto renderer = rendererFrontend->getRenderer();
+    std::size_t len = pluginPtrs.Length(env);
+    for (std::size_t i = 0; i < len; i++) {
+        auto ptr = pluginPtrs.Get(env, i);
+        auto plugin = reinterpret_cast<mbgl::platform::XPlatformPlugin*>(ptr);
+        plugins.push_back(plugin);
+        plugin->onLoad(map.get(), renderer);
+    }
+}
+
 // Static methods //
 
 void NativeMapView::registerNative(jni::JNIEnv& env) {
@@ -1451,10 +1503,17 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
         METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
         METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
-        METHOD(&NativeMapView::setFrustumOffset, "nativeSetFrustumOffset"));
+        METHOD(&NativeMapView::setFrustumOffset, "nativeSetFrustumOffset"),
+        METHOD(&NativeMapView::registerPlugins, "nativeRegisterPlugins"));
 }
 
-void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
+void NativeMapView::onRegisterShaders(gfx::ShaderRegistry& registry) {
+    for (auto plugin : plugins) {
+        if (plugin != nullptr) {
+            plugin->onRegisterShaders(registry);
+        }
+    }
+}
 
 // Shader compilation
 void NativeMapView::onPreCompileShader(shaders::BuiltIn id,

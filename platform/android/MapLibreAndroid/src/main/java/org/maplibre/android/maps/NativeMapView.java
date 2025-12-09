@@ -1745,6 +1745,14 @@ final class NativeMapView implements NativeMap {
     return nativePtr;
   }
 
+  @Override
+  public void registerPlugins(@NonNull long[] pluginPtrs) {
+    nativeRegisterPlugins(pluginPtrs);
+  }
+
+  @Keep
+  private native void nativeRegisterPlugins(@NonNull long[] pluginPtrs);
+
   @Keep
   private native void nativeTriggerRepaint();
 

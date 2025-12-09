@@ -1,45 +1,45 @@
 #include "BasicPluginExample.hpp"
 #include <mbgl/map/camera.hpp>
 #include <mbgl/util/geo.hpp>
-#include <iostream>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl::platform {
 
 BasicPluginExample::BasicPluginExample() {
-  std::cout << "BasicPluginExample: Created" << std::endl;
+  Log::Info(Event::General, "BasicPluginExample: Created");
 }
 
 BasicPluginExample::~BasicPluginExample() {
-  std::cout << "BasicPluginExample: Destroyed" << std::endl;
+  Log::Info(Event::General, "BasicPluginExample: Destroyed");
 }
 
 void BasicPluginExample::onLoad(mbgl::Map* map, mbgl::Renderer* renderer) {
   map_ = map;
   renderer_ = renderer;
-  std::cout << "BasicPluginExample::onLoad - Plugin loaded with map and renderer" << std::endl;
+  Log::Info(Event::General, "BasicPluginExample::onLoad");
 }
 
 void BasicPluginExample::onUnload() {
-  std::cout << "BasicPluginExample::onUnload - Plugin unloading" << std::endl;
+  Log::Info(Event::General, "BasicPluginExample::onUnload - Plugin unloading");
   map_ = nullptr;
   renderer_ = nullptr;
 }
 
 void BasicPluginExample::onWillStartLoadingMap() {
-  std::cout << "BasicPluginExample::onWillStartLoadingMap" << std::endl;
+  Log::Info(Event::General, "BasicPluginExample::onWillStartLoadingMap");
 }
 
 void BasicPluginExample::onDidFinishLoadingMap() {
-  std::cout << "BasicPluginExample::onDidFinishLoadingMap" << std::endl;
+  Log::Info(Event::General, "BasicPluginExample::onDidFinishLoadingMap");
 }
 
-void BasicPluginExample::onDidFailLoadingMap(MapLoadError error, const std::string& message) {
-  std::cerr << "BasicPluginExample::onDidFailLoadingMap - Error: " << message << std::endl;
+void BasicPluginExample::onDidFailLoadingMap(MapLoadError, const std::string& message) {
+  Log::Error(Event::General, "BasicPluginExample::onDidFailLoadingMap - Error: " + message);
 }
 
 void BasicPluginExample::showSanFrancisco() {
   if (!map_) {
-    std::cerr << "BasicPluginExample::showSanFrancisco - Map not available" << std::endl;
+    Log::Error(Event::General, "BasicPluginExample::showSanFrancisco - Map not available");
     return;
   }
 
@@ -51,8 +51,7 @@ void BasicPluginExample::showSanFrancisco() {
   camera.center = LatLng{sfLatitude, sfLongitude};
   camera.zoom = zoomLevel;
 
-  std::cout << "BasicPluginExample::showSanFrancisco - Setting camera to ("
-            << sfLatitude << ", " << sfLongitude << ") at zoom " << zoomLevel << std::endl;
+  Log::Info(Event::General, "BasicPluginExample::showSanFrancisco - Setting camera");
 
   map_->jumpTo(camera);
 }

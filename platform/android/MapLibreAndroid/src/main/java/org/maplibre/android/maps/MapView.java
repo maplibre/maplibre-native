@@ -34,6 +34,7 @@ import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.tile.TileOperation;
+import org.maplibre.android.XPlatformPluginBridge;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -92,6 +93,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   private Bundle savedInstanceState;
   private boolean isStarted;
 
+  private final List<XPlatformPluginBridge> pluginBridges = new ArrayList<>();
+  private boolean pluginsRegistrationOpen = true;
+
   @UiThread
   public MapView(@NonNull Context context) {
     super(context);
@@ -145,6 +149,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
   private void initializeMap() {
     Context context = getContext();
+
+    registerPlugins();
 
     // callback for focal point invalidation
     focalInvalidator.addListener(createFocalPointChangeListener());
@@ -435,6 +441,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     if (mapRenderer != null) {
       mapRenderer.onDestroy();
     }
+
+    pluginBridges.clear();
   }
 
   /**
@@ -1543,6 +1551,33 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
   void setMapLibreMap(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
+  }
+
+  //
+  // Cross-platform Plugin API
+  //
+
+  private void registerPlugins() {
+    pluginsRegistrationOpen = false;
+    long[] pluginPtrs = new long[pluginBridges.size()];
+    for (int i = 0; i < pluginBridges.size(); i++) {
+      pluginPtrs[i] = pluginBridges.get(i).getNativePlugin();
+    }
+    nativeMapView.registerPlugins(pluginPtrs);
+  }
+
+  /**
+   * Add a cross-platform plugin bridge to the map.
+   * Plugins must be registered before the map is initialized (before onCreate is called).
+   *
+   * @param bridge The plugin bridge to add
+   * @throws IllegalStateException if called after native initialization
+   */
+  public void addPluginBridge(@NonNull XPlatformPluginBridge bridge) {
+    if (!pluginsRegistrationOpen) {
+      throw new IllegalStateException("Plugins must be registered before native initialization");
+    }
+    pluginBridges.add(bridge);
   }
 
   private class FocalPointInvalidator implements FocalPointChangeListener {

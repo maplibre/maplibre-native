@@ -14,6 +14,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/main.cpp
             ${PROJECT_SOURCE_DIR}/jni_native.cpp
             ${PROJECT_SOURCE_DIR}/jni_native.hpp
+            ${PROJECT_SOURCE_DIR}/plugin_jni.cpp
+            ${PROJECT_SOURCE_DIR}/plugin_jni.hpp
             ${PROJECT_SOURCE_DIR}/file_source.cpp
             ${PROJECT_SOURCE_DIR}/file_source.hpp
             ${PROJECT_SOURCE_DIR}/http_file_source.cpp
@@ -240,3 +242,9 @@ target_link_libraries(maplibre
                               mbgl-vendor-unique_resource)
 
 install(TARGETS maplibre LIBRARY DESTINATION lib)
+
+# Plugins - built into maplibre.so to avoid visibility issues. 
+# Each plugin handles its own option and adds sources to maplibre target
+# NOTE: This should not be considered as the "one true way" of building plugins, but one option among many. Plugins should be very flexible and adaptable to any build system setup.
+set(MLN_ROOT ${PROJECT_SOURCE_DIR}/../../../../..)
+add_subdirectory(${MLN_ROOT}/platform/plugins ${CMAKE_BINARY_DIR}/plugins)
