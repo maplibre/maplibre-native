@@ -244,6 +244,7 @@ template <typename T>
 std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValue(const Value& value) {
     return value.match(
         [&](const std::vector<Value>& v) -> std::optional<std::vector<T>> {
+            // Convert array of expression values to vector of typed values
             std::vector<T> result;
             result.reserve(v.size());
             for (const Value& item : v) {
@@ -255,7 +256,17 @@ std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValu
             }
             return result;
         },
-        [&](const auto&) { return std::optional<std::vector<T>>(); });
+        [&](const auto&) -> std::optional<std::vector<T>> {
+            // Handle zoom function interpolation for array-typed properties.
+            // When array properties (e.g., std::vector<Color>) use zoom functions,
+            // the expression interpolates individual item values (e.g., Color),
+            // so we wrap the single interpolated value into a vector.
+            std::optional<T> convertedItem = ValueConverter<T>::fromExpressionValue(value);
+            if (convertedItem) {
+                return std::vector<T>{*convertedItem};
+            }
+            return std::nullopt;
+        });
 }
 
 Value ValueConverter<Position>::toExpressionValue(const mbgl::style::Position& value) {
