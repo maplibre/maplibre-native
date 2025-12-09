@@ -9,7 +9,7 @@ namespace mbgl {
 class Tileset;
 class TileParameters;
 
-class VectorMVTTile : public VectorTile {
+class VectorMVTTile final : public VectorTile {
 public:
     VectorMVTTile(const OverscaledTileID&,
                   std::string sourceID,
