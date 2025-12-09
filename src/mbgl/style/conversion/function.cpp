@@ -373,11 +373,19 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         return std::nullopt;
     }
 
-    // For array output types, parse stops as the item type
+    // For variable-length array output types with non-Number item types (like std::vector<Color>),
+    // parse stops as the item type to enable interpolation of individual items.
+    // Fixed-size arrays (like Array<Number, 2> for translate properties) and variable-length
+    // Number arrays (like line-dasharray) should NOT be unwrapped.
     type::Type stopType = type;
     type.match(
         [&](const type::Array& arr) {
-            stopType = arr.itemType;
+            // Only extract item type for variable-length arrays with non-Number item types
+            // (e.g., Array<Color> for hillshade colors). This enables interpolating individual colors.
+            // Arrays of numbers (both fixed and variable length) are interpolated as a whole.
+            if (!arr.N && arr.itemType != type::Number) {
+                stopType = arr.itemType;
+            }
         },
         [](const auto&) {}
     );
@@ -568,24 +576,29 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
     
-    // For array types, create step with item type  
+    // For variable-length array types with non-Number item types (like std::vector<Color>),
+    // create step with item type to enable interpolation of individual items.
+    // Fixed-size arrays and variable-length Number arrays use the full array type.
     type::Type exprType = type;
-    bool isArrayType = false;
+    bool isNonNumberVariableLengthArray = false;
     type.match(
         [&](const type::Array& arr) {
-            exprType = arr.itemType;
-            isArrayType = true;
+            // Only extract item type for variable-length arrays with non-Number item types
+            if (!arr.N && arr.itemType != type::Number) {
+                exprType = arr.itemType;
+                isNonNumberVariableLengthArray = true;
+            }
         },
         [](const auto&) {}
     );
-    
+
     auto expr = step(exprType, makeInput(true), std::move(*stops));
-    
-    // For array types with camera functions, return the step directly
-    if (isArrayType && !def) {
+
+    // For non-Number variable-length array types with camera functions, return the step directly
+    if (isNonNumberVariableLengthArray && !def) {
         return expr;
     }
-    
+
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
@@ -606,25 +619,30 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
         return std::nullopt;
     }
     
-    // For array types, create interpolation with item type
+    // For variable-length array types with non-Number item types (like std::vector<Color>),
+    // create interpolation with item type to enable interpolation of individual items.
+    // Fixed-size arrays and variable-length Number arrays use the full array type.
     type::Type exprType = type;
-    bool isArrayType = false;
+    bool isNonNumberVariableLengthArray = false;
     type.match(
         [&](const type::Array& arr) {
-            exprType = arr.itemType;
-            isArrayType = true;
+            // Only extract item type for variable-length arrays with non-Number item types
+            if (!arr.N && arr.itemType != type::Number) {
+                exprType = arr.itemType;
+                isNonNumberVariableLengthArray = true;
+            }
         },
         [](const auto&) {}
     );
-    
+
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
-    
-    // For array types with camera functions, return the interpolation directly
+
+    // For non-Number variable-length array types with camera functions, return the interpolation directly
     // The value.cpp wrapping will convert Color -> std::vector<Color>
-    if (isArrayType && !def) {
+    if (isNonNumberVariableLengthArray && !def) {
         return expr;
     }
-    
+
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
