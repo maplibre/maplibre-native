@@ -249,6 +249,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/heatmap_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/hillshade_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/color_relief_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/layer_manager.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/line_layer_factory.hpp
@@ -360,6 +361,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/heatmap_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/hillshade_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/color_relief_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/line_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/raster_layer.hpp
@@ -499,6 +501,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/fill_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/heatmap_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/hillshade_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/color_relief_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/layer_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/line_layer_factory.cpp
@@ -580,6 +583,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_heatmap_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_hillshade_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_hillshade_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_color_relief_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_color_relief_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/color_relief_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/color_relief_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_line_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_line_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_raster_layer.cpp
@@ -678,6 +685,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/hillshade_conversions.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source_options.cpp
@@ -763,6 +771,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_properties.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_properties.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_impl.hpp
@@ -1014,6 +1027,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/color_relief.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
@@ -1090,6 +1104,7 @@ if(MLN_WITH_OPENGL)
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_texture_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_layer_ubo.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/color_relief_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_prepare_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
@@ -1165,6 +1180,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/heatmap_texture.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/color_relief.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/location_indicator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
@@ -1206,6 +1222,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/color_relief.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
@@ -1266,6 +1283,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/heatmap_texture.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/color_relief.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/location_indicator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
@@ -1309,6 +1327,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/color_relief.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/location_indicator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
@@ -1352,6 +1371,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/color_relief.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/line.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
@@ -1390,6 +1410,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap_texture.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/color_relief.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
@@ -1589,7 +1610,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
-	    mlt-cpp
+        mlt-cpp
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
         $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-freetype>

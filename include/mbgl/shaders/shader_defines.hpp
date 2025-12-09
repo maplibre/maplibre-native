@@ -79,6 +79,13 @@ enum {
 };
 
 enum {
+    idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idColorReliefTilePropsUBO = drawableReservedUBOCount,
+    idColorReliefEvaluatedPropsUBO,
+    colorReliefDrawableUBOCount
+};
+
+enum {
     idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idLineTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
     lineDrawableUBOCount = drawableReservedUBOCount
@@ -120,6 +127,7 @@ static constexpr uint32_t layerUBOStartId = std::max({static_cast<uint32_t>(back
                                                       static_cast<uint32_t>(heatmapTextureDrawableUBOCount),
                                                       static_cast<uint32_t>(hillshadeDrawableUBOCount),
                                                       static_cast<uint32_t>(hillshadePrepareDrawableUBOCount),
+                                                      static_cast<uint32_t>(colorReliefDrawableUBOCount),
                                                       static_cast<uint32_t>(lineDrawableUBOCount),
                                                       static_cast<uint32_t>(locationIndicatorDrawableUBOCount),
                                                       static_cast<uint32_t>(rasterDrawableUBOCount),
@@ -196,6 +204,10 @@ enum {
 };
 
 enum {
+    colorReliefUBOCount = getLayerStartValue(colorReliefDrawableUBOCount)
+};
+
+enum {
     idLineEvaluatedPropsUBO = getLayerStartValue(lineDrawableUBOCount),
     idLineExpressionUBO,
     lineUBOCount
@@ -233,6 +245,7 @@ static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>
                                                            static_cast<uint32_t>(heatmapTextureUBOCount),
                                                            static_cast<uint32_t>(hillshadeUBOCount),
                                                            static_cast<uint32_t>(hillshadePrepareUBOCount),
+                                                           static_cast<uint32_t>(colorReliefUBOCount),
                                                            static_cast<uint32_t>(lineUBOCount),
                                                            static_cast<uint32_t>(locationIndicatorUBOCount),
                                                            static_cast<uint32_t>(rasterUBOCount),
@@ -297,6 +310,13 @@ enum {
 };
 
 enum {
+    idColorReliefImageTexture,
+    idColorReliefElevationStopsTexture,
+    idColorReliefColorStopsTexture,
+    colorReliefTextureCount
+};
+
+enum {
     idLocationIndicatorTexture,
     locationIndicatorTextureCount
 };
@@ -329,6 +349,7 @@ static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint3
                                                                static_cast<uint32_t>(fillExtrusionTextureCount),
                                                                static_cast<uint32_t>(heatmapTextureCount),
                                                                static_cast<uint32_t>(hillshadeTextureCount),
+                                                               static_cast<uint32_t>(colorReliefTextureCount),
                                                                static_cast<uint32_t>(lineTextureCount),
                                                                static_cast<uint32_t>(locationIndicatorTextureCount),
                                                                static_cast<uint32_t>(rasterTextureCount),
@@ -430,6 +451,12 @@ enum {
 };
 
 enum {
+    idColorReliefPosVertexAttribute,
+    idColorReliefTexturePosVertexAttribute,
+    colorReliefVertexAttributeCount
+};
+
+enum {
     idLinePosNormalVertexAttribute,
     idLineDataVertexAttribute,
 
@@ -505,6 +532,7 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
     static_cast<uint32_t>(fillExtrusionVertexAttributeCount),
     static_cast<uint32_t>(heatmapVertexAttributeCount),
     static_cast<uint32_t>(hillshadeVertexAttributeCount),
+    static_cast<uint32_t>(colorReliefVertexAttributeCount),
     static_cast<uint32_t>(lineVertexAttributeCount),
     static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
