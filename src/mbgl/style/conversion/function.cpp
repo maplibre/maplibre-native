@@ -378,6 +378,21 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         return std::nullopt;
     }
 
+    // For variable-length array output types with zoom functions, parse stops as the item type
+    // This allows hillshade color arrays to interpolate via zoom functions
+    // Fixed-size arrays (like translate [x,y]) should use the full type
+    type::Type stopType = type;
+    type.match(
+        [&](const type::Array& arr) {
+            // Only use item type for variable-length arrays (arr.N is null)
+            // Fixed-size arrays should parse the full array value
+            if (!arr.N) {
+                stopType = arr.itemType;
+            }
+        },
+        [](const auto&) {}
+    );
+
     std::map<double, std::unique_ptr<Expression>> stops;
     for (std::size_t i = 0; i < arrayLength(*stopsValue); ++i) {
         const auto& stopValue = arrayMember(*stopsValue, i);
@@ -398,7 +413,7 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         }
 
         std::optional<std::unique_ptr<Expression>> e = convertLiteral(
-            type, arrayMember(stopValue, 1), error, convertTokens);
+            stopType, arrayMember(stopValue, 1), error, convertTokens);
         if (!e) {
             return std::nullopt;
         }
@@ -568,7 +583,27 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
 
-    auto expr = step(type, makeInput(true), std::move(*stops));
+    // For variable-length array types, create step with item type  
+    type::Type exprType = type;
+    bool isVariableLengthArray = false;
+    type.match(
+        [&](const type::Array& arr) {
+            // Only use item type for variable-length arrays
+            if (!arr.N) {
+                exprType = arr.itemType;
+                isVariableLengthArray = true;
+            }
+        },
+        [](const auto&) {}
+    );
+    
+    auto expr = step(exprType, makeInput(true), std::move(*stops));
+    
+    // For variable-length array types with camera functions, return the step directly
+    if (isVariableLengthArray && !def) {
+        return expr;
+    }
+    
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
