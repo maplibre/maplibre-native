@@ -81,8 +81,7 @@ enum {
 enum {
     idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idColorReliefTilePropsUBO = drawableReservedUBOCount,
-    idColorReliefEvaluatedPropsUBO = drawableReservedUBOCount + 1,
-    colorReliefDrawableUBOCount = drawableReservedUBOCount + 2
+    colorReliefDrawableUBOCount
 };
 
 enum {
