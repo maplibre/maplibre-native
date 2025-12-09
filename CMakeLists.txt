@@ -217,6 +217,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/established_actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/mailbox.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/message.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/actor/optional_actor.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/actor/optional_actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/scheduler.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp

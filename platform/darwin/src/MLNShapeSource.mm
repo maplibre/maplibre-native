@@ -27,6 +27,7 @@ const MLNShapeSourceOption MLNShapeSourceOptionMaximumZoomLevelForClustering = @
 const MLNShapeSourceOption MLNShapeSourceOptionMinimumZoomLevel = @"MLNShapeSourceOptionMinimumZoomLevel";
 const MLNShapeSourceOption MLNShapeSourceOptionSimplificationTolerance = @"MLNShapeSourceOptionSimplificationTolerance";
 const MLNShapeSourceOption MLNShapeSourceOptionLineDistanceMetrics = @"MLNShapeSourceOptionLineDistanceMetrics";
+const MLNShapeSourceOption MLNShapeSourceOptionSynchronousUpdate = @"MLNShapeSourceOptionSynchronousUpdate";
 
 mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSDictionary<MLNShapeSourceOption, id> *options) {
     auto geoJSONOptions = mbgl::makeMutable<mbgl::style::GeoJSONOptions>();
@@ -152,6 +153,14 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
                         format:@"MLNShapeSourceOptionLineDistanceMetrics must be an NSNumber."];
         }
         geoJSONOptions->lineMetrics = value.boolValue;
+    }
+
+    if (NSNumber *value = options[MLNShapeSourceOptionSynchronousUpdate]) {
+        if (![value isKindOfClass:[NSNumber class]]) {
+            [NSException raise:NSInvalidArgumentException
+                        format:@"MLNShapeSourceOptionSynchronousUpdate must be an NSNumber."];
+        }
+        geoJSONOptions->synchronousUpdate = value.boolValue;
     }
 
     return geoJSONOptions;
