@@ -1,0 +1,14 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+# Core C++ plugin - platform agnostic
+cc_library(
+    name = "basic-example-plugin",
+    srcs = ["BasicPluginExample.cpp"],
+    hdrs = ["BasicPluginExample.hpp"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+    ],
+)

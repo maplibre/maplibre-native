@@ -119,6 +119,7 @@ MLN_DARWIN_OBJCPP_HEADERS = [
     "src/MLNRendererFrontend.h",
     "src/MLNStyleLayerManager.h",
     "src/MLNValueEvaluator.h",
+    "src/MLNXPlatformPluginBridge.h",
     "src/NSArray+MLNAdditions.h",
     "src/NSBundle+MLNAdditions.h",
     "src/NSCoder+MLNAdditions.h",

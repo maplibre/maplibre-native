@@ -252,6 +252,7 @@ objc_library(
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
+        "src/MLNXPlatformPluginBridge.h",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",

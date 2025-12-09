@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "objc_library")
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+
+# Darwin (iOS/macOS) binding for the basic example plugin
+objc_library(
+    name = "basic-example-plugin-darwin",
+    srcs = ["MLNBasicPluginExample.mm"],
+    hdrs = ["MLNBasicPluginExample.h"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
+    includes = [
+        "..",
+        "../../../darwin/src",
+    ],
+    module_name = "MLNBasicPluginExample",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//platform/darwin:darwin-objcpp",
+        "//platform/plugins/basic-example-plugin",
+    ],
+)
