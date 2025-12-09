@@ -16,6 +16,7 @@ VectorMVTTile::VectorMVTTile(const OverscaledTileID& id_,
     : VectorTile(id_, std::move(sourceID_), parameters_, tileset_, observer_) {}
 
 VectorMVTTile::~VectorMVTTile() {
+    // this needs to be explicitly deleted in the most-derived destructor
     loader.reset();
 
     // Don't rely on `~TileLoader` to close, it's not safe to call there.
