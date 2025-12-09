@@ -51,14 +51,14 @@ public:
 
     // Construct the `Object` from a tuple containing the constructor arguments
     // (i.e. `Object(std::get<0>(args), std::get<1>(args), ...)`)
-    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size_v<std::decay_t<ArgsTuple>>>
+    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args)
         : parent(parent_) {
         emplaceObject(std::forward<ArgsTuple>(args), std::make_index_sequence<ArgCount>{});
         parent.mailbox->open(scheduler);
     }
 
-    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size_v<std::decay_t<ArgsTuple>>>
+    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
     EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args) {
         EstablishedActor(*scheduler.get(), parent_, std::forward<ArgsTuple>(args));
     }
