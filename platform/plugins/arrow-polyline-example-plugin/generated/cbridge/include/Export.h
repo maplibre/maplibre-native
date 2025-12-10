@@ -23,9 +23,9 @@
 // NOTE: Always export on Windows, since these symbols are intended to be loaded dynamically rather
 // than used directly.
 #ifndef _GLUECODIUM_C_EXPORT
-#   if defined(_WIN32) || defined(__CYGWIN)
-#       define _GLUECODIUM_C_EXPORT __declspec( dllexport )
-#   else
-#       define _GLUECODIUM_C_EXPORT __attribute__( ( visibility( "default" ) ) )
-#   endif
+#if defined(_WIN32) || defined(__CYGWIN)
+#define _GLUECODIUM_C_EXPORT __declspec(dllexport)
+#else
+#define _GLUECODIUM_C_EXPORT __attribute__((visibility("default")))
+#endif
 #endif

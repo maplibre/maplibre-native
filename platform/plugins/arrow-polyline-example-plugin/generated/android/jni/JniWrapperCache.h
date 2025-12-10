@@ -7,25 +7,22 @@
 
 #include "JniReference.h"
 
-namespace glue_internal
-{
-namespace jni
-{
+namespace glue_internal {
+namespace jni {
 
-class JNIEXPORT JniWrapperCache final
-{
+class JNIEXPORT JniWrapperCache final {
 public:
-    template<class T>
+    template <class T>
     static void cache_wrapper(JNIEnv* jenv, const std::shared_ptr<T>& nobj, const JniReference<jobject>& jobj) {
         cache_wrapper_impl(jenv, nobj.get(), jobj);
     }
 
-    template<class T>
+    template <class T>
     static JniReference<jobject> get_cached_wrapper(JNIEnv* jenv, const std::shared_ptr<T>& nobj) {
         return get_cached_wrapper_impl(jenv, nobj.get());
     }
 
-    template<class T>
+    template <class T>
     static void remove_cached_wrapper(JNIEnv* jenv, const std::shared_ptr<T>& nobj) {
         remove_cached_wrapper_impl(jenv, nobj.get());
     }

@@ -60,14 +60,14 @@
 namespace mbgl {
 namespace android {
 
-#define APPLY_PLUGINS(method_call)   \
-    if (vm == nullptr) {             \
-        return;                      \
-    }                                \
-    for (auto plugin : plugins) {    \
-        if (plugin != nullptr) {     \
-            plugin->method_call;     \
-        }                            \
+#define APPLY_PLUGINS(method_call) \
+    if (vm == nullptr) {           \
+        return;                    \
+    }                              \
+    for (auto plugin : plugins) {  \
+        if (plugin != nullptr) {   \
+            plugin->method_call;   \
+        }                          \
     }
 
 NativeMapView::NativeMapView(jni::JNIEnv& _env,

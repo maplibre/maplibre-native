@@ -8,9 +8,9 @@ namespace mbgl::platform {
 
 class XPlatformPlugin : public mbgl::MapObserver {
 public:
-  virtual ~XPlatformPlugin() = default;
-  virtual void onLoad(mbgl::Map* map, mbgl::Renderer* renderer) = 0;
-  virtual void onUnload() = 0;
+    virtual ~XPlatformPlugin() = default;
+    virtual void onLoad(mbgl::Map* map, mbgl::Renderer* renderer) = 0;
+    virtual void onUnload() = 0;
 };
 
 } // namespace mbgl::platform

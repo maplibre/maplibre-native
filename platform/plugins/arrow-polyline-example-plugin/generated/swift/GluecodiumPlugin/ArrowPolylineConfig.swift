@@ -25,7 +25,8 @@ public struct ArrowPolylineConfig {
         self.lineColor = lineColor
         self.lineWidth = lineWidth
     }
-    internal init(cHandle: _baseRef) {
+
+    init(cHandle: _baseRef) {
         headLength = moveFromCType(GluecodiumPlugin_ArrowPolylineConfig_headLength_get(cHandle))
         headAngle = moveFromCType(GluecodiumPlugin_ArrowPolylineConfig_headAngle_get(cHandle))
         lineColor = moveFromCType(GluecodiumPlugin_ArrowPolylineConfig_lineColor_get(cHandle))
@@ -33,44 +34,46 @@ public struct ArrowPolylineConfig {
     }
 }
 
-
-
-internal func copyFromCType(_ handle: _baseRef) -> ArrowPolylineConfig {
-    return ArrowPolylineConfig(cHandle: handle)
+func copyFromCType(_ handle: _baseRef) -> ArrowPolylineConfig {
+    ArrowPolylineConfig(cHandle: handle)
 }
-internal func moveFromCType(_ handle: _baseRef) -> ArrowPolylineConfig {
+
+func moveFromCType(_ handle: _baseRef) -> ArrowPolylineConfig {
     defer {
         GluecodiumPlugin_ArrowPolylineConfig_release_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: ArrowPolylineConfig) -> RefHolder {
+func copyToCType(_ swiftType: ArrowPolylineConfig) -> RefHolder {
     let c_headLength = moveToCType(swiftType.headLength)
     let c_headAngle = moveToCType(swiftType.headAngle)
     let c_lineColor = moveToCType(swiftType.lineColor)
     let c_lineWidth = moveToCType(swiftType.lineWidth)
     return RefHolder(GluecodiumPlugin_ArrowPolylineConfig_create_handle(c_headLength.ref, c_headAngle.ref, c_lineColor.ref, c_lineWidth.ref))
 }
-internal func moveToCType(_ swiftType: ArrowPolylineConfig) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: GluecodiumPlugin_ArrowPolylineConfig_release_handle)
+
+func moveToCType(_ swiftType: ArrowPolylineConfig) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: GluecodiumPlugin_ArrowPolylineConfig_release_handle)
 }
-internal func copyFromCType(_ handle: _baseRef) -> ArrowPolylineConfig? {
+
+func copyFromCType(_ handle: _baseRef) -> ArrowPolylineConfig? {
     guard handle != 0 else {
         return nil
     }
     let unwrappedHandle = GluecodiumPlugin_ArrowPolylineConfig_unwrap_optional_handle(handle)
     return ArrowPolylineConfig(cHandle: unwrappedHandle) as ArrowPolylineConfig
 }
-internal func moveFromCType(_ handle: _baseRef) -> ArrowPolylineConfig? {
+
+func moveFromCType(_ handle: _baseRef) -> ArrowPolylineConfig? {
     defer {
         GluecodiumPlugin_ArrowPolylineConfig_release_optional_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: ArrowPolylineConfig?) -> RefHolder {
-    guard let swiftType = swiftType else {
+func copyToCType(_ swiftType: ArrowPolylineConfig?) -> RefHolder {
+    guard let swiftType else {
         return RefHolder(0)
     }
     let c_headLength = moveToCType(swiftType.headLength)
@@ -79,9 +82,7 @@ internal func copyToCType(_ swiftType: ArrowPolylineConfig?) -> RefHolder {
     let c_lineWidth = moveToCType(swiftType.lineWidth)
     return RefHolder(GluecodiumPlugin_ArrowPolylineConfig_create_optional_handle(c_headLength.ref, c_headAngle.ref, c_lineColor.ref, c_lineWidth.ref))
 }
-internal func moveToCType(_ swiftType: ArrowPolylineConfig?) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: GluecodiumPlugin_ArrowPolylineConfig_release_optional_handle)
+
+func moveToCType(_ swiftType: ArrowPolylineConfig?) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: GluecodiumPlugin_ArrowPolylineConfig_release_optional_handle)
 }
-
-
-

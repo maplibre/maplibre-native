@@ -46,4 +46,4 @@ private:
 };
 
 _GLUECODIUM_C_EXPORT WrapperCache& get_wrapper_cache();
-}
+} // namespace glue_internal

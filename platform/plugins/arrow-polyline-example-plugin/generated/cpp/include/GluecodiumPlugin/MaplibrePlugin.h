@@ -22,20 +22,17 @@ public:
     MaplibrePlugin();
     virtual ~MaplibrePlugin();
 
-
 public:
     /**
      *
      * \return @NotNull
      */
-    static ::std::shared_ptr< ::GluecodiumPlugin::MaplibrePlugin > create(  );
+    static ::std::shared_ptr<::GluecodiumPlugin::MaplibrePlugin> create();
     /**
      *
      * \return Pointer to the underlying C++ class that implements XPlatformPlugin
      */
-    virtual uint64_t get_ptr(  ) const = 0;
-
+    virtual uint64_t get_ptr() const = 0;
 };
 
-
-}
+} // namespace GluecodiumPlugin

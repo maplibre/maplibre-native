@@ -26,24 +26,25 @@ namespace glue_internal {
 
 std::atomic<bool> WrapperCache::is_alive{};
 
-WrapperCache::WrapperCache() noexcept { is_alive = true; }
-WrapperCache::~WrapperCache() { is_alive = false; }
+WrapperCache::WrapperCache() noexcept {
+    is_alive = true;
+}
+WrapperCache::~WrapperCache() {
+    is_alive = false;
+}
 
-void
-WrapperCache::cache_wrapper(WrapperCache::CppPtr cpp_ptr, WrapperCache::SwiftPtr swift_ptr) {
+void WrapperCache::cache_wrapper(WrapperCache::CppPtr cpp_ptr, WrapperCache::SwiftPtr swift_ptr) {
     ::std::lock_guard<std::mutex> lock(mutex);
     cache[cpp_ptr] = swift_ptr;
 }
 
-WrapperCache::SwiftPtr
-WrapperCache::get_cached_wrapper(WrapperCache::CppPtr cpp_ptr) {
+WrapperCache::SwiftPtr WrapperCache::get_cached_wrapper(WrapperCache::CppPtr cpp_ptr) {
     ::std::lock_guard<std::mutex> lock(mutex);
     auto iter = cache.find(cpp_ptr);
     return (iter != cache.end()) ? iter->second : nullptr;
 }
 
-void
-WrapperCache::remove_cached_wrapper(WrapperCache::CppPtr cpp_ptr) {
+void WrapperCache::remove_cached_wrapper(WrapperCache::CppPtr cpp_ptr) {
     ::std::lock_guard<std::mutex> lock(mutex);
     cache.erase(cpp_ptr);
 }
@@ -53,10 +54,9 @@ WrapperCache::remove_cached_wrapper(WrapperCache::CppPtr cpp_ptr) {
 // 1. Use function static variable to ensure it's constructed on first use.
 // 2. Use an "alive" flag to ensure it won't crash if destructed early. (e.g. storing a
 //    shared_ptr to a proxy object as a static variable)
-WrapperCache& get_wrapper_cache()
-{
+WrapperCache& get_wrapper_cache() {
     static WrapperCache cache;
     return cache;
 }
 
-}
+} // namespace glue_internal

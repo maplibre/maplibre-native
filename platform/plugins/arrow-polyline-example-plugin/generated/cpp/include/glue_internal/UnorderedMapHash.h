@@ -24,21 +24,17 @@
 
 namespace glue_internal {
 
-template< class Key, class T, class Hash >
-struct hash< std::unordered_map< Key, T, Hash > >
-{
-    size_t
-    operator( )( const std::unordered_map< Key, T, Hash >& vec ) const
-    {
+template <class Key, class T, class Hash>
+struct hash<std::unordered_map<Key, T, Hash>> {
+    size_t operator()(const std::unordered_map<Key, T, Hash>& vec) const {
         size_t hash_value = 29;
         auto key_hasher = Hash();
         auto value_hasher = hash<T>();
-        for (const auto& entry: vec)
-        {
-            hash_value ^= (809 ^ key_hasher( entry.first ) );
-            hash_value ^= (811 ^ value_hasher( entry.second ) );
+        for (const auto& entry : vec) {
+            hash_value ^= (809 ^ key_hasher(entry.first));
+            hash_value ^= (811 ^ value_hasher(entry.second));
         }
         return hash_value;
     }
 };
-}
+} // namespace glue_internal

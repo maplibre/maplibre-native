@@ -2,8 +2,8 @@
 
 //
 
-internal class RefHolder {
-    public let ref: _baseRef
+class RefHolder {
+    let ref: _baseRef
     private let release: ((_baseRef) -> Void)?
 
     init(_ ref: _baseRef) {
@@ -23,10 +23,10 @@ internal class RefHolder {
     }
 }
 
-internal typealias _baseRef = Int64
+typealias _baseRef = Int64
 
-internal struct PrimitiveHolder<T> {
-    public let ref: T
+struct PrimitiveHolder<T> {
+    let ref: T
 
     init(_ ref: T) {
         self.ref = ref

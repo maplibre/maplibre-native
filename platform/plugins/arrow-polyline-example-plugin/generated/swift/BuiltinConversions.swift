@@ -21,7 +21,7 @@
 import Foundation
 
 extension String {
-    internal func convertToCType() -> _baseRef {
+    func convertToCType() -> _baseRef {
         let result = std_string_create_handle(self)
         precondition(result != 0, "Out of memory")
         return result
@@ -30,32 +30,33 @@ extension String {
 
 // String
 
-internal func copyFromCType(_ handle: _baseRef) -> String {
+func copyFromCType(_ handle: _baseRef) -> String {
     if let convertedString = String(data: Data(bytes: std_string_data_get(handle),
-                                    count: Int(std_string_size_get(handle))),
-                                    encoding: .utf8) {
+                                               count: Int(std_string_size_get(handle))),
+                                    encoding: .utf8)
+    {
         return convertedString
     }
 
     fatalError("Failed to decode character buffer as UTF-8 string")
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> String {
+func moveFromCType(_ handle: _baseRef) -> String {
     defer {
         std_string_release_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: String) -> RefHolder {
-    return RefHolder(std_string_create_handle(swiftType))
+func copyToCType(_ swiftType: String) -> RefHolder {
+    RefHolder(std_string_create_handle(swiftType))
 }
 
-internal func moveToCType(_ swiftType: String) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: std_string_release_handle)
+func moveToCType(_ swiftType: String) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: std_string_release_handle)
 }
 
-internal func copyFromCType(_ handle: _baseRef) -> String? {
+func copyFromCType(_ handle: _baseRef) -> String? {
     guard handle != 0 else {
         return nil
     }
@@ -63,41 +64,41 @@ internal func copyFromCType(_ handle: _baseRef) -> String? {
     return copyFromCType(unwrappedHandle) as String
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> String? {
+func moveFromCType(_ handle: _baseRef) -> String? {
     defer {
         std_string_release_optional_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: String?) -> RefHolder {
-    guard let swiftType = swiftType else {
+func copyToCType(_ swiftType: String?) -> RefHolder {
+    guard let swiftType else {
         return RefHolder(0)
     }
     return RefHolder(std_string_create_optional_handle(swiftType))
 }
 
-internal func moveToCType(_ swiftType: String?) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: std_string_release_optional_handle)
+func moveToCType(_ swiftType: String?) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: std_string_release_optional_handle)
 }
 
 // Data
 
-internal func copyFromCType(_ handle: _baseRef) -> Data {
+func copyFromCType(_ handle: _baseRef) -> Data {
     guard let byteArrayData = byteArray_data_get(handle) else {
         return Data()
     }
     return Data(bytes: byteArrayData, count: Int(byteArray_size_get(handle)))
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> Data {
+func moveFromCType(_ handle: _baseRef) -> Data {
     defer {
         byteArray_release_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: Data) -> RefHolder {
+func copyToCType(_ swiftType: Data) -> RefHolder {
     let handle = byteArray_create_handle()
     swiftType.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
         let uint8ptr = ptr.baseAddress?.assumingMemoryBound(to: UInt8.self)
@@ -106,11 +107,11 @@ internal func copyToCType(_ swiftType: Data) -> RefHolder {
     return RefHolder(handle)
 }
 
-internal func moveToCType(_ swiftType: Data) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: byteArray_release_handle)
+func moveToCType(_ swiftType: Data) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: byteArray_release_handle)
 }
 
-internal func copyFromCType(_ handle: _baseRef) -> Data? {
+func copyFromCType(_ handle: _baseRef) -> Data? {
     guard handle != 0 else {
         return nil
     }
@@ -118,15 +119,15 @@ internal func copyFromCType(_ handle: _baseRef) -> Data? {
     return copyFromCType(unwrappedHandle) as Data
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> Data? {
+func moveFromCType(_ handle: _baseRef) -> Data? {
     defer {
         byteArray_release_optional_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: Data?) -> RefHolder {
-    guard let swiftType = swiftType else {
+func copyToCType(_ swiftType: Data?) -> RefHolder {
+    guard let swiftType else {
         return RefHolder(0)
     }
     let handle = byteArray_create_optional_handle()
@@ -137,29 +138,29 @@ internal func copyToCType(_ swiftType: Data?) -> RefHolder {
     return RefHolder(handle)
 }
 
-internal func moveToCType(_ swiftType: Data?) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: byteArray_release_optional_handle)
+func moveToCType(_ swiftType: Data?) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: byteArray_release_optional_handle)
 }
 
 // Date
 
-internal func copyFromCType(_ seconds_since_epoch: Double) -> Date {
-    return Date(timeIntervalSince1970: seconds_since_epoch)
+func copyFromCType(_ seconds_since_epoch: Double) -> Date {
+    Date(timeIntervalSince1970: seconds_since_epoch)
 }
 
-internal func moveFromCType(_ seconds_since_epoch: Double) -> Date {
-    return copyFromCType(seconds_since_epoch)
+func moveFromCType(_ seconds_since_epoch: Double) -> Date {
+    copyFromCType(seconds_since_epoch)
 }
 
-internal func copyToCType(_ swiftType: Date) -> PrimitiveHolder<Double> {
-    return PrimitiveHolder(swiftType.timeIntervalSince1970)
+func copyToCType(_ swiftType: Date) -> PrimitiveHolder<Double> {
+    PrimitiveHolder(swiftType.timeIntervalSince1970)
 }
 
-internal func moveToCType(_ swiftType: Date) -> PrimitiveHolder<Double> {
-    return copyToCType(swiftType)
+func moveToCType(_ swiftType: Date) -> PrimitiveHolder<Double> {
+    copyToCType(swiftType)
 }
 
-internal func copyFromCType(_ handle: _baseRef) -> Date? {
+func copyFromCType(_ handle: _baseRef) -> Date? {
     guard handle != 0 else {
         return nil
     }
@@ -167,27 +168,27 @@ internal func copyFromCType(_ handle: _baseRef) -> Date? {
     return copyFromCType(unwrappedHandle) as Date
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> Date? {
+func moveFromCType(_ handle: _baseRef) -> Date? {
     defer {
         double_release_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: Date?) -> RefHolder {
-    guard let swiftType = swiftType else {
+func copyToCType(_ swiftType: Date?) -> RefHolder {
+    guard let swiftType else {
         return RefHolder(0)
     }
     return RefHolder(double_create_handle(copyToCType(swiftType).ref))
 }
 
-internal func moveToCType(_ swiftType: Date?) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: double_release_handle)
+func moveToCType(_ swiftType: Date?) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: double_release_handle)
 }
 
 // Locale
 
-internal func copyFromCType(_ handle: _baseRef) -> Locale {
+func copyFromCType(_ handle: _baseRef) -> Locale {
     let languageTag = moveFromCType(locale_get_language_tag(handle)) as String?
     if let languageTagUnwrapped = languageTag {
         // BCP 47 language tag takes precedence if present.
@@ -212,14 +213,14 @@ internal func copyFromCType(_ handle: _baseRef) -> Locale {
     return Locale(identifier: Locale.identifier(fromComponents: components))
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> Locale {
+func moveFromCType(_ handle: _baseRef) -> Locale {
     defer {
         locale_release_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: Locale) -> RefHolder {
+func copyToCType(_ swiftType: Locale) -> RefHolder {
     let languageCodeHandle = moveToCType(swiftType.languageCode)
     let countryCodeHandle = moveToCType(swiftType.regionCode)
     let scriptCodeHandle = moveToCType(swiftType.scriptCode)
@@ -228,11 +229,11 @@ internal func copyToCType(_ swiftType: Locale) -> RefHolder {
                                           scriptCodeHandle.ref, languageTagHandle.ref))
 }
 
-internal func moveToCType(_ swiftType: Locale) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: locale_release_handle)
+func moveToCType(_ swiftType: Locale) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: locale_release_handle)
 }
 
-internal func copyFromCType(_ handle: _baseRef) -> Locale? {
+func copyFromCType(_ handle: _baseRef) -> Locale? {
     guard handle != 0 else {
         return nil
     }
@@ -240,15 +241,15 @@ internal func copyFromCType(_ handle: _baseRef) -> Locale? {
     return copyFromCType(unwrappedHandle) as Locale
 }
 
-internal func moveFromCType(_ handle: _baseRef) -> Locale? {
+func moveFromCType(_ handle: _baseRef) -> Locale? {
     defer {
         locale_release_optional_handle(handle)
     }
     return copyFromCType(handle)
 }
 
-internal func copyToCType(_ swiftType: Locale?) -> RefHolder {
-    guard let swiftType = swiftType else {
+func copyToCType(_ swiftType: Locale?) -> RefHolder {
+    guard let swiftType else {
         return RefHolder(0)
     }
     let handle = copyToCType(swiftType).ref
@@ -258,28 +259,28 @@ internal func copyToCType(_ swiftType: Locale?) -> RefHolder {
     return RefHolder(locale_create_optional_handle(handle))
 }
 
-internal func moveToCType(_ swiftType: Locale?) -> RefHolder {
-    return RefHolder(ref: copyToCType(swiftType).ref, release: locale_release_optional_handle)
+func moveToCType(_ swiftType: Locale?) -> RefHolder {
+    RefHolder(ref: copyToCType(swiftType).ref, release: locale_release_optional_handle)
 }
 
 // Primitives
 
 // catch primitive types
-internal func copyFromCType<T>(_ primitive: T) -> T {
-    return primitive
+func copyFromCType<T>(_ primitive: T) -> T {
+    primitive
 }
 
 // catch primitive types
-internal func moveFromCType<T>(_ primitive: T) -> T {
-    return primitive
+func moveFromCType<T>(_ primitive: T) -> T {
+    primitive
 }
 
 // catch primitive types
-internal func copyToCType<T>(_ primitive: T) -> PrimitiveHolder<T> {
-    return PrimitiveHolder(primitive)
+func copyToCType<T>(_ primitive: T) -> PrimitiveHolder<T> {
+    PrimitiveHolder(primitive)
 }
 
 // catch primitive types
-internal func moveToCType<T>(_ primitive: T) -> PrimitiveHolder<T> {
-    return PrimitiveHolder(primitive)
+func moveToCType<T>(_ primitive: T) -> PrimitiveHolder<T> {
+    PrimitiveHolder(primitive)
 }

@@ -24,48 +24,37 @@
 
 namespace glue_internal {
 
-struct TypeRepository::Impl
-{
+struct TypeRepository::Impl {
     std::unordered_map<const void*, TypeId> m_repo;
     mutable std::mutex m_mutex;
 };
 
 TypeRepository::TypeRepository()
-    : pimpl(new TypeRepository::Impl())
-{
-}
+    : pimpl(new TypeRepository::Impl()) {}
 
-TypeRepository::~TypeRepository()
-{
+TypeRepository::~TypeRepository() {
     delete pimpl;
 }
 
-void
-TypeRepository::add_type(const void* instance, const TypeId& id)
-{
+void TypeRepository::add_type(const void* instance, const TypeId& id) {
     std::lock_guard<std::mutex> lock(pimpl->m_mutex);
     pimpl->m_repo[instance] = id;
 }
 
-TypeId
-TypeRepository::get_id(const void* instance) const
-{
+TypeId TypeRepository::get_id(const void* instance) const {
     std::lock_guard<std::mutex> lock(pimpl->m_mutex);
     const auto& found = pimpl->m_repo.find(instance);
     return found != pimpl->m_repo.end() ? found->second : "";
 }
 
-void
-TypeRepository::remove_type(const void* instance)
-{
+void TypeRepository::remove_type(const void* instance) {
     std::lock_guard<std::mutex> lock(pimpl->m_mutex);
     pimpl->m_repo.erase(instance);
 }
 
-TypeRepository& get_type_repository()
-{
+TypeRepository& get_type_repository() {
     static TypeRepository s_repo;
     return s_repo;
 }
 
-}
+} // namespace glue_internal

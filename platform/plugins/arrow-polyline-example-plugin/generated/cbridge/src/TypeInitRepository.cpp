@@ -22,37 +22,30 @@
 #include <mutex>
 #include <unordered_map>
 
-struct TypeInitRepository::Impl
-{
+struct TypeInitRepository::Impl {
     ::std::unordered_map<TypeId, InitFunction*> m_init;
     std::mutex m_mutex;
 };
 
 TypeInitRepository::TypeInitRepository()
-    : pimpl(new Impl())
-{
-}
+    : pimpl(new Impl()) {}
 
-TypeInitRepository::~TypeInitRepository()
-{
+TypeInitRepository::~TypeInitRepository() {
     delete pimpl;
 }
 
-void
-TypeInitRepository::add_init(const TypeId& id, TypeInitRepository::InitFunction* init) {
+void TypeInitRepository::add_init(const TypeId& id, TypeInitRepository::InitFunction* init) {
     std::lock_guard<std::mutex> lock(pimpl->m_mutex);
     pimpl->m_init[id] = init;
 }
 
-TypeInitRepository::InitFunction*
-TypeInitRepository::get_init(const TypeId& id) const {
+TypeInitRepository::InitFunction* TypeInitRepository::get_init(const TypeId& id) const {
     std::lock_guard<std::mutex> lock(pimpl->m_mutex);
     const auto& found = pimpl->m_init.find(id);
     return found != pimpl->m_init.end() ? found->second : nullptr;
 }
 
-TypeInitRepository& get_init_repository()
-{
+TypeInitRepository& get_init_repository() {
     static TypeInitRepository s_repo;
     return s_repo;
 }

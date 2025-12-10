@@ -10,13 +10,10 @@
 
 #include <string>
 
-namespace glue_internal
-{
-namespace jni
-{
+namespace glue_internal {
+namespace jni {
 
-void checkExceptionAndReportIfAny(JNIEnv* env)
-{
+void checkExceptionAndReportIfAny(JNIEnv* env) {
     if (!env->ExceptionCheck()) {
         return;
     }
@@ -53,5 +50,5 @@ void checkExceptionAndReportIfAny(JNIEnv* env)
     env->FatalError(errorMessage.c_str());
 }
 
-}
-}
+} // namespace jni
+} // namespace glue_internal

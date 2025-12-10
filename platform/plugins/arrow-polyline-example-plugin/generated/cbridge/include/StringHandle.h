@@ -28,14 +28,14 @@
 extern "C" {
 #endif
 
-_GLUECODIUM_C_EXPORT _baseRef std_string_create_handle( const char* c_str );
-_GLUECODIUM_C_EXPORT const char* std_string_data_get( _baseRef handle );
-_GLUECODIUM_C_EXPORT int64_t std_string_size_get( _baseRef handle );
-_GLUECODIUM_C_EXPORT void std_string_release_handle( _baseRef handle );
+_GLUECODIUM_C_EXPORT _baseRef std_string_create_handle(const char* c_str);
+_GLUECODIUM_C_EXPORT const char* std_string_data_get(_baseRef handle);
+_GLUECODIUM_C_EXPORT int64_t std_string_size_get(_baseRef handle);
+_GLUECODIUM_C_EXPORT void std_string_release_handle(_baseRef handle);
 
-_GLUECODIUM_C_EXPORT _baseRef std_string_create_optional_handle( const char* c_str );
-_GLUECODIUM_C_EXPORT void std_string_release_optional_handle( _baseRef handle );
-_GLUECODIUM_C_EXPORT _baseRef std_string_unwrap_optional_handle( _baseRef handle );
+_GLUECODIUM_C_EXPORT _baseRef std_string_create_optional_handle(const char* c_str);
+_GLUECODIUM_C_EXPORT void std_string_release_optional_handle(_baseRef handle);
+_GLUECODIUM_C_EXPORT _baseRef std_string_unwrap_optional_handle(_baseRef handle);
 
 #ifdef __cplusplus
 }

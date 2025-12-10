@@ -22,10 +22,6 @@ _GLUECODIUM_C_EXPORT void GluecodiumPlugin_LatLng_release_optional_handle(_baseR
 _GLUECODIUM_C_EXPORT double GluecodiumPlugin_LatLng_latitude_get(_baseRef handle);
 _GLUECODIUM_C_EXPORT double GluecodiumPlugin_LatLng_longitude_get(_baseRef handle);
 
-
-
-
-
 #ifdef __cplusplus
 }
 #endif

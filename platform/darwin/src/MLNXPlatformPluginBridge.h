@@ -9,7 +9,7 @@ namespace mbgl {
 namespace platform {
 class XPlatformPlugin;
 }
-}
+}  // namespace mbgl
 #endif
 
 NS_ASSUME_NONNULL_BEGIN

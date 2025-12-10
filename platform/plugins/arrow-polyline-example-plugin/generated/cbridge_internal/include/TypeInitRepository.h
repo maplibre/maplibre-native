@@ -29,8 +29,7 @@ using TypeId = std::string_view;
 /**
  * Stores links to Swift init functions.
  */
-class _GLUECODIUM_C_EXPORT TypeInitRepository
-{
+class _GLUECODIUM_C_EXPORT TypeInitRepository {
 public:
     TypeInitRepository();
     ~TypeInitRepository();

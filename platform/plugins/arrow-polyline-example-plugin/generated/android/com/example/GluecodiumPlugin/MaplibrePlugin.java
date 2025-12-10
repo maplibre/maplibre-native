@@ -49,4 +49,3 @@ public class MaplibrePlugin extends NativeBase {
 
 
 }
-

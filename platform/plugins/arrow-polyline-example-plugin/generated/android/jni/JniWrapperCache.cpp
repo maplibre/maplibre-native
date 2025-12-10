@@ -11,13 +11,10 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace glue_internal
-{
-namespace jni
-{
+namespace glue_internal {
+namespace jni {
 
-struct CachedObject
-{
+struct CachedObject {
     jobject obj = nullptr;
     unsigned int scheduled_removals = 0;
 };
@@ -31,10 +28,11 @@ void JniWrapperCache::cache_wrapper_impl(JNIEnv* jenv, const void* obj_ptr, cons
 #ifdef GLUECODIUM_ENABLE_INTERNAL_DEBUG_CHECKS
     auto iter = s_wrapper_cache.find(obj_ptr);
     if (iter != s_wrapper_cache.end() && iter->second.obj != nullptr) {
-        throw_new_runtime_exception(jenv, "Weak reference leaked! A possible root cause can be calling platform "
-                                          "method with 'this' argument from C++ factory function.\nPlease check "
-                                          "'@AfterConstructed()' attribute from the following link:\n"
-                                          "\thttps://github.com/heremaps/gluecodium/blob/master/docs/lime_attributes.md");
+        throw_new_runtime_exception(jenv,
+                                    "Weak reference leaked! A possible root cause can be calling platform "
+                                    "method with 'this' argument from C++ factory function.\nPlease check "
+                                    "'@AfterConstructed()' attribute from the following link:\n"
+                                    "\thttps://github.com/heremaps/gluecodium/blob/master/docs/lime_attributes.md");
     }
 #endif
 
@@ -45,8 +43,7 @@ JniReference<jobject> JniWrapperCache::get_cached_wrapper_impl(JNIEnv* jenv, con
     std::lock_guard<std::mutex> lock(s_mutex);
 
     auto iter = s_wrapper_cache.find(obj_ptr);
-    if (iter == s_wrapper_cache.end())
-        return {};
+    if (iter == s_wrapper_cache.end()) return {};
 
     if (iter->second.obj == nullptr) {
         return {};
@@ -80,10 +77,11 @@ void JniWrapperCache::remove_cached_wrapper_impl(JNIEnv* jenv, const void* obj_p
 
 #ifdef GLUECODIUM_ENABLE_INTERNAL_DEBUG_CHECKS
     if (iter == s_wrapper_cache.end()) {
-        throw_new_runtime_exception(jenv, "Invalid removal of cache entry. A possible root cause can be calling platform "
-                                          "method with 'this' argument from C++ factory function.\nPlease check "
-                                          "'@AfterConstructed()' attribute from the following link:\n"
-                                          "\thttps://github.com/heremaps/gluecodium/blob/master/docs/lime_attributes.md");
+        throw_new_runtime_exception(jenv,
+                                    "Invalid removal of cache entry. A possible root cause can be calling platform "
+                                    "method with 'this' argument from C++ factory function.\nPlease check "
+                                    "'@AfterConstructed()' attribute from the following link:\n"
+                                    "\thttps://github.com/heremaps/gluecodium/blob/master/docs/lime_attributes.md");
     }
 #endif
 

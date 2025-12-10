@@ -43,9 +43,7 @@ struct _GLUECODIUM_CPP_EXPORT Locale final {
            std::optional<std::string> language_tag) noexcept;
     explicit Locale(std::string language_tag) noexcept;
     Locale(std::string language_code, std::string country_code) noexcept;
-    Locale(std::string language_code,
-           std::string country_code,
-           std::string script_code) noexcept;
+    Locale(std::string language_code, std::string country_code, std::string script_code) noexcept;
     Locale(std::string language_code,
            std::string country_code,
            std::string script_code,
@@ -64,10 +62,9 @@ struct _GLUECODIUM_CPP_EXPORT Locale final {
     bool operator!=(const Locale& rhs) const;
 };
 
-template<>
-struct hash<Locale>
-{
+template <>
+struct hash<Locale> {
     size_t operator()(const Locale& t) const noexcept;
 };
 
-}
+} // namespace glue_internal

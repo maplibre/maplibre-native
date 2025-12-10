@@ -48,4 +48,3 @@ public final class ArrowPolylineExample extends MaplibrePlugin {
 
 
 }
-

@@ -24,18 +24,14 @@
 
 namespace glue_internal {
 
-template<class T>
-struct hash< std::vector< T > >
-{
-    size_t
-    operator( )( const std::vector< T >& vec ) const
-    {
+template <class T>
+struct hash<std::vector<T>> {
+    size_t operator()(const std::vector<T>& vec) const {
         size_t hash_value = 67;
-        for (const auto& value: vec)
-        {
-            hash_value = ( hash_value << 1 ) ^ ::glue_internal::hash< T >()(value);
+        for (const auto& value : vec) {
+            hash_value = (hash_value << 1) ^ ::glue_internal::hash<T>()(value);
         }
         return hash_value;
     }
 };
-}
+} // namespace glue_internal

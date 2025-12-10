@@ -4,20 +4,20 @@ namespace mbgl {
 namespace android {
 
 namespace {
-  std::vector<PluginJniRegistrationFn>& getJniRegistry() {
+std::vector<PluginJniRegistrationFn>& getJniRegistry() {
     static std::vector<PluginJniRegistrationFn> registry;
     return registry;
-  }
 }
+} // namespace
 
 void addPluginJniRegistration(PluginJniRegistrationFn fn) {
-  getJniRegistry().push_back(fn);
+    getJniRegistry().push_back(fn);
 }
 
 void registerAllPluginJniNatives(jni::JNIEnv& env) {
-  for (auto fn : getJniRegistry()) {
-    fn(env);
-  }
+    for (auto fn : getJniRegistry()) {
+        fn(env);
+    }
 }
 
 } // namespace android

@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-_GLUECODIUM_C_EXPORT _baseRef byteArray_create_handle( );
-_GLUECODIUM_C_EXPORT void byteArray_release_handle( _baseRef handle );
-_GLUECODIUM_C_EXPORT void byteArray_assign( _baseRef handle, const uint8_t* data, const size_t size );
-_GLUECODIUM_C_EXPORT const uint8_t* byteArray_data_get( _baseRef handle );
-_GLUECODIUM_C_EXPORT size_t byteArray_size_get( _baseRef handle );
+_GLUECODIUM_C_EXPORT _baseRef byteArray_create_handle();
+_GLUECODIUM_C_EXPORT void byteArray_release_handle(_baseRef handle);
+_GLUECODIUM_C_EXPORT void byteArray_assign(_baseRef handle, const uint8_t* data, const size_t size);
+_GLUECODIUM_C_EXPORT const uint8_t* byteArray_data_get(_baseRef handle);
+_GLUECODIUM_C_EXPORT size_t byteArray_size_get(_baseRef handle);
 
-_GLUECODIUM_C_EXPORT _baseRef byteArray_create_optional_handle( );
-_GLUECODIUM_C_EXPORT void byteArray_release_optional_handle( _baseRef handle );
-_GLUECODIUM_C_EXPORT _baseRef byteArray_unwrap_optional_handle( _baseRef handle );
-_GLUECODIUM_C_EXPORT void byteArray_assign_optional( _baseRef handle, const uint8_t* data, const size_t size );
+_GLUECODIUM_C_EXPORT _baseRef byteArray_create_optional_handle();
+_GLUECODIUM_C_EXPORT void byteArray_release_optional_handle(_baseRef handle);
+_GLUECODIUM_C_EXPORT _baseRef byteArray_unwrap_optional_handle(_baseRef handle);
+_GLUECODIUM_C_EXPORT void byteArray_assign_optional(_baseRef handle, const uint8_t* data, const size_t size);
 
 #ifdef __cplusplus
 }

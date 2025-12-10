@@ -14,13 +14,15 @@
 #include <memory>
 #include <optional>
 
-namespace glue_internal
-{
-namespace jni
-{
+namespace glue_internal {
+namespace jni {
 
-JNIEXPORT std::shared_ptr<::GluecodiumPlugin::ArrowPolylineExample> convert_from_jni(JNIEnv* _env, const JniReference<jobject>& _jobj, TypeId<std::shared_ptr<::GluecodiumPlugin::ArrowPolylineExample>>);
-JNIEXPORT JniReference<jobject> convert_to_jni(JNIEnv* _jenv, const std::shared_ptr<::GluecodiumPlugin::ArrowPolylineExample>& _ninput);
+JNIEXPORT std::shared_ptr<::GluecodiumPlugin::ArrowPolylineExample> convert_from_jni(
+    JNIEnv* _env,
+    const JniReference<jobject>& _jobj,
+    TypeId<std::shared_ptr<::GluecodiumPlugin::ArrowPolylineExample>>);
+JNIEXPORT JniReference<jobject> convert_to_jni(
+    JNIEnv* _jenv, const std::shared_ptr<::GluecodiumPlugin::ArrowPolylineExample>& _ninput);
 
-}
-}
+} // namespace jni
+} // namespace glue_internal

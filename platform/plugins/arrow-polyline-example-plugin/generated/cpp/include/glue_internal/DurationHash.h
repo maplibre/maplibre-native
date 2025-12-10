@@ -24,11 +24,9 @@
 
 namespace glue_internal {
 
-template<class Rep, class Period>
+template <class Rep, class Period>
 struct hash<std::chrono::duration<Rep, Period>> {
-    size_t operator()(const std::chrono::duration<Rep, Period>& t) const noexcept {
-        return hash<Rep>{}(t.count());
-    }
+    size_t operator()(const std::chrono::duration<Rep, Period>& t) const noexcept { return hash<Rep>{}(t.count()); }
 };
 
-}
+} // namespace glue_internal

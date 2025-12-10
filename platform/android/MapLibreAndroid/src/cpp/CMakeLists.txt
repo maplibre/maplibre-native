@@ -243,7 +243,7 @@ target_link_libraries(maplibre
 
 install(TARGETS maplibre LIBRARY DESTINATION lib)
 
-# Plugins - built into maplibre.so to avoid visibility issues. 
+# Plugins - built into maplibre.so to avoid visibility issues.
 # Each plugin handles its own option and adds sources to maplibre target
 # NOTE: This should not be considered as the "one true way" of building plugins, but one option among many. Plugins should be very flexible and adaptable to any build system setup.
 set(MLN_ROOT ${PROJECT_SOURCE_DIR}/../../../../..)

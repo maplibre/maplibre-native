@@ -14,6 +14,4 @@ ArrowPolylineExample::~ArrowPolylineExample() {
     ::glue_internal::get_type_repository().remove_type(this);
 }
 
-
-}
-
+} // namespace GluecodiumPlugin

@@ -24,18 +24,14 @@
 
 namespace glue_internal {
 
-template<class T, class H>
-struct hash< std::unordered_set< T, H > >
-{
-    size_t
-    operator( )( const std::unordered_set< T, H >& set ) const
-    {
+template <class T, class H>
+struct hash<std::unordered_set<T, H>> {
+    size_t operator()(const std::unordered_set<T, H>& set) const {
         size_t hash_value = 67;
-        for (const auto& value: set)
-        {
-            hash_value = hash_value ^ ::glue_internal::hash< T >()(value);
+        for (const auto& value : set) {
+            hash_value = hash_value ^ ::glue_internal::hash<T>()(value);
         }
         return hash_value;
     }
 };
-}
+} // namespace glue_internal

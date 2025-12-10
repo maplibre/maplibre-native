@@ -26,63 +26,41 @@
 #include <optional>
 #include <vector>
 
-_baseRef
-byteArray_create_handle( )
-{
-    return reinterpret_cast< _baseRef >( new ( ::std::nothrow )
-                                             ::std::shared_ptr< ::std::vector< uint8_t > >(
-                                                 new ( ::std::nothrow ) ::std::vector< uint8_t >{} ) );
+_baseRef byteArray_create_handle() {
+    return reinterpret_cast<_baseRef>(
+        new (::std::nothrow)::std::shared_ptr<::std::vector<uint8_t>>(new (::std::nothrow)::std::vector<uint8_t>{}));
 }
 
-void
-byteArray_release_handle( _baseRef handle )
-{
-    delete get_pointer< ::std::shared_ptr< ::std::vector< uint8_t > > >( handle );
+void byteArray_release_handle(_baseRef handle) {
+    delete get_pointer<::std::shared_ptr<::std::vector<uint8_t>>>(handle);
 }
 
-void
-byteArray_assign( _baseRef handle, const uint8_t* data, const size_t size )
-{
-    ( *get_pointer< ::std::shared_ptr< ::std::vector< uint8_t > > >( handle ) )
-        ->assign( data, data + size );
+void byteArray_assign(_baseRef handle, const uint8_t* data, const size_t size) {
+    (*get_pointer<::std::shared_ptr<::std::vector<uint8_t>>>(handle))->assign(data, data + size);
 }
 
-const uint8_t*
-byteArray_data_get( _baseRef handle )
-{
-    return ( *get_pointer< ::std::shared_ptr< ::std::vector< uint8_t > > >( handle ) )->data( );
+const uint8_t* byteArray_data_get(_baseRef handle) {
+    return (*get_pointer<::std::shared_ptr<::std::vector<uint8_t>>>(handle))->data();
 }
 
-size_t
-byteArray_size_get( _baseRef handle )
-{
-    return ( *get_pointer< ::std::shared_ptr< ::std::vector< uint8_t > > >( handle ) )->size( );
+size_t byteArray_size_get(_baseRef handle) {
+    return (*get_pointer<::std::shared_ptr<::std::vector<uint8_t>>>(handle))->size();
 }
 
-_baseRef
-byteArray_create_optional_handle( )
-{
-    return reinterpret_cast< _baseRef >(
-        new ( ::std::nothrow ) std::optional< ::std::shared_ptr< ::std::vector< uint8_t > > >(
-            ::std::shared_ptr< ::std::vector< uint8_t > >( new ( ::std::nothrow ) ::std::vector< uint8_t >{} ) ) );
+_baseRef byteArray_create_optional_handle() {
+    return reinterpret_cast<_baseRef>(new (::std::nothrow) std::optional<::std::shared_ptr<::std::vector<uint8_t>>>(
+        ::std::shared_ptr<::std::vector<uint8_t>>(new (::std::nothrow)::std::vector<uint8_t>{})));
 }
 
-void
-byteArray_release_optional_handle( _baseRef handle )
-{
-    delete reinterpret_cast< std::optional <::std::shared_ptr< ::std::vector< uint8_t > > >* >(handle);
+void byteArray_release_optional_handle(_baseRef handle) {
+    delete reinterpret_cast<std::optional<::std::shared_ptr<::std::vector<uint8_t>>>*>(handle);
 }
 
-_baseRef
-byteArray_unwrap_optional_handle( _baseRef handle )
-{
-    return reinterpret_cast< _baseRef >(
-        &**reinterpret_cast< std::optional< ::std::shared_ptr< ::std::vector< uint8_t > > >* >( handle ) );
+_baseRef byteArray_unwrap_optional_handle(_baseRef handle) {
+    return reinterpret_cast<_baseRef>(
+        &**reinterpret_cast<std::optional<::std::shared_ptr<::std::vector<uint8_t>>>*>(handle));
 }
 
-void
-byteArray_assign_optional( _baseRef handle, const uint8_t* data, const size_t size )
-{
-    ( **get_pointer< std::optional< ::std::shared_ptr< ::std::vector< uint8_t > > > >( handle ) )
-        ->assign( data, data + size );
+void byteArray_assign_optional(_baseRef handle, const uint8_t* data, const size_t size) {
+    (**get_pointer<std::optional<::std::shared_ptr<::std::vector<uint8_t>>>>(handle))->assign(data, data + size);
 }

@@ -23,7 +23,6 @@ _GLUECODIUM_C_EXPORT _baseRef ArrayOf_GluecodiumPlugin_LatLng_create_optional_ha
 _GLUECODIUM_C_EXPORT void ArrayOf_GluecodiumPlugin_LatLng_release_optional_handle(_baseRef handle);
 _GLUECODIUM_C_EXPORT _baseRef ArrayOf_GluecodiumPlugin_LatLng_unwrap_optional_handle(_baseRef handle);
 
-
 #ifdef __cplusplus
 }
 #endif

@@ -9,43 +9,42 @@ namespace android {
 
 class BasicPluginExampleJni {
 public:
-  static constexpr auto Name() { return "org/maplibre/android/testapp/plugins/BasicPluginExample"; }
+    static constexpr auto Name() { return "org/maplibre/android/testapp/plugins/BasicPluginExample"; }
 
-  static void registerNative(jni::JNIEnv& env) {
-    static auto& javaClass = jni::Class<BasicPluginExampleJni>::Singleton(env);
+    static void registerNative(jni::JNIEnv& env) {
+        static auto& javaClass = jni::Class<BasicPluginExampleJni>::Singleton(env);
 
-    #define METHOD(MethodPtr, name) jni::MakeNativeMethod<decltype(MethodPtr), (MethodPtr)>(name)
+#define METHOD(MethodPtr, name) jni::MakeNativeMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
-    jni::RegisterNatives(
-        env,
-        *javaClass,
-        METHOD(&BasicPluginExampleJni::nativeCreate, "nativeCreate"),
-        METHOD(&BasicPluginExampleJni::nativeDestroy, "nativeDestroy"),
-        METHOD(&BasicPluginExampleJni::nativeShowSanFrancisco, "nativeShowSanFrancisco"));
-  }
-
-  static jni::jlong nativeCreate(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&) {
-    auto plugin = new plugin::ex::BasicPluginExample();
-    return reinterpret_cast<jni::jlong>(plugin);
-  }
-
-  static void nativeDestroy(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&, jni::jlong nativePtr) {
-    if (nativePtr != 0) {
-      auto plugin = reinterpret_cast<plugin::ex::BasicPluginExample*>(nativePtr);
-      delete plugin;
+        jni::RegisterNatives(env,
+                             *javaClass,
+                             METHOD(&BasicPluginExampleJni::nativeCreate, "nativeCreate"),
+                             METHOD(&BasicPluginExampleJni::nativeDestroy, "nativeDestroy"),
+                             METHOD(&BasicPluginExampleJni::nativeShowSanFrancisco, "nativeShowSanFrancisco"));
     }
-  }
 
-  static void nativeShowSanFrancisco(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&, jni::jlong nativePtr) {
-    if (nativePtr != 0) {
-      auto plugin = reinterpret_cast<plugin::ex::BasicPluginExample*>(nativePtr);
-      plugin->showSanFrancisco();
+    static jni::jlong nativeCreate(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&) {
+        auto plugin = new plugin::ex::BasicPluginExample();
+        return reinterpret_cast<jni::jlong>(plugin);
     }
-  }
+
+    static void nativeDestroy(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&, jni::jlong nativePtr) {
+        if (nativePtr != 0) {
+            auto plugin = reinterpret_cast<plugin::ex::BasicPluginExample*>(nativePtr);
+            delete plugin;
+        }
+    }
+
+    static void nativeShowSanFrancisco(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&, jni::jlong nativePtr) {
+        if (nativePtr != 0) {
+            auto plugin = reinterpret_cast<plugin::ex::BasicPluginExample*>(nativePtr);
+            plugin->showSanFrancisco();
+        }
+    }
 };
 
 void registerBasicPluginExampleNatives(jni::JNIEnv& env) {
-  BasicPluginExampleJni::registerNative(env);
+    BasicPluginExampleJni::registerNative(env);
 }
 
 // Self-register JNI native methods for this plugin

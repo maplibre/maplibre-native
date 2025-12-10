@@ -19,26 +19,26 @@
 // -------------------------------------------------------------------------------------------------
 
 /// Custom collection implementation.
-public class CollectionOf<T> : Collection {
+public class CollectionOf<T>: Collection {
     public typealias Element = T
     public typealias Index = UInt64
 
-    private(set) public var startIndex: Index
-    private(set) public var endIndex: Index
+    public private(set) var startIndex: Index
+    public private(set) var endIndex: Index
 
     private let elementGetter: (Index) -> Element
     private let releaser: () -> Void
 
     /// :nodoc:
-    internal let c_handle: _baseRef
+    let c_handle: _baseRef
 
     /// :nodoc:
-    internal init(handle: _baseRef, size: Index, elementGetter: @escaping (Index) -> Element, releaser: @escaping () -> Void) {
-        self.startIndex = 0
-        self.endIndex = size
+    init(handle: _baseRef, size: Index, elementGetter: @escaping (Index) -> Element, releaser: @escaping () -> Void) {
+        startIndex = 0
+        endIndex = size
         self.elementGetter = elementGetter
         self.releaser = releaser
-        self.c_handle = handle
+        c_handle = handle
     }
 
     deinit {
@@ -46,10 +46,10 @@ public class CollectionOf<T> : Collection {
     }
 
     public func index(after i: Index) -> Index {
-        return i+1
+        i + 1
     }
 
     public subscript(position: Index) -> Element {
-        return elementGetter(position)
+        elementGetter(position)
     }
 }

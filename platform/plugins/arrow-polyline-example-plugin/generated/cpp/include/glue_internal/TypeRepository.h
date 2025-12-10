@@ -26,8 +26,7 @@ namespace glue_internal {
 
 using TypeId = std::string_view;
 
-class _GLUECODIUM_CPP_EXPORT TypeRepository final
-{
+class _GLUECODIUM_CPP_EXPORT TypeRepository final {
 public:
     TypeRepository();
     ~TypeRepository();
@@ -43,4 +42,4 @@ private:
 
 _GLUECODIUM_CPP_EXPORT TypeRepository& get_type_repository();
 
-}
+} // namespace glue_internal

@@ -25,28 +25,25 @@
 #include <new>
 #include <optional>
 
-#define DEFINE_HANDLE_METHODS( T )                                                                                      \
-    _baseRef T##_create_handle( T t )                                                                                   \
-    {                                                                                                                   \
-        return reinterpret_cast< _baseRef >( new ( ::std::nothrow ) std::optional< T >( t ) );    \
-    }                                                                                                                   \
-    void T##_release_handle( _baseRef handle )                                                                          \
-    {                                                                                                                   \
-        delete reinterpret_cast< std::optional< T >* >( handle );                               \
-    }                                                                                                                   \
-    T T##_value_get( _baseRef handle )                                                                                  \
-    {                                                                                                                   \
-        return **reinterpret_cast< std::optional< T >* >( handle );                             \
+#define DEFINE_HANDLE_METHODS(T)                                                     \
+    _baseRef T##_create_handle(T t) {                                                \
+        return reinterpret_cast<_baseRef>(new (::std::nothrow) std::optional<T>(t)); \
+    }                                                                                \
+    void T##_release_handle(_baseRef handle) {                                       \
+        delete reinterpret_cast<std::optional<T>*>(handle);                          \
+    }                                                                                \
+    T T##_value_get(_baseRef handle) {                                               \
+        return **reinterpret_cast<std::optional<T>*>(handle);                        \
     }
 
-DEFINE_HANDLE_METHODS( bool );
-DEFINE_HANDLE_METHODS( float );
-DEFINE_HANDLE_METHODS( double );
-DEFINE_HANDLE_METHODS( int8_t );
-DEFINE_HANDLE_METHODS( uint8_t );
-DEFINE_HANDLE_METHODS( int16_t );
-DEFINE_HANDLE_METHODS( uint16_t );
-DEFINE_HANDLE_METHODS( int32_t );
-DEFINE_HANDLE_METHODS( uint32_t );
-DEFINE_HANDLE_METHODS( int64_t );
-DEFINE_HANDLE_METHODS( uint64_t );
+DEFINE_HANDLE_METHODS(bool);
+DEFINE_HANDLE_METHODS(float);
+DEFINE_HANDLE_METHODS(double);
+DEFINE_HANDLE_METHODS(int8_t);
+DEFINE_HANDLE_METHODS(uint8_t);
+DEFINE_HANDLE_METHODS(int16_t);
+DEFINE_HANDLE_METHODS(uint16_t);
+DEFINE_HANDLE_METHODS(int32_t);
+DEFINE_HANDLE_METHODS(uint32_t);
+DEFINE_HANDLE_METHODS(int64_t);
+DEFINE_HANDLE_METHODS(uint64_t);

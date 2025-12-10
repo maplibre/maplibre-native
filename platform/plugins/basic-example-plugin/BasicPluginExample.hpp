@@ -8,24 +8,24 @@ namespace plugin::ex {
 /// This plugin logs lifecycle events and provides a method to set the camera to San Francisco.
 class BasicPluginExample : public mbgl::platform::XPlatformPlugin {
 public:
-  BasicPluginExample();
-  ~BasicPluginExample() override;
+    BasicPluginExample();
+    ~BasicPluginExample() override;
 
-  // XPlatformPlugin interface
-  void onLoad(mbgl::Map* map, mbgl::Renderer* renderer) override;
-  void onUnload() override;
+    // XPlatformPlugin interface
+    void onLoad(mbgl::Map* map, mbgl::Renderer* renderer) override;
+    void onUnload() override;
 
-  // MapObserver lifecycle overrides
-  void onWillStartLoadingMap() override;
-  void onDidFinishLoadingMap() override;
-  void onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& message) override;
+    // MapObserver lifecycle overrides
+    void onWillStartLoadingMap() override;
+    void onDidFinishLoadingMap() override;
+    void onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& message) override;
 
-  // Custom plugin methods
-  void showSanFrancisco();
+    // Custom plugin methods
+    void showSanFrancisco();
 
 private:
-  mbgl::Map* map_ = nullptr;
-  mbgl::Renderer* renderer_ = nullptr;
+    mbgl::Map* map_ = nullptr;
+    mbgl::Renderer* renderer_ = nullptr;
 };
 
 } // namespace plugin::ex

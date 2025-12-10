@@ -24,10 +24,10 @@
 
 namespace glue_internal {
 
-template<class Clock, class Duration>
+template <class Clock, class Duration>
 struct hash<std::chrono::time_point<Clock, Duration>> {
     size_t operator()(const std::chrono::time_point<Clock, Duration>& t) const noexcept {
         return hash<typename Clock::rep>{}(t.time_since_epoch().count());
     }
 };
-}
+} // namespace glue_internal

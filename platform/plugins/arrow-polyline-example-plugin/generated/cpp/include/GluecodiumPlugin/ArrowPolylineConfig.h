@@ -36,10 +36,8 @@ struct _GLUECODIUM_CPP_EXPORT ArrowPolylineConfig {
      */
     double line_width = 3.0;
 
-    ArrowPolylineConfig( );
-    ArrowPolylineConfig( double head_length, double head_angle, ::std::string line_color, double line_width );
-
+    ArrowPolylineConfig();
+    ArrowPolylineConfig(double head_length, double head_angle, ::std::string line_color, double line_width);
 };
 
-
-}
+} // namespace GluecodiumPlugin

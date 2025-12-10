@@ -4,7 +4,7 @@ A minimal cross-platform plugin demonstrating the MapLibre plugin architecture.
 
 ## Overview
 
-This example shows how to build a basic cross platform plugin that interacts with maplibre's c++ core API. Bindings from native to ios and android are created using objc++ and maplibre's own JNI system. With this, you can build out your implementation directly in native and only need to then expose a (hopefully) thin set of bindings to have ios and android clients call into. 
+This example shows how to build a basic cross platform plugin that interacts with maplibre's c++ core API. Bindings from native to ios and android are created using objc++ and maplibre's own JNI system. With this, you can build out your implementation directly in native and only need to then expose a (hopefully) thin set of bindings to have ios and android clients call into.
 
 ## Usage
 
