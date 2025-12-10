@@ -567,4 +567,3 @@ Mutable<Layer::Impl> HillshadeLayer::mutableBaseImpl() const {
 } // namespace mbgl
 
 // clang-format on
-

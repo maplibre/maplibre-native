@@ -33,8 +33,7 @@ bool hasTokens(const std::string& source) {
     while (pos != end) {
         auto brace = std::find(pos, end, '{');
         if (brace == end) return false;
-        for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++)
-            ;
+        for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++);
         if (brace != end && *brace == '}') {
             return true;
         }
@@ -67,8 +66,7 @@ std::unique_ptr<Expression> convertTokenStringToExpression(const std::string& so
         }
         pos = brace;
         if (pos != end) {
-            for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++)
-                ;
+            for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++);
             if (brace != end && *brace == '}') {
                 inputs.push_back(get(literal(std::string(pos + 1, brace))));
                 pos = brace + 1;
@@ -394,11 +392,9 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
                     stopType = arr.itemType;
                     isColorArray = true;
                 },
-                [](const auto&) {}
-            );
+                [](const auto&) {});
         },
-        [](const auto&) {}
-    );
+        [](const auto&) {});
 
     std::map<double, std::unique_ptr<Expression>> stops;
     for (std::size_t i = 0; i < arrayLength(*stopsValue); ++i) {
@@ -583,7 +579,6 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
-
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
         return std::nullopt;
@@ -601,11 +596,9 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
                     exprType = arr.itemType;
                     isColorArray = true;
                 },
-                [](const auto&) {}
-            );
+                [](const auto&) {});
         },
-        [](const auto&) {}
-    );
+        [](const auto&) {});
 
     auto expr = step(exprType, makeInput(true), std::move(*stops));
 
@@ -624,7 +617,6 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
     std::unique_ptr<Expression> def,
     bool convertTokens = false) {
-
     auto stops = convertStops(type, value, error, convertTokens);
     if (!stops) {
         return std::nullopt;
@@ -645,11 +637,9 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
                     exprType = arr.itemType;
                     isColorArray = true;
                 },
-                [](const auto&) {}
-            );
+                [](const auto&) {});
         },
-        [](const auto&) {}
-    );
+        [](const auto&) {});
 
     auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
 
@@ -1041,4 +1031,3 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
-

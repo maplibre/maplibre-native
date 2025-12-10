@@ -46,4 +46,3 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
-

@@ -55,7 +55,7 @@ private:
     // FIX 1: Changed type and name to correctly hold float elevation data
     std::shared_ptr<std::vector<float>> elevationStopsData; // Elevation values for each stop
 
-    std::shared_ptr<PremultipliedImage> colorStops;     // RGB colors for each stop
+    std::shared_ptr<PremultipliedImage> colorStops; // RGB colors for each stop
 
     // GPU textures
     std::shared_ptr<gfx::Texture2D> elevationStopsTexture;
@@ -70,4 +70,3 @@ private:
 };
 
 } // namespace mbgl
-

@@ -1311,4 +1311,3 @@ bool CompoundExpression::exists(const std::string& name) noexcept {
 } // namespace expression
 } // namespace style
 } // namespace mbgl
-

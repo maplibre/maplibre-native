@@ -161,4 +161,3 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
 } // namespace shaders
 } // namespace mbgl
-

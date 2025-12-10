@@ -31,9 +31,7 @@ std::optional<Color> Color::parse(const std::string& s) {
         a = (a << 4) | a;
 
         // Convert to rgba() format with alpha in 0-1 range
-        colorString = "rgba(" + util::toString(r) + "," +
-                      util::toString(g) + "," +
-                      util::toString(b) + "," +
+        colorString = "rgba(" + util::toString(r) + "," + util::toString(g) + "," + util::toString(b) + "," +
                       util::toString(a / 255.0) + ")";
     }
     // --- END: FIX to support #RGBA (4-digit hex) ---
@@ -80,4 +78,3 @@ mbgl::Value Color::toObject() const {
 }
 
 } // namespace mbgl
-

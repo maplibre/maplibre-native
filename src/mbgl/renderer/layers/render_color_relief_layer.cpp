@@ -175,10 +175,10 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     for (uint32_t i = 0; i < rampSize; ++i) {
         // Store elevation in the R channel of an RGBA float vector
-        (*elevationStopsData)[i*4 + 0] = elevationStopsVector[i];  // R = elevation
-        (*elevationStopsData)[i*4 + 1] = 0.0f;                      // G = unused
-        (*elevationStopsData)[i*4 + 2] = 0.0f;                      // B = unused
-        (*elevationStopsData)[i*4 + 3] = 1.0f;                      // A = unused
+        (*elevationStopsData)[i * 4 + 0] = elevationStopsVector[i]; // R = elevation
+        (*elevationStopsData)[i * 4 + 1] = 0.0f;                    // G = unused
+        (*elevationStopsData)[i * 4 + 2] = 0.0f;                    // B = unused
+        (*elevationStopsData)[i * 4 + 3] = 1.0f;                    // A = unused
 
         // Store colors without premultiplication for proper interpolation
         Color color = colorStopsVector[i];
@@ -229,7 +229,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
-    mbgl::Log::Info(mbgl::Event::Render, "ColorRelief shader loaded, renderTiles count: " + std::to_string(renderTiles->size()));
+    mbgl::Log::Info(mbgl::Event::Render,
+                    "ColorRelief shader loaded, renderTiles count: " + std::to_string(renderTiles->size()));
 
     auto renderPass = RenderPass::Translucent;
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
@@ -382,32 +383,32 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         auto demImagePtr = bucket.getDEMData().getImagePtr();
         if (!demImagePtr || !demImagePtr->valid()) {
             mbgl::Log::Warning(mbgl::Event::Render, "ColorRelief: DEM image not valid for tile");
-            continue;  // Skip this tile if DEM data is not ready
+            continue; // Skip this tile if DEM data is not ready
         }
 
         const auto& demData = bucket.getDEMData();
-        mbgl::Log::Info(mbgl::Event::Render,
-            "ColorRelief DEM: dim=" + std::to_string(demData.dim) +
-            ", stride=" + std::to_string(demData.stride) +
-            ", imageSize=" + std::to_string(demImagePtr->size.width) + "x" + std::to_string(demImagePtr->size.height) +
-            ", colorRampSize=" + std::to_string(colorRampSize));
+        mbgl::Log::Info(
+            mbgl::Event::Render,
+            "ColorRelief DEM: dim=" + std::to_string(demData.dim) + ", stride=" + std::to_string(demData.stride) +
+                ", imageSize=" + std::to_string(demImagePtr->size.width) + "x" +
+                std::to_string(demImagePtr->size.height) + ", colorRampSize=" + std::to_string(colorRampSize));
 
         // Sample a few pixels from the DEM to verify data
         if (demImagePtr->data) {
             const auto* pixels = reinterpret_cast<const uint8_t*>(demImagePtr->data.get());
             // Sample center pixel
-            size_t centerIdx = (demImagePtr->size.height / 2) * demImagePtr->size.width * 4 + (demImagePtr->size.width / 2) * 4;
-            uint8_t r = pixels[centerIdx], g = pixels[centerIdx+1], b = pixels[centerIdx+2], a = pixels[centerIdx+3];
+            size_t centerIdx = (demImagePtr->size.height / 2) * demImagePtr->size.width * 4 +
+                               (demImagePtr->size.width / 2) * 4;
+            uint8_t r = pixels[centerIdx], g = pixels[centerIdx + 1], b = pixels[centerIdx + 2],
+                    a = pixels[centerIdx + 3];
             const auto unpackVector = demData.getUnpackVector();
             float elevation = r * unpackVector[0] + g * unpackVector[1] + b * unpackVector[2] - unpackVector[3];
             mbgl::Log::Info(mbgl::Event::Render,
-                "ColorRelief DEM center pixel: R=" + std::to_string(r) +
-                " G=" + std::to_string(g) +
-                " B=" + std::to_string(b) +
-                " A=" + std::to_string(a) +
-                " -> elevation=" + std::to_string(elevation) + "m" +
-                ", unpack=[" + std::to_string(unpackVector[0]) + "," + std::to_string(unpackVector[1]) +
-                "," + std::to_string(unpackVector[2]) + "," + std::to_string(unpackVector[3]) + "]");
+                            "ColorRelief DEM center pixel: R=" + std::to_string(r) + " G=" + std::to_string(g) +
+                                " B=" + std::to_string(b) + " A=" + std::to_string(a) +
+                                " -> elevation=" + std::to_string(elevation) + "m" + ", unpack=[" +
+                                std::to_string(unpackVector[0]) + "," + std::to_string(unpackVector[1]) + "," +
+                                std::to_string(unpackVector[2]) + "," + std::to_string(unpackVector[3]) + "]");
         }
 
         std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
@@ -462,4 +463,3 @@ bool RenderColorReliefLayer::queryIntersectsFeature(const GeometryCoordinates&,
 }
 
 } // namespace mbgl
-

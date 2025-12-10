@@ -142,4 +142,3 @@ void main() {
 
 } // namespace shaders
 } // namespace mbgl
-

@@ -14,7 +14,7 @@ struct alignas(16) ColorReliefTilePropsUBO {
     /*  0 */ std::array<float, 4> unpack;    // DEM unpack vector
     /* 16 */ std::array<float, 2> dimension; // Texture dimensions
     /* 24 */ int32_t color_ramp_size;        // Number of color stops
-    /* 28 */ float pad_tile0;                     // Padding for alignment
+    /* 28 */ float pad_tile0;                // Padding for alignment
     /* 32 */
 };
 static_assert(sizeof(ColorReliefTilePropsUBO) == 32);

@@ -52,13 +52,13 @@ public:
           colorRampParameter(std::move(colorRampParameter_)) {}
 
     EvaluationContext(std::optional<float> zoom_,
-                  GeometryTileFeature const* feature_,
-                  std::optional<double> colorRampParameter_,
-                  std::optional<float> elevation_) noexcept
-    : zoom(std::move(zoom_)),
-      feature(feature_),
-      colorRampParameter(std::move(colorRampParameter_)),
-      elevation(std::move(elevation_)) {}
+                      GeometryTileFeature const* feature_,
+                      std::optional<double> colorRampParameter_,
+                      std::optional<float> elevation_) noexcept
+        : zoom(std::move(zoom_)),
+          feature(feature_),
+          colorRampParameter(std::move(colorRampParameter_)),
+          elevation(std::move(elevation_)) {}
 
     EvaluationContext& withFormattedSection(const Value* formattedSection_) noexcept {
         formattedSection = formattedSection_;
@@ -210,13 +210,13 @@ enum class Kind : int32_t {
 
 enum class Dependency : uint32_t {
     None = 0,
-    Feature = 1 << 0,  // Data reference
-    Image = 1 << 1,    // Image reference (equivalent to not "runtime constant")
-    Zoom = 1 << 2,     // Zoom level
-    Location = 1 << 3, // Not used yet, "distance-from-center" not supported
-    Bind = 1 << 4,     // Create variable binding ("let")
-    Var = 1 << 5,      // Use variable binding
-    Override = 1 << 6, // Property override
+    Feature = 1 << 0,   // Data reference
+    Image = 1 << 1,     // Image reference (equivalent to not "runtime constant")
+    Zoom = 1 << 2,      // Zoom level
+    Location = 1 << 3,  // Not used yet, "distance-from-center" not supported
+    Bind = 1 << 4,      // Create variable binding ("let")
+    Var = 1 << 5,       // Use variable binding
+    Override = 1 << 6,  // Property override
     Elevation = 1 << 7, // Elevation from DEM
     MaskCount = 8,
     All = (1 << MaskCount) - 1,

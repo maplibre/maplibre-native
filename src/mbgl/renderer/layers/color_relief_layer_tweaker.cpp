@@ -23,7 +23,8 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
     evaluatedPropsUBO.opacity = evaluated.get<style::ColorReliefOpacity>();
 
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.createOrUpdate(idColorReliefEvaluatedPropsUBO, &evaluatedPropsUBO, parameters.context); // Use parameters.context
+    layerUniforms.createOrUpdate(
+        idColorReliefEvaluatedPropsUBO, &evaluatedPropsUBO, parameters.context); // Use parameters.context
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID()) {

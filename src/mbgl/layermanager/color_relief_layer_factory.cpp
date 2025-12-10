@@ -10,8 +10,8 @@ const style::LayerTypeInfo* ColorReliefLayerFactory::getTypeInfo() const noexcep
     return style::ColorReliefLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> ColorReliefLayerFactory::createLayer(const std::string& id,
-                                                                   const style::conversion::Convertible& value) noexcept {
+std::unique_ptr<style::Layer> ColorReliefLayerFactory::createLayer(
+    const std::string& id, const style::conversion::Convertible& value) noexcept {
     const auto source = getSource(value);
     if (!source) {
         return nullptr;
