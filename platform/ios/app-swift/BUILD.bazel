@@ -35,6 +35,8 @@ swift_library(
     deps = [
         "//platform:ios-sdk",
         "//platform/plugins/basic-example-plugin/darwin:basic-example-plugin-darwin",
+        "//platform/plugins/arrow-polyline-example-plugin:arrow-polyline-swift",
+        "//platform/plugins/arrow-polyline-example-plugin:arrow-polyline-ios-bridge",
         "@swiftpkg_polyline//:Polyline",
         "@swiftpkg_sentry_cocoa//:Sentry",
     ],

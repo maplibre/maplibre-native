@@ -7,14 +7,11 @@ objc_library(
     srcs = ["MLNBasicPluginExample.mm"],
     hdrs = ["MLNBasicPluginExample.h"],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
-    includes = [
-        "..",
-        "../../../darwin/src",
-    ],
+    includes = [".."],
     module_name = "MLNBasicPluginExample",
     visibility = ["//visibility:public"],
     deps = [
-        "//platform/darwin:darwin-objcpp",
+        "//platform:ios-sdk",
         "//platform/plugins/basic-example-plugin",
     ],
 )

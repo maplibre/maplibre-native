@@ -2,11 +2,11 @@
 
 #include <mbgl/plugin/cross_platform_plugin.hpp>
 
-namespace mbgl::platform {
+namespace plugin::ex {
 
 /// A basic example cross-platform plugin that demonstrates the plugin architecture.
 /// This plugin logs lifecycle events and provides a method to set the camera to San Francisco.
-class BasicPluginExample : public XPlatformPlugin {
+class BasicPluginExample : public mbgl::platform::XPlatformPlugin {
 public:
   BasicPluginExample();
   ~BasicPluginExample() override;
@@ -18,7 +18,7 @@ public:
   // MapObserver lifecycle overrides
   void onWillStartLoadingMap() override;
   void onDidFinishLoadingMap() override;
-  void onDidFailLoadingMap(MapLoadError error, const std::string& message) override;
+  void onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& message) override;
 
   // Custom plugin methods
   void showSanFrancisco();
@@ -28,4 +28,4 @@ private:
   mbgl::Renderer* renderer_ = nullptr;
 };
 
-} // namespace mbgl::platform
+} // namespace plugin::ex

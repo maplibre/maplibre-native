@@ -25,20 +25,20 @@ public:
   }
 
   static jni::jlong nativeCreate(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&) {
-    auto plugin = new mbgl::platform::BasicPluginExample();
+    auto plugin = new plugin::ex::BasicPluginExample();
     return reinterpret_cast<jni::jlong>(plugin);
   }
 
   static void nativeDestroy(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&, jni::jlong nativePtr) {
     if (nativePtr != 0) {
-      auto plugin = reinterpret_cast<mbgl::platform::BasicPluginExample*>(nativePtr);
+      auto plugin = reinterpret_cast<plugin::ex::BasicPluginExample*>(nativePtr);
       delete plugin;
     }
   }
 
   static void nativeShowSanFrancisco(jni::JNIEnv&, const jni::Object<BasicPluginExampleJni>&, jni::jlong nativePtr) {
     if (nativePtr != 0) {
-      auto plugin = reinterpret_cast<mbgl::platform::BasicPluginExample*>(nativePtr);
+      auto plugin = reinterpret_cast<plugin::ex::BasicPluginExample*>(nativePtr);
       plugin->showSanFrancisco();
     }
   }

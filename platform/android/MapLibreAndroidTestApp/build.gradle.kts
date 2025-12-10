@@ -35,6 +35,14 @@ android {
         manifestPlaceholders["SENTRY_ENV"] = ""
     }
 
+    // Example: Including a cross-platform plugin's generated Java bindings.
+    // End users would add their plugin's generated sources similarly.
+    sourceSets {
+        getByName("main") {
+            java.srcDir("${rootDir}/../plugins/arrow-polyline-example-plugin/generated/android")
+        }
+    }
+
     nativeBuild(listOf("example-custom-layer"))
 
     packaging {

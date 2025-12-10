@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
-#import "MLNXPlatformPluginBridge.h"
+
+@protocol MLNXPlatformPluginBridge;
 
 NS_ASSUME_NONNULL_BEGIN
 

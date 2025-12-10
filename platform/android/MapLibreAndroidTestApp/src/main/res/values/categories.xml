@@ -10,6 +10,7 @@
     <string name="category_infowindow">Info Window</string>
     <string name="category_maplayout">Map Layout</string>
     <string name="category_offline">Offline</string>
+    <string name="category_plugins">Plugins</string>
     <string name="category_style">Styling</string>
     <string name="category_features">Features</string>
     <string name="category_storage">Storage</string>

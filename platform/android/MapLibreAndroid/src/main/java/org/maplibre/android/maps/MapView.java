@@ -1580,6 +1580,17 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     pluginBridges.add(bridge);
   }
 
+  /**
+   * Add a cross-platform plugin by its native pointer.
+   * For use with Gluecodium-generated plugins that have a getPtr() method.
+   *
+   * @param nativePluginPtr The native XPlatformPlugin pointer
+   * @throws IllegalStateException if called after native initialization
+   */
+  public void addPluginByPtr(long nativePluginPtr) {
+    addPluginBridge(() -> nativePluginPtr);
+  }
+
   private class FocalPointInvalidator implements FocalPointChangeListener {
 
     private final List<FocalPointChangeListener> focalPointChangeListeners = new ArrayList<>();

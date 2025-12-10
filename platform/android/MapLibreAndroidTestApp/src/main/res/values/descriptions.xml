@@ -52,6 +52,7 @@
     <string name="description_query_source_features">Query source for features</string>
     <string name="description_simple_map">Shows a simple map</string>
     <string name="description_basic_plugin_example">Demonstrates the basic cross-platform plugin</string>
+    <string name="description_arrow_polyline_example">Demonstrates Gluecodium cross-platform plugin bindings</string>
     <string name="description_map_change">Logs map change events to Logcat</string>
     <string name="description_visibility_map">Changes visibility of map and view parent</string>
     <string name="description_add_remove_markers">Change Symbol icon when zoom levels changes</string>

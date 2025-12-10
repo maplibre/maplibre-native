@@ -9,3 +9,4 @@
 
 # Include available plugins
 add_subdirectory(basic-example-plugin)
+add_subdirectory(arrow-polyline-example-plugin)

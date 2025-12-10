@@ -8,8 +8,11 @@ struct MapLibreNavigationView: View {
                 NavigationLink("SimpleMap") {
                     SimpleMap().edgesIgnoringSafeArea(.all)
                 }
-                NavigationLink("BasicPluginExample") {
+                NavigationLink("BasicPluginExample (ObjC++)") {
                     BasicPluginExampleView()
+                }
+                NavigationLink("AdvancedPluginExample (Gluecodium)") {
+                    ArrowPolylineExampleView()
                 }
                 #if MLN_RENDER_BACKEND_METAL
                     NavigationLink("CustomStyleLayer (Metal)") {

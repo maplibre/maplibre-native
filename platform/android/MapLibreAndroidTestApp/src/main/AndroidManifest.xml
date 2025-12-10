@@ -525,7 +525,19 @@
             android:label="@string/activity_basic_plugin_example">
             <meta-data
                 android:name="@string/category"
-                android:value="@string/category_basic" />
+                android:value="@string/category_plugins" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.ArrowPolylineExampleActivity"
+            android:description="@string/description_arrow_polyline_example"
+            android:exported="true"
+            android:label="@string/activity_arrow_polyline_example">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_plugins" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />

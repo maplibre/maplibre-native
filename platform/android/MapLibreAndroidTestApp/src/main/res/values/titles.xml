@@ -51,7 +51,8 @@
     <string name="activity_symbol_layer">Symbols</string>
     <string name="activity_add_sprite">Add Custom Sprite</string>
     <string name="activity_simple_map">Simple Map</string>
-    <string name="activity_basic_plugin_example">Basic Plugin Example</string>
+    <string name="activity_basic_plugin_example">Basic Plugin Example (JNI)</string>
+    <string name="activity_arrow_polyline_example">Advanced Plugin Example (Gluecodium)</string>
     <string name="activity_map_change">Map Change Events</string>
     <string name="activity_map_visibility">Visibility Map</string>
     <string name="activity_map_in_dialog">Dialog with map</string>

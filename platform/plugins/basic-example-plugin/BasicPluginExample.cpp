@@ -3,7 +3,12 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl::platform {
+namespace plugin::ex {
+
+using mbgl::Log;
+using mbgl::Event;
+using mbgl::CameraOptions;
+using mbgl::LatLng;
 
 BasicPluginExample::BasicPluginExample() {
   Log::Info(Event::General, "BasicPluginExample: Created");
@@ -33,7 +38,7 @@ void BasicPluginExample::onDidFinishLoadingMap() {
   Log::Info(Event::General, "BasicPluginExample::onDidFinishLoadingMap");
 }
 
-void BasicPluginExample::onDidFailLoadingMap(MapLoadError, const std::string& message) {
+void BasicPluginExample::onDidFailLoadingMap(mbgl::MapLoadError, const std::string& message) {
   Log::Error(Event::General, "BasicPluginExample::onDidFailLoadingMap - Error: " + message);
 }
 
@@ -56,4 +61,4 @@ void BasicPluginExample::showSanFrancisco() {
   map_->jumpTo(camera);
 }
 
-} // namespace mbgl::platform
+} // namespace plugin::ex
