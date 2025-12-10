@@ -181,6 +181,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .pitch_with_map = (symbolData.pitchAlignment == style::AlignmentType::Map),
             .is_size_zoom_constant = size.isZoomConstant,
             .is_size_feature_constant = size.isFeatureConstant,
+            .is_offset = symbolData.isOffset,
 
             .size_t = size.sizeT,
             .size = size.size,
