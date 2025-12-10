@@ -17,14 +17,13 @@
 namespace mbgl {
 namespace style {
 
-static LightObserver nullObserver;
+namespace {
+LightObserver nullObserver;
+} // namespace
 
-Light::Light(Immutable<Light::Impl> impl_)
-    : impl(std::move(impl_)),
-      observer(&nullObserver) {}
+Light::Light(Immutable<Light::Impl> impl_) : impl(std::move(impl_)), observer(&nullObserver) {}
 
-Light::Light()
-    : Light(makeMutable<Impl>()) {}
+Light::Light() : Light(makeMutable<Impl>()) {}
 
 Light::~Light() = default;
 
@@ -71,84 +70,89 @@ constexpr const auto properties = mapbox::eternal::hash_map<mapbox::eternal::str
 std::optional<Error> Light::setProperty(const std::string& name, const Convertible& value) {
     const auto it = properties.find(name.c_str());
     if (it == properties.end()) {
-        return Error{"light doesn't support this property"};
+        return Error { "light doesn't support this property" };
     }
 
     auto property = static_cast<Property>(it->second);
 
+        
     if (property == Property::Anchor) {
         Error error;
-        std::optional<PropertyValue<LightAnchorType>> typedValue = convert<PropertyValue<LightAnchorType>>(
-            value, error, false, false);
+        std::optional<PropertyValue<LightAnchorType>> typedValue = convert<PropertyValue<LightAnchorType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-
+        
         setAnchor(*typedValue);
         return std::nullopt;
+        
     }
-
+    
     if (property == Property::Color) {
         Error error;
         std::optional<PropertyValue<Color>> typedValue = convert<PropertyValue<Color>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-
+        
         setColor(*typedValue);
         return std::nullopt;
+        
     }
-
+    
     if (property == Property::Intensity) {
         Error error;
         std::optional<PropertyValue<float>> typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-
+        
         setIntensity(*typedValue);
         return std::nullopt;
+        
     }
-
+    
     if (property == Property::Position) {
         Error error;
-        std::optional<PropertyValue<Position>> typedValue = convert<PropertyValue<Position>>(
-            value, error, false, false);
+        std::optional<PropertyValue<Position>> typedValue = convert<PropertyValue<Position>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
-
+        
         setPosition(*typedValue);
         return std::nullopt;
+        
     }
+    
 
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
         return error;
     }
-
+    
     if (property == Property::AnchorTransition) {
         setAnchorTransition(*transition);
         return std::nullopt;
     }
-
+    
     if (property == Property::ColorTransition) {
         setColorTransition(*transition);
         return std::nullopt;
     }
-
+    
     if (property == Property::IntensityTransition) {
         setIntensityTransition(*transition);
         return std::nullopt;
     }
-
+    
     if (property == Property::PositionTransition) {
         setPositionTransition(*transition);
         return std::nullopt;
     }
+    
 
-    return Error{"light doesn't support this property"};
+    return Error { "light doesn't support this property" };
 }
 
 StyleProperty Light::getProperty(const std::string& name) const {
@@ -281,6 +285,7 @@ void Light::setPositionTransition(const TransitionOptions& options) {
 TransitionOptions Light::getPositionTransition() const {
     return impl->properties.template get<LightPosition>().options;
 }
+
 
 } // namespace style
 } // namespace mbgl
