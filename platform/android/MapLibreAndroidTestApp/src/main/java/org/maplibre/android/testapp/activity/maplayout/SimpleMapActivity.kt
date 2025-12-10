@@ -30,7 +30,7 @@ class SimpleMapActivity : AppCompatActivity() {
             val key = ApiKeyUtils.getApiKey(applicationContext)
             if (key == null || key == "YOUR_API_KEY_GOES_HERE") {
                 it.setStyle(
-                    Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")
+                    Style.Builder().fromUri("https://gist.githubusercontent.com/louwers/d1f02395608bad979258f8a879bf1057/raw/ee0ec25f1d66efc4d887b063360479705ccf3051/gistfile1.txt")
                 )
             } else {
                 val styles = Style.getPredefinedStyles()
