@@ -1,5 +1,21 @@
 # Changelog MapLibre Native for Android
 
+## 12.3.0
+
+### ✨ Features and improvements
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+
+### 🐞 Bug fixes
+
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+
+## 12.2.2
+
+### 🐞 Bug fixes
+
+- Fix crash due to pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
+
 ## 12.2.1
 
 ### 🐞 Bug fixes
