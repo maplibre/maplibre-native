@@ -938,6 +938,8 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/renderer/layers/background_layer_tweaker.hpp",
     "src/mbgl/renderer/layers/circle_layer_tweaker.cpp",
     "src/mbgl/renderer/layers/circle_layer_tweaker.hpp",
+    "src/mbgl/renderer/layers/color_relief_layer_tweaker.cpp",
+    "src/mbgl/renderer/layers/color_relief_layer_tweaker.hpp",
     "src/mbgl/renderer/layers/fill_layer_tweaker.cpp",
     "src/mbgl/renderer/layers/fill_layer_tweaker.hpp",
     "src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.cpp",
