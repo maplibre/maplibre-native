@@ -5,6 +5,8 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/string.hpp>
 
+#include <vector>
+
 #include <rustutils/color.hpp>
 
 namespace mbgl {
@@ -38,10 +40,14 @@ std::array<double, 4> Color::toArray() const {
 }
 
 mbgl::Value Color::toObject() const {
-    return mapbox::base::ValueObject{{"r", static_cast<double>(r)},
-                                     {"g", static_cast<double>(g)},
-                                     {"b", static_cast<double>(b)},
-                                     {"a", static_cast<double>(a)}};
+    const auto array = toArray();
+    return std::vector<mbgl::Value>{
+        std::string("rgba"),
+        array[0],
+        array[1],
+        array[2],
+        array[3],
+    };
 }
 
 mbgl::Value Color::serialize() const {
