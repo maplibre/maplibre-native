@@ -100,12 +100,7 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     // Get the expression from ColorRampPropertyValue
     // Note: getExpression() dereferences the internal pointer, so we must ensure isUndefined() is false first
-    const mbgl::style::expression::Expression* exprPtr = nullptr;
-    try {
-        exprPtr = &colorValue.getExpression();
-    } catch (...) {
-        return;
-    }
+    const mbgl::style::expression::Expression* exprPtr = &colorValue.getExpression();
     if (!exprPtr) {
         return;
     }
@@ -128,17 +123,13 @@ void RenderColorReliefLayer::updateColorRamp() {
         for (float elevation : elevationStopsVector) {
             Color color = {0.0f, 0.0f, 0.0f, 0.0f}; // Default to transparent black
 
-            try {
-                // Create evaluation context with elevation as color ramp parameter
-                expression::EvaluationContext context(std::nullopt, nullptr, static_cast<double>(elevation));
+            // Create evaluation context with elevation as color ramp parameter
+            expression::EvaluationContext context(std::nullopt, nullptr, static_cast<double>(elevation));
 
-                expression::EvaluationResult result = expr.evaluate(context);
+            expression::EvaluationResult result = expr.evaluate(context);
 
-                if (result && result->is<Color>()) {
-                    color = result->get<Color>();
-                }
-            } catch (...) {
-                // If evaluation fails, use the default transparent black
+            if (result && result->is<Color>()) {
+                color = result->get<Color>();
             }
 
             colorStopsVector.push_back(color);
