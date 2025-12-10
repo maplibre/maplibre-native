@@ -38,6 +38,7 @@ MLN_PRIVATE_GENERATED_STYLE_HEADERS = [
     "src/mbgl/style/layers/fill_extrusion_layer_properties.hpp",
     "src/mbgl/style/layers/raster_layer_properties.hpp",
     "src/mbgl/style/layers/hillshade_layer_properties.hpp",
+    "src/mbgl/style/layers/color_relief_layer_properties.hpp",
     "src/mbgl/style/layers/background_layer_properties.hpp",
     "src/mbgl/style/layers/location_indicator_layer_properties.hpp",
 ]
