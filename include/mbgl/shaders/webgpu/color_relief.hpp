@@ -152,9 +152,9 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     if (abs(denom) >= 0.0001) {
         t = clamp((el - el_l) / denom, 0.0, 1.0);
     }
-    let final_color = mix(color_l, color_r, t);
+    let final_color = mix(color_l, color_r, t) * props.opacity;
 
-    return vec4<f32>(final_color.rgb, final_color.a * props.opacity);
+    return vec4<f32>(final_color);
 }
 )";
 };
