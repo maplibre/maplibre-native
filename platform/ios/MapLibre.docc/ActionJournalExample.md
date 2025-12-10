@@ -65,6 +65,7 @@ Enabling the action journal.
 ```swift
 let options = MLNMapOptions()
         options.actionJournalOptions.enabled = true
+        options.actionJournalOptions.renderingStatsReportInterval = 10
         options.styleURL = AMERICANA_STYLE
         mapView = MLNMapView(frame: view.bounds, options: options)
 ```
