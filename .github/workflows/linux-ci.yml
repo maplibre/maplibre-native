@@ -183,6 +183,11 @@ jobs:
 
       - run: chmod +x build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
 
+      - name: Enable core dumps
+        run: |
+          ulimit -c unlimited
+          echo "/tmp/core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
+
       - name: Run C++ tests
         continue-on-error: ${{ matrix.variant.renderer == 'vulkan' }}
         run: xvfb-run -a build-linux-${{ matrix.variant.renderer }}/mbgl-test-runner
@@ -214,6 +219,35 @@ jobs:
 
       - name: Run expression test
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
+
+      # Generate and upload symbolicated stack traces from core dumps
+      - name: Generate stack traces
+        if: always()
+        run: |
+          mkdir -p stack-traces
+
+          # Process all core dumps
+          for core_file in /tmp/core.*; do
+            [ -f "$core_file" ] || continue
+
+            trace_file=stack-traces/"$(basename "$core_file")".txt
+
+            # Try to auto-detect binary and generate backtrace
+            gdb -batch \
+                -ex "set confirm off" \
+                -ex "core-file $core_file" \
+                -ex "thread apply all bt full" \
+                -ex "info registers" \
+                -ex "quit" > "$trace_file" 2>&1 || true
+          done
+
+      - name: Upload stack traces
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: stack-traces-${{ matrix.variant.renderer }}
+          path: stack-traces/
+          if-no-files-found: ignore
 
   linux-coverage:
     runs-on: ubuntu-22.04
