@@ -85,11 +85,6 @@ public:
         return *this;
     };
 
-    EvaluationContext& withGlobalState(const FeatureState* globalState_) noexcept {
-        globalState = globalState_;
-        return *this;
-    };
-
     std::optional<float> zoom;
     std::optional<mbgl::Value> accumulated;
     GeometryTileFeature const* feature = nullptr;
@@ -98,7 +93,6 @@ public:
     // Contains formatted section object, std::unordered_map<std::string, Value>.
     const Value* formattedSection = nullptr;
     const FeatureState* featureState = nullptr;
-    const FeatureState* globalState = nullptr;
     const std::set<std::string>* availableImages = nullptr;
     const mbgl::CanonicalTileID* canonical = nullptr;
 };
