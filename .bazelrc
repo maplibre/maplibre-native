@@ -9,3 +9,6 @@ common --allow_yanked_versions=rules_cc@0.1.0
 coverage --experimental_ui_max_stdouterr_bytes=10485760
 
 common:macos --linkopt=-L/opt/homebrew/lib
+
+# disables telemetry https://github.com/aspect-build/tools_telemetry
+common --repo_env=ASPECT_TOOLS_TELEMETRY=
