@@ -125,7 +125,7 @@ public:
 
     void activateOrQueueRequest(OnlineFileRequest* req) {
         assert(allRequests.contains(req));
-        assert(activeRequests.contains(req));
+        assert(!activeRequests.contains(req));
         assert(!req->request);
 
         if (activeRequests.size() >= getMaximumConcurrentRequests()) {
