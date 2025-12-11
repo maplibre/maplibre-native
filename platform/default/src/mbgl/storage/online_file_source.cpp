@@ -124,8 +124,8 @@ public:
     }
 
     void activateOrQueueRequest(OnlineFileRequest* req) {
-        assert(allRequests.find(req) != allRequests.end());
-        assert(activeRequests.find(req) == activeRequests.end());
+        assert(allRequests.contains(req));
+        assert(activeRequests.contains(req));
         assert(!req->request);
 
         if (activeRequests.size() >= getMaximumConcurrentRequests()) {
@@ -167,7 +167,7 @@ public:
 
     bool isPending(OnlineFileRequest* req) { return pendingRequests.contains(req); }
 
-    bool isActive(OnlineFileRequest* req) { return activeRequests.find(req) != activeRequests.end(); }
+    bool isActive(OnlineFileRequest* req) { return activeRequests.contains(req); }
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 

@@ -36,7 +36,7 @@ void CustomTileLoader::fetchTile(const OverscaledTileID& tileID, const ActorRef<
 
 void CustomTileLoader::cancelTile(const OverscaledTileID& tileID) {
     std::scoped_lock guard(dataMutex);
-    if (tileCallbackMap.find(tileID.canonical) != tileCallbackMap.end()) {
+    if (tileCallbackMap.contains(tileID.canonical)) {
         invokeTileCancel(tileID.canonical);
     }
 }

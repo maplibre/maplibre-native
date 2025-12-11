@@ -47,7 +47,7 @@ const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& s
     // but the current interface defines one source == one group when
     // crossSourceCollisions == true.
     if (!crossSourceCollisions) {
-        if (collisionGroups.find(sourceID) == collisionGroups.end()) {
+        if (!collisionGroups.contains(sourceID)) {
             uint16_t nextGroupID = ++maxGroupID;
             collisionGroups.emplace(
                 sourceID,
@@ -716,7 +716,7 @@ void Placement::commit() {
     // copy and update values from the previous placement that aren't in the
     // current placement but haven't finished fading
     for (auto& prevOpacity : getPrevPlacement()->opacities) {
-        if (opacities.find(prevOpacity.first) == opacities.end()) {
+        if (!opacities.contains(prevOpacity.first)) {
             JointOpacityState jointOpacity(prevOpacity.second, increment, false, false);
             if (!jointOpacity.isHidden()) {
                 opacities.emplace(prevOpacity.first, jointOpacity);

@@ -376,7 +376,7 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
     for (auto& fontDependencies : glyphDependencies.glyphs) {
         auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
         for (auto glyphID : fontDependencies.second) {
-            if (fontGlyphs == glyphMap.end() || fontGlyphs->second.find(glyphID) == fontGlyphs->second.end()) {
+            if (fontGlyphs == glyphMap.end() || !fontGlyphs->second.contains(glyphID)) {
                 pendingGlyphDependencies.glyphs[fontDependencies.first].insert(glyphID);
             }
         }

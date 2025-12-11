@@ -125,7 +125,6 @@ Checks: [
     -modernize-type-traits,
     -misc-use-internal-linkage,
     -modernize-use-ranges,
-    -readability-container-contains,
     -modernize-use-integer-sign-comparison,
     -clang-analyzer-core.CallAndMessage,
     -clang-diagnostic-deprecated-declarations,

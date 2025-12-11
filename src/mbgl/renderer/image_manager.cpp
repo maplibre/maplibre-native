@@ -68,7 +68,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 
     if (sizeChanged) {
         // Update cache size if requested image size has changed.
-        if (requestedImages.find(image_->id) != requestedImages.end()) {
+        if (requestedImages.contains(image_->id)) {
             int64_t diff = image_->image.bytes() - oldImage->second->image.bytes();
             assert(static_cast<int64_t>(requestedImagesCacheSize + diff) >= 0ll);
             requestedImagesCacheSize += diff;
@@ -133,7 +133,7 @@ void ImageManager::getImages(ImageRequestor& requestor, ImageRequestPair&& pair)
     if (!isLoaded()) {
         bool hasAllDependencies = true;
         for (const auto& dependency : pair.first) {
-            if (images.find(dependency.first) == images.end()) {
+            if (!images.contains(dependency.first)) {
                 hasAllDependencies = false;
                 break;
             }

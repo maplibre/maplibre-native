@@ -219,7 +219,7 @@ private:
     }
 
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
-        if (header_cache.find(url) != header_cache.end()) {
+        if (header_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
         }
 
@@ -270,7 +270,7 @@ private:
     }
 
     void getMetadata(std::string& url, AsyncRequest* req, AsyncCallback callback) {
-        if (metadata_cache.find(url) != metadata_cache.end()) {
+        if (metadata_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
         }
 
@@ -419,7 +419,7 @@ private:
                         uint64_t directoryOffset,
                         uint64_t directoryLength,
                         const std::string& directoryData) {
-        if (directory_cache.find(url) == directory_cache.end()) {
+        if (!directory_cache.contains(url)) {
             directory_cache.emplace(url, std::map<std::string, std::vector<pmtiles::entryv3>>());
             directory_cache_control.emplace(url, std::vector<std::string>());
         }
@@ -443,8 +443,7 @@ private:
         std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
                                           std::to_string(directoryLength);
 
-        if (directory_cache.find(url) != directory_cache.end() &&
-            directory_cache.at(url).find(directory_cache_key) != directory_cache.at(url).end()) {
+        if (directory_cache.contains(url) && directory_cache.at(url).contains(directory_cache_key)) {
             if (directory_cache_control.at(url).back() != directory_cache_key) {
                 directory_cache_control.at(url).emplace_back(directory_cache_key);
 
