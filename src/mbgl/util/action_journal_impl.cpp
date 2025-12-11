@@ -9,6 +9,7 @@
 #include <rapidjson/writer.h>
 
 #include <algorithm>
+#include <mutex>
 #include <regex>
 
 #ifdef __APPLE__

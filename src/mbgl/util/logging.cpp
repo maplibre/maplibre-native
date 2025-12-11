@@ -9,6 +9,7 @@
 #include <cstdarg>
 #include <exception>
 #include <sstream>
+#include <mutex>
 
 namespace mbgl {
 
