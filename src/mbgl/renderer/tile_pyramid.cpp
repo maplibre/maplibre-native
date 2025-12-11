@@ -110,10 +110,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
 
-    util::TileCoverParameters tileCoverParameters = {.transformState=parameters.transformState,
-                                                     .tileLodMinRadius=parameters.tileLodMinRadius,
-                                                     .tileLodScale=parameters.tileLodScale,
-                                                     .tileLodPitchThreshold=parameters.tileLodPitchThreshold};
+    util::TileCoverParameters tileCoverParameters = {.transformState = parameters.transformState,
+                                                     .tileLodMinRadius = parameters.tileLodMinRadius,
+                                                     .tileLodScale = parameters.tileLodScale,
+                                                     .tileLodPitchThreshold = parameters.tileLodPitchThreshold};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
@@ -158,7 +158,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     auto retainTileFn = [&](Tile& tile, TileNecessity necessity) -> void {
         if (retain.emplace(tile.id).second) {
-            tile.setUpdateParameters({.minimumUpdateInterval=minimumUpdateInterval, .isVolatile=isVolatile});
+            tile.setUpdateParameters({.minimumUpdateInterval = minimumUpdateInterval, .isVolatile = isVolatile});
             tile.setNecessity(necessity);
         }
 

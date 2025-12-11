@@ -131,8 +131,8 @@ Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& 
         const vec3 axis0 = {{0.0, -frustumEdges[i][2], frustumEdges[i][1]}};
         const vec3 axis1 = {{frustumEdges[i][2], 0.0, -frustumEdges[i][0]}};
 
-        projections[i * 2] = {.axis=axis0, .projection=ProjectPointsToAxis(points, points[0], axis0)};
-        projections[i * 2 + 1] = {.axis=axis1, .projection=ProjectPointsToAxis(points, points[0], axis1)};
+        projections[i * 2] = {.axis = axis0, .projection = ProjectPointsToAxis(points, points[0], axis0)};
+        projections[i * 2 + 1] = {.axis = axis1, .projection = ProjectPointsToAxis(points, points[0], axis1)};
     }
 }
 

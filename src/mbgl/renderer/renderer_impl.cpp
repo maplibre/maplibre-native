@@ -106,8 +106,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             if (const auto& cmdQueue = mtlBackend.getCommandQueue()) {
                 if (const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager())) {
                     // NOLINTNEXTLINE(bugprone-assignment-in-if-condition)
-                    if ((commandCaptureScope = NS::TransferPtr(captureManager->newCaptureScope(
-                             cmdQueue.get())))) {
+                    if ((commandCaptureScope = NS::TransferPtr(captureManager->newCaptureScope(cmdQueue.get())))) {
                         const auto label = "Renderer::Impl frame=" + util::toString(frameCount);
                         commandCaptureScope->setLabel(NS::String::string(label.c_str(), NS::UTF8StringEncoding));
                         captureManager->setDefaultCaptureScope(commandCaptureScope.get());

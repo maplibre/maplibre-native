@@ -109,7 +109,7 @@ gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
 #else
-    return gfx::DepthMode{.func=gfx::DepthFunctionType::LessEqual, .mask=mask};
+    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = mask};
 #endif
 }
 
@@ -117,7 +117,7 @@ gfx::DepthMode PaintParameters::depthModeFor3D() const {
 #if MLN_RENDER_BACKEND_OPENGL
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
 #else
-    return gfx::DepthMode{.func=gfx::DepthFunctionType::LessEqual, .mask=gfx::DepthMaskType::ReadWrite};
+    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = gfx::DepthMaskType::ReadWrite};
 #endif
 }
 
@@ -150,13 +150,8 @@ void PaintParameters::clearStencil() {
     const auto debugGroup = renderPass->createDebugGroup("tile-clip-mask-clear");
 #endif
 
-    const std::vector<shaders::ClipUBO> tileUBO = {
-        shaders::ClipUBO{.matrix = util::cast<float>(matrixForTile({0, 0, 0})),
-                         .stencil_ref = 0,
-                         .pad1 = 0,
-                         .pad2 = 0,
-                         .pad3 = 0}
-    };
+    const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
+        .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
     mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_VULKAN

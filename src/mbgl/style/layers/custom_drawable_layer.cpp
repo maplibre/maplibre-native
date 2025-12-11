@@ -40,13 +40,13 @@ namespace style {
 using namespace shaders;
 
 namespace {
-const LayerTypeInfo typeInfoCustomDrawable{.type="custom-drawable",
-                                           .source=LayerTypeInfo::Source::NotRequired,
-                                           .pass3d=LayerTypeInfo::Pass3D::NotRequired,
-                                           .layout=LayerTypeInfo::Layout::NotRequired,
-                                           .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
-                                           .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
-                                           .tileKind=LayerTypeInfo::TileKind::NotRequired};
+const LayerTypeInfo typeInfoCustomDrawable{.type = "custom-drawable",
+                                           .source = LayerTypeInfo::Source::NotRequired,
+                                           .pass3d = LayerTypeInfo::Pass3D::NotRequired,
+                                           .layout = LayerTypeInfo::Layout::NotRequired,
+                                           .fadingTiles = LayerTypeInfo::FadingTiles::NotRequired,
+                                           .crossTileIndex = LayerTypeInfo::CrossTileIndex::NotRequired,
+                                           .tileKind = LayerTypeInfo::TileKind::NotRequired};
 } // namespace
 
 CustomDrawableLayer::CustomDrawableLayer(const std::string& layerID, std::unique_ptr<CustomDrawableLayerHost> host)
@@ -120,28 +120,28 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::LineEvaluatedPropsUBO propsUBO = {.color=options.color,
-                                                         .blur=options.blur,
-                                                         .opacity=options.opacity,
-                                                         .gapwidth=options.gapWidth,
-                                                         .offset=options.offset,
-                                                         .width=options.width,
-                                                         /*floorwidth=*/.floorwidth=0.0f,
-                                                         .expressionMask=LineExpressionMask::None,
-                                                         .pad1=0};
+        const shaders::LineEvaluatedPropsUBO propsUBO = {.color = options.color,
+                                                         .blur = options.blur,
+                                                         .opacity = options.opacity,
+                                                         .gapwidth = options.gapWidth,
+                                                         .offset = options.offset,
+                                                         .width = options.width,
+                                                         /*floorwidth=*/.floorwidth = 0.0f,
+                                                         .expressionMask = LineExpressionMask::None,
+                                                         .pad1 = 0};
 
         // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
         assert(propsUBO.expressionMask == LineExpressionMask::None);
 
         if (!expressionUniformBuffer) {
             const LineExpressionUBO exprUBO = {
-                /* .color = */ .color=nullptr,
-                /* .blur = */ .blur=nullptr,
-                /* .opacity = */ .opacity=nullptr,
-                /* .gapwidth = */ .gapwidth=nullptr,
-                /* .offset = */ .offset=nullptr,
-                /* .width = */ .width=nullptr,
-                /* .floorWidth = */ .floorWidth=nullptr,
+                /* .color = */ .color = nullptr,
+                /* .blur = */ .blur = nullptr,
+                /* .opacity = */ .opacity = nullptr,
+                /* .gapwidth = */ .gapwidth = nullptr,
+                /* .offset = */ .offset = nullptr,
+                /* .width = */ .width = nullptr,
+                /* .floorWidth = */ .floorWidth = nullptr,
             };
 
             expressionUniformBuffer = parameters.context.createUniformBuffer(&exprUBO, sizeof(exprUBO));
@@ -159,16 +159,16 @@ public:
 #else
         const shaders::LineDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ .matrix=util::cast<float>(matrix),
-            /* .ratio = */ .ratio=1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+            /* .matrix = */ .matrix = util::cast<float>(matrix),
+            /* .ratio = */ .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
 
-            /* .color_t = */ .color_t=0.f,
-            /* .blur_t = */ .blur_t=0.f,
-            /* .opacity_t = */ .opacity_t=0.f,
-            /* .gapwidth_t = */ .gapwidth_t=0.f,
-            /* .offset_t = */ .offset_t=0.f,
-            /* .width_t = */ .width_t=0.f,
-            /* .pad1 = */ .pad1=0
+            /* .color_t = */ .color_t = 0.f,
+            /* .blur_t = */ .blur_t = 0.f,
+            /* .opacity_t = */ .opacity_t = 0.f,
+            /* .gapwidth_t = */ .gapwidth_t = 0.f,
+            /* .offset_t = */ .offset_t = 0.f,
+            /* .width_t = */ .width_t = 0.f,
+            /* .pad1 = */ .pad1 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -240,30 +240,30 @@ public:
 
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
         shaders::WideVectorUniformsUBO uniform = {
-            /* .mvpMatrix = */ .mvpMatrix=mvpMatrix,
-            /* .mvpMatrixDiff = */ .mvpMatrixDiff=mvpMatrixDiff,
-            /* .mvMatrix = */ .mvMatrix=mvMatrix,
-            /* .mvMatrixDiff = */ .mvMatrixDiff=mvMatrixDiff,
-            /* .pMatrix = */ .pMatrix=pMatrix,
-            /* .pMatrixDiff = */ .pMatrixDiff=pMatrixDiff,
-            /* .frameSize = */ .frameSize={(float)renderableSize.width, (float)renderableSize.height},
-            /* .pad1 = */ .pad1=0,
-            /* .pad2 = */ .pad2=0};
+            /* .mvpMatrix = */ .mvpMatrix = mvpMatrix,
+            /* .mvpMatrixDiff = */ .mvpMatrixDiff = mvpMatrixDiff,
+            /* .mvMatrix = */ .mvMatrix = mvMatrix,
+            /* .mvMatrixDiff = */ .mvMatrixDiff = mvMatrixDiff,
+            /* .pMatrix = */ .pMatrix = pMatrix,
+            /* .pMatrixDiff = */ .pMatrixDiff = pMatrixDiff,
+            /* .frameSize = */ .frameSize = {(float)renderableSize.width, (float)renderableSize.height},
+            /* .pad1 = */ .pad1 = 0,
+            /* .pad2 = */ .pad2 = 0};
 
         shaders::WideVectorUniformWideVecUBO wideVec = {
-            /* .color = */ .color=options.color,
-            /* .w2 = */ .w2=options.width,
-            /* .offset = */ .offset=options.offset,
-            /* .edge = */ .edge=0.0f,      // TODO: MLN does not provide a value. Analyze impact.
-            /* .texRepeat = */ .texRepeat=0.0f, // N/A
-            /* .texOffset = */ .texOffset={},   // N/A
-            /* .miterLimit = */ .miterLimit=options.geometry.miterLimit,
-            /* .join = */ .join=static_cast<int32_t>(options.geometry.joinType),
-            /* .cap = */ .cap=static_cast<int32_t>(options.geometry.beginCap), // TODO: MLN option for endCap to be
-                                                                          // implemented in the shader!
-            /* .hasExp = */ .hasExp=false,                                        // N/A
-            /* .interClipLimit = */ .interClipLimit=0.0f,                                 // N/A
-            /* .pad1 = */ .pad1=0};
+            /* .color = */ .color = options.color,
+            /* .w2 = */ .w2 = options.width,
+            /* .offset = */ .offset = options.offset,
+            /* .edge = */ .edge = 0.0f,           // TODO: MLN does not provide a value. Analyze impact.
+            /* .texRepeat = */ .texRepeat = 0.0f, // N/A
+            /* .texOffset = */ .texOffset = {},   // N/A
+            /* .miterLimit = */ .miterLimit = options.geometry.miterLimit,
+            /* .join = */ .join = static_cast<int32_t>(options.geometry.joinType),
+            /* .cap = */ .cap = static_cast<int32_t>(options.geometry.beginCap), // TODO: MLN option for endCap to be
+                                                                                 // implemented in the shader!
+            /* .hasExp = */ .hasExp = false,                                     // N/A
+            /* .interClipLimit = */ .interClipLimit = 0.0f,                      // N/A
+            /* .pad1 = */ .pad1 = 0};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
@@ -305,12 +305,12 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ .color=options.color,
-                                                         /* .outline_color = */ .outline_color=Color::white(),
-                                                         /* .opacity = */ .opacity=options.opacity,
-                                                         /* .fade = */ .fade=0.f,
-                                                         /* .from_scale = */ .from_scale=0.f,
-                                                         /* .to_scale = */ .to_scale=0.f};
+        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ .color = options.color,
+                                                         /* .outline_color = */ .outline_color = Color::white(),
+                                                         /* .opacity = */ .opacity = options.opacity,
+                                                         /* .fade = */ .fade = 0.f,
+                                                         /* .from_scale = */ .from_scale = 0.f,
+                                                         /* .to_scale = */ .to_scale = 0.f};
 
 #if MLN_UBO_CONSOLIDATION
         FillDrawableUnionUBO drawableUBO;
@@ -318,12 +318,12 @@ public:
 #else
         const shaders::FillDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ .matrix=util::cast<float>(matrix),
+            /* .matrix = */ .matrix = util::cast<float>(matrix),
 
-            /* .color_t = */ .color_t=0.f,
-            /* .opacity_t = */ .opacity_t=0.f,
-            /* .pad1 = */ .pad1=0,
-            /* .pad2 = */ .pad2=0
+            /* .color_t = */ .color_t = 0.f,
+            /* .opacity_t = */ .opacity_t = 0.f,
+            /* .pad1 = */ .pad1 = 0,
+            /* .pad2 = */ .pad2 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -390,17 +390,19 @@ public:
                                                                               parameters.pixelsToGLUnits[1] * factor};
 
         const shaders::CustomSymbolIconDrawableUBO drawableUBO = {
-            /* .matrix = */ .matrix=util::cast<float>(matrix),
-            /* .extrude_scale = */ .extrude_scale={extrudeScale[0] * options.size.width, extrudeScale[1] * options.size.height},
-            /* .anchor = */ .anchor=options.anchor,
-            /* .angle_degrees = */ .angle_degrees=options.angleDegrees,
-            /* .scale_with_map = */ .scale_with_map=options.scaleWithMap,
-            /* .pitch_with_map = */ .pitch_with_map=options.pitchWithMap,
-            /* .camera_to_center_distance = */ .camera_to_center_distance=parameters.state.getCameraToCenterDistance(),
-            /* .aspect_ratio = */ .aspect_ratio=parameters.pixelsToGLUnits[0] / parameters.pixelsToGLUnits[1],
-            /* .pad1 = */ .pad1=0,
-            /* .pad2 = */ .pad2=0,
-            /* .pad3 = */ .pad3=0};
+            /* .matrix = */ .matrix = util::cast<float>(matrix),
+            /* .extrude_scale = */ .extrude_scale = {extrudeScale[0] * options.size.width,
+                                                     extrudeScale[1] * options.size.height},
+            /* .anchor = */ .anchor = options.anchor,
+            /* .angle_degrees = */ .angle_degrees = options.angleDegrees,
+            /* .scale_with_map = */ .scale_with_map = options.scaleWithMap,
+            /* .pitch_with_map = */ .pitch_with_map = options.pitchWithMap,
+            /* .camera_to_center_distance = */ .camera_to_center_distance =
+                parameters.state.getCameraToCenterDistance(),
+            /* .aspect_ratio = */ .aspect_ratio = parameters.pixelsToGLUnits[0] / parameters.pixelsToGLUnits[1],
+            /* .pad1 = */ .pad1 = 0,
+            /* .pad2 = */ .pad2 = 0,
+            /* .pad3 = */ .pad3 = 0};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
@@ -430,8 +432,8 @@ public:
             callback(drawable, parameters, options);
         }
 
-        CustomGeometryDrawableUBO drawableUBO = {/* .matrix = */ .matrix=util::cast<float>(options.matrix),
-                                                 /* .color = */ .color=options.color};
+        CustomGeometryDrawableUBO drawableUBO = {/* .matrix = */ .matrix = util::cast<float>(options.matrix),
+                                                 /* .color = */ .color = options.color};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCustomGeometryDrawableUBO, &drawableUBO, parameters.context);
@@ -644,8 +646,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
     for (int y = 0; y <= 1; ++y) {
         for (int x = 0; x <= 1; ++x) {
             vertices.emplace_back(
-                CustomSymbolIcon{.a_pos={static_cast<float>(point.x * 2 + x), static_cast<float>(point.y * 2 + y)},
-                                 .a_tex={textureCoordinates[x][0], textureCoordinates[y][1]}});
+                CustomSymbolIcon{.a_pos = {static_cast<float>(point.x * 2 + x), static_cast<float>(point.y * 2 + y)},
+                                 .a_tex = {textureCoordinates[x][0], textureCoordinates[y][1]}});
         }
     }
 

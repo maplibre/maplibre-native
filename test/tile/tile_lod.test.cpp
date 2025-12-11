@@ -78,9 +78,7 @@ public:
         // check this after frontend.render()
         EXPECT_EQ(tileCount, expectedTileCount);
 
-        std::ranges::transform(images, images.begin(), [](const auto& img) {
-            return "test/fixtures/tile_lod/" + img;
-        });
+        std::ranges::transform(images, images.begin(), [](const auto& img) { return "test/fixtures/tile_lod/" + img; });
 
         test::checkImages(images, result.image, imageThreshold, 0.01);
     }

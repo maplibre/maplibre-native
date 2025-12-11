@@ -647,8 +647,7 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
         if (RenderSource* renderSource = getRenderSource(sourceID)) {
             auto sourceResults = renderSource->queryRenderedFeatures(
                 geometry, transformState, filteredLayers, options, projMatrix);
-            std::ranges::move(
-                sourceResults, std::inserter(resultsByLayer, resultsByLayer.begin()));
+            std::ranges::move(sourceResults, std::inserter(resultsByLayer, resultsByLayer.begin()));
         }
     }
 

@@ -260,8 +260,7 @@ TEST(Sprite, SpriteParsing) {
     const auto images = parseSprite("default", image_1x, json_1x);
 
     std::set<std::string> names;
-    std::ranges::transform(
-        images, std::inserter(names, names.begin()), [](const auto& image) { return image->id; });
+    std::ranges::transform(images, std::inserter(names, names.begin()), [](const auto& image) { return image->id; });
 
     EXPECT_EQ(std::set<std::string>({"airfield_icon",
                                      "airport_icon",
@@ -339,8 +338,7 @@ TEST(Sprite, SpriteParsing) {
               names);
 
     {
-        auto& sprite = *std::ranges::find_if(
-            images, [](const auto& image) { return image->id == "generic-metro"; });
+        auto& sprite = *std::ranges::find_if(images, [](const auto& image) { return image->id == "generic-metro"; });
         EXPECT_EQ(18u, sprite->image.size.width);
         EXPECT_EQ(18u, sprite->image.size.height);
         EXPECT_EQ(1, sprite->pixelRatio);

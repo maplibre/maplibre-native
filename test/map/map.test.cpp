@@ -1795,16 +1795,18 @@ TEST(Map, ObserveTileLifecycle) {
     observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
         if (sourceID != "mapbox") return;
         std::scoped_lock lock(tileMutex);
-        tileOps.push_back(TileEntry{.id=id, .sourceID=sourceID, .op=op});
+        tileOps.push_back(TileEntry{.id = id, .sourceID = sourceID, .op = op});
     };
-    observer.onPreCompileShaderCallback =
-        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
-            shaderOps.push_back(ShaderEntry{.id=id, .type=type, .defines=additionalDefines, .isPostCompile=false});
-        };
-    observer.onPostCompileShaderCallback =
-        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
-            shaderOps.push_back(ShaderEntry{.id=id, .type=type, .defines=additionalDefines, .isPostCompile=true});
-        };
+    observer.onPreCompileShaderCallback = [&](shaders::BuiltIn id,
+                                              gfx::Backend::Type type,
+                                              const std::string& additionalDefines) {
+        shaderOps.push_back(ShaderEntry{.id = id, .type = type, .defines = additionalDefines, .isPostCompile = false});
+    };
+    observer.onPostCompileShaderCallback = [&](shaders::BuiltIn id,
+                                               gfx::Backend::Type type,
+                                               const std::string& additionalDefines) {
+        shaderOps.push_back(ShaderEntry{.id = id, .type = type, .defines = additionalDefines, .isPostCompile = true});
+    };
 
     HeadlessFrontend frontend{{512, 512}, 1};
     MapAdapter map(

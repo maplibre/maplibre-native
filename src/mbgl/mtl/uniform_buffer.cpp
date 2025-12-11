@@ -18,7 +18,7 @@ UniformBuffer::UniformBuffer(BufferResource&& buffer_)
 
 UniformBuffer::UniformBuffer(UniformBuffer&& other)
     : gfx::UniformBuffer(std::move(other)),
-      buffer(std::move(other.buffer)) {}  // NOLINT(bugprone-use-after-move)
+      buffer(std::move(other.buffer)) {} // NOLINT(bugprone-use-after-move)
 
 UniformBuffer::~UniformBuffer() {
     buffer.getContext().renderingStats().numUniformBuffers--;

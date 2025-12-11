@@ -96,7 +96,7 @@ TEST(TileCover, PitchWithLargerResultSet) {
                          .withBearing(-142.2630000003529176)
                          .withPitch(60.0));
 
-    auto cover = util::tileCover({.transformState=transform.getState()}, 5);
+    auto cover = util::tileCover({.transformState = transform.getState()}, 5);
     // Returned vector has above 100 elements, we check first 16 as there is a
     // plan to return lower LOD for distant tiles.
     EXPECT_EQ((std::vector<OverscaledTileID>{{5, 15, 16},

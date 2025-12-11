@@ -419,7 +419,8 @@ TEST(Annotations, QueryFractionalZoomLevels) {
             return lhs.id == rhs.id;
         };
         std::ranges::sort(features, sortID);
-        features.erase(std::unique(features.begin(), features.end(), sameID), features.end());  // NOLINT(modernize-use-ranges)
+        features.erase(std::unique(features.begin(), features.end(), sameID),
+                       features.end()); // NOLINT(modernize-use-ranges)
         EXPECT_EQ(features.size(), ids.size());
     }
 }
@@ -454,14 +455,16 @@ TEST(Annotations, VisibleFeatures) {
         return lhs.id == rhs.id;
     };
     std::ranges::sort(features, sortID);
-    features.erase(std::unique(features.begin(), features.end(), sameID), features.end());  // NOLINT(modernize-use-ranges)
+    features.erase(std::unique(features.begin(), features.end(), sameID),
+                   features.end()); // NOLINT(modernize-use-ranges)
     EXPECT_EQ(features.size(), ids.size());
 
     test.map.jumpTo(CameraOptions().withZoom(4.0).withBearing(0.0));
     test.frontend.render(test.map);
     features = test.frontend.getRenderer()->queryRenderedFeatures(box);
     std::ranges::sort(features, sortID);
-    features.erase(std::unique(features.begin(), features.end(), sameID), features.end());  // NOLINT(modernize-use-ranges)
+    features.erase(std::unique(features.begin(), features.end(), sameID),
+                   features.end()); // NOLINT(modernize-use-ranges)
     EXPECT_EQ(features.size(), ids.size());
 }
 
@@ -544,8 +547,8 @@ TEST(Annotations, ViewFrustumCulling) {
         auto features = test.frontend.getRenderer()->queryRenderedFeatures(box, {});
         for (uint64_t id : testCase.second) { // testCase.second is vector of ids expected.
             EXPECT_NE(std::ranges::find_if(features,
-                                  
-                                   [&id](auto feature) { return id == feature.id.template get<uint64_t>(); }),
+
+                                           [&id](auto feature) { return id == feature.id.template get<uint64_t>(); }),
                       features.end())
                 << "Point with id " << id << " is missing in test case " << i;
             EXPECT_EQ(features.size(), testCase.second.size()) << " in test case " << i;

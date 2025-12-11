@@ -26,7 +26,8 @@ std::string toAbsoluteURL(const std::string& fileName) {
 #else
     char* cwd = getcwd(buff, PATH_MAX + 1);
 #endif
-    std::string url = {mbgl::util::FILE_PROTOCOL + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName};  // NOLINT(clang-analyzer-nullability.NullPassedToNonnull)
+    std::string url = {mbgl::util::FILE_PROTOCOL + std::string(cwd) + "/test/fixtures/storage/assets/" +
+                       fileName}; // NOLINT(clang-analyzer-nullability.NullPassedToNonnull)
     assert(url.size() <= PATH_MAX);
     return url;
 }
