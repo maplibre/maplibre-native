@@ -30,9 +30,11 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_file_source.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/storage/file_source_manager.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -80,6 +82,7 @@
 #import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 #import "MLNPluginLayer.h"
+#import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
 
@@ -449,8 +452,9 @@ public:
 @property (nonatomic) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
-// Plugin Layers
+// Plugin Objects
 @property NSMutableArray *pluginLayers;
+@property NSMutableArray *pluginProtocols;
 
 @end
 
@@ -7850,6 +7854,140 @@ static void *windowScreenContext = &windowScreenContext;
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
 }
+
+- (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
+    
+    MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
+
+    // The URL of the request
+    tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
+
+    // The kind of request
+    switch (resource.kind) {
+        case mbgl::Resource::Kind::Style:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindStyle;
+            break;
+        case mbgl::Resource::Kind::Source:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSource;
+            break;
+        case mbgl::Resource::Kind::Tile:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindTile;
+            break;
+        case mbgl::Resource::Kind::Glyphs:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindGlyphs;
+            break;
+        case mbgl::Resource::Kind::SpriteImage:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteImage;
+            break;
+        case mbgl::Resource::Kind::Image:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindImage;
+            break;
+        case mbgl::Resource::Kind::SpriteJSON:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteJSON;
+            break;
+        default:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindUnknown;
+            break;
+    }
+
+    // The loading method
+    if (resource.loadingMethod == mbgl::Resource::LoadingMethod::CacheOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::NetworkOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodNetworkOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::All) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodAll;
+    }
+
+    if (resource.tileData) {
+        auto td = *resource.tileData;
+        MLNTileData *tileData = [[MLNTileData alloc] init];
+        tileData.tileURLTemplate = [NSString stringWithUTF8String:td.urlTemplate.c_str()];
+        tileData.tilePixelRatio = td.pixelRatio;
+        tileData.tileX = td.x;
+        tileData.tileY = td.y;
+        tileData.tileZoom = td.z;
+        tempResult.tileData = tileData;
+    }
+
+    // TODO: Figure out which other properties from resource should be passed along here
+/*
+    Usage usage{Usage::Online};
+    Priority priority{Priority::Regular};
+    std::optional<std::pair<uint64_t, uint64_t>> dataRange = std::nullopt;
+    std::optional<Timestamp> priorModified = std::nullopt;
+    std::optional<Timestamp> priorExpires = std::nullopt;
+    std::optional<std::string> priorEtag = std::nullopt;
+    std::shared_ptr<const std::string> priorData;
+    Duration minimumUpdateInterval{Duration::zero()};
+    StoragePolicy storagePolicy{StoragePolicy::Permanent};
+    */
+
+    return tempResult;
+    
+}
+
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass {
+    
+    
+    MLNPluginProtocolHandler *handler = [[pluginProtocolHandlerClass alloc] init];
+    if (!self.pluginProtocols) {
+        self.pluginProtocols = [NSMutableArray array];
+    }
+    [self.pluginProtocols addObject:handler];
+
+    // TODO: Unclear if any of these options are needed for plugins
+    mbgl::ResourceOptions resourceOptions;
+
+    // TODO: Unclear if any of the properties on clientOptions need to be set
+    mbgl::ClientOptions clientOptions;
+    
+    // Use weak here so there isn't a retain cycle
+    __weak MLNPluginProtocolHandler *weakHandler = handler;
+    __weak MLNMapView *weakSelf = self;
+    
+    std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
+    pluginSource->setOnRequestResourceFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> mbgl::Response {
+        mbgl::Response tempResult;
+        
+        __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+        if (strongHandler) {
+            
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+
+            // TODO: Figure out what other fields in response need to be passed back from requestResource
+            MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
+            if (response.data) {
+                tempResult.data = std::make_shared<std::string>((const char*)[response.data bytes],
+                                                                [response.data length]);
+            }
+        }
+        
+        return tempResult;
+        
+    });
+    
+    pluginSource->setOnCanRequestFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> bool{
+        @autoreleasepool {
+            __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+            if (!strongHandler) {
+                return false;
+            }
+            
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+            BOOL tempResult = [strongHandler canRequestResource:res];
+
+            return tempResult;
+            
+        }
+    });
+    
+    auto fileSourceManager = mbgl::FileSourceManager::get();
+    fileSourceManager->registerCustomFileSource(pluginSource);
+    
+}
+
+
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
 {
