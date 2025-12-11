@@ -4,6 +4,8 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 namespace style {
 namespace expression {
@@ -51,7 +53,7 @@ EvaluationResult toColor(const Value& colorValue) {
         },
         [&colorValue](const std::vector<Value>& components) -> EvaluationResult {
             const std::size_t len = components.size();
-            bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+            bool isNumeric = std::ranges::all_of(components, [](const Value& item) -> bool {
                 return item.template is<double>();
             });
             if ((len == 3 || len == 4) && isNumeric) {

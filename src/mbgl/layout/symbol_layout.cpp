@@ -300,8 +300,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         if (ft.formattedText || ft.icon) {
             if (sortFeaturesByKey) {
                 ft.sortKey = layout->evaluate<SymbolSortKey>(zoom, ft, canonicalID);
-                const auto lowerBound = std::lower_bound(
-                    features.begin(), features.end(), ft); // NOLINT(modernize-use-ranges)
+                const auto lowerBound = std::lower_bound(  // NOLINT(modernize-use-ranges)
+                    features.begin(), features.end(), ft);
                 features.insert(lowerBound, std::move(ft));
             } else {
                 features.push_back(std::move(ft));

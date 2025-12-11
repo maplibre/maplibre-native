@@ -229,7 +229,7 @@ private:
         resource.dataRange = std::make_pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
                                                                 pmtilesHeaderOffset + pmtilesHeaderLength - 1);
 
-        tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
+        tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {  // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
             if (response.error) {
                 std::string message = std::string("Error fetching PMTiles header: ") + response.error->message;
 
@@ -272,7 +272,7 @@ private:
             callback(std::unique_ptr<Response::Error>());
         }
 
-        getHeader(url, req, [=, this](std::unique_ptr<Response::Error> error) {
+        getHeader(url, req, [=, this](std::unique_ptr<Response::Error> error) {  // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
             if (error) {
                 callback(std::move(error));
                 return;
@@ -511,7 +511,7 @@ private:
             return;
         }
 
-        getDirectory(url, req, directoryOffset, directoryLength, [=, this](std::unique_ptr<Response::Error> error) {
+        getDirectory(url, req, directoryOffset, directoryLength, [=, this](std::unique_ptr<Response::Error> error) {  // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
             if (error) {
                 callback(std::make_pair(0, 0), std::move(error));
                 return;

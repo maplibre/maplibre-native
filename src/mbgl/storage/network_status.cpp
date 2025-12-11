@@ -46,7 +46,7 @@ void NetworkStatus::Reachable() {
     }
 
     std::scoped_lock lock(NetworkStatus::mtx);
-    for (auto async : observers) {
+    for (auto async : observers) {  // NOLINT(bugprone-nondeterministic-pointer-iteration-order)
         async->send();
     }
 }

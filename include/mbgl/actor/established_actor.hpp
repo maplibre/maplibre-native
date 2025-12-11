@@ -51,14 +51,14 @@ public:
 
     // Construct the `Object` from a tuple containing the constructor arguments
     // (i.e. `Object(std::get<0>(args), std::get<1>(args), ...)`)
-    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
+    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>  // NOLINT(modernize-type-traits)
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args)
         : parent(parent_) {
         emplaceObject(std::forward<ArgsTuple>(args), std::make_index_sequence<ArgCount>{});
         parent.mailbox->open(scheduler);
     }
 
-    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
+    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>  // NOLINT(modernize-type-traits)
     EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args) {
         EstablishedActor(*scheduler.get(), parent_, std::forward<ArgsTuple>(args));
     }
@@ -98,7 +98,7 @@ private:
     // Used to expand a tuple holding the constructor arguments
     template <class ArgsTuple, std::size_t... I>
     void emplaceObject(ArgsTuple&& args, std::index_sequence<I...>) {
-        emplaceObject(std::move(std::get<I>(std::forward<ArgsTuple>(args)))...);
+        emplaceObject(std::move(std::get<I>(std::forward<ArgsTuple>(args)))...);  // NOLINT(bugprone-use-after-move)
         (void)args; // mark args as used: if it's empty tuple, it's not actually used above.
     }
 

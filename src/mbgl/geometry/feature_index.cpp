@@ -171,7 +171,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
     std::vector<RefIndexedSubfeature> features = grid.query(
         {convertPoint<float>(box.min - additionalPadding), convertPoint<float>(box.max + additionalPadding)});
 
-    std::sort(features.begin(), features.end(), [](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
+    std::ranges::sort(features, [](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
         return a.getSortIndex() > b.getSortIndex();
     });
     size_t previousSortIndex = std::numeric_limits<size_t>::max();

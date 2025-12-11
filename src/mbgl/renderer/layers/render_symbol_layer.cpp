@@ -549,7 +549,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
-        assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
+        assert(bucket.paintProperties.contains(getID()));
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
         auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {

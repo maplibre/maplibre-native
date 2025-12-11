@@ -180,7 +180,7 @@ void ImageManager::reduceMemoryUse() {
     unusedIDs.reserve(requestedImages.size());
 
     for (const auto& pair : requestedImages) {
-        if (pair.second.empty() && images.find(pair.first) != images.end()) {
+        if (pair.second.empty() && images.contains(pair.first)) {
             unusedIDs.push_back(pair.first);
         }
     }
@@ -224,14 +224,14 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
     ImageDependencies missingDependencies;
 
     for (const auto& dependency : pair.first) {
-        if (images.find(dependency.first) == images.end()) {
+        if (!images.contains(dependency.first)) {
             missingDependencies.emplace(dependency);
         }
     }
 
     if (!missingDependencies.empty()) {
         ImageRequestor* requestorPtr = &requestor;
-        assert(!missingImageRequestors.count(requestorPtr));
+        assert(!missingImageRequestors.contains(requestorPtr));
         missingImageRequestors.emplace(requestorPtr, pair);
 
         for (const auto& dependency : missingDependencies) {
@@ -277,7 +277,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
     } else {
         // Associate requestor with an image that was provided by the client.
         for (const auto& dependency : pair.first) {
-            if (requestedImages.find(dependency.first) != requestedImages.end()) {
+            if (requestedImages.contains(dependency.first)) {
                 requestedImages[dependency.first].emplace(&requestor);
             }
         }

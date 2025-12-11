@@ -196,7 +196,7 @@ TEST(GlyphManager, LoadingSuccess) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å', u' '}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes={}});
 }
 
 TEST(GlyphManager, LoadingFail) {
@@ -224,7 +224,7 @@ TEST(GlyphManager, LoadingFail) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å'}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes={}});
 }
 
 TEST(GlyphManager, LoadingCorrupted) {
@@ -252,7 +252,7 @@ TEST(GlyphManager, LoadingCorrupted) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å'}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes={}});
 }
 
 TEST(GlyphManager, LoadingCancel) {
@@ -267,7 +267,7 @@ TEST(GlyphManager, LoadingCancel) {
         FAIL() << "Should never be called";
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å'}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes={}});
 }
 
 TEST(GlyphManager, LoadLocalCJKGlyph) {
@@ -309,7 +309,7 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'中'}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'中'}}}, .shapes={}});
 }
 
 TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
@@ -336,8 +336,8 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
             //  instead of using the glyph recieved from the range
             //  for the ideagraphic mark
             test.glyphManager.getGlyphs(test.requestor,
-                                        GlyphDependencies{{{{{"Test Stack"}}, {u'テ'}}}, // 0x30c6
-                                                          {}},
+                                        GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'テ'}}}, // 0x30c6
+                                                          .shapes={}},
                                         test.fileSource);
         } else {
             ASSERT_EQ(testPositions.size(), 1u);
@@ -357,8 +357,8 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
     };
 
     test.run("test/fixtures/resources/glyphs-12244-12543.pbf",
-             GlyphDependencies{{{{{"Test Stack"}}, {u'々'}}}, // 0x3005
-                               {}});
+             GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'々'}}}, // 0x3005
+                               .shapes={}});
 }
 
 TEST(GlyphManager, LoadingInvalid) {
@@ -391,7 +391,7 @@ TEST(GlyphManager, LoadingInvalid) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'A', u'E'}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'A', u'E'}}}, .shapes={}});
 }
 
 TEST(GlyphManager, ImmediateFileSource) {
@@ -434,5 +434,5 @@ TEST(GlyphManager, ImmediateFileSource) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å', u' '}}}, {}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{.glyphs={{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes={}});
 }

@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 
+#include <algorithm>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_observer.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
@@ -77,7 +78,7 @@ public:
         // check this after frontend.render()
         EXPECT_EQ(tileCount, expectedTileCount);
 
-        std::transform(images.begin(), images.end(), images.begin(), [](const auto& img) {
+        std::ranges::transform(images, images.begin(), [](const auto& img) {
             return "test/fixtures/tile_lod/" + img;
         });
 
