@@ -746,6 +746,22 @@ const auto& featureStateCompoundExpression() {
     return signature;
 }
 
+const auto& globalStateCompoundExpression() {
+    static auto signature = detail::makeSignature(
+        "global-state",
+        [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
+            mbgl::Value state;
+            if (params.globalState != nullptr) {
+                auto it = params.globalState->find(key);
+                if (it != params.globalState->end()) {
+                    state = mbgl::Value(it->second);
+                }
+            }
+            return toExpressionValue(state);
+        });
+    return signature;
+}
+
 // Legacy Filters
 const auto& filterEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
@@ -1068,6 +1084,7 @@ constexpr const auto compoundExpressionRegistry =
         {"resolved-locale", resolvedLocaleCompoundExpression},
         {"error", errorCompoundExpression},
         {"feature-state", featureStateCompoundExpression},
+        {"global-state", globalStateCompoundExpression},
         // Legacy Filters
         {"filter-==", filterEqualsCompoundExpression},
         {"filter-id-==", filterIdEqualsCompoundExpression},
