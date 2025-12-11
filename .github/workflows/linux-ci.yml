@@ -79,14 +79,9 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - run: cargo install armerge@2.2.0
-      # TODO: use below once
-      # https://github.com/tux3/armerge/issues/14
-      # is fixed
-
-      # - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
-      #   with:
-      #     tool: armerge@2
+      - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
+        with:
+          tool: armerge@2
 
       - if: matrix.variant.rust
         run: cargo install cxxbridge-cmd --version 1.0.157 --locked
