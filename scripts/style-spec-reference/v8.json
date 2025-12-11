@@ -97,26 +97,6 @@
         }
       }
     },
-    "state": {
-      "type": "state",
-      "default": {},
-      "doc": "An object used to define default values when using the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.",
-      "example": {
-        "chargerType": {
-          "default": ["CCS", "CHAdeMO", "Type2"]
-        },
-        "minPreferredChargingSpeed": {
-          "default": 50
-        }
-      },
-      "sdk-support": {
-        "basic functionality": {
-          "js": "5.6.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
-        }
-      }
-    },
     "light": {
       "type": "light",
       "doc": "The global light source.",
@@ -3796,33 +3776,6 @@
             "js": "1.4.0",
             "android": "8.6.0",
             "ios": "5.7.0"
-          }
-        }
-      },
-      "global-state": {
-        "doc": "Retrieves a property value from global state that can be set with platform-specific APIs. Defaults can be provided using the [`state`](https://maplibre.org/maplibre-style-spec/root/#state) root property. Returns `null` if no value nor default value is set for the retrieved property.",
-        "group": "Lookup",
-        "syntax": {
-          "overloads": [
-            {
-              "parameters": ["property_name"],
-              "output-type": "any"
-            }
-          ],
-          "parameters": [
-            {
-              "name": "property_name",
-              "type": "string literal",
-              "description": "The name of the global state property to retrieve."
-            }
-          ]
-        },
-        "example": ["global-state", "someProperty"],
-        "sdk-support": {
-          "basic functionality": {
-            "js": "https://github.com/maplibre/maplibre-gl-js/issues/4964",
-            "android": "https://github.com/maplibre/maplibre-native/issues/3302",
-            "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
           }
         }
       },
