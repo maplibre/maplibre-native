@@ -15,7 +15,7 @@ jobs:
       run:
         working-directory: platform/android
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
 
       - name: Validate and set version
         working-directory: .
@@ -52,7 +52,7 @@ jobs:
 
       - name: Create release (draft)
         id: create_release
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           name: ${{ steps.prepare_release.outputs.version_tag }}
@@ -78,15 +78,15 @@ jobs:
           - Release
           - Debug
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
         with:
           node-version-file: ".nvmrc"
 
-      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4
+      - uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v4
         with:
           distribution: "temurin"
           java-version: "17"
@@ -118,7 +118,7 @@ jobs:
              "build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.tar.gz"
 
       - name: Upload release assets (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           fail_on_unmatched_files: true
@@ -149,20 +149,20 @@ jobs:
       - android-build-and-upload-release
     steps:
       - name: Publish release (remove draft)
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           name: ${{ needs.android-create-release.outputs.version_tag }}
           draft: false
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
 
-      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4
+      - uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v4
         with:
           distribution: "temurin"
           java-version: "17"
 
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
         with:
           node-version-file: ".nvmrc"
 
