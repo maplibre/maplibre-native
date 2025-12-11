@@ -154,7 +154,7 @@ jobs:
       - name: Build mbgl-core for Windows
         run: |
           cmake --preset windows-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset windows-${{ matrix.renderer }}
+          cmake --build --preset windows-${{ matrix.renderer }}-core
 
       - name: Rename artifact
         run: Copy-Item build-windows-${{ matrix.renderer }}/mbgl-core.lib maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
