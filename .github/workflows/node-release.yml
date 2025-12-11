@@ -1,5 +1,9 @@
 name: node-release
 
+permissions:
+  id-token: write  # Required for trusted publishing
+  contents: write
+
 on:
   push:
     branches: [main]
@@ -245,6 +249,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish_binaries
     permissions:
+      id-token: write  # Required for trusted publishing
       contents: write
     defaults:
       run:
@@ -259,6 +264,7 @@ jobs:
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         with:
           node-version-file: 'platform/node/.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Get version
         id: package-version
@@ -304,16 +310,10 @@ jobs:
         if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
         working-directory: platform/node
         run: |
-          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
         if: ${{ steps.prepare_release.outputs.prerelease == 'true' }}
         working-directory: platform/node
         run: |
-          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
