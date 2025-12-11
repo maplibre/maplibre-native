@@ -60,7 +60,7 @@ void updateRenderables(GetTileFn getTile,
             covered = true;
             parentOrChildTileFound = false;
             overscaledZ = idealDataTileID.overscaledZ + 1;
-            if (overscaledZ > zoomRange.max) {
+            if (std::cmp_greater(overscaledZ, zoomRange.max)) {
                 // We're looking for an overzoomed child tile.
                 const auto childDataTileID = idealDataTileID.scaledTo(overscaledZ);
                 tile = getTile(childDataTileID);
@@ -90,7 +90,8 @@ void updateRenderables(GetTileFn getTile,
 
             if (!covered) {
                 // We couldn't find child tiles that entirely cover the ideal tile.
-                for (overscaledZ = idealDataTileID.overscaledZ - 1; overscaledZ >= zoomRange.min; --overscaledZ) {
+                for (overscaledZ = idealDataTileID.overscaledZ - 1; std::cmp_greater_equal(overscaledZ, zoomRange.min);
+                     --overscaledZ) {
                     const auto parentDataTileID = idealDataTileID.scaledTo(overscaledZ);
 
                     // Request / render parent tile only if it's overscale

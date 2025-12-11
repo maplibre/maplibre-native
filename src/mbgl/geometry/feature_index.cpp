@@ -171,7 +171,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
     std::vector<RefIndexedSubfeature> features = grid.query(
         {convertPoint<float>(box.min - additionalPadding), convertPoint<float>(box.max + additionalPadding)});
 
-    std::sort(features.begin(), features.end(), [](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
+    std::ranges::sort(features, [](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
         return a.getSortIndex() > b.getSortIndex();
     });
     size_t previousSortIndex = std::numeric_limits<size_t>::max();
@@ -206,30 +206,28 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
     std::vector<std::reference_wrapper<const RefIndexedSubfeature>> sortedFeatures(symbolFeatures.begin(),
                                                                                    symbolFeatures.end());
 
-    std::sort(sortedFeatures.begin(),
-              sortedFeatures.end(),
-              [featureSortOrder](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
-                  // Same idea as the non-symbol sort order, but symbol features may
-                  // have changed their sort order since their corresponding
-                  // IndexedSubfeature was added to the CollisionIndex The
-                  // 'featureSortOrder' is relatively inefficient for querying but
-                  // cheap to build on every bucket sort
-                  if (featureSortOrder) {
-                      // queryRenderedSymbols documentation says we'll return features in
-                      // "top-to-bottom" rendering order (aka last-to-first).
-                      // Actually there can be multiple symbol instances per feature, so
-                      // we sort each feature based on the first matching symbol instance.
-                      auto sortedA = std::find(featureSortOrder->begin(), featureSortOrder->end(), a.getIndex());
-                      auto sortedB = std::find(featureSortOrder->begin(), featureSortOrder->end(), b.getIndex());
-                      assert(sortedA != featureSortOrder->end());
-                      assert(sortedB != featureSortOrder->end());
-                      return sortedA > sortedB;
-                  } else {
-                      // Bucket hasn't been re-sorted based on angle, so use same
-                      // "reverse of appearance in source data" logic as non-symboles
-                      return a.getSortIndex() > b.getSortIndex();
-                  }
-              });
+    std::ranges::sort(sortedFeatures, [featureSortOrder](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
+        // Same idea as the non-symbol sort order, but symbol features may
+        // have changed their sort order since their corresponding
+        // IndexedSubfeature was added to the CollisionIndex The
+        // 'featureSortOrder' is relatively inefficient for querying but
+        // cheap to build on every bucket sort
+        if (featureSortOrder) {
+            // queryRenderedSymbols documentation says we'll return features in
+            // "top-to-bottom" rendering order (aka last-to-first).
+            // Actually there can be multiple symbol instances per feature, so
+            // we sort each feature based on the first matching symbol instance.
+            auto sortedA = std::find(featureSortOrder->begin(), featureSortOrder->end(), a.getIndex());
+            auto sortedB = std::find(featureSortOrder->begin(), featureSortOrder->end(), b.getIndex());
+            assert(sortedA != featureSortOrder->end());
+            assert(sortedB != featureSortOrder->end());
+            return sortedA > sortedB;
+        } else {
+            // Bucket hasn't been re-sorted based on angle, so use same
+            // "reverse of appearance in source data" logic as non-symboles
+            return a.getSortIndex() > b.getSortIndex();
+        }
+    });
 
     for (const auto& symbolFeature : sortedFeatures) {
         mat4 unusedMatrix;

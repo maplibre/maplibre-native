@@ -13,6 +13,7 @@
 #include <cmath>
 #include <limits>
 #include <sstream>
+#include <utility>
 
 namespace mbgl {
 
@@ -31,7 +32,8 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
                                                const std::optional<style::TextFit>& textFitHeight) {
     // Disallow invalid parameter configurations.
     if (width <= 0 || height <= 0 || width > 1024 || height > 1024 || ratio <= 0 || ratio > 10 || srcX < 0 ||
-        srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
+        srcY < 0 || std::cmp_greater_equal(srcX, static_cast<int32_t>(image.size.width)) ||
+        std::cmp_greater_equal(srcY, static_cast<int32_t>(image.size.height)) ||
         srcX + width > static_cast<int32_t>(image.size.width) ||
         srcY + height > static_cast<int32_t>(image.size.height)) {
         std::ostringstream ss;
@@ -145,10 +147,10 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
         if (content.IsArray() && content.Size() == 4 && content[rapidjson::SizeType(0)].IsNumber() &&
             content[rapidjson::SizeType(1)].IsNumber() && content[rapidjson::SizeType(2)].IsNumber() &&
             content[rapidjson::SizeType(3)].IsNumber()) {
-            return style::ImageContent{content[rapidjson::SizeType(0)].GetFloat(),
-                                       content[rapidjson::SizeType(1)].GetFloat(),
-                                       content[rapidjson::SizeType(2)].GetFloat(),
-                                       content[rapidjson::SizeType(3)].GetFloat()};
+            return style::ImageContent{.left = content[rapidjson::SizeType(0)].GetFloat(),
+                                       .top = content[rapidjson::SizeType(1)].GetFloat(),
+                                       .right = content[rapidjson::SizeType(2)].GetFloat(),
+                                       .bottom = content[rapidjson::SizeType(3)].GetFloat()};
         } else {
             Log::Warning(Event::Sprite,
                          "Invalid sprite image '" + std::string(name) + "': value of '" + property +

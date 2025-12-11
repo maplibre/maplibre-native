@@ -58,10 +58,10 @@ Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSiz
         const auto c1 = zone.first;
         const auto c2 = zone.second;
         const auto lastStretch = cuts.back().stretch;
-        cuts.emplace_back(Cut{c1 - lastStretch, lastStretch});
-        cuts.emplace_back(Cut{c1 - lastStretch, lastStretch + (c2 - c1)});
+        cuts.emplace_back(Cut{.fixed = c1 - lastStretch, .stretch = lastStretch});
+        cuts.emplace_back(Cut{.fixed = c1 - lastStretch, .stretch = lastStretch + (c2 - c1)});
     }
-    cuts.emplace_back(Cut{fixedSize + border, stretchSize});
+    cuts.emplace_back(Cut{.fixed = fixedSize + border, .stretch = stretchSize});
     return cuts;
 }
 
@@ -184,7 +184,10 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     };
 
     if (!hasIconTextFit || (image.stretchX.empty() && image.stretchY.empty())) {
-        makeBox({0, -1}, {0, -1}, {0, static_cast<float>(imageWidth + 1)}, {0, static_cast<float>(imageHeight + 1)});
+        makeBox({.fixed = 0, .stretch = -1},
+                {.fixed = 0, .stretch = -1},
+                {.fixed = 0, .stretch = static_cast<float>(imageWidth + 1)},
+                {.fixed = 0, .stretch = static_cast<float>(imageHeight + 1)});
     } else {
         const auto xCuts = stretchZonesToCuts(stretchX, fixedWidth, stretchWidth);
         const auto yCuts = stretchZonesToCuts(stretchY, fixedHeight, stretchHeight);

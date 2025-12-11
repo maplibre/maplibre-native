@@ -400,9 +400,9 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, [[maybe_unused]] HBShape
 
                     auto fontStackHash = FontStackHasher()(fontStack);
                     bool needShape = true;
-                    if (glyphMap.find(fontStackHash) != glyphMap.end()) {
+                    if (glyphMap.contains(fontStackHash)) {
                         auto& glyphs = glyphMap[fontStackHash];
-                        if (glyphs.find(glyphID) != glyphs.end()) needShape = false;
+                        if (glyphs.contains(glyphID)) needShape = false;
                     }
                     if (needShape) {
                         auto glyph = glyphManager->getGlyph(fontStack, glyphID);

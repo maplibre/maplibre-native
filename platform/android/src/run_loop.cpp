@@ -158,7 +158,7 @@ void RunLoop::Impl::wake() {
 
 void RunLoop::Impl::addRunnable(Runnable* runnable) {
     {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
         runnables.push_back(runnable);
     }
 
@@ -166,7 +166,7 @@ void RunLoop::Impl::addRunnable(Runnable* runnable) {
 }
 
 void RunLoop::Impl::removeRunnable(Runnable* runnable) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     runnables.remove(runnable);
     if (runnables.empty()) {
         cvEmpty.notify_all();
@@ -178,7 +178,7 @@ Milliseconds RunLoop::Impl::processRunnables() {
     auto nextDue = TimePoint::max();
     std::list<Runnable*> tmp;
     {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
 
         // O(N) but in the render thread where we get tons
         // of messages, the size of the list is usually 1~2.
@@ -220,7 +220,7 @@ void RunLoop::Impl::waitForEmpty() {
     while (true) {
         std::size_t remaining;
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            std::scoped_lock lock(mutex);
             remaining = runnables.size();
         }
 

@@ -23,8 +23,9 @@ public:
         colorTexture = context.createTexture2D();
         colorTexture->setSize(size);
         colorTexture->setFormat(gfx::TexturePixelType::RGBA, type);
-        colorTexture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        colorTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                               .wrapU = gfx::TextureWrapType::Clamp,
+                                               .wrapV = gfx::TextureWrapType::Clamp});
         static_cast<Texture2D*>(colorTexture.get())
             ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
 
@@ -32,8 +33,9 @@ public:
             depthTexture = context.createTexture2D();
             depthTexture->setSize(size);
             depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
-            depthTexture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            depthTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                   .wrapU = gfx::TextureWrapType::Clamp,
+                                                   .wrapV = gfx::TextureWrapType::Clamp});
             static_cast<Texture2D*>(depthTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
@@ -44,8 +46,9 @@ public:
             stencilTexture = context.createTexture2D();
             stencilTexture->setSize(size);
             stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
-            stencilTexture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            stencilTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                     .wrapU = gfx::TextureWrapType::Clamp,
+                                                     .wrapV = gfx::TextureWrapType::Clamp});
             static_cast<Texture2D*>(stencilTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }

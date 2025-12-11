@@ -46,7 +46,8 @@ public:
             const auto& sortKeyProperty = layout.template get<style::CircleSortKey>();
             float sortKey = sortKeyProperty.evaluate(*feature, zoom, style::CircleSortKey::defaultValue());
             CircleFeature circleFeature{.i = i, .feature = std::move(feature), .sortKey = sortKey};
-            const auto sortPosition = std::lower_bound(features.cbegin(), features.cend(), circleFeature);
+            const auto sortPosition = std::lower_bound(
+                features.cbegin(), features.cend(), circleFeature); // NOLINT(modernize-use-ranges)
             features.insert(sortPosition, std::move(circleFeature));
         }
     }
@@ -75,7 +76,7 @@ public:
         if (!bucket->hasData()) return;
 
         for (const auto& pair : layerPropertiesMap) {
-            renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
+            renderData.emplace(pair.first, LayerRenderData{.bucket = bucket, .layerProperties = pair.second});
         }
     }
 

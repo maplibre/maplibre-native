@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/map_adapter.hpp>
@@ -11,6 +12,8 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
+
+#include <algorithm>
 
 using namespace mbgl;
 
@@ -416,8 +419,9 @@ TEST(Annotations, QueryFractionalZoomLevels) {
         auto sameID = [](const Feature& lhs, const Feature& rhs) {
             return lhs.id == rhs.id;
         };
-        std::sort(features.begin(), features.end(), sortID);
-        features.erase(std::unique(features.begin(), features.end(), sameID), features.end());
+        std::ranges::sort(features, sortID);
+        features.erase(std::unique(features.begin(), features.end(), sameID),
+                       features.end()); // NOLINT(modernize-use-ranges)
         EXPECT_EQ(features.size(), ids.size());
     }
 }
@@ -451,15 +455,17 @@ TEST(Annotations, VisibleFeatures) {
     auto sameID = [](const Feature& lhs, const Feature& rhs) {
         return lhs.id == rhs.id;
     };
-    std::sort(features.begin(), features.end(), sortID);
-    features.erase(std::unique(features.begin(), features.end(), sameID), features.end());
+    std::ranges::sort(features, sortID);
+    features.erase(std::unique(features.begin(), features.end(), sameID),
+                   features.end()); // NOLINT(modernize-use-ranges)
     EXPECT_EQ(features.size(), ids.size());
 
     test.map.jumpTo(CameraOptions().withZoom(4.0).withBearing(0.0));
     test.frontend.render(test.map);
     features = test.frontend.getRenderer()->queryRenderedFeatures(box);
-    std::sort(features.begin(), features.end(), sortID);
-    features.erase(std::unique(features.begin(), features.end(), sameID), features.end());
+    std::ranges::sort(features, sortID);
+    features.erase(std::unique(features.begin(), features.end(), sameID),
+                   features.end()); // NOLINT(modernize-use-ranges)
     EXPECT_EQ(features.size(), ids.size());
 }
 
@@ -541,9 +547,9 @@ TEST(Annotations, ViewFrustumCulling) {
         test.frontend.render(test.map);
         auto features = test.frontend.getRenderer()->queryRenderedFeatures(box, {});
         for (uint64_t id : testCase.second) { // testCase.second is vector of ids expected.
-            EXPECT_NE(std::find_if(features.begin(),
-                                   features.end(),
-                                   [&id](auto feature) { return id == feature.id.template get<uint64_t>(); }),
+            EXPECT_NE(std::ranges::find_if(features,
+
+                                           [&id](auto feature) { return id == feature.id.template get<uint64_t>(); }),
                       features.end())
                 << "Point with id " << id << " is missing in test case " << i;
             EXPECT_EQ(features.size(), testCase.second.size()) << " in test case " << i;

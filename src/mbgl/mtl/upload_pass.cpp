@@ -150,10 +150,10 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // up a valid binding or the validation will complain when the shader code references the
             // attribute at compile time, regardless of whether it's ever used at runtime.
             bindings[index] = {
-                /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
-                /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
-                /*.vertexBufferResource = */ nullptr,
-                /*.vertexOffset = */ 0,
+                .attribute = {.dataType = defaultAttr.getDataType(), /*offset=*/.offset = 0},
+                .vertexStride = static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
+                .vertexBufferResource = nullptr,
+                .vertexOffset = 0,
             };
             return;
         }

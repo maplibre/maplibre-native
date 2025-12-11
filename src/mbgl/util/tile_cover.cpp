@@ -115,7 +115,7 @@ std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
             for (x = x0; x < x1; ++x) {
                 const auto dx = x + 0.5 - c.x;
                 const auto dy = y + 0.5 - c.y;
-                t.emplace_back(ID{x, y, dx * dx + dy * dy});
+                t.emplace_back(ID{.x = x, .y = y, .sqDist = dx * dx + dy * dy});
             }
         }
     };
@@ -193,12 +193,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double radiusOfMaxLvlLodInTiles = std::max(1.0, state.tileLodMinRadius);
 
     const auto newRootTile = [&](int16_t wrap) -> Node {
-        return {AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
-                uint8_t(0),
-                uint16_t(0),
-                uint16_t(0),
-                wrap,
-                false};
+        return {.aabb = AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
+                .zoom = uint8_t(0),
+                .x = uint16_t(0),
+                .y = uint16_t(0),
+                .wrap = wrap,
+                .fullyVisible = false};
     };
 
     // Perform depth-first traversal on tile tree to find visible tiles
