@@ -29,6 +29,7 @@ class TransformTest : BaseTest() {
         nativeMapView = mockk()
         mainLooper = shadowOf(getMainLooper())
         transform = Transform(mapView, nativeMapView, cameraChangeDispatcher)
+        every { mapView.getMapLibreMap() } returns null
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.cameraPosition } returns CameraPosition.DEFAULT
         every { nativeMapView.cancelTransitions() } answers {}
