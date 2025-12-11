@@ -286,15 +286,15 @@ const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
 
 namespace {
 const auto clipMaskStencilMode = gfx::StencilMode{
-    /*.test=*/gfx::StencilMode::Always(),
-    /*.ref=*/0,
-    /*.mask=*/0b11111111,
-    /*.fail=*/gfx::StencilOpType::Keep,
-    /*.depthFail=*/gfx::StencilOpType::Keep,
-    /*.pass=*/gfx::StencilOpType::Replace,
+    .test=gfx::StencilMode::Always(),
+    .ref=0,
+.mask=0b11111111,
+    .fail=gfx::StencilOpType::Keep,
+    .depthFail=gfx::StencilOpType::Keep,
+    .pass=gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/gfx::DepthFunctionType::Always,
-                                              /*.mask=*/gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{.func=gfx::DepthFunctionType::Always,
+                                              .mask=gfx::DepthMaskType::ReadOnly};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,

@@ -449,7 +449,7 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{id, mode, pixelRatio, leaderImpl.getTypeInfo()};
+        BucketParameters parameters{.tileID=id, .mode=mode, .pixelRatio=pixelRatio, .layerType=leaderImpl.getTypeInfo()};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {
@@ -472,7 +472,7 @@ void GeometryTileWorker::parse() {
         // images/glyphs are available to add the features to the buckets.
         if (leaderImpl.getTypeInfo()->layout == LayerTypeInfo::Layout::Required) {
             std::unique_ptr<Layout> layout = LayerManager::get()->createLayout(
-                {parameters, fontFaces, glyphDependencies, imageDependencies, availableImages},
+                {.bucketParameters=parameters, .fontFaces=fontFaces, .glyphDependencies=glyphDependencies, .imageDependencies=imageDependencies, .availableImages=availableImages},
                 std::move(geometryLayer),
                 group);
             if (layout->hasDependencies()) {
@@ -502,7 +502,7 @@ void GeometryTileWorker::parse() {
             }
 
             for (const auto& layer : group) {
-                renderData.emplace(layer->baseImpl->id, LayerRenderData{bucket, layer});
+                renderData.emplace(layer->baseImpl->id, LayerRenderData{.bucket=bucket, .layerProperties=layer});
             }
         }
     }
