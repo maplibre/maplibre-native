@@ -322,6 +322,11 @@
       "targets": ["mbgl-core"]
     },
     {
+      "name": "windows-opengl-core",
+      "configurePreset": "windows-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
       "name": "windows-egl-core",
       "configurePreset": "windows-egl",
       "targets": ["mbgl-core"]
