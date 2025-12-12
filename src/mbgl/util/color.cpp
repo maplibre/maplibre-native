@@ -55,7 +55,16 @@ std::string Color::stringify() const {
 }
 
 mbgl::Value Color::serialize() const {
-    return toObject();
+    // Emit as an rgba expression array for expression serialization to avoid
+    // "Bare objects invalid" parse errors in expression roundtrips.
+    const auto array = toArray();
+    return std::vector<mbgl::Value>{
+        std::string("rgba"),
+        array[0],
+        array[1],
+        array[2],
+        array[3],
+    };
 }
 
 std::array<double, 4> Color::toArray() const {
@@ -72,16 +81,11 @@ std::array<double, 4> Color::toArray() const {
 }
 
 mbgl::Value Color::toObject() const {
-    // Emit as an rgba expression array instead of a bare object to avoid
-    // "Bare objects invalid" parse errors in expression roundtrips.
-    const auto array = toArray();
-    return std::vector<mbgl::Value>{
-        std::string("rgba"),
-        array[0],
-        array[1],
-        array[2],
-        array[3],
-    };
+    // Return object format for evaluation output
+    return mapbox::base::ValueObject{{"r", static_cast<double>(r)},
+                                     {"g", static_cast<double>(g)},
+                                     {"b", static_cast<double>(b)},
+                                     {"a", static_cast<double>(a)}};
 }
 
 } // namespace mbgl
