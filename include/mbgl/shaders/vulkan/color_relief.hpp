@@ -29,20 +29,35 @@ struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefDrawableUBO) uniform ColorReliefDrawableUBO {
-    mat4 matrix;
-} drawable;
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefTilePropsUBO) uniform ColorReliefTilePropsUBO {
+struct ColorReliefDrawableUBO {
+    mat4 matrix;
+};
+
+struct ColorReliefTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     int color_ramp_size;
     float pad_tile0;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idColorReliefDrawableUBO) readonly buffer ColorReliefDrawableUBOVector {
+    ColorReliefDrawableUBO drawable_ubo[];
+} drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idColorReliefTilePropsUBO) readonly buffer ColorReliefTilePropsUBOVector {
+    ColorReliefTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(location = 0) out vec2 frag_position;
+layout(location = 1) flat out int frag_ubo_index;
 
 void main() {
+    const ColorReliefDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const ColorReliefTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
     applySurfaceTransform();
@@ -54,20 +69,27 @@ void main() {
     // Handle poles (use in_position to match GLSL a_pos)
     if (float(in_position.y) < -32767.5) frag_position.y = 0.0;
     if (float(in_position.y) > 32766.5) frag_position.y = 1.0;
+
+    frag_ubo_index = constant.ubo_index;
 }
 )";
 
     static constexpr auto fragment = R"(
 
 layout(location = 0) in vec2 frag_position;
+layout(location = 1) flat in int frag_ubo_index;
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idColorReliefTilePropsUBO) uniform ColorReliefTilePropsUBO {
+struct ColorReliefTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     int color_ramp_size;
     float pad_tile0;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idColorReliefTilePropsUBO) readonly buffer ColorReliefTilePropsUBOVector {
+    ColorReliefTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idColorReliefEvaluatedPropsUBO) uniform ColorReliefEvaluatedPropsUBO {
     float opacity;
@@ -80,21 +102,21 @@ layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_samp
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D elevation_stops_sampler;
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D color_stops_sampler;
 
-float getElevation(vec2 coord) {
+float getElevation(vec2 coord, vec4 unpack) {
     // Convert encoded elevation value to meters
     vec4 data = texture(image_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, tileProps.unpack);
+    return dot(data, unpack);
 }
 
-float getElevationStop(int stop) {
+float getElevationStop(int stop, int color_ramp_size) {
     // Elevation stops are plain float values, not terrain-RGB encoded
-    float x = (float(stop) + 0.5) / float(tileProps.color_ramp_size);
+    float x = (float(stop) + 0.5) / float(color_ramp_size);
     return texture(elevation_stops_sampler, vec2(x, 0.0)).r;
 }
 
-vec4 getColorStop(int stop) {
-    float x = (float(stop) + 0.5) / float(tileProps.color_ramp_size);
+vec4 getColorStop(int stop, int color_ramp_size) {
+    float x = (float(stop) + 0.5) / float(color_ramp_size);
     return texture(color_stops_sampler, vec2(x, 0.0));
 }
 
@@ -105,7 +127,9 @@ void main() {
     return;
 #endif
 
-    float el = getElevation(frag_position);
+    const ColorReliefTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[frag_ubo_index];
+
+    float el = getElevation(frag_position, tileProps.unpack);
 
     // Binary search to find surrounding elevation stops (l and r indices)
     int r = tileProps.color_ramp_size - 1;
@@ -114,7 +138,7 @@ void main() {
     // Perform binary search
     while (r - l > 1) {
         int m = (r + l) / 2;
-        float el_m = getElevationStop(m);
+        float el_m = getElevationStop(m, tileProps.color_ramp_size);
 
         if (el < el_m) {
             r = m;
@@ -124,11 +148,11 @@ void main() {
     }
 
     // Get elevation values and colors at the stops
-    float el_l = getElevationStop(l);
-    float el_r = getElevationStop(r);
+    float el_l = getElevationStop(l, tileProps.color_ramp_size);
+    float el_r = getElevationStop(r, tileProps.color_ramp_size);
 
-    vec4 color_l = getColorStop(l);
-    vec4 color_r = getColorStop(r);
+    vec4 color_l = getColorStop(l, tileProps.color_ramp_size);
+    vec4 color_r = getColorStop(r, tileProps.color_ramp_size);
 
     // Interpolate color based on elevation
     // Guard against division by zero when el_r == el_l
