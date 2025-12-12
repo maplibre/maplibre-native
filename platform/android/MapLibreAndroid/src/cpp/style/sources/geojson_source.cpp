@@ -62,8 +62,9 @@ GeoJSONSource::~GeoJSONSource() = default;
 void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jString) {
     std::shared_ptr<std::string> json = std::make_shared<std::string>(jni::Make<std::string>(env, jString));
 
-    Update::Converter converterFn = [this, json](ActorRef<GeoJSONDataCallback> _callback) {
-        converter->self().invoke(&FeatureConverter::convertJson, json, _callback);
+    ActorRef<FeatureConverter> converterRef = converter->self();
+    Update::Converter converterFn = [converterRef, json](ActorRef<GeoJSONDataCallback> _callback) {
+        converterRef.invoke(&FeatureConverter::convertJson, json, _callback);
     };
 
     setAsync(converterFn);
@@ -72,8 +73,9 @@ void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jStrin
 void GeoJSONSource::setGeoJSONStringSync(jni::JNIEnv& env, const jni::String& jString) {
     std::shared_ptr<std::string> json = std::make_shared<std::string>(jni::Make<std::string>(env, jString));
 
-    Update::Converter converterFn = [this, json](ActorRef<GeoJSONDataCallback> _callback) {
-        converter->self().ask(&FeatureConverter::convertJson, json, _callback).wait();
+    ActorRef<FeatureConverter> converterRef = converter->self();
+    Update::Converter converterFn = [converterRef, json](ActorRef<GeoJSONDataCallback> _callback) {
+        converterRef.ask(&FeatureConverter::convertJson, json, _callback).wait();
     };
 
     setAsync(converterFn);
@@ -193,8 +195,9 @@ void GeoJSONSource::setCollectionAsync(jni::JNIEnv& env, const jni::Object<JNITy
     auto global = jni::NewGlobal<jni::EnvAttachingDeleter>(env, jObject);
     auto object = std::make_shared<decltype(global)>(std::move(global));
 
-    Update::Converter converterFn = [this, object](ActorRef<GeoJSONDataCallback> _callback) {
-        converter->self().invoke(&FeatureConverter::convertObject<JNIType>, object, _callback);
+    ActorRef<FeatureConverter> converterRef = converter->self();
+    Update::Converter converterFn = [converterRef, object](ActorRef<GeoJSONDataCallback> _callback) {
+        converterRef.invoke(&FeatureConverter::convertObject<JNIType>, object, _callback);
     };
 
     setAsync(converterFn);
@@ -235,8 +238,9 @@ void GeoJSONSource::setCollectionSync(jni::JNIEnv& env, const jni::Object<JNITyp
     auto global = jni::NewGlobal<jni::EnvAttachingDeleter>(env, jObject);
     auto object = std::make_shared<decltype(global)>(std::move(global));
 
-    Update::Converter converterFn = [this, object](ActorRef<GeoJSONDataCallback> _callback) {
-        converter->self().ask(&FeatureConverter::convertObject<JNIType>, object, _callback).wait();
+    ActorRef<FeatureConverter> converterRef = converter->self();
+    Update::Converter converterFn = [converterRef, object](ActorRef<GeoJSONDataCallback> _callback) {
+        converterRef.ask(&FeatureConverter::convertObject<JNIType>, object, _callback).wait();
     };
 
     setAsync(converterFn);
