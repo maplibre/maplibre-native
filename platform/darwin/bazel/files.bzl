@@ -110,6 +110,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNPluginLayer.h",
     "src/MLNPluginStyleLayer.h",
     "src/MLNNetworkResponse.h",
+    "src/MLNXPlatformPluginBridge.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [

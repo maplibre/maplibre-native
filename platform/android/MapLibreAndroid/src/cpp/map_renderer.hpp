@@ -90,6 +90,7 @@ public:
     void requestSnapshot(SnapshotCallback);
 
     AndroidRendererBackend& getRendererBackend() const { return *backend; }
+    Renderer* getRenderer() const { return renderer.get(); }
     const TaggedScheduler& getThreadPool() const { return threadPool; }
 
 protected:

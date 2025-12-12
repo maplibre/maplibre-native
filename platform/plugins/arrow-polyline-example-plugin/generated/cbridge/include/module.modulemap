@@ -1,0 +1,4 @@
+module GluecodiumCBridge {
+    umbrella header "GluecodiumCBridge.h"
+    export *
+}

@@ -1,0 +1,46 @@
+package GluecodiumPlugin
+
+// A geographic coordinate with latitude and longitude
+@Equatable
+struct LatLng {
+  latitude: Double
+  longitude: Double
+}
+
+// Configuration for arrow polyline appearance
+struct ArrowPolylineConfig {
+  // Length of the arrow head in pixels
+  headLength: Double = 50.0
+
+  // Angle of the arrow head in degrees
+  headAngle: Double = 30.0
+
+  // Color of the arrow line as hex string (e.g., "#FF0000")
+  lineColor: String = "#FF0000"
+
+  // Width of the arrow line in pixels
+  lineWidth: Double = 3.0
+}
+
+// Base class for gluecodium-based maplibre plugins
+// (In a full integration, this would be in a shared package)
+open class MaplibrePlugin {
+  constructor create()
+
+  // Pointer to the underlying C++ class that implements XPlatformPlugin
+  property ptr: ULong { get }
+}
+
+// An example plugin that draws arrow polylines on the map.
+// Takes a list of coordinates and draws a polyline with a chevron arrow head.
+class ArrowPolylineExample: MaplibrePlugin {
+  constructor create()
+
+  // Add an arrow polyline to the map
+  // @param[coordinates] List of LatLng coordinates (at least 2 points)
+  // @param[config] Arrow appearance configuration
+  fun addArrowPolyline(coordinates: List<LatLng>, config: ArrowPolylineConfig)
+
+  // Remove the current arrow polyline from the map
+  fun removeArrowPolyline()
+}
