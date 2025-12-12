@@ -51,7 +51,7 @@ private:
     Resource resource;
     std::shared_ptr<FileSource> fileSource;
     std::unique_ptr<AsyncRequest> request;
-    TileUpdateParameters updateParameters{Duration::zero(), false};
+    TileUpdateParameters updateParameters{.minimumUpdateInterval = Duration::zero(), .isVolatile = false};
 
     /// @brief It's possible for async requests in flight to mess with the request
     /// object at the same time as the loader's destructor. This construct is shared

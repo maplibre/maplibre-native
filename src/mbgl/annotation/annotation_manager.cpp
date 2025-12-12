@@ -53,7 +53,7 @@ void AnnotationManager::onStyleLoaded() {
 
 AnnotationID AnnotationManager::addAnnotation(const Annotation& annotation) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(nextID++);
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     AnnotationID id = nextID++;
     Annotation::visit(annotation, [&](const auto& annotation_) { this->add(id, annotation_); });
     dirty = true;
@@ -62,14 +62,14 @@ AnnotationID AnnotationManager::addAnnotation(const Annotation& annotation) {
 
 bool AnnotationManager::updateAnnotation(const AnnotationID& id, const Annotation& annotation) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(true);
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     Annotation::visit(annotation, [&](const auto& annotation_) { this->update(id, annotation_); });
     return dirty;
 }
 
 void AnnotationManager::removeAnnotation(const AnnotationID& id) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     remove(id);
     dirty = true;
 }
@@ -192,7 +192,7 @@ void AnnotationManager::updateStyle() {
         style.get().impl->addLayer(std::move(layer));
     }
 
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
 
     for (const auto& shape : shapeAnnotations) {
         shape.second->updateStyle(*style.get().impl);
@@ -212,7 +212,7 @@ void AnnotationManager::updateStyle() {
 
 void AnnotationManager::updateData() {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     if (dirty) {
         for (auto& tile : tiles) {
             tile->setData(getTileData(tile->id.canonical));
@@ -223,14 +223,14 @@ void AnnotationManager::updateData() {
 
 void AnnotationManager::addTile(AnnotationTile& tile) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     tiles.insert(&tile);
     tile.setData(getTileData(tile.id.canonical));
 }
 
 void AnnotationManager::removeTile(AnnotationTile& tile) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     tiles.erase(&tile);
 }
 
@@ -246,7 +246,7 @@ std::string prefixedImageID(const std::string& id) {
 
 void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     const std::string id = prefixedImageID(image->getID());
     images.erase(id);
     auto inserted = images.emplace(id,
@@ -256,7 +256,7 @@ void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
 
 void AnnotationManager::removeImage(const std::string& id_) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     const std::string id = prefixedImageID(id_);
     images.erase(id);
     style.get().impl->removeImage(id);
@@ -264,7 +264,7 @@ void AnnotationManager::removeImage(const std::string& id_) {
 
 double AnnotationManager::getTopOffsetPixelsForImage(const std::string& id_) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(0.0);
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     const std::string id = prefixedImageID(id_);
     auto it = images.find(id);
     return it != images.end() ? -(it->second.getImage().size.height / it->second.getPixelRatio()) / 2 : 0.0;

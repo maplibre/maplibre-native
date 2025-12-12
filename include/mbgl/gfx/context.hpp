@@ -91,7 +91,7 @@ public:
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     virtual void visualizeStencilBuffer() = 0;
     virtual void visualizeDepthBuffer(float depthRangeSize) = 0;
 #endif

@@ -49,16 +49,17 @@ std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view
     errno = 0;
 
     if constexpr (std::is_same_v<T, int32_t>) {
-        long val = std::strtol(str.data(), &end, base);
+        long val = std::strtol(str.data(), &end, base); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
     } else if constexpr (std::is_same_v<T, uint32_t>) {
-        unsigned long val = std::strtoul(str.data(), &end, base);
+        unsigned long val = std::strtoul(str.data(), &end, base); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
     } else if constexpr (std::is_same_v<T, int64_t>) {
-        long long val = std::strtoll(str.data(), &end, base);
+        long long val = std::strtoll(str.data(), &end, base); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
     } else if constexpr (std::is_same_v<T, uint64_t>) {
-        unsigned long long val = std::strtoull(str.data(), &end, base);
+        unsigned long long val = std::strtoull(
+            str.data(), &end, base); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
     }
 
@@ -74,13 +75,13 @@ std::enable_if_t<std::is_floating_point_v<T>, std::optional<T>> parse(std::strin
     errno = 0;
 
     if constexpr (std::is_same_v<T, float>) {
-        float val = std::strtof(str.data(), &end);
+        float val = std::strtof(str.data(), &end); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return val;
     } else if constexpr (std::is_same_v<T, double>) {
-        double val = std::strtod(str.data(), &end);
+        double val = std::strtod(str.data(), &end); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return val;
     } else if constexpr (std::is_same_v<T, long double>) {
-        long double val = std::strtold(str.data(), &end);
+        long double val = std::strtold(str.data(), &end); // NOLINT(bugprone-suspicious-stringview-data-usage)
         if (errno == 0 && end == str.data() + str.size()) return val;
     }
 

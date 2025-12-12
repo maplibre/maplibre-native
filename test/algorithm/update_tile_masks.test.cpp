@@ -1,6 +1,8 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/algorithm/update_tile_masks.hpp>
 
+#include <algorithm>
+
 using namespace mbgl;
 
 namespace {
@@ -23,7 +25,7 @@ bool operator==(const FakeTile& lhs, const FakeTile& rhs) {
 
 void validate(std::map<UnwrappedTileID, FakeTile> expected) {
     auto actual = expected;
-    std::for_each(actual.begin(), actual.end(), [](auto& renderable) { renderable.second.mask.clear(); });
+    std::ranges::for_each(actual, [](auto& renderable) { renderable.second.mask.clear(); });
 
     algorithm::updateTileMasks(actual);
     EXPECT_EQ(expected, actual);

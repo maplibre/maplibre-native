@@ -16,7 +16,7 @@ Texture2D::Texture2D(Context& context_)
 Texture2D::~Texture2D() {
     if (metalTexture) {
         context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= getDataSize();
+        context.renderingStats().memTextures -= getDataSize(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     }
 }
 
@@ -57,17 +57,17 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
 }
 
 size_t Texture2D::getDataSize() const noexcept {
-    return size.width * size.height * getPixelStride();
+    return size.width * size.height * getPixelStride(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
 size_t Texture2D::getPixelStride() const noexcept {
     switch (channelType) {
         case gfx::TextureChannelDataType::UnsignedByte:
-            return 1 * numChannels();
+            return 1 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         case gfx::TextureChannelDataType::HalfFloat:
-            return 2 * numChannels();
+            return 2 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         case gfx::TextureChannelDataType::Float:
-            return 4 * numChannels();
+            return 4 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     }
 }
 

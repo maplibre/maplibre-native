@@ -6,6 +6,7 @@ namespace mbgl {
 
 using namespace shaders;
 
+// NOLINTNEXTLINE(modernize-use-ranges)
 MBGL_DEFINE_ENUM(BuiltIn,
                  {{BuiltIn::None, "None"},
                   {BuiltIn::Prelude, "Prelude"},

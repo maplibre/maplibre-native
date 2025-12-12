@@ -8,6 +8,8 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <algorithm>
+#include <mutex>
 #include <regex>
 
 #ifdef __APPLE__
@@ -175,7 +177,7 @@ std::vector<std::string> ActionJournal::Impl::getLogFiles() const {
 }
 
 std::vector<std::string> ActionJournal::Impl::getLog() {
-    std::lock_guard lock(fileMutex);
+    std::scoped_lock lock(fileMutex);
     std::vector<std::string> logEvents;
 
     const auto readFile = [&](std::fstream& file) {
@@ -215,7 +217,7 @@ std::vector<std::string> ActionJournal::Impl::getLog() {
 }
 
 void ActionJournal::Impl::clearLog() {
-    std::lock_guard lock(fileMutex);
+    std::scoped_lock lock(fileMutex);
 
     // close current file
     currentFile.close();
@@ -277,21 +279,13 @@ void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& fra
     previousFrameTime = currentFrameTime;
 
     // update rendering stats
-    if (renderingStats.encodingMin > frame.renderingStats.encodingTime) {
-        renderingStats.encodingMin = frame.renderingStats.encodingTime;
-    }
+    renderingStats.encodingMin = std::min(renderingStats.encodingMin, frame.renderingStats.encodingTime);
 
-    if (renderingStats.encodingMax < frame.renderingStats.encodingTime) {
-        renderingStats.encodingMax = frame.renderingStats.encodingTime;
-    }
+    renderingStats.encodingMax = std::max(renderingStats.encodingMax, frame.renderingStats.encodingTime);
 
-    if (renderingStats.renderingMin > frame.renderingStats.renderingTime) {
-        renderingStats.renderingMin = frame.renderingStats.renderingTime;
-    }
+    renderingStats.renderingMin = std::min(renderingStats.renderingMin, frame.renderingStats.renderingTime);
 
-    if (renderingStats.renderingMax < frame.renderingStats.renderingTime) {
-        renderingStats.renderingMax = frame.renderingStats.renderingTime;
-    }
+    renderingStats.renderingMax = std::max(renderingStats.renderingMax, frame.renderingStats.renderingTime);
 
     renderingStats.encodingTotal += frame.renderingStats.encodingTime;
     renderingStats.renderingTotal += frame.renderingStats.renderingTime;
@@ -617,7 +611,7 @@ void ActionJournal::Impl::logToFile(const std::string& value) {
         return;
     }
 
-    std::lock_guard lock(fileMutex);
+    std::scoped_lock lock(fileMutex);
 
     if (!prepareFile(value.size() + 1)) {
         return;

@@ -14,7 +14,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
 
@@ -45,7 +45,7 @@ jobs:
     needs: [create-release]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
 
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build mbgl-core for macOS
         run: |
-          cmake --preset macos-metal -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF
+          cmake --preset macos-metal -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_WITH_GLFW=OFF -DMLN_CREATE_AMALGAMATION=ON
           cmake --build build-macos-metal --target mbgl-core
 
       - name: Rename artifact
@@ -97,7 +97,7 @@ jobs:
           - renderer: vulkan
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
 
@@ -110,7 +110,7 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_CREATE_AMALGAMATION=ON
           cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core
 
       - name: Rename artifact
@@ -145,7 +145,7 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
 
@@ -153,7 +153,7 @@ jobs:
 
       - name: Build mbgl-core for Windows
         run: |
-          cmake --preset windows-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --preset windows-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
           cmake --build --preset windows-${{ matrix.renderer }}-core
 
       - name: Rename artifact

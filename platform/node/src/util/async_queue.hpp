@@ -27,7 +27,7 @@ public:
 
     void send(T &&data) {
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            std::scoped_lock lock(mutex);
             queue.push(std::make_unique<T>(std::move(data)));
         }
         uv_async_send(&async);
@@ -35,7 +35,7 @@ public:
 
     void send(std::unique_ptr<T> data) {
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            std::scoped_lock lock(mutex);
             queue.push(std::move(data));
         }
         uv_async_send(&async);
