@@ -12,6 +12,7 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
+#include <mbgl/shaders/vulkan/color_relief.hpp>
 #include <mbgl/shaders/vulkan/custom_geometry.hpp>
 #include <mbgl/shaders/vulkan/custom_symbol_icon.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
@@ -666,6 +667,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::ColorReliefShader,
                   shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
