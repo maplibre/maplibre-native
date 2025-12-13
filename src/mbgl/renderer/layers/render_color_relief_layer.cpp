@@ -7,6 +7,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/color_relief_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -424,7 +425,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
 
-            // Set up tile properties UBO
+            // Set up tile properties data on the drawable
             shaders::ColorReliefTilePropsUBO tilePropsUBO;
 
             const auto unpackVector = demData.getUnpackVector();
@@ -434,8 +435,14 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
             tilePropsUBO.pad_tile0 = 0.0f;
 
+            // Store tile props in drawable data for use by the tweaker
+            drawable->setData(std::make_unique<gfx::ColorReliefDrawableData>(tilePropsUBO));
+
+#if !MLN_UBO_CONSOLIDATION
+            // For non-consolidated UBOs, set the uniform buffer directly
             auto& drawableUniforms = drawable->mutableUniformBuffers();
             drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
+#endif
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

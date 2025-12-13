@@ -43,7 +43,7 @@ struct ColorReliefTilePropsUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<ColorReliefDrawableUBO>;
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -91,8 +91,8 @@ struct ColorReliefEvaluatedPropsUBO {
 };
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(3) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
-@group(0) @binding(4) var<uniform> props: ColorReliefEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: ColorReliefEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
 @group(1) @binding(2) var elevation_stops_texture: texture_2d<f32>;

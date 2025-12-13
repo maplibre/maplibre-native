@@ -170,6 +170,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/dynamic_texture_atlas.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/gpu_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/color_relief_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp

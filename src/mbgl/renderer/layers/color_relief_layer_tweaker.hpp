@@ -2,6 +2,7 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/shaders/color_relief_layer_ubo.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 
 namespace mbgl {
 
@@ -15,9 +16,12 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 private:
-    shaders::ColorReliefDrawableUBO drawableUBO;
-    shaders::ColorReliefTilePropsUBO tilePropsUBO;
-    shaders::ColorReliefEvaluatedPropsUBO evaluatedPropsUBO;
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniformBufferPtr drawableUniformBuffer;
+    gfx::UniformBufferPtr tilePropsUniformBuffer;
+#endif
 };
 
 } // namespace mbgl
