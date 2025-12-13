@@ -155,7 +155,7 @@ void RenderColorReliefLayer::updateColorRamp() {
         }
     }
 
-    const uint32_t rampSize = elevationStopsVector.size();
+    const uint32_t rampSize = static_cast<uint32_t>(elevationStopsVector.size());
     if (rampSize == 0) {
         return;
     }
