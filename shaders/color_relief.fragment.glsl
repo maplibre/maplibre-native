@@ -32,12 +32,12 @@ float getElevation(vec2 coord) {
 float getElevationStop(int stop) {
     // Elevation stops are plain float values, not terrain-RGB encoded
     float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_elevation_stops, vec2(x, 0.0)).r;
+    return texture(u_elevation_stops, vec2(x, 0.5)).r;
 }
 
 vec4 getColorStop(int stop) {
     float x = (float(stop) + 0.5) / float(u_color_ramp_size);
-    return texture(u_color_stops, vec2(x, 0.0));
+    return texture(u_color_stops, vec2(x, 0.5));
 }
 
 void main() {
