@@ -14,6 +14,7 @@ namespace mbgl {
 using namespace shaders;
 
 void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
+    auto& context = parameters.context;
     const auto& props = static_cast<const style::ColorReliefLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
 
@@ -28,7 +29,6 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
     evaluatedPropsUBO.pad_eval1 = 0.0f;
     evaluatedPropsUBO.pad_eval2 = 0.0f;
 
-    auto& context = parameters.context;
     context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
 
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
@@ -49,13 +49,12 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i].matrix = util::cast<float>(parameters.matrixForTile(tileID));
-        
+
         // Get tile props from drawable data (set during creation)
-        if (const auto& data = drawable.getData()) {
-            const auto& colorReliefData = static_cast<const gfx::ColorReliefDrawableData&>(*data);
-            tilePropsUBOVector[i] = colorReliefData.tileProps;
+        if (const auto* data = static_cast<const gfx::ColorReliefDrawableData*>(drawable.getData())) {
+            tilePropsUBOVector[i] = data->tileProps;
         }
-        
+
         drawable.setUBOIndex(i++);
 #else
         ColorReliefDrawableUBO drawableUBO;

@@ -435,11 +435,11 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
             tilePropsUBO.pad_tile0 = 0.0f;
 
-            // Store tile props in drawable data for use by the tweaker
+            // Store tile props in drawable data for use by the tweaker (for consolidated backends)
             drawable->setData(std::make_unique<gfx::ColorReliefDrawableData>(tilePropsUBO));
 
 #if !MLN_UBO_CONSOLIDATION
-            // For non-consolidated UBOs, set the uniform buffer directly
+            // For non-consolidated UBOs (OpenGL), set the uniform buffer directly on the drawable
             auto& drawableUniforms = drawable->mutableUniformBuffers();
             drawableUniforms.createOrUpdate(idColorReliefTilePropsUBO, &tilePropsUBO, context);
 #endif
