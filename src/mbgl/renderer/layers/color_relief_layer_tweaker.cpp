@@ -51,8 +51,10 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         drawableUBOVector[i].matrix = util::cast<float>(parameters.matrixForTile(tileID));
 
         // Get tile props from drawable data (set during creation)
-        if (const auto* data = static_cast<const gfx::ColorReliefDrawableData*>(drawable.getData())) {
-            tilePropsUBOVector[i] = data->tileProps;
+        if (const auto& drawableData = drawable.getData()) {
+            if (const auto* data = static_cast<const gfx::ColorReliefDrawableData*>(drawableData.get())) {
+                tilePropsUBOVector[i] = data->tileProps;
+            }
         }
 
         drawable.setUBOIndex(i++);
