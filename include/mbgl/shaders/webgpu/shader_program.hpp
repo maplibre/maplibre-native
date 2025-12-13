@@ -67,7 +67,7 @@ public:
         StorageBuffer,
         Sampler,
         Texture,
-        UnfilterableTexture  // For RGBA32Float textures that require textureLoad instead of textureSample
+        UnfilterableTexture // For RGBA32Float textures that require textureLoad instead of textureSample
     };
 
     struct BindingInfo {

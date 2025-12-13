@@ -502,10 +502,10 @@ void ShaderProgram::analyzeShaderBindings(const std::string& source, WGPUShaderS
         if (colonPos == std::string::npos) {
             break;
         }
-        
+
         // Extract the variable name
         const auto varName = trimString(std::string_view(source.data() + afterVar, colonPos - afterVar));
-        
+
         size_t typeStart = colonPos + 1;
         size_t typeEnd = typeStart;
         while (typeEnd < source.size()) {
@@ -527,7 +527,7 @@ void ShaderProgram::analyzeShaderBindings(const std::string& source, WGPUShaderS
                 std::string textureSamplePattern = std::string("textureSample(") + std::string(varName);
                 bool usesTextureLoad = source.find(textureLoadPattern) != std::string::npos;
                 bool usesTextureSample = source.find(textureSamplePattern) != std::string::npos;
-                
+
                 // If only textureLoad is used (not textureSample), mark as unfilterable
                 if (usesTextureLoad && !usesTextureSample) {
                     type = BindingType::UnfilterableTexture;
