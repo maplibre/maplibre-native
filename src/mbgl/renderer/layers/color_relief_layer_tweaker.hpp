@@ -1,11 +1,12 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/shaders/color_relief_layer_ubo.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
 
 namespace mbgl {
 
+/**
+    Color relief layer specific tweaker
+ */
 class ColorReliefLayerTweaker : public LayerTweaker {
 public:
     ColorReliefLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
@@ -15,7 +16,7 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-private:
+protected:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 
 #if MLN_UBO_CONSOLIDATION

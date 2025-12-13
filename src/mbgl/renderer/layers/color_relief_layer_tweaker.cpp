@@ -1,10 +1,11 @@
 #include <mbgl/renderer/layers/color_relief_layer_tweaker.hpp>
+
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/color_relief_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/color_relief_layer_ubo.hpp>
 #include <mbgl/style/layers/color_relief_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
