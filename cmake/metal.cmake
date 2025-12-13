@@ -43,6 +43,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade_prepare.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/color_relief.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
@@ -84,6 +85,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/color_relief.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp

@@ -316,6 +316,23 @@ const std::vector<TextureInfo> HillshadeShaderInfo::textures = {
     TextureInfo{"u_image", idHillshadeImageTexture},
 };
 
+// Color Relief
+using ColorReliefShaderInfo = ShaderInfo<BuiltIn::ColorReliefShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> ColorReliefShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"ColorReliefDrawableUBO", idColorReliefDrawableUBO},
+    UniformBlockInfo{"ColorReliefTilePropsUBO", idColorReliefTilePropsUBO},
+    UniformBlockInfo{"ColorReliefEvaluatedPropsUBO", idColorReliefEvaluatedPropsUBO},
+};
+const std::vector<AttributeInfo> ColorReliefShaderInfo::attributes = {
+    AttributeInfo{"a_pos", idColorReliefPosVertexAttribute},
+};
+const std::vector<TextureInfo> ColorReliefShaderInfo::textures = {
+    TextureInfo{"u_image", idColorReliefImageTexture},
+    TextureInfo{"u_elevation_stops", idColorReliefElevationStopsTexture},
+    TextureInfo{"u_color_stops", idColorReliefColorStopsTexture},
+};
+
 // Line
 using LineShaderInfo = ShaderInfo<BuiltIn::LineShader, gfx::Backend::Type::OpenGL>;
 

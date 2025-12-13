@@ -35,6 +35,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/color_relief.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
@@ -73,6 +74,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade_prepare.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/color_relief.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
