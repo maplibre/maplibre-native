@@ -105,8 +105,8 @@ fn getElevation(coord: vec2<f32>, unpack: vec4<f32>) -> f32 {
 }
 
 fn getElevationStop(stop: i32, color_ramp_size: i32) -> f32 {
-    let x = (f32(stop) + 0.5) / f32(color_ramp_size);
-    return textureSample(elevation_stops_texture, texture_sampler, vec2<f32>(x, 0.5)).r;
+    // Use textureLoad for RGBA32Float texture (not filterable in WebGPU)
+    return textureLoad(elevation_stops_texture, vec2<i32>(stop, 0), 0).r;
 }
 
 fn getColorStop(stop: i32, color_ramp_size: i32) -> vec4<f32> {
