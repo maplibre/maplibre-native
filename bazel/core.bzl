@@ -923,6 +923,7 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/gfx/dynamic_texture_atlas.cpp",
     "src/mbgl/gfx/gpu_expression.cpp",
     "src/mbgl/gfx/hillshade_prepare_drawable_data.hpp",
+    "src/mbgl/gfx/color_relief_drawable_data.hpp",
     "src/mbgl/gfx/image_drawable_data.hpp",
     "src/mbgl/gfx/line_drawable_data.hpp",
     "src/mbgl/gfx/symbol_drawable_data.hpp",
