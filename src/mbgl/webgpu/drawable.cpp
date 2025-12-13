@@ -618,7 +618,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                 entry.sampler = texture->getSampler();
                                 break;
                             }
-                            case ShaderProgram::BindingType::Texture: {
+                            case ShaderProgram::BindingType::Texture:
+                            case ShaderProgram::BindingType::UnfilterableTexture: {
                                 Texture2D* texture = findTextureForBinding(bindingInfo.binding, false);
                                 if (!texture) {
                                     validBindings = false;
