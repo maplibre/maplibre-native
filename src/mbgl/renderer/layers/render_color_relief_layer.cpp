@@ -42,9 +42,9 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
       unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 
-    // Initialize color ramp data
+    // Initialize color ramp data with RGBA format (4 floats per stop)
     colorRampSize = 256;
-    elevationStopsData = std::make_shared<std::vector<float>>(colorRampSize);
+    elevationStopsData = std::make_shared<std::vector<float>>(colorRampSize * 4);
     colorStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
 }
 
@@ -261,6 +261,11 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                                     .wrapV = gfx::TextureWrapType::Clamp});
 
         colorRampChanged = false;
+    }
+
+    // Skip rendering if color ramp textures aren't ready
+    if (!elevationStopsTexture || !colorStopsTexture) {
+        return;
     }
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
