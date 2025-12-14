@@ -24,7 +24,6 @@ TEST(Expression, IsExpression) {
 
     for (auto& entry : allExpressions.GetObject()) {
         const std::string name{entry.name.GetString(), entry.name.GetStringLength()};
-        std::cerr << "Testing expression: " << name << std::endl;
         JSDocument document;
         document.Parse<0>(R"([")" + name + R"("])");
         const JSValue* expression = &document;

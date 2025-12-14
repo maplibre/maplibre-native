@@ -248,25 +248,6 @@ jobs:
             //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
-      - name: Dump failing test logs (coverage)
-        if: failure()
-        run: |
-          set -o pipefail
-          base="/home/runner/.cache/bazel/_bazel_runner/1d1acb9f1301ccd99df6af6030e32002/execroot/_main/bazel-out/k8-fastbuild/testlogs"
-          for log in \
-            "$base/expression-test/test/test.log" \
-            "$base/render-test/render-test/test.log" \
-            "$base/test/core/test.log"
-          do
-            if [ -f "$log" ]; then
-              echo "==== $log (tail -200) ===="
-              tail -200 "$log"
-              echo
-            else
-              echo "Missing log: $log"
-            fi
-          done
-
       - name: Upload coverage report
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
