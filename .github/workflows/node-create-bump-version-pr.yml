@@ -79,7 +79,7 @@ jobs:
 
           // Get commit range
           const commitRange = latestTag ? `${latestTag}..HEAD` : 'HEAD';
-          
+
           // Get all PR numbers from commit messages
           let commits;
           try {
@@ -102,7 +102,7 @@ jobs:
           // Check which PR numbers are missing from changelog
           const missingPrNumbers = prNumbers.filter(prNum => !changelog.includes(`#${prNum}`));
           const missingEntries = [];
-          
+
           if (missingPrNumbers.length === 0) {
             console.log('All PRs are already in the changelog');
           } else {
@@ -124,7 +124,7 @@ jobs:
               try {
                 const prJson = execSync(`gh pr view ${prNumber} --json title,author,number`, { encoding: 'utf8' });
                 const pr = JSON.parse(prJson);
-                
+
                 // Skip dependabot PRs
                 if (pr.author.login.includes('dependabot')) {
                   console.log(`Skipping dependabot PR #${prNumber}`);
@@ -140,7 +140,7 @@ jobs:
               }
             }
           }
-          
+
           changelog = changelog.replace('## main', `## ${newVersion}`);
           changelog = changelog.replaceAll('- _...Add new stuff here..._\n', '');
           let changelogHeader = '## main\n\n';
@@ -177,7 +177,7 @@ jobs:
           title: "Release node v${{ steps.version-details.outputs.version }}"
           body: |
             This PR bumps the Node.js bindings version to v${{ steps.version-details.outputs.version }}.
-            
+
             ## Checklist
             - [ ] Review CHANGELOG.md updates
             - [ ] Verify version in package.json
