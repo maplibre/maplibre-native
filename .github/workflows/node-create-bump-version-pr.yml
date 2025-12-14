@@ -157,7 +157,7 @@ jobs:
             const entriesText = missingEntries.join('\n');
             changelogHeader += entriesText + '\n';
           }
-          
+
           changelog = changelogHeader + changelog;
           fs.writeFileSync(changelogPath, changelog, 'utf8');
           console.log(`Changelog updated at ${changelogPath}`);
