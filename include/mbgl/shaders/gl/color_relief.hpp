@@ -15,8 +15,8 @@ struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::OpenGL> {
 layout(std140) uniform ColorReliefTilePropsUBO {
     highp vec4 u_unpack;
     highp vec2 u_dimension;
-    int u_color_ramp_size;
-    float pad_tile0;
+    highp int u_color_ramp_size;
+    highp float pad_tile0;
 };
 
 in vec2 a_pos;
@@ -41,15 +41,15 @@ void main() {
 layout(std140) uniform ColorReliefTilePropsUBO {
     highp vec4 u_unpack;
     highp vec2 u_dimension;
-    int u_color_ramp_size;
-    float pad_tile0;
+    highp int u_color_ramp_size;
+    highp float pad_tile0;
 };
 
 layout(std140) uniform ColorReliefEvaluatedPropsUBO {
-    float u_opacity;
-    float pad_eval0;
-    float pad_eval1;
-    float pad_eval2;
+    highp float u_opacity;
+    highp float pad_eval0;
+    highp float pad_eval1;
+    highp float pad_eval2;
 };
 
 uniform sampler2D u_image;

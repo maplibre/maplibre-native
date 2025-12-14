@@ -5,6 +5,7 @@
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/style/layers/color_relief_layer.hpp>
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/color_relief_drawable_data.hpp>
@@ -46,6 +47,9 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
     colorRampSize = 256;
     elevationStopsData = std::make_shared<std::vector<float>>(colorRampSize * 4);
     colorStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
+
+    // Initialize with default color ramp immediately to avoid uninitialized state
+    updateColorRamp();
 }
 
 RenderColorReliefLayer::~RenderColorReliefLayer() = default;
@@ -90,10 +94,14 @@ void RenderColorReliefLayer::updateColorRamp() {
         return;
     }
 
-    // Get the color property value
+    // Get the color property value, using default if undefined
     auto colorValue = unevaluated.get<ColorReliefColor>().getValue();
     if (colorValue.isUndefined()) {
-        return;
+        colorValue = style::ColorReliefLayer::getDefaultColorReliefColor();
+        if (colorValue.isUndefined()) {
+            // If even the default is undefined, we can't proceed
+            return;
+        }
     }
 
     std::vector<float> elevationStopsVector;
