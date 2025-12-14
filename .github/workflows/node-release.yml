@@ -32,7 +32,7 @@ jobs:
         run: |
           packageName="$( node -e "console.log(require('./package.json').name)" )"
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
-          isPublished="$( npm view $packageName versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
+          isPublished="$( npm view "$packageName" versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
           echo "published=$isPublished" >> "$GITHUB_OUTPUT"
           echo "currentVersion: $currentVersion"
           echo "isPublished: $isPublished"
