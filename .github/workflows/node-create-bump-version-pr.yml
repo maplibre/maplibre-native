@@ -143,15 +143,11 @@ jobs:
           
           changelog = changelog.replace('## main', `## ${newVersion}`);
           changelog = changelog.replaceAll('- _...Add new stuff here..._\n', '');
-          let changelogHeader = `## main
-
-### ✨ Features and improvements
-- _...Add new stuff here..._
-
-### 🐞 Bug fixes
-- _...Add new stuff here..._
-
-`;
+          let changelogHeader = '## main\n\n';
+          changelogHeader += '### ✨ Features and improvements\n';
+          changelogHeader += '- _...Add new stuff here..._\n\n';
+          changelogHeader += '### 🐞 Bug fixes\n';
+          changelogHeader += '- _...Add new stuff here..._\n\n';
           if (missingEntries.length > 0) {
             console.log(`Adding ${missingEntries.length} missing PR entries to changelog`);
             const entriesText = missingEntries.join('\n');
