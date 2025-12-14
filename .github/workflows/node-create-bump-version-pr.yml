@@ -26,7 +26,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
@@ -43,6 +42,10 @@ jobs:
           const packageJsonPath = `${packageDir}/package.json`;
           const packageLockPath = `${packageDir}/package-lock.json`;
           const changelogPath = `${packageDir}/CHANGELOG.md`;
+
+          // Get the current branch name
+          const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+          console.log(`Current branch: ${currentBranch}`);
 
           console.log(`Bumping version in ${packageJsonPath}`);
           execSync(`npm version --commit-hooks false --git-tag-version false --preid pre ${versionType}`, {
@@ -141,9 +144,9 @@ jobs:
             }
           }
 
-          changelog = changelog.replace('## main', `## ${newVersion}`);
+          changelog = changelog.replace(`## ${currentBranch}`, `## ${newVersion}`);
           changelog = changelog.replaceAll('- _...Add new stuff here..._\n', '');
-          let changelogHeader = '## main\n\n';
+          let changelogHeader = `## ${currentBranch}\n\n`;
           changelogHeader += '### ✨ Features and improvements\n';
           changelogHeader += '- _...Add new stuff here..._\n\n';
           changelogHeader += '### 🐞 Bug fixes\n';
@@ -160,6 +163,7 @@ jobs:
 
           // Write outputs to GITHUB_OUTPUT
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${newVersion}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `base_branch=${currentBranch}\n`);
           EOF
       - name: Bump version and update changelog
         id: version-details
@@ -174,6 +178,7 @@ jobs:
         with:
           commit-message: "Release node v${{ steps.version-details.outputs.version }}"
           branch: node-release-v${{ steps.version-details.outputs.version }}
+          base: ${{ steps.version-details.outputs.base_branch }}
           title: "Release node v${{ steps.version-details.outputs.version }}"
           body: |
             This PR bumps the Node.js bindings version to v${{ steps.version-details.outputs.version }}.
