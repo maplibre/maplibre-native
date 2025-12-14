@@ -45,7 +45,7 @@ jobs:
           const changelogPath = `${packageDir}/CHANGELOG.md`;
 
           console.log(`Bumping version in ${packageJsonPath}`);
-          execSync(`npm version --commit-hooks false --git-tag-version false ${versionType}`, {
+          execSync(`npm version --commit-hooks false --git-tag-version false --preid pre ${versionType}`, {
             stdio: 'inherit',
             cwd: packageDir
           });
