@@ -1,4 +1,4 @@
-name: Create Node.js bump version PR
+name: node-create-bump-version-pr
 on:
   workflow_dispatch:
     inputs:
