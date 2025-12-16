@@ -28,7 +28,7 @@ const std::map<std::string, std::optional<Color>> testCases = {
     {"rgba(100,100,100,0.2)", Color(20.0f / 255, 20.0f / 255, 20.0f / 255, 0.2f)},
     // 4-digit hex with alpha (#RGBA)
     {"#0F0F", Color(0.0f, 1.0f, 0.0f, 1.0f)},
-    {"#F00C", Color(0.8f, 0.0f, 0.0f, 0.8f)}, // Red with ~80% alpha
+    {"#F00C", Color(0.8f, 0.0f, 0.0f, 0.8f)},     // Red with ~80% alpha
     {"#123F", Color(0.067f, 0.133f, 0.2f, 1.0f)}, // Same as #123 but with full alpha
     // 8-digit hex with alpha (#RRGGBBAA)
     {"#FF0000FF", Color(1.0f, 0.0f, 0.0f, 1.0f)}, // Red with full alpha
