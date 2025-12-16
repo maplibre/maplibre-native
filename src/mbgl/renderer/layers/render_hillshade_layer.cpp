@@ -182,19 +182,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);
     }
 
-    // NEW: Get shader with defines for number of illumination sources
-    // For now, we'll use the default shader. When you implement multiple light sources,
-    // you'll need to determine the number of lights and select the appropriate shader variant
     if (!hillshadeShader) {
-        // TODO: Add shader variant selection based on number of lights
-        // For now, use default (1 light source)
         hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
-
-        // Future implementation:
-        // const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-        // auto illumination = getIlluminationProperties(evaluated);
-        // std::string shaderName = HillshadeShaderGroupName + "/lights:" + std::to_string(illumination.numSources());
-        // hillshadeShader = context.getGenericShader(shaders, shaderName);
     }
 
     if (!hillshadePrepareShader || !hillshadeShader) {
