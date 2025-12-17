@@ -74,6 +74,7 @@
     <string name="activity_textureview_resize">TextureView resize</string>
     <string name="activity_textureview_animate">TextureView animation</string>
     <string name="activity_textureview_transparent">TextureView transparent background</string>
+    <string name="activity_surfaceview_resize">SurfaceView resize</string>
     <string name="activity_overlay">Map overlay</string>
     <string name="activity_grid_source">Grid Source</string>
     <string name="activity_no_style">No Style URI/JSON</string>
