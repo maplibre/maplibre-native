@@ -188,7 +188,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const TransformState& state = renderTreeParameters.transformParams.state;
     const Size& size = state.getSize();
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
-    gfx::ScissorRect scissorRect = {.x = 0,.y = 0,.width = 0,.height = 0};
+    gfx::ScissorRect scissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
     if (!frustumOffset.isFlush()) {
         scissorRect = {
             .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
@@ -198,7 +198,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
             .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
-            .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
+            .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) *
+                                            pixelRatio),
         };
     }
 
