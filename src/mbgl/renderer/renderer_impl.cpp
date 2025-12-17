@@ -188,16 +188,19 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const TransformState& state = renderTreeParameters.transformParams.state;
     const Size& size = state.getSize();
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
-    const gfx::ScissorRect scissorRect = {
-        .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
+    gfx::ScissorRect scissorRect = {.x = 0,.y = 0,.width = 0,.height = 0};
+    if (!frustumOffset.isFlush()) {
+        scissorRect = {
+            .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
 #if MLN_RENDER_BACKEND_OPENGL
-        .y = static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
+            .y = static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
 #else
-        .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
+            .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
-        .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
-        .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
-    };
+            .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
+            .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
+        };
+    }
 
     PaintParameters parameters{
         context,
