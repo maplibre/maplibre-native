@@ -230,7 +230,9 @@ void RenderPass::setScissorRect(MTL::ScissorRect rect) {
         if (rect.height + rect.y > height) {
             rect.height = height - rect.y;
         }
-        encoder->setScissorRect(rect);
+        if (rect.x != 0 || rect.y != 0 || rect.width != 0 || rect.height != 0) {
+            encoder->setScissorRect(rect);
+        }
         currentScissorRect = rect;
     }
 }

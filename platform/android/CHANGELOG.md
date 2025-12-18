@@ -1,5 +1,9 @@
 # Changelog MapLibre Native for Android
 
+## 12.2.3
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
 ## 12.2.2
 
 ### 🐞 Bug fixes

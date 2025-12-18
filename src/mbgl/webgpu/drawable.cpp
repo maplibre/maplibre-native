@@ -841,11 +841,14 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    wgpuRenderPassEncoderSetScissorRect(renderPassEncoder,
-                                        parameters.scissorRect.x,
-                                        parameters.scissorRect.y,
-                                        parameters.scissorRect.width,
-                                        parameters.scissorRect.height);
+    if (parameters.scissorRect.x != 0 || parameters.scissorRect.y != 0 || parameters.scissorRect.width != 0 ||
+        parameters.scissorRect.height != 0) {
+        wgpuRenderPassEncoderSetScissorRect(renderPassEncoder,
+                                            parameters.scissorRect.x,
+                                            parameters.scissorRect.y,
+                                            parameters.scissorRect.width,
+                                            parameters.scissorRect.height);
+    }
 
     uint32_t bufferSlot = 0;
     for (const auto& binding : uniqueBindings) {
