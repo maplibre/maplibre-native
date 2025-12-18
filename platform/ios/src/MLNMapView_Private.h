@@ -3,12 +3,18 @@
 #import "MLNTileOperation.h"
 #import "MLNUserLocationAnnotationView.h"
 
+#include <vector>
+
 namespace mbgl {
 class Map;
 class Renderer;
 
 namespace gfx {
 struct RenderingStats;
+}
+
+namespace platform {
+class XPlatformPlugin;
 }
 
 }  // namespace mbgl
@@ -85,6 +91,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 
 - (mbgl::Map &)mbglMap;
 - (nonnull mbgl::Renderer *)renderer;
+- (std::vector<mbgl::platform::XPlatformPlugin *>)plugins;
 
 /** Returns whether the map view is currently loading or processing any assets required to render
  * the map */

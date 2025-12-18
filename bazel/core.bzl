@@ -840,6 +840,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/work_request.hpp",
     "include/mbgl/util/work_task.hpp",
     "include/mbgl/util/work_task_impl.hpp",
+    "include/mbgl/plugin/cross_platform_plugin.hpp",
 ]
 
 MLN_OPENGL_SOURCE = [

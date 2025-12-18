@@ -33,6 +33,9 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/plugin/cross_platform_plugin.hpp>
+
+#import "MLNXPlatformPluginBridge.h"
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -452,6 +455,9 @@ public:
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
 
+// XPlatform Plugins
+@property (nonatomic, strong) NSArray<id<MLNXPlatformPluginBridge>> *pluginBridges;
+
 @end
 
 @implementation MLNMapView
@@ -531,6 +537,20 @@ public:
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromCGRect(frame), styleURL);
+        [self commonInitWithOptions:nil];
+        self.styleURL = styleURL;
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL plugins:(NSArray<id<MLNXPlatformPluginBridge>> *)plugins
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromCGRect(frame), styleURL);
+        self.pluginBridges = plugins;
         [self commonInitWithOptions:nil];
         self.styleURL = styleURL;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
@@ -958,6 +978,22 @@ public:
     _shouldRequestAuthorizationToUseLocationServices = YES;
 
     _dynamicNavigationCameraAnimationDuration = NO;
+
+    // Load x-platform plugins
+    for (auto plugin : [self plugins]) {
+      plugin->onLoad(_mbglMap.get(), _rendererFrontend->getRenderer());
+    }
+}
+
+- (std::vector<mbgl::platform::XPlatformPlugin *>)plugins
+{
+    std::vector<mbgl::platform::XPlatformPlugin *> plugins;
+    plugins.reserve(_pluginBridges.count);
+    for (id<MLNXPlatformPluginBridge> bridge in _pluginBridges) {
+        mbgl::platform::XPlatformPlugin &pluginRef = [bridge plugin];
+        plugins.push_back(&pluginRef);
+    }
+    return plugins;
 }
 
 - (mbgl::Size)size
@@ -989,6 +1025,11 @@ public:
     self.residualDebugMask = self.debugMask;
     if (!_initialStyleJSON) {
         self.residualStyleURL = self.styleURL;
+    }
+
+    // Unload x-platform plugins
+    for (auto plugin : [self plugins]) {
+        plugin->onUnload();
     }
 
     // Tear down C++ objects, insuring worker threads correctly terminate.

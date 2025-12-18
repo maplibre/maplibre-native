@@ -162,6 +162,10 @@ void AndroidRendererFrontend::reduceMemoryUse() {
     mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
 }
 
+Renderer* AndroidRendererFrontend::getRenderer() const {
+    return mapRenderer.getRenderer();
+}
+
 std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::string& sourceID,
                                                                   const SourceQueryOptions& options) const {
     // Waits for the result from the orchestration thread and returns

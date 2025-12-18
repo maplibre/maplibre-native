@@ -59,6 +59,7 @@
 #include "logger.hpp"
 #include "text/local_glyph_rasterizer_jni.hpp"
 #include "tile/tile_operation.hpp"
+#include "plugin_jni.hpp"
 
 namespace mbgl {
 namespace android {
@@ -173,6 +174,9 @@ void registerNatives(JavaVM* vm) {
     // Util
     DefaultStyle::registerNative(env);
     TileServerOptions::registerNative(env);
+
+    // Plugin JNI natives (self-registered via static initialization)
+    registerAllPluginJniNatives(env);
 }
 
 } // namespace android
