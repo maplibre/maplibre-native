@@ -453,7 +453,10 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
     }
 
     dynamicStates.push_back(vk::DynamicState::eViewport);
-    dynamicStates.push_back(vk::DynamicState::eScissor);
+    if (scissorRect.offset.x != 0 || scissorRect.offset.y != 0 || scissorRect.extent.width != 0 ||
+        scissorRect.extent.height != 0) {
+        dynamicStates.push_back(vk::DynamicState::eScissor);
+    }
 
     return dynamicStates;
 }
