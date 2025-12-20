@@ -1,195 +1,25 @@
-name: node-create-bump-version-pr
+name: Create bump version PR
+
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: Version bump type.
-        required: true
+      release_type:
         type: choice
+        description: 'Type of version bump'
         options:
-          - prerelease
-          - prepatch
-          - preminor
-          - premajor
-          - patch
-          - minor
           - major
-permissions:
-  contents: write
-  pull-requests: write
+          - minor
+          - patch
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+
 jobs:
   bump-version-pr:
-    name: Bump version PR
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: platform/node
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Use Node.js from nvmrc
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: 'platform/node/.nvmrc'
-      - name: Create bump script
-        working-directory: .
-        run: |
-          cat > bump-version.mjs << 'EOF'
-          import { execSync } from 'child_process';
-          import * as fs from 'fs';
-
-          const versionType = process.argv[2];
-          const packageDir = 'platform/node';
-          const packageJsonPath = `${packageDir}/package.json`;
-          const packageLockPath = `${packageDir}/package-lock.json`;
-          const changelogPath = `${packageDir}/CHANGELOG.md`;
-
-          // Get the current branch name
-          const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
-          console.log(`Current branch: ${currentBranch}`);
-
-          console.log(`Bumping version in ${packageJsonPath}`);
-          execSync(`npm version --commit-hooks false --git-tag-version false --preid pre ${versionType}`, {
-            stdio: 'inherit',
-            cwd: packageDir
-          });
-
-          // Get the new version
-          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-          const newVersion = packageJson.version;
-
-          console.log(`New version: ${newVersion}`);
-
-          // Update changelog
-          console.log(`Checking for changelog at: ${changelogPath}`);
-          if (!fs.existsSync(changelogPath)) {
-            console.log(`No changelog found at ${changelogPath}, skipping changelog update`);
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${newVersion}\n`);
-            process.exit(0);
-          }
-
-          let changelog = fs.readFileSync(changelogPath, 'utf8');
-
-          // Get PRs since last tag (look for node-v* tags)
-          console.log('Fetching PRs since last tagged version...');
-          let latestTag;
-          try {
-            latestTag = execSync('git describe --tags --match "node-v*" --abbrev=0', { encoding: 'utf8' }).trim();
-            console.log(`Latest tag: ${latestTag}`);
-          } catch (error) {
-            console.log('No previous node-v* tags found, using all commits');
-            latestTag = '';
-          }
-
-          // Get commit range
-          const commitRange = latestTag ? `${latestTag}..HEAD` : 'HEAD';
-
-          // Get all PR numbers from commit messages
-          let commits;
-          try {
-            commits = execSync(`git log ${commitRange} --oneline -- platform/node`, { encoding: 'utf8' });
-          } catch (error) {
-            console.log('No commits found');
-            commits = '';
-          }
-
-          // Extract PR numbers from merge commits
-          const prNumbers = [];
-          const prRegex = /#(\d+)/g;
-          let match;
-          while ((match = prRegex.exec(commits)) !== null) {
-            prNumbers.push(match[1]);
-          }
-
-          console.log(`Found ${prNumbers.length} PRs since last tag`);
-
-          // Check which PR numbers are missing from changelog
-          const missingPrNumbers = prNumbers.filter(prNum => !changelog.includes(`#${prNum}`));
-          const missingEntries = [];
-
-          if (missingPrNumbers.length === 0) {
-            console.log('All PRs are already in the changelog');
-          } else {
-            console.log(`Found ${missingPrNumbers.length} missing PRs, fetching details...`);
-
-            // Get repository info for PR links
-            let repoFullName;
-            try {
-              const remoteUrl = execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim();
-              const repoMatch = remoteUrl.match(/github\.com[:/](.+?)(?:\.git)?$/);
-              repoFullName = repoMatch ? repoMatch[1] : null;
-            } catch (error) {
-              console.log('Could not determine repository name');
-              repoFullName = null;
-            }
-
-            // Fetch PR details using gh CLI only for missing PRs
-            for (const prNumber of missingPrNumbers) {
-              try {
-                const prJson = execSync(`gh pr view ${prNumber} --json title,author,number`, { encoding: 'utf8' });
-                const pr = JSON.parse(prJson);
-
-                // Skip dependabot PRs
-                if (pr.author.login.includes('dependabot')) {
-                  console.log(`Skipping dependabot PR #${prNumber}`);
-                  continue;
-                }
-
-                const prUrl = repoFullName ? `https://github.com/${repoFullName}/pull/${pr.number}` : `#${pr.number}`;
-                const entry = `- ${pr.title} ([#${pr.number}](${prUrl})) (by [${pr.author.login}](https://github.com/${pr.author.login}))`;
-                missingEntries.push(entry);
-                console.log(`Added: ${entry}`);
-              } catch (error) {
-                console.log(`Could not fetch details for PR #${prNumber}: ${error.message}`);
-              }
-            }
-          }
-
-          changelog = changelog.replace(`## ${currentBranch}`, `## ${newVersion}`);
-          changelog = changelog.replaceAll('- _...Add new stuff here..._\n', '');
-          let changelogHeader = `## ${currentBranch}\n\n`;
-          changelogHeader += '### ✨ Features and improvements\n';
-          changelogHeader += '- _...Add new stuff here..._\n\n';
-          changelogHeader += '### 🐞 Bug fixes\n';
-          changelogHeader += '- _...Add new stuff here..._\n\n';
-          if (missingEntries.length > 0) {
-            console.log(`Adding ${missingEntries.length} missing PR entries to changelog`);
-            const entriesText = missingEntries.join('\n');
-            changelogHeader += entriesText + '\n';
-          }
-
-          changelog = changelogHeader + changelog;
-          fs.writeFileSync(changelogPath, changelog, 'utf8');
-          console.log(`Changelog updated at ${changelogPath}`);
-
-          // Write outputs to GITHUB_OUTPUT
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${newVersion}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `base_branch=${currentBranch}\n`);
-          EOF
-      - name: Bump version and update changelog
-        id: version-details
-        working-directory: .
-        run: |
-          node bump-version.mjs "${{ inputs.version }}"
-          rm bump-version.mjs
-        env:
-          GH_TOKEN: ${{ github.token }}
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: "Release node v${{ steps.version-details.outputs.version }}"
-          branch: node-release-v${{ steps.version-details.outputs.version }}
-          base: ${{ steps.version-details.outputs.base_branch }}
-          title: "Release node v${{ steps.version-details.outputs.version }}"
-          body: |
-            This PR bumps the Node.js bindings version to v${{ steps.version-details.outputs.version }}.
-
-            ## Checklist
-            - [ ] Review CHANGELOG.md updates
-            - [ ] Verify version in package.json
-            - [ ] Ensure all tests pass
-          labels: |
-            release
-            node
+    uses: maplibre/reusable-workflows/.github/workflows/create-bump-version-pr.yml@main
+    with:
+      version: ${{ github.event.inputs.release_type }}
+      preid: 'pre'
+      package-folders: 'platform/node'
+      changelog-path: 'platform/node/CHANGELOG.md'
