@@ -74,6 +74,13 @@ gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
     return *this;
 }
 
+void HeadlessBackend::setSize(Size size) {
+    if (texture) {
+        texture->setSize(size);
+    }
+    gfx::HeadlessBackend::setSize(size);
+}
+
 PremultipliedImage HeadlessBackend::readStillImage() {
     auto& contextImpl = static_cast<Context&>(*context);
     auto& resourceImpl = static_cast<HeadlessRenderableResource&>(*resource);
