@@ -24,6 +24,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/plugin/plugin_style_filter.hpp>
+#include <mbgl/plugin/plugin_manager.hpp>
 #include <sstream>
 
 namespace mbgl {
@@ -82,17 +83,19 @@ void Style::Impl::loadURL(const std::string& url_) {
 
 void Style::Impl::filterThenParse(const std::string& styleData) {
     
-    if (_styleFilters.size() == 0) {
+    auto pm = plugin::PluginManager::get();
+    auto stylePreprocessors = pm->getStylePreprocessors();
+    if (stylePreprocessors.size() == 0) {
           parse(styleData);
           return;
       }
 
       // Otherwise, go through the chain of filters
-      std::string filteredStyle = styleData;
-      for (auto filter : _styleFilters) {
-          filteredStyle = filter->filterResponse(filteredStyle);
+      std::string processedStyle = styleData;
+      for (auto preprocessor : stylePreprocessors) {
+          processedStyle = preprocessor->processStyle(processedStyle);
       }
-      parse(filteredStyle);
+      parse(processedStyle);
     
 }
 

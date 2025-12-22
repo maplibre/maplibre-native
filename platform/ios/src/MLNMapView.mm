@@ -34,6 +34,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/plugin/plugin_map_layer.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -85,6 +86,7 @@
 #include "MLNPluginStyleLayer_Private.h"
 #include "MLNStyleFilter.h"
 #include "MLNStyleFilter_Private.h"
+#import "MLNCPPPlugins.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -245,6 +247,22 @@ int processIsTranslated() {
 }
 
 #endif
+
+
+//
+
+extern "C" {
+__attribute__((used))
+__attribute__((visibility("default")))
+void _force_link_MapLayerTypeObjC() {
+    (void)sizeof(mbgl::plugin::LayerProperty);
+    (void)sizeof(mbgl::plugin::MapLayerType);
+    (void)sizeof(mbgl::plugin::DrawingContext);
+    (void)sizeof(mbgl::plugin::RenderingContext);
+    (void)sizeof(mbgl::plugin::MapLayer);
+}
+}
+
 
 class MLNAnnotationContext;
 
@@ -7725,6 +7743,9 @@ static void *windowScreenContext = &windowScreenContext;
  */
 -(void)addPluginLayerType:(Class)pluginLayerClass {
 
+
+    
+    
     auto layerManager = mbgl::LayerManager::get();
     auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
 
