@@ -23,3 +23,4 @@ jobs:
       preid: 'pre'
       package-folders: 'platform/node'
       changelog-path: 'platform/node/CHANGELOG.md'
+      nvmrc-path: 'platform/node/.nvmrc'
