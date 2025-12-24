@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.22.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
 ## 6.22.0
 
 - Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
