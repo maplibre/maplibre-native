@@ -36,6 +36,7 @@ class MLNMapViewMetalImpl final : public MLNMapViewImpl,
   mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
   mbgl::PremultipliedImage readStillImage() override;
+  MLNBackendResource* getObject() override;
 
  private:
   bool presentsWithTransaction = false;
