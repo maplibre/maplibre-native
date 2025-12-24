@@ -163,7 +163,7 @@ mbgl::PremultipliedImage MLNMapViewMetalImpl::readStillImage() {
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {
     auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-    
+
     return [[MLNBackendResource alloc] initWithMTKView:resource.mtlView
                                                 device:resource.mtlView.device
                                   renderPassDescriptor:resource.mtlView.currentRenderPassDescriptor

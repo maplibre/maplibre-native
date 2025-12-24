@@ -2,12 +2,12 @@
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "MLNBackendResource.h"
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
-#import "MLNBackendResource.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -1340,7 +1340,7 @@ around the returned camera object if it were set as the receiver’s camera.
 #if MLN_RENDER_BACKEND_METAL
 /**
  Returns the Metal backend resource for use in custom style layers.
- 
+
  This property provides access to the Metal device, command buffer, and other
  resources needed for custom Metal rendering in MLNCustomStyleLayer subclasses.
  */
