@@ -191,9 +191,10 @@ std::optional<Color> parse(const std::string& css_str) {
         }
     }
 
-    // #abc and #abc123 syntax.
+    // #abc, #abcd, #abc123, and #abc12345 syntax.
     if (str.length() && str.front() == '#') {
         if (str.length() == 4) {
+            // #RGB
             int64_t iv = parseInt(str.substr(1), 16);  // TODO(deanm): Stricter parsing.
             if (!(iv >= 0 && iv <= 0xfff)) {
                 return {};
@@ -205,7 +206,21 @@ std::optional<Color> parse(const std::string& css_str) {
                     1
                 }};
             }
+        } else if (str.length() == 5) {
+            // #RGBA
+            int64_t iv = parseInt(str.substr(1), 16);  // TODO(deanm): Stricter parsing.
+            if (!(iv >= 0 && iv <= 0xffff)) {
+                return {};
+            } else {
+                return {{
+                    static_cast<uint8_t>(((iv & 0xf000) >> 8) | ((iv & 0xf000) >> 12)),
+                    static_cast<uint8_t>(((iv & 0xf00) >> 4) | ((iv & 0xf00) >> 8)),
+                    static_cast<uint8_t>((iv & 0xf0) | ((iv & 0xf0) >> 4)),
+                    static_cast<float>(((iv & 0xf) | ((iv & 0xf) << 4))) / 255.0f
+                }};
+            }
         } else if (str.length() == 7) {
+            // #RRGGBB
             int64_t iv = parseInt(str.substr(1), 16);  // TODO(deanm): Stricter parsing.
             if (!(iv >= 0 && iv <= 0xffffff)) {
                 return {};  // Covers NaN.
@@ -215,6 +230,19 @@ std::optional<Color> parse(const std::string& css_str) {
                     static_cast<uint8_t>((iv & 0xff00) >> 8),
                     static_cast<uint8_t>(iv & 0xff),
                     1
+                }};
+            }
+        } else if (str.length() == 9) {
+            // #RRGGBBAA
+            int64_t iv = parseInt(str.substr(1), 16);  // TODO(deanm): Stricter parsing.
+            if (!(iv >= 0 && iv <= 0xffffffff)) {
+                return {};  // Covers NaN.
+            } else {
+                return {{
+                    static_cast<uint8_t>((iv & 0xff000000) >> 24),
+                    static_cast<uint8_t>((iv & 0xff0000) >> 16),
+                    static_cast<uint8_t>((iv & 0xff00) >> 8),
+                    static_cast<float>(iv & 0xff) / 255.0f
                 }};
             }
         }

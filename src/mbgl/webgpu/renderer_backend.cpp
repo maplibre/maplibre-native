@@ -21,6 +21,7 @@
 #include <mbgl/shaders/webgpu/heatmap_texture.hpp>
 #include <mbgl/shaders/webgpu/hillshade.hpp>
 #include <mbgl/shaders/webgpu/hillshade_prepare.hpp>
+#include <mbgl/shaders/webgpu/color_relief.hpp>
 #include <mbgl/shaders/webgpu/line.hpp>
 #include <mbgl/shaders/webgpu/location_indicator.hpp>
 #include <mbgl/shaders/webgpu/raster.hpp>
@@ -108,6 +109,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,
                   shaders::BuiltIn::HillshadePrepareShader,
+                  shaders::BuiltIn::ColorReliefShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LinePatternShader,
