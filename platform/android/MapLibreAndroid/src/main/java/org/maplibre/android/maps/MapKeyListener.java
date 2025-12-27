@@ -167,6 +167,14 @@ final class MapKeyListener {
         PointF focalPoint = new PointF(uiSettings.getWidth() / 2, uiSettings.getHeight() / 2);
         mapGestureDetector.zoomInAnimated(focalPoint, true);
         return true;
+      case KeyEvent.KEYCODE_DEL:
+        if (!uiSettings.isZoomGesturesEnabled()) {
+          return false;
+        }
+
+        // Zoom out
+        focalPoint = new PointF(uiSettings.getWidth() / 2, uiSettings.getHeight() / 2);
+        mapGestureDetector.zoomOutAnimated(focalPoint, true);
     }
 
     // We are not interested in this key
