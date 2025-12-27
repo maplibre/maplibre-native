@@ -35,6 +35,7 @@ void GeoJSONSource::setURL(const std::string& url_) {
 
     // Signal that the source description needs a reload
     if (loaded || req) {
+        requestGeneration++; // invalidate potential pending reloads
         loaded = false;
         req.reset();
         observer->onSourceDescriptionChanged(*this);
