@@ -5,12 +5,8 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
-- [node] Create bump workflow using reusable workflow ([#4016](https://github.com/maplibre/maplibre-native/pull/4016)) (by [acalcutt](https://github.com/acalcutt))
 ## 6.3.0-pre.2
-
-### ✨ Features and improvements
-
-### 🐞 Bug fixes
+- [node] Create bump workflow using reusable workflow ([#4016](https://github.com/maplibre/maplibre-native/pull/4016)) (by [acalcutt](https://github.com/acalcutt)
 
 ## 6.3.0-pre.1
 - Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
