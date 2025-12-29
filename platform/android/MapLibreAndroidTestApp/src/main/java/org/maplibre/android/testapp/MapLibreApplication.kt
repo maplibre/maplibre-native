@@ -5,6 +5,7 @@ import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
 import android.text.TextUtils
 import androidx.multidex.MultiDexApplication
+import org.maplibre.maplibrepluginsexamplelibrary.NativeLib
 import org.maplibre.android.MapStrictMode
 import org.maplibre.android.MapLibre
 import org.maplibre.android.WellKnownTileServer
@@ -27,7 +28,12 @@ open class MapLibreApplication : MultiDexApplication() {
         super.onCreate()
         initializeLogger()
         initializeStrictMode()
+        initializePlugins()
         initializeMapbox()
+    }
+
+    private fun initializePlugins() {
+        NativeLib().registerPlugins()
     }
 
     private fun initializeLogger() {

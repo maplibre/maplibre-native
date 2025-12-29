@@ -17,7 +17,7 @@
 
 namespace mbgl { namespace plugin {
 
-    class PluginManager {
+    class __attribute__((visibility("default"))) PluginManager {
     public:
         
         virtual ~PluginManager();
