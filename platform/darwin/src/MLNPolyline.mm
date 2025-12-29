@@ -167,7 +167,7 @@
     if (self = [super initWithCoder:decoder]) {
         NSSet<Class> *polylinesClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNPolyline class]]];
         _polylines = [decoder decodeObjectOfClasses:polylinesClasses forKey:@"polylines"];
-        
+
         mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
 
         for (MLNPolyline *polyline in _polylines) {

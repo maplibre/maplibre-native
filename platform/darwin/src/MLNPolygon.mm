@@ -174,7 +174,7 @@
     if (self = [super initWithCoder:decoder]) {
         NSSet<Class> *polygonsClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNPolygon class]]];
         _polygons = [decoder decodeObjectOfClasses:polygonsClasses forKey:@"polygons"];
-        
+
         mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
 
         for (MLNPolygon *polygon in _polygons) {

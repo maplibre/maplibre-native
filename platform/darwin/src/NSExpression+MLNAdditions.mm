@@ -622,7 +622,7 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
     return [NSExpression expressionForFunctionHelper:selectorName
                                      arguments:@[inputExpression, [NSExpression expressionForConstantValue:curveType], sanitizeParams, stops]];
-    
+
 }
 
 + (instancetype)mgl_expressionForMatchingExpression:(nonnull NSExpression *)inputExpression inDictionary:(nonnull NSDictionary<NSExpression *, NSExpression *> *)matchedExpressions defaultExpression:(nonnull NSExpression *)defaultExpression {
