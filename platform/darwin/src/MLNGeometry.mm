@@ -85,6 +85,11 @@ MLNRadianCoordinate2D MLNRadianCoordinateAtDistanceFacingDirection(MLNRadianCoor
 }
 
 CLLocationDirection MLNDirectionBetweenCoordinates(CLLocationCoordinate2D firstCoordinate, CLLocationCoordinate2D secondCoordinate) {
+    if (MLNEqualFloatWithAccuracy(firstCoordinate.latitude, secondCoordinate.latitude, 1e-8) && MLNEqualFloatWithAccuracy(firstCoordinate.longitude, secondCoordinate.longitude, 1e-8)) {
+        return 0;
+    }
+    
+    
     // Ported from https://github.com/mapbox/turf-swift/blob/857e2e8060678ef4a7a9169d4971b0788fdffc37/Turf/Turf.swift#L23-L31
     MLNRadianCoordinate2D firstRadianCoordinate = MLNRadianCoordinateFromLocationCoordinate(firstCoordinate);
     MLNRadianCoordinate2D secondRadianCoordinate = MLNRadianCoordinateFromLocationCoordinate(secondCoordinate);

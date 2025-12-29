@@ -59,9 +59,14 @@ NS_ASSUME_NONNULL_END
       NSSet<Class> *identifierClasses =                                                      \
           [NSSet setWithArray:@[ [NSString class], [NSNumber class] ]];                      \
       identifier = [decoder decodeObjectOfClasses:identifierClasses forKey:@"identifier"];   \
-      _attributes = [decoder decodeObjectOfClass:[NSDictionary class] forKey:@"attributes"]; \
+      NSSet<Class> *atrributesClasses =                                                      \
+          [NSSet setWithArray:@[ [NSDictionary class], [NSArray class] ]];                   \
+      _attributes = [decoder decodeObjectOfClasses:atrributesClasses forKey:@"attributes"];  \
     }                                                                                        \
     return self;                                                                             \
+  }                                                                                          \
+  + (BOOL)supportsSecureCoding {                                                             \
+    return YES;                                                                              \
   }
 
 #define MLN_DEFINE_FEATURE_ENCODE()                        \

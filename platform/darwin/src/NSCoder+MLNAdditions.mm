@@ -10,7 +10,8 @@
 }
 
 - (std::vector<CLLocationCoordinate2D>)mgl_decodeLocationCoordinates2DForKey:(NSString *)key {
-    NSArray *coordinates = [self decodeObjectOfClass:[NSArray class] forKey:key];
+    NSSet<Class> *coordinateClasses = [NSSet setWithArray:@[[NSArray class], [NSDictionary class]]];
+    NSArray *coordinates = [self decodeObjectOfClasses:coordinateClasses forKey:key];
     return [coordinates mgl_coordinates];
 }
 
@@ -19,7 +20,7 @@
 }
 
 - (CLLocationCoordinate2D)decodeMLNCoordinateForKey:(NSString *)key {
-    NSDictionary *coordinate = [self decodeObjectForKey:key];
+    NSDictionary *coordinate = [self decodeObjectOfClass:[NSDictionary class] forKey:key];
     return CLLocationCoordinate2DMake([coordinate[@"latitude"] doubleValue], [coordinate[@"longitude"] doubleValue]);
 }
 

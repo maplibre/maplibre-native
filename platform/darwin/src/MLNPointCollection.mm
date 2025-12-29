@@ -14,6 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
     std::vector<CLLocationCoordinate2D> _coordinates;
 }
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 + (instancetype)pointCollectionWithCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count
 {
     return [[self alloc] initWithCoordinates:coords count:count];
@@ -33,7 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithCoder:(NSCoder *)decoder {
     MLNLogInfo(@"Initializing with coder.O");
     if (self = [super initWithCoder:decoder]) {
-        NSArray *coordinates = [decoder decodeObjectOfClass:[NSArray class] forKey:@"coordinates"];
+        NSSet<Class> *coordinatesClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class]]];
+        NSArray *coordinates = [decoder decodeObjectOfClasses:coordinatesClasses forKey:@"coordinates"];
         _coordinates = [coordinates mgl_coordinates];
     }
     return self;
