@@ -6,14 +6,6 @@
 - _...Add new stuff here..._
 
 ## 6.3.0
-### ✨ Features and improvements
-
-### 🐞 Bug fixes
-
-## 6.3.0-pre.2
-- [node] Create bump workflow using reusable workflow ([#4016](https://github.com/maplibre/maplibre-native/pull/4016)) (by [acalcutt](https://github.com/acalcutt)
-
-## 6.3.0-pre.1
 - Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
 - Updated NAN to v2.23.0 to support node v24 ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
 - Updated the linux binary to be built on Ubuntu 24.04 ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
@@ -21,6 +13,7 @@
 - Moved node-pre-gyp back to @acalcutt/node-pre-gyp to support node v24. There is currently an issue with releases of @mapbox/node-pre-gyp which is preventing using it. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
 - Add Windows arm64 binary build to ci and release workflows. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
 - Add options parameter to addImage method in Node.js type definitions ([#3868](https://github.com/maplibre/maplibre-native/pull/3868))
+- Create bump workflow using reusable workflow ([#4016](https://github.com/maplibre/maplibre-native/pull/4016)) (by [acalcutt](https://github.com/acalcutt)
 
 ## 6.2.0
 - Fix freezing in macos/metal after ~32 renders ([Issue](https://github.com/maplibre/maplibre-native/issues/2928), [PR](https://github.com/maplibre/maplibre-native/pull/3673)).
