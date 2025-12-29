@@ -5,6 +5,11 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+## 6.3.0
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
 ## 6.3.0-pre.2
 - [node] Create bump workflow using reusable workflow ([#4016](https://github.com/maplibre/maplibre-native/pull/4016)) (by [acalcutt](https://github.com/acalcutt)
 
