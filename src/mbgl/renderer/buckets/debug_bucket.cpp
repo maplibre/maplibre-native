@@ -28,7 +28,7 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
             std::optional<Point<int16_t>> prev;
 
             const glyph& glyph = simplex[c - 32];
-            for (int32_t j = 0; j < glyph.length; j += 2) {
+            for (int32_t j = 0; std::cmp_less(j, glyph.length); j += 2) {
                 if (glyph.data[j] == -1 && glyph.data[j + 1] == -1) {
                     prev = {};
                 } else {

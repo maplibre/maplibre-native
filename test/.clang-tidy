@@ -18,6 +18,7 @@ Checks: >
     -modernize-use-constraints,
     -modernize-use-trailing-return-type,
     misc-static-assert,
+    -clang-analyzer-security.ArrayBound,
     -clang-analyzer-security.insecureAPI.rand,
     -clang-analyzer-core.uninitialized.UndefReturn,
     -clang-analyzer-core.StackAddressEscape,

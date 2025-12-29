@@ -1277,11 +1277,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             if (info.textureInfo.image) {
                 if (!info.textureInfo.texture) {
                     info.textureInfo.texture = context.createTexture2D();
-                    info.textureInfo.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear,
-                                                                       gfx::TextureWrapType::Clamp,
-                                                                       gfx::TextureWrapType::Clamp,
-                                                                       16,
-                                                                       true});
+                    info.textureInfo.texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                                       .wrapU = gfx::TextureWrapType::Clamp,
+                                                                       .wrapV = gfx::TextureWrapType::Clamp,
+                                                                       .maxAnisotropy = 16,
+                                                                       .mipmapped = true});
                 }
 
                 info.textureInfo.texture->upload(info.textureInfo.image->get()->image);

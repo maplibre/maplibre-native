@@ -105,6 +105,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         if (!commandCaptureScope) {
             if (const auto& cmdQueue = mtlBackend.getCommandQueue()) {
                 if (const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager())) {
+                    // NOLINTNEXTLINE(bugprone-assignment-in-if-condition)
                     if ((commandCaptureScope = NS::TransferPtr(captureManager->newCaptureScope(cmdQueue.get())))) {
                         const auto label = "Renderer::Impl frame=" + util::toString(frameCount);
                         commandCaptureScope->setLabel(NS::String::string(label.c_str(), NS::UTF8StringEncoding));
@@ -187,16 +188,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const TransformState& state = renderTreeParameters.transformParams.state;
     const Size& size = state.getSize();
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
-    const gfx::ScissorRect scissorRect = {
-        .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
+    gfx::ScissorRect scissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
+    if (!frustumOffset.isFlush()) {
+        scissorRect = {
+            .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
 #if MLN_RENDER_BACKEND_OPENGL
-        .y = static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
+            .y = static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
 #else
-        .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
+            .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
-        .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
-        .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
-    };
+            .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
+            .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) *
+                                            pixelRatio),
+        };
+    }
 
     PaintParameters parameters{
         context,

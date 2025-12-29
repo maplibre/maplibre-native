@@ -22,28 +22,28 @@ MATCHER_P(Vec3NearEquals1E7, vec, "") {
 TEST(FreeCameraOptions, SetLocation) {
     FreeCameraOptions options;
 
-    options.setLocation({{0.0, 0.0}, util::EARTH_RADIUS_M * pi});
+    options.setLocation({.location = {0.0, 0.0}, .altitude = util::EARTH_RADIUS_M * pi});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 0.5, 0.5}}));
 
-    options.setLocation({{25.0, -180.0}, 1000.0});
+    options.setLocation({.location = {25.0, -180.0}, .altitude = 1000.0});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.0, 0.4282409625, 0.000027532812465}}));
 
-    options.setLocation(
-        {{util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * pi * std::cos(util::deg2rad(util::LATITUDE_MAX))});
+    options.setLocation({.location = {util::LATITUDE_MAX, 0.0},
+                         .altitude = util::EARTH_RADIUS_M * pi * std::cos(util::deg2rad(util::LATITUDE_MAX))});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 0.0, 0.5}}));
 
-    options.setLocation(
-        {{-util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * pi * std::cos(util::deg2rad(-util::LATITUDE_MAX))});
+    options.setLocation({.location = {-util::LATITUDE_MAX, 0.0},
+                         .altitude = util::EARTH_RADIUS_M * pi * std::cos(util::deg2rad(-util::LATITUDE_MAX))});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 1.0, 0.5}}));
 }
 
 TEST(FreeCameraOptions, SetLocationNegativeAltitude) {
     FreeCameraOptions options;
-    options.setLocation({{0.0, 0.0}, -100.0});
+    options.setLocation({.location = {0.0, 0.0}, .altitude = -100.0});
     ASSERT_TRUE(options.position);
     ASSERT_DOUBLE_EQ(options.position.value()[2], -100.0 / util::M2PI / util::EARTH_RADIUS_M);
 }
@@ -51,7 +51,7 @@ TEST(FreeCameraOptions, SetLocationNegativeAltitude) {
 TEST(FreeCameraOptions, SetLocationUnwrappedLocation) {
     FreeCameraOptions options;
 
-    options.setLocation({{0.0, -540.0}, 0.0});
+    options.setLocation({.location = {0.0, -540.0}, .altitude = 0.0});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{-1.0, 0.5, 0.0}}));
 }
@@ -145,7 +145,7 @@ TEST(FreeCameraOptions, LookAtPoint) {
     ASSERT_THAT(forward, Vec3NearEquals1E7(vec3{{1.0, 0.0, 0.0}}));
 
     // Pitch: 0, bearing: 0
-    options.setLocation({{60.1699, 24.9384}, 100.0});
+    options.setLocation({.location = {60.1699, 24.9384}, .altitude = 100.0});
     options.lookAtPoint({60.1699, 24.9384}, vec3{{0.0, -1.0, 0.0}});
     ASSERT_TRUE(options.orientation);
     std::tie(right, up, forward) = rotatedFrame(options.orientation.value());
@@ -155,7 +155,7 @@ TEST(FreeCameraOptions, LookAtPoint) {
     ASSERT_THAT(forward, Vec3NearEquals1E7(vec3{{0.0, 0.0, -1.0}}));
 
     // Pitch: 0, bearing: 45
-    options.setLocation({{60.1699, 24.9384}, 100.0});
+    options.setLocation({.location = {60.1699, 24.9384}, .altitude = 100.0});
     options.lookAtPoint({60.1699, 24.9384}, vec3{{-1.0, -1.0, 0.0}});
     ASSERT_TRUE(options.orientation);
     std::tie(right, up, forward) = rotatedFrame(options.orientation.value());
@@ -165,7 +165,7 @@ TEST(FreeCameraOptions, LookAtPoint) {
     ASSERT_THAT(forward, Vec3NearEquals1E7(vec3{{0.0, 0.0, -1.0}}));
 
     // Looking south, up vector almost same as forward vector
-    options.setLocation({{37.7749, 122.4194}, 0.0});
+    options.setLocation({.location = {37.7749, 122.4194}, .altitude = 0.0});
     options.lookAtPoint({37.5, 122.4194}, vec3{{0.0, 1.0, 0.00001}});
     ASSERT_TRUE(options.orientation);
     std::tie(right, up, forward) = rotatedFrame(options.orientation.value());
@@ -175,7 +175,7 @@ TEST(FreeCameraOptions, LookAtPoint) {
     ASSERT_THAT(forward, Vec3NearEquals1E7(vec3{{0.0, 1.0, 0.0}}));
 
     // Orientation with roll-component
-    options.setLocation({{-33.8688, 151.2093}, 0.0});
+    options.setLocation({.location = {-33.8688, 151.2093}, .altitude = 0.0});
     options.lookAtPoint({-33.8688, 160.0}, vec3{{0.0, -1.0, 0.1}});
     ASSERT_TRUE(options.orientation);
     std::tie(right, up, forward) = rotatedFrame(options.orientation.value());

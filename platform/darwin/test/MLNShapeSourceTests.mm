@@ -24,7 +24,8 @@
                               MLNShapeSourceOptionMaximumZoomLevel: @99,
                               MLNShapeSourceOptionBuffer: @1976,
                               MLNShapeSourceOptionSimplificationTolerance: @0.42,
-                              MLNShapeSourceOptionLineDistanceMetrics: @YES};
+                              MLNShapeSourceOptionLineDistanceMetrics: @YES,
+                              MLNShapeSourceOptionSynchronousUpdate: @YES};
 
     auto mbglOptions = MLNGeoJSONOptionsFromDictionary(options);
     XCTAssertTrue(mbglOptions->cluster);
@@ -36,6 +37,7 @@
     XCTAssertEqual(mbglOptions->tolerance, 0.42);
     XCTAssertTrue(mbglOptions->lineMetrics);
     XCTAssertTrue(!mbglOptions->clusterProperties.empty());
+    XCTAssertTrue(mbglOptions->synchronousUpdate);
 
     options = @{MLNShapeSourceOptionClustered: @"number 1"};
     XCTAssertThrows(MLNGeoJSONOptionsFromDictionary(options));

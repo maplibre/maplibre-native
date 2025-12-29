@@ -29,8 +29,8 @@ namespace mbgl {
 
 using namespace style;
 
-GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
-                                       ActorRef<GeometryTile> parent_,
+GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self_,
+                                       OptionalActorRef<GeometryTile> parent_,
                                        const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,
@@ -376,7 +376,7 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
     for (auto& fontDependencies : glyphDependencies.glyphs) {
         auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
         for (auto glyphID : fontDependencies.second) {
-            if (fontGlyphs == glyphMap.end() || fontGlyphs->second.find(glyphID) == fontGlyphs->second.end()) {
+            if (fontGlyphs == glyphMap.end() || !fontGlyphs->second.contains(glyphID)) {
                 pendingGlyphDependencies.glyphs[fontDependencies.first].insert(glyphID);
             }
         }
@@ -449,7 +449,8 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{id, mode, pixelRatio, leaderImpl.getTypeInfo()};
+        BucketParameters parameters{
+            .tileID = id, .mode = mode, .pixelRatio = pixelRatio, .layerType = leaderImpl.getTypeInfo()};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {
@@ -471,10 +472,13 @@ void GeometryTileWorker::parse() {
         // images/glyphs are used, or the Layout is stored until the
         // images/glyphs are available to add the features to the buckets.
         if (leaderImpl.getTypeInfo()->layout == LayerTypeInfo::Layout::Required) {
-            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout(
-                {parameters, fontFaces, glyphDependencies, imageDependencies, availableImages},
-                std::move(geometryLayer),
-                group);
+            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout({.bucketParameters = parameters,
+                                                                                .fontFaces = fontFaces,
+                                                                                .glyphDependencies = glyphDependencies,
+                                                                                .imageDependencies = imageDependencies,
+                                                                                .availableImages = availableImages},
+                                                                               std::move(geometryLayer),
+                                                                               group);
             if (layout->hasDependencies()) {
                 layouts.push_back(std::move(layout));
             } else {
@@ -502,7 +506,7 @@ void GeometryTileWorker::parse() {
             }
 
             for (const auto& layer : group) {
-                renderData.emplace(layer->baseImpl->id, LayerRenderData{bucket, layer});
+                renderData.emplace(layer->baseImpl->id, LayerRenderData{.bucket = bucket, .layerProperties = layer});
             }
         }
     }

@@ -47,7 +47,7 @@ bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::strin
     }
 
     const auto& protocol = tileServerOptions.uriSchemeAlias() + "://";
-    return url.compare(0, protocol.length(), protocol) == 0;
+    return url.starts_with(protocol);
 }
 
 std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate, const std::string& url) {

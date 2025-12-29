@@ -618,6 +618,8 @@ MLN_CORE_HEADERS = [
     "include/mbgl/actor/established_actor.hpp",
     "include/mbgl/actor/mailbox.hpp",
     "include/mbgl/actor/message.hpp",
+    "include/mbgl/actor/optional_actor.hpp",
+    "include/mbgl/actor/optional_actor_ref.hpp",
     "include/mbgl/actor/scheduler.hpp",
     "include/mbgl/annotation/annotation.hpp",
     "include/mbgl/gfx/backend.hpp",

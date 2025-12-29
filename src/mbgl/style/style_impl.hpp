@@ -45,6 +45,14 @@ public:
     void loadJSON(const std::string&);
     void loadURL(const std::string&);
 
+    /**
+     * @brief Cancels any pending style request.
+     *
+     * This will cancel any in-progress style URL load. Has no effect if no
+     * style load is in progress.
+     */
+    void cancelPendingRequest() noexcept;
+
     std::string getJSON() const;
     std::string getURL() const;
 

@@ -13,20 +13,16 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
                        const Tileset& tileset,
                        TileObserver* observer_)
     : GeometryTile(id_, std::move(sourceID_), parameters_, observer_),
-      loader(*this, id_, parameters_, tileset) {}
+      loader(std::make_unique<TileLoader<VectorTile>>(*this, id_, parameters_, tileset)) {}
 
-VectorTile::~VectorTile() {
-    // Don't rely on `~TileLoader` to close, it's not safe to call there.
-    // We're still calling a virtual method from a destructor, so any overrides will not be called.
-    GeometryTile::cancel();
-}
+VectorTile::~VectorTile() {}
 
 void VectorTile::setNecessity(TileNecessity necessity) {
-    loader.setNecessity(necessity);
+    loader->setNecessity(necessity);
 }
 
 void VectorTile::setUpdateParameters(const TileUpdateParameters& params) {
-    loader.setUpdateParameters(params);
+    loader->setUpdateParameters(params);
 }
 
 void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<Timestamp> expires_) {

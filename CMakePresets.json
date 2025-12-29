@@ -220,14 +220,6 @@
       }
     },
     {
-      "name": "windows-opengl-core",
-      "inherits": "windows-opengl",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "ON"
-      }
-    },
-    {
       "name": "windows-opengl-node",
       "inherits": "windows",
       "binaryDir": "${sourceDir}/build",
@@ -250,14 +242,6 @@
       }
     },
     {
-      "name": "windows-egl-core",
-      "inherits": "windows-egl",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "ON"
-      }
-    },
-    {
       "name": "windows-vulkan",
       "binaryDir": "${sourceDir}/build-windows-vulkan",
       "inherits": "windows",
@@ -265,14 +249,6 @@
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
         "MLN_WITH_VULKAN": "ON"
-      }
-    },
-    {
-      "name": "windows-vulkan-core",
-      "inherits": "windows-vulkan",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "ON"
       }
     },
     {

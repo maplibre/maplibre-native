@@ -13,8 +13,9 @@ DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pix
     texture = context.createTexture2D();
     texture->setSize(size);
     texture->setFormat(pixelType, TextureChannelDataType::UnsignedByte);
-    texture->setSamplerConfiguration(
-        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                      .wrapU = gfx::TextureWrapType::Clamp,
+                                      .wrapV = gfx::TextureWrapType::Clamp});
 #if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
     deferredCreation = true;
 #else
@@ -37,7 +38,7 @@ bool DynamicTexture::isEmpty() const {
 }
 
 std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32_t uniqueId) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     mapbox::Bin* bin = shelfPack.packOne(uniqueId, size.width, size.height);
     if (!bin) {
         return std::nullopt;
@@ -49,7 +50,7 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
 }
 
 void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHandle) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
 
@@ -75,7 +76,7 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
 }
 
 void DynamicTexture::uploadDeferredImages() {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     if (deferredCreation) {
         texture->create();
         deferredCreation = false;
@@ -88,7 +89,7 @@ void DynamicTexture::uploadDeferredImages() {
 }
 
 void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     auto* bin = shelfPack.getBin(texHandle.getId());
     if (!bin) {
         return;

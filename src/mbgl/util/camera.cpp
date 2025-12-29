@@ -242,7 +242,7 @@ std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const noexcept {
     const double worldSize = Projection::worldSize(std::pow(2.0, 0.0));
     const double altitude = positionValue[2] * worldSize * metersPerPixel;
 
-    return LatLngAltitude{location, altitude};
+    return LatLngAltitude{.location = location, .altitude = altitude};
 }
 
 void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector) noexcept {

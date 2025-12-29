@@ -20,7 +20,7 @@ public:
 
     void operator()() override {
         // Lock the mutex while processing so that cancel() will block.
-        std::lock_guard<std::recursive_mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
         if (!canceled->load(std::memory_order_acquire)) {
             invoke(std::make_index_sequence<std::tuple_size_v<P>>{});
         }
@@ -35,7 +35,7 @@ public:
     /// If the task has completed and the after callback has executed, this will
     /// do nothing.
     void cancel() override {
-        std::lock_guard<std::recursive_mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
         canceled->store(true, std::memory_order_release);
     }
 

@@ -16,7 +16,8 @@ class StubFileSource : public FileSource {
 public:
     enum class ResponseType {
         Asynchronous = 0,
-        Synchronous
+        Synchronous,
+        Manual
     };
 
     StubFileSource(const ResourceOptions&, const ClientOptions&, ResponseType = ResponseType::Asynchronous);
@@ -26,6 +27,8 @@ public:
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     bool canRequest(const Resource&) const override { return true; }
     void remove(AsyncRequest*);
+    void respondToAll();
+
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     mapbox::base::Value getProperty(const std::string&) const override;
 
