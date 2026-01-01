@@ -29,11 +29,11 @@ env:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -66,27 +66,22 @@ jobs:
             rust: true
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
+        uses: github/codeql-action/init@cf1bb45a277cb3c205638b2cd5c984db1c46a412 # v4.31.7
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - run: cargo install armerge@2.2.0
-      # TODO: use below once
-      # https://github.com/tux3/armerge/issues/14
-      # is fixed
-
-      # - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
-      #   with:
-      #     tool: armerge@2
+      - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
+        with:
+          tool: armerge@2
 
       - if: matrix.variant.rust
         run: cargo install cxxbridge-cmd --version 1.0.157 --locked
@@ -103,7 +98,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -175,7 +170,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
+        uses: github/codeql-action/analyze@cf1bb45a277cb3c205638b2cd5c984db1c46a412 # v4.31.7
         with:
           category: "/language:cpp"
 
@@ -218,7 +213,7 @@ jobs:
   linux-coverage:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -234,7 +229,7 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
         with:
           node-version-file: '.nvmrc'
 
@@ -268,7 +263,7 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number

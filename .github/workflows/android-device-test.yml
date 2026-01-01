@@ -78,11 +78,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
         with:
           node-version-file: '.nvmrc'
 
@@ -102,7 +102,7 @@ jobs:
         id: get-pr-number
 
       - name: Generate token
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: generate_token
         with:
           skip-token-revoke: true  # revoking will fail for long running workflows, because the token will already have expired
@@ -145,7 +145,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: env.run_device_test == 'true'
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -205,7 +205,7 @@ jobs:
 
       - name: Generate another token (previous one could have expired)
         if: always()
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: generate_token_2
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}

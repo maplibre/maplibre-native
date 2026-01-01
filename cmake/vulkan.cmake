@@ -1,0 +1,97 @@
+if(NOT MLN_WITH_VULKAN)
+    return()
+endif()
+
+message(STATUS "Configuring Vulkan renderer backend")
+
+target_compile_definitions(
+        mbgl-core
+        PUBLIC
+        MLN_RENDER_BACKEND_VULKAN=1
+)
+
+list(APPEND
+        INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/descriptor_set.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/index_buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/offscreen_texture.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/pipeline.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderer_backend.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/render_pass.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderable_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/texture2d.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/tile_layer_group.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/uniform_buffer.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/upload_pass.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_attribute.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_group.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_program.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/background.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/circle.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/collision.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_geometry.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_symbol_icon.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill_extrusion.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/heatmap.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/heatmap_texture.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/hillshade.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/hillshade_prepare.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/location_indicator.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/symbol.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/widevector.hpp
+)
+
+list(APPEND
+        SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/context.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/descriptor_set.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/index_buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/offscreen_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/pipeline.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderer_backend.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/render_pass.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderable_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/tile_layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/uniform_buffer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/upload_pass.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_attribute.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/shader_program.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/background.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_geometry.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_symbol_icon.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/hillshade.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/location_indicator.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/widevector.cpp
+)

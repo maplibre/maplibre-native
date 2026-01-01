@@ -122,7 +122,10 @@ MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) noexcept {
 }
 
 MTL::ScissorRect getMetalScissorRect(gfx::ScissorRect rect) noexcept {
-    return {static_cast<uint32_t>(rect.x), static_cast<uint32_t>(rect.y), rect.width, rect.height};
+    return {.x = static_cast<uint32_t>(rect.x),
+            .y = static_cast<uint32_t>(rect.y),
+            .width = rect.width,
+            .height = rect.height};
 }
 
 } // namespace
@@ -181,8 +184,10 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (impl->renderPassDescriptor && descriptor != *impl->renderPassDescriptor) {
         impl->pipelineState.reset();
     }
-    impl->renderPassDescriptor.emplace(gfx::RenderPassDescriptor{
-        descriptor.renderable, descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil});
+    impl->renderPassDescriptor.emplace(gfx::RenderPassDescriptor{.renderable = descriptor.renderable,
+                                                                 .clearColor = descriptor.clearColor,
+                                                                 .clearDepth = descriptor.clearDepth,
+                                                                 .clearStencil = descriptor.clearStencil});
 
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 

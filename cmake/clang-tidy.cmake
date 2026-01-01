@@ -1,6 +1,6 @@
 if (MLN_WITH_CLANG_TIDY OR MLN_CLANG_TIDY_COMMAND)
     if(MLN_CLANG_TIDY_COMMAND)
-        set(CLANG_TIDY_COMMAND MLN_CLANG_TIDY_COMMAND)
+        set(CLANG_TIDY_COMMAND "${MLN_CLANG_TIDY_COMMAND}")
         message(STATUS "Using clang-tidy at ${CLANG_TIDY_COMMAND}")
     else()
         find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)

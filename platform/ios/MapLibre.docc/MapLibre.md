@@ -15,6 +15,12 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 [MapLibre Native](https://github.com/maplibre/maplibre-native) is a map rendering toolkit with support for iOS. It can be used as an alternative to MapKit. You have full control over the data sources used for rendering the map, as well as the styling. You can even participate in the development as MapLibre Native is free and open-source project.
 > Note: For information on creating and modifying map styles, see the [MapLibre Style Spec documentation](https://maplibre.org/maplibre-style-spec/).
 
+## License
+
+MapLibre iOS is distributed under the BSD 2-Clause License. Refer to the [full list of licenses](https://github.com/maplibre/maplibre-native/blob/main/platform/ios/LICENSE.md).
+
+MapLibre iOS is based in part of the work of the [FreeType](https://freetype.org/) Team.
+
 ## Topics
 
 ### Essentials

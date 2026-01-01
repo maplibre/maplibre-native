@@ -32,7 +32,7 @@ public:
     }
 
     void notify(const Response& response_) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
         if (!cancelled) {
             response = response_;
             async.send();
@@ -40,7 +40,7 @@ public:
     }
 
     void cancel() {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
         cancelled = true;
     }
 

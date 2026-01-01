@@ -82,7 +82,7 @@ void RenderPass::resetState() {
 
     currentCullMode = MTL::CullModeNone;
     currentWinding = MTL::WindingClockwise;
-    currentScissorRect = {0, 0, 0, 0};
+    currentScissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
 }
 
 namespace {
@@ -130,7 +130,7 @@ void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::
                 return;
             }
         }
-        vertexBinds[index] = BindInfo{&buf, actualSize, offset};
+        vertexBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindVertex(encoder, offset, index, actualSize);
 }
@@ -156,7 +156,7 @@ void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std
                 return;
             }
         }
-        fragmentBinds[index] = BindInfo{&buf, actualSize, offset};
+        fragmentBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindFragment(encoder, offset, index, actualSize);
 }
@@ -230,7 +230,9 @@ void RenderPass::setScissorRect(MTL::ScissorRect rect) {
         if (rect.height + rect.y > height) {
             rect.height = height - rect.y;
         }
-        encoder->setScissorRect(rect);
+        if (rect.x != 0 || rect.y != 0 || rect.width != 0 || rect.height != 0) {
+            encoder->setScissorRect(rect);
+        }
         currentScissorRect = rect;
     }
 }

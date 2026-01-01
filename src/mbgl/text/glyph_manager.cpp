@@ -29,7 +29,7 @@ GlyphManager::~GlyphManager() {
 void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
     auto dependencies = std::make_shared<GlyphDependencies>(std::move(glyphDependencies));
     {
-        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+        std::scoped_lock readWriteLock(rwLock);
         // Figure out which glyph ranges need to be fetched. For each range that
         // does need to be fetched, record an entry mapping the requestor to a
         // shared pointer containing the dependencies. When the shared pointer
@@ -115,7 +115,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
     }
 
     {
-        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+        std::scoped_lock readWriteLock(rwLock);
 
         Entry& entry = entries[fontStack];
         GlyphRequest& request = entry.ranges[range];
@@ -191,7 +191,7 @@ void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& gl
 }
 
 void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
-    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+    std::scoped_lock readWriteLock(rwLock);
     for (auto& entry : entries) {
         for (auto& range : entry.second.ranges) {
             range.second.requestors.erase(&requestor);
@@ -200,7 +200,7 @@ void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
 }
 
 void GlyphManager::evict(const std::set<FontStack>& keep) {
-    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+    std::scoped_lock readWriteLock(rwLock);
     util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 
