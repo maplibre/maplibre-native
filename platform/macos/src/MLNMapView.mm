@@ -48,6 +48,7 @@
 #import <unordered_set>
 
 #import "MLNMapView+Impl.h"
+#import "MLNBackendResource.h"
 #import "NSBundle+MLNAdditions.h"
 #import "NSDate+MLNAdditions.h"
 #import "NSProcessInfo+MLNAdditions.h"
@@ -3313,5 +3314,11 @@ public:
 
     actionJournal->clearLog();
 }
+
+#if MLN_RENDER_BACKEND_METAL
+- (MLNBackendResource *)backendResource {
+    return _mbglView->getObject();
+}
+#endif
 
 @end
