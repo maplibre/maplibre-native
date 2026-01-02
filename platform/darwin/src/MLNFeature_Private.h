@@ -59,9 +59,9 @@ NS_ASSUME_NONNULL_END
       NSSet<Class> *identifierClasses =                                                     \
           [NSSet setWithArray:@[ [NSString class], [NSNumber class] ]];                     \
       identifier = [decoder decodeObjectOfClasses:identifierClasses forKey:@"identifier"];  \
-      NSSet<Class> *atrributesClasses =                                                     \
+      NSSet<Class> *attributesClasses =                                                     \
           [NSSet setWithArray:@[ [NSDictionary class], [NSArray class] ]];                  \
-      _attributes = [decoder decodeObjectOfClasses:atrributesClasses forKey:@"attributes"]; \
+      _attributes = [decoder decodeObjectOfClasses:attributesClasses forKey:@"attributes"]; \
     }                                                                                       \
     return self;                                                                            \
   }                                                                                         \
