@@ -661,6 +661,10 @@ public:
 }
 
 - (void)setStyleJSON:(NSString *)styleJSON {
+
+    // Remove all the plugin layers
+    [self.pluginLayers removeAllObjects];
+
     // Reset style and load new JSON
     self.style = nil;
     self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
@@ -1009,6 +1013,10 @@ public:
 
 
 - (void)destroyCoreObjects {
+
+    // Remove all the plugin layers
+    [self.pluginLayers removeAllObjects];
+
     // Record the current state. Currently only saving a limited set of properties.
     self.terminated = YES;
     self.residualCamera = self.camera;
@@ -7838,12 +7846,17 @@ static void *windowScreenContext = &windowScreenContext;
     factory->supportsSymbolBuckets = capabilities.supportsReadingSymbols;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
+        MLNMapView *strongMapView = weakMapView;
+        if (!strongMapView) {
+            return;
+        }
+
         //NSLog(@"Creating Plugin Layer: %@", layerClass);
         MLNPluginLayer *layer = [[layerClass alloc] init];
-        if (!weakMapView.pluginLayers) {
-            weakMapView.pluginLayers = [NSMutableArray array];
+        if (!strongMapView.pluginLayers) {
+            strongMapView.pluginLayers = [NSMutableArray array];
         }
-        [weakMapView.pluginLayers addObject:layer];
+        [strongMapView.pluginLayers addObject:layer];
 
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
@@ -7889,6 +7902,9 @@ static void *windowScreenContext = &windowScreenContext;
             };
 
             MLNMapView *strongMapView = weakMapView;
+            if (!strongMapView) {
+                return;
+            }
 
             const mbgl::TransformState& state = paintParameters.state;
 
@@ -7940,15 +7956,20 @@ static void *windowScreenContext = &windowScreenContext;
 
                 @autoreleasepool {
 
+                    MLNMapView *strongMapView = weakMapView;
+                    if (!strongMapView) {
+                        return;
+                    }
+
                     MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
 
                     // Add the features
                     NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
                     for (auto f: featureCollection->_features) {
-                        [featureList addObject:[weakMapView featureFromCore:f]];
+                        [featureList addObject:[strongMapView featureFromCore:f]];
                     }
                     collection.features = [NSArray arrayWithArray:featureList];
-                    collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
+                    collection.tileID = [strongMapView tileIDToString:featureCollection->_featureCollectionTileID];
 
                     NSMutableDictionary *tileSprites = [NSMutableDictionary dictionary];
                     for (const auto& s : featureCollection->_sprites) {
@@ -7987,6 +8008,11 @@ static void *windowScreenContext = &windowScreenContext;
 
                 @autoreleasepool {
 
+                    MLNMapView *strongMapView = weakMapView;
+                    if (!strongMapView) {
+                        return;
+                    }
+
                     // TODO: Map these collections to local vars and maybe don't keep recreating it
 
                     MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
@@ -7994,10 +8020,10 @@ static void *windowScreenContext = &windowScreenContext;
                     // Add the features
                     NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
                     for (auto f: featureCollection->_features) {
-                        [featureList addObject:[weakMapView featureFromCore:f]];
+                        [featureList addObject:[strongMapView featureFromCore:f]];
                     }
                     collection.features = [NSArray arrayWithArray:featureList];
-                    collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
+                    collection.tileID = [strongMapView tileIDToString:featureCollection->_featureCollectionTileID];
 
                     [weakPlugInLayer onFeatureCollectionUnloaded:collection];
                 }

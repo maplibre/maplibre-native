@@ -259,11 +259,11 @@ jobs:
             --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
-      - name: Build XCFramework (Static)
-        # for now, just build it TODO: make a static framework release
-        run: |
-          bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
-          echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.static)" >> "$GITHUB_ENV"
+      # - name: Build XCFramework (Static)
+      #   # for now, just build it TODO: make a static framework release
+      #   run: |
+      #     bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
+      #     echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.static)" >> "$GITHUB_ENV"
 
       - name: Create .zip with debug symbols
         if: env.make_release
@@ -319,11 +319,11 @@ jobs:
         if: env.make_release
         run: |
           cp ${{ env.xcframework }} MapLibre.dynamic.xcframework.zip
-          cp ${{ env.xcframework_static }} MapLibre.static.xcframework.zip
+          # cp ${{ env.xcframework_static }} MapLibre.static.xcframework.zip
           chmod +w MapLibre.dynamic.xcframework.zip
-          chmod +w MapLibre.static.xcframework.zip
+          # chmod +w MapLibre.static.xcframework.zip
           zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
-          zip MapLibre.static.xcframework.zip LICENSE.md  # add license to zip
+          # zip MapLibre.static.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
 
       - name: Release (GitHub)
@@ -334,7 +334,6 @@ jobs:
           name: ios-v${{ env.version }}
           files: |
             MapLibre.dynamic.xcframework.zip
-            MapLibre.static.xcframework.zip
             ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ github.event.inputs.release == 'pre' }}
