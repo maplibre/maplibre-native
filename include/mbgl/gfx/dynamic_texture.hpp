@@ -61,7 +61,7 @@ public:
 
     virtual void uploadImage(const uint8_t* pixelData, TextureHandle& texHandle);
     virtual void uploadDeferredImages() {};
-    virtual void removeTexture(const TextureHandle& texHandle);
+    virtual bool removeTexture(const TextureHandle& texHandle);
 
 protected:
     mapbox::ShelfPack shelfPack;

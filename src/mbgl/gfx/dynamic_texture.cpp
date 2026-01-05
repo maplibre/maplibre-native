@@ -2,9 +2,6 @@
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
 
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/texture2d.hpp>
-
 namespace mbgl {
 namespace gfx {
 
@@ -60,16 +57,18 @@ void DynamicTexture::uploadImage(const uint8_t* /*pixelData*/, gfx::TextureHandl
     texHandle.needsUpload = false;
 }
 
-void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
+bool DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     std::scoped_lock lock(mutex);
     auto* bin = shelfPack.getBin(texHandle.getId());
     if (!bin) {
-        return;
+        return false;
     }
     auto refcount = shelfPack.unref(*bin);
     if (refcount == 0) {
         numTextures--;
+        return true;
     }
+    return false;
 }
 
 } // namespace gfx

@@ -128,6 +128,8 @@ public:
 
     gfx::Texture2DPtr createTexture2D() override;
 
+    gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
+
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
