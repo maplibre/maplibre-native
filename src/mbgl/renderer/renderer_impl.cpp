@@ -188,8 +188,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const TransformState& state = renderTreeParameters.transformParams.state;
     const Size& size = state.getSize();
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
-    gfx::ScissorRect scissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
-    if (!frustumOffset.isFlush()) {
+    gfx::ScissorRect scissorRect;
+
+#if MLN_RENDER_BACKEND_OPENGL
+    if (frustumOffset.isFlush()) {
+        scissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
+    } else
+#endif
+    {
         scissorRect = {
             .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
 #if MLN_RENDER_BACKEND_OPENGL
