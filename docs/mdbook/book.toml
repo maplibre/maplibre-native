@@ -1,7 +1,6 @@
 [book]
 authors = ["MapLibre Contributors"]
 language = "en"
-multilingual = false
 src = "src"
 title = "MapLibre Native Developer Documentation"
 
