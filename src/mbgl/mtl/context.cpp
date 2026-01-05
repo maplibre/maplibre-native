@@ -3,6 +3,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/drawable_builder.hpp>
+#include <mbgl/mtl/dynamic_texture.hpp>
 #include <mbgl/mtl/layer_group.hpp>
 #include <mbgl/mtl/offscreen_texture.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
@@ -227,6 +228,10 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialC
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
