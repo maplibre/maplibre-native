@@ -12,9 +12,6 @@ public:
     DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType);
 
     void uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) override;
-
-private:
-    Context& context;
 };
 
 } // namespace mtl
