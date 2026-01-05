@@ -28,7 +28,7 @@ using is_utf16char_like_pointer =
     std::integral_constant<bool, std::is_pointer_v<T> && is_utf16char_like<std::remove_pointer_t<T>>::value>;
 
 template <class OutPointer, class InChar>
-OutPointer utf16char_cast(InChar *in)
+OutPointer utf16char_cast(InChar* in)
     requires(is_utf16char_like<InChar>::value && is_utf16char_like_pointer<OutPointer>::value)
 {
     return reinterpret_cast<OutPointer>(in);

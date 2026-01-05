@@ -36,7 +36,7 @@ struct EventPermutation {
     const EventSeverity severity;
     const Event event;
 
-    constexpr bool operator==(const EventPermutation &rhs) const {
+    constexpr bool operator==(const EventPermutation& rhs) const {
         return severity == rhs.severity && event == rhs.event;
     }
 };

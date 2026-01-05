@@ -79,7 +79,7 @@ mbgl::Color premultiply(mbgl::Color c) {
     return c;
 }
 
-std::array<double, 3> toArray(const mbgl::LatLng &crd) {
+std::array<double, 3> toArray(const mbgl::LatLng& crd) {
     return {crd.latitude(), crd.longitude(), 0};
 }
 } // namespace
@@ -122,7 +122,7 @@ constexpr TileLodMode nextTileLodMode(TileLodMode current) {
     }
 }
 
-void cycleTileLodMode(mbgl::Map &map) {
+void cycleTileLodMode(mbgl::Map& map) {
     // TileLodMode::Default parameters
     static const auto defaultRadius = map.getTileLodMinRadius();
     static const auto defaultScale = map.getTileLodScale();
@@ -159,7 +159,7 @@ void cycleTileLodMode(mbgl::Map &map) {
     map.triggerRepaint();
 }
 
-void tileLodZoomShift(mbgl::Map &map, bool positive) {
+void tileLodZoomShift(mbgl::Map& map, bool positive) {
     constexpr auto tileLodZoomShiftStep = 0.25;
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
     shift = map.getTileLodZoomShift() + shift;
@@ -169,7 +169,7 @@ void tileLodZoomShift(mbgl::Map &map, bool positive) {
     map.triggerRepaint();
 }
 
-void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
+void addFillExtrusionLayer(mbgl::style::Style& style, bool visible) {
     MLN_TRACE_FUNC();
 
     using namespace mbgl::style;
@@ -204,14 +204,14 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
 }
 } // namespace
 
-void glfwError(int error, const char *description) {
+void glfwError(int error, const char* description) {
     mbgl::Log::Error(mbgl::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,
                    bool benchmark_,
-                   const mbgl::ResourceOptions &resourceOptions,
-                   const mbgl::ClientOptions &clientOptions)
+                   const mbgl::ResourceOptions& resourceOptions,
+                   const mbgl::ClientOptions& clientOptions)
     : fullscreen(fullscreen_),
       benchmark(benchmark_),
       snapshotterObserver(std::make_unique<SnapshotObserver>()),
@@ -235,7 +235,7 @@ GLFWView::GLFWView(bool fullscreen_,
         exit(1);
     }
 
-    GLFWmonitor *monitor = nullptr;
+    GLFWmonitor* monitor = nullptr;
     if (fullscreen) {
         monitor = glfwGetPrimaryMonitor();
         auto videoMode = glfwGetVideoMode(monitor);
@@ -386,29 +386,29 @@ GLFWView::~GLFWView() {
     glfwTerminate();
 }
 
-void GLFWView::setMap(mbgl::Map *map_) {
+void GLFWView::setMap(mbgl::Map* map_) {
     MLN_TRACE_FUNC();
 
     map = map_;
     map->addAnnotationImage(makeImage("default_marker", 22, 22, 1));
 }
 
-void GLFWView::setRenderFrontend(GLFWRendererFrontend *rendererFrontend_) {
+void GLFWView::setRenderFrontend(GLFWRendererFrontend* rendererFrontend_) {
     MLN_TRACE_FUNC();
 
     rendererFrontend = rendererFrontend_;
 }
 
-mbgl::gfx::RendererBackend &GLFWView::getRendererBackend() {
+mbgl::gfx::RendererBackend& GLFWView::getRendererBackend() {
     MLN_TRACE_FUNC();
 
     return backend->getRendererBackend();
 }
 
-void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, int mods) {
+void GLFWView::onKey(GLFWwindow* window, int key, int /*scancode*/, int action, int mods) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
 
     if (action == GLFW_RELEASE) {
         if (key != GLFW_KEY_R || key != GLFW_KEY_S) view->animateRouteCallback = nullptr;
@@ -494,11 +494,11 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->show3DExtrusions = true;
                 view->toggle3DExtrusions(view->show3DExtrusions);
                 if (view->animateRouteCallback) break;
-                view->animateRouteCallback = [](mbgl::Map *routeMap) {
+                view->animateRouteCallback = [](mbgl::Map* routeMap) {
                     static mapbox::cheap_ruler::CheapRuler ruler{40.7}; // New York
                     static mapbox::geojson::geojson route{mapbox::geojson::parse(mbgl::platform::glfw::route)};
-                    const auto &geometry = route.get<mapbox::geometry::geometry<double>>();
-                    const auto &lineString = geometry.get<mapbox::geometry::line_string<double>>();
+                    const auto& geometry = route.get<mapbox::geometry::geometry<double>>();
+                    const auto& lineString = geometry.get<mapbox::geometry::line_string<double>>();
 
                     static double routeDistance = ruler.lineDistance(lineString);
                     static double routeProgress = 0;
@@ -568,7 +568,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 using namespace mbgl::style;
                 using namespace mbgl::style::expression::dsl;
 
-                auto &style = view->map->getStyle();
+                auto& style = view->map->getStyle();
                 if (!style.getSource("states")) {
                     std::string url = "https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson";
                     auto source = std::make_unique<GeoJSONSource>("states");
@@ -709,7 +709,7 @@ namespace util {
 
 template <>
 struct Interpolator<mbgl::LatLng> {
-    mbgl::LatLng operator()(const mbgl::LatLng &a, const mbgl::LatLng &b, const double t) {
+    mbgl::LatLng operator()(const mbgl::LatLng& a, const mbgl::LatLng& b, const double t) {
         return {
             interpolate<double>(a.latitude(), b.latitude(), t),
             interpolate<double>(a.longitude(), b.longitude(), t),
@@ -766,7 +766,7 @@ mbgl::Point<double> GLFWView::makeRandomPoint() const {
     return {latLng.longitude(), latLng.latitude()};
 }
 
-std::unique_ptr<mbgl::style::Image> GLFWView::makeImage(const std::string &id,
+std::unique_ptr<mbgl::style::Image> GLFWView::makeImage(const std::string& id,
                                                         int width,
                                                         int height,
                                                         float pixelRatio) {
@@ -780,7 +780,7 @@ std::unique_ptr<mbgl::style::Image> GLFWView::makeImage(const std::string &id,
     const int h = static_cast<int>(std::ceil(pixelRatio * height));
 
     mbgl::PremultipliedImage image({static_cast<uint32_t>(w), static_cast<uint32_t>(h)});
-    auto data = reinterpret_cast<uint32_t *>(image.data.get());
+    auto data = reinterpret_cast<uint32_t*>(image.data.get());
     const int dist = (w / 2) * (w / 2);
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
@@ -903,13 +903,13 @@ void GLFWView::cycleDebugOptions() {
 void GLFWView::clearAnnotations() {
     MLN_TRACE_FUNC();
 
-    for (const auto &id : annotationIDs) {
+    for (const auto& id : annotationIDs) {
         map->removeAnnotation(id);
     }
 
     annotationIDs.clear();
 
-    for (const auto &id : animatedAnnotationIDs) {
+    for (const auto& id : animatedAnnotationIDs) {
         map->removeAnnotation(id);
     }
 
@@ -927,10 +927,10 @@ void GLFWView::popAnnotation() {
 
 void GLFWView::toggleCustomDrawableStyle() {
 #if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    auto &style = map->getStyle();
+    auto& style = map->getStyle();
 
     const std::string identifier = "ExampleCustomDrawableStyleLayer";
-    const auto &existingLayer = style.getLayer(identifier);
+    const auto& existingLayer = style.getLayer(identifier);
 
     if (!existingLayer) {
         style.addLayer(std::make_unique<mbgl::style::CustomDrawableLayer>(
@@ -956,11 +956,11 @@ void GLFWView::makeSnapshot(bool withOverlay) {
 
     auto snapshot = [&] {
         snapshotter->setCameraOptions(map->getCameraOptions());
-        snapshotter->snapshot([](const std::exception_ptr &ptr,
+        snapshotter->snapshot([](const std::exception_ptr& ptr,
                                  mbgl::PremultipliedImage image,
-                                 const mbgl::MapSnapshotter::Attributions &,
-                                 const mbgl::MapSnapshotter::PointForFn &,
-                                 const mbgl::MapSnapshotter::LatLngForFn &) {
+                                 const mbgl::MapSnapshotter::Attributions&,
+                                 const mbgl::MapSnapshotter::PointForFn&,
+                                 const mbgl::MapSnapshotter::LatLngForFn&) {
             if (!ptr) {
                 std::ostringstream oss;
                 oss << "Made snapshot './snapshot.png' with size w:" << image.size.width << "px h:" << image.size.height
@@ -984,10 +984,10 @@ void GLFWView::makeSnapshot(bool withOverlay) {
     }
 }
 
-void GLFWView::onScroll(GLFWwindow *window, double /*xOffset*/, double yOffset) {
+void GLFWView::onScroll(GLFWwindow* window, double /*xOffset*/, double yOffset) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
     double delta = yOffset * 40;
 
     bool isWheel = delta != 0 && std::fmod(delta, 4.000244140625) == 0;
@@ -1014,10 +1014,10 @@ void GLFWView::onScroll(GLFWwindow *window, double /*xOffset*/, double yOffset) 
 #endif
 }
 
-void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
+void GLFWView::onWindowResize(GLFWwindow* window, int width, int height) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
     view->width = width;
     view->height = height;
     view->map->setSize({static_cast<uint32_t>(view->width), static_cast<uint32_t>(view->height)});
@@ -1029,10 +1029,10 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
 #endif
 }
 
-void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
+void GLFWView::onFramebufferResize(GLFWwindow* window, int width, int height) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
     view->backend->setSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
     // This is only triggered when the framebuffer is resized, but not the
@@ -1052,10 +1052,10 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
 #endif
 }
 
-void GLFWView::onMouseClick(GLFWwindow *window, int button, int action, int modifiers) {
+void GLFWView::onMouseClick(GLFWwindow* window, int button, int action, int modifiers) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT || (button == GLFW_MOUSE_BUTTON_LEFT && modifiers & GLFW_MOD_CONTROL)) {
         view->rotating = action == GLFW_PRESS;
@@ -1085,10 +1085,10 @@ void GLFWView::onMouseClick(GLFWwindow *window, int button, int action, int modi
     }
 }
 
-void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
+void GLFWView::onMouseMove(GLFWwindow* window, double x, double y) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
     if (view->tracking) {
         const double dx = x - view->lastX;
         const double dy = y - view->lastY;
@@ -1111,7 +1111,7 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
         view->puck->setLocation(toArray(mapCenter));
     }
 #endif
-    auto &style = view->map->getStyle();
+    auto& style = view->map->getStyle();
     if (style.getLayer("state-fills")) {
         auto screenCoordinate = mbgl::ScreenCoordinate{view->lastX, view->lastY};
         const mbgl::RenderedQueryOptions queryOptions({{{"state-fills"}}, {}});
@@ -1147,19 +1147,19 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
     }
 }
 
-void GLFWView::onWindowFocus(GLFWwindow *window, int focused) {
+void GLFWView::onWindowFocus(GLFWwindow* window, int focused) {
     MLN_TRACE_FUNC();
 
     if (focused == GLFW_FALSE) { // Focus lost.
-        auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+        auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
         view->rendererFrontend->getRenderer()->reduceMemoryUse();
     }
 }
 
 #if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
-void GLFWView::onWindowRefresh(GLFWwindow *window) {
+void GLFWView::onWindowRefresh(GLFWwindow* window) {
     // Untested elsewhere
-    if (auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window))) {
+    if (auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window))) {
         view->invalidate();
         view->render();
 #if defined(MLN_RENDER_BACKEND_OPENGL)
@@ -1286,7 +1286,7 @@ void GLFWView::setShouldClose() {
     glfwPostEmptyEvent();
 }
 
-void GLFWView::setWindowTitle(const std::string &title) {
+void GLFWView::setWindowTitle(const std::string& title) {
     MLN_TRACE_FUNC();
 
     glfwSetWindowTitle(window, (std::string{"MapLibre Native (GLFW): "} + title).c_str());
@@ -1316,9 +1316,9 @@ void GLFWView::toggleCustomSource() {
 
     if (!map->getStyle().getSource("custom")) {
         mbgl::style::CustomGeometrySource::Options options;
-        options.cancelTileFunction = [](const mbgl::CanonicalTileID &) {
+        options.cancelTileFunction = [](const mbgl::CanonicalTileID&) {
         };
-        options.fetchTileFunction = [&](const mbgl::CanonicalTileID &tileID) {
+        options.fetchTileFunction = [&](const mbgl::CanonicalTileID& tileID) {
             double gridSpacing = 0.1;
             mbgl::FeatureCollection features;
             const mbgl::LatLngBounds bounds(tileID);
@@ -1341,7 +1341,7 @@ void GLFWView::toggleCustomSource() {
 
                 features.emplace_back(gridLine);
             }
-            auto source = static_cast<mbgl::style::CustomGeometrySource *>(map->getStyle().getSource("custom"));
+            auto source = static_cast<mbgl::style::CustomGeometrySource*>(map->getStyle().getSource("custom"));
             if (source) {
                 source->setTileData(tileID, features);
                 source->invalidateTile(tileID);
@@ -1350,7 +1350,7 @@ void GLFWView::toggleCustomSource() {
         map->getStyle().addSource(std::make_unique<mbgl::style::CustomGeometrySource>("custom", options));
     }
 
-    auto *layer = map->getStyle().getLayer("grid");
+    auto* layer = map->getStyle().getLayer("grid");
 
     if (!layer) {
         auto lineLayer = std::make_unique<mbgl::style::LineLayer>("grid", "custom");
@@ -1367,7 +1367,7 @@ void GLFWView::toggleLocationIndicatorLayer() {
     MLN_TRACE_FUNC();
 
 #ifdef ENABLE_LOCATION_INDICATOR
-    puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
+    puck = static_cast<mbgl::style::LocationIndicatorLayer*>(map->getStyle().getLayer("puck"));
     static const mbgl::LatLng puckLocation{35.683389, 139.76525}; // A location on the crossing of 4 tiles
     if (puck == nullptr) {
         auto puckLayer = std::make_unique<mbgl::style::LocationIndicatorLayer>("puck");
@@ -1432,7 +1432,7 @@ void GLFWView::onWillStartRenderingFrame() {
     MLN_TRACE_FUNC();
 
 #ifdef ENABLE_LOCATION_INDICATOR
-    puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
+    puck = static_cast<mbgl::style::LocationIndicatorLayer*>(map->getStyle().getLayer("puck"));
     if (puck) {
         uint64_t ns = mbgl::Clock::now().time_since_epoch().count();
         const double bearing = static_cast<double>(ns % 2000000000) / 2000000000.0 * 360.0;
