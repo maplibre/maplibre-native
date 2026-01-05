@@ -23,8 +23,8 @@ jobs:
       - name: Install Dependencies
         shell: bash
         run: sudo apt-get install -y libwayland-dev libxkbcommon-dev # Required for winit
-      - name: Install mdbook-alerts, mdbook-mermaid
-        run: cargo install mdbook-alerts mdbook-mermaid
+      - name: Install mdbook-mermaid
+        run: cargo install mdbook-mermaid
       - name: Build
         working-directory: docs/mdbook
         shell: bash

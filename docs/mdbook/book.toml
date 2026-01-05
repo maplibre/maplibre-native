@@ -9,7 +9,5 @@ title = "MapLibre Native Developer Documentation"
 additional-css = ["diff.css"]
 additional-js = []
 
-[preprocessor.alerts]
-
 [preprocessor.mermaid]
 command = "mdbook-mermaid"
