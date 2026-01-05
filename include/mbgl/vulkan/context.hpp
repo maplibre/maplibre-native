@@ -147,7 +147,8 @@ public:
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     void enqueueDeletion(std::function<void(Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function, bool createCommandPool = false) const;
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function,
+                              bool createCommandPool = false) const;
 
     void requestSurfaceUpdate(bool useDelay = true);
 

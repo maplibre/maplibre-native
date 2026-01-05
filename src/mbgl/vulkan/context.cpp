@@ -169,7 +169,8 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
 }
 
 std::mutex mutex;
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function, bool createCommandPool) const {
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function,
+                                   bool createCommandPool) const {
     MLN_TRACE_FUNC();
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -181,7 +182,7 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     }
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-            createCommandPool ? newCommandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+        createCommandPool ? newCommandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();

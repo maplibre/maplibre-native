@@ -15,7 +15,8 @@ public:
     void uploadDeferredImages() override;
     bool removeTexture(const gfx::TextureHandle& texHandle) override;
 
-    using ImagesToUpload = std::unordered_map<gfx::TextureHandle, std::unique_ptr<uint8_t[]>, gfx::TextureHandle::Hasher>;
+    using ImagesToUpload =
+        std::unordered_map<gfx::TextureHandle, std::unique_ptr<uint8_t[]>, gfx::TextureHandle::Hasher>;
 
 private:
     Context& context;

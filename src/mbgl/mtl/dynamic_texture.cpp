@@ -7,7 +7,6 @@ namespace mtl {
 DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelType pixelType)
     : gfx::DynamicTexture(context_, size, pixelType),
       context(context_) {
-
     texture->create();
 }
 

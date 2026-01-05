@@ -14,8 +14,8 @@ DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pix
     texture->setSize(size);
     texture->setFormat(pixelType, gfx::TextureChannelDataType::UnsignedByte);
     texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                             .wrapU = gfx::TextureWrapType::Clamp,
-                                             .wrapV = gfx::TextureWrapType::Clamp});
+                                      .wrapU = gfx::TextureWrapType::Clamp,
+                                      .wrapV = gfx::TextureWrapType::Clamp});
 }
 
 const gfx::Texture2DPtr& DynamicTexture::getTexture() const {
