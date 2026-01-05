@@ -75,15 +75,20 @@ gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
 }
 
 PremultipliedImage HeadlessBackend::readStillImage() {
+    if (!resource) {
+        resource = std::make_unique<HeadlessRenderableResource>(*this);
+    }
+
     auto& contextImpl = static_cast<Context&>(*context);
     auto& resourceImpl = static_cast<HeadlessRenderableResource&>(*resource);
 
     if (!texture) {
         texture = std::make_unique<Texture2D>(contextImpl);
         texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
-        texture->setSize(size);
         texture->setUsage(Texture2DUsage::Read);
     }
+
+    texture->setSize(size);
 
     contextImpl.waitFrame();
     texture->copyImage(resourceImpl.getAcquiredImage());
