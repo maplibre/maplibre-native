@@ -4,6 +4,7 @@
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/noncopyable.hpp>
@@ -89,6 +90,8 @@ public:
 
     gfx::Texture2DPtr createTexture2D() override;
 
+    gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
+
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     void resetState(gfx::DepthMode, gfx::ColorMode) override {}
@@ -144,7 +147,7 @@ public:
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     void enqueueDeletion(std::function<void(Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function, bool createCommandPool = false) const;
 
     void requestSurfaceUpdate(bool useDelay = true);
 

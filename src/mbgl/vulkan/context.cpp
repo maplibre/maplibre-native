@@ -6,6 +6,7 @@
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/vulkan/drawable_builder.hpp>
+#include <mbgl/vulkan/dynamic_texture.hpp>
 #include <mbgl/vulkan/offscreen_texture.hpp>
 #include <mbgl/vulkan/layer_group.hpp>
 #include <mbgl/vulkan/tile_layer_group.hpp>
@@ -167,11 +168,20 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
+std::mutex mutex;
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function, bool createCommandPool) const {
     MLN_TRACE_FUNC();
+    std::lock_guard<std::mutex> lock(mutex);
+
+    vk::UniqueCommandPool newCommandPool;
+    if (createCommandPool) {
+        const vk::CommandPoolCreateInfo createInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                                                   backend.getGraphicsQueueIndex());
+        newCommandPool = backend.getDevice()->createCommandPoolUnique(createInfo, nullptr, backend.getDispatcher());
+    }
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+            createCommandPool ? newCommandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -315,6 +325,8 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+    std::lock_guard<std::mutex> lock(mutex);
+
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end(dispatcher);
@@ -431,6 +443,10 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {

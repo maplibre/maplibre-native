@@ -19,6 +19,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/wgsl_preprocessor.cpp
@@ -55,6 +56,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/dynamic_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/index_buffer_resource.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
@@ -91,6 +93,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/index_buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp

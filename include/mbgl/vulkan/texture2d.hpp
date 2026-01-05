@@ -72,7 +72,8 @@ public:
                          const Size& size,
                          uint16_t xOffset,
                          uint16_t yOffset,
-                         const vk::UniqueCommandBuffer& buffer) noexcept;
+                         const vk::UniqueCommandBuffer& buffer,
+                         std::vector<std::function<void(gfx::Context&)>>* deletionQueue = nullptr) noexcept;
 
     bool needsUpload() const noexcept override { return !!imageData; };
 

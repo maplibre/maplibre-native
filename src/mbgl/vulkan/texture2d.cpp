@@ -152,7 +152,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 const Size& size_,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
-                                const vk::UniqueCommandBuffer& commandBuffer) noexcept {
+                                const vk::UniqueCommandBuffer& commandBuffer,
+                                std::vector<std::function<void(gfx::Context&)>>* deletionQueue) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
@@ -205,7 +206,15 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
     enqueueCommands(commandBuffer);
 
-    context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](auto&) mutable { buffAlloc.reset(); });
+    const auto function = [buffAlloc = std::move(bufferAllocation)](auto&) mutable {
+        buffAlloc.reset();
+    };
+
+    if (deletionQueue) {
+        deletionQueue->push_back(std::move(function));
+    } else {
+        context.enqueueDeletion(std::move(function));
+    }
 
     context.renderingStats().numTextureUpdates++;
     context.renderingStats().textureUpdateBytes += bufferInfo.size;

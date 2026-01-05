@@ -10,12 +10,11 @@
 #include <mutex>
 
 namespace mbgl {
-
 namespace gfx {
 
 class Context;
 class Texture2D;
-using Texture2DPtr = std::shared_ptr<gfx::Texture2D>;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class TextureHandle {
 public:
@@ -46,14 +45,13 @@ private:
 class DynamicTexture {
 public:
     DynamicTexture(Context& context, Size size, TexturePixelType pixelType);
-    ~DynamicTexture() = default;
+    virtual ~DynamicTexture() = default;
 
     const Texture2DPtr& getTexture() const;
     TexturePixelType getPixelFormat() const;
     bool isEmpty() const;
 
     std::optional<TextureHandle> reserveSize(const Size& size, int32_t uniqueId);
-    void uploadImage(const uint8_t* pixelData, TextureHandle& texHandle);
 
     template <typename Image>
     std::optional<TextureHandle> addImage(const Image& image, int32_t uniqueId = -1) {
@@ -61,22 +59,16 @@ public:
     }
     std::optional<TextureHandle> addImage(const uint8_t* pixelData, const Size& imageSize, int32_t uniqueId = -1);
 
-    void uploadDeferredImages();
-    void removeTexture(const TextureHandle& texHandle);
+    virtual void uploadImage(const uint8_t* pixelData, TextureHandle& texHandle);
+    virtual void uploadDeferredImages() {};
+    virtual void removeTexture(const TextureHandle& texHandle);
 
-    using ImagesToUpload = std::unordered_map<TextureHandle, std::unique_ptr<uint8_t[]>, TextureHandle::Hasher>;
-
-private:
-    Texture2DPtr texture;
+protected:
     mapbox::ShelfPack shelfPack;
+    Texture2DPtr texture;
     int numTextures = 0;
-    bool deferredCreation = false;
-    ImagesToUpload imagesToUpload;
     std::mutex mutex;
 };
-
-#define MLN_DEFER_UPLOAD_ON_RENDER_THREAD \
-    (MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_WEBGPU)
 
 } // namespace gfx
 } // namespace mbgl
