@@ -1,8 +1,8 @@
-#include <mbgl/gl/dynamic_texture.hpp>
-#include <mbgl/gl/context.hpp>
+#include <mbgl/webgpu/dynamic_texture.hpp>
+#include <mbgl/webgpu/context.hpp>
 
 namespace mbgl {
-namespace gl {
+namespace webgpu {
 
 DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelType pixelType)
     : gfx::DynamicTexture(context_, size, pixelType),
@@ -46,5 +46,5 @@ bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
     return false;
 }
 
-} // namespace gl
+} // namespace webgpu
 } // namespace mbgl

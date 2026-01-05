@@ -28,5 +28,5 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
 }
 
-} // namespace gfx
+} // namespace vulkan
 } // namespace mbgl
