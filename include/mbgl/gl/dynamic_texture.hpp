@@ -19,7 +19,6 @@ public:
         std::unordered_map<gfx::TextureHandle, std::unique_ptr<uint8_t[]>, gfx::TextureHandle::Hasher>;
 
 private:
-    Context& context;
     bool deferredCreation = false;
     ImagesToUpload imagesToUpload;
 };

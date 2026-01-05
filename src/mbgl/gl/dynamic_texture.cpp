@@ -4,9 +4,8 @@
 namespace mbgl {
 namespace gl {
 
-DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelType pixelType)
-    : gfx::DynamicTexture(context_, size, pixelType),
-      context(context_) {
+DynamicTexture::DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType)
+    : gfx::DynamicTexture(context, size, pixelType) {
     deferredCreation = true;
 }
 
