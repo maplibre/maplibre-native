@@ -1,4 +1,5 @@
 #include <mbgl/webgpu/dynamic_texture.hpp>
+#include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/webgpu/context.hpp>
 
 namespace mbgl {

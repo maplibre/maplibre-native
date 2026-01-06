@@ -1,4 +1,5 @@
 #include <mbgl/mtl/dynamic_texture.hpp>
+#include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/context.hpp>
 
 namespace mbgl {
