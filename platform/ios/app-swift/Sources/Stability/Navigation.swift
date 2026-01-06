@@ -144,7 +144,11 @@ class NavigationRoute {
     init(json: [String: Any], mapView: MLNMapView) {
         self.mapView = mapView
 
-        load(json: json)
+        do {
+            try load(json: json)
+        } catch {
+            print("Error loading route: \(error)")
+        }
     }
 
     deinit {
@@ -152,7 +156,7 @@ class NavigationRoute {
         mapView?.locationManager = nil
     }
 
-    private func load(json: [String: Any]) {
+    private func load(json: [String: Any]) throws {
         let routeJson = (json["routes"] as! [[String: Any]]).first!
 
         // stats
@@ -164,7 +168,11 @@ class NavigationRoute {
         destination = CLLocationCoordinate2D(latitude: destinationJson.last!, longitude: destinationJson.first!)
 
         // route geometry
-        let geometry: [LocationCoordinate2D] = decodePolyline(routeJson["geometry"] as! String, precision: 1e6)!
+        Polyline.setCompressionAlgorithm(CompressionAlgorithm.Polyline6)
+
+        let geometry = try Polyline.decodeToLngLatArray(routeJson["geometry"] as! String).map {
+            CLLocationCoordinate2D(latitude: $0.last!, longitude: $0.first!)
+        }
 
         loadGeometry(from: geometry)
 

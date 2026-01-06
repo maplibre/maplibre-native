@@ -3,10 +3,10 @@
     {
       "identity" : "polyline",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/raphaelmor/Polyline",
+      "location" : "https://github.com/aws-geospatial/polyline/",
       "state" : {
-        "revision" : "353f80378dcd8f17eefe8550090c6b1ae3c9da23",
-        "version" : "5.1.0"
+        "revision" : "deaef283f8040debf7cbd21bf95d779d2d1a798e",
+        "version" : "0.3.1"
       }
     },
     {
