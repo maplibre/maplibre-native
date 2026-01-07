@@ -78,7 +78,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Calculate texture coordinate
     float2 epsilon = 1.0 / tileProps.dimension;
     float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    float2 pos = (float2(vertx.texture_pos) / 8192.0) * scale + epsilon;
+    float2 pos = (float2(vertx.pos) / 8192.0) * scale + epsilon;
 
     // Handle poles (use vertx.pos, not texture_pos, to match GLSL a_pos)
     if (float(vertx.pos.y) < -32767.5) pos.y = 0.0;
