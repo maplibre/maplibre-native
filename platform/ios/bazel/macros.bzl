@@ -39,7 +39,7 @@ def _env_info_plist_impl(ctx):
 
             for var in "${vars[@]}"; do
                 if [ -n "${!var}" ]; then
-                    if plutil -p $out | grep -q "<key>$var<key>"; then
+                    if plutil -p $out | grep -q "<key>$var</key>"; then
                         # skip if there is a key present (let the user manually override)
                         #plutil -replace $var -string ${!var} $out
                         echo "User $var key detected. Update ignored"
