@@ -424,11 +424,11 @@ public class SymbolLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = {2.0f, 2.0f, 2.0f, 2.0f};
     layer.setProperties(iconPadding(propertyValue));
-    assertEquals(layer.getIconPadding().getValue(), propertyValue);
+    assertArrayEquals(layer.getIconPadding().getValue(), propertyValue);
     // Single number value can be used too for backward compatibility
     Float number = propertyValue[0] + 1.0f;
     layer.setProperties(iconPadding(number));
-    assertEquals(layer.getIconPadding().getValue(), new Float[]{number, number, number, number});
+    assertArrayEquals(layer.getIconPadding().getValue(), new Float[]{number, number, number, number});
   }
 
   @Test
@@ -719,7 +719,7 @@ public class SymbolLayerTest extends BaseLayerTest {
     // Set and Get
     String[] propertyValue = new String[0];
     layer.setProperties(textVariableAnchor(propertyValue));
-    assertEquals(layer.getTextVariableAnchor().getValue(), propertyValue);
+    assertArrayEquals(layer.getTextVariableAnchor().getValue(), propertyValue);
   }
 
   @Test
@@ -732,7 +732,7 @@ public class SymbolLayerTest extends BaseLayerTest {
     // Set and Get
     Object[] propertyValue = new Object[] {"top", new Float[]{1f, 2f}};
     layer.setProperties(textVariableAnchorOffset(propertyValue));
-    assertEquals(layer.getTextVariableAnchorOffset().getValue(), propertyValue);
+    assertArrayEquals(layer.getTextVariableAnchorOffset().getValue(), propertyValue);
   }
 
   @Test
@@ -784,7 +784,7 @@ public class SymbolLayerTest extends BaseLayerTest {
     // Set and Get
     String[] propertyValue = new String[0];
     layer.setProperties(textWritingMode(propertyValue));
-    assertEquals(layer.getTextWritingMode().getValue(), propertyValue);
+    assertArrayEquals(layer.getTextWritingMode().getValue(), propertyValue);
   }
 
   @Test
