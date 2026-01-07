@@ -12,441 +12,440 @@
 namespace mbgl {
 namespace android {
 
-inline mbgl::style::LineLayer& toLineLayer(mbgl::style::Layer& layer) {
-    return static_cast<mbgl::style::LineLayer&>(layer);
-}
-
-/**
- * Creates an owning peer object (for layers not attached to the map) from the JVM side
- */
-LineLayer::LineLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::LineLayer>(jni::Make<std::string>(env, layerId),
-                                                     jni::Make<std::string>(env, sourceId))) {}
-
-/**
- * Creates a non-owning peer object (for layers currently attached to the map)
- */
-LineLayer::LineLayer(mbgl::style::LineLayer& coreLayer)
-    : Layer(coreLayer) {}
-
-/**
- * Creates an owning peer object (for layers not attached to the map)
- */
-LineLayer::LineLayer(std::unique_ptr<mbgl::style::LineLayer> coreLayer)
-    : Layer(std::move(coreLayer)) {}
-
-LineLayer::~LineLayer() = default;
-
-// Property getters
-
-jni::Local<jni::Object<>> LineLayer::getLineCap(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineCap()));
+    inline mbgl::style::LineLayer& toLineLayer(mbgl::style::Layer& layer) {
+        return static_cast<mbgl::style::LineLayer&>(layer);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineCap()));
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineJoin(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineJoin()));
+    /**
+     * Creates an owning peer object (for layers not attached to the map) from the JVM side
+     */
+    LineLayer::LineLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
+        : Layer(std::make_unique<mbgl::style::LineLayer>(jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId))) {
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineJoin()));
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineMiterLimit(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineMiterLimit()));
+    /**
+     * Creates a non-owning peer object (for layers currently attached to the map)
+     */
+    LineLayer::LineLayer(mbgl::style::LineLayer& coreLayer)
+        : Layer(coreLayer) {
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineMiterLimit()));
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineRoundLimit(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineRoundLimit()));
+    /**
+     * Creates an owning peer object (for layers not attached to the map)
+     */
+    LineLayer::LineLayer(std::unique_ptr<mbgl::style::LineLayer> coreLayer)
+        : Layer(std::move(coreLayer)) {
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineRoundLimit()));
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineSortKey(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineSortKey()));
+    LineLayer::~LineLayer() = default;
+
+    // Property getters
+
+    jni::Local<jni::Object<>> LineLayer::getLineCap(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineCap()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineCap()));
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineSortKey()));
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineOpacity(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineOpacity()));
+    jni::Local<jni::Object<>> LineLayer::getLineJoin(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineJoin()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineJoin()));
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineOpacity()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineOpacityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineMiterLimit(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineMiterLimit()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineMiterLimit()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineOpacityTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<>> LineLayer::getLineRoundLimit(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineRoundLimit()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineRoundLimit()));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineOpacityTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineColor()));
+    jni::Local<jni::Object<>> LineLayer::getLineSortKey(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineSortKey()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineSortKey()));
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineColor()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineOpacity(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineOpacity()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineOpacity()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineColorTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineOpacityTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineOpacityTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineColorTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineTranslate(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineTranslate()));
+    void LineLayer::setLineOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineOpacityTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineTranslate()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineTranslateTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineColor(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineColor()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineColor()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineTranslateTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineTranslateTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineColorTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineColorTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineTranslateTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineTranslateAnchor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineTranslateAnchor()));
+    void LineLayer::setLineColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineColorTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineTranslateAnchor()));
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineWidth(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineWidth()));
+    jni::Local<jni::Object<>> LineLayer::getLineTranslate(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineTranslate()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineTranslate()));
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineWidth()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineWidthTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineTranslateTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineTranslateTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineWidthTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineWidthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    void LineLayer::setLineTranslateTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineTranslateTransition(options);
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineWidthTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineGapWidth(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineGapWidth()));
+    jni::Local<jni::Object<>> LineLayer::getLineTranslateAnchor(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineTranslateAnchor()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineTranslateAnchor()));
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineGapWidth()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineGapWidthTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineWidth(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineWidth()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineWidth()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineGapWidthTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineGapWidthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineWidthTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineWidthTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineGapWidthTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineOffset(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineOffset()));
+    void LineLayer::setLineWidthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineWidthTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineOffset()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineOffsetTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineGapWidth(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineGapWidth()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineGapWidth()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineOffsetTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineOffsetTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineGapWidthTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineGapWidthTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineOffsetTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineBlur(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineBlur()));
+    void LineLayer::setLineGapWidthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineGapWidthTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineBlur()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineBlurTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineOffset(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineOffset()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineOffset()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineBlurTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineBlurTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineOffsetTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineOffsetTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineBlurTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineDasharray(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineDasharray()));
+    void LineLayer::setLineOffsetTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineOffsetTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineDasharray()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineDasharrayTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineBlur(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineBlur()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineBlur()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineDasharrayTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLineDasharrayTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineBlurTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineBlurTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLineDasharrayTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLinePattern(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLinePattern()));
+    void LineLayer::setLineBlurTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineBlurTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLinePattern()));
-}
 
-jni::Local<jni::Object<TransitionOptions>> LineLayer::getLinePatternTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    jni::Local<jni::Object<>> LineLayer::getLineDasharray(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineDasharray()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineDasharray()));
     }
-    mbgl::style::TransitionOptions options = toLineLayer(*layer).getLinePatternTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
 
-void LineLayer::setLinePatternTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLineDasharrayTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLineDasharrayTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
-    toLineLayer(*layer).setLinePatternTransition(options);
-}
 
-jni::Local<jni::Object<>> LineLayer::getLineGradient(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineGradient()));
+    void LineLayer::setLineDasharrayTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLineDasharrayTransition(options);
     }
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineGradient()));
-}
 
-// LineJavaLayerPeerFactory
+    jni::Local<jni::Object<>> LineLayer::getLinePattern(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLinePattern()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLinePattern()));
+    }
 
-LineJavaLayerPeerFactory::~LineJavaLayerPeerFactory() = default;
+    jni::Local<jni::Object<TransitionOptions>> LineLayer::getLinePatternTransition(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        }
+        mbgl::style::TransitionOptions options = toLineLayer(*layer).getLinePatternTransition();
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+    }
 
-namespace {
-jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
-    static auto& javaClass = jni::Class<LineLayer>::Singleton(env);
-    static auto constructor = javaClass.GetConstructor<jni::jlong>(env);
-    return javaClass.New(env, constructor, reinterpret_cast<jni::jlong>(layer));
-}
-} // namespace
+    void LineLayer::setLinePatternTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return;
+        }
+        mbgl::style::TransitionOptions options;
+        options.duration.emplace(mbgl::Milliseconds(duration));
+        options.delay.emplace(mbgl::Milliseconds(delay));
+        toLineLayer(*layer).setLinePatternTransition(options);
+    }
 
-jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                             mbgl::style::Layer& layer) {
-    assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(env, new LineLayer(toLineLayer(layer)));
-}
+    jni::Local<jni::Object<>> LineLayer::getLineGradient(jni::JNIEnv& env) {
+        using namespace mbgl::android::conversion;
+        auto layer = layerPtr.get();
+        if (!layer) {
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LineLayer::getDefaultLineGradient()));
+        }
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, toLineLayer(*layer).getLineGradient()));
+    }
 
-jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
-    assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-    return createJavaPeer(
-        env,
-        new LineLayer(std::unique_ptr<mbgl::style::LineLayer>(static_cast<mbgl::style::LineLayer*>(layer.release()))));
-}
 
-void LineJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
-    // Lookup the class
-    static auto& javaClass = jni::Class<LineLayer>::Singleton(env);
+    // LineJavaLayerPeerFactory
 
-#define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
+    LineJavaLayerPeerFactory::~LineJavaLayerPeerFactory() = default;
 
-    // Register the peer
-    jni::RegisterNativePeer<LineLayer>(
-        env,
-        javaClass,
-        "nativePtr",
-        jni::MakePeer<LineLayer, jni::String&, jni::String&>,
-        "initialize",
-        "finalize",
-        METHOD(&LineLayer::getLineCap, "nativeGetLineCap"),
-        METHOD(&LineLayer::getLineJoin, "nativeGetLineJoin"),
-        METHOD(&LineLayer::getLineMiterLimit, "nativeGetLineMiterLimit"),
-        METHOD(&LineLayer::getLineRoundLimit, "nativeGetLineRoundLimit"),
-        METHOD(&LineLayer::getLineSortKey, "nativeGetLineSortKey"),
-        METHOD(&LineLayer::getLineOpacityTransition, "nativeGetLineOpacityTransition"),
-        METHOD(&LineLayer::setLineOpacityTransition, "nativeSetLineOpacityTransition"),
-        METHOD(&LineLayer::getLineOpacity, "nativeGetLineOpacity"),
-        METHOD(&LineLayer::getLineColorTransition, "nativeGetLineColorTransition"),
-        METHOD(&LineLayer::setLineColorTransition, "nativeSetLineColorTransition"),
-        METHOD(&LineLayer::getLineColor, "nativeGetLineColor"),
-        METHOD(&LineLayer::getLineTranslateTransition, "nativeGetLineTranslateTransition"),
-        METHOD(&LineLayer::setLineTranslateTransition, "nativeSetLineTranslateTransition"),
-        METHOD(&LineLayer::getLineTranslate, "nativeGetLineTranslate"),
-        METHOD(&LineLayer::getLineTranslateAnchor, "nativeGetLineTranslateAnchor"),
-        METHOD(&LineLayer::getLineWidthTransition, "nativeGetLineWidthTransition"),
-        METHOD(&LineLayer::setLineWidthTransition, "nativeSetLineWidthTransition"),
-        METHOD(&LineLayer::getLineWidth, "nativeGetLineWidth"),
-        METHOD(&LineLayer::getLineGapWidthTransition, "nativeGetLineGapWidthTransition"),
-        METHOD(&LineLayer::setLineGapWidthTransition, "nativeSetLineGapWidthTransition"),
-        METHOD(&LineLayer::getLineGapWidth, "nativeGetLineGapWidth"),
-        METHOD(&LineLayer::getLineOffsetTransition, "nativeGetLineOffsetTransition"),
-        METHOD(&LineLayer::setLineOffsetTransition, "nativeSetLineOffsetTransition"),
-        METHOD(&LineLayer::getLineOffset, "nativeGetLineOffset"),
-        METHOD(&LineLayer::getLineBlurTransition, "nativeGetLineBlurTransition"),
-        METHOD(&LineLayer::setLineBlurTransition, "nativeSetLineBlurTransition"),
-        METHOD(&LineLayer::getLineBlur, "nativeGetLineBlur"),
-        METHOD(&LineLayer::getLineDasharrayTransition, "nativeGetLineDasharrayTransition"),
-        METHOD(&LineLayer::setLineDasharrayTransition, "nativeSetLineDasharrayTransition"),
-        METHOD(&LineLayer::getLineDasharray, "nativeGetLineDasharray"),
-        METHOD(&LineLayer::getLinePatternTransition, "nativeGetLinePatternTransition"),
-        METHOD(&LineLayer::setLinePatternTransition, "nativeSetLinePatternTransition"),
-        METHOD(&LineLayer::getLinePattern, "nativeGetLinePattern"),
-        METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"));
-}
+    namespace {
+        jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
+            static auto& javaClass = jni::Class<LineLayer>::Singleton(env);
+            static auto constructor = javaClass.GetConstructor<jni::jlong>(env);
+            return javaClass.New(env, constructor, reinterpret_cast<jni::jlong>(layer));
+        }
+    }  // namespace
+
+    jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env, mbgl::style::Layer& layer) {
+        assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
+        return createJavaPeer(env, new LineLayer(toLineLayer(layer)));
+    }
+
+    jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+        assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
+        return createJavaPeer(env, new LineLayer(std::unique_ptr<mbgl::style::LineLayer>(static_cast<mbgl::style::LineLayer*>(layer.release()))));
+    }
+
+    void LineJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
+        // Lookup the class
+        static auto& javaClass = jni::Class<LineLayer>::Singleton(env);
+
+        #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
+
+        // Register the peer
+        jni::RegisterNativePeer<LineLayer>(
+            env,
+            javaClass,
+            "nativePtr",
+            jni::MakePeer<LineLayer, jni::String&, jni::String&>,
+            "initialize",
+            "finalize",
+            METHOD(&LineLayer::getLineCap, "nativeGetLineCap"),
+            METHOD(&LineLayer::getLineJoin, "nativeGetLineJoin"),
+            METHOD(&LineLayer::getLineMiterLimit, "nativeGetLineMiterLimit"),
+            METHOD(&LineLayer::getLineRoundLimit, "nativeGetLineRoundLimit"),
+            METHOD(&LineLayer::getLineSortKey, "nativeGetLineSortKey"),
+            METHOD(&LineLayer::getLineOpacityTransition, "nativeGetLineOpacityTransition"),
+            METHOD(&LineLayer::setLineOpacityTransition, "nativeSetLineOpacityTransition"),
+            METHOD(&LineLayer::getLineOpacity, "nativeGetLineOpacity"),
+            METHOD(&LineLayer::getLineColorTransition, "nativeGetLineColorTransition"),
+            METHOD(&LineLayer::setLineColorTransition, "nativeSetLineColorTransition"),
+            METHOD(&LineLayer::getLineColor, "nativeGetLineColor"),
+            METHOD(&LineLayer::getLineTranslateTransition, "nativeGetLineTranslateTransition"),
+            METHOD(&LineLayer::setLineTranslateTransition, "nativeSetLineTranslateTransition"),
+            METHOD(&LineLayer::getLineTranslate, "nativeGetLineTranslate"),
+            METHOD(&LineLayer::getLineTranslateAnchor, "nativeGetLineTranslateAnchor"),
+            METHOD(&LineLayer::getLineWidthTransition, "nativeGetLineWidthTransition"),
+            METHOD(&LineLayer::setLineWidthTransition, "nativeSetLineWidthTransition"),
+            METHOD(&LineLayer::getLineWidth, "nativeGetLineWidth"),
+            METHOD(&LineLayer::getLineGapWidthTransition, "nativeGetLineGapWidthTransition"),
+            METHOD(&LineLayer::setLineGapWidthTransition, "nativeSetLineGapWidthTransition"),
+            METHOD(&LineLayer::getLineGapWidth, "nativeGetLineGapWidth"),
+            METHOD(&LineLayer::getLineOffsetTransition, "nativeGetLineOffsetTransition"),
+            METHOD(&LineLayer::setLineOffsetTransition, "nativeSetLineOffsetTransition"),
+            METHOD(&LineLayer::getLineOffset, "nativeGetLineOffset"),
+            METHOD(&LineLayer::getLineBlurTransition, "nativeGetLineBlurTransition"),
+            METHOD(&LineLayer::setLineBlurTransition, "nativeSetLineBlurTransition"),
+            METHOD(&LineLayer::getLineBlur, "nativeGetLineBlur"),
+            METHOD(&LineLayer::getLineDasharrayTransition, "nativeGetLineDasharrayTransition"),
+            METHOD(&LineLayer::setLineDasharrayTransition, "nativeSetLineDasharrayTransition"),
+            METHOD(&LineLayer::getLineDasharray, "nativeGetLineDasharray"),
+            METHOD(&LineLayer::getLinePatternTransition, "nativeGetLinePatternTransition"),
+            METHOD(&LineLayer::setLinePatternTransition, "nativeSetLinePatternTransition"),
+            METHOD(&LineLayer::getLinePattern, "nativeGetLinePattern"),
+            METHOD(&LineLayer::getLineGradient, "nativeGetLineGradient"));
+    }
 
 } // namespace android
 } // namespace mbgl
