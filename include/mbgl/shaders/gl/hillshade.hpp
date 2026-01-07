@@ -106,7 +106,9 @@ void multidirectional_hillshade(vec2 deriv) {
     fragColor = vec4(0, 0, 0, 0);
 
     // Iterate through all light sources (up to u_num_lights, max 4)
-    for (int i = 0; i < u_num_lights; i++) {
+    for (int i = 0; i < 4; i++) {
+        if (i >= u_num_lights) break;
+
         // Access altitude and azimuth from vec4 UBOs
         float altitude = (i == 0) ? u_altitudes.x : (i == 1) ? u_altitudes.y : (i == 2) ? u_altitudes.z : u_altitudes.w;
         float azimuth = (i == 0) ? u_azimuths.x : (i == 1) ? u_azimuths.y : (i == 2) ? u_azimuths.z : u_azimuths.w;
