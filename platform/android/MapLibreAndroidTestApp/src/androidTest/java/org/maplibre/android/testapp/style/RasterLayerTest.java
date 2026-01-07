@@ -260,3 +260,4 @@ public class RasterLayerTest extends BaseLayerTest {
     assertEquals(layer.getRasterFadeDuration().getValue(), propertyValue);
   }
 }
+

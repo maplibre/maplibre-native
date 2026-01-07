@@ -271,7 +271,7 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {0f, 0f};
     layer.setProperties(fillExtrusionTranslate(propertyValue));
-    assertEquals(layer.getFillExtrusionTranslate().getValue(), propertyValue);
+    assertArrayEquals(layer.getFillExtrusionTranslate().getValue(), propertyValue);
   }
 
   @Test
@@ -414,3 +414,4 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     assertEquals(layer.getFillExtrusionVerticalGradient().getValue(), propertyValue);
   }
 }
+

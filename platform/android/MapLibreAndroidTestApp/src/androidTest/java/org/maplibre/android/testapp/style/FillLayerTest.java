@@ -372,7 +372,7 @@ public class FillLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {0f, 0f};
     layer.setProperties(fillTranslate(propertyValue));
-    assertEquals(layer.getFillTranslate().getValue(), propertyValue);
+    assertArrayEquals(layer.getFillTranslate().getValue(), propertyValue);
   }
 
   @Test
@@ -426,3 +426,4 @@ public class FillLayerTest extends BaseLayerTest {
     assertEquals(layer.getFillPattern().getExpression(), expression);
   }
 }
+
