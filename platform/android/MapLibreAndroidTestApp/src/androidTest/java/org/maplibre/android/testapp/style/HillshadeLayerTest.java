@@ -94,7 +94,7 @@ public class HillshadeLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {1.0f, 2.0f};
     layer.setProperties(hillshadeIlluminationDirection(propertyValue));
-    assertEquals(layer.getHillshadeIlluminationDirection().getValue(), propertyValue);
+    assertArrayEquals(layer.getHillshadeIlluminationDirection().getValue(), propertyValue);
   }
 
   @Test
@@ -107,7 +107,7 @@ public class HillshadeLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {1.0f, 2.0f};
     layer.setProperties(hillshadeIlluminationAltitude(propertyValue));
-    assertEquals(layer.getHillshadeIlluminationAltitude().getValue(), propertyValue);
+    assertArrayEquals(layer.getHillshadeIlluminationAltitude().getValue(), propertyValue);
   }
 
   @Test
@@ -170,7 +170,7 @@ public class HillshadeLayerTest extends BaseLayerTest {
     // Set and Get
     String[] propertyValue = new String[] {"rgba(255,0,0,1)", "rgba(0,0,255,1)"};
     layer.setProperties(hillshadeShadowColor(propertyValue));
-    assertEquals(layer.getHillshadeShadowColor().getValue(), propertyValue);
+    assertArrayEquals(layer.getHillshadeShadowColor().getValue(), propertyValue);
   }
 
   @Test
@@ -195,7 +195,7 @@ public class HillshadeLayerTest extends BaseLayerTest {
     // Set and Get
     String[] propertyValue = new String[] {"rgba(255,0,0,1)", "rgba(0,0,255,1)"};
     layer.setProperties(hillshadeHighlightColor(propertyValue));
-    assertEquals(layer.getHillshadeHighlightColor().getValue(), propertyValue);
+    assertArrayEquals(layer.getHillshadeHighlightColor().getValue(), propertyValue);
   }
 
   @Test
