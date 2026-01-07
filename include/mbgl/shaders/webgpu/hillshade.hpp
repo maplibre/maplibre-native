@@ -111,8 +111,8 @@ fn standard_hillshade(deriv: vec2<f32>, tileProps: HillshadeTilePropsUBO) -> vec
     let base = 1.875 - intensity * 1.75;
     let maxValue = 0.5 * PI;
     let denom = pow(base, maxValue) - 1.0;
-    let useLinear = abs(intensity - 0.5) < 1e-6;
-    let scaledSlope = select(((pow(base, slope) - 1.0) / denom) * maxValue, slope, useLinear);
+    let useNonLinear = abs(intensity - 0.5) > 1e-6;
+    let scaledSlope = select(slope, ((pow(base, slope) - 1.0) / denom) * maxValue, useNonLinear);
 
     let accent = cos(scaledSlope);
     let accentColor = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
