@@ -414,4 +414,3 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     assertEquals(layer.getFillExtrusionVerticalGradient().getValue(), propertyValue);
   }
 }
-

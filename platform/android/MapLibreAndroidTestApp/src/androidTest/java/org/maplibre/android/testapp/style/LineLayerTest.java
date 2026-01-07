@@ -593,4 +593,3 @@ public class LineLayerTest extends BaseLayerTest {
     assertEquals(layer.getLinePattern().getExpression(), expression);
   }
 }
-

@@ -553,4 +553,3 @@ public class CircleLayerTest extends BaseLayerTest {
     assertEquals(layer.getCircleStrokeOpacity().getExpression(), expression);
   }
 }
-

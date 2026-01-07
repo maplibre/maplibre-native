@@ -161,4 +161,3 @@ public class BackgroundLayerTest extends BaseLayerTest {
     assertEquals(layer.getBackgroundOpacity().getValue(), propertyValue);
   }
 }
-

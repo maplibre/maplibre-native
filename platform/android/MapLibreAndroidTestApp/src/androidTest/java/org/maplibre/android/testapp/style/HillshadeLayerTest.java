@@ -247,4 +247,3 @@ public class HillshadeLayerTest extends BaseLayerTest {
     assertEquals(layer.getHillshadeMethod().getValue(), propertyValue);
   }
 }
-

@@ -289,4 +289,3 @@ public class HeatmapLayerTest extends BaseLayerTest {
     assertEquals(layer.getHeatmapOpacity().getValue(), propertyValue);
   }
 }
-

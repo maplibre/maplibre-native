@@ -200,4 +200,3 @@ public class ColorReliefLayerTest extends BaseLayerTest {
     assertEquals(layer.getColorReliefOpacity().getValue(), propertyValue);
   }
 }
-

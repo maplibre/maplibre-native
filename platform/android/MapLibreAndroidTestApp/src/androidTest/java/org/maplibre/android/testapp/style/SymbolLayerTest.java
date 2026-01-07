@@ -1430,4 +1430,3 @@ public class SymbolLayerTest extends BaseLayerTest {
     assertEquals(layer.getTextTranslateAnchor().getValue(), propertyValue);
   }
 }
-

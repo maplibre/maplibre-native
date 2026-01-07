@@ -426,4 +426,3 @@ public class FillLayerTest extends BaseLayerTest {
     assertEquals(layer.getFillPattern().getExpression(), expression);
   }
 }
-
