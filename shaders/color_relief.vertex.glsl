@@ -5,8 +5,8 @@ layout(std140) uniform ColorReliefDrawableUBO {
 layout(std140) uniform ColorReliefTilePropsUBO {
     highp vec4 u_unpack;
     highp vec2 u_dimension;
-    int u_color_ramp_size;
-    float pad_tile0;
+    highp int u_color_ramp_size;
+    highp float pad_tile0;
 };
 
 layout (location = 0) in vec2 a_pos;
