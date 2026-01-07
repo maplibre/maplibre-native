@@ -202,7 +202,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     let pixel = textureSample(hillshade_texture, texture_sampler, in.tex_coord);
 
     let latRange = tileProps.latrange;
-    let latitude = (latRange.x - latRange.y) * in.tex_coord.y + latRange.y;
+    let latitude = (latRange.x - latRange.y) * (1.0 - in.tex_coord.y) + latRange.y;
     let scaleFactor = cos(radians(latitude));
 
     let deriv = ((pixel.rg * 8.0) - vec2<f32>(4.0, 4.0)) / scaleFactor;

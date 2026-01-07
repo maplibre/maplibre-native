@@ -53,14 +53,13 @@ fn main(in: VertexInput) -> VertexOutput {
 
     out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
 
-    let a_pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
     let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
     let scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    out.frag_position = (a_pos / 8192.0) * scale + epsilon;
+    out.frag_position = (vec2<f32>(f32(in.texture_pos.x), f32(in.texture_pos.y)) / 8192.0) * scale + epsilon;
 
     // Handle poles
-    out.frag_position.y = select(out.frag_position.y, 0.0, a_pos.y < -32767.5);
-    out.frag_position.y = select(out.frag_position.y, 1.0, a_pos.y > 32766.5);
+    out.frag_position.y = select(out.frag_position.y, 0.0, f32(in.position.y) < -32767.5);
+    out.frag_position.y = select(out.frag_position.y, 1.0, f32(in.position.y) > 32766.5);
 
     return out;
 }

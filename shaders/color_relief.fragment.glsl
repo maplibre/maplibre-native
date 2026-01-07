@@ -47,7 +47,8 @@ void main() {
     int r = (u_color_ramp_size - 1);
     int l = 0;
 
-    while (r - l > 1) {
+    for (int i = 0; i < 16; i++) {
+        if (r - l <= 1) break;
         int m = (r + l) / 2;
         float el_m = getElevationStop(m);
         if (el < el_m) {

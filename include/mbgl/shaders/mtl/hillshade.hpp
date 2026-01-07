@@ -9,6 +9,19 @@ namespace shaders {
 
 constexpr auto hillshadeShaderPrelude = R"(
 
+#include <metal_stdlib>
+using namespace metal;
+
+// OpenGL `mod` is `x-y*floor(x/y)` where `floor` rounds down.
+// Metal `fmod` is `x-y*trunc(x/y)` where `trunc` rounds toward zero.
+// This function provides GL-compatible modulus for porting GLSL shaders.
+template <typename T1, typename T2>
+inline auto glMod(T1 x, T2 y) { return x - y * metal::floor(x/y); }
+
+inline float radians(float degrees) {
+    return M_PI_F * degrees / 180.0;
+}
+
 enum {
     idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idHillshadeTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
@@ -232,7 +245,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float4 pixel = image.sample(image_sampler, in.pos);
 
     // Scale the derivative based on the mercator distortion at this latitude
-    float scaleFactor = cos(radians((tileProps.latrange.x - tileProps.latrange.y) * (1.0 - in.pos.y) + tileProps.latrange.y));
+    float scaleFactor = cos(radians((tileProps.latrange.x - tileProps.latrange.y) * in.pos.y + tileProps.latrange.y));
 
     // The derivative is scaled back from [0, 1] texture range to world-space slope
     // Texture range [0, 1] corresponds to slope range [-4, 4]
@@ -248,8 +261,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     } else if (tileProps.method == MULTIDIRECTIONAL) {
         multidirectional_hillshade(deriv, tileProps, props, fragColor);
     } else {
-        // Default to BASIC
-        basic_hillshade(deriv, tileProps, props, fragColor);
+        // Default to STANDARD
+        standard_hillshade(deriv, tileProps, props, fragColor);
     }
 
     return fragColor;

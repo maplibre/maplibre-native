@@ -63,7 +63,7 @@ void main() {
 
     highp vec2 epsilon = 1.0 / tileProps.dimension;
     float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    frag_position = (vec2(in_position) / 8192.0) * scale + epsilon;
+    frag_position = (vec2(in_texture_position) / 8192.0) * scale + epsilon;
 
     // Handle poles (use in_position to match GLSL a_pos)
     if (float(in_position.y) < -32767.5) frag_position.y = 0.0;
