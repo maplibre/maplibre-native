@@ -27,7 +27,6 @@ struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
-layout(location = 1) in ivec2 in_texture_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -63,7 +62,7 @@ void main() {
 
     highp vec2 epsilon = 1.0 / tileProps.dimension;
     float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    frag_position = (vec2(in_texture_position) / 8192.0) * scale + epsilon;
+    frag_position = (vec2(in_position) / 8192.0) * scale + epsilon;
 
     // Handle poles (use in_position to match GLSL a_pos)
     if (float(in_position.y) < -32767.5) frag_position.y = 0.0;

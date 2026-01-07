@@ -105,10 +105,9 @@ float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::s
 }
 
 // Function to get the color value at a specific color ramp stop
-float4 getColorStop(int stop, int color_ramp_size, texture2d<uint, access::sample> colorStops, sampler color_sampler) {
+float4 getColorStop(int stop, int color_ramp_size, texture2d<float, access::sample> colorStops, sampler color_sampler) {
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    // Sample returns uint values [0-255], convert to float [0-1]
-    return float4(colorStops.sample(color_sampler, float2(x, 0.5))) / 255.0;
+    return colorStops.sample(color_sampler, float2(x, 0.5));
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
@@ -117,7 +116,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const ColorReliefEvaluatedPropsUBO& props [[buffer(idColorReliefEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             texture2d<float, access::sample> elevationStops [[texture(1)]],
-                            texture2d<uint, access::sample> colorStops [[texture(2)]],
+                            texture2d<float, access::sample> colorStops [[texture(2)]],
                             sampler image_sampler [[sampler(0)]],
                             sampler elevation_stops_sampler [[sampler(1)]],
                             sampler color_stops_sampler [[sampler(2)]]) {
