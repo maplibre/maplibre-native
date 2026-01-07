@@ -326,6 +326,7 @@ const std::vector<UniformBlockInfo> ColorReliefShaderInfo::uniformBlocks = {
 };
 const std::vector<AttributeInfo> ColorReliefShaderInfo::attributes = {
     AttributeInfo{"a_pos", idColorReliefPosVertexAttribute},
+    AttributeInfo{"a_texture_pos", idColorReliefTexturePosVertexAttribute},
 };
 const std::vector<TextureInfo> ColorReliefShaderInfo::textures = {
     TextureInfo{"u_image", idColorReliefImageTexture},
