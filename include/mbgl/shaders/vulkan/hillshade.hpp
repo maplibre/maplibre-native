@@ -230,7 +230,7 @@ void main() {
     vec4 pixel = texture(image_sampler, frag_position);
 
     // Scale the derivative based on the mercator distortion at this latitude
-    float scaleFactor = cos(radians((tileProps.latrange[0] - tileProps.latrange[1]) * (1.0 - frag_position.y) + tileProps.latrange[1]));
+    float scaleFactor = cos(radians((tileProps.latrange[0] - tileProps.latrange[1]) * frag_position.y + tileProps.latrange[1]));
 
     // The derivative is scaled back from [0, 1] texture range to world-space slope
     // Texture range [0, 1] corresponds to slope range [-4, 4]
