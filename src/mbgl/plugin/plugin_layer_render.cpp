@@ -234,7 +234,9 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     }
 
     std::string jsonProperties = pm.propertiesAsJSON();
-    i->_updateLayerPropertiesFunction(jsonProperties);
+    if (i->_updateLayerPropertiesFunction) {
+        i->_updateLayerPropertiesFunction(jsonProperties);
+    }
 
     auto properties = makeMutable<style::PluginLayerProperties>(
         staticImmutableCast<style::PluginLayer::Impl>(baseImpl));
