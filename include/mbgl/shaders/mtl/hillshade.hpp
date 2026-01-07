@@ -122,7 +122,7 @@ void standard_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tilePr
     // Scale the slope exponentially based on intensity
     float base = 1.875 - intensity * 1.75;
     float maxValue = 0.5 * PI;
-    float scaledSlope = intensity != 0.5 ? ((pow(base, slope) - 1.0) / (pow(base, maxValue) - 1.0)) * maxValue : slope;
+    float scaledSlope = abs(intensity - 0.5) > 1e-6 ? ((pow(base, slope) - 1.0) / (pow(base, maxValue) - 1.0)) * maxValue : slope;
 
     float accent = cos(scaledSlope);
     float4 accent_color = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
