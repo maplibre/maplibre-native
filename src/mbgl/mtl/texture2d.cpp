@@ -14,10 +14,7 @@ Texture2D::Texture2D(Context& context_)
     : context(context_) {}
 
 Texture2D::~Texture2D() {
-    if (metalTexture) {
-        context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= getDataSize(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
-    }
+    destroyMetalTexture();
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
@@ -36,6 +33,9 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
     }
+
+    destroyMetalTexture();
+
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     textureDirty = true;
@@ -46,6 +46,9 @@ gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
+
+    destroyMetalTexture();
+
     size = size_;
     textureDirty = true;
     return *this;
@@ -146,7 +149,8 @@ void Texture2D::createMetalTexture() noexcept {
     if (size == Size{0, 0}) {
         return;
     }
-    metalTexture.reset();
+
+    destroyMetalTexture();
 
     const auto format = getMetalPixelFormat();
     if (format == MTL::PixelFormat::PixelFormatInvalid) {
@@ -193,6 +197,16 @@ void Texture2D::create() noexcept {
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
+}
+
+void Texture2D::destroyMetalTexture() noexcept {
+    if (!metalTexture) {
+        return;
+    }
+
+    metalTexture.reset();
+    context.renderingStats().numActiveTextures--;
+    context.renderingStats().memTextures -= getDataSize();
 }
 
 gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
