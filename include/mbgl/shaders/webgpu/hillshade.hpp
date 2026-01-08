@@ -51,12 +51,6 @@ fn main(in: VertexInput) -> VertexOutput {
 )";
 
     static constexpr auto fragment = R"(
-const PI: f32 = 3.141592653589793;
-
-fn glMod(x: f32, y: f32) -> f32 {
-    return x - y * floor(x / y);
-}
-
 const STANDARD: i32 = 0;
 const COMBINED: i32 = 1;
 const IGOR: i32 = 2;
