@@ -53,15 +53,20 @@ NSDictionary<NSString *, id> *NSDictionaryFeatureForGeometry(NSDictionary *geome
 
 NS_ASSUME_NONNULL_END
 
-#define MLN_DEFINE_FEATURE_INIT_WITH_CODER()                                                 \
-  -(instancetype)initWithCoder : (NSCoder *)decoder {                                        \
-    if (self = [super initWithCoder:decoder]) {                                              \
-      NSSet<Class> *identifierClasses =                                                      \
-          [NSSet setWithArray:@[ [NSString class], [NSNumber class] ]];                      \
-      identifier = [decoder decodeObjectOfClasses:identifierClasses forKey:@"identifier"];   \
-      _attributes = [decoder decodeObjectOfClass:[NSDictionary class] forKey:@"attributes"]; \
-    }                                                                                        \
-    return self;                                                                             \
+#define MLN_DEFINE_FEATURE_INIT_WITH_CODER()                                                \
+  -(instancetype)initWithCoder : (NSCoder *)decoder {                                       \
+    if (self = [super initWithCoder:decoder]) {                                             \
+      NSSet<Class> *identifierClasses =                                                     \
+          [NSSet setWithArray:@[ [NSString class], [NSNumber class] ]];                     \
+      identifier = [decoder decodeObjectOfClasses:identifierClasses forKey:@"identifier"];  \
+      NSSet<Class> *attributesClasses =                                                     \
+          [NSSet setWithArray:@[ [NSDictionary class], [NSArray class] ]];                  \
+      _attributes = [decoder decodeObjectOfClasses:attributesClasses forKey:@"attributes"]; \
+    }                                                                                       \
+    return self;                                                                            \
+  }                                                                                         \
+  +(BOOL)supportsSecureCoding {                                                             \
+    return YES;                                                                             \
   }
 
 #define MLN_DEFINE_FEATURE_ENCODE()                        \
