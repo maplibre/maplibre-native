@@ -273,8 +273,6 @@ vk::SamplerAddressMode Texture2D::vulkanAddressMode(const gfx::TextureWrapType t
 void Texture2D::createTexture() {
     if (size.width == 0 || size.height == 0) return;
 
-    destroyTexture();
-
     const auto& backend = context.getBackend();
 
     const auto format = vulkanFormat(pixelFormat, channelType);
