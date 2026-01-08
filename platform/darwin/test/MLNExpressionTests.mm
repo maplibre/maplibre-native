@@ -1526,9 +1526,6 @@ using namespace std::string_literals;
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
     }
     {
-        #if TARGET_OS_IPHONE
-        XCTExpectFailure(@"Awaiting unit test refactoring for https://github.com/maplibre/maplibre-native/issues/331");
-        #endif
         NSExpression *expression = [[NSExpression expressionForConstantValue:@"Old"] mgl_expressionByAppendingExpression:[NSExpression expressionForConstantValue:@"MacDonald"]];
 
         NSArray *jsonExpression = @[@"concat", @"Old", @"MacDonald"];

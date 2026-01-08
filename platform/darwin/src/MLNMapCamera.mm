@@ -6,11 +6,6 @@
 
 #include <mbgl/math/wrap.hpp>
 
-BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
-{
-    return MAX(left, right) - MIN(left, right) <= accuracy;
-}
-
 @implementation MLNMapCamera
 
 + (BOOL)supportsSecureCoding
