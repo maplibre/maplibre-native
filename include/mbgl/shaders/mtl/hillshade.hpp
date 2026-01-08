@@ -261,8 +261,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     } else if (tileProps.method == MULTIDIRECTIONAL) {
         multidirectional_hillshade(deriv, tileProps, props, fragColor);
     } else {
-        // Default to STANDARD
-        standard_hillshade(deriv, tileProps, props, fragColor);
+        // Default to BASIC
+        basic_hillshade(deriv, tileProps, props, fragColor);
     }
 
     return fragColor;
