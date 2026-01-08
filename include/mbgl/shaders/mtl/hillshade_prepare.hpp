@@ -120,6 +120,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float exaggerationFactor = tileProps.zoom < 2.0 ? 0.4 : tileProps.zoom < 4.5 ? 0.35 : 0.3;
     float exaggeration = tileProps.zoom < tileProps.maxzoom ? (tileProps.zoom - tileProps.maxzoom) * exaggerationFactor : 0.0;
 
+    // DEBUG: Check maxzoom value
+    if (tileProps.maxzoom < 1.0 || tileProps.maxzoom > 50.0) {
+        // Output visible indicator if maxzoom is out of expected range
+        // Red channel encodes the issue
+        return half4(1.0, tileProps.maxzoom / 50.0, 0.0, 1.0); // Red for debug, green shows maxzoom/50
+    }
+
     float2 deriv = float2(
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
