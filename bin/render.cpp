@@ -127,6 +127,7 @@ int main(int argc, char* argv[]) {
     } else {
         map.jumpTo(CameraOptions()
                        .withCenter(LatLng{lat, lon})
+                       .withCenterAltitude(alt)
                        .withZoom(zoom)
                        .withBearing(bearing)
                        .withPitch(pitch)

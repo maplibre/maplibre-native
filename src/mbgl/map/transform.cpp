@@ -199,7 +199,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
             if (roll != startRoll) {
-                state.setPitch(util::interpolate(startRoll, roll, t));
+                state.setRoll(util::interpolate(startRoll, roll, t));
             }
             if (fov != startFov) {
                 state.setFieldOfView(util::interpolate(startFov, fov, t));
@@ -227,7 +227,6 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
     const double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
-    double zoom = camera.zoom.value_or(getZoom());
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
     double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
