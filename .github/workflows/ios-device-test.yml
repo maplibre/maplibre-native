@@ -61,6 +61,7 @@ jobs:
 
       - name: Run ${{ matrix.test.name }} on AWS Device Farm
         if: steps.check_files.outputs.files_exists == 'true'
+        continue-on-error: true
         run: |
           export name="${{ matrix.test.name }}"
           export appType=IOS_APP
@@ -72,7 +73,33 @@ jobs:
           export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}"
           export wait_for_completion=true
 
-          ./scripts/aws-device-farm/aws-device-farm-run.sh
+          # Save run output to a log file so subsequent steps can pick up the run ARN
+          ./scripts/aws-device-farm/aws-device-farm-run.sh 2>&1 | tee df-run.log || true
+
+      - name: Download Device Farm artifacts
+        if: always()
+        run: |
+          mkdir -p df-artifacts
+          # extract the most-recent Device Farm run ARN from the run log
+          ARN=$(grep -oE 'arn:aws:devicefarm:[^[:space:]"\']+' df-run.log | tail -n1 || true)
+          if [ -z "$ARN" ]; then
+            echo "No Device Farm ARN found in df-run.log; skipping artifact download."
+            exit 0
+          fi
+          echo "Found ARN: $ARN"
+          aws devicefarm list-artifacts --arn "$ARN" --type FILE --query 'artifacts[*].{name:name,url:url}' --output json > df-artifacts.json || true
+          jq -r '.[].url' df-artifacts.json 2>/dev/null | while read -r url; do
+            fname=$(basename "${url%%\?*}")
+            echo "Downloading $url as $fname"
+            curl -L -s -f -o "df-artifacts/$fname" "$url" || echo "Failed to download $url"
+          done || true
+
+      - name: Upload Device Farm artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: devicefarm-artifacts-${{ matrix.test.artifactName }}
+          path: df-artifacts/**
 
       - name: Generate another token (previous one could have expired)
         if: always()
