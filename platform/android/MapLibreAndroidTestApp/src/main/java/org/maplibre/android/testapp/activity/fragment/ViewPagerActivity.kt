@@ -24,6 +24,8 @@ class ViewPagerActivity : AppCompatActivity() {
         binding = ActivityViewpagerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.viewPager.adapter = MapFragmentAdapter(this, supportFragmentManager)
+        // Ensure all pages are instantiated so their titles are available to UI tests immediately
+        binding.viewPager.offscreenPageLimit = binding.viewPager.adapter?.count ?: 1
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
