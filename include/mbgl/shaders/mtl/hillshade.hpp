@@ -239,8 +239,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float2 deriv = ((pixel.rg * 8.0) - 4.0) / scaleFactor;
 
     // Dispatch to the selected hillshade method
-    if (tileProps.method == STANDARD) {
-        standard_hillshade(deriv, tileProps, props, fragColor);
+    if (tileProps.method == BASIC) {
+        basic_hillshade(deriv, tileProps, props, fragColor);
     } else if (tileProps.method == COMBINED) {
         combined_hillshade(deriv, tileProps, props, fragColor);
     } else if (tileProps.method == IGOR) {
@@ -248,8 +248,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     } else if (tileProps.method == MULTIDIRECTIONAL) {
         multidirectional_hillshade(deriv, tileProps, props, fragColor);
     } else {
-        // Default to BASIC
-        basic_hillshade(deriv, tileProps, props, fragColor);
+        // Default to STANDARD
+        standard_hillshade(deriv, tileProps, props, fragColor);
     }
 
     return fragColor;
