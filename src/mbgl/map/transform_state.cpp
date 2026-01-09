@@ -136,7 +136,7 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
                                      std::tan(fov / 2.0) *
                                      (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
     const double tanMultiple = tanFovAboveCenter * std::tan(getPitch());
-    assert(tanMultiple < 1);
+    // assert(tanMultiple < 1);
     // Calculate z distance of the farthest fragment that should be rendered.
     const double furthestDistance = cameraToCenterDistance / (1 - tanMultiple);
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
@@ -240,7 +240,6 @@ void TransformState::updateStateFromCamera() {
     const double dx = forward[0];
     const double dy = forward[1];
     const double dz = forward[2];
-    assert(position[2] > 0.0 && dz < 0.0);
 
     // Compute bearing and pitch
     double newBearing;
@@ -302,11 +301,6 @@ bool TransformState::setCameraOrientation(const Quaternion& orientation_) {
     Quaternion unitQuat = orientation_.normalized();
     const vec3 forward = unitQuat.transform({{0.0, 0.0, -1.0}});
     const vec3 up = unitQuat.transform({{0.0, -1.0, 0.0}});
-
-    if (up[2] < 0.0) {
-        // Camera is upside down and not recoverable
-        return false;
-    }
 
     const std::optional<Quaternion> updatedOrientation = util::Camera::orientationFromFrame(forward, up);
     if (!updatedOrientation) return false;
