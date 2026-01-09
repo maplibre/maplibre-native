@@ -174,10 +174,11 @@ vec3 Camera::up() const noexcept {
 void Camera::getOrientation(double& roll, double& pitch, double& bearing) const noexcept {
     const vec3 f = forward();
     const vec3 r = right();
+    const vec3 u = up();
 
-    bearing = std::atan2(-r[1], r[0]);
+    bearing = -std::atan2(f[0], -f[1]);
     pitch = std::atan2(std::sqrt(f[0] * f[0] + f[1] * f[1]), -f[2]);
-    roll = 0; // TODO
+    roll = std::atan2(r[2], u[2]);
 }
 
 void Camera::setOrientation(double roll, double pitch, double bearing) noexcept {
@@ -197,11 +198,11 @@ void Camera::setPosition(const vec3& position) noexcept {
 std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) noexcept {
     const vec3 right = vec3Cross(up, forward);
 
-    const double bearing = std::atan2(-right[1], right[0]);
+    const double bearing = -std::atan2(forward[0], -forward[1]);
     const double pitch = std::atan2(std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]), -forward[2]);
-    const double roll = 0; // TODO
+    const double roll = std::atan2(right[2], up[2]);
 
-    return util::orientationFromRollPitchBearing(pitch, bearing, roll);
+    return util::orientationFromRollPitchBearing(roll, pitch, bearing);
 }
 } // namespace util
 

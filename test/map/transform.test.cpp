@@ -1189,3 +1189,33 @@ TEST(Transform, FreeCameraOptionsStateSynchronization) {
     EXPECT_THAT(up, Vec3NearEquals1E5(vec3{{0, -0.5, 0.866025}}));
     EXPECT_THAT(forward, Vec3NearEquals1E5(vec3{{0, -0.866025, -0.5}}));
 }
+
+TEST(Camera, SetOrientation) {
+    util::Camera camera;
+    const double bearing = 0.22;
+    const double pitch = 0.34;
+    const double roll = 0.0;
+    double bearing_ = 0;
+    double pitch_ = 0;
+    double roll_ = 0;
+    camera.setOrientation(roll, pitch, bearing);
+    camera.getOrientation(roll_, pitch_, bearing_);
+    EXPECT_NEAR(bearing, bearing_, 1.0e-9);
+    EXPECT_NEAR(pitch, pitch_, 1.0e-9);
+    EXPECT_NEAR(roll, roll_, 1.0e-9);
+}
+
+TEST(Camera, SetOrientationWithRoll) {
+    util::Camera camera;
+    const double bearing = 0.22;
+    const double pitch = 0.34;
+    const double roll = 0.45;
+    double bearing_ = 0;
+    double pitch_ = 0;
+    double roll_ = 0;
+    camera.setOrientation(roll, pitch, bearing);
+    camera.getOrientation(roll_, pitch_, bearing_);
+    EXPECT_NEAR(bearing, bearing_, 1.0e-9);
+    EXPECT_NEAR(pitch, pitch_, 1.0e-9);
+    EXPECT_NEAR(roll, roll_, 1.0e-9);
+}
