@@ -3,7 +3,8 @@ package org.maplibre.android.integration
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
 import org.junit.Ignore
 import org.maplibre.android.testapp.activity.fragment.ViewPagerActivity
 import org.junit.Rule
@@ -32,6 +33,8 @@ class ViewPagerScrollTest : BaseIntegrationTest() {
     }
 
     private fun clickTab(index: Int) {
-        device.findObject(UiSelector().text("Page $index")).click()
+        val text = "Page $index"
+        device.wait(Until.hasObject(By.text(text)), TIMEOUT_UI_SEARCH_WAIT)
+        device.findObject(By.text(text)).click()
     }
 }
