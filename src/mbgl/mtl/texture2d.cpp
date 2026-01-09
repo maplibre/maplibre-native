@@ -150,6 +150,8 @@ void Texture2D::createMetalTexture() noexcept {
         return;
     }
 
+    destroyMetalTexture();
+
     const auto format = getMetalPixelFormat();
     if (format == MTL::PixelFormat::PixelFormatInvalid) {
         return;
