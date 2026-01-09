@@ -37,10 +37,10 @@ processFiles(dir);
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * 
- * @param {string} filePath 
- * @param {string} gitRevision 
- * @param {string} filename 
+ *
+ * @param {string} filePath
+ * @param {string} gitRevision
+ * @param {string} filename
  */
 async function uploadFileToS3(filePath, gitRevision, filename) {
   const s3Client = new S3Client({ region: "eu-central-1" });
@@ -62,8 +62,8 @@ async function uploadFileToS3(filePath, gitRevision, filename) {
 }
 
 /**
- * 
- * @param {string} dir 
+ *
+ * @param {string} dir
  */
 async function processFiles(dir) {
   const files = await fs.readdir(dir);

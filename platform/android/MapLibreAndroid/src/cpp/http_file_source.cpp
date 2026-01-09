@@ -91,8 +91,14 @@ void RegisterNativeHTTPRequest(jni::JNIEnv& env) {
 HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, FileSource::Callback callback_)
     : resource(resource_),
       callback(callback_) {
+    std::string dataRangeStr;
     std::string etagStr;
     std::string modifiedStr;
+
+    if (resource.dataRange) {
+        dataRangeStr = std::string("bytes=") + std::to_string(resource.dataRange->first) + std::string("-") +
+                       std::to_string(resource.dataRange->second);
+    }
 
     if (resource.priorEtag) {
         etagStr = *resource.priorEtag;
@@ -104,13 +110,14 @@ HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, FileSource
 
     static auto& javaClass = jni::Class<HTTPRequest>::Singleton(env);
     static auto constructor =
-        javaClass.GetConstructor<jni::jlong, jni::String, jni::String, jni::String, jni::jboolean>(env);
+        javaClass.GetConstructor<jni::jlong, jni::String, jni::String, jni::String, jni::String, jni::jboolean>(env);
 
     javaRequest = jni::NewGlobal(env,
                                  javaClass.New(env,
                                                constructor,
                                                reinterpret_cast<jlong>(this),
                                                jni::Make<jni::String>(env, resource.url),
+                                               jni::Make<jni::String>(env, dataRangeStr),
                                                jni::Make<jni::String>(env, etagStr),
                                                jni::Make<jni::String>(env, modifiedStr),
                                                (jboolean)(resource_.usage == Resource::Usage::Offline)));
@@ -154,7 +161,7 @@ void HTTPRequest::onResponse(jni::JNIEnv& env,
         response.expires = util::parseTimestamp(jni::Make<std::string>(env, expires).c_str());
     }
 
-    if (code == 200) {
+    if (code == 200 || code == 206) {
         if (body) {
             auto data = std::make_shared<std::string>(body.Length(env), char());
             jni::GetArrayRegion(env, *body, 0, data->size(), reinterpret_cast<jbyte*>(&(*data)[0]));

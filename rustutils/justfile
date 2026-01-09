@@ -1,0 +1,64 @@
+#!/usr/bin/env just --justfile
+
+@_default:
+    just --list
+
+# Clean all build artifacts
+clean:
+    cargo clean
+
+# Update all dependencies, including the breaking changes. Requires nightly toolchain (install with `rustup install nightly`)
+update:
+    cargo +nightly -Z unstable-options update --breaking
+    cargo update
+
+# Quick compile without building a binary
+check:
+    RUSTFLAGS='-D warnings' cargo check --workspace --all-targets
+
+# Build the library
+build:
+    cargo build --workspace
+
+# Run cargo clippy to lint the code
+clippy:
+    cargo clippy --all-targets --workspace -- -D warnings
+
+# Test code formatting
+test-fmt:
+    cargo fmt --all -- --check
+
+# Reformat all code `cargo fmt`. If nightly is available, use it for better results
+fmt:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if command -v cargo +nightly &> /dev/null; then
+        echo 'Reformatting Rust code using nightly Rust fmt to sort imports'
+        cargo +nightly fmt --all -- --config imports_granularity=Module,group_imports=StdExternalCrate
+    else
+        echo 'Reformatting Rust with the stable cargo fmt.  Install nightly with `rustup install nightly` for better results'
+        cargo fmt --all
+    fi
+
+# Run all tests
+test:
+    cargo test --all-targets --workspace
+
+# Test documentation
+test-doc:
+    RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+
+# Build and open code documentation
+docs:
+    cargo doc --no-deps --open
+
+# Print Rust version information
+rust-info:
+    rustc --version
+    cargo --version
+
+# Run all tests as expected by CI
+ci-test: rust-info clippy build test test-doc
+
+# Run minimal subset of tests to ensure compatibility with MSRV (Minimum Supported Rust Version). This assumes the default toolchain is already set to MSRV.
+ci-test-msrv: rust-info build test

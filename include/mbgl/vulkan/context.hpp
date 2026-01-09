@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -43,6 +42,7 @@ class Texture2D;
 
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
+using UniqueUniformBufferArray = std::unique_ptr<gfx::UniformBufferArray>;
 
 class Context final : public gfx::Context {
 public:
@@ -70,11 +70,16 @@ public:
                                       const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     /// Called at the end of a frame.
-    void performCleanup() override {}
+    void performCleanup() override;
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data,
+                                              std::size_t size,
+                                              bool persistent,
+                                              bool ssbo = false) override;
+
+    UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -98,10 +103,6 @@ public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
-
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
 
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;
@@ -133,8 +134,7 @@ public:
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
 
-    const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
-    const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
+    const std::unique_ptr<BufferResource>& getDummyBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
 
     const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
@@ -146,25 +146,17 @@ public:
     void enqueueDeletion(std::function<void(Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
 
-    void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
+    void requestSurfaceUpdate(bool useDelay = true);
 
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
-
-        vk::UniqueSemaphore surfaceSemaphore;
-        vk::UniqueSemaphore frameSemaphore;
         vk::UniqueFence flightFrameFence;
 
         std::vector<std::function<void(Context&)>> deletionQueue;
 
-        FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueSemaphore&& surf,
-                       vk::UniqueSemaphore&& frame,
-                       vk::UniqueFence&& flight)
+        FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              surfaceSemaphore(std::move(surf)),
-              frameSemaphore(std::move(frame)),
               flightFrameFence(std::move(flight)) {}
 
         void runDeletionQueue(Context&);
@@ -175,6 +167,8 @@ private:
 
     void buildImageDescriptorSetLayout();
     void buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                         size_t startId,
+                                         size_t storageCount,
                                          size_t uniformCount,
                                          const std::string& name);
 
@@ -184,8 +178,7 @@ private:
     vulkan::UniformBufferArray globalUniformBuffers;
     std::unordered_map<DescriptorSetType, DescriptorPoolGrowable> descriptorPoolMap;
 
-    std::unique_ptr<BufferResource> dummyVertexBuffer;
-    std::unique_ptr<BufferResource> dummyUniformBuffer;
+    std::unique_ptr<BufferResource> dummyBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
     vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
@@ -197,6 +190,8 @@ private:
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
     bool surfaceUpdateRequested{false};
+    int32_t surfaceUpdateLatency{0};
+    int32_t currentFrameCount{0};
 
     struct {
         gfx::ShaderProgramBasePtr shader;

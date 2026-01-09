@@ -7,6 +7,8 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/util/action_journal.hpp>
+#include <mbgl/util/action_journal_options.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
@@ -49,6 +51,8 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<std::string> apikeyValue(argumentParser, "key", "API key", {'t', "apikey"});
     args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
     args::ValueFlag<std::string> cacheDBValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
+    args::ValueFlag<std::string> actionJournalDirValue(
+        argumentParser, "directory", "Action journal log directory", {"actionJournalDir"});
     args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
     args::ValueFlag<double> latValue(argumentParser, "degrees", "Latitude", {'y', "lat"});
     args::ValueFlag<double> zoomValue(argumentParser, "number", "Zoom level", {'z', "zoom"});
@@ -128,11 +132,20 @@ int main(int argc, char* argv[]) {
     GLFWRendererFrontend rendererFrontend{
         std::make_unique<mbgl::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view};
 
+    // Configure action journal options if directory is specified
+    mbgl::util::ActionJournalOptions actionJournalOptions;
+    if (actionJournalDirValue) {
+        const std::string actionJournalDir = args::get(actionJournalDirValue);
+        actionJournalOptions.enable(true).withPath(actionJournalDir);
+        mbgl::Log::Info(mbgl::Event::General, "Action journal enabled. Logs will be written to: " + actionJournalDir);
+    }
+
     mbgl::Map map(rendererFrontend,
                   *view,
                   mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
                   resourceOptions,
-                  clientOptions);
+                  clientOptions,
+                  actionJournalOptions);
 
     backend.setMap(&map);
 
@@ -208,9 +221,8 @@ int main(int argc, char* argv[]) {
     if (style.empty()) {
         const char* url = getenv("MLN_STYLE_URL");
         if (url == nullptr) {
-            mbgl::util::DefaultStyle newStyle = orderedStyles[0];
-            style = newStyle.getUrl();
-            view->setWindowTitle(newStyle.getName());
+            style = "https://tiles.openfreemap.org/styles/liberty";
+            view->setWindowTitle("OpenFreeMap Liberty");
         } else {
             style = url;
             view->setWindowTitle(url);

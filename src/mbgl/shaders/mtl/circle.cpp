@@ -4,13 +4,9 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-    UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
-    UniformBlockInfo{true, false, sizeof(CircleInterpolateUBO), idCircleInterpolateUBO},
-    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
-};
-const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::attributes = {
+using CircleShaderSource = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
+
+const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
     AttributeInfo{circleUBOCount + 0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},
     AttributeInfo{circleUBOCount + 1, gfx::AttributeDataType::Float4, idCircleColorVertexAttribute},
     AttributeInfo{circleUBOCount + 2, gfx::AttributeDataType::Float2, idCircleRadiusVertexAttribute},
@@ -20,7 +16,7 @@ const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Back
     AttributeInfo{circleUBOCount + 6, gfx::AttributeDataType::Float2, idCircleStrokeWidthVertexAttribute},
     AttributeInfo{circleUBOCount + 7, gfx::AttributeDataType::Float2, idCircleStrokeOpacityVertexAttribute},
 };
-const std::array<TextureInfo, 0> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::textures = {};
+const std::array<TextureInfo, 0> CircleShaderSource::textures = {};
 
 } // namespace shaders
 } // namespace mbgl

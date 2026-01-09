@@ -15,7 +15,7 @@ export function iff(condition, val) {
 };
 
 /**
- * @param {string} str 
+ * @param {string} str
  * @returns {string}
  */
 export function camelize(str) {
@@ -25,7 +25,7 @@ export function camelize(str) {
 };
 
 /**
- * @param {string} str 
+ * @param {string} str
  * @returns {string}
  */
 export function camelizeWithLeadingLowercase(str) {
@@ -43,10 +43,10 @@ export function unhyphenate (/** @type {string} **/ str) {
 };
 
 /**
- * 
- * @param {string} filename 
- * @param {string} newContent 
- * @param {string} output 
+ *
+ * @param {string} filename
+ * @param {string} newContent
+ * @param {string} output
  */
 export function writeIfModified(filename, newContent, output) {
   if (output) {
@@ -73,10 +73,10 @@ export function writeIfModified(filename, newContent, output) {
 };
 
 /**
- * 
- * @param {string} filename 
- * @param {string} root 
- * @returns 
+ *
+ * @param {string} filename
+ * @param {string} root
+ * @returns
  */
 export function readAndCompile(filename, root) {
   if (root) {

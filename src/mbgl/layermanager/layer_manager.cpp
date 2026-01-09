@@ -11,6 +11,8 @@
 
 namespace mbgl {
 
+void LayerManager::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) {}
+
 std::unique_ptr<style::Layer> LayerManager::createLayer(const std::string& type,
                                                         const std::string& id,
                                                         const style::conversion::Convertible& value,

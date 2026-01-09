@@ -10,6 +10,8 @@
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/style/style.hpp>
 
+#include <regex>
+
 /*
     LoadLocalCJKGlyph in glyph_manager.test.cpp exercises the
    platform-independent part of LocalGlyphRasterizer. This test actually
@@ -17,13 +19,8 @@
    on. Different platforms have different default fonts, so adding a new
    platform requires new "expected" fixtures.
 
-    At the time of writing, we don't run `mbgl-test` on iOS or Android, so the
-   only supported test platform is macOS. Supporting Android would require
-   adding a new test case (probably using the "Droid" font family). iOS should
-   theoretically work -- the "PingFang" font family used below is expected to be
-   available on all iOS devices, and we use a relatively high image diff
-   tolerance (0.05) to account for small changes between the many possible
-   variants of the PingFang family.
+   At the time of writing, we don't run this test on Android, that would require
+   adding a new test case (probably using the "Droid" font family).
 */
 
 using namespace mbgl;
@@ -33,7 +30,14 @@ namespace {
 class LocalGlyphRasterizerTest {
 public:
     LocalGlyphRasterizerTest(const std::optional<std::string> fontFamily)
-        : frontend(1, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Unique, fontFamily) {}
+        : frontend(1, gfx::HeadlessBackend::SwapBehaviour::NoFlush, gfx::ContextMode::Unique, fontFamily) {
+        this->fileSource->glyphsResponse = [&](const Resource& resource) {
+            EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
+            Response response;
+            response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+            return response;
+        };
+    }
 
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
@@ -59,12 +63,6 @@ public:
 TEST(LocalGlyphRasterizer, PingFang) {
     LocalGlyphRasterizerTest test(std::string("PingFang TC"));
 
-    test.fileSource->glyphsResponse = [&](const Resource& resource) {
-        EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
-        Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
-        return response;
-    };
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
 #if defined(__APPLE__) && !defined(__QT__)
     test.checkRendering("ping_fang", 0.0161);
@@ -73,16 +71,19 @@ TEST(LocalGlyphRasterizer, PingFang) {
 #endif // defined(__APPLE__)
 }
 
+TEST(LocalGlyphRasterizer, PingFangWithBoldInStyle) {
+    LocalGlyphRasterizerTest test(std::string("PingFang TC"));
+    std::stringstream ss;
+    ss << std::regex_replace(
+        util::read_file("test/fixtures/local_glyphs/mixed.json"), std::regex("NotoCJK"), "NotoCJK Bold");
+    test.map.getStyle().loadJSON(ss.str());
+    test.checkRendering("ping_fang_with_bold_in_style");
+}
+
 #if !defined(__QT__)
 TEST(LocalGlyphRasterizer, PingFangSemibold) {
     LocalGlyphRasterizerTest test(std::string("PingFang TC Semibold"));
 
-    test.fileSource->glyphsResponse = [&](const Resource& resource) {
-        EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
-        Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
-        return response;
-    };
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
     test.checkRendering("ping_fang_semibold", 0.0161);
 }
@@ -94,13 +95,6 @@ TEST(LocalGlyphRasterizer, PingFangSemibold) {
 TEST(LocalGlyphRasterizer, NotoSansCJK) {
     LocalGlyphRasterizerTest test(std::string("Noto Sans CJK KR Regular"));
 
-    test.fileSource->glyphsResponse = [&](const Resource& resource) {
-        EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
-        Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
-        return response;
-    };
-
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
     test.checkRendering("noto_sans_cjk_kr_regular_qt");
 }
@@ -110,13 +104,6 @@ TEST(LocalGlyphRasterizer, NoLocal) {
     // Expectation: without any local fonts set, and without any CJK glyphs
     // provided, the output should just contain basic latin characters.
     LocalGlyphRasterizerTest test({});
-
-    test.fileSource->glyphsResponse = [&](const Resource& resource) {
-        EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
-        Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
-        return response;
-    };
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
     test.checkRendering("no_local", 0.001, 0.1);
 }
@@ -126,13 +113,6 @@ TEST(LocalGlyphRasterizer, NoLocalWithContentInsets) {
     // center. Rendered text should be on the same offset and keep the same size
     // as with no offset.
     LocalGlyphRasterizerTest test({});
-
-    test.fileSource->glyphsResponse = [&](const Resource& resource) {
-        EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
-        Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
-        return response;
-    };
     auto viewSize = test.frontend.getSize();
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
 
@@ -149,13 +129,6 @@ TEST(LocalGlyphRasterizer, NoLocalWithContentInsetsAndPitch) {
     // center. Rendered text should be on the same offset and keep the same size
     // as with no offset.
     LocalGlyphRasterizerTest test({});
-
-    test.fileSource->glyphsResponse = [&](const Resource& resource) {
-        EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
-        Response response;
-        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
-        return response;
-    };
     auto viewSize = test.frontend.getSize();
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
 

@@ -8,6 +8,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #endif
 
 #include <memory>
@@ -16,13 +17,16 @@ namespace mbgl {
 namespace gfx {
 
 void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& drawable,
-                                             const mbgl::PaintParameters& paintParameters) {
+                                             mbgl::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
 #if MLN_RENDER_BACKEND_METAL
+    const auto& mtlRenderPass = static_cast<mtl::RenderPass*>(paintParameters.renderPass.get());
+    mtlRenderPass->resetState();
+
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
@@ -35,6 +39,7 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
 
     context.setDirtyState();
+    context.bindGlobalUniformBuffers(*paintParameters.renderPass);
 }
 
 } // namespace gfx

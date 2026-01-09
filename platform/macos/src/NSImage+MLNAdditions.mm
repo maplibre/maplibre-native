@@ -51,7 +51,7 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
 - (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
     mbgl::PremultipliedImage cPremultipliedImage = self.mgl_premultipliedImage;
     auto imageWidth = cPremultipliedImage.size.width;
-    
+
     float scale = static_cast<float>(imageWidth) / self.size.width;
     mbgl::style::ImageStretches stretchX, stretchY;
     if (self.resizingMode == NSImageResizingModeStretch) {
@@ -62,7 +62,7 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
             self.capInsets.top * scale, (self.size.height - self.capInsets.bottom) * scale,
         });
     }
-    
+
     std::optional<mbgl::style::ImageContent> imageContent;
     if (!MLNEdgeInsetsIsZero(self.capInsets)) {
         imageContent = (mbgl::style::ImageContent){
@@ -72,7 +72,7 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
             .bottom = static_cast<float>((self.size.height - self.capInsets.bottom) * scale),
         };
     }
-    
+
     return std::make_unique<mbgl::style::Image>([identifier UTF8String],
                                                 std::move(cPremultipliedImage),
                                                 scale,

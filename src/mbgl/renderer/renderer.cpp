@@ -2,6 +2,7 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/renderer_impl.hpp>
@@ -9,6 +10,8 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/util/instrumentation.hpp>
+
+#include <algorithm>
 
 namespace mbgl {
 
@@ -32,7 +35,13 @@ void Renderer::setObserver(RendererObserver* observer) {
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC();
     assert(updateParameters);
-    if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
+    const bool styleChanged = impl->styleLoaded && !updateParameters->styleLoaded;
+    impl->styleLoaded = updateParameters->styleLoaded;
+    if (!impl->dynamicTextureAtlas || styleChanged) {
+        auto& context = impl->backend.getContext();
+        impl->dynamicTextureAtlas = std::make_unique<gfx::DynamicTextureAtlas>(context);
+    }
+    if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters, impl->dynamicTextureAtlas)) {
         renderTree->prepare();
         impl->render(*renderTree, updateParameters);
     }
@@ -84,7 +93,7 @@ AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) c
     }
     AnnotationIDs ids;
     ids.reserve(set.size());
-    std::move(set.begin(), set.end(), std::back_inserter(ids));
+    std::ranges::move(set, std::back_inserter(ids));
     return ids;
 }
 
@@ -151,5 +160,11 @@ void Renderer::reduceMemoryUse() {
 void Renderer::clearData() {
     impl->orchestrator.clearData();
 }
+
+#if MLN_RENDER_BACKEND_OPENGL
+void Renderer::enableAndroidEmulatorGoldfishMitigation(bool enable) {
+    impl->orchestrator.enableAndroidEmulatorGoldfishMitigation(enable);
+}
+#endif
 
 } // namespace mbgl

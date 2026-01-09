@@ -13,6 +13,11 @@
 
 @dynamic overlayBounds;
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
 + (instancetype)polylineWithCoordinates:(const CLLocationCoordinate2D *)coords
                                   count:(NSUInteger)count
 {
@@ -70,7 +75,7 @@
     CLLocationCoordinate2D *coordinates = self.coordinates;
     CLLocationDistance middle = [self length] / 2.0;
     CLLocationDistance traveled = 0.0;
-    
+
     if (count > 1 || middle > traveled) {
         for (NSUInteger i = 0; i < count; i++) {
 
@@ -79,7 +84,7 @@
 
             MLNRadianCoordinate2D from = MLNRadianCoordinateFromLocationCoordinate(coordinates[i]);
             MLNRadianCoordinate2D to = MLNRadianCoordinateFromLocationCoordinate(coordinates[i + nextIndex]);
-            
+
             if (traveled >= middle) {
                 double overshoot = middle - traveled;
                 if (overshoot == 0) {
@@ -93,7 +98,7 @@
                 return CLLocationCoordinate2DMake(MLNDegreesFromRadians(otherCoordinate.latitude),
                                                   MLNDegreesFromRadians(otherCoordinate.longitude));
             }
-            
+
             traveled += (MLNDistanceBetweenRadianCoordinates(from, to) * mbgl::util::EARTH_RADIUS_M);
         }
     }
@@ -104,14 +109,14 @@
 - (CLLocationDistance)length
 {
     CLLocationDistance length = 0.0;
-    
+
     NSUInteger count = self.pointCount;
     CLLocationCoordinate2D *coordinates = self.coordinates;
-    
-    for (NSUInteger i = 0; i < count - 1; i++) {        
+
+    for (NSUInteger i = 0; i < count - 1; i++) {
         length += (MLNDistanceBetweenRadianCoordinates(MLNRadianCoordinateFromLocationCoordinate(coordinates[i]),                                                  MLNRadianCoordinateFromLocationCoordinate(coordinates[i + 1])) * mbgl::util::EARTH_RADIUS_M);
     }
-    
+
     return length;
 }
 
@@ -153,10 +158,22 @@
     return self;
 }
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (instancetype)initWithCoder:(NSCoder *)decoder {
     MLNLogInfo(@"Initializing with coder.");
     if (self = [super initWithCoder:decoder]) {
-        _polylines = [decoder decodeObjectOfClass:[NSArray class] forKey:@"polylines"];
+        NSSet<Class> *polylinesClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNPolyline class]]];
+        _polylines = [decoder decodeObjectOfClasses:polylinesClasses forKey:@"polylines"];
+
+        mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+
+        for (MLNPolyline *polyline in _polylines) {
+            bounds.extend(MLNLatLngBoundsFromCoordinateBounds(polyline.overlayBounds));
+        }
+        _overlayBounds = MLNCoordinateBoundsFromLatLngBounds(bounds);
     }
     return self;
 }

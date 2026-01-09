@@ -40,56 +40,94 @@ BackgroundLayer::~BackgroundLayer() = default;
 
 jni::Local<jni::Object<>> BackgroundLayer::getBackgroundColor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toBackgroundLayer(layer).getBackgroundColor()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::BackgroundLayer::getDefaultBackgroundColor()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toBackgroundLayer(*layer).getBackgroundColor()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> BackgroundLayer::getBackgroundColorTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toBackgroundLayer(layer).getBackgroundColorTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void BackgroundLayer::setBackgroundColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toBackgroundLayer(layer).setBackgroundColorTransition(options);
+    toBackgroundLayer(*layer).setBackgroundColorTransition(options);
 }
 
 jni::Local<jni::Object<>> BackgroundLayer::getBackgroundPattern(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toBackgroundLayer(layer).getBackgroundPattern()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::BackgroundLayer::getDefaultBackgroundPattern()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toBackgroundLayer(*layer).getBackgroundPattern()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> BackgroundLayer::getBackgroundPatternTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toBackgroundLayer(layer).getBackgroundPatternTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundPatternTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void BackgroundLayer::setBackgroundPatternTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toBackgroundLayer(layer).setBackgroundPatternTransition(options);
+    toBackgroundLayer(*layer).setBackgroundPatternTransition(options);
 }
 
 jni::Local<jni::Object<>> BackgroundLayer::getBackgroundOpacity(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toBackgroundLayer(layer).getBackgroundOpacity()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::BackgroundLayer::getDefaultBackgroundOpacity()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toBackgroundLayer(*layer).getBackgroundOpacity()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> BackgroundLayer::getBackgroundOpacityTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toBackgroundLayer(layer).getBackgroundOpacityTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void BackgroundLayer::setBackgroundOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toBackgroundLayer(layer).setBackgroundOpacityTransition(options);
+    toBackgroundLayer(*layer).setBackgroundOpacityTransition(options);
 }
 
 // BackgroundJavaLayerPeerFactory

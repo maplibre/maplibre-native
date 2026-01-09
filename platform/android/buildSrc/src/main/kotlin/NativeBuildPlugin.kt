@@ -2,6 +2,7 @@ import com.android.build.gradle.BaseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.getByType
+import java.io.File
 
 open class NativeBuildPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -64,14 +65,6 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                 "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
                             )
                         )
-
-                        // Enable ccache if available.
-                        val ccachePaths = listOf("/usr/bin/ccache", "/usr/local/bin/ccache")
-                        for (path in ccachePaths) {
-                            if (file(path).exists()) {
-                                arguments.add("-DANDROID_CCACHE=$path")
-                            }
-                        }
 
                         cFlags.add("-Qunused-arguments")
                         cppFlags.add("-Qunused-arguments")

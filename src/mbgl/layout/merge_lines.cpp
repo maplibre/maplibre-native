@@ -7,7 +7,7 @@ namespace util {
 
 // Map of key -> index into features
 using Index = std::unordered_map<size_t, size_t>;
-
+namespace {
 size_t mergeFromRight(std::vector<SymbolFeature>& features,
                       Index& rightIndex,
                       Index::iterator left,
@@ -40,7 +40,7 @@ size_t mergeFromLeft(std::vector<SymbolFeature>& features,
 size_t getKey(const std::u16string& text, const GeometryCoordinate& coord) {
     return util::hash(text, coord.x, coord.y);
 }
-
+} // namespace
 void mergeLines(std::vector<SymbolFeature>& features) {
     Index leftIndex;
     Index rightIndex;

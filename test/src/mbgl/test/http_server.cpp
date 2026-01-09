@@ -9,6 +9,8 @@
 #include <httplib.h>
 
 #include <atomic>
+#include <cstdint>
+#include <string>
 
 using namespace std::literals::string_literals;
 
@@ -19,6 +21,7 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
     using namespace httplib;
 
     server->Get("/test", [](const Request& req, Response& res) {
+        std::string content = "Hello World!";
         if (req.has_param("modified")) {
             std::string str = util::rfc1123(util::parseTimestamp(std::stoi(req.get_param_value("modified"))));
             res.set_header("Last-Modified", str);
@@ -33,7 +36,15 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
         if (req.has_param("cachecontrol")) {
             res.set_header("Cache-Control", "max-age=" + req.get_param_value("cachecontrol"));
         }
-        res.set_content("Hello World!", "text/plain");
+        if (req.has_param("range")) {
+            std::string str = req.get_param_value("range");
+            str = str.substr(std::char_traits<char>::length("bytes="));
+            uint64_t start = std::strtoull(str.substr(0, str.find("-")).c_str(), nullptr, 10);
+            uint64_t end = std::strtoull(str.substr(str.find("-") + 1).c_str(), nullptr, 10);
+            content = content.substr(start, end - start + 1);
+            res.status = 206;
+        }
+        res.set_content(content, "text/plain");
     });
 
     server->Get("/stale", [](const Request&, Response&) {
@@ -176,7 +187,7 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
     });
 
     server->Get("/delayed", [](const Request&, Response& res) {
-        usleep(200000);
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         res.status = 200;
         res.set_content("Response", "text/plain");
     });

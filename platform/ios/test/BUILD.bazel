@@ -1,6 +1,7 @@
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
+load("@rules_apple//apple:ios.bzl", "ios_unit_test")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
+    "@rules_swift//swift:swift.bzl",
     "swift_library",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
@@ -51,7 +52,7 @@ ios_unit_test(
     name = "ios_test",
     timeout = "long",
     minimum_os_version = "12.0",
-    runner = "@build_bazel_rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
+    runner = "@rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",
     ],

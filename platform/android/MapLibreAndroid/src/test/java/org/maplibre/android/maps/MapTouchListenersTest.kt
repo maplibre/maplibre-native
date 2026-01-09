@@ -9,9 +9,10 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap.*
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.Mockito
 
-class MapTouchListenersTest {
+class MapTouchListenersTest : BaseTest() {
     private var mapGestureDetector: MapGestureDetector? = null
     private var latLng: LatLng? = null
     private var pointF: PointF? = null

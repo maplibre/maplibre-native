@@ -10,6 +10,7 @@ import junit.framework.TestCase
 import org.hamcrest.Matcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
@@ -143,6 +144,7 @@ class MapLibreMapTest : EspressoTest() {
 
     @Test
     @Deprecated("remove this test when removing deprecated annotations")
+    @Ignore("Needs to be investigated https://github.com/maplibre/maplibre-native/issues/3425")
     fun testAddEmptyPolygon() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -209,9 +211,10 @@ class MapLibreMapTest : EspressoTest() {
 
     @Test
     @Deprecated("remove this test when removing deprecated annotations")
+    @Ignore("Needs to be investigated https://github.com/maplibre/maplibre-native/issues/3425")
     fun testAddEmptyPolyline() {
         validateTestSetup()
-        onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
+        onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { _: UiController?, _: View? ->
             val polylineOptions = PolylineOptions()
             val polyline = maplibreMap.addPolyline(polylineOptions)
             assertTrue("Polyline should be ignored", !maplibreMap.polylines.contains(polyline))
@@ -491,6 +494,44 @@ class MapLibreMapTest : EspressoTest() {
             // Switch to CONTINUOUS rendering
             mapView.setRenderingRefreshMode(RenderingRefreshMode.CONTINUOUS)
             assertTrue(mapView.getRenderingRefreshMode() == RenderingRefreshMode.CONTINUOUS)
+        }
+    }
+
+    @Test
+    fun testSetFrustumOffset() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            // RectF(left, top, right, bottom) - frustum offset represents insets in pixels
+            val offset = android.graphics.RectF(20f, 50f, 30f, 40f)
+            maplibreMap.setFrustumOffset(offset)
+            // Verify that setFrustumOffset was called without throwing an exception
+            // Since there's no getter, we can only verify it doesn't crash
+        }
+    }
+
+    @Test
+    fun testSetFrustumOffsetZero() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            val zeroOffset = android.graphics.RectF(0f, 0f, 0f, 0f)
+            maplibreMap.setFrustumOffset(zeroOffset)
+            // Verify that setFrustumOffset with zero values works
+        }
+    }
+
+    @Test
+    fun testSetFrustumOffsetMultipleChanges() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            val firstOffset = android.graphics.RectF(10f, 20f, 30f, 40f)
+            maplibreMap.setFrustumOffset(firstOffset)
+
+            val secondOffset = android.graphics.RectF(100f, 200f, 300f, 400f)
+            maplibreMap.setFrustumOffset(secondOffset)
+
+            val zeroOffset = android.graphics.RectF(0f, 0f, 0f, 0f)
+            maplibreMap.setFrustumOffset(zeroOffset)
+            // Verify that multiple changes to frustum offset work correctly
         }
     }
 

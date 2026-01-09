@@ -13,10 +13,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class StyleBuilderTest {
+class StyleBuilderTest : BaseTest() {
 
     @Test
     fun testFromUrl() {

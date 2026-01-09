@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Įnašo ikona. Paspausk norėdamas pamatyti dialogą su detalėmis</string>
     <string name="maplibre_myLocationViewContentDescription">Vartotojo vietos vaizdas. Nurodo tavo poziciją žemėlapyje</string>
     <string name="maplibre_mapActionDescription">Rodomas MapLibre kurtas žemėlapis. Naviguok tempdamas du pirštus. Valdyk žemėlapio pritraukimą suimdamas/atitolindamas du pirštus.</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Android SDK</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_offline_error_region_definition_invalid">Pasirinktas OfflineRegionDefinition netalpa į rėžius:  %s</string>
 
     </resources>

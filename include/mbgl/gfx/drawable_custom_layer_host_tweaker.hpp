@@ -25,7 +25,7 @@ public:
 
     void init(Drawable&) override {};
 
-    void execute(Drawable&, const PaintParameters&) override;
+    void execute(Drawable&, PaintParameters&) override;
 
 protected:
     std::shared_ptr<style::CustomLayerHost> host;

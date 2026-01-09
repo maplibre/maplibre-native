@@ -11,7 +11,7 @@ RasterDEMTileWorker::RasterDEMTileWorker(const ActorRef<RasterDEMTileWorker>&, A
 
 void RasterDEMTileWorker::parse(const std::shared_ptr<const std::string>& data,
                                 uint64_t correlationID,
-                                Tileset::DEMEncoding encoding) {
+                                Tileset::RasterEncoding encoding) {
     if (!data) {
         parent.invoke(&RasterDEMTile::onParsed, nullptr,
                       correlationID); // No data; empty tile.

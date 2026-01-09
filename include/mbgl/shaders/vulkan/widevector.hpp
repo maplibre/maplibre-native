@@ -6,20 +6,27 @@
 namespace mbgl {
 namespace shaders {
 
+constexpr auto wideVectorShaderPrelude = R"(
+
+#define idWideVectorUniformsUBO         idDrawableReservedVertexOnlyUBO
+#define idWideVectorUniformWideVecUBO   drawableReservedUBOCount
+
+)";
+
 template <>
 struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "WideVectorShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static const std::array<AttributeInfo, 4> instanceAttributes;
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = wideVectorShaderPrelude;
     static constexpr auto vertex = R"(
 
 /** Expressions are used to change values like width and opacity over zoom levels. **/
 #define WKSExpStops 8
-    
+
 // Line Joins
 // These are assumed to match WideVectorLineJoinType
 #define WKSVertexLineJoinMiter          0
@@ -35,7 +42,7 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
 #define WKSVertexLineCapButt    1
 #define WKSVertexLineCapSquare  2
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform WideVectorUniformsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idWideVectorUniformsUBO) uniform WideVectorUniformsUBO {
     mat4 mvpMatrix;
     mat4 mvpMatrixDiff;
     mat4 mvMatrix;
@@ -45,19 +52,30 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform WideVectorUniformsUBO 
     vec2 frameSize;
 } uniforms;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform WideVectorUniformWideVecUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idWideVectorUniformWideVecUBO) uniform WideVectorUniformWideVecUBO {
     vec4 color;
     float w2;
     float offset;
     float edge;
     float texRepeat;
-    vec4 texOffset;
+    vec2 texOffset;
     float miterLimit;
     int join;
     int cap;
     int hasExp;
     float interClipLimit;
 } wideVec;
+
+// Instance info for the wide vector (new) vertex shader
+typedef struct
+{
+    // Center of the point on the line
+    vec3 center;
+    // Color
+    vec4 color;
+    // Used to track loops and such
+    int prev,next; // set to -1 for non-loops
+} VertexTriWideVecInstance;
 
 struct IntersectInfo {
     bool valid;
@@ -103,16 +121,28 @@ IntersectInfo intersectWideLines(vec2 p0,vec2 p1,vec2 p2, vec2 n0,vec2 n1)
     return intersectLines(p0 + n0, p1 + n0, p1 + n1, p2 + n1);
 }
 
+// Used to track what info we have about a center point
+struct CenterInfo {
+    /// Screen coordinates of the line segment endpoint
+    vec2 screenPos;
+    /// Length of the segment (in screen coordinates)
+    float len;
+    /// Normalized direction of the segment
+    vec2 nDir;
+    /// Normalized plane normal, perpendicular to the segment
+    vec2 norm;
+};
+
 vec3 viewPos(const mat4 &mat, vec3 vec) {
     const vec4 p = mat * vec4(vec, 1.0);
     return p.xyz;   // / p.w; ?
 }
 
-float2 screenPos_MVP(const Uniforms &u, float3 viewPos) {
-    const float4 p4 = float4(viewPos, 1.0);
-    
+vec2 screenPos_MVP(const Uniforms &u, vec3 viewPos) {
+    const vec4 p4 = vec4(viewPos, 1.0);
+
     // Use the MVP matrix
-    const float4 s = u.mvpMatrix * p4;
+    const vec4 s = u.mvpMatrix * p4;
 
     return s.xy / s.w;
 }
@@ -150,22 +180,7 @@ void main() {
 )";
 
     static constexpr auto fragment = R"(
-layout(location = 0) in vec2 frag_uv;
-layout(location = 0) out vec4 out_color;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform DebugUBO {
-    mat4 matrix;
-    vec4 color;
-    float overlay_scale;
-    float pad1, pad2, pad3;
-} debug;
-
-layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
-
-void main() {
-    vec4 overlay_color = texture(image_sampler, frag_uv);
-    out_color = mix(debug.color, overlay_color, overlay_color.a);
-}
+    // TODO
 )";
 };
 

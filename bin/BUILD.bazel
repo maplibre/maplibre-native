@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_binary(
@@ -8,6 +9,7 @@ cc_binary(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//platform:macos-objcpp",
+        "//vendor:args",
     ],
 )
 
@@ -19,5 +21,6 @@ cc_binary(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//platform:macos-objcpp",
+        "//vendor:args",
     ],
 )

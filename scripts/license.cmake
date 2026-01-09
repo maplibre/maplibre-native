@@ -2,7 +2,7 @@
 
 function(mbgl_generate_license param)
     # Fake targets or non relevant.
-    set(BLACKLIST "mbgl-compiler-options")
+    set(BLACKLIST "mbgl-compiler-options" "mbgl-rustutils")
 
     get_target_property(LIBRARIES ${param} LINK_LIBRARIES)
     list(INSERT LIBRARIES 0 ${param})

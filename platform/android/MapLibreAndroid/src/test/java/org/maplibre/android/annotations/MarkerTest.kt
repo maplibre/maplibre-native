@@ -6,9 +6,10 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.Mockito
 
-class MarkerTest {
+class MarkerTest : BaseTest() {
     @Test
     fun testSanity() {
         val markerOptions = MarkerOptions()

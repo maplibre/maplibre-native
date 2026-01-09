@@ -10,6 +10,7 @@ import org.maplibre.android.utils.ColorUtils
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.robolectric.RobolectricTestRunner
 import java.util.*
 
@@ -17,7 +18,7 @@ import java.util.*
  * Expression unit tests that validate the expression output with the expected Object[]array representation.
  */
 @RunWith(RobolectricTestRunner::class)
-class ExpressionTest {
+class ExpressionTest : BaseTest() {
     @Test
     fun testPropertyValueIsExpression() {
         val property: PropertyValue<*> = PropertyFactory.lineWidth(Expression.get("width"))

@@ -115,9 +115,9 @@ private:
                                ReplyFn&& reply,
                                mapbox::base::WeakPtr<Scheduler> replyScheduler) {
         schedule(tag, [replyScheduler = std::move(replyScheduler), tag, task, reply] {
-            auto lock = replyScheduler.lock();
-            if (!replyScheduler) return;
-            replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
+            if (auto guard = replyScheduler.lock(); replyScheduler) {
+                replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
+            }
         });
     }
 };

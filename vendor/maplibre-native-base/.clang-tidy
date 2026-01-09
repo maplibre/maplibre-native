@@ -1,0 +1,8 @@
+Checks: 'bugprone-*,cppcoreguidelines-*,clang-analyzer-*,google-*,misc-*,modernize-*,performance-*,readability-*,-google-runtime-int,-google-readability-todo,-readability-named-parameter,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-special-member-functions,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-pro-bounds-pointer-arithmetic'
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+CheckOptions:
+  - key:   readability-identifier-naming.PrivateMemberSuffix
+    value: '_'
+  - key:   readability-identifier-naming.ProtectedMemberSuffix
+    value: '_'

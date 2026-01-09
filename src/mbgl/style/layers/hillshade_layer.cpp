@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* HillshadeLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"hillshade",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::Required,
-                                        LayerTypeInfo::Layout::NotRequired,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::RasterDEM};
+    const static LayerTypeInfo typeInfo{.type="hillshade",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::Required,
+                                        .layout=LayerTypeInfo::Layout::NotRequired,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::RasterDEM};
     return &typeInfo;
 }
-
 
 HillshadeLayer::HillshadeLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {
@@ -40,7 +39,9 @@ HillshadeLayer::HillshadeLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-HillshadeLayer::~HillshadeLayer() = default;
+HillshadeLayer::~HillshadeLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const HillshadeLayer::Impl& HillshadeLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

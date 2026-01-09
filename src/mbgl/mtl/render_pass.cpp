@@ -30,6 +30,10 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                 }
             }
             encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
+
+            const auto& texture = rpd->colorAttachments()->object(0)->texture();
+            width = texture->width();
+            height = texture->height();
         }
     }
 
@@ -62,6 +66,11 @@ void RenderPass::endEncoding() {
         encoder.reset();
     }
 
+    resetState();
+}
+
+void RenderPass::resetState() {
+    currentPipelineState.reset();
     currentDepthStencilState.reset();
     currentStencilReferenceValue = 0;
     for (int i = 0; i < maxBinds; ++i) {
@@ -70,6 +79,10 @@ void RenderPass::endEncoding() {
         fragmentTextureBindings[i].reset();
         fragmentSamplerStates[i].reset();
     }
+
+    currentCullMode = MTL::CullModeNone;
+    currentWinding = MTL::WindingClockwise;
+    currentScissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
 }
 
 namespace {
@@ -117,9 +130,13 @@ void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::
                 return;
             }
         }
-        vertexBinds[index] = BindInfo{&buf, actualSize, offset};
+        vertexBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindVertex(encoder, offset, index, actualSize);
+}
+
+void RenderPass::unbindVertex(std::size_t index) {
+    vertexBinds[index] = std::nullopt;
 }
 
 void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std::size_t index, std::size_t size) {
@@ -139,9 +156,13 @@ void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std
                 return;
             }
         }
-        fragmentBinds[index] = BindInfo{&buf, actualSize, offset};
+        fragmentBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindFragment(encoder, offset, index, actualSize);
+}
+
+void RenderPass::unbindFragment(std::size_t index) {
+    fragmentBinds[index] = std::nullopt;
 }
 
 void RenderPass::setDepthStencilState(const MTLDepthStencilStatePtr& state) {
@@ -175,6 +196,42 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
             fragmentSamplerStates[location] = state;
             encoder->setFragmentSamplerState(state.get(), location);
         }
+    }
+}
+
+/// Set the render pipeline state
+void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelineState) {
+    if (pipelineState != currentPipelineState) {
+        currentPipelineState = pipelineState;
+        encoder->setRenderPipelineState(currentPipelineState.get());
+    }
+}
+
+void RenderPass::setCullMode(const MTL::CullMode mode) {
+    if (mode != currentCullMode) {
+        encoder->setCullMode(mode);
+        currentCullMode = mode;
+    }
+}
+
+void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
+    if (winding != currentWinding) {
+        encoder->setFrontFacingWinding(winding);
+        currentWinding = winding;
+    }
+}
+
+void RenderPass::setScissorRect(MTL::ScissorRect rect) {
+    if (rect.x != currentScissorRect.x || rect.y != currentScissorRect.y || rect.width != currentScissorRect.width ||
+        rect.height != currentScissorRect.height) {
+        if (rect.width + rect.x > width) {
+            rect.width = width - rect.x;
+        }
+        if (rect.height + rect.y > height) {
+            rect.height = height - rect.y;
+        }
+        encoder->setScissorRect(rect);
+        currentScissorRect = rect;
     }
 }
 

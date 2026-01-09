@@ -1,7 +1,14 @@
 {
   "version": 8,
   "metadata": {
-    "test": {}
+    "test": {
+      "source-replace": [
+        {
+          "replace": "maplibre",
+          "with": "mlt"
+        }
+      ]
+    }
   },
   "zoom": 2,
   "sources": {
@@ -12,6 +19,15 @@
       "tiles": [
         "local://tiles/{z}-{x}-{y}.tms.mvt"
       ]
+    },
+    "mlt": {
+      "type": "vector",
+      "maxzoom": 14,
+      "scheme": "tms",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.tms.mlt"
+      ],
+      "encoding": "mlt"
     }
   },
   "layers": [

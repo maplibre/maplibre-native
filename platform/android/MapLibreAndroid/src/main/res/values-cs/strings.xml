@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Atributy. Zobrazit nastavení atributů.</string>
     <string name="maplibre_myLocationViewContentDescription">Zobrazení polohy. Zobrazit umístění na mapě.</string>
     <string name="maplibre_mapActionDescription">Zobrazení mapy vytvořené s MapLibre. Posunout tažením dvěma prsty. Změnit velikost roztažením dvou prstů.</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK pro Android</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">Na zařízení není nainstalován webový prohlížeč, webovou stránku nelze zobrazit.</string>
     <string name="maplibre_offline_error_region_definition_invalid">Pokud OfflineRegionDefinition neodpovídá hranicím: %s</string>
     </resources>

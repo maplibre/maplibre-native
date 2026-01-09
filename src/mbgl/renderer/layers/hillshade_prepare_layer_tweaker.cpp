@@ -22,8 +22,8 @@ constexpr std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}}
 // https://aws.amazon.com/public-datasets/terrain/
 constexpr std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
 
-constexpr const std::array<float, 4>& getUnpackVector(const Tileset::DEMEncoding encoding) {
-    return (encoding == Tileset::DEMEncoding::Terrarium) ? unpackTerrarium : unpackMapbox;
+constexpr const std::array<float, 4>& getUnpackVector(const Tileset::RasterEncoding encoding) {
+    return (encoding == Tileset::RasterEncoding::Terrarium) ? unpackTerrarium : unpackMapbox;
 }
 } // namespace
 
@@ -50,15 +50,16 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, -1, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
 
-        const HillshadePrepareDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .unpack = */ getUnpackVector(drawableData.encoding),
-            /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
-            /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
+        const HillshadePrepareDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
+        const HillshadePrepareTilePropsUBO tilePropsUBO = {
+            .unpack = getUnpackVector(drawableData.encoding),
+            .dimension = {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
+            .zoom = static_cast<float>(tileID.canonical.z),
+            .maxzoom = static_cast<float>(drawableData.maxzoom)};
 
-        drawable.mutableUniformBuffers().createOrUpdate(
-            idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idHillshadePrepareTilePropsUBO, &tilePropsUBO, parameters.context);
     });
 }
 

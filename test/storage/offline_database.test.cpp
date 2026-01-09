@@ -371,7 +371,8 @@ TEST(OfflineDatabase, PutTile) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
     Resource resource{Resource::Tile, "http://example.com/"};
-    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
+    resource.tileData = Resource::TileData{
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
@@ -417,7 +418,8 @@ TEST(OfflineDatabase, PutTileNotFound) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
     Resource resource{Resource::Tile, "http://example.com/"};
-    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
+    resource.tileData = Resource::TileData{
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
     Response response;
     response.noContent = true;
 
@@ -1303,7 +1305,8 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     ASSERT_TRUE(region);
 
     Resource resource{Resource::Tile, "http://example.com/"};
-    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
+    resource.tileData = Resource::TileData{
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
     Response response;
 
     response.data = std::make_shared<std::string>("first");

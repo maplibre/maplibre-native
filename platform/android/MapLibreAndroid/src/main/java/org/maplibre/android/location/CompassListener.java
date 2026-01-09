@@ -30,4 +30,3 @@ public interface CompassListener {
    */
   void onCompassAccuracyChange(int compassStatus);
 }
-

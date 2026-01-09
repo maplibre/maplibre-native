@@ -1,0 +1,7 @@
+{
+    "render-tests/fill-extrusion-color/function": "Needs investigation (Diff: 0.0014495849609375)",
+    "render-tests/icon-text-fit/enlargen-both": "Needs investigation (Diff: 0.0059814453125)",
+    "render-tests/icon-text-fit/textFit-grid-long": "Needs investigation (Diff: 0.00507716049382716)",
+    "render-tests/regressions/mapbox-gl-js#5642": "Needs investigation (Diff: 0.01416015625)",
+    "render-tests/regressions/mapbox-gl-js#7066": "Needs investigation (Diff: 0.0002777777777777778)"
+}

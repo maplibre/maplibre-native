@@ -4,13 +4,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapView.OnDidFinishLoadingStyleListener
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -42,52 +41,59 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     private var isLoadingStyle = true
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_circle_layer)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap? ->
-                if (map != null) {
-                    maplibreMap = map
-                }
-                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
-                mapView.addOnDidFinishLoadingStyleListener(
-                    OnDidFinishLoadingStyleListener {
-                        val style = maplibreMap.style
-                        addBusStopSource(style)
-                        addBusStopCircleLayer(style)
-                        initFloatingActionButtons()
-                        isLoadingStyle = false
-                    }
-                )
+        mapView.getMapAsync { map: MapLibreMap? ->
+            if (map != null) {
+                maplibreMap = map
             }
-        )
+            maplibreMap.setStyle(TestStyles.PROTOMAPS_WHITE) {
+                maplibreMap.getStyle { style ->
+                    addBusStopSource(style)
+                    addBusStopCircleLayer(style)
+                    initFloatingActionButtons()
+                    isLoadingStyle = false
+
+                    style.addImage(
+                        "bus-icon",
+                        AppCompatResources.getDrawable(this, R.drawable.ic_directions_bus_black)!!
+                    )
+                }
+            }
+        }
     }
 
-    private fun addBusStopSource(style: Style?) {
+    private fun addBusStopSource(style: Style) {
+        // --8<-- [start:addBusStopSource]
         try {
             source = GeoJsonSource(SOURCE_ID, URI(URL_BUS_ROUTES))
         } catch (exception: URISyntaxException) {
             Timber.e(exception, "That's not an url... ")
         }
-        style!!.addSource(source!!)
+        style.addSource(source!!)
+        // --8<-- [end:addBusStopSource]
     }
 
-    private fun addBusStopCircleLayer(style: Style?) {
+    private fun addBusStopCircleLayer(style: Style) {
+        // --8<-- [start:addBusStopCircleLayer]
         layer = CircleLayer(LAYER_ID, SOURCE_ID)
         layer!!.setProperties(
             PropertyFactory.circleColor(Color.parseColor("#FF9800")),
             PropertyFactory.circleRadius(2.0f)
         )
-        style!!.addLayerBelow(layer!!, "water_intermittent")
+        style.addLayer(layer!!)
+        // --8<-- [end:addBusStopCircleLayer]
+
     }
 
     private fun initFloatingActionButtons() {
         routeFab = findViewById(R.id.fab_route)
-        routeFab.setColorFilter(ContextCompat.getColor(this@CircleLayerActivity, R.color.primary))
-        routeFab.setOnClickListener(this@CircleLayerActivity)
+        routeFab.setColorFilter(ContextCompat.getColor(this, R.color.primary))
+        routeFab.setOnClickListener(this)
         styleFab = findViewById(R.id.fab_style)
-        styleFab.setOnClickListener(this@CircleLayerActivity)
+        styleFab.setOnClickListener(this)
     }
 
     override fun onClick(view: View) {
@@ -113,102 +119,107 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun addClusteredSource() {
-        try {
-            maplibreMap.style!!.addSource(
-                GeoJsonSource(
-                    SOURCE_ID_CLUSTER,
-                    URI(URL_BUS_ROUTES),
-                    GeoJsonOptions()
-                        .withCluster(true)
-                        .withClusterMaxZoom(14)
-                        .withClusterRadius(50)
+        maplibreMap.getStyle { style ->
+            try {
+                // --8<-- [start:addClusteredSource]
+                style.addSource(
+                    GeoJsonSource(
+                        SOURCE_ID_CLUSTER,
+                        URI(URL_BUS_ROUTES),
+                        GeoJsonOptions()
+                            .withCluster(true)
+                            .withClusterMaxZoom(14)
+                            .withClusterRadius(50)
+                    )
                 )
-            )
-        } catch (malformedUrlException: URISyntaxException) {
-            Timber.e(malformedUrlException, "That's not an url... ")
-        }
+                // --8<-- [end:addClusteredSource]
+            } catch (malformedUrlException: URISyntaxException) {
+                Timber.e(malformedUrlException, "That's not an url... ")
+            }
 
-        // Add unclustered layer
-        val layers = arrayOf(
-            intArrayOf(
-                150,
-                ResourcesCompat.getColor(
+            // --8<-- [start:unclusteredLayer]
+            val unclustered = SymbolLayer("unclustered-points", SOURCE_ID_CLUSTER)
+            unclustered.setProperties(
+                PropertyFactory.iconImage("bus-icon"),
+            )
+            unclustered.setFilter(
+                Expression.neq(Expression.get("cluster"), true)
+            )
+            style.addLayer(unclustered)
+            // --8<-- [end:unclusteredLayer]
+
+            // --8<-- [start:clusteredCircleLayers]
+            val layers = arrayOf(
+                150 to ResourcesCompat.getColor(
                     resources,
                     R.color.redAccent,
                     theme
-                )
-            ),
-            intArrayOf(20, ResourcesCompat.getColor(resources, R.color.greenAccent, theme)),
-            intArrayOf(
-                0,
-                ResourcesCompat.getColor(
+                ),
+                20 to ResourcesCompat.getColor(resources, R.color.greenAccent, theme),
+                0 to ResourcesCompat.getColor(
                     resources,
                     R.color.blueAccent,
                     theme
                 )
             )
-        )
-        val unclustered = SymbolLayer("unclustered-points", SOURCE_ID_CLUSTER)
-        unclustered.setProperties(
-            PropertyFactory.iconImage("bus-15")
-        )
-        maplibreMap.style!!.addLayer(unclustered)
-        for (i in layers.indices) {
-            // Add some nice circles
-            val circles = CircleLayer("cluster-$i", SOURCE_ID_CLUSTER)
-            circles.setProperties(
-                PropertyFactory.circleColor(layers[i][1]),
-                PropertyFactory.circleRadius(18f)
-            )
-            val pointCount = Expression.toNumber(Expression.get("point_count"))
-            circles.setFilter(
-                if (i == 0) {
-                    Expression.all(
-                        Expression.has("point_count"),
-                        Expression.gte(
-                            pointCount,
-                            Expression.literal(
-                                layers[i][0]
-                            )
-                        )
+            // --8<-- [end:clusteredCircleLayers]
 
-                    )
-                } else {
-                    Expression.all(
-                        Expression.has("point_count"),
-                        Expression.gt(
-                            pointCount,
-                            Expression.literal(
-                                layers[i][0]
-                            )
-                        ),
-                        Expression.lt(
-                            pointCount,
-                            Expression.literal(
-                                layers[i - 1][0]
+            // --8<-- [start:clusteredCircleLayersLoop]
+            for (i in layers.indices) {
+                // Add some nice circles
+                val circles = CircleLayer("cluster-$i", SOURCE_ID_CLUSTER)
+                circles.setProperties(
+                    PropertyFactory.circleColor(layers[i].second),
+                    PropertyFactory.circleRadius(18f)
+                )
+
+                val pointCount = Expression.toNumber(Expression.get("point_count"))
+                circles.setFilter(
+                    if (i == 0) {
+                        Expression.all(
+                            Expression.has("point_count"),
+                            Expression.gte(
+                                pointCount,
+                                Expression.literal(layers[i].first)
                             )
                         )
-                    )
-                }
+                    } else {
+                        Expression.all(
+                            Expression.has("point_count"),
+                            Expression.gt(
+                                pointCount,
+                                Expression.literal(layers[i].first)
+                            ),
+                            Expression.lt(
+                                pointCount,
+                                Expression.literal(layers[i - 1].first)
+                            )
+                        )
+                    }
+                )
+
+                style.addLayer(circles)
+            }
+            // --8<-- [end:clusteredCircleLayersLoop]
+
+            // --8<-- [start:countLabels]
+            val count = SymbolLayer("count", SOURCE_ID_CLUSTER)
+            count.setProperties(
+                PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
+                PropertyFactory.textFont(arrayOf("Noto Sans Medium")),
+                PropertyFactory.textSize(12f),
+                PropertyFactory.textColor(Color.WHITE),
+                PropertyFactory.textIgnorePlacement(true),
+                PropertyFactory.textAllowOverlap(true)
             )
-            maplibreMap.style!!.addLayer(circles)
+            style.addLayer(count)
+            // --8<-- [end:countLabels]
         }
-
-        // Add the count labels
-        val count = SymbolLayer("count", SOURCE_ID_CLUSTER)
-        count.setProperties(
-            PropertyFactory.textField(Expression.toString(Expression.get("point_count"))),
-            PropertyFactory.textSize(12f),
-            PropertyFactory.textColor(Color.WHITE),
-            PropertyFactory.textIgnorePlacement(true),
-            PropertyFactory.textAllowOverlap(true)
-        )
-        maplibreMap.style!!.addLayer(count)
     }
 
     private fun removeFabs() {
-        routeFab!!.visibility = View.GONE
-        styleFab!!.visibility = View.GONE
+        routeFab.visibility = View.GONE
+        styleFab.visibility = View.GONE
     }
 
     private fun changeMapStyle() {
@@ -226,13 +237,8 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         maplibreMap.setStyle(Style.Builder().fromUri(nextStyle))
     }
 
-    private fun addBusStop() {
-        maplibreMap.style!!.addLayer(layer!!)
-        maplibreMap.style!!.addSource(source!!)
-    }
-
     private val nextStyle: String
-        private get() {
+        get() {
             currentStyleIndex++
             if (currentStyleIndex == Data.STYLES.size) {
                 currentStyleIndex = 0
@@ -277,12 +283,8 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
 
     private object Data {
         val STYLES = arrayOf(
-            TestStyles.getPredefinedStyleWithFallback("Streets"),
-            TestStyles.getPredefinedStyleWithFallback("Outdoor"),
-            TestStyles.getPredefinedStyleWithFallback("Bright"),
-            TestStyles.getPredefinedStyleWithFallback("Pastel"),
-            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
-            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
+            TestStyles.PROTOMAPS_WHITE,
+            TestStyles.PROTOMAPS_LIGHT
         )
     }
 
@@ -290,7 +292,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         const val SOURCE_ID = "bus_stop"
         const val SOURCE_ID_CLUSTER = "bus_stop_cluster"
         const val URL_BUS_ROUTES =
-            "https://raw.githubusercontent.com/cheeaun/busrouter-sg/master/data/2/bus-stops.geojson"
+            "https://s3.eu-central-1.amazonaws.com/maplibre-native/android-documentation-resources/bus-stops.geojson"
         const val LAYER_ID = "stops_layer"
     }
 }

@@ -3,9 +3,9 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
 #include <mbgl/shaders/line_layer_ubo.hpp>
-#endif // MLN_RENDER_BACKEND_METAL
+#endif // MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
 
 #include <string>
 
@@ -60,12 +60,20 @@ private:
 protected:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniformBufferPtr drawableUniformBuffer;
+    gfx::UniformBufferPtr tilePropsUniformBuffer;
+#endif
+
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr expressionUniformBuffer;
     Unevaluated::GPUExpressions gpuExpressions;
-    shaders::LineExpressionMask expressionMask = shaders::LineExpressionMask::None;
     bool gpuExpressionsUpdated = true;
 #endif // MLN_RENDER_BACKEND_METAL
+
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
+    shaders::LineExpressionMask expressionMask = shaders::LineExpressionMask::None;
+#endif
 };
 
 } // namespace mbgl

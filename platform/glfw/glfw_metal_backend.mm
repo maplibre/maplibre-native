@@ -6,8 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-GLFWMetalBackend::GLFWMetalBackend(GLFWwindow* window_, const bool capFrameRate)
-    : 
+GLFWMetalBackend::GLFWMetalBackend(GLFWwindow* window_, [[maybe_unused]] const bool capFrameRate)
+    :
       window(glfwGetCocoaWindow(window_)),
       rendererBackend(window)
       {

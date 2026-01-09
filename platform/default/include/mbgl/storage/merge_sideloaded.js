@@ -18,4 +18,3 @@ ${fs.readFileSync('platform/default/mbgl/storage/merge_sideloaded.sql', 'utf8')
 
 } // namespace mbgl
 `);
-

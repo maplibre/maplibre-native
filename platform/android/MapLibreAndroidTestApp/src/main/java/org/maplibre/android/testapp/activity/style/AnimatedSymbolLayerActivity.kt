@@ -35,7 +35,6 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private val random = Random()
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
-    private var style: Style? = null
     private val randomCars: MutableList<Car> = ArrayList()
     private var randomCarSource: GeoJsonSource? = null
     private var taxi: Car? = null
@@ -49,22 +48,21 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             maplibreMap = it
-            it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
-                this.style = style
-                setupCars()
-                animateRandomRoutes()
-                animateTaxi()
+            it.setStyle(TestStyles.OPENFREEMAP_LIBERTY) { style ->
+                setupCars(style)
+                animateRandomRoutes(style)
+                animateTaxi(style)
             }
         }
     }
 
-    private fun setupCars() {
-        addRandomCars()
-        addPassenger()
-        addMainCar()
+    private fun setupCars(style: Style) {
+        addRandomCars(style)
+        addPassenger(style)
+        addTaxi(style)
     }
 
-    private fun animateRandomRoutes() {
+    private fun animateRandomRoutes(style: Style) {
         val longestDrive = longestDrive
         val random = Random()
         for (car in randomCars) {
@@ -85,7 +83,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
                     override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
                         updateRandomDestinations()
-                        animateRandomRoutes()
+                        animateRandomRoutes(style)
                     }
                 })
             }
@@ -105,7 +103,8 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun animateTaxi() {
+    // --8<-- [start:animateTaxi]
+    private fun animateTaxi(style: Style) {
         val valueAnimator = ValueAnimator.ofObject(LatLngEvaluator(), taxi!!.current, taxi!!.next)
         valueAnimator.addUpdateListener(object : AnimatorUpdateListener {
             private var latLng: LatLng? = null
@@ -118,8 +117,8 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         valueAnimator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 super.onAnimationEnd(animation)
-                updatePassenger()
-                animateTaxi()
+                updatePassenger(style)
+                animateTaxi(style)
             }
         })
         valueAnimator.addListener(object : AnimatorListenerAdapter() {
@@ -134,15 +133,16 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         valueAnimator.start()
         animators.add(valueAnimator)
     }
+    // --8<-- [end:animateTaxi]
 
-    private fun updatePassenger() {
+    private fun updatePassenger(style: Style) {
         passenger = latLngInBounds
-        updatePassengerSource()
+        updatePassengerSource(style)
         taxi!!.setNext(passenger)
     }
 
-    private fun updatePassengerSource() {
-        val source = style!!.getSourceAs<GeoJsonSource>(PASSENGER_SOURCE)
+    private fun updatePassengerSource(style: Style) {
+        val source = style.getSourceAs<GeoJsonSource>(PASSENGER_SOURCE)
         val featureCollection = FeatureCollection.fromFeatures(
             arrayOf(
                 Feature.fromGeometry(
@@ -198,7 +198,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     private val duration: Long
         get() = (random.nextInt(DURATION_RANDOM_MAX) + DURATION_BASE).toLong()
 
-    private fun addRandomCars() {
+    private fun addRandomCars(style: Style) {
         var latLng: LatLng
         var next: LatLng
         for (i in 0..9) {
@@ -216,12 +216,13 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
             randomCars.add(
                 Car(feature, next, duration)
             )
+
         }
         randomCarSource = GeoJsonSource(RANDOM_CAR_SOURCE, featuresFromRoutes())
-        style!!.addSource(randomCarSource!!)
-        style!!.addImage(
+        style.addSource(randomCarSource!!)
+        style.addImage(
             RANDOM_CAR_IMAGE_ID,
-            (ResourcesCompat.getDrawable(resources, R.drawable.ic_car_top, theme) as BitmapDrawable).bitmap
+            ResourcesCompat.getDrawable(resources, R.drawable.ic_car_top, theme)!!
         )
         val symbolLayer = SymbolLayer(RANDOM_CAR_LAYER, RANDOM_CAR_SOURCE)
         symbolLayer.withProperties(
@@ -230,10 +231,12 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
             PropertyFactory.iconRotate(Expression.get(PROPERTY_BEARING)),
             PropertyFactory.iconIgnorePlacement(true)
         )
-        style!!.addLayerBelow(symbolLayer, WATERWAY_LAYER_ID)
+
+        style.addLayerBelow(symbolLayer, "label_country_1")
     }
 
-    private fun addPassenger() {
+    // --8<-- [start:addPassenger]
+    private fun addPassenger(style: Style) {
         passenger = latLngInBounds
         val featureCollection = FeatureCollection.fromFeatures(
             arrayOf(
@@ -245,22 +248,24 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
                 )
             )
         )
-        style!!.addImage(
+        style.addImage(
             PASSENGER,
-            (ResourcesCompat.getDrawable(resources, R.drawable.icon_burned, theme) as BitmapDrawable).bitmap
+            ResourcesCompat.getDrawable(resources, R.drawable.icon_burned, theme)!!
         )
         val geoJsonSource = GeoJsonSource(PASSENGER_SOURCE, featureCollection)
-        style!!.addSource(geoJsonSource)
+        style.addSource(geoJsonSource)
         val symbolLayer = SymbolLayer(PASSENGER_LAYER, PASSENGER_SOURCE)
         symbolLayer.withProperties(
             PropertyFactory.iconImage(PASSENGER),
             PropertyFactory.iconIgnorePlacement(true),
             PropertyFactory.iconAllowOverlap(true)
         )
-        style!!.addLayerBelow(symbolLayer, RANDOM_CAR_LAYER)
+        style.addLayerBelow(symbolLayer, RANDOM_CAR_LAYER)
     }
+    // --8<-- [end:addPassenger]
 
-    private fun addMainCar() {
+    // --8<-- [start:addTaxi]
+    private fun addTaxi(style: Style) {
         val latLng = latLngInBounds
         val properties = JsonObject()
         properties.addProperty(PROPERTY_BEARING, Car.getBearing(latLng, passenger))
@@ -273,12 +278,12 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         )
         val featureCollection = FeatureCollection.fromFeatures(arrayOf(feature))
         taxi = Car(feature, passenger, duration)
-        style!!.addImage(
+        style.addImage(
             TAXI,
             (ResourcesCompat.getDrawable(resources, R.drawable.ic_taxi_top, theme) as BitmapDrawable).bitmap
         )
         taxiSource = GeoJsonSource(TAXI_SOURCE, featureCollection)
-        style!!.addSource(taxiSource!!)
+        style.addSource(taxiSource!!)
         val symbolLayer = SymbolLayer(TAXI_LAYER, TAXI_SOURCE)
         symbolLayer.withProperties(
             PropertyFactory.iconImage(TAXI),
@@ -286,17 +291,23 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
             PropertyFactory.iconAllowOverlap(true),
             PropertyFactory.iconIgnorePlacement(true)
         )
-        style!!.addLayer(symbolLayer)
+        style.addLayer(symbolLayer)
     }
+    // --8<-- [end:addTaxi]
 
+
+    // --8<-- [start:latLngInBounds]
     private val latLngInBounds: LatLng
         get() {
             val bounds = maplibreMap.projection.visibleRegion.latLngBounds
             val generator = Random()
-            val randomLat = bounds.latitudeSouth + generator.nextDouble() * bounds.latitudeNorth - bounds.latitudeSouth
-            val randomLon = bounds.longitudeWest + generator.nextDouble() * bounds.longitudeEast - bounds.longitudeWest
+
+            val randomLat = bounds.latitudeSouth + generator.nextDouble() * (bounds.latitudeNorth - bounds.latitudeSouth)
+            val randomLon = bounds.longitudeWest + generator.nextDouble() * (bounds.longitudeEast - bounds.longitudeWest)
+
             return LatLng(randomLat, randomLon)
         }
+    // --8<-- [end:latLngInBounds]
 
     override fun onStart() {
         super.onStart()

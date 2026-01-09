@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Icona d’atribució. Activa per mostrar el diàleg de l’atribució.</string>
     <string name="maplibre_myLocationViewContentDescription">Vista de posició. Mostra la teva posició al mapa.</string>
     <string name="maplibre_mapActionDescription">Mostrant un mapa creat amb MapLibre. Desplaça’t arrossegant amb dos dits. Fes zoom pessigant amb dos dits.</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Android SDK</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_offline_error_region_definition_invalid">La OfflineRegionDefinition proporcionada no encaixa amb els límits del món: %s</string>
 
     </resources>

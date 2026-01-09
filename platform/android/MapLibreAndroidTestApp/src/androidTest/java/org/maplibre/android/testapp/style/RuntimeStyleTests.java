@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -79,8 +80,10 @@ public class RuntimeStyleTests extends EspressoTest {
     onView(withId(R.id.mapView)).perform(new BaseViewAction() {
       @Override
       public void perform(UiController uiController, View view) {
-        List<Layer> layers = maplibreMap.getStyle().getLayers();
-        Source source = maplibreMap.getStyle().getSources().get(0);
+        List<Layer> layers = Objects.requireNonNull(maplibreMap.getStyle()).getLayers();
+
+        Source source = maplibreMap.getStyle().getSources().stream()
+          .filter(s -> s.getId().equals("openmaptiles")).findAny().get();
 
         // Test inserting with invalid above-id
         try {
@@ -134,8 +137,9 @@ public class RuntimeStyleTests extends EspressoTest {
     onView(withId(R.id.mapView)).perform(new BaseViewAction() {
       @Override
       public void perform(UiController uiController, View view) {
-        List<Layer> layers = maplibreMap.getStyle().getLayers();
-        Source source = maplibreMap.getStyle().getSources().get(0);
+        List<Layer> layers = Objects.requireNonNull(maplibreMap.getStyle()).getLayers();
+        Source source = maplibreMap.getStyle().getSources().stream()
+          .filter(s -> s.getId().equals("openmaptiles")).findAny().get();
 
         // Test inserting out of range
         try {

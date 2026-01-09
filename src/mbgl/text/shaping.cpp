@@ -246,6 +246,9 @@ float determineAverageLineWidth(const TaggedString& logicalInput,
 
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
         const SectionOptions& section = logicalInput.getSection(i);
+        if (section.type != GlyphIDType::FontPBF) {
+            continue;
+        }
         char16_t codePoint = logicalInput.getCharCodeAt(i);
         totalWidth += getGlyphAdvance(codePoint, section, glyphMap, imagePositions, layoutTextSize, spacing);
     }
@@ -440,17 +443,27 @@ void shapeLines(Shaping& shaping,
         for (std::size_t i = 0; i < line.length(); i++) {
             const std::size_t sectionIndex = line.getSectionIndex(i);
             const SectionOptions& section = line.sectionAt(sectionIndex);
-            char16_t codePoint = line.getCharCodeAt(i);
+            const HBShapeAdjust* adjust = nullptr;
+            if (section.adjusts) {
+                assert(section.startIndex >= 0);
+                if (i >= (std::size_t)section.startIndex && i - section.startIndex < section.adjusts->size()) {
+                    adjust = &((*section.adjusts)[i - section.startIndex]);
+                }
+            }
+            GlyphID codePoint(line.getCharCodeAt(i), section.type);
+
             double baselineOffset = 0.0;
             Rect<uint16_t> rect;
             GlyphMetrics metrics;
             float advance = 0.0f;
+            float xHBOffset = 0.0f;
+            float yHBOffset = 0.0f;
             float verticalAdvance = util::ONE_EM;
             double sectionScale = section.scale;
             assert(sectionScale);
 
             const bool vertical = !(
-                writingMode == WritingModeType::Horizontal ||
+                writingMode == WritingModeType::Horizontal || codePoint.complex.type != GlyphIDType::FontPBF ||
                 // Don't verticalize glyphs that have no upright orientation
                 // if vertical placement is disabled.
                 (!allowVerticalPlacement && !util::i18n::hasUprightVerticalOrientation(codePoint)) ||
@@ -482,6 +495,17 @@ void shapeLines(Shaping& shaping,
                     metrics = (*glyph->second)->metrics;
                 }
                 advance = static_cast<float>(metrics.advance);
+
+                if (adjust) advance = adjust->advance;
+                if (adjust) {
+                    xHBOffset = (float)(adjust->x_offset * section.scale);
+                    yHBOffset = (float)(adjust->y_offset * section.scale);
+                }
+                if (advance < 0.01f) {
+                    // Advance is 0, this glyph should align to the preview glyph remove spacing
+                    xHBOffset -= spacing;
+                }
+
                 // We don't know the baseline, but since we're laying out
                 // at 24 points, we can calculate how much it will move when
                 // we scale up or down.
@@ -522,8 +546,8 @@ void shapeLines(Shaping& shaping,
 
             if (!vertical) {
                 positionedGlyphs.emplace_back(codePoint,
-                                              x,
-                                              y + static_cast<float>(baselineOffset),
+                                              x + xHBOffset,
+                                              y + static_cast<float>(baselineOffset) + yHBOffset,
                                               vertical,
                                               section.fontStackHash,
                                               static_cast<float>(sectionScale),
@@ -531,7 +555,10 @@ void shapeLines(Shaping& shaping,
                                               metrics,
                                               section.imageID,
                                               sectionIndex);
-                x += advance * static_cast<float>(sectionScale) + spacing;
+                if (advance > 0.01f) {
+                    // Only thce glyph with advance should increase spacing
+                    x += advance * static_cast<float>(sectionScale) + spacing;
+                }
             } else {
                 positionedGlyphs.emplace_back(codePoint,
                                               x,
@@ -598,21 +625,123 @@ Shaping getShaping(const TaggedString& formattedString,
                    bool allowVerticalPlacement) {
     assert(layoutTextSize);
     std::vector<TaggedString> reorderedLines;
-    if (formattedString.sectionCount() == 1) {
-        auto untaggedLines = bidi.processText(
-            formattedString.rawText(),
-            determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
-        for (const auto& line : untaggedLines) {
-            reorderedLines.emplace_back(line, formattedString.sectionAt(0));
-        }
-    } else {
-        auto processedLines = bidi.processStyledText(
-            formattedString.getStyledText(),
-            determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
-        for (const auto& line : processedLines) {
-            reorderedLines.emplace_back(line, formattedString.getSections());
+    if (formattedString.rawText().length()) {
+        if (formattedString.sectionCount() == 1) {
+            if (formattedString.getSection(0).type != GlyphIDType::FontPBF) {
+                reorderedLines.emplace_back(formattedString);
+            } else {
+                auto untaggedLines = bidi.processText(
+                    formattedString.rawText(),
+                    determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
+                for (const auto& line : untaggedLines) {
+                    reorderedLines.emplace_back(line, formattedString.sectionAt(0));
+                }
+            }
+        } else {
+            StyledText subString;
+            GlyphIDType sectionType = GlyphIDType::FontPBF;
+            auto strLen = formattedString.getStyledText().first.length();
+
+            std::vector<SectionOptions> formattedSections = formattedString.getSections();
+            if (formattedSections.size() > 0) sectionType = formattedSections[0].type;
+
+            std::vector<StyledText> pendStrings;
+
+            auto processAline = [&](StyledText line) {
+                reorderedLines.emplace_back(line, formattedSections);
+
+                auto cutLens = (int32_t)line.first.length();
+
+                for (auto& sec : formattedSections) {
+                    sec.startIndex -= cutLens;
+                }
+            };
+
+            auto applyLineAndPendingStrings = [&](StyledText line) {
+                if (pendStrings.empty()) {
+                    processAline(line);
+                } else {
+                    StyledText combine;
+                    for (auto& pendString : pendStrings) {
+                        combine.first.append(pendString.first);
+                        combine.second.insert(combine.second.end(), pendString.second.begin(), pendString.second.end());
+                    }
+                    pendStrings.clear();
+                    combine.first.append(line.first);
+                    combine.second.insert(combine.second.end(), line.second.begin(), line.second.end());
+                    processAline(combine);
+                }
+            };
+
+            auto applySubString = [&]() {
+                if (subString.first.length()) {
+                    if (GlyphIDType::FontPBF == sectionType) {
+                        auto processedLines = bidi.processStyledText(
+                            subString,
+                            determineLineBreaks({subString, formattedString.getSections()},
+                                                spacing,
+                                                maxWidth,
+                                                glyphMap,
+                                                imagePositions,
+                                                layoutTextSize));
+
+                        auto lastChar = u'x';
+                        if (!subString.first.empty()) lastChar = subString.first[subString.first.length() - 1];
+
+                        if (u'\n' == lastChar) {
+                            for (const auto& line : processedLines) {
+                                applyLineAndPendingStrings(line);
+                            }
+                        } else {
+                            auto lineCount = processedLines.size();
+                            if (lineCount > 1) {
+                                for (size_t lineIndex = 0; lineIndex < lineCount - 1; ++lineIndex) {
+                                    applyLineAndPendingStrings(processedLines[lineIndex]);
+                                }
+                            }
+                            if (lineCount) {
+                                pendStrings.push_back(processedLines[lineCount - 1]);
+                            }
+                        }
+
+                    } else {
+                        pendStrings.push_back(subString);
+                    }
+                }
+            };
+
+            for (size_t charIndex = 0; charIndex < strLen; ++charIndex) {
+                auto& ch = formattedString.getStyledText().first[charIndex];
+                auto& sec = formattedString.getStyledText().second[charIndex];
+                auto& secType = formattedSections[sec].type;
+
+                if (sectionType != secType) {
+                    applySubString();
+
+                    subString.first.clear();
+                    subString.second.clear();
+
+                    sectionType = secType;
+                }
+
+                subString.first += ch;
+                subString.second.emplace_back(sec);
+            }
+
+            applySubString();
+
+            if (!pendStrings.empty()) {
+                StyledText combine;
+                for (auto& pendString : pendStrings) {
+                    combine.first.append(pendString.first);
+                    combine.second.insert(combine.second.end(), pendString.second.begin(), pendString.second.end());
+                }
+                pendStrings.clear();
+                processAline(combine);
+            }
         }
     }
+
     Shaping shaping(translate[0], translate[1], writingMode);
     shapeLines(shaping,
                reorderedLines,

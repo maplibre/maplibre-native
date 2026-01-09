@@ -58,7 +58,8 @@ public class HttpRequestImpl implements HttpRequest {
 
   @Override
   public void executeRequest(HttpResponder httpRequest, long nativePtr, @NonNull String resourceUrl,
-                             @NonNull String etag, @NonNull String modified, boolean offlineUsage) {
+                             @NonNull String dataRange, @NonNull String etag, @NonNull String modified,
+                             boolean offlineUsage) {
     OkHttpCallback callback = new OkHttpCallback(httpRequest);
     try {
       HttpUrl httpUrl = HttpUrl.parse(resourceUrl);
@@ -74,6 +75,11 @@ public class HttpRequestImpl implements HttpRequest {
         .url(resourceUrl)
         .tag(resourceUrl.toLowerCase(MapLibreConstants.MAPLIBRE_LOCALE))
         .addHeader("User-Agent", userAgentString);
+
+      if (dataRange.length() > 0) {
+        builder.addHeader("Range", dataRange);
+      }
+
       if (etag.length() > 0) {
         builder.addHeader("If-None-Match", etag);
       } else if (modified.length() > 0) {

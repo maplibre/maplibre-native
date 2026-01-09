@@ -44,8 +44,10 @@ public:
             commandQueue = [mtlView.device newCommandQueue];
         }
 
-        commandBuffer = [commandQueue commandBuffer];
-        commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        if (!commandBuffer) {
+            commandBuffer = [commandQueue commandBuffer];
+            commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        }
     }
 
     const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
@@ -108,7 +110,7 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
       mbgl::mtl::RendererBackend(mbgl::gfx::ContextMode::Unique),
       mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<MLNMapViewMetalRenderableResource>(*this)) {
-          
+
       auto& resource = getResource<MLNMapViewMetalRenderableResource>();
       if (resource.mtlView) {
           return;
@@ -157,4 +159,13 @@ void MLNMapViewMetalImpl::updateAssumedState() {
 mbgl::PremultipliedImage MLNMapViewMetalImpl::readStillImage() {
     // return readFramebuffer(mapView.framebufferSize); // TODO: RendererBackend::readFramebuffer
     return {};
+}
+
+MLNBackendResource* MLNMapViewMetalImpl::getObject() {
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+
+    return [[MLNBackendResource alloc] initWithMTKView:resource.mtlView
+                                                device:resource.mtlView.device
+                                  renderPassDescriptor:resource.mtlView.currentRenderPassDescriptor
+                                         commandBuffer:resource.commandBuffer];
 }

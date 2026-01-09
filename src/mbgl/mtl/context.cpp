@@ -13,12 +13,12 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -139,7 +139,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
-    NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
+    NS::String* nsSource = NS::String::string(
+        source.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
 
     const auto& device = backend.getDevice();
     auto library = NS::TransferPtr(device->newLibrary(nsSource, options.get(), &error));
@@ -152,7 +153,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         return nullptr;
     }
 
-    const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
+    const auto nsVertName = NS::String::string(
+        vertexName.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
@@ -164,7 +166,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // fragment function is optional
     MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
-        const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
+        const auto nsFragName = NS::String::string(
+            fragmentName.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
@@ -199,9 +202,13 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool /*ssbo*/) {
     return std::make_shared<UniformBuffer>(
         createBuffer(data, size, gfx::BufferUsageType::StaticDraw, /*isIndexBuffer=*/false, persistent));
+}
+
+UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArray>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -226,7 +233,7 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
+void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
                                            const void* data,
@@ -282,15 +289,15 @@ const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
 
 namespace {
 const auto clipMaskStencilMode = gfx::StencilMode{
-    /*.test=*/gfx::StencilMode::Always(),
-    /*.ref=*/0,
-    /*.mask=*/0b11111111,
-    /*.fail=*/gfx::StencilOpType::Keep,
-    /*.depthFail=*/gfx::StencilOpType::Keep,
-    /*.pass=*/gfx::StencilOpType::Replace,
+    .test = gfx::StencilMode::Always(),
+    .ref = 0,
+    .mask = 0b11111111,
+    .fail = gfx::StencilOpType::Keep,
+    .depthFail = gfx::StencilOpType::Keep,
+    .pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/gfx::DepthFunctionType::Always,
-                                              /*.mask=*/gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
+                                              .mask = gfx::DepthMaskType::ReadOnly};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -366,7 +373,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
-        const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
         const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
                                                   0,
                                                   MTL::VertexFormatShort2,
@@ -379,7 +385,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         }
     }
     if (clipMaskPipelineState) {
-        encoder->setRenderPipelineState(clipMaskPipelineState.get());
+        mtlRenderPass.setRenderPipelineState(clipMaskPipelineState);
     } else {
         assert(!"Failed to create render pipeline state for clip masking");
         return false;
@@ -405,7 +411,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         uboBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
-    encoder->setCullMode(MTL::CullModeNone);
+    mtlRenderPass.setCullMode(MTL::CullModeNone);
 
     mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
 
@@ -415,7 +421,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Adding a `[[depth(...)]]` output to the shader prevents this error, but the stencil value is
     // still not written to the stencil attachment on those same devices.
 #if STENCIL_INSTANCING
-    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, shaders::idClippingMaskUBO);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,
@@ -423,10 +429,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*indexOffset=*/0,
                                    /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
-    const auto uboIndex = ShaderClass::uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
         encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
-        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
+        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
@@ -454,14 +459,7 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
     return createOffscreenTexture(size, type, false, false);
 }
 
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                                     gfx::TexturePixelType,
-                                                                     gfx::TextureChannelDataType) {
-    assert(false);
-    return nullptr;
-}
-
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
     return std::make_unique<RenderbufferResource>();
 }
 
@@ -477,7 +475,7 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {}
 
-void Context::visualizeDepthBuffer(float depthRangeSize) {}
+void Context::visualizeDepthBuffer(float) {}
 #endif // !defined(NDEBUG)
 
 void Context::clearStencilBuffer(int32_t) {
@@ -603,12 +601,12 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
         // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil
         // depthAttachment texture`
         if (auto* depthTarget = rpd->depthAttachment()) {
-            if (auto* tex = depthTarget->texture()) {
+            if (depthTarget->texture()) {
                 applyDepthMode(depthMode, depthStencilDescriptor.get());
             }
         }
         if (auto* stencilTarget = rpd->stencilAttachment()) {
-            if (auto* tex = stencilTarget->texture()) {
+            if (stencilTarget->texture()) {
                 auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
                 if (!stencilDescriptor) {
                     return {};
@@ -626,15 +624,8 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
 }
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        const auto& buffer = static_cast<UniformBuffer&>(*globalUniformBuffer.get());
-        const auto& resource = buffer.getBufferResource();
-        auto& mtlRenderPass = static_cast<RenderPass&>(renderPass);
-        mtlRenderPass.bindVertex(resource, 0, id);
-        mtlRenderPass.bindFragment(resource, 0, id);
-    }
+    auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
+    globalUniformBuffers.bindMtl(mtlRenderPass);
 }
 
 } // namespace mtl

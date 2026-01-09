@@ -56,18 +56,18 @@
     };
 
     XCTAssert([pointFeature isKindOfClass:[MLNPointFeature class]], @"");
-    
+
     NSString *filePath = [self temporaryFilePathForClass:MLNPointFeature.class];
     [NSKeyedArchiver archiveRootObject:pointFeature toFile:filePath];
     MLNPointFeature *unarchivedPointFeature = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
-    
+
     XCTAssertEqualObjects(pointFeature, unarchivedPointFeature);
 
     // Unarchive process should ensure we still have a cluster
     XCTAssert([unarchivedPointFeature isMemberOfClass:[MLNPointFeatureCluster class]]);
-    
+
     id<MLNCluster> cluster = MLN_OBJC_DYNAMIC_CAST_AS_PROTOCOL(unarchivedPointFeature, MLNCluster);
-    
+
     XCTAssert(cluster);
     XCTAssert(cluster.clusterIdentifier == 456);
     XCTAssert(cluster.clusterPointCount == 2);
@@ -99,46 +99,46 @@
     [unarchivedPolyline replaceCoordinatesInRange:NSMakeRange(0, 1) withCoordinates:otherCoordinates];
 
     XCTAssertNotEqualObjects(polyline, unarchivedPolyline);
-    
+
     CLLocationCoordinate2D multiLineCoordinates[] = {
         CLLocationCoordinate2DMake(51.000000, 0.000000),
         CLLocationCoordinate2DMake(51.000000, 1.000000),
         CLLocationCoordinate2DMake(51.000000, 2.000000),
     };
-    
+
     NSUInteger multiLineCoordinatesCount = sizeof(multiLineCoordinates) / sizeof(CLLocationCoordinate2D);
     MLNPolyline *multiLine = [MLNPolyline polylineWithCoordinates:multiLineCoordinates count:multiLineCoordinatesCount];
     CLLocationCoordinate2D multiLineCenter = CLLocationCoordinate2DMake(51.000000, 1.000000);
-    
+
     XCTAssertEqual([multiLine coordinate].latitude, multiLineCenter.latitude);
     XCTAssertEqual([multiLine coordinate].longitude, multiLineCenter.longitude);
-    
+
     CLLocationCoordinate2D segmentCoordinates[] = {
         CLLocationCoordinate2DMake(35.040390, -85.311477),
         CLLocationCoordinate2DMake(35.040390, -85.209510),
     };
-    
+
     NSUInteger segmentCoordinatesCount = sizeof(segmentCoordinates) / sizeof(CLLocationCoordinate2D);
     MLNPolyline *segmentLine = [MLNPolyline polylineWithCoordinates:segmentCoordinates count:segmentCoordinatesCount];
     CLLocationCoordinate2D segmentCenter = CLLocationCoordinate2DMake(35.0404006631, -85.2604935);
-    
+
     XCTAssertEqualWithAccuracy([segmentLine coordinate].latitude, segmentCenter.latitude, 0.0001);
     XCTAssertEqualWithAccuracy([segmentLine coordinate].longitude, segmentCenter.longitude, 0.0001);
-    
+
     CLLocationCoordinate2D sfToBerkeleyCoordinates[] = {
         CLLocationCoordinate2DMake(37.782440, -122.397111),
         CLLocationCoordinate2DMake(37.818384, -122.352994),
         CLLocationCoordinate2DMake(37.831401, -122.274545),
         CLLocationCoordinate2DMake(37.862172, -122.262700),
     };
-    
+
     NSUInteger sfToBerkeleyCoordinatesCount = sizeof(sfToBerkeleyCoordinates) / sizeof(CLLocationCoordinate2D);
     MLNPolyline *sfToBerkeleyLine = [MLNPolyline polylineWithCoordinates:sfToBerkeleyCoordinates count:sfToBerkeleyCoordinatesCount];
     CLLocationCoordinate2D sfToBerkeleyCenter = CLLocationCoordinate2DMake(37.8230575118,-122.324867587);
-    
+
     XCTAssertEqualWithAccuracy([sfToBerkeleyLine coordinate].latitude, sfToBerkeleyCenter.latitude, 0.0001);
     XCTAssertEqualWithAccuracy([sfToBerkeleyLine coordinate].longitude, sfToBerkeleyCenter.longitude, 0.0001);
-    
+
 }
 
 - (void)testPolygon {
@@ -162,18 +162,18 @@
     [unarchivedPolygon coordinate];
 
     XCTAssertEqualObjects(polygon, unarchivedPolygon);
-    
+
     CLLocationCoordinate2D squareCoordinates[] = {
         CLLocationCoordinate2DMake(100.0, 0.0),
         CLLocationCoordinate2DMake(101.0, 0.0),
         CLLocationCoordinate2DMake(101.0, 1.0),
         CLLocationCoordinate2DMake(100.0, 1.0),
     };
-    
+
     NSUInteger squareCoordinatesCount = sizeof(squareCoordinates) / sizeof(CLLocationCoordinate2D);
     MLNPolygon *squarePolygon = [MLNPolygon polygonWithCoordinates:squareCoordinates count:squareCoordinatesCount];
     CLLocationCoordinate2D squareCenter = CLLocationCoordinate2DMake(100.5, 0.5);
-    
+
     XCTAssertEqual([squarePolygon coordinate].latitude, squareCenter.latitude);
     XCTAssertEqual([squarePolygon coordinate].longitude, squareCenter.longitude);
 
@@ -261,10 +261,10 @@
 
     MLNPointCollection *pointCollection = [MLNPointCollection pointCollectionWithCoordinates:coordinates count:numberOfCoordinates];
     CLLocationCoordinate2D pointsCenter = CLLocationCoordinate2DMake(0, 1);
-    
+
     XCTAssertEqual([pointCollection coordinate].latitude, pointsCenter.latitude);
     XCTAssertEqual([pointCollection coordinate].longitude, pointsCenter.longitude);
-    
+
     NSString *filePath = [self temporaryFilePathForClass:[MLNPointCollection class]];
     [NSKeyedArchiver archiveRootObject:pointCollection toFile:filePath];
 
@@ -314,28 +314,28 @@
         CLLocationCoordinate2DMake(20, 21),
         CLLocationCoordinate2DMake(30, 31),
     };
-    
+
     CLLocationCoordinate2D line1[] = {
         CLLocationCoordinate2DMake(100, 40),
         CLLocationCoordinate2DMake(105, 45),
         CLLocationCoordinate2DMake(110, 55)
     };
-    
+
     CLLocationCoordinate2D line2[] = {
         CLLocationCoordinate2DMake(105, 40),
         CLLocationCoordinate2DMake(110, 45),
         CLLocationCoordinate2DMake(115, 55)
     };
-    
+
     NSUInteger road1CoordinatesCount = sizeof(line1) / sizeof(CLLocationCoordinate2D);
     NSUInteger road2CoordinatesCount = sizeof(line2) / sizeof(CLLocationCoordinate2D);
-    
+
     MLNPolyline *road1Polyline = [MLNPolyline polylineWithCoordinates:line1 count:road1CoordinatesCount];
     MLNPolyline *road2Polyline = [MLNPolyline polylineWithCoordinates:line1 count:road2CoordinatesCount];
-    
+
     MLNMultiPolyline *roads = [MLNMultiPolyline multiPolylineWithPolylines:@[road1Polyline, road2Polyline]];
     CLLocationCoordinate2D roadCenter = CLLocationCoordinate2DMake(100, 40);
-    
+
     XCTAssertEqual([roads coordinate].latitude, roadCenter.latitude);
     XCTAssertEqual([roads coordinate].longitude, roadCenter.longitude);
 
@@ -368,29 +368,29 @@
         CLLocationCoordinate2DMake(20, 21),
         CLLocationCoordinate2DMake(30, 31),
     };
-    
+
     CLLocationCoordinate2D outerSquare[] = {
         CLLocationCoordinate2DMake(100.0, 0.0),
         CLLocationCoordinate2DMake(101.0, 0.0),
         CLLocationCoordinate2DMake(101.0, 1.0),
         CLLocationCoordinate2DMake(100.0, 1.0),
     };
-                                    
+
     CLLocationCoordinate2D innerSquare[] = {
         CLLocationCoordinate2DMake(100.35, 0.35),
         CLLocationCoordinate2DMake(100.65, 0.35),
         CLLocationCoordinate2DMake(100.65, 0.65),
         CLLocationCoordinate2DMake(100.35, 0.65),
     };
-    
+
     NSUInteger outerCoordinatesCount = sizeof(outerSquare) / sizeof(CLLocationCoordinate2D);
     NSUInteger innerCoordinatesCount = sizeof(innerSquare) / sizeof(CLLocationCoordinate2D);
-    
+
     MLNPolygon *innerPolygonSquare = [MLNPolygon polygonWithCoordinates:innerSquare count:innerCoordinatesCount];
     MLNPolygon *outerPolygonSquare = [MLNPolygon polygonWithCoordinates:outerSquare count:outerCoordinatesCount interiorPolygons:@[innerPolygonSquare]];
     MLNMultiPolygon *squares = [MLNMultiPolygon multiPolygonWithPolygons:@[outerPolygonSquare, innerPolygonSquare]];
     CLLocationCoordinate2D squareCenter = CLLocationCoordinate2DMake(100.5, 0.5);
-    
+
     XCTAssertEqual([squares coordinate].latitude, squareCenter.latitude);
     XCTAssertEqual([squares coordinate].longitude, squareCenter.longitude);
 
@@ -410,10 +410,10 @@
 
     MLNMultiPolygon *unarchivedMultiPolygon = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
     MLNMultiPolygon *anotherMultiPolygon = [MLNMultiPolygon multiPolygonWithPolygons:[polygons subarrayWithRange:NSMakeRange(0, polygons.count/2)]];
-    
+
     XCTAssertEqualObjects(multiPolygon, unarchivedMultiPolygon);
     XCTAssertNotEqualObjects(anotherMultiPolygon, unarchivedMultiPolygon);
-    
+
 }
 
 - (void)testShapeCollection {

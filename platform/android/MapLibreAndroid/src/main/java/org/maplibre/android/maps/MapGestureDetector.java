@@ -169,8 +169,15 @@ final class MapGestureDetector {
       androidGesturesManager.setMutuallyExclusiveGestures(shoveScaleSet, shoveRotateSet, ScaleLongPressSet);
     }
 
+    // If this was 0°, every shove gesture (for tilting the map) would be detected as also a rotate
+    androidGesturesManager.getRotateGestureDetector().setAngleThreshold(3f);
+
+    // If this was 0 (the default), a simple tap would also be detected as a move. A (very) small
+    // move threshold solves this issue, while not making the map feel "sticky". (See #2792)
+    androidGesturesManager.getMoveGestureDetector().setMoveThresholdResource(R.dimen.maplibre_minimum_move_threshold);
+
     gesturesManager = androidGesturesManager;
-    gesturesManager.getRotateGestureDetector().setAngleThreshold(3f);
+
   }
 
   /**

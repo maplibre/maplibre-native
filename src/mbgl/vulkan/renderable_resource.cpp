@@ -1,22 +1,14 @@
 #include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/constants.hpp>
 
 namespace mbgl {
 namespace vulkan {
 
-static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice, const vk::MemoryPropertyFlagBits& type) {
-    const auto& memoryProps = physicalDevice.getMemoryProperties();
-    for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
-        if (memoryProps.memoryTypes[i].propertyFlags & type) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 SurfaceRenderableResource::~SurfaceRenderableResource() {
+    backend.getDevice()->waitIdle(backend.getDispatcher());
+
     // specific order
     swapchainFramebuffers.clear();
     renderPass.reset();
@@ -70,11 +62,12 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     }
 }
 
-void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode) {
+void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
-    const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get());
+    const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get(), dispatcher);
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
         return (format.format == vk::Format::eB8G8R8A8Unorm || format.format == vk::Format::eR8G8B8A8Unorm) &&
                format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
@@ -84,7 +77,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
 
     // only vk::PresentModeKHR::eFifo (vsync on) is guaranteed
     if (presentMode != vk::PresentModeKHR::eFifo) {
-        const std::vector<vk::PresentModeKHR>& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get());
+        const auto& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get(), dispatcher);
+
         if (std::find(presentModes.begin(), presentModes.end(), presentMode) == presentModes.end()) {
             mbgl::Log::Error(
                 mbgl::Event::Render,
@@ -95,7 +89,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
     }
 
     // pick surface size
-    const vk::SurfaceCapabilitiesKHR& capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
+    capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), dispatcher);
 
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         extent = capabilities.currentExtent;
@@ -103,6 +97,13 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         // update values based on surface limits
         extent.width = std::min(std::max(w, capabilities.minImageExtent.width), capabilities.maxImageExtent.width);
         extent.height = std::min(std::max(h, capabilities.minImageExtent.height), capabilities.maxImageExtent.height);
+    }
+
+    if (hasSurfaceTransformSupport()) {
+        if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
+            capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
+            std::swap(extent.width, extent.height);
+        }
     }
 
     uint32_t swapchainImageCount = capabilities.minImageCount + 1;
@@ -133,7 +134,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eExclusive);
     }
 
-    swapchainCreateInfo.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity);
+    swapchainCreateInfo.setPreTransform(hasSurfaceTransformSupport() ? capabilities.currentTransform
+                                                                     : vk::SurfaceTransformFlagBitsKHR::eIdentity);
     swapchainCreateInfo.setClipped(VK_TRUE);
 
     if (capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eInherit) {
@@ -143,18 +145,30 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
     }
 
     // update this when recreating
-    swapchainCreateInfo.setOldSwapchain(vk::SwapchainKHR(swapchain.get()));
+    swapchainCreateInfo.setOldSwapchain(swapchain.get());
 
-    swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo);
-    swapchainImages = device->getSwapchainImagesKHR(swapchain.get());
+    swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo, nullptr, dispatcher);
+    swapchainImages = device->getSwapchainImagesKHR(swapchain.get(), dispatcher);
 
     colorFormat = swapchainCreateInfo.imageFormat;
     extent = swapchainCreateInfo.imageExtent;
+
+    acquireSemaphores.reserve(swapchainImages.size());
+    presentSemaphores.reserve(swapchainImages.size());
+    for (uint32_t index = 0; index < swapchainImages.size(); ++index) {
+        acquireSemaphores.emplace_back(device->createSemaphoreUnique({}, nullptr, dispatcher));
+        presentSemaphores.emplace_back(device->createSemaphoreUnique({}, nullptr, dispatcher));
+
+        const auto indexStr = std::to_string(index);
+        backend.setDebugName(acquireSemaphores.back().get(), "PresentSemaphore_" + indexStr);
+        backend.setDebugName(presentSemaphores.back().get(), "AcquireSemaphore_" + indexStr);
+    }
 }
 
 void SurfaceRenderableResource::initDepthStencil() {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
     // check for depth format support
     const std::vector<vk::Format> formats = {
@@ -164,7 +178,7 @@ void SurfaceRenderableResource::initDepthStencil() {
     };
 
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [&](const auto& format) {
-        const auto& formatProps = physicalDevice.getFormatProperties(format);
+        const auto& formatProps = physicalDevice.getFormatProperties(format, dispatcher);
         return formatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment;
     });
 
@@ -174,10 +188,6 @@ void SurfaceRenderableResource::initDepthStencil() {
     }
 
     depthFormat = *formatIt;
-
-    const bool hasLazyMemory = hasMemoryType(physicalDevice, vk::MemoryPropertyFlagBits::eLazilyAllocated);
-    const auto memoryUsage = hasLazyMemory ? VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED
-                                           : VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
 
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eDepthStencilAttachment |
                             vk::ImageUsageFlagBits::eTransientAttachment;
@@ -195,8 +205,15 @@ void SurfaceRenderableResource::initDepthStencil() {
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
     VmaAllocationCreateInfo allocCreateInfo = {};
-    allocCreateInfo.usage = memoryUsage;
+    allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED;
     allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+
+    uint32_t lazyMemoryIndex = 0;
+    uint32_t memoryTypeBits = std::numeric_limits<uint32_t>::max();
+    if (vmaFindMemoryTypeIndex(backend.getAllocator(), memoryTypeBits, &allocCreateInfo, &lazyMemoryIndex) !=
+        VK_SUCCESS) {
+        allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+    }
 
     depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
     if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
@@ -210,11 +227,12 @@ void SurfaceRenderableResource::initDepthStencil() {
             .setViewType(vk::ImageViewType::e2D)
             .setFormat(depthFormat)
             .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
-            .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
+            .setSubresourceRange(vk::ImageSubresourceRange(
+                vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil, 0, 1, 0, 1));
 
-    depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo);
+    depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo, nullptr, dispatcher);
 
-    backend.setDebugName(vk::Image(depthAllocation->image), "SwapchainDepthImage");
+    backend.setDebugName(depthAllocation->image, "SwapchainDepthImage");
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
@@ -231,6 +249,50 @@ const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     return colorAllocations[acquiredImageIndex]->image;
 }
 
+const vk::Semaphore& SurfaceRenderableResource::getAcquireSemaphore() const {
+    const auto& context = static_cast<const Context&>(backend.getContext());
+    return acquireSemaphores[context.getCurrentFrameResourceIndex()].get();
+}
+
+const vk::Semaphore& SurfaceRenderableResource::getPresentSemaphore() const {
+    return presentSemaphores[acquiredImageIndex].get();
+}
+
+bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
+#ifdef __ANDROID__
+    return surface && capabilities.supportedTransforms != vk::SurfaceTransformFlagBitsKHR::eIdentity;
+#else
+    return false;
+#endif
+}
+
+bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
+    const auto& physicalDevice = backend.getPhysicalDevice();
+    const auto& updatedCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), backend.getDispatcher());
+
+    return capabilities.currentTransform != updatedCapabilities.currentTransform;
+}
+
+float SurfaceRenderableResource::getRotation() {
+    switch (capabilities.currentTransform) {
+        default:
+        case vk::SurfaceTransformFlagBitsKHR::eIdentity:
+            return 0.0f * M_PI / 180.0f;
+
+        case vk::SurfaceTransformFlagBitsKHR::eRotate90:
+        case vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90:
+            return 90.0f * M_PI / 180.0f;
+
+        case vk::SurfaceTransformFlagBitsKHR::eRotate180:
+        case vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180:
+            return 180.0f * M_PI / 180.0f;
+
+        case vk::SurfaceTransformFlagBitsKHR::eRotate270:
+        case vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270:
+            return 270.0f * M_PI / 180.0f;
+    }
+}
+
 void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     if (surface) {
         initSwapchain(w, h);
@@ -239,6 +301,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     }
 
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
     // create swapchain image views
     swapchainImageViews.reserve(swapchainImages.size());
@@ -251,11 +314,11 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 
     for (const auto& image : swapchainImages) {
         imageViewCreateInfo.setImage(image);
-        swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
+        swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo, nullptr, dispatcher));
 
         const size_t index = swapchainImageViews.size() - 1;
-        backend.setDebugName(vk::Image(image), "SwapchainImage_" + std::to_string(index));
-        backend.setDebugName(vk::Image(image), "SwapchainImageView_" + std::to_string(index));
+        backend.setDebugName(image, "SwapchainImage_" + std::to_string(index));
+        backend.setDebugName(image, "SwapchainImageView_" + std::to_string(index));
     }
 
     // depth resources
@@ -263,28 +326,29 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 
     // create render pass
     const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
-    const auto colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                     .setFormat(colorFormat)
-                                     .setSamples(vk::SampleCountFlagBits::e1)
-                                     .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                     .setStoreOp(vk::AttachmentStoreOp::eStore)
-                                     .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                     .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setInitialLayout(vk::ImageLayout::eUndefined)
-                                     .setFinalLayout(colorLayout);
+
+    const std::array<vk::AttachmentDescription, 2> attachments = {
+        vk::AttachmentDescription()
+            .setFormat(colorFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eStore)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(colorLayout),
+
+        vk::AttachmentDescription()
+            .setFormat(depthFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
 
     const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
-
-    const auto depthAttachment = vk::AttachmentDescription()
-                                     .setFormat(depthFormat)
-                                     .setSamples(vk::SampleCountFlagBits::e1)
-                                     .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                     .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
-                                     .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setInitialLayout(vk::ImageLayout::eUndefined)
-                                     .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
     const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
     const auto subpass = vk::SubpassDescription()
@@ -293,30 +357,30 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                              .setColorAttachments(colorAttachmentRef)
                              .setPDepthStencilAttachment(&depthAttachmentRef);
 
-    const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                     vk::PipelineStageFlagBits::eLateFragmentTests;
+    const std::array<vk::SubpassDependency, 2> dependencies = {
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setSrcAccessMask({})
+            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
 
-    const auto subpassDstStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                     vk::PipelineStageFlagBits::eEarlyFragmentTests;
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setSrcAccessMask({})
+            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
+    };
 
-    const auto subpassSrcAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-    const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
-                                      vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-    const auto subpassDependency = vk::SubpassDependency()
-                                       .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                       .setDstSubpass(0)
-                                       .setSrcStageMask(subpassSrcStageMask)
-                                       .setDstStageMask(subpassDstStageMask)
-                                       .setSrcAccessMask(subpassSrcAccessMask)
-                                       .setDstAccessMask(subpassDstAccessMask);
-
-    const std::array<vk::AttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
     const auto renderPassCreateInfo =
-        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(subpassDependency);
+        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
 
-    renderPass = device->createRenderPassUnique(renderPassCreateInfo);
+    renderPass = device->createRenderPassUnique(renderPassCreateInfo, nullptr, dispatcher);
 
     // create swapchain framebuffers
     swapchainFramebuffers.reserve(swapchainImageViews.size());
@@ -332,19 +396,21 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
         const std::array<vk::ImageView, 2> imageViews = {imageView.get(), depthAllocation->imageView.get()};
 
         framebufferCreateInfo.setAttachments(imageViews);
-        swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo));
+        swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo, nullptr, dispatcher));
     }
 }
 
 void SurfaceRenderableResource::recreateSwapchain() {
     if (!surface) return;
 
-    backend.getDevice()->waitIdle();
+    backend.getDevice()->waitIdle(backend.getDispatcher());
 
     swapchainFramebuffers.clear();
     renderPass.reset();
     swapchainImageViews.clear();
     swapchainImages.clear();
+    acquireSemaphores.clear();
+    presentSemaphores.clear();
 
     init(extent.width, extent.height);
 }

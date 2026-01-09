@@ -25,6 +25,9 @@ FOUNDATION_EXTERN NSString *const MBXReuseQueueStatsEnabled;
 @property (nonatomic) BOOL framerateMeasurementEnabled;
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 @property (nonatomic) BOOL reuseQueueStatsEnabled;
+@property (nonatomic) BOOL showsCompassView;
+@property (nonatomic) BOOL showsLogoView;
+@property (nonatomic) BOOL showsAttributionButton;
 
 @property (nonatomic, readonly) NSString *debugDescription;
 

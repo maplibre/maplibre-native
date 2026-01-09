@@ -159,9 +159,9 @@ NSString * const MLNLastMapDebugMaskDefaultsKey = @"MLNLastMapDebugMask";
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent {
     // geo:29.95,-90.066667,3000
-    // geo:29.95,-90.066667?z=14    
+    // geo:29.95,-90.066667?z=14
     // mapboxgl://?center=29.95,-90.066667&zoom=14&bearing=45&pitch=30
-    
+
     NSURLComponents *components = [NSURLComponents componentsWithString:[event paramDescriptorForKeyword:keyDirectObject].stringValue];
     BOOL isGLURL = [components.scheme isEqualToString:@"mapboxgl"];
     BOOL isGeoURL = [components.scheme isEqualToString:@"geo"];
@@ -184,7 +184,7 @@ NSString * const MLNLastMapDebugMaskDefaultsKey = @"MLNLastMapDebugMask";
                 params[parts[0]] = parts[1];
             }
         }
-    }    
+    }
 
     MLNMapCamera *camera = [MLNMapCamera camera];
     NSString *zoomLevelString = params[@"zoom"] ?: params[@"z"];

@@ -6,6 +6,8 @@
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/style/expression/value.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 namespace gfx {
 
@@ -53,7 +55,7 @@ auto addStop(UniqueGPUExpression& expr, GPUOutputType outType, std::size_t& inde
                     assert(value.is<Color>());
                     if (value.is<Color>()) {
                         const auto& color = attributeValue(value.get<Color>());
-                        std::copy(color.begin(), color.end(), &expr->stops.colors[2 * index++]);
+                        std::ranges::copy(color, &expr->stops.colors[2 * index++]);
                     } else {
                         // Evaluation error, cancel
                         expr.reset();
@@ -105,7 +107,8 @@ UniqueGPUExpression GPUExpression::create(const Expression& expression, const Zo
 }
 
 float GPUExpression::evaluateFloat(const float zoom) const {
-    const auto index = std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom));
+    const auto index = static_cast<std::uint16_t>(
+        std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom)));
     if (index == 0) {
         return stops.floats[0];
     } else if (index == stopCount) {
@@ -151,7 +154,8 @@ Color GPUExpression::getColor(std::size_t index) const {
 }
 
 Color GPUExpression::evaluateColor(const float zoom) const {
-    const auto index = std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom));
+    const auto index = static_cast<std::uint16_t>(
+        std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom)));
     if (index == 0) {
         return getColor(0);
     } else if (index == stopCount) {

@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
@@ -57,6 +58,7 @@ cc_library(
         "src/mbgl/storage/offline_database.cpp",
         "src/mbgl/storage/offline_download.cpp",
         "src/mbgl/storage/online_file_source.cpp",
+        "src/mbgl/storage/pmtiles_file_source.cpp",
         "src/mbgl/storage/sqlite3.cpp",
         "src/mbgl/text/bidi.cpp",
         "src/mbgl/util/compression.cpp",
@@ -143,6 +145,7 @@ cc_library(
         ],
         "@platforms//os:linux": [
             "default-collator",
+            "//vendor:sqlite",
         ],
         "@platforms//os:osx": [
             ":default-collator",

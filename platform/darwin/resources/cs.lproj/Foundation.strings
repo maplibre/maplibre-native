@@ -303,4 +303,3 @@
 
 /* User-friendly error description */
 "REMOVE_SRC_FAIL_MISMATCH_FMT" = "The source can’t be removed because its identifier, “%@”, belongs to a different source in this style.";
-

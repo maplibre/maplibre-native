@@ -19,8 +19,9 @@
 using namespace std::numbers;
 
 namespace mbgl {
+namespace {
 
-static double signedArea(const GeometryCoordinates& ring) {
+double signedArea(const GeometryCoordinates& ring) {
     double sum = 0;
 
     for (std::size_t i = 0, len = ring.size(), j = len - 1; i < len; j = i++) {
@@ -32,7 +33,7 @@ static double signedArea(const GeometryCoordinates& ring) {
     return sum;
 }
 
-static LinearRing<int32_t> toWagyuPath(const GeometryCoordinates& ring) {
+LinearRing<int32_t> toWagyuPath(const GeometryCoordinates& ring) {
     MLN_TRACE_FUNC();
 
     LinearRing<int32_t> result;
@@ -43,7 +44,7 @@ static LinearRing<int32_t> toWagyuPath(const GeometryCoordinates& ring) {
     return result;
 }
 
-static GeometryCollection toGeometryCollection(MultiPolygon<int16_t>&& multipolygon) {
+GeometryCollection toGeometryCollection(MultiPolygon<int16_t>&& multipolygon) {
     MLN_TRACE_FUNC();
 
     GeometryCollection result;
@@ -54,6 +55,7 @@ static GeometryCollection toGeometryCollection(MultiPolygon<int16_t>&& multipoly
     }
     return result;
 }
+} // namespace
 
 GeometryCollection fixupPolygons(const GeometryCollection& rings) {
     MLN_TRACE_FUNC();

@@ -5,8 +5,8 @@
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/types.hpp>
-#include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/render_pass.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -24,7 +24,7 @@ struct Drawable::Impl {
 
 Drawable::Drawable(std::string name_)
     : name(name_),
-      renderPass(RenderPass::Opaque),
+      renderPass(mbgl::RenderPass::Opaque),
       depthType(DepthMaskType::ReadOnly),
       impl(std::make_unique<Impl>()) {}
 

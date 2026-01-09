@@ -1,13 +1,13 @@
 #pragma once
 
 #include <mbgl/renderer/sources/render_tile_source.hpp>
-#include <mbgl/style/sources/raster_source_impl.hpp>
+#include <mbgl/style/sources/tile_source_impl.hpp>
 
 namespace mbgl {
 
 class RenderRasterDEMSource final : public RenderTileSetSource {
 public:
-    explicit RenderRasterDEMSource(Immutable<style::RasterSource::Impl>, const TaggedScheduler&);
+    explicit RenderRasterDEMSource(Immutable<style::TileSource::Impl>, const TaggedScheduler&);
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -27,7 +27,7 @@ private:
                         const TileParameters&) override;
     const std::optional<Tileset>& getTileset() const override;
 
-    const style::RasterSource::Impl& impl() const;
+    const style::TileSource::Impl& impl() const;
 
     void onTileChanged(Tile&) override;
 };

@@ -1,6 +1,6 @@
 # Vector Tile Sources
 
-Add and style a vector tile source 
+Add and style a vector tile source
 
 > This example uses UIKit
 

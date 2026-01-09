@@ -7,7 +7,7 @@
     lint-baseline-ci.xml (THIS FILE) which is the only one included in the repo.
     Eventually, it'll be removed (when we remove all current lint errors included). -->
 <issues by="lint 2.3.1" format="4">
-    
+
     <issue
         errorLine1="    android:background=&quot;#cccc&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~"

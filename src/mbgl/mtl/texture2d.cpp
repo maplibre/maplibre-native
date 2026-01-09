@@ -14,13 +14,15 @@ Texture2D::Texture2D(Context& context_)
     : context(context_) {}
 
 Texture2D::~Texture2D() {
-    if (metalTexture) {
-        context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= getDataSize();
-    }
+    destroyMetalTexture();
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
+    if (samplerState.filter == samplerState_.filter && samplerState.wrapU == samplerState_.wrapU &&
+        samplerState.wrapV == samplerState_.wrapV) {
+        return *this;
+    }
+
     samplerState = samplerState_;
     samplerStateDirty = true;
     return *this;
@@ -31,6 +33,9 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
     }
+
+    destroyMetalTexture();
+
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     textureDirty = true;
@@ -41,6 +46,9 @@ gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
+
+    destroyMetalTexture();
+
     size = size_;
     textureDirty = true;
     return *this;
@@ -52,17 +60,17 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
 }
 
 size_t Texture2D::getDataSize() const noexcept {
-    return size.width * size.height * getPixelStride();
+    return size.width * size.height * getPixelStride(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
 size_t Texture2D::getPixelStride() const noexcept {
     switch (channelType) {
         case gfx::TextureChannelDataType::UnsignedByte:
-            return 1 * numChannels();
+            return 1 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         case gfx::TextureChannelDataType::HalfFloat:
-            return 2 * numChannels();
+            return 2 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         case gfx::TextureChannelDataType::Float:
-            return 4 * numChannels();
+            return 4 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     }
 }
 
@@ -141,7 +149,8 @@ void Texture2D::createMetalTexture() noexcept {
     if (size == Size{0, 0}) {
         return;
     }
-    metalTexture.reset();
+
+    destroyMetalTexture();
 
     const auto format = getMetalPixelFormat();
     if (format == MTL::PixelFormat::PixelFormatInvalid) {
@@ -190,6 +199,16 @@ void Texture2D::create() noexcept {
     }
 }
 
+void Texture2D::destroyMetalTexture() noexcept {
+    if (!metalTexture) {
+        return;
+    }
+
+    metalTexture.reset();
+    context.renderingStats().numActiveTextures--;
+    context.renderingStats().memTextures -= getDataSize();
+}
+
 gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
     usage = usage_;
     textureDirty = true;
@@ -216,6 +235,8 @@ void Texture2D::updateSamplerConfiguration() noexcept {
                                            ? MTL::SamplerAddressModeClampToEdge
                                            : MTL::SamplerAddressModeRepeat);
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
+
+    samplerStateDirty = false;
 }
 
 void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {

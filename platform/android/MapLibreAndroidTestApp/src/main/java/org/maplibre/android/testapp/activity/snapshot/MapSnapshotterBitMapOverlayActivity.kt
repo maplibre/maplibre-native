@@ -50,7 +50,7 @@ class MapSnapshotterBitMapOverlayActivity :
                             Math.min(container.measuredHeight, 1024)
                         )
                             .withStyleBuilder(
-                                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))
+                                Style.Builder().fromUri(TestStyles.AMERICANA)
                             )
                             .withCameraPosition(
                                 CameraPosition.Builder().target(LatLng(52.090737, 5.121420))

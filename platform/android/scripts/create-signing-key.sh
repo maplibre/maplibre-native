@@ -24,7 +24,7 @@ gpg --batch --generate-key foo
 rm foo
 gpg --list-secret-keys
 
-# gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --send-keys < your key here - i.e. 6BCC07D1, last 8 characters > 
+# gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --send-keys < your key here - i.e. 6BCC07D1, last 8 characters >
 # gpg --keyserver hkps://keys.openpgp.org --send-key 6BCC07D1
 # gpg --export-secret-keys < your key here - i.e. 6BCC07D1, last 8 characters > /Volumes/Src/src/MapTiler/Native/maplibre-gl-native/platform/android/signing-key.gpg
 # base64 /Volumes/Src/src/MapTiler/Native/maplibre-gl-native/platform/android/signing-key.gpg > /Volumes/Src/src/MapTiler/Native/maplibre-gl-native/platform/android/signing-key.text

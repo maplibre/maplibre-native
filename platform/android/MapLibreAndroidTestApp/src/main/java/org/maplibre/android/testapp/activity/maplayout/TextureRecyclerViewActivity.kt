@@ -7,7 +7,7 @@ import org.maplibre.android.testapp.R
  * TestActivity showcasing how to integrate multiple TexureView MapViews in a RecyclerView.
  */
 @SuppressLint("ClickableViewAccessibility")
-class TextureRecyclerViewActivity : GLSurfaceRecyclerViewActivity() {
+class TextureRecyclerViewActivity : SurfaceRecyclerViewActivity() {
 
     override fun getMapItemLayoutId(): Int {
         return R.layout.item_map_texture

@@ -24,13 +24,14 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
                                                    const TaggedScheduler& threadPool_) {
     switch (impl->type) {
         case SourceType::Vector:
-            return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl),
+            // the TileSet isn't available yet, so we can't make different sources by format
+            return std::make_unique<RenderVectorSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                         std::move(threadPool_));
         case SourceType::Raster:
-            return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl),
+            return std::make_unique<RenderRasterSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                         std::move(threadPool_));
         case SourceType::RasterDEM:
-            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterSource::Impl>(impl),
+            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                            std::move(threadPool_));
         case SourceType::GeoJSON:
             return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl),
@@ -58,7 +59,9 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
     return nullptr;
 }
 
-static RenderSourceObserver nullObserver;
+namespace {
+RenderSourceObserver nullObserver;
+}
 
 RenderSource::RenderSource(Immutable<style::Source::Impl> impl)
     : baseImpl(std::move(impl)),

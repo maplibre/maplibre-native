@@ -1,5 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
-load("@build_bazel_rules_apple//apple:macos.bzl", "macos_command_line_application")
+load("@rules_apple//apple:macos.bzl", "macos_command_line_application")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",

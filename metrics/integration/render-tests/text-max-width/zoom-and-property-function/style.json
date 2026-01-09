@@ -16,9 +16,9 @@
         "features": [
           {
             "type": "Feature",
-            "properties": { 
+            "properties": {
               "width": "varying",
-              "text": "These lines look the same a a a a a a a a a a a a a a a a a a a a a a a a a a a a" 
+              "text": "These lines look the same a a a a a a a a a a a a a a a a a a a a a a a a a a a a"
             },
             "geometry": {
               "type": "Point",
@@ -27,15 +27,15 @@
           },
           {
             "type": "Feature",
-            "properties": { 
+            "properties": {
               "width": "fixed",
-              "text": "These lines look the same a a a a a a a a a a a a a a a a a a a a a a a a a a a a" 
+              "text": "These lines look the same a a a a a a a a a a a a a a a a a a a a a a a a a a a a"
             },
             "geometry": {
               "type": "Point",
               "coordinates": [ 25, -15 ]
             }
-          }  
+          }
         ]
       }
     }

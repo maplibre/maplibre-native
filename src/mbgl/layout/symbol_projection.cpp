@@ -141,7 +141,7 @@ bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffe
 void addDynamicAttributes(const Point<float>& anchorPoint,
                           const float angle,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
-    auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(anchorPoint, angle);
+    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(anchorPoint, angle);
     dynamicVertexArray.emplace_back(dynamicVertex);
     dynamicVertexArray.emplace_back(dynamicVertex);
     dynamicVertexArray.emplace_back(dynamicVertex);
@@ -220,7 +220,7 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
         currentIndex += dir;
 
         // offset does not fit on the projected line
-        if (currentIndex < 0 || currentIndex >= static_cast<int32_t>(line.size())) {
+        if (currentIndex < 0 || std::cmp_greater_equal(currentIndex, static_cast<int32_t>(line.size()))) {
             return {};
         }
 

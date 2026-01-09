@@ -1,45 +1,30 @@
 #pragma once
 
-#include <mbgl/style/source.hpp>
+#include <mbgl/style/sources/tile_source.hpp>
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/variant.hpp>
 
 namespace mbgl {
-
-class AsyncRequest;
-
 namespace style {
 
-class RasterSource : public Source {
+class RasterSource : public TileSource {
 public:
     RasterSource(std::string id,
                  variant<std::string, Tileset> urlOrTileset,
                  uint16_t tileSize,
                  SourceType sourceType = SourceType::Raster);
-    ~RasterSource() override;
-
-    const variant<std::string, Tileset>& getURLOrTileset() const;
-    std::optional<std::string> getURL() const;
-
-    uint16_t getTileSize() const;
-
-    class Impl;
-    const Impl& impl() const;
-
-    void loadDescription(FileSource&) final;
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() final { return weakFactory.makeWeakPtr(); }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
-    Mutable<Source::Impl> createMutable() const noexcept final;
+    // Allows derived classes (e.g. RasterDEMSource) to invalidate weak pointers
+    // early in their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
-    const variant<std::string, Tileset> urlOrTileset;
-    std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this}; // Must remain last
 };
 
 template <>

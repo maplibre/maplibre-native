@@ -152,7 +152,7 @@ std::vector<TileSpan> scan_row(uint32_t y, Bounds& activeBounds) {
     tile_range.reserve(activeBounds.size());
 
     for (Bound& b : activeBounds) {
-        TileSpan xp = {INT_MAX, 0, b.winding};
+        TileSpan xp = {.xmin = INT_MAX, .xmax = 0, .winding = b.winding};
         double x;
         const auto numEdges = b.points.size() - 1;
         while (b.currentPoint < numEdges) {

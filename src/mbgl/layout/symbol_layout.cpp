@@ -5,9 +5,9 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/text/get_anchors.hpp>
 #include <mbgl/text/shaping.hpp>
+#include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/utf.hpp>
@@ -27,13 +27,15 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+
 template <class Property>
-static bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
+bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
     return layout.get<Property>().match([](const typename Property::Type& t) { return !t.empty(); },
                                         [](const auto&) { return true; });
 }
+} // namespace
 
-namespace {
 expression::Value sectionOptionsToValue(const SectionOptions& options) {
     std::unordered_map<std::string, expression::Value> result;
     // TODO: Data driven properties that can be overridden on per section basis.
@@ -83,7 +85,34 @@ inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
     return layout;
 }
 
-} // namespace
+GlyphIDType getCharGlyphIDType(char16_t ch,
+                               const FontStack& stack,
+                               std::shared_ptr<FontFaces> faces,
+                               GlyphIDType lastCharType) {
+    if (!faces) {
+        return GlyphIDType::FontPBF;
+    }
+
+    if (util::i18n::isVariationSelector1(ch)) {
+        return lastCharType;
+    }
+
+    for (const auto& name : stack) {
+        for (auto& face : *faces) {
+            if (face.name == name) {
+                for (auto& range : face.ranges) {
+                    if (ch >= range.first && ch <= range.second) return face.type;
+                }
+            }
+        }
+    }
+
+    return GlyphIDType::FontPBF;
+}
+
+} // namespace mbgl
+
+namespace mbgl {
 
 SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                            const std::vector<Immutable<style::LayerProperties>>& layers,
@@ -124,10 +153,11 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         auto modes = layout->get<TextWritingMode>();
         // Remove duplicates and preserve order.
         std::set<style::TextWritingModeType> seen;
-        auto end = std::remove_if(modes.begin(), modes.end(), [&seen, this](const auto& placementMode) {
-            allowVerticalPlacement = allowVerticalPlacement || placementMode == style::TextWritingModeType::Vertical;
-            return !seen.insert(placementMode).second;
-        });
+        auto end = std::ranges::remove_if(modes, [&seen, this](const auto& placementMode) {
+                       allowVerticalPlacement = allowVerticalPlacement ||
+                                                placementMode == style::TextWritingModeType::Vertical;
+                       return !seen.insert(placementMode).second;
+                   }).begin();
         modes.erase(end, modes.end());
         placementModes = std::move(modes);
     }
@@ -154,19 +184,72 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
             FontStack baseFontStack = layout->evaluate<TextFont>(zoom, ft, canonicalID);
 
             ft.formattedText = TaggedString();
-            for (const auto& section : formatted.sections) {
+            std::map<std::size_t, std::size_t> sectionTable;
+
+            for (std::size_t sectionIndex = 0; sectionIndex < formatted.sections.size(); sectionIndex++) {
+                const auto& section = formatted.sections[sectionIndex];
+
                 if (!section.image) {
-                    std::string u8string = section.text;
-                    if (textTransform == TextTransformType::Uppercase) {
-                        u8string = platform::uppercase(u8string);
-                    } else if (textTransform == TextTransformType::Lowercase) {
-                        u8string = platform::lowercase(u8string);
-                    }
                     try {
-                        ft.formattedText->addTextSection(applyArabicShaping(util::convertUTF8ToUTF16(u8string)),
-                                                         section.fontScale ? *section.fontScale : 1.0,
-                                                         section.fontStack ? *section.fontStack : baseFontStack,
-                                                         section.textColor);
+                        std::string u8string = section.text;
+                        if (textTransform == TextTransformType::Uppercase) {
+                            u8string = platform::uppercase(u8string);
+                        } else if (textTransform == TextTransformType::Lowercase) {
+                            u8string = platform::lowercase(u8string);
+                        }
+
+                        auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
+                        const char16_t* u16Char = u16String.data();
+                        std::u16string subString;
+                        auto sectionScale = section.fontScale ? *section.fontScale : 1.0;
+                        auto sectionFontStack = section.fontStack ? *section.fontStack : baseFontStack;
+
+                        GlyphIDType subStringtype = getCharGlyphIDType(
+                            *u16Char, sectionFontStack, layoutParameters.fontFaces, GlyphIDType::FontPBF);
+
+                        while (*u16Char) {
+                            const auto chType = getCharGlyphIDType(
+                                *u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
+                            if (chType != subStringtype) {
+                                if (subString.length()) {
+                                    ft.formattedText->addTextSection(subString,
+                                                                     sectionScale,
+                                                                     sectionFontStack,
+                                                                     subStringtype,
+                                                                     false,
+                                                                     section.textColor);
+                                    sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
+                                    if (subStringtype != GlyphIDType::FontPBF) {
+                                        layoutParameters.glyphDependencies
+                                            .shapes[section.fontStack ? *section.fontStack : baseFontStack]
+                                                   [subStringtype]
+                                            .insert(subString);
+                                    }
+                                }
+
+                                subString.clear();
+                                subStringtype = chType;
+                            }
+
+                            subString += *u16Char;
+
+                            ++u16Char;
+                        }
+
+                        if (subString.length()) {
+                            ft.formattedText->addTextSection(subString,
+                                                             section.fontScale ? *section.fontScale : 1.0,
+                                                             section.fontStack ? *section.fontStack : baseFontStack,
+                                                             subStringtype,
+                                                             true,
+                                                             section.textColor);
+                            sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
+                            if (subStringtype != GlyphIDType::FontPBF) {
+                                layoutParameters.glyphDependencies
+                                    .shapes[section.fontStack ? *section.fontStack : baseFontStack][subStringtype]
+                                    .insert(subString);
+                            }
+                        }
                     } catch (...) {
                         mbgl::Log::Error(
                             mbgl::Event::ParseTile,
@@ -187,17 +270,23 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 
             // Loop through all characters of this text and collect unique codepoints.
             for (std::size_t j = 0; j < ft.formattedText->length(); j++) {
-                const auto& section = formatted.sections[ft.formattedText->getSectionIndex(j)];
-                if (section.image) continue;
-
-                const auto& sectionFontStack = section.fontStack;
+                uint8_t sectionIndex = ft.formattedText->getSectionIndex(j);
+                auto& section = ft.formattedText->getSections()[sectionIndex];
+                if (section.imageID) continue;
+                const auto& sectionFontStack = formatted.sections[sectionTable[sectionIndex]].fontStack;
                 GlyphIDs& dependencies =
-                    layoutParameters.glyphDependencies[sectionFontStack ? *sectionFontStack : baseFontStack];
-                char16_t codePoint = ft.formattedText->getCharCodeAt(j);
-                dependencies.insert(codePoint);
-                if (canVerticalizeText || (allowVerticalPlacement && ft.formattedText->allowsVerticalWritingMode())) {
-                    if (char16_t verticalChr = util::i18n::verticalizePunctuation(codePoint)) {
-                        dependencies.insert(verticalChr);
+                    layoutParameters.glyphDependencies.glyphs[sectionFontStack ? *sectionFontStack : baseFontStack];
+                if (section.type != FontPBF) {
+                    dependencies.insert(GlyphID(0, section.type));
+                    needFinalizeSymbolsVal = true;
+                } else {
+                    char16_t codePoint = ft.formattedText->getCharCodeAt(j);
+                    dependencies.insert(codePoint);
+                    if (canVerticalizeText ||
+                        (allowVerticalPlacement && ft.formattedText->allowsVerticalWritingMode())) {
+                        if (char16_t verticalChr = util::i18n::verticalizePunctuation(codePoint)) {
+                            dependencies.insert(verticalChr);
+                        }
                     }
                 }
             }
@@ -211,7 +300,10 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         if (ft.formattedText || ft.icon) {
             if (sortFeaturesByKey) {
                 ft.sortKey = layout->evaluate<SymbolSortKey>(zoom, ft, canonicalID);
-                const auto lowerBound = std::lower_bound(features.begin(), features.end(), ft);
+                const auto lowerBound = std::lower_bound( // NOLINT(modernize-use-ranges)
+                    features.begin(),
+                    features.end(),
+                    ft);
                 features.insert(lowerBound, std::move(ft));
             } else {
                 features.push_back(std::move(ft));
@@ -223,6 +315,74 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         util::mergeLines(features);
     }
 }
+
+void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
+    for (auto& feature : features) {
+        if (feature.geometry.empty()) {
+            continue;
+        }
+
+        if (feature.formattedText && feature.formattedText->hasNeedHBShapeText() &&
+            !feature.formattedText->hbShaped()) {
+            auto shapedString = TaggedString();
+
+            const auto& sections = feature.formattedText->getSections();
+            const auto& styleText = feature.formattedText->getStyledText();
+
+            std::u16string subString;
+            auto sectionIndex = styleText.second[0];
+            auto strLen = styleText.first.length();
+
+            auto applySubString = [&]() {
+                if (subString.length()) {
+                    auto& section = sections[sectionIndex];
+                    if (GlyphIDType::FontPBF == section.type) {
+                        shapedString.addTextSection(subString,
+                                                    section.scale,
+                                                    section.fontStack,
+                                                    section.type,
+                                                    section.keySection,
+                                                    section.textColor);
+                    } else {
+                        auto& fontstackResults = results[section.fontStack];
+                        auto& typeResults = fontstackResults[section.type];
+                        auto& result = typeResults[subString];
+
+                        shapedString.addTextSection(result.str,
+                                                    section.scale,
+                                                    section.fontStack,
+                                                    section.type,
+                                                    result.adjusts,
+                                                    section.keySection,
+                                                    section.textColor);
+                    }
+                }
+            };
+
+            for (size_t charIndex = 0; charIndex < strLen; ++charIndex) {
+                auto& ch = styleText.first[charIndex];
+                auto& sec = styleText.second[charIndex];
+
+                if (sectionIndex != sec) {
+                    applySubString();
+
+                    subString.clear();
+                    sectionIndex = sec;
+                }
+
+                subString += ch;
+            }
+
+            applySubString();
+
+            shapedString.setHBShaped(true);
+            feature.formattedText = shapedString;
+
+        } // feature.formattedText
+    } // for (auto & feature : features ..
+
+    needFinalizeSymbolsVal = false;
+} // SymbolLayout::finalizeSymbols
 
 bool SymbolLayout::hasDependencies() const {
     return !features.empty();
@@ -808,7 +968,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
 }
 
 bool SymbolLayout::anchorIsTooClose(const std::u16string& text, const float repeatDistance, const Anchor& anchor) {
-    if (compareText.find(text) == compareText.end()) {
+    if (!compareText.contains(text)) {
         compareText.emplace(text, Anchors());
     } else {
         const auto& otherAnchors = compareText.find(text)->second;
@@ -997,7 +1157,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
             if (!firstLoad) {
                 bucket->justReloaded = true;
             }
-            renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
+            renderData.emplace(pair.first, LayerRenderData{.bucket = bucket, .layerProperties = pair.second});
         }
     }
 }
@@ -1088,53 +1248,53 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
 
     // coordinates (2 triangles)
     auto& vertices = buffer.vertices();
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             tl,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x,
-                                                             tex.y,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             pixelOffsetTL,
-                                                             minFontScale));
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             tr,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x + tex.w,
-                                                             tex.y,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             {pixelOffsetBR.x, pixelOffsetTL.y},
-                                                             minFontScale));
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             bl,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x,
-                                                             tex.y + tex.h,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             {pixelOffsetTL.x, pixelOffsetBR.y},
-                                                             minFontScale));
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             br,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x + tex.w,
-                                                             tex.y + tex.h,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             pixelOffsetBR,
-                                                             minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     tl,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x,
+                                                     tex.y,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     pixelOffsetTL,
+                                                     minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     tr,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x + tex.w,
+                                                     tex.y,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     {pixelOffsetBR.x, pixelOffsetTL.y},
+                                                     minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     bl,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x,
+                                                     tex.y + tex.h,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     {pixelOffsetTL.x, pixelOffsetBR.y},
+                                                     minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     br,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x + tex.w,
+                                                     tex.y + tex.h,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     pixelOffsetBR,
+                                                     minFontScale));
 
     // Dynamic/Opacity vertices are initialized so that the vertex count always
     // agrees with the layout vertex buffer, but they will always be updated
     // before rendering happens
-    auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(labelAnchor.point, 0);
+    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(labelAnchor.point, 0);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
 
-    auto opacityVertex = SymbolSDFIconProgram::opacityVertex(true, 1.0);
+    auto opacityVertex = SymbolBucket::opacityVertex(true, 1.0);
     buffer.opacityVertices().emplace_back(opacityVertex);
     buffer.opacityVertices().emplace_back(opacityVertex);
     buffer.opacityVertices().emplace_back(opacityVertex);
@@ -1210,18 +1370,18 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 auto index = static_cast<uint16_t>(segment.vertexLength);
 
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tl));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, tl));
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tr));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, tr));
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, br));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, br));
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, bl));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, bl));
 
                 // Dynamic vertices are initialized so that the vertex count
                 // always agrees with the layout vertex buffer, but they will
                 // always be updated before rendering happens
-                auto dynamicVertex = CollisionBoxProgram::dynamicVertex(false, false, {});
+                auto dynamicVertex = SymbolBucket::collisionDynamicVertex(false, false, {});
                 collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
                 collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
                 collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);

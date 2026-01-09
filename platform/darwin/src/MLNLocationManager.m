@@ -69,7 +69,7 @@
 - (void)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:(NSString *)purposeKey {
     if (@available(iOS 14.0, *)) {
         [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:purposeKey];
-    } 
+    }
 }
 #endif
 
@@ -132,7 +132,7 @@
     if ([self.delegate respondsToSelector:@selector(locationManagerShouldDisplayHeadingCalibration:)]) {
         return [self.delegate locationManagerShouldDisplayHeadingCalibration:self];
     }
-    
+
     return NO;
 }
 

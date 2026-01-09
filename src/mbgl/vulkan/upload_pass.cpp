@@ -50,31 +50,6 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     static_cast<IndexBufferResource&>(resource).get().update(data, size, /*offset=*/0);
 }
 
-std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size,
-                                                                        const void*,
-                                                                        gfx::TexturePixelType,
-                                                                        gfx::TextureChannelDataType) {
-    assert(false);
-    throw std::runtime_error("UploadPass::createTextureResource not implemented on Vulkan!");
-}
-
-void UploadPass::updateTextureResource(
-    gfx::TextureResource&, const Size, const void*, gfx::TexturePixelType, gfx::TextureChannelDataType) {
-    assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResource not implemented on Vulkan!");
-}
-
-void UploadPass::updateTextureResourceSub(gfx::TextureResource&,
-                                          const uint16_t,
-                                          const uint16_t,
-                                          const Size,
-                                          const void*,
-                                          gfx::TexturePixelType,
-                                          gfx::TextureChannelDataType) {
-    assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResourceSub not implemented on Vulkan!");
-}
-
 struct VertexBuffer : public gfx::VertexBufferBase {
     ~VertexBuffer() override = default;
 
@@ -85,7 +60,7 @@ static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
                                                              const gfx::BufferUsageType usage,
-                                                             bool forceUpdate) {
+                                                             [[maybe_unused]] bool forceUpdate) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
@@ -96,11 +71,11 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
-                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                    resource.setLastUpdated(vec->getLastModified());
+                if (vec->isModifiedAfter(resource.getLastUpdated())) {
+                    // updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                } else {
+                    return rawData->resource;
                 }
-                return rawData->resource;
             }
         }
         // Otherwise, create a new one
@@ -108,6 +83,10 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto buffer = std::make_unique<VertexBuffer>();
             buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
+
+            auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer());
+            auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
+            resource.setLastUpdated(vec->getLastModified());
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
     }

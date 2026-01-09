@@ -35,7 +35,7 @@ The icons need to be extracted with a tool like [Inkscape](https://inkscape.org/
 
 The `.mbtiles` file needs to be added to the assets of the app. When the style loads we can add a ``MLNVectorTileSource`` with as URL `mbtiles://\(Bundle.main.bundlePath)/pois-nps.mbtiles"`.
 
-The images need to be added to an imageset so they can be loaded as an `UIImage` and added to the style with ``MLNStyle/setImage:forName:`` as is shown below in the example. Note that you should set ``MLNVectorStyleLayer/sourceLayerIdentifier`` to match the layer name in the MBTiles file. Lastly a [`match` expression](https://maplibre.org/maplibre-style-spec/expressions/#match) is used to select the correct image based on `POITYPE` attribute present in the feature. 
+The images need to be added to an imageset so they can be loaded as an `UIImage` and added to the style with ``MLNStyle/setImage:forName:`` as is shown below in the example. Note that you should set ``MLNVectorStyleLayer/sourceLayerIdentifier`` to match the layer name in the MBTiles file. Lastly a [`match` expression](https://maplibre.org/maplibre-style-spec/expressions/#match) is used to select the correct image based on `POITYPE` attribute present in the feature.
 
 <!-- include-example(MultipleImagesExample) -->
 

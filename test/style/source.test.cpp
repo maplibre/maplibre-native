@@ -44,6 +44,7 @@
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <cstdint>
 #include <optional>
@@ -64,20 +65,22 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
     Style style;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
-        return {1.0,
-                MapDebugOptions(),
-                transformState,
-                fileSource,
-                mapMode,
-                annotationManager.makeWeakPtr(),
-                imageManager,
-                glyphManager,
-                0,
-                threadPool};
+        return {.pixelRatio = 1.0,
+                .debugOptions = MapDebugOptions(),
+                .transformState = transformState,
+                .fileSource = fileSource,
+                .mode = mapMode,
+                .annotationManager = annotationManager.makeWeakPtr(),
+                .imageManager = imageManager,
+                .glyphManager = glyphManager,
+                .prefetchZoomDelta = 0,
+                .threadPool = threadPool,
+                .dynamicTextureAtlas = dynamicTextureAtlas};
     };
 
     SourceTest()
@@ -665,14 +668,14 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
     SourceTest test;
 
     test.fileSource->sourceResponse = [&](const Resource& resource) {
-        EXPECT_EQ("url", resource.url);
+        EXPECT_EQ("http://source-url.ext", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(
             R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})");
         return response;
     };
 
-    test.styleObserver.sourceDescriptionChanged = [&](Source&) {
+    test.styleObserver.sourceLoaded = [&](Source&) {
         // Should be called (test will hang if it doesn't)
         test.end();
     };
@@ -687,6 +690,7 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
     test.loop.invoke([&]() {
         // Update the url
         source.setURL(std::string("http://source-url.ext"));
+        source.loadDescription(*test.fileSource);
     });
 
     test.run();
@@ -833,6 +837,7 @@ TEST(Source, InvisibleSourcesTileNecessity) {
     Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
         staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
+    EXPECT_CALL(renderTilesetSource, tileSetMinimumUpdateInterval).Times(testing::AnyNumber());
     EXPECT_CALL(renderTilesetSource, tileSetNecessity(TileNecessity::Required)).Times(1);
     renderSource->update(initialized.baseImpl, layers, true, true, test.tileParameters());
 
@@ -860,6 +865,7 @@ TEST(Source, SourceMinimumUpdateInterval) {
     Duration minimumTileUpdateInterval = initialized.getMinimumTileUpdateInterval();
     auto baseImpl = initialized.baseImpl;
     EXPECT_EQ(Duration::zero(), minimumTileUpdateInterval);
+    EXPECT_CALL(renderTilesetSource, tileSetNecessity).Times(testing::AnyNumber());
     EXPECT_CALL(renderTilesetSource, tileSetMinimumUpdateInterval(minimumTileUpdateInterval)).Times(1);
     renderSource->update(baseImpl, layers, true, false, test.tileParameters());
 

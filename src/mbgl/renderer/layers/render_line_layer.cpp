@@ -3,8 +3,7 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/programs/line_program.hpp>
-#include <mbgl/programs/programs.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/renderer/buckets/line_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -21,7 +20,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
@@ -30,7 +28,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#endif
 
 namespace mbgl {
 
@@ -44,11 +41,7 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
     return static_cast<const LineLayer::Impl&>(*impl);
 }
 
-#if MLN_DRAWABLE_RENDERER
-
 const auto posNormalAttribName = "a_pos_normal";
-
-#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace
 
@@ -63,6 +56,7 @@ RenderLineLayer::~RenderLineLayer() = default;
 
 void RenderLineLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
     updateColorRamp();
 
 #if MLN_RENDER_BACKEND_METAL
@@ -87,14 +81,12 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
-#if MLN_DRAWABLE_RENDERER
     if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
         tweaker->updateProperties(evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
         tweaker->updateGPUExpressions(unevaluated, parameters.now);
 #endif // MLN_RENDER_BACKEND_METAL
     }
-#endif
 }
 
 bool RenderLineLayer::hasTransition() const {
@@ -122,134 +114,6 @@ void RenderLineLayer::prepare(const LayerPrepareParameters& params) {
             evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
     }
 }
-
-#if MLN_LEGACY_RENDERER
-void RenderLineLayer::upload(gfx::UploadPass& uploadPass) {
-    if (!unevaluated.get<LineGradient>().getValue().isUndefined() && !colorRampTexture) {
-        colorRampTexture = uploadPass.createTexture(*colorRamp);
-    }
-}
-
-void RenderLineLayer::render(PaintParameters& parameters) {
-    assert(renderTiles);
-    if (parameters.pass == RenderPass::Opaque) {
-        return;
-    }
-
-    if (!parameters.shaders.getLegacyGroup().populate(lineProgram)) return;
-    if (!parameters.shaders.getLegacyGroup().populate(lineGradientProgram)) return;
-    if (!parameters.shaders.getLegacyGroup().populate(lineSDFProgram)) return;
-    if (!parameters.shaders.getLegacyGroup().populate(linePatternProgram)) return;
-
-    parameters.renderTileClippingMasks(renderTiles);
-
-    for (const RenderTile& tile : *renderTiles) {
-        const LayerRenderData* renderData = getRenderDataForPass(tile, parameters.pass);
-        if (!renderData) {
-            continue;
-        }
-        auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
-        const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
-        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
-
-        auto draw = [&](auto& programInstance,
-                        auto&& uniformValues,
-                        const std::optional<ImagePosition>& patternPositionA,
-                        const std::optional<ImagePosition>& patternPositionB,
-                        auto&& textureBindings) {
-            auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-
-            paintPropertyBinders.setPatternParameters(patternPositionA, patternPositionB, crossfade);
-
-            const auto allUniformValues = programInstance.computeAllUniformValues(
-                std::forward<decltype(uniformValues)>(uniformValues),
-                paintPropertyBinders,
-                evaluated,
-                static_cast<float>(parameters.state.getZoom()));
-            const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
-                *bucket.vertexBuffer, paintPropertyBinders, evaluated);
-
-            checkRenderability(parameters, programInstance.activeBindingCount(allAttributeBindings));
-
-            programInstance.draw(parameters.context,
-                                 *parameters.renderPass,
-                                 gfx::Triangles(),
-                                 parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-                                 parameters.stencilModeForClipping(tile.id),
-                                 parameters.colorModeForRenderPass(),
-                                 gfx::CullFaceMode::disabled(),
-                                 *bucket.indexBuffer,
-                                 bucket.segments,
-                                 allUniformValues,
-                                 allAttributeBindings,
-                                 std::forward<decltype(textureBindings)>(textureBindings),
-                                 getID());
-        };
-
-        if (!evaluated.get<LineDasharray>().from.empty()) {
-            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
-                                                                                          : LinePatternCap::Square;
-            const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
-                evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
-
-            draw(*lineSDFProgram,
-                 LineSDFProgram::layoutUniformValues(evaluated,
-                                                     parameters.pixelRatio,
-                                                     tile,
-                                                     parameters.state,
-                                                     parameters.pixelsToGLUnits,
-                                                     dashPatternTexture.getFrom(),
-                                                     dashPatternTexture.getTo(),
-                                                     crossfade,
-                                                     static_cast<float>(dashPatternTexture.getSize().width)),
-                 {},
-                 {},
-                 LineSDFProgram::TextureBindings{
-                     dashPatternTexture.textureBinding(),
-                 });
-
-        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-            const Size& texsize = tile.getIconAtlasTexture()->getSize();
-
-            std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
-            std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
-
-            draw(*linePatternProgram,
-                 LinePatternProgram::layoutUniformValues(evaluated,
-                                                         tile,
-                                                         parameters.state,
-                                                         parameters.pixelsToGLUnits,
-                                                         parameters.pixelRatio,
-                                                         texsize,
-                                                         crossfade),
-                 posA,
-                 posB,
-                 LinePatternProgram::TextureBindings{
-                     tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
-                 });
-        } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
-            assert(colorRampTexture);
-
-            draw(*lineGradientProgram,
-                 LineGradientProgram::layoutUniformValues(
-                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits, parameters.pixelRatio),
-                 {},
-                 {},
-                 LineGradientProgram::TextureBindings{
-                     textures::image::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
-                 });
-        } else {
-            draw(*lineProgram,
-                 LineProgram::layoutUniformValues(
-                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits, parameters.pixelRatio),
-                 {},
-                 {},
-                 LineProgram::TextureBindings{});
-        }
-    }
-}
-#endif // MLN_LEGACY_RENDERER
 
 namespace {
 
@@ -324,9 +188,6 @@ void RenderLineLayer::updateColorRamp() {
         return;
     }
 
-    colorRampTexture = std::nullopt;
-
-#if MLN_DRAWABLE_RENDERER
     if (colorRampTexture2D) {
         colorRampTexture2D.reset();
 
@@ -336,7 +197,6 @@ void RenderLineLayer::updateColorRamp() {
             layerGroup->clearDrawables();
         }
     }
-#endif
 }
 
 float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
@@ -354,7 +214,6 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
     }
 }
 
-#if MLN_DRAWABLE_RENDERER
 namespace {
 
 inline void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
@@ -602,8 +461,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 // create texture. to be reused for all the tiles of the layer
                 colorRampTexture2D = context.createTexture2D();
                 colorRampTexture2D->setImage(colorRamp);
-                colorRampTexture2D->setSamplerConfiguration(
-                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                colorRampTexture2D->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                             .wrapU = gfx::TextureWrapType::Clamp,
+                                                             .wrapV = gfx::TextureWrapType::Clamp});
             }
 
             if (colorRampTexture2D) {
@@ -643,6 +503,5 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
-#endif
 
 } // namespace mbgl

@@ -20,4 +20,3 @@ ${fs.readFileSync('platform/default/include/mbgl/storage/offline_schema.sql', 'u
 
 } // namespace mbgl
 `);
-

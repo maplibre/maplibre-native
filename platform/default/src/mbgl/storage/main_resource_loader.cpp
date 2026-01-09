@@ -21,12 +21,14 @@ public:
                              std::shared_ptr<FileSource> databaseFileSource_,
                              std::shared_ptr<FileSource> localFileSource_,
                              std::shared_ptr<FileSource> onlineFileSource_,
-                             std::shared_ptr<FileSource> mbtilesFileSource_)
+                             std::shared_ptr<FileSource> mbtilesFileSource_,
+                             std::shared_ptr<FileSource> pmtilesFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
           onlineFileSource(std::move(onlineFileSource_)),
-          mbtilesFileSource(std::move(mbtilesFileSource_)) {}
+          mbtilesFileSource(std::move(mbtilesFileSource_)),
+          pmtilesFileSource(std::move(pmtilesFileSource_)) {}
 
     void request(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto callback = [ref](const Response& res) {
@@ -70,6 +72,9 @@ public:
         } else if (mbtilesFileSource && mbtilesFileSource->canRequest(resource)) {
             // Local file request
             tasks[req] = mbtilesFileSource->request(resource, callback);
+        } else if (pmtilesFileSource && pmtilesFileSource->canRequest(resource)) {
+            // Local file request
+            tasks[req] = pmtilesFileSource->request(resource, callback);
         } else if (localFileSource && localFileSource->canRequest(resource)) {
             // Local file request
             tasks[req] = localFileSource->request(resource, callback);
@@ -131,6 +136,7 @@ private:
     const std::shared_ptr<FileSource> localFileSource;
     const std::shared_ptr<FileSource> onlineFileSource;
     const std::shared_ptr<FileSource> mbtilesFileSource;
+    const std::shared_ptr<FileSource> pmtilesFileSource;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 };
 
@@ -142,12 +148,14 @@ public:
          std::shared_ptr<FileSource> databaseFileSource_,
          std::shared_ptr<FileSource> localFileSource_,
          std::shared_ptr<FileSource> onlineFileSource_,
-         std::shared_ptr<FileSource> mbtilesFileSource_)
+         std::shared_ptr<FileSource> mbtilesFileSource_,
+         std::shared_ptr<FileSource> pmtilesFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
           onlineFileSource(std::move(onlineFileSource_)),
           mbtilesFileSource(std::move(mbtilesFileSource_)),
+          pmtilesFileSource(std::move(pmtilesFileSource_)),
           supportsCacheOnlyRequests_(bool(databaseFileSource)),
           thread(std::make_unique<util::Thread<MainResourceLoaderThread>>(
               util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_WORKER),
@@ -156,7 +164,8 @@ public:
               databaseFileSource,
               localFileSource,
               onlineFileSource,
-              mbtilesFileSource)),
+              mbtilesFileSource,
+              pmtilesFileSource)),
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
@@ -175,7 +184,8 @@ public:
                (localFileSource && localFileSource->canRequest(resource)) ||
                (databaseFileSource && databaseFileSource->canRequest(resource)) ||
                (onlineFileSource && onlineFileSource->canRequest(resource)) ||
-               (mbtilesFileSource && mbtilesFileSource->canRequest(resource));
+               (mbtilesFileSource && mbtilesFileSource->canRequest(resource)) ||
+               (pmtilesFileSource && pmtilesFileSource->canRequest(resource));
     }
 
     bool supportsCacheOnlyRequests() const { return supportsCacheOnlyRequests_; }
@@ -185,32 +195,34 @@ public:
     void resume() { thread->resume(); }
 
     void setResourceOptions(ResourceOptions options) {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         resourceOptions = options;
         assetFileSource->setResourceOptions(options.clone());
         databaseFileSource->setResourceOptions(options.clone());
         localFileSource->setResourceOptions(options.clone());
         onlineFileSource->setResourceOptions(options.clone());
         mbtilesFileSource->setResourceOptions(options.clone());
+        pmtilesFileSource->setResourceOptions(options.clone());
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return resourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         clientOptions = options;
         assetFileSource->setClientOptions(options.clone());
         databaseFileSource->setClientOptions(options.clone());
         localFileSource->setClientOptions(options.clone());
         onlineFileSource->setClientOptions(options.clone());
         mbtilesFileSource->setClientOptions(options.clone());
+        pmtilesFileSource->setClientOptions(options.clone());
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return clientOptions.clone();
     }
 
@@ -220,6 +232,7 @@ private:
     const std::shared_ptr<FileSource> localFileSource;
     const std::shared_ptr<FileSource> onlineFileSource;
     const std::shared_ptr<FileSource> mbtilesFileSource;
+    const std::shared_ptr<FileSource> pmtilesFileSource;
     const bool supportsCacheOnlyRequests_;
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
     mutable std::mutex resourceOptionsMutex;
@@ -236,7 +249,8 @@ MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, c
           FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions, clientOptions),
           FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, resourceOptions, clientOptions),
           FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
-          FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions))) {}
+          FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions),
+          FileSourceManager::get()->getFileSource(FileSourceType::Pmtiles, resourceOptions, clientOptions))) {}
 
 MainResourceLoader::~MainResourceLoader() = default;
 

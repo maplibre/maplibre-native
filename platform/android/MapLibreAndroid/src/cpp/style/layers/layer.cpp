@@ -29,13 +29,13 @@ namespace android {
  */
 Layer::Layer(std::unique_ptr<mbgl::style::Layer> coreLayer)
     : ownedLayer(std::move(coreLayer)),
-      layer(*ownedLayer) {}
+      layerPtr(ownedLayer->makeWeakPtr()) {}
 
 /**
  * Takes a non-owning reference. For lookup methods
  */
 Layer::Layer(mbgl::style::Layer& coreLayer)
-    : layer(coreLayer) {}
+    : layerPtr(coreLayer.makeWeakPtr()) {}
 
 Layer::~Layer() {}
 
@@ -59,17 +59,27 @@ std::unique_ptr<mbgl::style::Layer> Layer::releaseCoreLayer() {
 }
 
 jni::Local<jni::String> Layer::getId(jni::JNIEnv& env) {
-    return jni::Make<jni::String>(env, layer.getID());
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return jni::Make<jni::String>(env, "");
+    }
+
+    return jni::Make<jni::String>(env, layer->getID());
 }
 
 style::Layer& Layer::get() {
-    return layer;
+    return *layerPtr.get();
 }
 
 void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::Object<>& jvalue) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+
     // Convert and set property
-    std::optional<mbgl::style::conversion::Error> error = layer.setProperty(jni::Make<std::string>(env, jname),
-                                                                            Value(env, jvalue));
+    std::optional<mbgl::style::conversion::Error> error = layer->setProperty(jni::Make<std::string>(env, jname),
+                                                                             Value(env, jvalue));
     if (error) {
         mbgl::Log::Error(mbgl::Event::JNI,
                          "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
@@ -81,6 +91,11 @@ void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
 
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+
     Error error;
     std::optional<Filter> converted = convert<Filter>(Value(env, jfilter), error);
     if (!converted) {
@@ -88,14 +103,19 @@ void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter
         return;
     }
 
-    layer.setFilter(std::move(*converted));
+    layer->setFilter(std::move(*converted));
 }
 
 jni::Local<jni::Object<gson::JsonElement>> Layer::getFilter(jni::JNIEnv& env) {
     using namespace mbgl::style;
     using namespace mbgl::style::conversion;
 
-    Filter filter = layer.getFilter();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return jni::Local<jni::Object<gson::JsonElement>>(env, nullptr);
+    }
+
+    Filter filter = layer->getFilter();
     if (filter.expression) {
         mbgl::Value expressionValue = (*filter.expression)->serialize();
         return gson::JsonElement::New(env, expressionValue);
@@ -105,36 +125,77 @@ jni::Local<jni::Object<gson::JsonElement>> Layer::getFilter(jni::JNIEnv& env) {
 }
 
 void Layer::setSourceLayer(jni::JNIEnv& env, const jni::String& sourceLayer) {
-    layer.setSourceLayer(jni::Make<std::string>(env, sourceLayer));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+
+    layer->setSourceLayer(jni::Make<std::string>(env, sourceLayer));
 }
 
 jni::Local<jni::String> Layer::getSourceLayer(jni::JNIEnv& env) {
-    return jni::Make<jni::String>(env, layer.getSourceLayer());
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return jni::Make<jni::String>(env, "");
+    }
+
+    return jni::Make<jni::String>(env, layer->getSourceLayer());
 }
 
 jni::Local<jni::String> Layer::getSourceId(jni::JNIEnv& env) {
-    return jni::Make<jni::String>(env, layer.getSourceID());
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return jni::Make<jni::String>(env, "");
+    }
+
+    return jni::Make<jni::String>(env, layer->getSourceID());
 }
 
 jni::jfloat Layer::getMinZoom(jni::JNIEnv&) {
-    return layer.getMinZoom();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return 0.0f;
+    }
+
+    return layer->getMinZoom();
 }
 
 jni::jfloat Layer::getMaxZoom(jni::JNIEnv&) {
-    return layer.getMaxZoom();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return 0.0f;
+    }
+
+    return layer->getMaxZoom();
 }
 
 void Layer::setMinZoom(jni::JNIEnv&, jni::jfloat zoom) {
-    layer.setMinZoom(zoom);
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+
+    layer->setMinZoom(zoom);
 }
 
 void Layer::setMaxZoom(jni::JNIEnv&, jni::jfloat zoom) {
-    layer.setMaxZoom(zoom);
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+
+    layer->setMaxZoom(zoom);
 }
 
 jni::Local<jni::Object<>> Layer::getVisibility(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, layer.getVisibility()));
+
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::VisibilityType::None));
+    }
+
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, layer->getVisibility()));
 }
 
 void Layer::registerNative(jni::JNIEnv& env) {

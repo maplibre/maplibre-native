@@ -32,7 +32,7 @@
     }
 
     NSString *apiBaseURL = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"MLNTileServerBaseURL"];
-    
+
     // If apiBaseURL is not a valid URL, [NSURL URLWithString:] will be `nil`.
     if (apiBaseURL.length && [NSURL URLWithString:apiBaseURL]) {
         [self setAPIBaseURL:[NSURL URLWithString:apiBaseURL]];
@@ -46,7 +46,7 @@
         return nil;
     }
 #endif
-    
+
     static dispatch_once_t onceToken;
     static MLNSettings *_sharedSettings;
     void (^setupBlock)(void) = ^{
@@ -125,7 +125,7 @@
 }
 
 + (void)setTileServerOptions:(MLNTileServerOptions*)options {
-    
+
     auto opts = mbgl::TileServerOptions()
             .withBaseURL(std::string([options.baseURL UTF8String]))
             .withUriSchemeAlias(std::string([options.uriSchemeAlias UTF8String]))
@@ -169,23 +169,23 @@
     }
     opts.withDefaultStyles(defaultStyles);
     opts.withDefaultStyle(std::string([options.defaultStyle.name UTF8String]));
-    
+
     self.tileServerOptionsInternal = opts;
 }
 
 + (MLNTileServerOptions*)tileServerOptions {
     auto cppOpts = [MLNSettings sharedSettings].tileServerOptionsInternal;
     if (cppOpts) {
-        
+
         MLNTileServerOptions* retVal = [[MLNTileServerOptions alloc] init];
         retVal.baseURL = [NSString stringWithUTF8String:cppOpts->baseURL().c_str()];
         retVal.uriSchemeAlias = [NSString stringWithUTF8String:cppOpts->uriSchemeAlias().c_str()];
         retVal.apiKeyParameterName = [NSString stringWithUTF8String:cppOpts->apiKeyParameterName().c_str()];
-        
+
         retVal.sourceTemplate = [NSString stringWithUTF8String:cppOpts->sourceTemplate().c_str()];
         retVal.sourceDomainName = [NSString stringWithUTF8String:cppOpts->sourceDomainName().c_str()];
         retVal.sourceVersionPrefix = cppOpts->sourceVersionPrefix().has_value() ? [NSString stringWithUTF8String:cppOpts->sourceVersionPrefix().value().c_str()] : nil;
-        
+
         retVal.styleTemplate = [NSString stringWithUTF8String:cppOpts->styleTemplate().c_str()];
         retVal.styleDomainName = [NSString stringWithUTF8String:cppOpts->styleDomainName().c_str()];
         retVal.styleVersionPrefix = cppOpts->styleVersionPrefix().has_value() ? [NSString stringWithUTF8String:cppOpts->styleVersionPrefix().value().c_str()] : nil;
@@ -197,34 +197,34 @@
         retVal.glyphsTemplate = [NSString stringWithUTF8String:cppOpts->glyphsTemplate().c_str()];
         retVal.glyphsDomainName = [NSString stringWithUTF8String:cppOpts->glyphsDomainName().c_str()];
         retVal.glyphsVersionPrefix = cppOpts->styleVersionPrefix().has_value() ? [NSString stringWithUTF8String:cppOpts->glyphsVersionPrefix().value().c_str()] : nil;
- 
+
         retVal.tileTemplate = [NSString stringWithUTF8String:cppOpts->tileTemplate().c_str()];
         retVal.tileDomainName = [NSString stringWithUTF8String:cppOpts->tileDomainName().c_str()];
         retVal.tileVersionPrefix = cppOpts->styleVersionPrefix().has_value() ? [NSString stringWithUTF8String:cppOpts->tileVersionPrefix().value().c_str()] : nil;
-      
+
         std::vector<mbgl::util::DefaultStyle> cppDefaultStyles = cppOpts->defaultStyles();
-        
-        
+
+
         NSMutableArray<MLNDefaultStyle*>* mglStyles = [[NSMutableArray<MLNDefaultStyle*> alloc] init];
         for (auto it = begin(cppDefaultStyles); it != end(cppDefaultStyles); ++it) {
             NSString* url = [NSString stringWithUTF8String:it->getUrl().c_str()];
-            
+
             auto* mglDefaultStyle = [[MLNDefaultStyle alloc] init];
             mglDefaultStyle.url = [NSURL URLWithString:url];
             mglDefaultStyle.name = [NSString stringWithUTF8String:it->getName().c_str()];
             mglDefaultStyle.version = it->getCurrentVersion();
             [mglStyles addObject:mglDefaultStyle];
-            
+
             // set default style name
             if (it->getName() == cppOpts->defaultStyle()) {
                 retVal.defaultStyle = mglDefaultStyle;
             }
         }
-        
+
         retVal.defaultStyles = mglStyles;
         return retVal;
     }
-    
+
     return nil;
 
 }

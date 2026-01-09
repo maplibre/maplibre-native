@@ -174,7 +174,7 @@ mbgl::style::CustomGeometrySource::Options MBGLCustomGeometrySourceOptionsFromDi
         NSOperation *operation = [[MLNComputedShapeSourceFetchOperation alloc] initForSource:self tile:tileID];
         [requestQueue addOperation:operation];
     };
-    
+
     sourceOptions.cancelTileFunction = ^void(const mbgl::CanonicalTileID& tileID) {
         for (MLNComputedShapeSourceFetchOperation *operation in requestQueue.operations) {
             if (operation.x == tileID.x && operation.y == tileID.y && operation.z == tileID.z) {

@@ -33,22 +33,22 @@
     },
     "source4": {
       "type": "geojson",
-      "data": { 
-        "type": "Feature", 
+      "data": {
+        "type": "Feature",
         "id": "feature1",
-        "geometry": { 
+        "geometry": {
           "type": "Point",
           "coordinates": [
             0.0,
             0.0
-          ] 
-        }, 
+          ]
+        },
         "properties": {
           "key1": "value1",
           "key2": 1.5,
           "key3": false,
           "key4": 0.5
-        } 
+        }
       }
     },
     "source5": {

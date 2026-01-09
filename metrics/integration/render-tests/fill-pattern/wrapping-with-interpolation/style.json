@@ -1,7 +1,14 @@
 {
   "version": 8,
   "metadata": {
-    "test": {}
+    "test": {
+      "source-replace": [
+        {
+          "replace": "maplibre",
+          "with": "mlt"
+        }
+      ]
+    }
   },
   "zoom": 0.99,
   "center": [
@@ -15,6 +22,14 @@
       "tiles": [
         "local://tiles/{z}-{x}-{y}.mvt"
       ]
+    },
+    "mlt": {
+      "type": "vector",
+      "maxzoom": 14,
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.mlt"
+      ],
+      "encoding": "mlt"
     }
   },
   "sprite": "local://sprites/solid-black",

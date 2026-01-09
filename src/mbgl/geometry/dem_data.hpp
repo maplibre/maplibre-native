@@ -13,7 +13,7 @@ namespace mbgl {
 
 class DEMData {
 public:
-    DEMData(const PremultipliedImage& image, Tileset::DEMEncoding encoding);
+    DEMData(const PremultipliedImage& image, Tileset::RasterEncoding encoding);
     void backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy);
 
     int32_t get(int32_t x, int32_t y) const;
@@ -24,7 +24,7 @@ public:
 
     const int32_t dim;
     const int32_t stride;
-    const Tileset::DEMEncoding encoding;
+    const Tileset::RasterEncoding encoding;
 
 private:
     std::shared_ptr<PremultipliedImage> image;

@@ -54,7 +54,12 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
-
+// Unpack pattern position
+inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,
+                     const float2 pattern_size, const float tile_units_to_pixels, const float2 pos) {
+    const float2 offset = glMod(glMod(glMod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
+    return (tile_units_to_pixels * pos + offset) / pattern_size;
+}
 
 template<class ForwardIt, class T>
 ForwardIt upper_bound(ForwardIt first, ForwardIt last, thread const T& value)
@@ -113,12 +118,12 @@ struct alignas(16) GPUExpression {
     uint16_t stopCount;
     GPUOptions options;
     GPUInterpType interpolation;
-    
+
     union InterpOptions {
         struct Exponential {
             float base;
         } exponential;
-        
+
         struct Bezier {
             float x1;
             float y1;
@@ -126,14 +131,14 @@ struct alignas(16) GPUExpression {
             float y2;
         } bezier;
     } interpOptions;
-    
+
     float inputs[maxExprStops];
-    
+
     union Stops {
         float floats[maxExprStops];
         float2 colors[maxExprStops];
     } stops;
-    
+
     float eval(float zoom) device const {
         const auto effectiveZoom = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
         const auto index = find(effectiveZoom);
@@ -196,49 +201,9 @@ struct alignas(16) GPUExpression {
 
     float4 getColor(size_t index) device const { return decode_color(stops.colors[index]); }
 };
-static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * maxExprStops, "wrong alignment");
+static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * maxExprStops, "wrong size");
 static_assert(sizeof(GPUExpression) % 16 == 0, "wrong alignment");
 
-
-enum {
-    idGlobalPaintParamsUBO,
-    globalUBOCount
-};
-
-enum {
-    idLineDrawableUBO = globalUBOCount,
-    idLineInterpolationUBO,
-    idLineTilePropertiesUBO,
-    idLineEvaluatedPropsUBO,
-    idLineExpressionUBO,
-    lineUBOCount
-};
-
-
-enum class LineExpressionMask : uint32_t {
-    None = 0,
-    Color = 1 << 0,
-    Opacity = 1 << 1,
-    Blur = 1 << 2,
-    Width = 1 << 3,
-    GapWidth = 1 << 4,
-    FloorWidth = 1 << 5,
-    Offset = 1 << 6,
-};
-bool operator&(LineExpressionMask a, LineExpressionMask b) { return (uint32_t)a & (uint32_t)b; }
-
-struct alignas(16) LineExpressionUBO {
-    GPUExpression color;
-    GPUExpression blur;
-    GPUExpression opacity;
-    GPUExpression gapwidth;
-    GPUExpression offset;
-    GPUExpression width;
-    GPUExpression floorwidth;
-};
-static_assert(sizeof(LineExpressionUBO) % 16 == 0, "wrong alignment");
-
-	
 struct alignas(16) GlobalPaintParamsUBO {
     /*  0 */ float2 pattern_atlas_texsize;
     /*  8 */ float2 units_to_pixels;
@@ -247,136 +212,23 @@ struct alignas(16) GlobalPaintParamsUBO {
     /* 28 */ float symbol_fade_change;
     /* 32 */ float aspect_ratio;
     /* 36 */ float pixel_ratio;
-    /* 40 */ float zoom;
+    /* 40 */ float map_zoom;
     /* 44 */ float pad1;
     /* 48 */
 };
-static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "unexpected padding");
+static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "wrong size");
 
-struct alignas(16) FillEvaluatedPropsUBO {
-    float4 color;
-    float4 outline_color;
-    float opacity;
-    float fade;
-    float from_scale;
-    float to_scale;
+enum {
+    idGlobalPaintParamsUBO,
+    idGlobalUBOIndex,
+    globalUBOCount,
 };
 
-struct alignas(16) FillExtrusionDrawableUBO {
-    /*  0 */ float4x4 matrix;
-    /* 64 */ float2 texsize;
-    /* 72 */ float2 pixel_coord_upper;
-    /* 80 */ float2 pixel_coord_lower;
-    /* 88 */ float height_factor;
-    /* 92 */ float tile_ratio;
-    /* 96 */
+enum {
+    idDrawableReservedVertexOnlyUBO = globalUBOCount,
+    idDrawableReservedFragmentOnlyUBO,
+    drawableReservedUBOCount
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 6 * 16, "unexpected padding");
-
-struct alignas(16) FillExtrusionPropsUBO {
-    /*  0 */ float4 color;
-    /* 16 */ float4 light_color_pad;
-    /* 32 */ float4 light_position_base;
-    /* 48 */ float height;
-    /* 52 */ float light_intensity;
-    /* 56 */ float vertical_gradient;
-    /* 60 */ float opacity;
-    /* 64 */ float fade;
-    /* 68 */ float from_scale;
-    /* 72 */ float to_scale;
-    /* 76 */ float pad2;
-    /* 80 */
-};
-static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "unexpected padding");
-
-struct alignas(16) FillExtrusionTilePropsUBO {
-    /*  0 */ float4 pattern_from;
-    /* 16 */ float4 pattern_to;
-    /* 32 */
-};
-static_assert(sizeof(FillExtrusionTilePropsUBO) == 2 * 16, "unexpected padding");
-
-struct alignas(16) FillExtrusionInterpolateUBO {
-    /*  0 */ float base_t;
-    /*  4 */ float height_t;
-    /*  8 */ float color_t;
-    /* 12 */ float pattern_from_t;
-    /* 16 */ float pattern_to_t;
-    /* 20 */ float pad1, pad2, pad3;
-    /* 32 */
-};
-static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16, "unexpected padding");
-
-struct alignas(16) LineEvaluatedPropsUBO {
-    float4 color;
-    float blur;
-    float opacity;
-    float gapwidth;
-    float offset;
-    float width;
-    float floorwidth;
-    LineExpressionMask expressionMask;
-    float pad1;
-};
-
-struct alignas(16) SymbolDrawableUBO {
-    float4x4 matrix;
-    float4x4 label_plane_matrix;
-    float4x4 coord_matrix;
-
-    float2 texsize;
-    float2 texsize_icon;
-
-    float gamma_scale;
-    /*bool*/ int rotate_symbol;
-    float2 pad;
-};
-static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
-
-struct alignas(16) SymbolTilePropsUBO {
-    /*bool*/ int is_text;
-    /*bool*/ int is_halo;
-    /*bool*/ int pitch_with_map;
-    /*bool*/ int is_size_zoom_constant;
-    /*bool*/ int is_size_feature_constant;
-    float size_t;
-    float size;
-    float padding;
-};
-static_assert(sizeof(SymbolTilePropsUBO) == 2 * 16, "unexpected padding");
-
-struct alignas(16) SymbolInterpolateUBO {
-    float fill_color_t;
-    float halo_color_t;
-    float opacity_t;
-    float halo_width_t;
-    float halo_blur_t;
-    float pad1, pad2, pad3;
-};
-static_assert(sizeof(SymbolInterpolateUBO) == 32, "unexpected padding");
-
-struct alignas(16) SymbolEvaluatedPropsUBO {
-    float4 text_fill_color;
-    float4 text_halo_color;
-    float text_opacity;
-    float text_halo_width;
-    float text_halo_blur;
-    float pad1;
-    float4 icon_fill_color;
-    float4 icon_halo_color;
-    float icon_opacity;
-    float icon_halo_width;
-    float icon_halo_blur;
-    float pad2;
-};
-static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "unexpected padding");
-
-// unpack pattern position
-inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,
-                     const float2 pattern_size, const float tile_units_to_pixels, const float2 pos) {
-    const float2 offset = glMod(glMod(glMod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
-    return (tile_units_to_pixels * pos + offset) / pattern_size;
-}
 
 )";
 

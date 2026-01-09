@@ -6,7 +6,9 @@
 
 namespace mbgl {
 
-static TileObserver nullObserver;
+namespace {
+TileObserver nullObserver;
+}
 
 Tile::Tile(Kind kind_, OverscaledTileID id_, std::string sourceID_, TileObserver* observer_)
     : kind(kind_),

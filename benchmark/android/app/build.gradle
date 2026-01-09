@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId = 'com.mapbox.mapboxsdk.maps.benchmark_runner'
         compileSdk 34
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 33
         def abi = 'all'
         if (project.hasProperty('maplibre.abis')) {
@@ -25,6 +25,7 @@ android {
             cmake {
                 arguments '-DANDROID_CCACHE=ccache'
                 arguments '-DANDROID_STL=c++_static'
+                arguments '-DMLN_WITH_OPENGL=ON'
                 targets 'mbgl-benchmark-runner'
             }
         }

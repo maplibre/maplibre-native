@@ -39,10 +39,15 @@ Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, con
 
 Style::Impl::~Impl() = default;
 
+void Style::Impl::cancelPendingRequest() noexcept {
+    styleRequest.reset();
+}
+
 void Style::Impl::loadJSON(const std::string& json_) {
     lastError = nullptr;
     observer->onStyleLoading();
 
+    cancelPendingRequest();
     url.clear();
     parse(json_);
 }
@@ -134,7 +139,7 @@ void Style::Impl::parse(const std::string& json_) {
                       std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
-
+    fontFaces = parser.fontFaces;
     loaded = true;
     observer->onStyleLoaded();
 }
@@ -425,6 +430,10 @@ void Style::Impl::dumpDebugLogs() const {
 
 const std::string& Style::Impl::getGlyphURL() const {
     return glyphURL;
+}
+
+std::shared_ptr<FontFaces> Style::Impl::getFontFaces() const {
+    return fontFaces;
 }
 
 Immutable<std::vector<Immutable<Image::Impl>>> Style::Impl::getImageImpls() const {

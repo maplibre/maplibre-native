@@ -16,7 +16,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://plugins.gradle.org/m2/")
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -26,7 +26,7 @@ plugins {
 
 include(":MapLibreAndroid", ":MapLibreAndroidTestApp", ":MapLibreAndroidLint")
 
-rootProject.name = "MapLibre Native for Android"
+rootProject.name = "MapLibreAndroid"
 
 val renderTestProjectDir = file("$rootDir/../../render-test/android")
 includeBuild(renderTestProjectDir) {
@@ -36,4 +36,12 @@ includeBuild(renderTestProjectDir) {
 val cppTestProjectDir = file("$rootDir/../../test/android")
 includeBuild(cppTestProjectDir) {
     name = "cppUnitTestsApp"
+}
+
+includeBuild("./MapLibrePlugin")
+
+buildCache {
+    local {
+        isEnabled = true
+    }
 }

@@ -103,7 +103,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
     if (styleDefinition != nil){
         return styleDefinition.url;
     }
-    
+
     return nil;
 }
 
@@ -137,6 +137,16 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 - (NSString *)name {
     std::string name = self.rawStyle->getName();
     return name.empty() ? nil : @(name.c_str());
+}
+
+- (NSString *)styleJSON {
+    std::string styleJSON = self.rawStyle->getJSON();
+    // Return empty string if no style is set
+    return styleJSON.empty() ? @"" : @(styleJSON.c_str());
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON {
+    self.rawStyle->loadJSON([styleJSON UTF8String]);
 }
 
 // MARK: Sources
@@ -173,7 +183,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 {
     MLNLogDebug(@"Querying source with identifier: %@", identifier);
     auto rawSource = self.rawStyle->getSource(identifier.UTF8String);
-    
+
     return rawSource ? [self sourceFromMBGLSource:rawSource] : nil;
 }
 
@@ -223,14 +233,14 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 
 - (BOOL)removeSource:(MLNSource *)source error:(NSError * __nullable * __nullable)outError {
     MLNLogDebug(@"Removing source: %@", source);
-    
+
     if (!source.rawSource) {
         NSString *errorMessage = [NSString stringWithFormat:
                                   @"The source %@ cannot be removed from the style. "
                                   @"Make sure the source was created as a member of a concrete subclass of MLNSource."
                                   @"Automatic re-addition of sources after style changes is not currently supported.",
                                   source];
-        
+
         if (outError) {
             *outError = [NSError errorWithDomain:MLNErrorDomain
                                             code:MLNErrorCodeSourceCannotBeRemovedFromStyle
@@ -241,7 +251,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
             [NSException raise:NSInvalidArgumentException format:@"%@", errorMessage];
         }
     }
-    
+
     return [source removeFromStylable:self.stylable error:outError];
 }
 
@@ -540,7 +550,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 - (MLNTransition)transition
 {
     const mbgl::style::TransitionOptions transitionOptions = self.rawStyle->getTransitionOptions();
-    
+
     return MLNTransitionFromOptions(transitionOptions);
 }
 
@@ -589,7 +599,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
             return [source isKindOfClass:[MLNVectorTileSource class]] && [source isMapboxStreets];
         }]];
     NSSet<NSString *> *streetsSourceIdentifiers = [streetsSources valueForKey:@"identifier"];
-    
+
     for (MLNSymbolStyleLayer *layer in self.layers) {
         if (![layer isKindOfClass:[MLNSymbolStyleLayer class]]) {
             continue;
@@ -597,7 +607,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
         if (![streetsSourceIdentifiers containsObject:layer.sourceIdentifier]) {
             continue;
         }
-        
+
         NSExpression *text = layer.text;
         NSExpression *localizedText = [text mgl_expressionLocalizedIntoLocale:locale];
         if (![localizedText isEqual:text]) {
@@ -614,7 +624,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 
 - (NSArray<MLNStyleLayer *> *)placeStyleLayers {
     NSSet *streetsSourceIdentifiers = [self.mapboxStreetsSources valueForKey:@"identifier"];
-    
+
     NSSet *placeSourceLayerIdentifiers = [NSSet setWithObjects:@"marine_label", @"country_label", @"state_label", @"place_label", @"water_label", @"poi_label", @"rail_station_label", @"mountain_peak_label", @"natural_label", @"transit_stop_label", nil];
     NSPredicate *isPlacePredicate = [NSPredicate predicateWithBlock:^BOOL (MLNVectorStyleLayer * _Nullable layer, NSDictionary<NSString *, id> * _Nullable bindings) {
         return [layer isKindOfClass:[MLNVectorStyleLayer class]] && [streetsSourceIdentifiers containsObject:layer.sourceIdentifier] && [placeSourceLayerIdentifiers containsObject:layer.sourceLayerIdentifier];

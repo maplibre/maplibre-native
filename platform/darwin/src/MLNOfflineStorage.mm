@@ -168,7 +168,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
         _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
         _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
         _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
-        
+
         // Observe for changes to the tile server options (and find out the current one).
         [[MLNSettings sharedSettings] addObserver:self
                                             forKeyPath:@"tileServerOptionsChangeToken"
@@ -188,7 +188,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
+
     [[MLNSettings sharedSettings] removeObserver:self forKeyPath:@"tileServerOptionsChangeToken"];
     [[MLNSettings sharedSettings] removeObserver:self forKeyPath:@"apiKey"];
 
@@ -225,7 +225,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
         NSString *customPath = [NSBundle.mainBundle objectForInfoDictionaryKey:MLNOfflineStorageDatabasePathInfoDictionaryKey];
         if ([customPath isKindOfClass:[NSString class]]) {
             _databaseURL = [NSURL fileURLWithPath:customPath.stringByStandardizingPath isDirectory:NO relativeToURL:NSBundle.mainBundle.resourceURL];
-            
+
             NSURL *directoryURL = _databaseURL.URLByDeletingLastPathComponent;
             [NSFileManager.defaultManager createDirectoryAtURL:directoryURL
                                    withIntermediateDirectories:YES
@@ -236,14 +236,14 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
         }
         NSString *databasePath = self.databasePath;
         NSAssert(databasePath, @"Offline pack database URL “%@” is not a valid file URL.", _databaseURL);
-        
+
         // Move the offline database from v3.2.0-beta.1 to a location that can
         // also be used for ambient caching.
         if (![[NSFileManager defaultManager] fileExistsAtPath:databasePath]) {
             NSString *legacyDatabasePath = [[self class] legacyDatabasePath];
             [[NSFileManager defaultManager] moveItemAtPath:legacyDatabasePath toPath:databasePath error:NULL];
         }
-        
+
         // Move the offline database from v3.2.x path to a subdirectory that can
         // be reliably excluded from backups.
         if (![[NSFileManager defaultManager] fileExistsAtPath:databasePath]) {
@@ -324,7 +324,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 - (void)addContentsOfFile:(NSString *)filePath withCompletionHandler:(MLNBatchedOfflinePackAdditionCompletionHandler)completion {
     MLNLogDebug(@"Adding contentsOfFile: %@ completionHandler: %@", filePath, completion);
     NSURL *fileURL = [NSURL fileURLWithPath:filePath];
-    
+
     [self addContentsOfURL:fileURL withCompletionHandler:completion];
 
 }
@@ -332,24 +332,24 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 - (void)addContentsOfURL:(NSURL *)fileURL withCompletionHandler:(MLNBatchedOfflinePackAdditionCompletionHandler)completion {
     MLNLogDebug(@"Adding contentsOfURL: %@ completionHandler: %@", fileURL, completion);
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    
+
     if (!fileURL.isFileURL) {
         [NSException raise:NSInvalidArgumentException format:@"%@ must be a valid file path", fileURL.absoluteString];
     }
     if (![fileManager isWritableFileAtPath:fileURL.path]) {
         [NSException raise:NSInvalidArgumentException format:@"The file path: %@ must be writable", fileURL.absoluteString];
     }
-    
+
     __weak MLNOfflineStorage *weakSelf = self;
     [self _addContentsOfFile:fileURL.path withCompletionHandler:^(NSArray<MLNOfflinePack *> * _Nullable packs, NSError * _Nullable error) {
         if (packs) {
             NSMutableDictionary *packsByIdentifier = [NSMutableDictionary dictionary];
-            
+
             MLNOfflineStorage *strongSelf = weakSelf;
             for (MLNOfflinePack *pack in packs) {
                 [packsByIdentifier setObject:pack forKey:@(pack.mbglOfflineRegion->getID())];
             }
-            
+
             id mutablePacks = [strongSelf mutableArrayValueForKey:@"packs"];
             NSMutableIndexSet *replaceIndexSet = [NSMutableIndexSet indexSet];
             NSMutableArray *replacePacksArray = [NSMutableArray array];
@@ -364,11 +364,11 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                 }
 
             }];
-            
+
             if (replaceIndexSet.count > 0) {
                 [mutablePacks replaceObjectsAtIndexes:replaceIndexSet withObjects:replacePacksArray];
             }
-            
+
             [mutablePacks addObjectsFromArray:packsByIdentifier.allValues];
         }
         if (completion) {
@@ -466,7 +466,7 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
         completion(nil);
         return;
     }
-    
+
     _mbglDatabaseFileSource->deleteOfflineRegion(std::move(*mbglOfflineRegion), [&, completion](std::exception_ptr exception) {
         NSError *error;
         if (exception) {
@@ -627,15 +627,15 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
     mbgl::Response response;
     response.data = std::make_shared<std::string>(static_cast<const char*>(data.bytes), data.length);
     response.mustRevalidate = mustRevalidate;
-    
+
     if (eTag) {
         response.etag = std::string(eTag.UTF8String);
     }
-    
+
     if (modified) {
         response.modified = mbgl::Timestamp() + std::chrono::duration_cast<mbgl::Seconds>(MLNDurationFromTimeInterval(modified.timeIntervalSince1970));
     }
-    
+
     if (expires) {
         response.expires = mbgl::Timestamp() + std::chrono::duration_cast<mbgl::Seconds>(MLNDurationFromTimeInterval(expires.timeIntervalSince1970));
     }

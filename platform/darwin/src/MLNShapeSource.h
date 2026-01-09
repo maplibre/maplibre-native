@@ -45,6 +45,15 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClus
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClusterRadius;
 
 /**
+ An `NSNumber` object containing an integer; specifies the minimum number of points to form a
+ cluster if clustering is enabled. The default value is 2.
+
+ This option only affects point features within an ``MLNShapeSource`` object; it
+ is ignored when creating an ``MLNComputedShapeSource`` object.
+ */
+FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClusterMinPoints;
+
+/**
  An `NSDictionary` object where the key is an `NSString`. The dictionary key will
  be the feature attribute key. The resulting attribute value is
  aggregated from the clustered points. The dictionary value is an `NSArray`
@@ -155,6 +164,12 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionSimp
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLineDistanceMetrics;
 
 /**
+ An `NSNumber` object containing a Boolean flag defining whether or not the fetched tiles for the
+ given source should be synchronously updated on the render thread. The default value is `NO`.
+ */
+FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionSynchronousUpdate;
+
+/**
  ``MLNShapeSource`` is a map content source that supplies vector shapes to be
  shown on the map. The shapes may be instances of ``MLNShape`` or ``MLNShape``,
  or they may be defined by local or external
@@ -233,7 +248,7 @@ MLN_EXPORT
  for the source.
 
  This class supports the following options: ``MLNShapeSourceOptionClustered``,
- ``MLNShapeSourceOptionClusterRadius``,
+ ``MLNShapeSourceOptionClusterRadius``, ``MLNShapeSourceOptionClusterMinPoints``,
  ``MLNShapeSourceOptionMaximumZoomLevelForClustering``,
  ``MLNShapeSourceOptionMinimumZoomLevel``, ``MLNShapeSourceOptionMinimumZoomLevel``,
  ``MLNShapeSourceOptionBuffer``, and

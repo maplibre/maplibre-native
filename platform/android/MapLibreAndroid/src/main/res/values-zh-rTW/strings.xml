@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Attribution圖標，點擊以顯示attribution對話框。</string>
     <string name="maplibre_myLocationViewContentDescription">定位視圖，在地圖上顯示當前位置。</string>
     <string name="maplibre_mapActionDescription">顯示由MapLibre創建的地圖，通過拖動兩個手指來滾動，捏兩個手指來放大。</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK for Android</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">設備中未安裝任何瀏覽器，不能打開該網頁</string>
     <string name="maplibre_offline_error_region_definition_invalid">提供的OfflineRegionDefinition不符合標準地理範圍：%s</string>
     </resources>

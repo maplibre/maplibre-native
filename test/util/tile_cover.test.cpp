@@ -44,7 +44,7 @@ TEST(TileCover, Pitch) {
                          .withPitch(40.0));
 
     EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}}),
-              util::tileCover(transform.getState(), 2));
+              util::tileCover({transform.getState()}, 2));
 }
 
 TEST(TileCover, PitchIssue15442) {
@@ -62,7 +62,7 @@ TEST(TileCover, PitchIssue15442) {
 
     EXPECT_EQ((std::vector<OverscaledTileID>{
                   {2, 3, 1}, {2, 2, 1}, {2, 3, 0}, {2, 2, 0}, {2, 1, {2, 0, 0}}, {2, 1, {2, 1, 0}}}),
-              util::tileCover(transform.getState(), 2));
+              util::tileCover({transform.getState()}, 2));
 }
 
 TEST(TileCover, PitchOverAllowedByContentInsets) {
@@ -80,7 +80,7 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}, {3, 4, 2}, {3, 5, 3}, {3, 5, 2}}),
-        util::tileCover(transform.getState(), 3));
+        util::tileCover({transform.getState()}, 3));
 }
 
 TEST(TileCover, PitchWithLargerResultSet) {
@@ -96,7 +96,7 @@ TEST(TileCover, PitchWithLargerResultSet) {
                          .withBearing(-142.2630000003529176)
                          .withPitch(60.0));
 
-    auto cover = util::tileCover(transform.getState(), 5);
+    auto cover = util::tileCover({.transformState = transform.getState()}, 5);
     // Returned vector has above 100 elements, we check first 16 as there is a
     // plan to return lower LOD for distant tiles.
     EXPECT_EQ((std::vector<OverscaledTileID>{{5, 15, 16},
@@ -148,7 +148,7 @@ TEST(TileCover, CoordinatesAreUnwrapped) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{1, 0, {1, 1, 0}}, {1, 1, {1, 0, 0}}, {1, 0, {1, 1, 1}}, {1, 1, {1, 0, 1}}}),
-        util::tileCover(transform.getState(), 1));
+        util::tileCover({transform.getState()}, 1));
 }
 
 TEST(TileCover, DifferentOverscaledZ) {
@@ -165,7 +165,7 @@ TEST(TileCover, DifferentOverscaledZ) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{3, 0, {2, 1, 1}}, {3, 0, {2, 2, 1}}, {3, 0, {2, 1, 2}}, {3, 0, {2, 2, 2}}}),
-        util::tileCover(transform.getState(), 2, 3));
+        util::tileCover({transform.getState()}, 2, 3));
 }
 
 TEST(TileCover, DifferentOverscaledZWithPitch) {
@@ -186,7 +186,7 @@ TEST(TileCover, DifferentOverscaledZWithPitch) {
                                              {5, 0, {3, 3, 1}},
                                              {5, 0, {3, 4, 1}},
                                              {5, 0, {3, 2, 1}}}),
-              util::tileCover(transform.getState(), 3, 5));
+              util::tileCover({transform.getState()}, 3, 5));
 }
 
 TEST(TileCover, DifferentOverscaledZWrapped) {
@@ -201,7 +201,7 @@ TEST(TileCover, DifferentOverscaledZWrapped) {
 
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{2, 0, {1, 1, 0}}, {2, 1, {1, 0, 0}}, {2, 0, {1, 1, 1}}, {2, 1, {1, 0, 1}}}),
-        util::tileCover(transform.getState(), 1, 2));
+        util::tileCover({transform.getState()}, 1, 2));
 }
 
 TEST(TileCover, FlippedY) {
@@ -216,7 +216,7 @@ TEST(TileCover, FlippedY) {
                          .withZoom(1.0));
 
     EXPECT_EQ((std::vector<OverscaledTileID>{{1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {1, 1, 1}}),
-              util::tileCover(transform.getState(), 1));
+              util::tileCover({transform.getState()}, 1));
 }
 
 TEST(TileCover, FlippedYPitch) {
@@ -233,7 +233,7 @@ TEST(TileCover, FlippedYPitch) {
                          .withPitch(40.0));
 
     EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}}),
-              util::tileCover(transform.getState(), 2));
+              util::tileCover({transform.getState()}, 2));
 }
 
 TEST(TileCover, FlippedYHelsinki) {
@@ -248,7 +248,7 @@ TEST(TileCover, FlippedYHelsinki) {
                          .withZoom(11.447425));
 
     EXPECT_EQ((std::vector<OverscaledTileID>{{11, 1165, 592}, {11, 1166, 592}, {11, 1165, 593}, {11, 1166, 593}}),
-              util::tileCover(transform.getState(), 11));
+              util::tileCover({transform.getState()}, 11));
 }
 
 TEST(TileCoverStream, Arctic) {
@@ -389,10 +389,10 @@ TEST(TileCover, GeomPolygon) {
 
     auto results = util::tileCover(polygon, 8);
 
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 134, 87}), results.end());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 139, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 134, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 139, 87}), results.end());
     // Should have a hole
-    EXPECT_EQ(std::find(results.begin(), results.end(), UnwrappedTileID{8, 136, 87}), results.end());
+    EXPECT_EQ(std::ranges::find(results, UnwrappedTileID{8, 136, 87}), results.end());
 }
 
 TEST(TileCover, GeomMultiPolygon) {
@@ -414,9 +414,9 @@ TEST(TileCover, GeomMultiPolygon) {
     auto results = util::tileCover(multiPolygon, 8);
 
     EXPECT_EQ(424u, results.size());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 139, 87}), results.end());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 136, 87}), results.end());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 174, 94}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 139, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 136, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 174, 94}), results.end());
 }
 
 TEST(TileCover, GeomSanFranciscoPoly) {

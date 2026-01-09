@@ -8,12 +8,13 @@ import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-class MapLibreMapOptionsTest {
+class MapLibreMapOptionsTest : BaseTest() {
     @Test
     fun testSanity() {
         Assert.assertNotNull("should not be null",

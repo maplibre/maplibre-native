@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Instrumentation Tests" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests">
-    <module name="MapLibre_Native_for_Android.MapLibreAndroidTestApp.androidTest" />
+    <module name="MapLibreAndroid.MapLibreAndroidTestApp.androidTest" />
     <option name="TESTING_TYPE" value="0" />
     <option name="METHOD_NAME" value="" />
     <option name="CLASS_NAME" value="" />
@@ -13,7 +13,6 @@
     <option name="RETENTION_COMPRESS_SNAPSHOTS" value="false" />
     <option name="CLEAR_LOGCAT" value="false" />
     <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
-    <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
     <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
     <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
     <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />

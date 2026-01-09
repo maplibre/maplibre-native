@@ -7,4 +7,6 @@
     <string name="category_benchmark">Benchmark</string>
     <string name="activity_benchmark_world_tour">World Tour Benchmark</string>
     <string name="description_world_tour_benchmark">Writes out avg. fps and 1% fps after world tour with .flyTo()</string>
+    <string name="search">Search</string>
+    <string name="category_data">Data Sources</string>
 </resources>

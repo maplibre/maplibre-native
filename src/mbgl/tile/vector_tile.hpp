@@ -20,10 +20,13 @@ public:
     void setNecessity(TileNecessity) final;
     void setUpdateParameters(const TileUpdateParameters&) final;
     void setMetadata(std::optional<Timestamp> modified, std::optional<Timestamp> expires);
-    void setData(const std::shared_ptr<const std::string>& data);
 
-private:
-    TileLoader<VectorTile> loader;
+    virtual void setData(const std::shared_ptr<const std::string>&) = 0;
+
+protected:
+    // this needs to be explicitly deleted in the most-derived destructor
+    // see `~VectorMVTTile`
+    std::unique_ptr<TileLoader<VectorTile>> loader;
 };
 
 } // namespace mbgl

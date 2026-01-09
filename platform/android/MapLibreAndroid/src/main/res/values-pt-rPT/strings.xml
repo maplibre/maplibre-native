@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Ícone de atribuição. Ativar para mostrar a janela de atribuição.</string>
     <string name="maplibre_myLocationViewContentDescription">Vista de localização. Isto mostra a sua localização no mapa.</string>
     <string name="maplibre_mapActionDescription">A mostrar um Mapa criado com MapLibre. Desloque arrastanto com 2 dedos. Zoom afastando ou aproximando os 2 dedos.</string>
-    <string name="maplibre_attributionsDialogTitle">Mapas MapLibre SDK para Android</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">Não está nenhum navegador de Internet instalado no dispositivo. Não é possível abrir a página web.</string>
     <string name="maplibre_offline_error_region_definition_invalid">O OfflineRegionDefinition não cabe nos limites do mundo: %s</string>
     </resources>

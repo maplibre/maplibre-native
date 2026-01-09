@@ -2,10 +2,12 @@ package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.os.PowerManager
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +27,7 @@ import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.BenchmarkInputData
@@ -32,53 +35,14 @@ import org.maplibre.android.testapp.utils.BenchmarkResult
 import org.maplibre.android.testapp.utils.BenchmarkRun
 import org.maplibre.android.testapp.utils.BenchmarkRunResult
 import org.maplibre.android.testapp.utils.FrameTimeStore
+import org.maplibre.android.testapp.utils.animateCameraSuspend
 import org.maplibre.android.testapp.utils.jsonPayload
+import org.maplibre.android.testapp.utils.setStyleSuspend
 import java.io.File
 import java.util.ArrayList
 import kotlin.collections.flatMap
 import kotlin.collections.toTypedArray
 import kotlin.coroutines.resume
-
-suspend fun MapLibreMap.animateCameraSuspend(
-    cameraUpdate: CameraUpdate,
-    durationMs: Int
-): Unit = suspendCancellableCoroutine { continuation ->
-    animateCamera(cameraUpdate, durationMs, object : CancelableCallback {
-        var resumed = false
-
-        override fun onCancel() {
-            continuation.cancel()
-        }
-
-        override fun onFinish() {
-            if (!resumed) {
-                resumed = true
-                continuation.resume(Unit)
-            }
-        }
-    })
-}
-
-suspend fun MapView.setStyleSuspend(styleUrl: String): Unit =
-    suspendCancellableCoroutine { continuation ->
-        var listener: MapView.OnDidFinishLoadingStyleListener? = null
-
-        var resumed = false
-        listener = MapView.OnDidFinishLoadingStyleListener {
-            if (!resumed) {
-                resumed = true
-                listener?.let { removeOnDidFinishLoadingStyleListener(it) }
-                continuation.resume(Unit)
-            }
-        }
-        addOnDidFinishLoadingStyleListener(listener)
-        getMapAsync { map -> map.setStyle(styleUrl) }
-
-        continuation.invokeOnCancellation {
-            removeOnDidFinishLoadingStyleListener(listener)
-        }
-
-    }
 
 /**
  * Benchmark using a [android.view.TextureView]
@@ -188,7 +152,23 @@ class BenchmarkActivity : AppCompatActivity() {
         }
     }
 
+    private fun getThermalStatus(): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            return powerManager.currentThermalStatus
+        }
+
+        return -1;
+    }
+
     private fun setupMapView() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            powerManager.addThermalStatusListener {
+                    status -> println("Thermal status changed $status")
+            }
+        }
+
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             val benchmarkResult = BenchmarkResult(arrayListOf())
@@ -213,6 +193,7 @@ class BenchmarkActivity : AppCompatActivity() {
                         val benchmarkPair = Pair(benchmarkRun, benchmarkRunResult)
                         // don't store results for fast run
                         if (i != 0) benchmarkResult.runs.add(benchmarkPair)
+                        println(jsonPayload(BenchmarkResult(arrayListOf(benchmarkPair))))
                     }
                 }
 
@@ -231,9 +212,9 @@ class BenchmarkActivity : AppCompatActivity() {
 
         maplibreMap.setSwapBehaviorFlush(benchmarkRun.syncRendering)
 
-        val listener = MapView.OnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
-            encodingTimeStore.add(frameEncodingTime * 1e3)
-            renderingTimeStore.add(frameRenderingTime * 1e3)
+        val listener = MapView.OnDidFinishRenderingFrameWithStatsListener { _: Boolean, stats: RenderingStats ->
+            encodingTimeStore.add(stats.encodingTime * 1e3)
+            renderingTimeStore.add(stats.renderingTime * 1e3)
             numFrames++;
         }
         mapView.addOnDidFinishRenderingFrameListener(listener)
@@ -253,7 +234,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         mapView.removeOnDidFinishRenderingFrameListener(listener)
 
-        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore)
+        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, getThermalStatus())
     }
 
     override fun onStart() {

@@ -28,8 +28,8 @@ void Mailbox::open(Scheduler& scheduler_) {
 
     // As with close(), block until neither receive() nor push() are in
     // progress, and acquire the two mutexes in the same order.
-    std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
-    std::lock_guard<std::mutex> pushingLock(pushingMutex);
+    std::scoped_lock receivingLock(receivingMutex);
+    std::scoped_lock pushingLock(pushingMutex);
 
     if (closed) {
         return;
@@ -51,8 +51,8 @@ void Mailbox::close() {
     // will obtain them when it self-sends a message, and consistent lock
     // acquisition order prevents deadlocks. The receiving mutex is recursive to
     // allow a mailbox (and thus the actor) to close itself.
-    std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
-    std::lock_guard<std::mutex> pushingLock(pushingMutex);
+    std::scoped_lock receivingLock(receivingMutex);
+    std::scoped_lock pushingLock(pushingMutex);
 
     closed = true;
 
@@ -69,7 +69,7 @@ void Mailbox::abandon() {
 }
 
 bool Mailbox::isOpen() const {
-    return bool(weakScheduler) && !closed;
+    return !closed && weakScheduler;
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
@@ -89,7 +89,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
 
     {
         MLN_TRACE_ZONE(push lock);
-        std::lock_guard<std::mutex> pushingLock(pushingMutex);
+        std::scoped_lock pushingLock(pushingMutex);
 
         if (closed) {
             state = State::Abandoned;
@@ -99,7 +99,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         bool wasEmpty = false;
         {
             MLN_TRACE_ZONE(queue lock);
-            std::lock_guard<std::mutex> queueLock(queueMutex);
+            std::scoped_lock queueLock(queueMutex);
             wasEmpty = queue.empty();
             queue.push(std::move(message));
         }
@@ -124,7 +124,7 @@ void Mailbox::receive() {
             state = State::Idle;
         }
     }};
-    std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
+    std::scoped_lock receivingLock(receivingMutex);
 
     if (closed) {
         state = State::Abandoned;
@@ -135,7 +135,7 @@ void Mailbox::receive() {
     bool wasEmpty = false;
 
     {
-        std::lock_guard<std::mutex> queueLock(queueMutex);
+        std::scoped_lock queueLock(queueMutex);
         assert(!queue.empty());
         message = std::move(queue.front());
         queue.pop();
@@ -152,8 +152,7 @@ void Mailbox::receive() {
 }
 
 void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
-    auto guard = weakScheduler.lock();
-    if (weakScheduler) {
+    if (auto guard = weakScheduler.lock(); weakScheduler) {
         std::weak_ptr<Mailbox> mailbox = shared_from_this();
         auto setToRecieve = [mbox = std::move(mailbox)]() {
             if (auto locked = mbox.lock()) {

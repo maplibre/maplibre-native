@@ -25,4 +25,3 @@ set_target_properties(
         INTERFACE_MAPLIBRE_AUTHOR "Bartosz Taudul"
         INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/tracy/LICENSE
 )
-

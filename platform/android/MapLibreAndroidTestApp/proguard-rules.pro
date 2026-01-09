@@ -10,8 +10,11 @@
 
 # GMS
 -dontnote com.google.android.gms.**
+-dontwarn com.google.android.gms.**
+-keep class com.google.android.gms.** { *; }
 
 -keep class org.maplibre.android.testapp.model.customlayer.ExampleCustomLayer { *; }
+
 
  # okhttp
 -dontwarn org.bouncycastle.jsse.BCSSLSocket

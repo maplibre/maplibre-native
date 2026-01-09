@@ -321,8 +321,7 @@ public:
 
     /// Indicates whether any values have changed
     bool isModifiedAfter(std::chrono::duration<double> time) const {
-        return std::any_of(
-            attrs.begin(), attrs.end(), [&](const auto& attr) { return attr && attr->isModifiedAfter(time); });
+        return std::ranges::any_of(attrs, [&](const auto& attr) { return attr && attr->isModifiedAfter(time); });
     }
 
     /// Clear the collection

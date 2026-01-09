@@ -2,11 +2,143 @@
 
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto fillShaderPrelude = R"(
+
+enum {
+    idFillDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillTilePropsUBO = drawableReservedUBOCount,
+    idFillEvaluatedPropsUBO,
+    fillUBOCount
+};
+
+//
+// Fill
+
+struct alignas(16) FillDrawableUBO {
+    /*  0 */ float4x4 matrix;
+
+    // Interpolations
+    /* 64 */ float color_t;
+    /* 68 */ float opacity_t;
+    /* 72 */ float pad1;
+    /* 76 */ float pad2;
+    /* 80 */
+};
+static_assert(sizeof(FillDrawableUBO) == 5 * 16, "wrong size");
+
+//
+// Fill outline
+
+struct alignas(16) FillOutlineDrawableUBO {
+    /*  0 */ float4x4 matrix;
+
+    // Interpolations
+    /* 64 */ float outline_color_t;
+    /* 68 */ float opacity_t;
+    /* 72 */ float pad1;
+    /* 76 */ float pad2;
+    /* 80 */
+};
+static_assert(sizeof(FillOutlineDrawableUBO) == 5 * 16, "wrong size");
+
+//
+// Fill pattern
+
+struct alignas(16) FillPatternDrawableUBO {
+    /*  0 */ float4x4 matrix;
+    /* 64 */ float2 pixel_coord_upper;
+    /* 72 */ float2 pixel_coord_lower;
+    /* 80 */ float tile_ratio;
+
+    // Interpolations
+    /* 84 */ float pattern_from_t;
+    /* 88 */ float pattern_to_t;
+    /* 92 */ float opacity_t;
+    /* 96 */
+};
+static_assert(sizeof(FillPatternDrawableUBO) == 6 * 16, "wrong size");
+
+struct alignas(16) FillPatternTilePropsUBO {
+    /*  0 */ float4 pattern_from;
+    /* 16 */ float4 pattern_to;
+    /* 32 */ float2 texsize;
+    /* 40 */ float pad1;
+    /* 44 */ float pad2;
+    /* 48 */
+};
+static_assert(sizeof(FillPatternTilePropsUBO) == 3 * 16, "wrong size");
+
+//
+// Fill pattern outline
+
+struct alignas(16) FillOutlinePatternDrawableUBO {
+    /*  0 */ float4x4 matrix;
+    /* 64 */ float2 pixel_coord_upper;
+    /* 72 */ float2 pixel_coord_lower;
+    /* 80 */ float tile_ratio;
+
+    // Interpolations
+    /* 84 */ float pattern_from_t;
+    /* 88 */ float pattern_to_t;
+    /* 92 */ float opacity_t;
+    /* 96 */
+};
+static_assert(sizeof(FillOutlinePatternDrawableUBO) == 6 * 16, "wrong size");
+
+struct alignas(16) FillOutlinePatternTilePropsUBO {
+    /*  0 */ float4 pattern_from;
+    /* 16 */ float4 pattern_to;
+    /* 32 */ float2 texsize;
+    /* 40 */ float pad1;
+    /* 44 */ float pad2;
+    /* 48 */
+};
+static_assert(sizeof(FillOutlinePatternTilePropsUBO) == 3 * 16, "wrong size");
+
+//
+// Fill outline triangulated
+
+struct alignas(16) FillOutlineTriangulatedDrawableUBO {
+    /*  0 */ float4x4 matrix;
+    /* 64 */ float ratio;
+    /* 68 */ float pad1;
+    /* 72 */ float pad2;
+    /* 76 */ float pad3;
+    /* 80 */
+};
+static_assert(sizeof(FillOutlineTriangulatedDrawableUBO) == 5 * 16, "wrong size");
+
+/// Evaluated properties that do not depend on the tile
+struct alignas(16) FillEvaluatedPropsUBO {
+    /*  0 */ float4 color;
+    /* 16 */ float4 outline_color;
+    /* 32 */ float opacity;
+    /* 36 */ float fade;
+    /* 40 */ float from_scale;
+    /* 44 */ float to_scale;
+    /* 48 */
+};
+static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16, "wrong size");
+
+union FillDrawableUnionUBO {
+    FillDrawableUBO fillDrawableUBO;
+    FillOutlineDrawableUBO fillOutlineDrawableUBO;
+    FillPatternDrawableUBO fillPatternDrawableUBO;
+    FillOutlinePatternDrawableUBO fillOutlinePatternDrawableUBO;
+    FillOutlineTriangulatedDrawableUBO fillOutlineTriangulatedDrawableUBO;
+};
+
+union FillTilePropsUnionUBO {
+    FillPatternTilePropsUBO fillPatternTilePropsUBO;
+    FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
+};
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
@@ -14,21 +146,21 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(5)]];
+    short2 position [[attribute(fillUBOCount + 0)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(6)]];
+    float4 color [[attribute(fillUBOCount + 1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(7)]];
+    float2 opacity [[attribute(fillUBOCount + 2)]];
 #endif
 };
 
@@ -43,32 +175,25 @@ struct FragmentStage {
 #endif
 };
 
-struct alignas(16) FillDrawableUBO {
-    float4x4 matrix;
-};
-
-struct alignas(16) FillInterpolateUBO {
-    float color_t;
-    float opacity_t;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillDrawableUBO& drawable [[buffer(1)]],
-                                device const FillInterpolateUBO& interp [[buffer(3)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+
+    device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
+
     return {
         .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(unpack_mix_color(vertx.color, interp.color_t)),
+        .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity  = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
+        .opacity  = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -96,16 +221,17 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
+
 struct VertexStage {
-    short2 position [[attribute(5)]];
-    float4 outline_color [[attribute(6)]];
-    float2 opacity [[attribute(7)]];
+    short2 position [[attribute(fillUBOCount + 0)]];
+    float4 outline_color [[attribute(fillUBOCount + 1)]];
+    float2 opacity [[attribute(fillUBOCount + 2)]];
 };
 
 struct FragmentStage {
@@ -119,35 +245,28 @@ struct FragmentStage {
 #endif
 };
 
-struct alignas(16) FillOutlineDrawableUBO {
-    float4x4 matrix;
-};
-
-struct alignas(16) FillOutlineInterpolateUBO {
-    float outline_color_t;
-    float opacity_t;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const FillOutlineDrawableUBO& drawable [[buffer(1)]],
-                                device const FillOutlineInterpolateUBO& interp [[buffer(3)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+
+    device const FillOutlineDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineDrawableUBO;
+
     const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
     return {
         .position       = position,
         .pos            = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
 #if !defined(HAS_UNIFORM_u_outline_color)
-        .outline_color  = half4(unpack_mix_color(vertx.outline_color, interp.outline_color_t)),
+        .outline_color  = half4(unpack_mix_color(vertx.outline_color, drawable.outline_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
+        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -181,23 +300,24 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
+    static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
+
 struct VertexStage {
-    short2 position [[attribute(5)]];
+    short2 position [[attribute(fillUBOCount + 0)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(6)]];
+    ushort4 pattern_from [[attribute(fillUBOCount + 1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(7)]];
+    ushort4 pattern_to [[attribute(fillUBOCount + 2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(8)]];
+    float2 opacity [[attribute(fillUBOCount + 3)]];
 #endif
 };
 
@@ -217,32 +337,16 @@ struct FragmentStage {
 #endif
 };
 
-struct alignas(16) FillPatternDrawableUBO {
-    float4x4 matrix;
-    float2 pixel_coord_upper;
-    float2 pixel_coord_lower;
-    float2 texsize;
-    float tile_ratio;
-    float pad;
-};
-
-struct alignas(16) FillPatternTilePropsUBO {
-    float4 pattern_from;
-    float4 pattern_to;
-};
-
-struct alignas(16) FillPatternInterpolateUBO {
-    float pattern_from_t;
-    float pattern_to_t;
-    float opacity_t;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const FillPatternDrawableUBO& drawable [[buffer(1)]],
-                                device const FillPatternTilePropsUBO& tileProps [[buffer(2)]],
-                                device const FillPatternInterpolateUBO& interp [[buffer(3)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
+                                device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
+
+    device const FillPatternDrawableUBO& drawable = drawableVector[uboIndex].fillPatternDrawableUBO;
+    device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
@@ -280,20 +384,22 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .pattern_to     = half4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
+        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillPatternDrawableUBO& drawable [[buffer(1)]],
-                            device const FillPatternTilePropsUBO& tileProps [[buffer(2)]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                            device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
+                            device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
+
+    device const FillPatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillPatternTilePropsUBO;
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from   = float4(tileProps.pattern_from);
@@ -319,11 +425,11 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float2 pattern_br_b = pattern_to.zw;
 
     const float2 imagecoord = glMod(in.v_pos_a, 1.0);
-    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
+    const float2 pos = mix(pattern_tl_a / tileProps.texsize, pattern_br_a / tileProps.texsize, imagecoord);
     const float4 color1 = image0.sample(image0_sampler, pos);
 
     const float2 imagecoord_b = glMod(in.v_pos_b, 1.0);
-    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
+    const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
     return half4(mix(color1, color2, props.fade) * opacity);
@@ -337,24 +443,24 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
+    static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(5)]];
+    short2 position [[attribute(fillUBOCount + 0)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(6)]];
+    ushort4 pattern_from [[attribute(fillUBOCount + 1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(7)]];
+    ushort4 pattern_to [[attribute(fillUBOCount + 2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(8)]];
+    float2 opacity [[attribute(fillUBOCount + 3)]];
 #endif
 };
 
@@ -375,32 +481,16 @@ struct FragmentStage {
 #endif
 };
 
-struct alignas(16) FillOutlinePatternDrawableUBO {
-    float4x4 matrix;
-    float2 pixel_coord_upper;
-    float2 pixel_coord_lower;
-    float2 texsize;
-    float tile_ratio;
-    float pad;
-};
-
-struct alignas(16) FillOutlinePatternTilePropsUBO {
-    float4 pattern_from;
-    float4 pattern_to;
-};
-
-struct alignas(16) FillOutlinePatternInterpolateUBO {
-    float pattern_from_t;
-    float pattern_to_t;
-    float opacity_t;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const FillOutlinePatternDrawableUBO& drawable [[buffer(1)]],
-                                device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(2)]],
-                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(3)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
+                                device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
+
+    device const FillOutlinePatternDrawableUBO& drawable = drawableVector[uboIndex].fillOutlinePatternDrawableUBO;
+    device const FillOutlinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillOutlinePatternTilePropsUBO;
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
@@ -414,7 +504,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    const auto opacity      = unpack_mix_float(vertx.opacity, interp.opacity_t);
+    const auto opacity      = unpack_mix_float(vertx.opacity, drawable.opacity_t);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -451,14 +541,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlinePatternDrawableUBO& drawable [[buffer(1)]],
-                            device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(2)]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                            device const FillTilePropsUnionUBO* tilePropsVector [[buffer(idFillTilePropsUBO)]],
+                            device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
+
+    device const FillOutlinePatternTilePropsUBO& tileProps = tilePropsVector[uboIndex].fillOutlinePatternTilePropsUBO;
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from   = float4(tileProps.pattern_from);
@@ -484,11 +576,11 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float2 pattern_br_b = pattern_to.zw;
 
     const float2 imagecoord = glMod(in.v_pos_a, 1.0);
-    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
+    const float2 pos = mix(pattern_tl_a / tileProps.texsize, pattern_br_a / tileProps.texsize, imagecoord);
     const float4 color1 = image0.sample(image0_sampler, pos);
 
     const float2 imagecoord_b = glMod(in.v_pos_b, 1.0);
-    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
+    const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
     // TODO: Should triangate the lines into triangles to support thick line and edge antialiased.
@@ -506,15 +598,16 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
+
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(fillUBOCount + 0)]];
+    uchar4 data [[attribute(fillUBOCount + 1)]];
 };
 
 struct FragmentStage {
@@ -524,16 +617,12 @@ struct FragmentStage {
     half gamma_scale;
 };
 
-struct alignas(16) FillOutlineTriangulatedDrawableUBO {
-    float4x4 matrix;
-    float ratio;
-    float pad1, pad2, pad3;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const FillOutlineTriangulatedDrawableUBO& drawable [[buffer(1)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+
+    device const FillOutlineTriangulatedDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineTriangulatedDrawableUBO;
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -571,7 +660,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(idFillEvaluatedPropsUBO)]]) {
 
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(in.normal) * in.width2;

@@ -110,6 +110,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/map_renderer_runnable.hpp
             ${PROJECT_SOURCE_DIR}/native_map_view.cpp
             ${PROJECT_SOURCE_DIR}/native_map_view.hpp
+            ${PROJECT_SOURCE_DIR}/native_map_options.cpp
+            ${PROJECT_SOURCE_DIR}/native_map_options.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region.cpp
@@ -120,6 +122,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/offline/offline_region_error.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.hpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.cpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.cpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshotter.cpp
@@ -201,10 +205,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.hpp
     )
-    target_compile_definitions(
-        maplibre
-            PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
 endif()
 
 if(MLN_WITH_VULKAN)
@@ -212,10 +212,6 @@ if(MLN_WITH_VULKAN)
         maplibre PRIVATE
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.hpp
-    )
-    target_compile_definitions(
-        maplibre
-            PRIVATE MLN_RENDER_BACKEND_VULKAN=1
     )
 endif()
 
@@ -239,7 +235,7 @@ target_link_libraries(maplibre
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
                               $<$<CONFIG:Release>:-flto>
                               $<$<CONFIG:Release>:-fuse-ld=gold>
-                              Mapbox::Base::jni.hpp
+                              MapLibreNative::Base::jni.hpp
                               mbgl-core
                               mbgl-vendor-unique_resource)
 

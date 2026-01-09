@@ -102,23 +102,23 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 @implementation MLNScaleBarLabel
 
 - (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
-    
+
     if (_shouldShowDarkStyles != shouldShowDarkStyles) {
         _shouldShowDarkStyles = shouldShowDarkStyles;
-        
+
         // Redraw labels
         [self setNeedsDisplay];
-        
+
     }
 }
 
 - (void)drawTextInRect:(CGRect)rect {
     CGSize shadowOffset = self.shadowOffset;
-    
+
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSetLineWidth(context, 2);
     CGContextSetLineJoin(context, kCGLineJoinRound);
-    
+
     CGContextSetTextDrawingMode(context, kCGTextStroke);
     if (_shouldShowDarkStyles) {
         self.textColor = [UIColor blackColor];
@@ -126,7 +126,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
         self.textColor = [UIColor whiteColor];
     }
     [super drawTextInRect:rect];
-    
+
     CGContextSetTextDrawingMode(context, kCGTextFill);
     if (self.shouldShowDarkStyles) {
         self.textColor = [UIColor whiteColor];
@@ -135,7 +135,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     }
     self.shadowOffset = CGSizeMake(0, 0);
     [super drawTextInRect:rect];
-    
+
     self.shadowOffset = shadowOffset;
 }
 
@@ -159,18 +159,18 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 
 - (void)commonInit {
     _size = CGSizeZero;
-    
+
     _primaryColor = [UIColor colorWithRed:18.0/255.0 green:45.0/255.0 blue:17.0/255.0 alpha:1];
     _secondaryColor = [UIColor colorWithRed:247.0/255.0 green:247.0/255.0 blue:247.0/255.0 alpha:1];
     _borderWidth = 1.0f;
-    
+
     self.clipsToBounds = NO;
     self.hidden = YES;
-    
+
     // Default to current local
     NSLocale *locale = [NSLocale currentLocale];
     _usesMetricSystem = [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
-    
+
     _containerView                     = [[UIView alloc] init];
     _containerView.clipsToBounds       = YES;
     _containerView.backgroundColor     = _secondaryColor;
@@ -181,7 +181,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     _containerView.layer.masksToBounds = YES;
 
     [self addSubview:_containerView];
-    
+
     _formatter = [[MLNDistanceFormatter alloc] init];
 
     // Image labels are now images
@@ -233,11 +233,11 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 // Uses the current set `row`
 - (CGFloat)actualWidth {
     CGFloat unitsPerPoint = [self unitsPerPoint];
-    
+
     if (unitsPerPoint == 0.0) {
         return 0.0;
     }
-        
+
     CGFloat width = self.row.distance / unitsPerPoint;
 
     if (width <= MLNScaleBarMinimumBarWidth) {
@@ -270,7 +270,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 
 - (MLNRow)preferredRow {
     CLLocationDistance maximumDistance = [self maximumWidth] * [self unitsPerPoint];
-    
+
     BOOL useMetric = [self usesMetricSystem];
 
     const MLNRow *row;
@@ -303,15 +303,15 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 // MARK: - Dark Mode Changes
 
 - (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
-    
+
     if (_shouldShowDarkStyles != shouldShowDarkStyles) {
         _shouldShowDarkStyles = shouldShowDarkStyles;
-        
+
         // Redraw labels
         _prototypeLabel.shouldShowDarkStyles = shouldShowDarkStyles;
         [self resetLabelImageCache];
         [self updateLabels];
-        
+
     }
 }
 
@@ -319,51 +319,51 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 // MARK: - Setters
 
 - (void)setUsesMetricSystem:(BOOL)usesMetricSystem {
-    
+
     if (_usesMetricSystem != usesMetricSystem) {
-        
+
         _usesMetricSystem = usesMetricSystem;
-        
+
         // Find the current locale for the system, then check if we need to override this. E.g. Locale is in the United States but we want to see metric.
         NSLocale *locale = [NSLocale currentLocale];
         BOOL currentLocaleUsesMetric = [[locale objectForKey:NSLocaleUsesMetricSystem] boolValue];
         if (currentLocaleUsesMetric && !usesMetricSystem) {
-            
+
             // Our current locale is metric, but for some reason we don't want to show metric here, so we need to force a locale that isn't metric.
             self.formatter.numberFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US"];
-            
+
         } else if (!currentLocaleUsesMetric && usesMetricSystem) {
-            
+
             // Our current locale is not metric, but we want to use the metric system for the scale bar.
             // Use Canada as the identifier as they use a period as a decimal seperator
             self.formatter.numberFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_CA"];
-            
+
         } else if ((currentLocaleUsesMetric && usesMetricSystem) || (!currentLocaleUsesMetric && !usesMetricSystem)) {
-            
+
             // Fallback to the system locale.
             self.formatter.numberFormatter.locale = locale;
-            
+
         }
-       
+
         [self resetLabelImageCache];
         [self updateVisibility];
-        
+
         self.recalculateSize = YES;
         [self invalidateIntrinsicContentSize];
-        
+
     }
-    
+
 }
 
 - (void)setMetersPerPoint:(CLLocationDistance)metersPerPoint {
     if (_metersPerPoint == metersPerPoint) {
         return;
     }
-    
+
     _metersPerPoint = metersPerPoint;
-    
+
     [self updateVisibility];
-    
+
     self.recalculateSize = YES;
     [self invalidateIntrinsicContentSize];
 }
@@ -390,14 +390,14 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
         [super updateConstraints];
         return;
     }
-        
+
     // TODO: Improve this (and the side-effects)
     self.row = [self preferredRow];
 
     NSAssert(self.row.numberOfBars > 0, @"");
 
     CGFloat totalBarWidth = self.actualWidth;
-    
+
     if (totalBarWidth <= 0.0) {
         [super updateConstraints];
         return;
@@ -408,33 +408,33 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     // also to stop jiggling when the scale bar is on the right hand of the screen
     // This will most likely be a constant, as we take a max using a "hint" for
     // the initial value
-    
+
     if (self.shouldLayoutBars) {
         [self updateLabels];
     }
-    
+
     CGFloat halfLabelWidth = ceil(self.lastLabelWidth/2);
-       
+
     self.size = CGSizeMake(totalBarWidth + halfLabelWidth, 16);
-       
+
     [self setNeedsLayout];
     [super updateConstraints]; // This calls intrinsicContentSize
 }
 
 - (void)updateVisibility {
     BOOL metric = [self usesMetricSystem];
-    
+
     NSUInteger count = metric
     ? sizeof(MLNMetricTable) / sizeof(MLNMetricTable[0])
     : sizeof(MLNImperialTable) / sizeof(MLNImperialTable[0]);
-    
+
     CLLocationDistance maximumDistance = [self maximumWidth] * [self unitsPerPoint];
     CLLocationDistance allowedDistance = metric
     ? MLNMetricTable[count-1].distance
     : MLNImperialTable[count-1].distance;
-    
+
     CGFloat alpha = maximumDistance > allowedDistance ? .0f : 1.0f;
-    
+
     if (self.alpha != alpha) {
         [UIView animateWithDuration:.2f delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
             self.alpha = alpha;
@@ -446,9 +446,9 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     if (_row.distance == row.distance) {
         return;
     }
-    
+
     self.shouldLayoutBars = YES;
-    
+
     _row = row;
 }
 
@@ -526,7 +526,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
 
         CLLocationDistance barDistance = multiplier * i;
         UIImage *image = [self cachedLabelImageForDistance:barDistance];
-        
+
         self.lastLabelWidth = MAX(self.lastLabelWidth, image.size.width);
 
         labelView.layer.contents      = (id)image.CGImage;
@@ -561,7 +561,7 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     if (totalBarWidth <= 0.0) {
         return;
     }
-    
+
     if (self.shouldLayoutBars) {
         self.shouldLayoutBars = NO;
         [_bars makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -575,14 +575,14 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     BOOL RTL               = [self usesRightToLeftLayout];
     CGFloat halfLabelWidth = ceil(self.lastLabelWidth/2);
     CGFloat barOffset      = RTL ? halfLabelWidth : 0.0;
-    
+
     self.containerView.frame = CGRectMake(barOffset,
                                           intrinsicContentHeight - MLNBarHeight,
                                           totalBarWidth,
                                           MLNBarHeight);
 
     [self layoutBarsWithWidth:barWidth];
-    
+
     CGFloat yPosition = round(0.5 * ( intrinsicContentHeight - MLNBarHeight));
     CGFloat barDelta = RTL ? -barWidth : barWidth;
     [self layoutLabelsWithOffset:barOffset delta:barDelta yPosition:yPosition];
@@ -608,19 +608,19 @@ static const CGFloat MLNScaleBarMinimumBarWidth = 30.0; // Arbitrary
     }
     NSAssert(self.bars.count == countOfVisibleLabels - 1, @"");
 #endif
-    
+
     CGFloat xPosition = barOffset;
-    
+
     if (barDelta < 0) {
         xPosition -= (barDelta*self.bars.count);
     }
-    
+
     for (UIView *label in self.labelViews) {
         // Label frames have 0 size - though the layer contents use "center" and do
         // not clip to bounds. This way we don't need to worry about positioning the
         // label. (Though you won't see the label in the view debugger)
         label.frame = CGRectMake(xPosition, yPosition, 0.0, 0.0);
-        
+
         xPosition += barDelta;
     }
 }

@@ -41,7 +41,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
                 if (map != null) {
                     maplibreMap = map
                 }
-                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+                maplibreMap.setStyle(TestStyles.OPENFREEMAP_BRIGHT) { style: Style ->
                     setupBuildings(style)
                     setupLight()
                 }
@@ -50,37 +50,43 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
     }
 
     private fun setupBuildings(style: Style) {
-        val fillExtrusionLayer = FillExtrusionLayer("3d-buildings", "composite")
+        // --8<-- [start:setupBuildings]
+        val fillExtrusionLayer = FillExtrusionLayer("building-3d", "openmaptiles")
         fillExtrusionLayer.sourceLayer = "building"
         fillExtrusionLayer.setFilter(
-            Expression.eq(
-                Expression.get("extrude"),
-                Expression.literal("true")
+            Expression.all(
+                Expression.has("render_height"),
+                Expression.has("render_min_height")
             )
         )
         fillExtrusionLayer.minZoom = 15f
         fillExtrusionLayer.setProperties(
             PropertyFactory.fillExtrusionColor(Color.LTGRAY),
-            PropertyFactory.fillExtrusionHeight(Expression.get("height")),
-            PropertyFactory.fillExtrusionBase(Expression.get("min_height")),
+            PropertyFactory.fillExtrusionHeight(Expression.get("render_height")),
+            PropertyFactory.fillExtrusionBase(Expression.get("render_min_height")),
             PropertyFactory.fillExtrusionOpacity(0.9f)
         )
         style.addLayer(fillExtrusionLayer)
+        // --8<-- [end:setupBuildings]
     }
 
     private fun setupLight() {
         light = maplibreMap.style!!.light
         findViewById<View>(R.id.fabLightPosition).setOnClickListener { v: View? ->
+            // --8<-- [start:lightPosition]
             isInitPosition = !isInitPosition
             if (isInitPosition) {
                 light!!.position = Position(1.5f, 90f, 80f)
             } else {
                 light!!.position = Position(1.15f, 210f, 30f)
             }
+            // --8<-- [end:lightPosition]
         }
         findViewById<View>(R.id.fabLightColor).setOnClickListener { v: View? ->
+            // --8<-- [start:lightColor]
             isRedColor = !isRedColor
             light!!.setColor(ColorUtils.colorToRgbaString(if (isRedColor) Color.RED else Color.BLUE))
+            // --8<-- [end:lightColor]
         }
     }
 

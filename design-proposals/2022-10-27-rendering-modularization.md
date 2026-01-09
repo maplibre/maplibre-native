@@ -4,7 +4,7 @@ Before we dive in, a bit about our process.  Stamen Design, with a sub-contract 
 
 We started with a sparse proposal, laying out the goals first.  Our intent was to let the MapLibre community add their own feedback and discussion.  We have finished our update to the PR and now look for more formal feedback on the way to adoption of the design.
 
-The mechanism for this will be a Pull Request, which we have obviously opened.  This will result in as much discussion as the community would like here, on the OSM Slack and by email or video call (we're available, so reach out).  As we wrap up our specific proposal, that discussion will hopefully reach a consensus and we'll be ready for a Yes or No on the PR by the 21st of November.  
+The mechanism for this will be a Pull Request, which we have obviously opened.  This will result in as much discussion as the community would like here, on the OSM Slack and by email or video call (we're available, so reach out).  As we wrap up our specific proposal, that discussion will hopefully reach a consensus and we'll be ready for a Yes or No on the PR by the 21st of November.
 
 Then we do it again for Metal.
 
@@ -65,7 +65,7 @@ It is useful to split our goals into three sections to articulate what this prop
 
 _Addresses core functionality [#1](#core) and [#2](#core)._
 
-We need an external representation for programs (shaders) so they can be added or replaced by developers.  
+We need an external representation for programs (shaders) so they can be added or replaced by developers.
 
 Internally to the toolkit shaders are called Programs, but that's far too confusing at this level.  Are we referring to a GPU program or a program the user writes?  Best to stick with the term shader.
 
@@ -73,7 +73,7 @@ The shaders need a representation visible outside the toolkit and we need to cha
 
 #### The way it is now
 
-Individual shaders are represented by an object class with massive amounts of template logic and a minimum of in-line comments.  They’re opaque from the outside and only controllable through vector tile data and styles. 
+Individual shaders are represented by an object class with massive amounts of template logic and a minimum of in-line comments.  They’re opaque from the outside and only controllable through vector tile data and styles.
 
 The [render_raster_layer](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/layers/render_raster_layer.cpp), as an example, asks for the instantiation of (eventually) RasterProgram.  Rather than having the source for the program, that then pokes into a compressed chunk of memory that contains the source, which is then uncompressed and fed into OpenGL for compilation.
 
@@ -96,7 +96,7 @@ We'll be able to:
 
 #### For GLES we’ll need to:
 - Push aside the existing Program hierarchy and rename it with a GLES extension.
-- Allow for named uniforms for new Programs.    
+- Allow for named uniforms for new Programs.
 We can probably ignore that requirement for the existing shaders and just wrap them
 
 ### Shader(Program) Registry
@@ -134,7 +134,7 @@ Modern graphics pipelines use more than one pass to create a visual representati
 Without getting too deep into specifics, early rendering passes allow the developer to use the power of the rasterizer for their own data.  Later rendering passes are typically used to decorate the map with effects.
 
 #### The way it is now:
-The [low level rendering logic](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) in the toolkit seems to only support one explicit rendering pass.  
+The [low level rendering logic](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) in the toolkit seems to only support one explicit rendering pass.
 
 However, there is the [RenderPass](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/gl/render_pass.hpp) so some notion of this exists in the toolkit, but it's not clear how complete that is.  It may depend on ordering to work things out, rather than the explicit command buffer filling and fences we would use in a more modern approach.
 
@@ -207,7 +207,7 @@ Which is to say that Drawable is a good concept which can encapsulate a lot of c
 
 To keep the Drawable somewhat manageable, we added the concept of a Drawable Builder.  This is an object that you throw geometry at in a somewhat disordered way and it emits Drawables when you’re done.  MapLibre's [Buckets](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/bucket.hpp) are similar, but not quite the same.  Perhaps they'll be adaptable.  We'll see.
 
-Drawables and Builders have a subclass for each supported rendering SDK.  One mistake we won’t bring over is using multiple inheritance for that.  You’re welcome.  
+Drawables and Builders have a subclass for each supported rendering SDK.  One mistake we won’t bring over is using multiple inheritance for that.  You’re welcome.
 
 It’s kind of obvious why you’d have a subclass of Drawable for each SDK.  You want to let the SDK represent data the way it wants (interleaved or not, 16 bit or 32 bit floats, all sorts of things), but it’s less obvious why the Builders need one subclass per SDK.
 
@@ -258,21 +258,21 @@ The shared Drawable super-class would contain core functionality across all plat
 In any case the Drawable acts as a basic container that is handed around between the parts of the system that build things and the part that renders things.
 
 Each SDK specific Drawable subclass will do things like:
-- Upload/Bind their data to the SDK.    
+- Upload/Bind their data to the SDK.
     Ideally this can happen on non-rendering threads, but you never know.
     This includes figuring out what the shader is asking for and providing it, or convincing defaults.  The way MapLibre Native does this now is a bit static, with templates.  Clever, but perhaps too clever.  It’s okay to wire things up dynamically.
-- Draw directly.    
+- Draw directly.
     OpenGL is big on this.  You have to set things up, draw, then tear them down.
     It has the virtue of being simple.  If you’re making changes, you just do them directly.
-- Draw indirectly.    
+- Draw indirectly.
     Metal does this.  You add your data to a command buffer where it may be drawn for many frames.
     This is the fastest and best way to do things, but there are updates you must make between frames.  Obviously, the overall map state needs to be updated, otherwise you’re just redrawing in the same way each time.  Sometimes Drawable specific state changes too and data driven rendering will come into play here.
-- Update for frame.    
+- Update for frame.
     If you’re drawing indirectly, this is all the state that must be changed for a given frame.
     Some of this is shared, like the map state (e.g. the matrix controlling positioning, lighting and so forth).
     Some can be specific to a particular Drawable.  Data driven visuals may fall into this category depending on what the data is.<br>
     Just to make this even more fun, modern renderers are going to have multiple frames in flight at any given time.  So you can’t just keep one set of values and update them periodically.  My preferred approach is to put memory copy commands into a command buffer with guard logic between them.  In Metal, anyway.  Vulkan will have its own way to do that and OpenGL just doesn't.  Well, there's probably an extension somewhere that does, but it's very hard to use and sparsely supported.
-- Tear down their data.    
+- Tear down their data.
     Pretty simple for OpenGL, but with Metal when you’re using heaps (and you should) you actually want another thread to do this.  Thus it’s SDK specific.
 
 Now there is already logic to do a lot of this spread throughout various classes in MapLibre Native.  Buckets have some of it, Programs actually own the draw() method, and so forth.  To switch to this approach we'll need to cut across the gl and gfx levels of the toolkit, even a bit higher, to capture everything that builds geometry.  We'll need to convert that over to this approach and make sure we didn't miss anything, like all the fiddly per-program state.

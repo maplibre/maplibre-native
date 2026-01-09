@@ -1,4 +1,7 @@
-[![MapLibre Logo](https://maplibre.org/img/maplibre-logo-big.svg)](https://maplibre.org/)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7ff2cda8-f564-4e70-a971-d34152f969f0#gh-light-mode-only" alt="MapLibre Logo" width="200">
+  <img src="https://github.com/user-attachments/assets/cee8376b-9812-40ff-91c6-2d53f9581b83#gh-dark-mode-only" alt="MapLibre Logo" width="200">
+</p>
 
 # MapLibre Native
 
@@ -14,14 +17,14 @@ This project originated as a fork of Mapbox GL Native, before their switch to a 
 
 ## Getting Started
 
-## Android
+### Android
 
 Add [the latest version](https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions) of MapLibre Native Android as a dependency to your project.
 
 ```gradle
     dependencies {
         ...
-        implementation 'org.maplibre.gl:android-sdk:11.5.1'
+        implementation 'org.maplibre.gl:android-sdk:11.11.0'
         ...
     }
 ```
@@ -37,7 +40,7 @@ Add a `MapView` to your layout XML file:
 ```
 
 > [!TIP]
-> There are external projects such as [Ramani Maps](https://github.com/ramani-maps/ramani-maps) and [MapLibre Compose Playground](https://github.com/Rallista/maplibre-compose-playground) available to intergrate MapLibre Native Android with Compose-based projects.
+> There are external projects such as [Ramani Maps](https://github.com/ramani-maps/ramani-maps) and [MapLibre Compose Playground](https://github.com/Rallista/maplibre-compose-playground) available to integrate MapLibre Native Android with Compose-based projects.
 
 Next, initialize the map in an activity:
 
@@ -47,7 +50,7 @@ Next, initialize the map in an activity:
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
@@ -115,13 +118,13 @@ class MainActivity : AppCompatActivity() {
 ```
 </details>
 
-For more information, refer to the [Android API Documentation](https://maplibre.org/maplibre-native/android/api/), [Android Examples Documentation](https://maplibre.org/maplibre-native/docs/book/android/getting-started-guide.html) or the [MapLibre Native Android `README.md`](platform/android/README.md).
+For more information, refer to the [Android API Documentation](https://maplibre.org/maplibre-native/android/api/) or the [Android Examples Documentation](https://maplibre.org/maplibre-native/android/examples/getting-started/).
 
 ## iOS
 
-You can find MapLibre Native iOS on [Cocoapods](https://cocoapods.org/) and on the [Swift Package Index](https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution). You can also MapLibre Native iOS [as a dependency to Xcode directly](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/gettingstarted/#Add-MapLibre-Native-as-a-dependency).
+You can find MapLibre Native iOS on [Cocoapods](https://cocoapods.org/) and on the [Swift Package Index](https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution). You can also add MapLibre Native iOS [as a dependency to Xcode directly](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/gettingstarted/#Add-MapLibre-Native-as-a-dependency).
 
-MapLibre Native iOS uses UIKit. To intergrate it with an UIKit project, you can use
+MapLibre Native iOS uses UIKit. To integrate it with an UIKit project, you can use
 
 ```swift
 class SimpleMap: UIViewController, MLNMapViewDelegate {
@@ -155,9 +158,10 @@ struct SimpleMap: UIViewRepresentable {
 }
 ```
 
-You can also use [MapLibreSwiftUI](https://github.com/maplibre/swiftui-dsl), a wrapper around MapLibre Native iOS that offers a declarative API like SwiftUI.
+> [!TIP]
+> You can also use [MapLibreSwiftUI](https://github.com/maplibre/swiftui-dsl), a wrapper around MapLibre Native iOS that offers a declarative API like SwiftUI.
 
-The [iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/) contains many examples and the entire API of the library. You might also want to check out the [MapLibre Native iOS `README.md`](platform/ios/README.md).
+The [iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/) contains many examples and the entire API of the library.
 
 ## Node.js
 
@@ -167,18 +171,22 @@ There is an [npm package](https://www.npmjs.com/package/@maplibre/maplibre-gl-na
 
 Please check out the [`maplibre/maplibre-native-qt` repository](https://github.com/maplibre/maplibre-native-qt) to learn how to intergrate MapLibre Native with a Qt project.
 
+## Compose Multiplatform
+
+[MapLibre Compose](https://github.com/maplibre/maplibre-compose) wraps MapLibre Native for various platforms that [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) supports. As of August 2025, iOS and Android are supported, with web and desktop partially supported.
+
 ## Other Platforms
 
 MapLibre Native can also be built on [Linux](platform/linux/README.md), [Windows](platform/windows/README.md) and [macOS](platform/macos/README.md).
 
 ## Contributing
 
-> [!NOTE]  
+> [!NOTE]
 > This section is only relevant for people who want to contribute to MapLibre Native.
 
 MapLibre Native has at its core a C++ library. This is where the bulk of development is currently happening.
 
-To get started with the code base, you need to clone the the repository including all its submodules.
+To get started with the code base, you need to clone the repository including all its submodules.
 
 All contributors use pull requests from a private fork. [Fork the project](https://github.com/maplibre/maplibre-native/fork). Then run:
 
@@ -187,22 +195,24 @@ git clone --recurse-submodules git@github.com:<YOUR NAME>/maplibre-native.git
 git remote add origin https://github.com/maplibre/maplibre-native.git
 ```
 
-Check out issues labelled as a [good first issue](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+The go-to reference is the [MapLibre Native Developer Documentation](https://maplibre.org/maplibre-native/docs/book/).
 
-## Core
+> [!TIP]
+> Check out issues labelled as a [good first issue](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+### Core
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/design/ten-thousand-foot-view.html): architectural notes
 - [GitHub Wiki](https://github.com/maplibre/maplibre-native/wiki): low-friction way to share information with the community
 - [Core C++ API Documentation](https://maplibre.org/maplibre-native/cpp/api/) (unstable)
 
-## Android
+### Android
 
 Open `platform/android` with Android Studio.
 
-More information: [`platform/android/DEVELOPING.md`](platform/android/DEVELOPING.md).
+More information: [MapLibre Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/android/index.html).
 
-## iOS
+### iOS
 
 You need to use [Bazel](https://bazel.build/) to generate an Xcode project. Install [`bazelisk`](https://formulae.brew.sh/formula/bazelisk) (a wrapper that installs the required Bazel version). Next, use:
 
@@ -213,7 +223,7 @@ xed platform/ios/MapLibre.xcodeproj
 
 To generate and open the Xcode project.
 
-More information: [`platform/android/CONTRIBUTING.md`](platform/ios/CONTRIBUTING.md).
+More information: [MapLibre iOS Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/ios/index.html).
 
 ## Other Platforms
 
@@ -233,9 +243,7 @@ Read more about the MapLibre Sponsorship Program at [https://maplibre.org/sponso
 
 Gold:
 
-<a href="https://aws.amazon.com/location"><img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/></a>
-
-<a href="https://meta.com"><img src="https://maplibre.org/img/meta-logo.svg" alt="Logo Meta" width="25%"/></a>
+<a href="https://www.microsoft.com/"><img src="https://maplibre.org/img/msft-logo.svg" alt="Logo Microsoft" width="25%"/></a>
 
 Silver:
 
@@ -247,11 +255,11 @@ Silver:
 
 <a href="https://www.radar.com/"><img src="https://maplibre.org/img/radar-logo.svg" alt="Logo Radar" width="25%"/></a>
 
-<a href="https://www.microsoft.com/"><img src="https://maplibre.org/img/msft-logo.svg" alt="Logo Microsoft" width="25%"/></a>
-
-<a href="https://www.mappedin.com/"><img src="https://maplibre.org/img/mappedin-logo.svg" alt="Logo mappedin" width="25%"/></a>
-
 <a href="https://www.mapme.com/"><img src="https://maplibre.org/img/mapme-logo.svg" alt="Logo mapme" width="25%"/></a>
+
+<a href="https://www.maptiler.com/"><img src="https://maplibre.org/img/maptiler-logo.svg" alt="Logo maptiler" width="25%"/></a>
+
+<a href="https://aws.amazon.com/location"><img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/></a>
 
 Backers and Supporters:
 

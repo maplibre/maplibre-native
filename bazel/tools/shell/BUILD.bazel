@@ -1,0 +1,8 @@
+package(default_visibility = ["//visibility:public"])
+
+toolchain(
+    name = "osx_sh_toolchain_exec",
+    exec_compatible_with = ["@platforms//os:osx"],
+    toolchain = "@local_config_shell//:osx_sh",
+    toolchain_type = "@rules_shell//shell:toolchain_type",
+)

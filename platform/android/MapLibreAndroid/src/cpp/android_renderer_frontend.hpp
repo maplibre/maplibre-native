@@ -14,6 +14,8 @@
 
 #include "map_renderer.hpp"
 
+#include <jni/jni.hpp>
+
 namespace mbgl {
 
 class RenderedQueryOptions;
@@ -27,9 +29,16 @@ class AsyncTask;
 
 namespace android {
 
-class AndroidRendererFrontend : public RendererFrontend {
+class AndroidRendererFrontend : public RendererFrontend, public std::enable_shared_from_this<AndroidRendererFrontend> {
+    struct Private {
+        explicit Private() = default;
+    };
+
 public:
-    AndroidRendererFrontend(MapRenderer&);
+    AndroidRendererFrontend(Private, jni::JNIEnv&, const jni::Object<MapRenderer>&);
+    static std::shared_ptr<AndroidRendererFrontend> create(jni::JNIEnv&, const jni::Object<MapRenderer>&);
+    void init(jni::JNIEnv&, const jni::Object<MapRenderer>&);
+
     ~AndroidRendererFrontend() override;
 
     void reset() override;
@@ -43,8 +52,8 @@ public:
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate&, const RenderedQueryOptions&) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox&, const RenderedQueryOptions&) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&) const;
-    AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
-    AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
+    AnnotationIDs queryPointAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
+    AnnotationIDs queryShapeAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
 
     // Feature extension query
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,

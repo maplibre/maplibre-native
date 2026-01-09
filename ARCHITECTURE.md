@@ -14,7 +14,7 @@ In the repository, core C++ code is contained in the `include` and `src` directo
 
 ## Platform specific code
 
-Code and build scripts belonging to platform SDKs are contained in the `platform` directory, which has subdirectories for each platform. 
+Code and build scripts belonging to platform SDKs are contained in the `platform` directory, which has subdirectories for each platform.
 
 - `platform/darwin` and `platform/default` directories contain code shared by multiple platform SDKs.
 - `platform/ios` and `platform/macos` - the SDKs for Apple's operating systems, forked from https://github.com/mapbox/mapbox-gl-native-ios/commit/a139216 (mapbox hosted both iOS and MacOS SDKs in the same project).

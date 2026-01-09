@@ -8,6 +8,10 @@
 
 @implementation MLNShapeCollection
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 + (instancetype)shapeCollectionWithShapes:(NSArray<MLNShape *> *)shapes {
     return [[self alloc] initWithShapes:shapes];
 }
@@ -23,7 +27,8 @@
 - (instancetype)initWithCoder:(NSCoder *)decoder {
     MLNLogInfo(@"Initializing with coder.");
     if (self = [super initWithCoder:decoder]) {
-        _shapes = [decoder decodeObjectOfClass:[NSArray class] forKey:@"shapes"];
+        NSSet<Class> *shapeClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNShape class]]];
+        _shapes = [decoder decodeObjectOfClasses:shapeClasses forKey:@"shapes"];
     }
     return self;
 }

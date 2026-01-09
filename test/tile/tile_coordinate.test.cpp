@@ -12,7 +12,7 @@ using namespace mbgl;
 
 TEST(TileCoordinate, FromLatLng) {
     size_t changeCount = 0;
-    struct TransformObserver : public mbgl::MapObserver {
+    struct TransformObserver : public mbgl::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode mode) final {
             if (mode == MapObserver::CameraChangeMode::Immediate && cameraWillChangeImmediateCallback) {
                 cameraWillChangeImmediateCallback();

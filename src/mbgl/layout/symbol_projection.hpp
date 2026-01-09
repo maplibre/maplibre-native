@@ -2,7 +2,7 @@
 
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/programs/symbol_program.hpp>
+#include <mbgl/renderer/buckets/symbol_bucket.hpp>
 
 namespace mbgl {
 

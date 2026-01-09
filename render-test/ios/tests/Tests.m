@@ -15,14 +15,14 @@
 }
 
 - (void)testStartRenderTestRunner {
-    IosTestRunner* runner = [[IosTestRunner alloc] init]; 
+    IosTestRunner* runner = [[IosTestRunner alloc] init];
     XCTAssert(runner, @"IOSTestRunner is not initialized correctly");
 
     NSString* styleResult = [runner getStyleResultPath];
     XCTAssert(styleResult, @"IOSTestRunner does not produce a style test result file");
     NSString* metricResult = [runner getMetricResultPath];
     XCTAssert(metricResult, @"IOSTestRunner does not produce a metric test result file");
-    
+
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL fileFound = [fileManager fileExistsAtPath: styleResult];
     XCTAssert(fileFound, @"Test result html '%@' does not exit", styleResult);

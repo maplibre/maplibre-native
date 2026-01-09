@@ -5,7 +5,7 @@
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
@@ -60,7 +60,9 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
 
-    bindUniformBuffers();
+    context.setScissorTest(parameters.scissorRect);
+
+    impl->uniformBuffers.bind();
     bindTextures();
 
     for (const auto& seg : impl->segments) {
@@ -74,10 +76,8 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     // Unbind the VAO so that future buffer commands outside Drawable do not change the current VAO state
     context.bindVertexArray = value::BindVertexArray::Default;
 
-#ifndef NDEBUG
     unbindTextures();
-    unbindUniformBuffers();
-#endif
+    impl->uniformBuffers.unbind();
 }
 
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
@@ -131,34 +131,6 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
 
 void DrawableGL::setVertexAttrId(const size_t id) {
     impl->vertexAttrId = id;
-}
-
-void DrawableGL::bindUniformBuffers() const {
-    if (shader) {
-        const auto& uniformBlocks = shader->getUniformBlocks();
-        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
-            const auto& block = uniformBlocks.get(id);
-            if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
-            if (uniformBuffer) {
-                block->bindBuffer(*uniformBuffer);
-            }
-        }
-    }
-}
-
-void DrawableGL::unbindUniformBuffers() const {
-    if (shader) {
-        const auto& uniformBlocks = shader->getUniformBlocks();
-        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
-            const auto& block = uniformBlocks.get(id);
-            if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
-            if (uniformBuffer) {
-                block->unbindBuffer();
-            }
-        }
-    }
 }
 
 struct IndexBufferGL : public gfx::IndexBufferBase {

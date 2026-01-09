@@ -1,6 +1,5 @@
 #include <mbgl/renderer/buckets/raster_bucket.hpp>
 #include <mbgl/renderer/layers/render_raster_layer.hpp>
-#include <mbgl/programs/raster_program.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 
 namespace mbgl {
@@ -22,26 +21,10 @@ void RasterBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     if (!hasData()) {
         return;
     }
-#if MLN_LEGACY_RENDERER
-    if (!texture) {
-        texture = uploadPass.createTexture(*image);
-    }
-    if (!vertices.empty()) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-    }
-    if (!indices.empty()) {
-        indexBuffer = uploadPass.createIndexBuffer(std::move(indices));
-    }
-#endif // MLN_LEGACY_RENDERER
     uploaded = true;
 }
 
 void RasterBucket::clear() {
-#if MLN_LEGACY_RENDERER
-    vertexBuffer = {};
-    indexBuffer = {};
-#endif // MLN_LEGACY_RENDERER
-
     segments.clear();
     vertices.clear();
     indices.clear();
@@ -53,7 +36,6 @@ void RasterBucket::clear() {
 
 void RasterBucket::setImage(std::shared_ptr<PremultipliedImage> image_) {
     image = std::move(image_);
-    texture = {};
     texture2d.reset();
     uploaded = false;
 }
@@ -94,13 +76,13 @@ void RasterBucket::setMask(TileMask&& mask_) {
             segments.emplace_back(vertices.elements(), indices.elements());
         }
 
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {tlVertex.x, tlVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(tlVertex.y)}));
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {brVertex.x, tlVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(tlVertex.y)}));
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {tlVertex.x, brVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(brVertex.y)}));
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {brVertex.x, brVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(brVertex.y)}));
 
         auto& segment = segments.back();

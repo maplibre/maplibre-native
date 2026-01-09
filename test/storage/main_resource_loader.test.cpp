@@ -69,7 +69,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(VolatileStoragePolicy)) {
 
         // Volatile resources are not stored in cache,
         // so we always get new data from the server ("Response N+1").
-        req = fs.request(resource, [&](Response res2) {
+        req = fs.request(resource, [&, firstData](Response res2) {
             req.reset();
             EXPECT_EQ(nullptr, res2.error);
             ASSERT_TRUE(res2.data);

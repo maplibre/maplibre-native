@@ -30,7 +30,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     pushDebugGroup(name);
 
-    commandEncoder.getCommandBuffer()->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+    commandEncoder.getCommandBuffer()->beginRenderPass(
+        renderPassBeginInfo, vk::SubpassContents::eInline, commandEncoder.getContext().getBackend().getDispatcher());
 
     commandEncoder.context.performCleanup();
 }
@@ -42,7 +43,7 @@ RenderPass::~RenderPass() {
 }
 
 void RenderPass::endEncoding() {
-    commandEncoder.getCommandBuffer()->endRenderPass();
+    commandEncoder.getCommandBuffer()->endRenderPass(commandEncoder.getContext().getBackend().getDispatcher());
 }
 
 void RenderPass::clearStencil(uint32_t value) const {
@@ -56,7 +57,8 @@ void RenderPass::clearStencil(uint32_t value) const {
     const auto rect = vk::ClearRect().setBaseArrayLayer(0).setLayerCount(1).setRect(
         {{0, 0}, {extent.width, extent.height}});
 
-    commandEncoder.getCommandBuffer()->clearAttachments(attach, rect);
+    commandEncoder.getCommandBuffer()->clearAttachments(
+        attach, rect, commandEncoder.getContext().getBackend().getDispatcher());
 }
 
 void RenderPass::pushDebugGroup(const char* name) {

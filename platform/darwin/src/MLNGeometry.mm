@@ -63,7 +63,7 @@ double MLNZoomLevelForAltitude(CLLocationDistance altitude, CGFloat pitch, CLLoc
 MLNRadianDistance MLNDistanceBetweenRadianCoordinates(MLNRadianCoordinate2D from, MLNRadianCoordinate2D to) {
     double a = pow(sin((to.latitude - from.latitude) / 2), 2)
         + pow(sin((to.longitude - from.longitude) / 2), 2) * cos(from.latitude) * cos(to.latitude);
-    
+
     return 2 * atan2(sqrt(a), sqrt(1 - a));
 }
 
@@ -85,10 +85,15 @@ MLNRadianCoordinate2D MLNRadianCoordinateAtDistanceFacingDirection(MLNRadianCoor
 }
 
 CLLocationDirection MLNDirectionBetweenCoordinates(CLLocationCoordinate2D firstCoordinate, CLLocationCoordinate2D secondCoordinate) {
+    if (MLNEqualFloatWithAccuracy(firstCoordinate.latitude, secondCoordinate.latitude, 1e-8) && MLNEqualFloatWithAccuracy(firstCoordinate.longitude, secondCoordinate.longitude, 1e-8)) {
+        return 0;
+    }
+
+
     // Ported from https://github.com/mapbox/turf-swift/blob/857e2e8060678ef4a7a9169d4971b0788fdffc37/Turf/Turf.swift#L23-L31
     MLNRadianCoordinate2D firstRadianCoordinate = MLNRadianCoordinateFromLocationCoordinate(firstCoordinate);
     MLNRadianCoordinate2D secondRadianCoordinate = MLNRadianCoordinateFromLocationCoordinate(secondCoordinate);
-    
+
     CGFloat a = sin(secondRadianCoordinate.longitude - firstRadianCoordinate.longitude) * cos(secondRadianCoordinate.latitude);
     CGFloat b = (cos(firstRadianCoordinate.latitude) * sin(secondRadianCoordinate.latitude)
                  - sin(firstRadianCoordinate.latitude) * cos(secondRadianCoordinate.latitude) * cos(secondRadianCoordinate.longitude - firstRadianCoordinate.longitude));
@@ -120,3 +125,7 @@ MLNMatrix4 MLNMatrix4Make(std::array<double, 16>  array) {
     return mat4;
 }
 
+BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
+{
+    return MAX(left, right) - MIN(left, right) <= accuracy;
+}

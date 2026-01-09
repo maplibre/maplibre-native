@@ -19,11 +19,12 @@ import org.maplibre.android.maps.Transform
 import org.maplibre.android.maps.UiSettings
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
-class LocationCameraControllerTest {
+class LocationCameraControllerTest : BaseTest() {
     @Test
     fun setCameraMode_mapTransitionsAreCancelled() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
@@ -94,7 +95,7 @@ class LocationCameraControllerTest {
         camera.initializeOptions(options)
         camera.cameraMode = CameraMode.NONE
         Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThreshold =
-            0f // one for initialization
+            MOVEMENT_THRESHOLD // one for initialization
         Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThresholdRect =
             null // one for initialization
     }
@@ -698,9 +699,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_enabled() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -717,9 +716,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_disabled() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -736,9 +733,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_optionNotChangedInitial() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -756,9 +751,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_optionNotChangedInternal() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -792,7 +785,7 @@ class LocationCameraControllerTest {
         Mockito.`when`(options.trackingMultiFingerProtectedMoveArea()).thenReturn(multiFingerArea)
         camera.initializeOptions(options)
         camera.onMoveListener.onMoveBegin(moveGestureDetector)
-        Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThreshold = 0f
+        Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThreshold = MOVEMENT_THRESHOLD
         Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThresholdRect = null
     }
 
@@ -876,12 +869,8 @@ class LocationCameraControllerTest {
         Mockito.verify(moveGestureDetector, Mockito.times(2)).interrupt()
 
         // verify that threshold are reset
-        val moveThresholdCaptor = ArgumentCaptor.forClass(
-            Float::class.java
-        )
         Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThreshold =
-            moveThresholdCaptor.capture()
-        org.junit.Assert.assertEquals(java.lang.Float.valueOf(0f), moveThresholdCaptor.value)
+            MOVEMENT_THRESHOLD
     }
 
     @Test
@@ -973,18 +962,9 @@ class LocationCameraControllerTest {
         Mockito.verify(moveGestureDetector, Mockito.times(2)).interrupt()
 
         // verify that threshold are reset
-        val moveThresholdCaptor = ArgumentCaptor.forClass(
-            Float::class.java
-        )
         Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThreshold =
-            moveThresholdCaptor.capture()
-        org.junit.Assert.assertEquals(java.lang.Float.valueOf(0f), moveThresholdCaptor.value)
-        val areaCaptor = ArgumentCaptor.forClass(
-            RectF::class.java
-        )
-        Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThresholdRect =
-            areaCaptor.capture()
-        org.junit.Assert.assertNull(areaCaptor.value)
+            MOVEMENT_THRESHOLD
+        Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThresholdRect = null
     }
 
     @Test
@@ -1911,9 +1891,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1923,7 +1900,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -1955,9 +1932,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1967,7 +1941,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -1985,9 +1959,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1997,7 +1968,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -2034,9 +2005,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -2046,7 +2014,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -2066,9 +2034,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -2078,7 +2043,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
         locationCameraController.setEnabled(true)
@@ -2112,6 +2077,18 @@ class LocationCameraControllerTest {
             internalGesturesManager
         )
     }
+
+    private fun buildInitialGesturesManager(): AndroidGesturesManager {
+        val moveGestureDetector = Mockito.mock<MoveGestureDetector>()
+        // return just "some" value
+        Mockito.`when`(moveGestureDetector.moveThreshold).thenReturn(MOVEMENT_THRESHOLD)
+
+        val manager = Mockito.mock<AndroidGesturesManager>()
+        Mockito.`when`(manager.moveGestureDetector).thenReturn(moveGestureDetector)
+        return manager
+    }
+
+    private val MOVEMENT_THRESHOLD = 10f
 
     private fun <T> getAnimationListener(
         @MapLibreAnimator.Type animatorType: Int,

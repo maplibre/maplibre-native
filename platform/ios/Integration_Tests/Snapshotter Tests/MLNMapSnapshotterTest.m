@@ -79,7 +79,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
 
 - (void)testSnapshotterWithoutStrongReferenceLOCKED {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Completion handler should be called even if there’s no strong reference to the snapshotter."];
-    
+
     CGSize size = self.mapView.bounds.size;
     CLLocationCoordinate2D coordinates = CLLocationCoordinate2DMake(30.0, 30.0);
     __weak MLNMapSnapshotter *weakSnapshotter;
@@ -95,7 +95,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
         MLNTestAssertNotNil(self, weakSnapshotter, @"Locally scoped snapshotter should not go away while in scope.");
     }
     MLNTestAssertNotNil(self, weakSnapshotter, @"Snapshotter should remain until it finishes even there’s no strong reference to it.");
-    
+
     [self waitForExpectations:@[expectation] timeout:10.0];
     MLNTestAssertNil(self, weakSnapshotter, @"Completion handler should not leak snapshotter.");
 }
@@ -123,7 +123,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
             @autoreleasepool {
                 MLNMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
                 weakSnapshotter = snapshotter;
-                
+
                 [snapshotter startWithCompletionHandler:^(MLNMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
                     // We expect this completion block to be called with an error
                     __typeof__(self) strongself = weakself;
@@ -312,21 +312,21 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
         @autoreleasepool {
             MLNMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
             [snapshotter startWithCompletionHandler:^(MLNMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
-                
+
                 // This should be the main queue
                 __typeof__(self) strongself = weakself;
-                
+
                 MLNTestAssertNotNil(strongself, strongself);
-                
+
                 MLNTestAssertNotNil(strongself, snapshot);
                 MLNTestAssertNotNil(strongself, snapshot.image);
                 MLNTestAssertNil(strongself, error, @"Snapshot should not error with: %@", error);
-                
+
                 // Change this to XCTAttachmentLifetimeKeepAlways to be able to look at the snapshots after running
                 XCTAttachment *attachment = [XCTAttachment attachmentWithImage:snapshot.image];
                 attachment.lifetime = XCTAttachmentLifetimeDeleteOnSuccess;
                 [strongself addAttachment:attachment];
-                
+
                 [expectation fulfill];
             }];
         }
@@ -429,7 +429,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
 
     [snapshotter startWithOverlayHandler:^(MLNMapSnapshotOverlay *snapshotOverlay) {
         XCTAssertNotNil(snapshotOverlay);
-        
+
         UIGraphicsEndImageContext();
         [expectation fulfill];
     } completionHandler:^(MLNMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
@@ -438,7 +438,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
         XCTAssertEqualObjects(error.domain, MLNErrorDomain);
         XCTAssertEqual(error.code, MLNErrorCodeSnapshotFailed);
         XCTAssertEqualObjects(error.localizedDescription, @"Failed to generate composited snapshot.");
-                
+
         [expectation fulfill];
     }];
 
@@ -456,12 +456,12 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
 
     MLNMapSnapshotter *snapshotter = snapshotterWithCoordinates(coord, size);
     XCTAssertNotNil(snapshotter);
-    
+
     CGFloat scale = snapshotter.options.scale;
-    
+
     [snapshotter startWithOverlayHandler:^(MLNMapSnapshotOverlay *snapshotOverlay) {
         XCTAssertNotNil(snapshotOverlay);
-        
+
         CGFloat width = CGBitmapContextGetWidth(snapshotOverlay.context);
         CGFloat height = CGBitmapContextGetHeight(snapshotOverlay.context);
 
@@ -470,7 +470,7 @@ MLNMapSnapshotter* snapshotterWithBounds(MLNCoordinateBounds bounds, CGSize size
         XCTAssertEqual(scale, scaleFromContext);
         XCTAssertEqual(width, size.width*scale);
         XCTAssertEqual(height, size.height*scale);
-        
+
         CGContextSetFillColorWithColor(snapshotOverlay.context, [UIColor.greenColor CGColor]);
         CGContextSetAlpha(snapshotOverlay.context, 0.2);
         CGContextAddRect(snapshotOverlay.context, snapshotRect);

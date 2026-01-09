@@ -156,7 +156,7 @@ declare module '@maplibre/maplibre-gl-native' {
     /**
      * Add image to map's style
      */
-    addImage: (imageId: string, image: any) => void;
+    addImage: (imageId: string, image: any, options: any) => void;
 
     /**
      * Remove image from map's style

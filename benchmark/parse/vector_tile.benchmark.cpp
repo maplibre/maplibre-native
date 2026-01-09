@@ -1,6 +1,6 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/tile/vector_tile_data.hpp>
+#include <mbgl/tile/vector_mvt_tile_data.hpp>
 #include <mbgl/util/io.hpp>
 
 using namespace mbgl;
@@ -11,7 +11,7 @@ static void Parse_VectorTile(benchmark::State& state) {
 
     while (state.KeepRunning()) {
         std::size_t length = 0;
-        VectorTileData tile(data);
+        VectorMVTTileData tile(data);
         for (const auto& name : tile.layerNames()) {
             if (auto layer = tile.getLayer(name)) {
                 const std::size_t count = layer->featureCount();

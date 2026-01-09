@@ -1,16 +1,22 @@
-uniform float u_fade_t;
-uniform float u_opacity;
+layout (std140) uniform RasterEvaluatedPropsUBO {
+    highp vec3 u_spin_weights;
+    highp vec2 u_tl_parent;
+    highp float u_scale_parent;
+    highp float u_buffer_scale;
+    highp float u_fade_t;
+    highp float u_opacity;
+    highp float u_brightness_low;
+    highp float u_brightness_high;
+    highp float u_saturation_factor;
+    highp float u_contrast_factor;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;
+
 in vec2 v_pos0;
 in vec2 v_pos1;
-
-uniform float u_brightness_low;
-uniform float u_brightness_high;
-
-uniform float u_saturation_factor;
-uniform float u_contrast_factor;
-uniform vec3 u_spin_weights;
 
 void main() {
 

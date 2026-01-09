@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * The render thread is responsible for managing the communication between the
@@ -24,7 +24,7 @@ abstract class TextureViewRenderThread extends Thread implements TextureView.Sur
   protected final Object lock = new Object();
 
   // Guarded by lock
-  protected final ArrayList<Runnable> eventQueue = new ArrayList<>();
+  protected final LinkedList<Runnable> eventQueue = new LinkedList<>();
   @Nullable
   protected SurfaceTexture surfaceTexture;
   protected boolean hasNativeSurface;
@@ -84,6 +84,14 @@ abstract class TextureViewRenderThread extends Thread implements TextureView.Sur
       this.destroySurface = true;
       this.requestRender = false;
       lock.notifyAll();
+
+      while (this.hasNativeSurface) {
+        try {
+          lock.wait();
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+        }
+      }
     }
     return true;
   }

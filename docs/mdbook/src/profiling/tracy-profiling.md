@@ -92,7 +92,7 @@ As an example, the glfw sample is used.
 With CMake, in MapLibre repository root do
 ~~~bash
 # generate project
-cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DMLN_USE_TRACY=ON
+cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DMLN_USE_TRACY=ON
 # build
 cmake --build build --target mbgl-glfw -j 8
 # run

@@ -12,7 +12,7 @@ const serverScript = process.argv[2];
 const prog = process.argv[3];
 const args = process.argv.slice(4);
 
-const sameStdio = { stdio: [process.stdin, process.stdout, process.stderr] }; 
+const sameStdio = { stdio: [process.stdin, process.stdout, process.stderr] };
 
 const server = spawn('node', [serverScript]);
 

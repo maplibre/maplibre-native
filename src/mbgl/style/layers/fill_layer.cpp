@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* FillLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"fill",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::NotRequired,
-                                        LayerTypeInfo::Layout::Required,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::Geometry};
+    const static LayerTypeInfo typeInfo{.type="fill",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::NotRequired,
+                                        .layout=LayerTypeInfo::Layout::Required,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::Geometry};
     return &typeInfo;
 }
-
 
 FillLayer::FillLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {
@@ -40,7 +39,9 @@ FillLayer::FillLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-FillLayer::~FillLayer() = default;
+FillLayer::~FillLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const FillLayer::Impl& FillLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

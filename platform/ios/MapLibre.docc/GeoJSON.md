@@ -31,10 +31,10 @@ the map, or you can use the object and its properties to power non-map-related
 functionality in your application.
 
 To include multiple shapes in the source, create and pass an ``MLNShapeCollection`` or
- ``MLNShapeCollectionFeature`` object to 
+ ``MLNShapeCollectionFeature`` object to
  ``MLNShapeSource/initWithIdentifier:shape:options:``. Alternatively, use the
- ``MLNShapeSource/initWithIdentifier:features:options:`` or 
- ``MLNShapeSource/initWithIdentifier:shapes:options:`` method to create a shape source 
+ ``MLNShapeSource/initWithIdentifier:features:options:`` or
+ ``MLNShapeSource/initWithIdentifier:shapes:options:`` method to create a shape source
  with an array. ``MLNShapeSource/initWithIdentifier:features:options:`` accepts only ``MLNFeature``
  instances, such as ``MLNPointFeature`` objects, whose attributes you can use when
  applying a predicate to ``MLNVectorStyleLayer`` or configuring a style layer’s

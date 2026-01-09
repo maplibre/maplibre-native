@@ -29,7 +29,7 @@ class NoStyleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMapSimpleBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        // # --8<-- [start:setup]
         binding.mapView.getMapAsync { map ->
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraTarget, cameraZoom))
             map.setStyle(
@@ -39,6 +39,7 @@ class NoStyleActivity : AppCompatActivity() {
                     .withLayer(SymbolLayer(layerId, sourceId).withProperties(iconImage(imageId)))
             )
         }
+        // # --8<-- [end:setup]
     }
 
     override fun onStart() {

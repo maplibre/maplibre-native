@@ -9,11 +9,15 @@
 #pragma warning(disable : 4244)
 #endif
 
+#include <gmock/gmock-matchers.h>
+#include <gmock/gmock-more-matchers.h>
 #include <mapbox/pixelmatch.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+using namespace ::testing;
 
 namespace mbgl {
 namespace test {
@@ -22,10 +26,27 @@ void checkImage(const std::string& base,
                 const PremultipliedImage& actual,
                 double imageThreshold,
                 double pixelThreshold) {
+    EXPECT_LE(getImageDiff(base, actual, pixelThreshold), imageThreshold);
+}
+
+void checkImages(const std::vector<std::string>& possibleExpected,
+                 const PremultipliedImage& actual,
+                 double imageThreshold,
+                 double pixelThreshold) {
+    std::vector<double> diffs(0.0, possibleExpected.size());
+
+    for (const auto& expected : possibleExpected) {
+        diffs.push_back(getImageDiff(expected, actual, pixelThreshold));
+    }
+
+    EXPECT_THAT(diffs, Contains(Le(imageThreshold)));
+}
+
+double getImageDiff(const std::string& base, const PremultipliedImage& actual, double pixelThreshold) {
 #if !TEST_READ_ONLY
     if (getenv("UPDATE")) {
         util::write_file(base + "/expected.png", encodePNG(actual));
-        return;
+        return 0.0;
     }
 #endif
 
@@ -44,7 +65,9 @@ void checkImage(const std::string& base,
     util::write_file(base + "/actual.png", encodePNG(actual));
 #endif
 
-    ASSERT_EQ(expected.size, actual.size);
+    if (expected.size != actual.size) {
+        return 1.0;
+    }
 
     uint64_t pixels = mapbox::pixelmatch(actual.data.get(),
                                          expected.data.get(),
@@ -53,11 +76,11 @@ void checkImage(const std::string& base,
                                          diff.data.get(),
                                          pixelThreshold);
 
-    EXPECT_LE(static_cast<double>(pixels) / (expected.size.width * expected.size.height), imageThreshold);
-
 #if !TEST_READ_ONLY
     util::write_file(base + "/diff.png", encodePNG(diff));
 #endif
+
+    return static_cast<double>(pixels) / (expected.size.width * expected.size.height);
 }
 
 } // namespace test

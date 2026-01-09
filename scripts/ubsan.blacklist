@@ -12,7 +12,7 @@ src:*/mbgl/util/hash.hpp
 # unsigned integer overflow: unsigned interger index in for loop
 src:*/vendor/earcut.hpp/include/mapbox/earcut.hpp
 
-# unsigned integer overflow: hash function: str_hash 
+# unsigned integer overflow: hash function: str_hash
 src:*/vendor/eternal/*/eternal.hpp
 
 # unsigned integer overflow

@@ -7,8 +7,8 @@ import fs from "fs/promises";
 import { join } from "path";
 
 /**
- * @param {string} baseDir 
- * @param {(path: string) => boolean} predicate 
+ * @param {string} baseDir
+ * @param {(path: string) => boolean} predicate
  * @returns paths
  */
 async function getFilePaths(baseDir, predicate) {
@@ -82,9 +82,9 @@ async function loadExamples() {
 
 /**
  * Replaces code block in examples with actual example in source code.
- * 
- * @param {string} documentationPath 
- * @param {Record<string, string>} examples 
+ *
+ * @param {string} documentationPath
+ * @param {Record<string, string>} examples
  */
 async function updateDocumentation(documentationPath, examples) {
   const content = await fs.readFile(documentationPath, 'utf8');

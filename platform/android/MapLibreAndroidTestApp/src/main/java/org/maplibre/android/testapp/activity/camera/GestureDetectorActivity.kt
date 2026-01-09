@@ -110,6 +110,7 @@ class GestureDetectorActivity : AppCompatActivity() {
     }
 
     fun attachListeners() {
+        // # --8<-- [start:addOnMoveListener]
         maplibreMap.addOnMoveListener(
             object : OnMoveListener {
                 override fun onMoveBegin(detector: MoveGestureDetector) {
@@ -132,6 +133,7 @@ class GestureDetectorActivity : AppCompatActivity() {
                 }
             }
         )
+        // # --8<-- [end:addOnMoveListener]
         maplibreMap.addOnRotateListener(
             object : OnRotateListener {
                 override fun onRotateBegin(detector: RotateGestureDetector) {

@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
     s.authors = { 'MapLibre' => '' }
     s.summary = 'Open source vector map solution for iOS with full styling capabilities.'
     s.platform = :ios
-    s.source = { 
+    s.source = {
         :http => "https://github.com/maplibre/maplibre-native/releases/download/ios-v#{version.to_s}/MapLibre.dynamic.xcframework.zip",
         :type => "zip"
     }

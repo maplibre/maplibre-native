@@ -5,7 +5,7 @@ MapLibre Native is a community led fork derived from [mapbox-gl-native](https://
 Beside merging in platform specific SDKs, the following changes were made compared to original mapbox projects:
 
 * The code was upgraded so that it can be built using latest clang compiler / Xcode 12.
-* CI/CD was migrated from CircleCI to GitHub Actions. 
+* CI/CD was migrated from CircleCI to GitHub Actions.
 * Along with GitHub releases, binaries are distributed as follows:
     * The iOS binaries distribution was upgraded from fat packages to Swift package containing XCFramework.
     * The Android binaries are distributed to GitHub maven package repository.

@@ -300,4 +300,3 @@
 
 /* User-friendly error description */
 "REMOVE_SRC_FAIL_IN_USE_FMT" = "La source « %@ » est en cours d’utilisation, impossible de la supprimer.";
-

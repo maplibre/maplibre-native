@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 objc_library(
@@ -12,15 +13,9 @@ objc_library(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//:maplibre_lib",
+        "//vendor:args",
         "@glfw",
     ],
-)
-
-filegroup(
-    name = "mapbox_puck_assets",
-    srcs = glob([
-        "assets/*.png",
-    ]),
 )
 
 cc_binary(
@@ -43,11 +38,9 @@ cc_binary(
                ],
            }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    data = [
-        ":mapbox_puck_assets",
-    ],
+    data = glob(["assets/*"]),
     defines = [
-        r"MAPBOX_PUCK_ASSETS_PATH=\"./platform/glfw/assets/\"",
+        r"MLN_ASSETS_PATH=\"assets/\"",
     ],
     linkopts = [
         "-lglfw",
@@ -64,6 +57,7 @@ cc_binary(
     deps = [
         "//:maplibre_lib",
         "@glfw",
+        "@tinyobjloader",
     ] + select({
         "@platforms//os:macos": ["metal_backend"],
         "@platforms//os:linux": ["//platform/linux:impl"],

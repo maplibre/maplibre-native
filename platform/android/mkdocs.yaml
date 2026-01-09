@@ -1,0 +1,81 @@
+site_name: MapLibre Android Examples
+site_url: https://www.maplibre.org/maplibre-native/android/examples
+repo_url: https://github.com/maplibre/maplibre-native
+site_description: MapLibre Android Examples
+edit_uri: edit/main/platform/android/docs
+copyright: Map data from <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>
+exclude_docs: README.md
+extra_css:
+  - assets/extra.css
+theme:
+  name: 'material'
+  favicon: https://maplibre.org/favicon.ico
+  logo: assets/logo.svg
+  features:
+    - content.code.copy
+    - search.suggest
+    - navigation.instant
+    - navigation.sections
+    - content.action.edit
+    - toc.integrate
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      dedent_subsections: true
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - admonition
+  - pymdownx.details
+  - footnotes
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+extra:
+  social:
+    - icon: fontawesome/brands/mastodon
+      link: https://mastodon.social/@maplibre
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/maplibre
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/maplibre
+    - icon: fontawesome/brands/slack
+      link: https://osmus.slack.com/archives/C01G3D28DAB
+    - icon: fontawesome/brands/github
+      link: https://github.com/maplibre
+plugins:
+  - search
+  - macros:
+      module_name: docs/main
+      on_undefined: strict
+  - social:
+      cards_layout_options:
+        background_color: '#295DAA'
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn

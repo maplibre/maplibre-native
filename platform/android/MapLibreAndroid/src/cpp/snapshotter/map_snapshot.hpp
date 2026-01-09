@@ -27,6 +27,7 @@ public:
                                                     float pixelRatio,
                                                     std::vector<std::string> attributions,
                                                     bool showLogo,
+                                                    bool showAttribution,
                                                     PointForFn pointForFn,
                                                     LatLngForFn latLngForFn);
 

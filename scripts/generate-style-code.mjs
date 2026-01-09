@@ -1,4 +1,4 @@
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import * as path from "node:path";
 import spec from "./style-spec.mjs";
 import colorParser from "csscolorparser";
@@ -7,14 +7,17 @@ import { camelize, camelizeWithLeadingLowercase, readAndCompile, writeIfModified
 
 // Parse command line
 const args = (() => {
-  const parser = new ArgumentParser({
-      description: "MapLibre Shader Tools"
+  const { values } = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      out: {
+        type: 'string',
+        short: 'o'
+      }
+    },
+    allowPositionals: false
   });
-  parser.add_argument("--out", "--o", {
-      help: "Directory root to write generated code.",
-      required: false
-  });
-  return parser.parse_args();
+  return values;
 })();
 
 function parseCSSColor(/** @type {string} **/ str) {
@@ -26,7 +29,7 @@ function parseCSSColor(/** @type {string} **/ str) {
 }
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function isLightProperty(property) {
   return property['light-property'] === true;
@@ -40,7 +43,7 @@ function isOverridable(property) {
 };
 
 /**
- * @param {any} property 
+ * @param {any} property
  * @returns {string}
  */
 function expressionType(property) {
@@ -69,8 +72,8 @@ function expressionType(property) {
 };
 
 /**
- * 
- * @param {any} property 
+ *
+ * @param {any} property
  * @returns {string}
  */
 function evaluatedType(property) {
@@ -124,8 +127,8 @@ function evaluatedType(property) {
 };
 
 /**
- * @param {any} property 
- * @param {any} type 
+ * @param {any} property
+ * @param {any} type
  */
 function attributeUniformType(property, type) {
     /** @type {Record<string, string[]>} **/
@@ -156,7 +159,7 @@ function attributeUniformType(property, type) {
 }
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function layoutPropertyType(property) {
   switch (property['property-type']) {
@@ -169,10 +172,10 @@ function layoutPropertyType(property) {
 };
 
 /**
- * 
- * @param {any} property 
- * @param {any} type 
- * @returns 
+ *
+ * @param {any} property
+ * @param {any} type
+ * @returns
  */
 function paintPropertyType(property, type) {
   switch (property['property-type']) {
@@ -190,7 +193,7 @@ function paintPropertyType(property, type) {
 };
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function propertyValueType(property) {
   switch (property['property-type']) {
@@ -202,8 +205,8 @@ function propertyValueType(property) {
 };
 
 /**
- * @param {any} property 
- * @param {number} num 
+ * @param {any} property
+ * @param {number} num
  * @returns {string}
  */
 function formatNumber(property, num = 0) {
@@ -215,7 +218,7 @@ function formatNumber(property, num = 0) {
 }
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function defaultValue(property) {
   // https://github.com/mapbox/mapbox-gl-native/issues/5258

@@ -1,0 +1,58 @@
+name: MapLibre iOS Bug Report
+description: Report a bug you encountered with MapLibre iOS.
+labels: ["ios"]
+type: "bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: version
+    attributes:
+      label: MapLibre iOS Version
+      placeholder: e.g. 6.8.1
+    validations:
+      required: true
+  - type: input
+    id: ios-version
+    attributes:
+      label: iOS Version
+      placeholder: e.g. 6.8.1
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: "Enter the device that you encountered the issue on or enter 'Simulator' if you only see this issue in a simulator."
+      placeholder: iPhone 15 Pro
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Explain how the issue can be reproduced.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Additional context such as screenshots or videos that are helpful.
+    validations:
+      required: false

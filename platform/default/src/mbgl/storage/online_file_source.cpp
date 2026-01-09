@@ -124,8 +124,8 @@ public:
     }
 
     void activateOrQueueRequest(OnlineFileRequest* req) {
-        assert(allRequests.find(req) != allRequests.end());
-        assert(activeRequests.find(req) == activeRequests.end());
+        assert(allRequests.contains(req));
+        assert(!activeRequests.contains(req));
         assert(!req->request);
 
         if (activeRequests.size() >= getMaximumConcurrentRequests()) {
@@ -167,7 +167,7 @@ public:
 
     bool isPending(OnlineFileRequest* req) { return pendingRequests.contains(req); }
 
-    bool isActive(OnlineFileRequest* req) { return activeRequests.find(req) != activeRequests.end(); }
+    bool isActive(OnlineFileRequest* req) { return activeRequests.contains(req); }
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 
@@ -339,26 +339,26 @@ public:
     void setResourceOptions(ResourceOptions options) {
         thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, options.clone());
         {
-            std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+            std::scoped_lock lock(resourceOptionsMutex);
             cachedResourceOptions = options;
         }
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return cachedResourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
         thread->actor().invoke(&OnlineFileSourceThread::setClientOptions, options.clone());
         {
-            std::lock_guard<std::mutex> lock(clientOptionsMutex);
+            std::scoped_lock lock(clientOptionsMutex);
             cachedClientOptions = options;
         }
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return cachedClientOptions.clone();
     }
 
@@ -370,7 +370,7 @@ public:
             const auto maxConcurrentRequests = static_cast<uint32_t>(*maximumConcurrentRequests);
             thread->actor().invoke(&OnlineFileSourceThread::setMaximumConcurrentRequests, maxConcurrentRequests);
             {
-                std::lock_guard<std::mutex> lock(maximumConcurrentRequestsMutex);
+                std::scoped_lock lock(maximumConcurrentRequestsMutex);
                 cachedMaximumConcurrentRequests = maxConcurrentRequests;
             }
         } else {
@@ -379,7 +379,7 @@ public:
     }
 
     uint32_t getMaximumConcurrentRequests() const {
-        std::lock_guard<std::mutex> lock(maximumConcurrentRequestsMutex);
+        std::scoped_lock lock(maximumConcurrentRequestsMutex);
         return cachedMaximumConcurrentRequests;
     }
 
@@ -387,7 +387,7 @@ public:
         if (auto* apiKey = value.getString()) {
             thread->actor().invoke(&OnlineFileSourceThread::setApiKey, *apiKey);
             {
-                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                std::scoped_lock lock(resourceOptionsMutex);
                 cachedResourceOptions.withApiKey(*apiKey);
             }
         } else {
@@ -396,7 +396,7 @@ public:
     }
 
     std::string getApiKey() const {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return cachedResourceOptions.apiKey();
     }
 
@@ -404,7 +404,7 @@ public:
         if (auto* baseURL = value.getString()) {
             thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
             {
-                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                std::scoped_lock lock(resourceOptionsMutex);
                 cachedResourceOptions.withTileServerOptions(
                     cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
             }
@@ -414,7 +414,7 @@ public:
     }
 
     std::string getAPIBaseURL() const {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return cachedResourceOptions.tileServerOptions().baseURL();
     }
 

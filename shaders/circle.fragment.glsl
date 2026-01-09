@@ -1,5 +1,18 @@
 in vec3 v_data;
 
+layout (std140) uniform CircleEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_stroke_color;
+    mediump float u_radius;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_stroke_width;
+    lowp float u_stroke_opacity;
+    bool u_scale_with_map;
+    bool u_pitch_with_map;
+    lowp float props_pad1;
+};
+
 #pragma mapbox: define highp vec4 color
 #pragma mapbox: define mediump float radius
 #pragma mapbox: define lowp float blur

@@ -1,0 +1,66 @@
+android:
+- changed-files:
+  - any-glob-to-any-file: 'platform/android/**/*'
+iOS:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'platform/ios/**/*'
+    - 'platform/darwin/**/*'
+cpp-core:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'src/**/*'
+    - 'include/**/*'
+documentation:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'docs/**/*'
+    - 'platform/ios/ios/MapLibre.docc/**/*'
+    - 'platform/android/docs/**/*'
+node:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'platform/node/**/*'
+Qt:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'platform/qt/**/*'
+windows:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'platform/windows/**/*'
+github_actions:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/**/*'
+build:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/CMakeLists.txt'
+    - '**/*.cmake'
+    - '**/BUILD.bazel'
+    - '**/*.bzl'
+    - CMakePresets.json
+OpenGL:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*opengl*'
+    - '**/*opengl*/**'
+    - '**/gl/**'
+Vulkan:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*vulkan*'
+    - '**/*vulkan*/**'
+metal:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*metal*'
+    - '**/*metal*/**'
+WebGPU:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*webgpu*'
+    - '**/*webgpu*/**'
+    - '**/*wgpu*'
+    - '**/*dawn*'

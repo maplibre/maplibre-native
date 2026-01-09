@@ -79,7 +79,7 @@ stays the same if we move the angle across the axis of earth.
 Figure 2 shows rendering map tile through the rendering spaces and
 transformations below:
 
-![](media/rendering-spaces-and-transformations-for-map-tiles.png)   
+![](media/rendering-spaces-and-transformations-for-map-tiles.png)
 *Figure 2: Rendering Spaces and Transformations for Map Tiles*
 
 ## World Coordinates
@@ -240,13 +240,13 @@ move the 3D plane with tiles, rather moves the camera atop the defined
 position named center. In the rendering world, this is not the center of
 the 3D plane we render tiles on, rather the position of the camera.*
 
-![](media/perspective-frustum.png)    
+![](media/perspective-frustum.png)
 *Figure 3: Perspective Frustum (Sourced from learnopengl.com)*
 
-The benefit of tile coordinates continues here. The camera representation 
-we use here, to be specific the view matrix, can directly take the tile 
-coordinates to move the camera to a particular tile in a zoom level. 
-Once a tile is built, the GPU can quickly draw the same tile with different 
+The benefit of tile coordinates continues here. The camera representation
+we use here, to be specific the view matrix, can directly take the tile
+coordinates to move the camera to a particular tile in a zoom level.
+Once a tile is built, the GPU can quickly draw the same tile with different
 bearing, pan, pitch, and zoom parameters[^15].
 
 If we keep following Figure 2, we see we need to also add a projection

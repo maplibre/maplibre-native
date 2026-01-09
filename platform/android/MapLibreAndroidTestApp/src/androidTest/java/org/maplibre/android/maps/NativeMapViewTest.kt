@@ -46,8 +46,10 @@ class NativeMapViewTest : AppCenter() {
     fun before() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val apiKey = MapLibre.getApiKey()
+        val options = NativeMapOptions(2.0f, false)
+
         MapLibre.getInstance(context, apiKey, WellKnownTileServer.MapTiler)
-        nativeMapView = NativeMapView(context, 2.0f, false, null, null, DummyRenderer(context))
+        nativeMapView = NativeMapView(context, options, null, null, DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }
 
@@ -446,7 +448,7 @@ class NativeMapViewTest : AppCenter() {
         override fun queueEvent(runnable: Runnable?) {
             // no-op
         }
-        
+
         override fun waitForEmpty() {
             // no-op
         }

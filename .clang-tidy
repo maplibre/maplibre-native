@@ -1,23 +1,23 @@
 ---
 Checks: [
-    android-*,	
+    android-*,
     boost-*,
     bugprone-*,
-    clang-analyzer-core*,	
-    clang-analyzer-cplusplus*,	
-    clang-analyzer-deadcode*,	
-    clang-analyzer-optin.cplusplus*,	
-    clang-analyzer-optin.performance.Padding,	
-    clang-analyzer-security*,	
+    clang-analyzer-core*,
+    clang-analyzer-cplusplus*,
+    clang-analyzer-deadcode*,
+    clang-analyzer-optin.cplusplus*,
+    clang-analyzer-optin.performance.Padding,
+    clang-analyzer-security*,
     clang-diagnostic-*,
     cppcoreguidelines-avoid-goto,
     cppcoreguidelines-no-malloc,
     google-*,
     llvm-*,
-    misc-*,	
-    modernize-*,	
-    performance-*,	
-    portability-*,	
+    misc-*,
+    modernize-*,
+    performance-*,
+    portability-*,
     readability-*,
     -bugprone-branch-clone,
     -bugprone-easily-swappable-parameters,
@@ -104,7 +104,7 @@ Checks: [
     -readability-redundant-member-init,
     -readability-redundant-string-init,
     -readability-simplify-boolean-expr,
-    -readability-static-accessed-through-instance
+    -readability-static-accessed-through-instance,
     -readability-static-definition-in-anonymous-namespace,
     -readability-suspicious-call-argument,
     -readability-uppercase-literal-suffix,
@@ -113,10 +113,25 @@ Checks: [
     -performance-enum-size,
     -misc-include-cleaner,
     -readability-redundant-inline-specifier,
-    -readability-avoid-nested-conditional-operator
+    -readability-avoid-nested-conditional-operator,
+    -readability-math-missing-parentheses,
+    -readability-enum-initial-value,
+    -boost-use-ranges,
+    -modernize-use-constraints,
+    -portability-template-virtual-member-function,
+    -portability-avoid-pragma-once,
+    -llvm-prefer-static-over-anonymous-namespace,
+    -readability-use-concise-preprocessor-directives,
+    -modernize-type-traits,
+    -misc-use-internal-linkage,
+    -modernize-use-ranges,
+    -modernize-use-integer-sign-comparison,
+    -clang-analyzer-core.CallAndMessage,
+    -clang-diagnostic-deprecated-declarations,
+    -clang-analyzer-security.ArrayBound
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-CheckOptions:	
-  - key:   performance-unnecessary-value-param.AllowedTypes	
+CheckOptions:
+  - key:   performance-unnecessary-value-param.AllowedTypes
     value: 'exception_ptr'

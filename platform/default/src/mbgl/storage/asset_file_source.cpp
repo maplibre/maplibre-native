@@ -13,7 +13,7 @@
 
 namespace {
 bool acceptsURL(const std::string& url) {
-    return 0 == url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::ASSET_PROTOCOL);
 }
 } // namespace
 
@@ -26,8 +26,8 @@ public:
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
-    void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
-        if (!acceptsURL(url)) {
+    void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
+        if (!acceptsURL(resource.url)) {
             Response response;
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid asset URL");
             req.invoke(&FileSourceRequest::setResponse, response);
@@ -36,27 +36,28 @@ public:
 
         // Cut off the protocol and prefix with path.
         const auto path = root + "/" +
-                          mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
-        requestLocalFile(path, req);
+                          mbgl::util::percentDecode(
+                              resource.url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
+        requestLocalFile(path, req, resource.dataRange);
     }
 
     void setResourceOptions(ResourceOptions options) {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         resourceOptions = options;
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return resourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         clientOptions = options;
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return clientOptions.clone();
     }
 
@@ -80,7 +81,7 @@ AssetFileSource::~AssetFileSource() = default;
 std::unique_ptr<AsyncRequest> AssetFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
-    impl->actor().invoke(&Impl::request, resource.url, req->actor());
+    impl->actor().invoke(&Impl::request, resource, req->actor());
 
     return req;
 }

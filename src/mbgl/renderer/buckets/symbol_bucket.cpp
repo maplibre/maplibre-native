@@ -4,9 +4,9 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/text/cross_tile_symbol_index.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/placement.hpp>
 
+#include <algorithm>
 #include <utility>
 
 namespace mbgl {
@@ -15,6 +15,27 @@ using namespace style;
 namespace {
 std::atomic<uint32_t> maxBucketInstanceId;
 } // namespace
+
+std::unique_ptr<SymbolSizeBinder> SymbolSizeBinder::create(const float tileZoom,
+                                                           const style::PropertyValue<float>& sizeProperty,
+                                                           const float defaultValue) {
+    return sizeProperty.match(
+        [&](const Undefined& value) -> std::unique_ptr<SymbolSizeBinder> {
+            return std::make_unique<ConstantSymbolSizeBinder>(tileZoom, value, defaultValue);
+        },
+        [&](float value) -> std::unique_ptr<SymbolSizeBinder> {
+            return std::make_unique<ConstantSymbolSizeBinder>(tileZoom, value, defaultValue);
+        },
+        [&](const style::PropertyExpression<float>& expression) -> std::unique_ptr<SymbolSizeBinder> {
+            if (expression.isFeatureConstant()) {
+                return std::make_unique<ConstantSymbolSizeBinder>(tileZoom, expression, defaultValue);
+            } else if (expression.isZoomConstant()) {
+                return std::make_unique<SourceFunctionSymbolSizeBinder>(tileZoom, expression, defaultValue);
+            } else {
+                return std::make_unique<CompositeFunctionSymbolSizeBinder>(tileZoom, expression, defaultValue);
+            }
+        });
+}
 
 SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout_,
                            const std::map<std::string, Immutable<style::LayerProperties>>& paintProperties_,
@@ -52,132 +73,17 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
       placementModes(std::move(placementModes_)) {
     for (const auto& pair : paintProperties_) {
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(pair.second);
-        paintProperties.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(PaintProperties{{RenderSymbolLayer::iconPaintProperties(evaluated), zoom},
-                                                  {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
+        paintProperties.emplace(std::piecewise_construct,
+                                std::forward_as_tuple(pair.first),
+                                std::forward_as_tuple(PaintProperties{
+                                    .iconBinders = {RenderSymbolLayer::iconPaintProperties(evaluated), zoom},
+                                    .textBinders = {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
     }
 }
 
 SymbolBucket::~SymbolBucket() = default;
 
 void SymbolBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (hasTextData()) {
-        if (!staticUploaded) {
-            text.indexBuffer = uploadPass.createIndexBuffer(
-                std::move(text.triangles),
-                sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
-            text.vertexBuffer = uploadPass.createVertexBuffer(text.vertices());
-            for (auto& pair : paintProperties) {
-                pair.second.textBinders.upload(uploadPass);
-            }
-        } else if (!sortUploaded) {
-            uploadPass.updateIndexBuffer(*text.indexBuffer, std::move(text.triangles));
-        }
-
-        if (!dynamicUploaded) {
-            if (!text.dynamicVertexBuffer) {
-                text.dynamicVertexBuffer = uploadPass.createVertexBuffer(text.dynamicVertices(),
-                                                                         gfx::BufferUsageType::StreamDraw);
-            } else {
-                uploadPass.updateVertexBuffer(*text.dynamicVertexBuffer, text.dynamicVertices());
-            }
-        }
-        if (!placementChangesUploaded) {
-            if (!text.opacityVertexBuffer) {
-                text.opacityVertexBuffer = uploadPass.createVertexBuffer(text.opacityVertices(),
-                                                                         gfx::BufferUsageType::StreamDraw);
-            } else {
-                uploadPass.updateVertexBuffer(*text.opacityVertexBuffer, text.opacityVertices());
-            }
-        }
-    }
-
-    auto updateIconBuffer = [&](Buffer& iconBuffer) {
-        if (!staticUploaded) {
-            iconBuffer.indexBuffer = uploadPass.createIndexBuffer(
-                std::move(iconBuffer.triangles),
-                sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
-            iconBuffer.vertexBuffer = uploadPass.createVertexBuffer(iconBuffer.vertices());
-            for (auto& pair : paintProperties) {
-                pair.second.iconBinders.upload(uploadPass);
-            }
-        } else if (!sortUploaded) {
-            uploadPass.updateIndexBuffer(*iconBuffer.indexBuffer, std::move(iconBuffer.triangles));
-        }
-        if (!dynamicUploaded) {
-            if (!iconBuffer.dynamicVertexBuffer) {
-                iconBuffer.dynamicVertexBuffer = uploadPass.createVertexBuffer(iconBuffer.dynamicVertices(),
-                                                                               gfx::BufferUsageType::StreamDraw);
-            } else {
-                uploadPass.updateVertexBuffer(*iconBuffer.dynamicVertexBuffer, iconBuffer.dynamicVertices());
-            }
-        }
-        if (!placementChangesUploaded) {
-            if (!iconBuffer.opacityVertexBuffer) {
-                iconBuffer.opacityVertexBuffer = uploadPass.createVertexBuffer(iconBuffer.opacityVertices(),
-                                                                               gfx::BufferUsageType::StreamDraw);
-            } else {
-                uploadPass.updateVertexBuffer(*iconBuffer.opacityVertexBuffer, iconBuffer.opacityVertices());
-            }
-        }
-    };
-    if (hasIconData()) {
-        updateIconBuffer(icon);
-    }
-    if (hasSdfIconData()) {
-        updateIconBuffer(sdfIcon);
-    }
-
-    const auto updateCollisionBox = [&](CollisionBoxBuffer& collisionBox) {
-        if (!staticUploaded) {
-            collisionBox.indexBuffer = uploadPass.createIndexBuffer(std::move(collisionBox.lines));
-            collisionBox.vertexBuffer = uploadPass.createVertexBuffer(std::move(collisionBox.vertices()));
-        }
-        if (!placementChangesUploaded) {
-            if (!collisionBox.dynamicVertexBuffer) {
-                collisionBox.dynamicVertexBuffer = uploadPass.createVertexBuffer(
-                    std::move(collisionBox.dynamicVertices()), gfx::BufferUsageType::StreamDraw);
-            } else {
-                uploadPass.updateVertexBuffer(*collisionBox.dynamicVertexBuffer,
-                                              std::move(collisionBox.dynamicVertices()));
-            }
-        }
-    };
-    if (hasIconCollisionBoxData()) {
-        updateCollisionBox(*iconCollisionBox);
-    }
-
-    if (hasTextCollisionBoxData()) {
-        updateCollisionBox(*textCollisionBox);
-    }
-
-    const auto updateCollisionCircle = [&](CollisionCircleBuffer& collisionCircle) {
-        if (!staticUploaded) {
-            collisionCircle.indexBuffer = uploadPass.createIndexBuffer(std::move(collisionCircle.triangles));
-            collisionCircle.vertexBuffer = uploadPass.createVertexBuffer(std::move(collisionCircle.vertices()));
-        }
-        if (!placementChangesUploaded) {
-            if (!collisionCircle.dynamicVertexBuffer) {
-                collisionCircle.dynamicVertexBuffer = uploadPass.createVertexBuffer(
-                    std::move(collisionCircle.dynamicVertices()), gfx::BufferUsageType::StreamDraw);
-            } else {
-                uploadPass.updateVertexBuffer(*collisionCircle.dynamicVertexBuffer,
-                                              std::move(collisionCircle.dynamicVertices()));
-            }
-        }
-    };
-    if (hasIconCollisionCircleData()) {
-        updateCollisionCircle(*iconCollisionCircle);
-    }
-
-    if (hasTextCollisionCircleData()) {
-        updateCollisionCircle(*textCollisionCircle);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
     staticUploaded = true;
     placementChangesUploaded = true;
@@ -305,7 +211,7 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
     const float sin = std::sin(angle);
     const float cos = std::cos(angle);
 
-    std::sort(result.begin(), result.end(), [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
+    std::ranges::sort(result, [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
         const auto aRotated = std::lround(sin * a.getAnchor().point.x + cos * a.getAnchor().point.y);
         const auto bRotated = std::lround(sin * b.getAnchor().point.x + cos * b.getAnchor().point.y);
         if (aRotated != bRotated) {

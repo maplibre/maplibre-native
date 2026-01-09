@@ -63,7 +63,7 @@ void bindUniform<std::array<double, 16>>(UniformLocation location, const std::ar
 
 template <>
 void bindUniform<bool>(UniformLocation location, const bool& t) {
-    return bindUniform(location, int32_t(t));
+    bindUniform(location, int32_t(t));
 }
 
 template <>

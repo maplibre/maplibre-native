@@ -61,7 +61,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
                     format:@"This instance %@ was already added to %@. Adding the same source instance " \
          "to the style more than once is invalid.", self, stylable.style];
     }
-    
+
     _stylable = stylable;
     _stylable.style.rawStyle->addSource(std::move(_pendingSource));
 }
@@ -69,11 +69,11 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
 - (BOOL)removeFromStylable:(id <MLNStylable>)mapView error:(NSError * __nullable * __nullable)outError {
     MLNAssertStyleSourceIsValid();
     BOOL removed = NO;
-    
+
     if (self.rawSource == mapView.style.rawStyle->getSource(self.identifier.UTF8String)) {
-        
+
         auto removedSource = mapView.style.rawStyle->removeSource(self.identifier.UTF8String);
-        
+
         if (removedSource) {
             removed = YES;
             _pendingSource = std::move(removedSource);
@@ -92,12 +92,12 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
         NSString *localizedDescription = [NSString stringWithFormat:
                                           NSLocalizedStringWithDefaultValue(@"REMOVE_SRC_FAIL_MISMATCH_FMT", @"Foundation", nil, @"The source can’t be removed because its identifier, “%@”, belongs to a different source in this style.", @"User-friendly error description"),
                                           self.identifier];
-        
+
         *outError = [NSError errorWithDomain:MLNErrorDomain
                                         code:MLNErrorCodeSourceIdentifierMismatch
                                     userInfo:@{ NSLocalizedDescriptionKey : localizedDescription }];
     }
-    
+
     return removed;
 }
 

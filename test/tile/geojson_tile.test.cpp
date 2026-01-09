@@ -14,6 +14,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 
@@ -29,21 +30,24 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
 
     GeoJSONTileTest()
-        : tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         {Scheduler::GetBackground(), uniqueID}},
+        : tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = {Scheduler::GetBackground(), uniqueID},
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 
@@ -54,7 +58,7 @@ public:
     FakeGeoJSONData(TileFeatures features_)
         : features(std::move(features_)) {}
 
-    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn) final {
+    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn, bool) final {
         assert(fn);
         fn(features);
     }
@@ -70,6 +74,25 @@ private:
 };
 
 } // namespace
+
+TEST(GeoJSONTile, SynchronousUpdate) {
+    GeoJSONTileTest test;
+
+    CircleLayer layer("circle", "source");
+
+    mapbox::feature::feature_collection<int16_t> features;
+    features.push_back(mapbox::feature::feature<int16_t>{mapbox::geometry::point<int16_t>(0, 0)});
+    auto data = std::make_shared<FakeGeoJSONData>(std::move(features));
+    TileParameters tileParameters = test.tileParameters;
+    tileParameters.isUpdateSynchronous = true;
+    GeoJSONTile tile(OverscaledTileID(0, 0, 0), "source", tileParameters, data);
+    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+    tile.setLayers(layers);
+    ASSERT_TRUE(tile.isComplete());
+    ASSERT_TRUE(tile.isRenderable());
+}
 
 TEST(GeoJSONTile, Issue7648) {
     GeoJSONTileTest test;
@@ -97,7 +120,7 @@ TEST(GeoJSONTile, Issue7648) {
         test.loop.runOnce();
     }
 
-    tile.updateData(data);
+    tile.updateData(data, false, test.tileParameters.isUpdateSynchronous);
     while (!tile.isComplete()) {
         test.loop.runOnce();
     }

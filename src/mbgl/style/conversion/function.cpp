@@ -12,6 +12,7 @@
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/util/string.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <utility>
 
@@ -399,9 +400,7 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
 void omitFirstStop(std::map<double, std::unique_ptr<Expression>>& stops) {
     double min = std::numeric_limits<double>::max();
     for (auto& s : stops) {
-        if (s.first < min) {
-            min = s.first;
-        }
+        min = std::min(s.first, min);
     }
     stops.emplace(-std::numeric_limits<double>::infinity(), std::move(stops[min]));
     stops.erase(min);

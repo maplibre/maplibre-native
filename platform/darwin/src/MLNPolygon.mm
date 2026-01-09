@@ -13,6 +13,10 @@
 
 @dynamic overlayBounds;
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 + (instancetype)polygonWithCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count {
     return [self polygonWithCoordinates:coords count:count interiorPolygons:nil];
 }
@@ -35,7 +39,8 @@
     MLNLogInfo(@"Initializng with coder.");
     self = [super initWithCoder:decoder];
     if (self) {
-        _interiorPolygons = [decoder decodeObjectOfClass:[NSArray class] forKey:@"interiorPolygons"];
+        NSSet<Class> *polygonClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNPolygon class]]];
+        _interiorPolygons = [decoder decodeObjectOfClasses:polygonClasses forKey:@"interiorPolygons"];
     }
     return self;
 }
@@ -61,7 +66,7 @@
 - (CLLocationCoordinate2D)coordinate {
     // pole of inaccessibility
     auto poi = mapbox::polylabel([self polygon]);
-    
+
     return MLNLocationCoordinate2DFromPoint(poi);
 }
 
@@ -141,6 +146,10 @@
 
 @synthesize overlayBounds = _overlayBounds;
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 + (instancetype)multiPolygonWithPolygons:(NSArray<MLNPolygon *> *)polygons {
     return [[self alloc] initWithPolygons:polygons];
 }
@@ -163,7 +172,15 @@
 - (instancetype)initWithCoder:(NSCoder *)decoder {
     MLNLogInfo(@"Initializing with coder.");
     if (self = [super initWithCoder:decoder]) {
-        _polygons = [decoder decodeObjectOfClass:[NSArray class] forKey:@"polygons"];
+        NSSet<Class> *polygonsClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNPolygon class]]];
+        _polygons = [decoder decodeObjectOfClasses:polygonsClasses forKey:@"polygons"];
+
+        mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+
+        for (MLNPolygon *polygon in _polygons) {
+            bounds.extend(MLNLatLngBoundsFromCoordinateBounds(polygon.overlayBounds));
+        }
+        _overlayBounds = MLNCoordinateBoundsFromLatLngBounds(bounds);
     }
     return self;
 }
@@ -192,7 +209,7 @@
 
 - (CLLocationCoordinate2D)coordinate {
     MLNPolygon *firstPolygon = self.polygons.firstObject;
-    
+
     return firstPolygon.coordinate;
 }
 

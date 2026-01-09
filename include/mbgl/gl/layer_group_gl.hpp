@@ -24,9 +24,6 @@ public:
 
     gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; };
 
-    void bindUniformBuffers() const;
-    void unbindUniformBuffers() const;
-
 protected:
     UniformBufferArrayGL uniformBuffers;
 };
@@ -45,9 +42,6 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override { return uniformBuffers; };
 
     gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; };
-
-    void bindUniformBuffers() const;
-    void unbindUniformBuffers() const;
 
 protected:
     UniformBufferArrayGL uniformBuffers;

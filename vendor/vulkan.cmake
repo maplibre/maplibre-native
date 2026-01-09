@@ -44,6 +44,9 @@ endif()
 
 get_target_property(glslang_inc glslang INTERFACE_INCLUDE_DIRECTORIES)
 set_target_properties(glslang PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${glslang_inc})
+if (NOT (WIN32 OR MINGW))
+    target_compile_options(SPIRV PRIVATE -include cstdint)
+endif()
 
 set_target_properties(
     glslang
@@ -78,6 +81,6 @@ export(TARGETS
     MachineIndependent
     OSDependent
     GenericCodeGen
-    
+
     APPEND FILE MapboxCoreTargets.cmake
 )

@@ -7,9 +7,8 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/shaders/gl/shader_group_gl.hpp>
-#endif
+#include <mbgl/shaders/gl/legacy/programs.hpp>
 
 #include <cassert>
 
@@ -54,10 +53,10 @@ void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
-void RendererBackend::assumeScissorTest(bool enabled) {
+void RendererBackend::assumeScissorTest(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().scissorTest.setCurrentValue(enabled);
+    getContext<gl::Context>().scissorTest.setCurrentValue({x, y, width, height});
     assert(gl::value::ScissorTest::Get() == getContext<gl::Context>().scissorTest.getCurrentValue());
 }
 
@@ -83,16 +82,15 @@ void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
-void RendererBackend::setScissorTest(bool enabled) {
+void RendererBackend::setScissorTest(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     MLN_TRACE_FUNC();
 
-    getContext<gl::Context>().scissorTest = enabled;
+    getContext<gl::Context>().scissorTest = {x, y, width, height};
     assert(gl::value::ScissorTest::Get() == getContext<gl::Context>().scissorTest.getCurrentValue());
 }
 
 RendererBackend::~RendererBackend() = default;
 
-#if MLN_DRAWABLE_RENDERER
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
 /// @param registry A shader registry instance
@@ -125,6 +123,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
@@ -142,12 +141,17 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LocationIndicatorShader,
+                  shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+
+    // Initialize legacy shader programs
+    Programs programs(programParameters);
+    programs.registerWith(shaders);
 }
-#endif
 
 } // namespace gl
 } // namespace mbgl
