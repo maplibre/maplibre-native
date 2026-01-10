@@ -202,7 +202,13 @@ void Camera::setPosition(const vec3& position) noexcept {
 }
 
 std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) noexcept {
+    const double epsilon = 1e-15;
+
     const vec3 right = vec3Cross(up, forward);
+
+    if (vec3Length(right) < epsilon) {
+        return std::nullopt;
+    }
 
     const double f01 = std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]);
     const double pitch = std::atan2(f01, -forward[2]);
@@ -256,7 +262,11 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     // Flip z-component of the up vector if it's pointing downwards
     up[2] = std::abs(up[2]);
 
-    orientation = util::Camera::orientationFromFrame(forward, up)->m;
+    auto q = util::Camera::orientationFromFrame(forward, up);
+
+    if (q) {
+        orientation = q->m;
+    }
 }
 
 void FreeCameraOptions::setRollPitchBearing(double roll, double pitch, double bearing) noexcept {

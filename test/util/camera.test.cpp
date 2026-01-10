@@ -180,8 +180,8 @@ TEST(FreeCameraOptions, LookAtPoint) {
     ASSERT_TRUE(options.orientation);
     std::tie(right, up, forward) = rotatedFrame(options.orientation.value());
 
-    ASSERT_THAT(right, Vec3NearEquals1E7(vec3{{0.0, 1.0, 0.0}}));
-    ASSERT_THAT(up, Vec3NearEquals1E7(vec3{{0.0, 0.0, 1.0}}));
+    ASSERT_THAT(right, Vec3NearEquals1E7(vec3{{0.0, 0.9714568644195829, 0.2372162738348117}}));
+    ASSERT_THAT(up, Vec3NearEquals1E7(vec3{{0.0, -0.23721627383481167, 0.97145686441958301}}));
     ASSERT_THAT(forward, Vec3NearEquals1E7(vec3{{1.0, 0.0, 0.0}}));
 
     // Up vector pointing downwards
