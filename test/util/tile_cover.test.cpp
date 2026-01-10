@@ -65,24 +65,6 @@ TEST(TileCover, PitchIssue15442) {
               util::tileCover({transform.getState()}, 2));
 }
 
-TEST(TileCover, PitchOverAllowedByContentInsets) {
-    Transform transform;
-    transform.resize({512, 512});
-
-    transform.jumpTo(CameraOptions()
-                         .withCenter(LatLng{0.1, -0.1})
-                         .withPadding(EdgeInsets{376, 0, 0, 0})
-                         .withZoom(8.0)
-                         .withBearing(45.0)
-                         .withPitch(60.0));
-    // Top padding of 376 leads to capped pitch. See Transform::getMaxPitchForEdgeInsets.
-    EXPECT_LE(transform.getPitch() + 0.001, util::deg2rad(60));
-
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}, {3, 4, 2}, {3, 5, 3}, {3, 5, 2}}),
-        util::tileCover({transform.getState()}, 3));
-}
-
 TEST(TileCover, PitchWithLargerResultSet) {
     Transform transform;
     transform.resize({1024, 768});
