@@ -54,7 +54,7 @@ void main() {
     // See nickidlugash's awesome breakdown for more info
     // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
     float exaggerationFactor = u_zoom < 2.0 ? 0.4 : u_zoom < 4.5 ? 0.35 : 0.3;
-    float exaggeration = u_zoom < u_maxzoom ? (u_zoom - u_maxzoom) * exaggerationFactor : 0.0;
+    float exaggeration = u_zoom < 15.0 ? (u_zoom - 15.0) * exaggerationFactor : 0.0;
 
     vec2 deriv = vec2(
         (c + f + f + i) - (a + d + d + g),

@@ -99,8 +99,8 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         exaggerationFactor = 0.4;
     }
     var exaggeration = 0.0;
-    if (tileProps.zoom < tileProps.maxzoom) {
-        exaggeration = (tileProps.zoom - tileProps.maxzoom) * exaggerationFactor;
+    if (tileProps.zoom < 15.0) {
+        exaggeration = (tileProps.zoom - 15.0) * exaggerationFactor;
     }
 
     let denom = pow(2.0, exaggeration + (28.2562 - tileProps.zoom));
