@@ -43,6 +43,7 @@ extern const std::string setCenterOp;
 extern const std::string setZoomOp;
 extern const std::string setBearingOp;
 extern const std::string setPitchOp;
+extern const std::string setRollOp;
 extern const std::string setFilterOp;
 extern const std::string setLayerZoomRangeOp;
 extern const std::string setLightOp;
