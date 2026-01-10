@@ -15,6 +15,14 @@ using namespace std::numbers;
 
 namespace mbgl {
 
+/*
+ * The maximum angle to use for the Mercator horizon. This must be less than 90
+ * to prevent errors in `MercatorTransform::_calcMatrices()`. It shouldn't be too close
+ * to 90, or the distance to the horizon will become very large, unnecessarily increasing
+ * the number of tiles needed to render the map.
+ */
+const double maxMercatorHorizonAngle = util::deg2rad(89.25);
+
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
     return {util::rad2deg(2 * std::atan(std::exp(pi - mercatorCoordinate.y * 2 * pi)) - (pi / 2)),
@@ -135,8 +143,9 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     const double tanFovAboveCenter = (0.5 + (offset.y - frustumOffset.top()) / size.height) * 2.0 *
                                      std::tan(fov / 2.0) *
                                      (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
-    const double tanMultiple = tanFovAboveCenter * std::tan(getPitch());
-    // assert(tanMultiple < 1);
+    const double tanMultiple = util::clamp(
+        tanFovAboveCenter * std::tan(util::clamp(getPitch(), 0.0, maxMercatorHorizonAngle)), 0.0, 0.99);
+    assert(tanMultiple < 1);
     // Calculate z distance of the farthest fragment that should be rendered.
     const double furthestDistance = cameraToCenterDistance / (1 - tanMultiple);
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`

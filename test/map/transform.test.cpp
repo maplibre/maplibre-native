@@ -908,15 +908,14 @@ TEST(Transform, MinMaxPitch) {
     ASSERT_DOUBLE_EQ(0, transform.getZoom());
     ASSERT_DOUBLE_EQ(0, transform.getPitch());
 
-    transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(60));
+    transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(180));
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(util::deg2rad(60), transform.getPitch());
+    ASSERT_DOUBLE_EQ(util::deg2rad(180), transform.getPitch());
 
     transform.setMaxPitch(70);
     transform.jumpTo(CameraOptions().withPitch(70));
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(util::deg2rad(60), transform.getPitch());
 
     transform.setMaxPitch(45);
     transform.jumpTo(CameraOptions().withPitch(60));
@@ -1025,12 +1024,18 @@ TEST(Transform, FreeCameraOptionsInvalidOrientation) {
     // Gimbal lock. Both forward and up vectors are on xy-plane
     options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, pi / 2).m;
     transform.setFreeCameraOptions(options);
-    EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
+    for (int i = 0; i < 4; i++) {
+        EXPECT_NEAR(Quaternion::fromEulerAngles(pi / 2, pi / 2, pi / 2).m[i],
+                    transform.getFreeCameraOptions().orientation.value()[i],
+                    1.0e-12);
+    }
 
     // Camera is upside down
     options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, pi / 2 + pi / 4).m;
     transform.setFreeCameraOptions(options);
-    EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
+    for (int i = 0; i < 4; i++) {
+        EXPECT_NEAR(options.orientation.value()[i], transform.getFreeCameraOptions().orientation.value()[i], 1.0e-12);
+    }
 }
 
 TEST(Transform, FreeCameraOptionsSetOrientation) {
@@ -1056,6 +1061,7 @@ TEST(Transform, FreeCameraOptionsSetOrientation) {
     transform.setFreeCameraOptions(options);
     EXPECT_DOUBLE_EQ(util::deg2rad(-56.0), transform.getState().getBearing());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getPitch());
+    EXPECT_DOUBLE_EQ(0.0, transform.getState().getRoll());
     EXPECT_DOUBLE_EQ(0.0, transform.getState().getX());
     EXPECT_NEAR(152.192378, transform.getState().getY(), 1e-6);
 
@@ -1067,27 +1073,21 @@ TEST(Transform, FreeCameraOptionsSetOrientation) {
     EXPECT_DOUBLE_EQ(util::deg2rad(30.0), transform.getState().getPitch());
     EXPECT_NEAR(1.308930, transform.getState().getX(), 1e-6);
     EXPECT_NEAR(56.813889, transform.getState().getY(), 1e-6);
+
+    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, util::deg2rad(-33.0))
+                              .multiply(Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, util::deg2rad(-22.0)))
+                              .multiply(Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, util::deg2rad(-11.0)))
+                              .m;
+    transform.setFreeCameraOptions(options);
+    EXPECT_DOUBLE_EQ(util::deg2rad(33.0), transform.getState().getBearing());
+    EXPECT_DOUBLE_EQ(util::deg2rad(22.0), transform.getState().getPitch());
+    EXPECT_FLOAT_EQ(util::deg2rad(11.0), transform.getState().getRoll());
 }
 
 static std::tuple<vec3, vec3, vec3> rotatedFrame(const std::array<double, 4>& quaternion) {
     Quaternion q(quaternion);
     return std::make_tuple(
         q.transform({{1.0, 0.0, 0.0}}), q.transform({{0.0, -1.0, 0.0}}), q.transform({{0.0, 0.0, -1.0}}));
-}
-
-TEST(Transform, FreeCameraOptionsClampPitch) {
-    Transform transform;
-    transform.resize({100, 100});
-    FreeCameraOptions options;
-    vec3 right, up, forward;
-
-    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, util::deg2rad(-85.0)).m;
-    transform.setFreeCameraOptions(options);
-    EXPECT_DOUBLE_EQ(util::PITCH_MAX, transform.getState().getPitch());
-    std::tie(right, up, forward) = rotatedFrame(transform.getFreeCameraOptions().orientation.value());
-    EXPECT_THAT(right, Vec3NearEquals1E5(vec3{{1.0, 0.0, 0.0}}));
-    EXPECT_THAT(up, Vec3NearEquals1E5(vec3{{0, -0.5, 0.866025}}));
-    EXPECT_THAT(forward, Vec3NearEquals1E5(vec3{{0, -0.866025, -0.5}}));
 }
 
 TEST(Transform, FreeCameraOptionsClampToBounds) {
@@ -1130,29 +1130,6 @@ TEST(Transform, FreeCameraOptionsInvalidState) {
     EXPECT_THAT(options.position.value(), Vec3NearEquals1E5(vec3{{0.0, 0.0, 0.0}}));
 }
 
-TEST(Transform, FreeCameraOptionsOrientationRoll) {
-    Transform transform;
-    FreeCameraOptions options;
-    transform.resize({100, 100});
-
-    const auto orientationWithoutRoll = Quaternion::fromEulerAngles(-pi / 4, 0.0, 0.0);
-    const auto orientationWithRoll = orientationWithoutRoll.multiply(Quaternion::fromEulerAngles(0.0, 0.0, pi / 4));
-
-    options.orientation = orientationWithRoll.m;
-    transform.setFreeCameraOptions(options);
-    options = transform.getFreeCameraOptions();
-
-    EXPECT_NEAR(options.orientation.value()[0], orientationWithoutRoll.x, 1e-9);
-    EXPECT_NEAR(options.orientation.value()[1], orientationWithoutRoll.y, 1e-9);
-    EXPECT_NEAR(options.orientation.value()[2], orientationWithoutRoll.z, 1e-9);
-    EXPECT_NEAR(options.orientation.value()[3], orientationWithoutRoll.w, 1e-9);
-
-    EXPECT_NEAR(util::deg2rad(45.0), transform.getState().getPitch(), 1e-9);
-    EXPECT_NEAR(0.0, transform.getState().getBearing(), 1e-9);
-    EXPECT_NEAR(0.0, transform.getState().getX(), 1e-9);
-    EXPECT_NEAR(150.0, transform.getState().getY(), 1e-9);
-}
-
 TEST(Transform, FreeCameraOptionsStateSynchronization) {
     Transform transform;
     transform.resize({100, 100});
@@ -1172,22 +1149,6 @@ TEST(Transform, FreeCameraOptionsStateSynchronization) {
     transform.jumpTo(CameraOptions().withPitch(20.0).withBearing(77.0).withCenter(LatLng{-20.0, 20.0}));
     EXPECT_THAT(transform.getFreeCameraOptions().position.value(),
                 Vec3NearEquals1E5(vec3{{0.457922, 0.57926, 0.275301}}));
-
-    // Invalid pitch
-    transform.jumpTo(CameraOptions().withPitch(-10.0).withBearing(0.0));
-    std::tie(right, up, forward) = rotatedFrame(transform.getFreeCameraOptions().orientation.value());
-    EXPECT_THAT(transform.getFreeCameraOptions().position.value(),
-                Vec3NearEquals1E5(vec3{{0.555556, 0.556719, 0.292969}}));
-    EXPECT_THAT(right, Vec3NearEquals1E5(vec3{{1.0, 0.0, 0.0}}));
-    EXPECT_THAT(up, Vec3NearEquals1E5(vec3{{0.0, -1.0, 0.0}}));
-    EXPECT_THAT(forward, Vec3NearEquals1E5(vec3{{0.0, 0.0, -1.0}}));
-
-    transform.jumpTo(CameraOptions().withPitch(85.0).withBearing(0.0).withCenter(LatLng{-80.0, 0.0}));
-    std::tie(right, up, forward) = rotatedFrame(transform.getFreeCameraOptions().orientation.value());
-    EXPECT_THAT(transform.getFreeCameraOptions().position.value(), Vec3NearEquals1E5(vec3{{0.5, 1.14146, 0.146484}}));
-    EXPECT_THAT(right, Vec3NearEquals1E5(vec3{{1.0, 0.0, 0.0}}));
-    EXPECT_THAT(up, Vec3NearEquals1E5(vec3{{0, -0.5, 0.866025}}));
-    EXPECT_THAT(forward, Vec3NearEquals1E5(vec3{{0, -0.866025, -0.5}}));
 }
 
 TEST(Camera, SetOrientation) {
@@ -1218,4 +1179,19 @@ TEST(Camera, SetOrientationWithRoll) {
     EXPECT_NEAR(bearing, bearing_, 1.0e-9);
     EXPECT_NEAR(pitch, pitch_, 1.0e-9);
     EXPECT_NEAR(roll, roll_, 1.0e-9);
+}
+
+TEST(Camera, SetOrientationWithRollNoPitch) {
+    util::Camera camera;
+    const double bearing = 0.22;
+    const double pitch = 0.0;
+    const double roll = 0.45;
+    double bearing_ = 0;
+    double pitch_ = 0;
+    double roll_ = 0;
+    camera.setOrientation(roll, pitch, bearing);
+    camera.getOrientation(roll_, pitch_, bearing_);
+    EXPECT_NEAR(bearing + roll, bearing_, 1.0e-9);
+    EXPECT_NEAR(pitch, pitch_, 1.0e-9);
+    EXPECT_NEAR(0.0, roll_, 1.0e-9);
 }
