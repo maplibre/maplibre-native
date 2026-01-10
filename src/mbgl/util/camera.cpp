@@ -70,7 +70,7 @@ Quaternion orientationFromRollPitchBearing(double roll, double pitch, double bea
     // Both angles have to be negated to achieve CW rotation around the axis of rotation
     Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
     Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
-    Quaternion rotRoll = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -roll);
+    Quaternion rotRoll = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, roll);
 
     return rotBearing.multiply(rotPitch).multiply(rotRoll);
 }
@@ -180,7 +180,7 @@ void Camera::getOrientation(double& roll, double& pitch, double& bearing) const 
     pitch = std::atan2(f01, -f[2]);
     if (f01 > 1.0e-3) {
         bearing = -std::atan2(f[0], -f[1]);
-        roll = std::atan2(r[2], u[2]);
+        roll = -std::atan2(r[2], u[2]);
     } else {
         bearing = std::atan2(-r[1], r[0]);
         roll = 0.0;
@@ -216,7 +216,7 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
     double roll;
     if (f01 > 1.0e-3) {
         bearing = -std::atan2(forward[0], -forward[1]);
-        roll = std::atan2(right[2], up[2]);
+        roll = -std::atan2(right[2], up[2]);
     } else {
         bearing = std::atan2(-right[1], right[0]);
         roll = 0.0;

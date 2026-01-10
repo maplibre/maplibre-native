@@ -1077,7 +1077,7 @@ TEST(Transform, FreeCameraOptionsSetOrientation) {
 
     options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, util::deg2rad(-33.0))
                               .multiply(Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, util::deg2rad(-22.0)))
-                              .multiply(Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, util::deg2rad(-11.0)))
+                              .multiply(Quaternion::fromAxisAngle(vec3{{0.0, 0.0, 1.0}}, util::deg2rad(11.0)))
                               .m;
     transform.setFreeCameraOptions(options);
     EXPECT_DOUBLE_EQ(util::deg2rad(33.0), transform.getState().getBearing());
@@ -1192,7 +1192,7 @@ TEST(Camera, SetOrientationWithRollNoPitch) {
     double roll_ = 0;
     camera.setOrientation(roll, pitch, bearing);
     camera.getOrientation(roll_, pitch_, bearing_);
-    EXPECT_NEAR(bearing + roll, bearing_, 1.0e-9);
+    EXPECT_NEAR(bearing - roll, bearing_, 1.0e-9);
     EXPECT_NEAR(pitch, pitch_, 1.0e-9);
     EXPECT_NEAR(0.0, roll_, 1.0e-9);
 }
