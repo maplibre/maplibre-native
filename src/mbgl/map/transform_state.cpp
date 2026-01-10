@@ -789,7 +789,7 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
 
     double z0 = coord0[2] / w0;
     double z1 = coord1[2] / w1;
-    double t = (z1 / z0 > 0.5) ? 0 : (targetZ - z0) / (z1 - z0);
+    double t = z0 <= z1 ? 0 : (targetZ - z0) / (z1 - z0);
 
     Point<double> p = util::interpolate(p0, p1, t) / scale * static_cast<double>(1 << atZoom);
     return {.p = {p.x, p.y}, .z = static_cast<double>(atZoom)};
