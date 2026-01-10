@@ -272,7 +272,7 @@ private:
 
     // Limit the amount of pitch
     double minPitch = util::PITCH_MIN;
-    double maxPitch = util::PITCH_MAX;
+    double maxPitch = util::DEFAULT_PITCH_MAX;
     double minFov = util::deg2rad(0.1);
     double maxFov = util::deg2rad(150.0);
 
