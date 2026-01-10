@@ -58,7 +58,7 @@ mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
     auto center = LatLng::getLatLng(env, position.Get(env, target));
 
     return mbgl::CameraOptions{center,
-                               centerAltitude,
+                               position.Get(env, centerAltitude),
                                padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
                                                                                 padding.Get(env, 0) * pixelRatio,
                                                                                 padding.Get(env, 3) * pixelRatio,
