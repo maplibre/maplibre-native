@@ -286,7 +286,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
             std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
             texture->setImage(bucket.getDEMData().getImagePtr());
-            texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+            // Use Nearest filtering to match GL JS behavior - the Sobel kernel samples exact pixel values
+            texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                               .wrapU = gfx::TextureWrapType::Clamp,
                                               .wrapV = gfx::TextureWrapType::Clamp});
             hillshadePrepareBuilder->setTexture(texture, idHillshadeImageTexture);
