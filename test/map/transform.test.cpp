@@ -908,10 +908,10 @@ TEST(Transform, MinMaxPitch) {
     ASSERT_DOUBLE_EQ(0, transform.getZoom());
     ASSERT_DOUBLE_EQ(0, transform.getPitch());
 
-    transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(180));
+    transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(60));
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
-    ASSERT_DOUBLE_EQ(util::deg2rad(180), transform.getPitch());
+    ASSERT_DOUBLE_EQ(util::deg2rad(60), transform.getPitch());
 
     transform.setMaxPitch(70);
     transform.jumpTo(CameraOptions().withPitch(70));
@@ -1022,6 +1022,7 @@ TEST(Transform, FreeCameraOptionsInvalidOrientation) {
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 
     // Gimbal lock. Both forward and up vectors are on xy-plane
+    transform.setMaxPitch(180.0);
     options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, pi / 2).m;
     transform.setFreeCameraOptions(options);
     for (int i = 0; i < 4; i++) {
