@@ -4,7 +4,7 @@
     "test": {
       "height": 256,
       "width": 256,
-      "description": "This test verifies hillshade rendering at low zoom levels (zoom 1) where exaggeration scaling is applied to make hillshading more visible"
+      "description": "This test verifies hillshade rendering with basic method at low zoom levels (zoom 1) where exaggeration scaling is applied"
     }
   },
   "center": [0, 45],
@@ -24,13 +24,16 @@
       "id": "background",
       "type": "background",
       "paint": {
-        "background-color": "white"
+        "background-color": "gray"
       }
     },
     {
       "id": "hillshade",
       "type": "hillshade",
-      "source": "source"
+      "source": "source",
+      "paint": {
+        "hillshade-method": "basic"
+      }
     }
   ]
 }
