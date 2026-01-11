@@ -24,7 +24,7 @@
       "id": "background",
       "type": "background",
       "paint": {
-        "background-color": "gray"
+        "background-color": "white"
       }
     },
     {
