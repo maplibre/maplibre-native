@@ -35,7 +35,7 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
     // convert tilt, core ranges from  [0 rad, 1,0472 rad], android ranges from 0 to 60
     double tilt_degrees = options.pitch.value_or(0);
     double roll_degrees = options.roll.value_or(0);
-    double fov_degrees = options.fov.value_or(0);
+    double fov_degrees = options.fov.value_or(37);
 
     std::vector<jdouble> paddingVect;
     auto insets = options.padding.value_or(EdgeInsets{0, 0, 0, 0});
