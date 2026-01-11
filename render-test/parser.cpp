@@ -510,6 +510,11 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         }
     }
 
+    if (testValue.HasMember("maxPitch")) {
+        assert(testValue["maxPitch"].IsNumber());
+        metadata.maxPitch = testValue["maxPitch"].GetFloat();
+    }
+
     if (testValue.HasMember("pixelRatio")) {
         assert(testValue["pixelRatio"].IsNumber());
         metadata.pixelRatio = testValue["pixelRatio"].GetFloat();
