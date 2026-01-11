@@ -5,6 +5,7 @@
 #import "MLNSettings_Private.h"
 
 #include "locations.hpp"
+#include "BenchmarkAdvancedMetrics.h"
 
 #include <chrono>
 
@@ -180,6 +181,7 @@ enum class State { None, WaitingForAssets, Benchmarking } state = State::None;
 int frames = 0;
 double totalFrameEncodingTime = 0;
 double totalFrameRenderingTime = 0;
+BenchmarkAdvancedMetrics* advancedMetrics = nil;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, std::pair<double, double>> > result;
 
@@ -218,6 +220,11 @@ namespace  mbgl {
 - (void)startBenchmarkIteration
 {
     if (mbgl::bench::locations.size() > idx) {
+        if (advancedMetrics == nil) {
+            advancedMetrics = [[BenchmarkAdvancedMetrics alloc] init];
+            [advancedMetrics start:1];
+        }
+
         const auto& location = mbgl::bench::locations[idx];
 
         mbgl::CameraOptions cameraOptions;
@@ -260,6 +267,13 @@ namespace  mbgl {
         // NSLog(@"Total uploads with dirty vattr: %zu", mbgl::uploadVertextAttrsDirty);
         // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
         // NSLog(@"Total uploads with build: %zu", mbgl::uploadBuildCount);
+
+        [advancedMetrics stop];
+
+        NSLog(@"Cpu usage: (min %.2f%%) (max %.2f%%) (avg %.2f%%)", advancedMetrics.min.cpu, advancedMetrics.max.cpu, advancedMetrics.avg.cpu);
+        NSLog(@"Memory usage: (min %llu MB) (max %llu MB) (avg %llu MB)", advancedMetrics.min.memory / 0x100000, advancedMetrics.max.memory / 0x100000, advancedMetrics.avg.memory / 0x100000);
+
+        advancedMetrics = nil;
 
 #if !defined(NDEBUG)
         // Clean up and show rendering stats, as in `destroyCoreObjects` from tests.
