@@ -4,13 +4,13 @@
     "test": {
       "width": 256,
       "height": 256,
-      "description": "This test verifies that changing hillshade array properties one at a time (causing temporary length mismatch) does not cause crashes or rendering artifacts. Starts with 4 lights, changes direction to 3, then updates colors to 3.",
+      "description": "This test verifies that changing hillshade array properties one at a time (causing temporary length mismatch) does not cause crashes or rendering artifacts. Starts with 4 lights, changes direction to 1, then updates colors to 1. Using a dramatic 4->1 change makes any issues more visible (per HarelM's suggestion).",
       "operations": [
         [
           "setPaintProperty",
           "hillshade",
           "hillshade-illumination-direction",
-          [270, 315, 0]
+          315
         ],
         [
           "wait"
@@ -19,7 +19,7 @@
           "setPaintProperty",
           "hillshade",
           "hillshade-highlight-color",
-          ["#FF4000", "#FFFF00", "#40ff00"]
+          "#FFFFFF"
         ],
         [
           "wait"
@@ -28,7 +28,7 @@
           "setPaintProperty",
           "hillshade",
           "hillshade-shadow-color",
-          ["#00bfff", "#0000ff", "#bf00ff"]
+          "#000000"
         ],
         [
           "wait"
