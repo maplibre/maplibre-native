@@ -92,14 +92,27 @@ jobs:
           cmake --build build -j "$(sysctl -n hw.ncpu)"
 
       - name: Generate platform-specific expected images
-        env:
-          TEST_FILTER: ${{ github.event.inputs.test_filter || 'hillshade-low-zoom/*,color-relief/low-zoom,combinations/color-relief-translucent--hillshade-translucent-low-zoom' }}
         run: |
-          echo "=== Running test with filter: $TEST_FILTER ==="
+          # Run each filter separately since comma-separated filters don't work
+          echo "=== Running hillshade-low-zoom tests ==="
           ./build/mbgl-render-test-runner \
             --manifestPath metrics/macos-xcode11-release-style.json \
-            --filter "$TEST_FILTER" \
-            --update platform
+            --filter "hillshade-low-zoom" \
+            --update platform || true
+          
+          echo ""
+          echo "=== Running color-relief/low-zoom test ==="
+          ./build/mbgl-render-test-runner \
+            --manifestPath metrics/macos-xcode11-release-style.json \
+            --filter "color-relief/low-zoom" \
+            --update platform || true
+          
+          echo ""
+          echo "=== Running combinations test ==="
+          ./build/mbgl-render-test-runner \
+            --manifestPath metrics/macos-xcode11-release-style.json \
+            --filter "color-relief-translucent--hillshade-translucent-low-zoom" \
+            --update platform || true
           
           echo ""
           echo "=== Git status for expectations folder (new/modified expected.png files) ==="
