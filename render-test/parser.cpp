@@ -619,6 +619,7 @@ const std::string setZoomOp("setZoom");
 const std::string setBearingOp("setBearing");
 const std::string setPitchOp("setPitch");
 const std::string setRollOp("setRoll");
+const std::string setCenterAltitudeOp("setCenterElevation");
 const std::string setFilterOp("setFilter");
 const std::string setLayerZoomRangeOp("setLayerZoomRange");
 const std::string setLightOp("setLight");
@@ -813,6 +814,15 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             double roll = operationArray[1].GetDouble();
             result.emplace_back([roll](TestContext& ctx) {
                 ctx.getMap().jumpTo(mbgl::CameraOptions().withRoll(roll));
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setCenterAltitudeOp) {
+            // setCenterAltitude
+            assert(operationArray.Size() >= 2u);
+            assert(operationArray[1].IsNumber());
+            double centerAltitude = operationArray[1].GetDouble();
+            result.emplace_back([centerAltitude](TestContext& ctx) {
+                ctx.getMap().jumpTo(mbgl::CameraOptions().withCenterAltitude(centerAltitude));
                 return true;
             });
         } else if (operationArray[0].GetString() == setFilterOp) {
