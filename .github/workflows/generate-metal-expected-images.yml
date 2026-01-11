@@ -123,19 +123,29 @@ jobs:
           mkdir -p generated-expected-images
           
           # --update platform writes expected.png to metrics/expectations/platform-macos/render-tests/
-          # Use git status to find newly created files (marked with ??)
+          # Find all expected.png files in the new directories shown by git status
           echo "=== Collecting new expected.png files from platform-macos expectations ==="
           
           git status --porcelain metrics/expectations/platform-macos/render-tests/ | while IFS= read -r line; do
             status="${line:0:2}"
-            file="${line:3}"
-            echo "Git status line: [$status] $file"
-            if [[ "$file" == *expected.png ]]; then
-              # Get the test path relative to render-tests
-              test_path=$(echo "$file" | sed 's|metrics/expectations/platform-macos/render-tests/||' | sed 's|/expected.png||')
+            path="${line:3}"
+            echo "Git status line: [$status] $path"
+            
+            # If it's a directory (ends with /), find all expected.png files inside
+            if [[ "$path" == */ ]]; then
+              echo "  -> Directory, searching for expected.png files inside..."
+              find "$path" -name "expected.png" 2>/dev/null | while read -r file; do
+                test_path=$(echo "$file" | sed 's|metrics/expectations/platform-macos/render-tests/||' | sed 's|/expected.png||')
+                mkdir -p "generated-expected-images/$test_path"
+                cp "$file" "generated-expected-images/$test_path/expected.png"
+                echo "  Copied: $test_path/expected.png"
+              done
+            elif [[ "$path" == *expected.png ]]; then
+              # It's a file directly
+              test_path=$(echo "$path" | sed 's|metrics/expectations/platform-macos/render-tests/||' | sed 's|/expected.png||')
               mkdir -p "generated-expected-images/$test_path"
-              cp "$file" "generated-expected-images/$test_path/expected.png"
-              echo "Copied: $test_path/expected.png"
+              cp "$path" "generated-expected-images/$test_path/expected.png"
+              echo "  Copied: $test_path/expected.png"
             fi
           done
           
