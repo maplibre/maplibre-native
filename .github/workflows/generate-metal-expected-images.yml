@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - main
+      - color-reliefe-and-hillshade-methods
       - topic/drawable
     paths:
       - "metrics/integration/render-tests/hillshade-low-zoom/**"
