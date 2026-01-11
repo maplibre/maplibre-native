@@ -99,21 +99,21 @@ jobs:
             --manifestPath metrics/macos-xcode11-release-style.json \
             --filter "hillshade-low-zoom" \
             --update platform || true
-          
+
           echo ""
           echo "=== Running color-relief/low-zoom test ==="
           ./build/mbgl-render-test-runner \
             --manifestPath metrics/macos-xcode11-release-style.json \
             --filter "color-relief/low-zoom" \
             --update platform || true
-          
+
           echo ""
           echo "=== Running combinations test ==="
           ./build/mbgl-render-test-runner \
             --manifestPath metrics/macos-xcode11-release-style.json \
             --filter "color-relief-translucent--hillshade-translucent-low-zoom" \
             --update platform || true
-          
+
           echo ""
           echo "=== Git status for expectations folder (new/modified expected.png files) ==="
           git status --porcelain metrics/expectations/platform-macos/render-tests/ || true
@@ -121,16 +121,16 @@ jobs:
       - name: Collect generated platform images
         run: |
           mkdir -p generated-expected-images
-          
+
           # --update platform writes expected.png to metrics/expectations/platform-macos/render-tests/
           # Find all expected.png files in the new directories shown by git status
           echo "=== Collecting new expected.png files from platform-macos expectations ==="
-          
+
           git status --porcelain metrics/expectations/platform-macos/render-tests/ | while IFS= read -r line; do
             status="${line:0:2}"
             path="${line:3}"
             echo "Git status line: [$status] $path"
-            
+
             # If it's a directory (ends with /), find all expected.png files inside
             if [[ "$path" == */ ]]; then
               echo "  -> Directory, searching for expected.png files inside..."
@@ -148,7 +148,7 @@ jobs:
               echo "  Copied: $test_path/expected.png"
             fi
           done
-          
+
           # List what we collected
           echo ""
           echo "=== Final collected images ==="
