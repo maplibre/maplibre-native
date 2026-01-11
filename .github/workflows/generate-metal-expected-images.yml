@@ -1,0 +1,154 @@
+name: generate-metal-expected-images
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: 'Test filter pattern (e.g., "hillshade-low-zoom*" or "color-relief/low-zoom*")'
+        required: true
+        default: 'hillshade-low-zoom*'
+  push:
+    branches:
+      - main
+      - topic/drawable
+    paths:
+      - "metrics/integration/render-tests/hillshade-low-zoom/**"
+      - "metrics/integration/render-tests/color-relief/low-zoom/**"
+      - "metrics/integration/render-tests/combinations/color-relief-translucent--hillshade-translucent-low-zoom/**"
+      - "include/mbgl/shaders/mtl/hillshade*.hpp"
+      - "shaders/hillshade*.glsl"
+      - ".github/workflows/generate-metal-expected-images.yml"
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - "metrics/integration/render-tests/hillshade-low-zoom/**"
+      - "metrics/integration/render-tests/color-relief/low-zoom/**"
+      - "metrics/integration/render-tests/combinations/color-relief-translucent--hillshade-translucent-low-zoom/**"
+      - "include/mbgl/shaders/mtl/hillshade*.hpp"
+      - "shaders/hillshade*.glsl"
+      - ".github/workflows/generate-metal-expected-images.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  generate-expected-images:
+    runs-on: macos-15
+    env:
+      BUILDTYPE: "Release"
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Get OS Architecture
+        run: uname -m
+
+      - name: Install dependencies (MacOS)
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+          brew list pkg-config || brew install pkg-config
+          brew list glfw || brew install glfw
+          brew list libuv || brew install libuv
+
+      - name: Use Node.js from nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'platform/node/.nvmrc'
+
+      - name: npm ci
+        working-directory: platform/node
+        run: npm ci --ignore-scripts
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2.20
+        with:
+          key: macos-15-arm64-${{ env.BUILDTYPE }}-generate-expected
+
+      - name: cmake version
+        run: cmake --version
+
+      - name: Configure maplibre-native (MacOS Metal)
+        run: |
+          cmake --preset macos-metal-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: Build maplibre-native
+        run: |
+          cmake --build build -j "$(sysctl -n hw.ncpu)"
+
+      - name: Generate expected images
+        env:
+          TEST_FILTER: ${{ github.event.inputs.test_filter || 'hillshade-low-zoom/*,color-relief/low-zoom,combinations/color-relief-translucent--hillshade-translucent-low-zoom' }}
+        run: |
+          ./build/mbgl-render-test-runner \
+            --manifestPath metrics/macos-xcode11-release-style.json \
+            --filter "$TEST_FILTER" \
+            --update default
+
+      - name: Collect generated images
+        run: |
+          mkdir -p generated-expected-images
+          
+          # Find all actual.png files from the filtered tests and copy them
+          # The actual.png after --update becomes the expected
+          find metrics -path "*render-tests*" -name "actual.png" | while read file; do
+            # Get the test path relative to render-tests
+            test_path=$(echo "$file" | sed 's|.*/render-tests/||' | sed 's|/actual.png||')
+            mkdir -p "generated-expected-images/$test_path"
+            cp "$file" "generated-expected-images/$test_path/expected.png"
+            echo "Copied: $test_path/expected.png"
+          done
+          
+          # Also copy any expected.png files that were updated
+          find metrics -path "*render-tests*" -name "expected.png" | while read file; do
+            test_path=$(echo "$file" | sed 's|.*/render-tests/||' | sed 's|/expected.png||')
+            mkdir -p "generated-expected-images/$test_path"
+            cp "$file" "generated-expected-images/$test_path/expected.png"
+            echo "Copied: $test_path/expected.png"
+          done
+          
+          # List what we collected
+          echo "=== Generated expected images ==="
+          find generated-expected-images -name "*.png" -type f
+
+      - name: Upload generated expected images
+        uses: actions/upload-artifact@v4
+        with:
+          name: metal-expected-images
+          path: generated-expected-images/
+          if-no-files-found: warn
+
+      - name: Upload full render test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-test-results-html
+          path: metrics/macos-xcode11-release-style.html
+          if-no-files-found: ignore
+
+      - name: Instructions
+        run: |
+          echo "=============================================="
+          echo "To use the generated expected images:"
+          echo ""
+          echo "1. Download the 'metal-expected-images' artifact"
+          echo "2. Extract it"
+          echo "3. Copy the contents to:"
+          echo "   metrics/expectations/platform-ios-metal/render-tests/"
+          echo ""
+          echo "Example:"
+          echo "  cp -r metal-expected-images/* metrics/expectations/platform-ios-metal/render-tests/"
+          echo "=============================================="
