@@ -95,31 +95,41 @@ jobs:
         env:
           TEST_FILTER: ${{ github.event.inputs.test_filter || 'hillshade-low-zoom/*,color-relief/low-zoom,combinations/color-relief-translucent--hillshade-translucent-low-zoom' }}
         run: |
+          echo "=== Running test with filter: $TEST_FILTER ==="
           ./build/mbgl-render-test-runner \
             --manifestPath metrics/macos-xcode11-release-style.json \
             --filter "$TEST_FILTER" \
             --update platform
+          
+          echo ""
+          echo "=== Git status for expectations folder (new/modified expected.png files) ==="
+          git status --porcelain metrics/expectations/platform-macos/render-tests/ || true
 
       - name: Collect generated platform images
         run: |
           mkdir -p generated-expected-images
           
-          # --update platform writes to metrics/expectations/platform-macos/render-tests/
-          # Use git to find new or modified files (untracked or changed)
-          echo "=== Checking for new/modified platform expectation images ==="
-          git status --porcelain metrics/expectations/platform-macos/render-tests/ | while read status file; do
-            if [[ "$file" == *.png ]]; then
+          # --update platform writes expected.png to metrics/expectations/platform-macos/render-tests/
+          # Use git status to find newly created files (marked with ??)
+          echo "=== Collecting new expected.png files from platform-macos expectations ==="
+          
+          git status --porcelain metrics/expectations/platform-macos/render-tests/ | while IFS= read -r line; do
+            status="${line:0:2}"
+            file="${line:3}"
+            echo "Git status line: [$status] $file"
+            if [[ "$file" == *expected.png ]]; then
               # Get the test path relative to render-tests
               test_path=$(echo "$file" | sed 's|metrics/expectations/platform-macos/render-tests/||' | sed 's|/expected.png||')
               mkdir -p "generated-expected-images/$test_path"
               cp "$file" "generated-expected-images/$test_path/expected.png"
-              echo "Copied (git status: $status): $test_path/expected.png"
+              echo "Copied: $test_path/expected.png"
             fi
           done
           
           # List what we collected
-          echo "=== Generated platform-specific expected images ==="
-          find generated-expected-images -name "*.png" -type f || echo "No images found"
+          echo ""
+          echo "=== Final collected images ==="
+          find generated-expected-images -type f -name "*.png" 2>/dev/null || echo "No images collected"
 
       - name: Upload generated expected images
         uses: actions/upload-artifact@v4
