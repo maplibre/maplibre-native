@@ -8,12 +8,19 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
                                                             mbgl::CameraOptions options,
                                                             float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
-    static auto constructor =
-        javaClass.GetConstructor<jni::Object<LatLng>, double, double, double, jni::Array<jni::jdouble>>(env);
+    static auto constructor = javaClass.GetConstructor<jni::Object<LatLng>,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       jni::Array<jni::jdouble>>(env);
 
     // wrap LatLng values coming from core
     auto center = options.center.value();
     center.wrap();
+    double centerAltitude = options.centerAltitude.value_or(0);
 
     // convert bearing, measured in radians counterclockwise from true north.
     // Wrapped to [−π rad, π rad). Android binding from 0 to 360 degrees
@@ -27,6 +34,8 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
 
     // convert tilt, core ranges from  [0 rad, 1,0472 rad], android ranges from 0 to 60
     double tilt_degrees = options.pitch.value_or(0);
+    double roll_degrees = options.roll.value_or(0);
+    double fov_degrees = options.fov.value_or(0);
 
     std::vector<jdouble> paddingVect;
     auto insets = options.padding.value_or(EdgeInsets{0, 0, 0, 0});
@@ -37,8 +46,16 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
     paddingVect.push_back(insets.bottom() * pixelRatio);
     padding.SetRegion<std::vector<jni::jdouble>>(env, 0, paddingVect);
 
-    return javaClass.New(
-        env, constructor, LatLng::New(env, center), options.zoom.value_or(0), tilt_degrees, bearing_degrees, padding);
+    return javaClass.New(env,
+                         constructor,
+                         LatLng::New(env, center),
+                         centerAltitude,
+                         options.zoom.value_or(0),
+                         tilt_degrees,
+                         bearing_degrees,
+                         roll_degrees,
+                         fov_degrees,
+                         padding);
 }
 
 mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
