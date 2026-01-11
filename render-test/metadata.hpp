@@ -155,7 +155,7 @@ struct TestMetadata {
     bool ignoreProbing = true;
 
     mbgl::Size size{512u, 512u};
-    float maxPitch = 60.f;
+    std::optional<float> maxPitch;
     float pixelRatio = 1.0f;
     double allowed = 0.00015; // diff
     std::string description;
