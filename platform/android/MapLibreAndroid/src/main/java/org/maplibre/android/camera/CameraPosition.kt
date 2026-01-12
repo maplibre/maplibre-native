@@ -174,7 +174,7 @@ class CameraPosition
      * @return A String with CameraPosition information.
      */
     override fun toString(): String {
-        return ("Target: " + target + ", Center Altitude: " + centerAltitude + ", Zoom:" + zoom + ", Bearing:" + bearing + ", Tilt:" + tilt + ", Roll:" + roll + ", FOV:" + fov + ", Padding:" + Arrays.toString(padding))
+        return ("Target: " + target + ", Center Altitude:" + centerAltitude + ", Zoom:" + zoom + ", Bearing:" + bearing + ", Tilt:" + tilt + ", Roll:" + roll + ", FOV:" + fov + ", Padding:" + Arrays.toString(padding))
     }
 
     /**

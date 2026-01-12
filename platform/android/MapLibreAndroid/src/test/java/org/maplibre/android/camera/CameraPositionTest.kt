@@ -85,11 +85,12 @@ class CameraPositionTest : BaseTest() {
     fun testToString() {
         val latLng = LatLng(1.0, 2.0)
         val cameraPosition =
-            CameraPosition(latLng, 3.0, 4.0, 5.0, doubleArrayOf(0.0, 500.0, 0.0, 0.0))
+            CameraPosition(latLng, 9.0, 3.0, 4.0, 5.0, 6.0, 7.0, doubleArrayOf(0.0, 500.0, 0.0, 0.0))
         Assert.assertEquals(
             "toString should match",
-            "Target: LatLng [latitude=1.0, longitude=2.0, altitude=0.0], Zoom:3.0, " +
-                "Bearing:5.0, Tilt:4.0, Padding:[0.0, 500.0, 0.0, 0.0]",
+            "Target: LatLng [latitude=1.0, longitude=2.0, altitude=0.0], " +
+                    "Center Altitude:9.0, Zoom:3.0, Bearing:5.0, Tilt:4.0, Roll:6.0, FOV:7.0, " +
+                    "Padding:[0.0, 500.0, 0.0, 0.0]",
             cameraPosition.toString()
         )
     }
@@ -98,7 +99,7 @@ class CameraPositionTest : BaseTest() {
     fun testHashcode() {
         val latLng = LatLng(1.0, 2.0)
         val cameraPosition =
-            CameraPosition(latLng, 3.0, 4.0, 5.0, doubleArrayOf(0.0, 500.0, 0.0, 0.0))
+            CameraPosition(latLng, 9.0, 3.0, 4.0, 5.0, 6.0, 7.0, doubleArrayOf(0.0, 500.0, 0.0, 0.0))
         Assert.assertEquals("hashCode should match", -420915327, cameraPosition.hashCode().toLong())
     }
 
