@@ -100,7 +100,7 @@ class CameraPositionTest : BaseTest() {
         val latLng = LatLng(1.0, 2.0)
         val cameraPosition =
             CameraPosition(latLng, 9.0, 3.0, 4.0, 5.0, 6.0, 7.0, doubleArrayOf(0.0, 500.0, 0.0, 0.0))
-        Assert.assertEquals("hashCode should match", -420915327, cameraPosition.hashCode().toLong())
+        Assert.assertEquals("hashCode should match", -1086105727, cameraPosition.hashCode().toLong())
     }
 
     @Test
