@@ -195,7 +195,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
                                      util::interpolate(startEdgeInsets.bottom(), padding.bottom(), t),
                                      util::interpolate(startEdgeInsets.right(), padding.right(), t)});
             }
-            if (pitch != startPitch) {
+            double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
+            if (pitch != startPitch || maxPitch < startPitch) {
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
             if (roll != startRoll) {
@@ -715,20 +716,12 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
 
     const auto height = state.getSize().height;
     assert(height);
-    // For details, see description at
-    // https://github.com/mapbox/mapbox-gl-native/pull/15195 The definition of
-    // half of TransformState::fov with no inset, is: fov = arctan((height / 2)
-    // / (height * 1.5)). We use half of fov, as it is field of view above
-    // perspective center. With inset, this angle changes and
-    // tangentOfFovAboveCenterAngle = (h/2 + centerOffsetY) / (height
-    // * 1.5). 1.03 is a bit extra added to prevent parallel ground to viewport
-    // clipping plane.
+    // Half of fov is the field of view above perspective center.
+    // 1.03 is a bit extra added to prevent parallel ground to viewport clipping plane.
     const double tangentOfFovAboveCenterAngle = 1.03 * (0.5 + centerOffsetY / height) * 2.0 *
                                                 tan(getFieldOfView() / 2.0);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
-    return pi * 0.5 - fovAboveCenter;
-    // e.g. Maximum pitch of 60 degrees is when perspective center's offset from
-    // the top is 84% of screen height.
+    return state.getMaxPitch() + getFieldOfView() / 2.0 - fovAboveCenter;
 }
 
 FreeCameraOptions Transform::getFreeCameraOptions() const {
