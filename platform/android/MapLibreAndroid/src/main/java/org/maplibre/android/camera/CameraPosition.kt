@@ -113,7 +113,7 @@ class CameraPosition
      * @param padding Padding in pixels. Specified in left, top, right, bottom order.
      * @throws NullPointerException     if target is null
      * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
-     */ @Keep internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double, padding: DoubleArray?) : this(target, 0.0, zoom, tilt, bearing, 0.0, 37.0, padding)
+     */ @Keep internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double, padding: DoubleArray?) : this(target, 0.0, zoom, tilt, bearing, 0.0, 36.86989764584402, padding)
 
     /**
      * Constructs a CameraPosition.
@@ -291,7 +291,7 @@ class CameraPosition
                 centerAltitude = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraCenterAltitude, 0.0f).toDouble()
                 tilt = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f).toDouble()
                 roll = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraRoll, 0.0f).toDouble()
-                fov = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraFov, 37.0f).toDouble()
+                fov = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraFov, 36.86989764584402f).toDouble()
                 zoom = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f).toDouble()
             }
         }
