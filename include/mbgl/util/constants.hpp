@@ -34,6 +34,11 @@ constexpr double DEGREES_MAX = 360;
 constexpr double PITCH_MIN = 0.0;
 constexpr double DEFAULT_PITCH_MAX = M_PI / 3;
 constexpr double PITCH_MAX = M_PI;
+// This fov value is somewhat arbitrary. The altitude of the camera used
+// to be defined as 1.5 screen heights above the ground, which was an
+// arbitrary choice. This is the fov equivalent to that value calculated
+// with: `fov = 2 * arctan((height / 2) / (height * 1.5))`
+constexpr double DEFAULT_FOV = 0.6435011087932844;
 constexpr double MIN_ZOOM = 0.0;
 constexpr double MAX_ZOOM = 25.5;
 constexpr float MIN_ZOOM_F = MIN_ZOOM;
