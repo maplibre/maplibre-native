@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     const double lon = lonValue ? args::get(lonValue) : 0;
     const double alt = altValue ? args::get(altValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
-    const double fov = fovValue ? args::get(fovValue) : util::rad2deg(util::DEFAULT_FOV);
+    const double fov = fovValue ? args::get(fovValue) : mbgl::util::rad2deg(mbgl::util::DEFAULT_FOV);
     const double bearing = bearingValue ? args::get(bearingValue) : 0;
     const double pitch = pitchValue ? args::get(pitchValue) : 0;
     const double roll = rollValue ? args::get(rollValue) : 0;
