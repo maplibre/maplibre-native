@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
     args::ValueFlag<double> rollValue(argumentParser, "degrees", "Roll", {'r', "roll"});
+    args::ValueFlag<double> maxPitchValue(argumentParser, "degrees", "Max Pitch", {'P', "maxPitch"});
 
     try {
         argumentParser.ParseCLI(argc, argv);
@@ -83,7 +84,8 @@ int main(int argc, char* argv[]) {
     if (lonValue) settings.longitude = args::get(lonValue);
     if (latValue) settings.latitude = args::get(latValue);
     if (altValue) settings.altitude = args::get(altValue);
-    settings.fov = fovValue ? args::get(fovValue) : mbgl::util::rad2deg(mbgl::util::DEFAULT_FOV);
+    if (fovValue) settings.fov = args::get(fovValue);
+    if (maxPitchValue) settings.maxPitch = args::get(maxPitchValue);
     if (zoomValue) settings.zoom = args::get(zoomValue);
     if (bearingValue) settings.bearing = args::get(bearingValue);
     if (pitchValue) settings.pitch = args::get(pitchValue);
@@ -152,6 +154,8 @@ int main(int argc, char* argv[]) {
                   resourceOptions,
                   clientOptions,
                   actionJournalOptions);
+
+    map.setBounds(mbgl::BoundOptions().withMaxPitch(settings.maxPitch));
 
     backend.setMap(&map);
 
@@ -259,7 +263,8 @@ int main(int argc, char* argv[]) {
                         std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
                         "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
                         std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
-                        "\" --fov=\"" + std::to_string(settings.fov) + "\"");
+                        "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
+                        std::to_string(settings.maxPitch) + "\"");
 
     view = nullptr;
 

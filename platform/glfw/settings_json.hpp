@@ -1,6 +1,8 @@
 #pragma once
 
 #include <mbgl/map/mode.hpp>
+#include <mbgl/util/constants.hpp>
+#include <mbgl/math/angles.hpp>
 
 namespace mbgl {
 
@@ -19,7 +21,8 @@ public:
     double bearing = 0;
     double pitch = 0;
     double roll = 0;
-    double fov = 0;
+    double fov = util::rad2deg(mbgl::util::DEFAULT_FOV);
+    double maxPitch = util::rad2deg(mbgl::util::DEFAULT_PITCH_MAX);
     bool axonometric = false;
     double xSkew = 0.0;
     double ySkew = 1.0;

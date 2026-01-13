@@ -20,6 +20,7 @@ void Settings_JSON::load() {
         file >> pitch;
         file >> roll;
         file >> fov;
+        file >> maxPitch;
         file >> debug;
         file >> online;
     }
@@ -36,6 +37,7 @@ void Settings_JSON::save() {
         file << pitch << std::endl;
         file << roll << std::endl;
         file << fov << std::endl;
+        file << maxPitch << std::endl;
         file << debug << std::endl;
         file << online << std::endl;
     }
@@ -50,6 +52,7 @@ void Settings_JSON::clear() {
     pitch = 0;
     roll = 0;
     fov = util::rad2deg(util::DEFAULT_FOV);
+    maxPitch = util::rad2deg(util::DEFAULT_PITCH_MAX);
     debug = 0;
     online = true;
 }
