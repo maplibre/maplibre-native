@@ -14,9 +14,12 @@ public:
 public:
     double longitude = 0;
     double latitude = 0;
+    double altitude = 0;
     double zoom = 0;
     double bearing = 0;
     double pitch = 0;
+    double roll = 0;
+    double fov = 0;
     bool axonometric = false;
     double xSkew = 0.0;
     double ySkew = 1.0;
