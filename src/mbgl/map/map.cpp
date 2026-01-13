@@ -375,6 +375,15 @@ void Map::setSize(const Size size) {
     impl->onUpdate();
 }
 
+void Map::setFrustumOffset(const EdgeInsets& frustumOffset) {
+    impl->transform.setFrustumOffset(frustumOffset);
+    impl->onUpdate();
+}
+
+EdgeInsets Map::getFrustumOffset() {
+    return impl->transform.getFrustumOffset();
+}
+
 void Map::setNorthOrientation(NorthOrientation orientation) {
     impl->transform.setNorthOrientation(orientation);
     impl->onUpdate();

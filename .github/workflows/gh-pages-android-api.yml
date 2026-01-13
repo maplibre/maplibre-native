@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           persist-credentials: false
 
-      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v4
+      - uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v4
         with:
           distribution: "temurin"
           java-version: "17"
@@ -28,7 +28,7 @@ jobs:
         run: ./gradlew dokkaGenerate
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
+        uses: JamesIves/github-pages-deploy-action@4a3abc783e1a24aeb44c16e869ad83caf6b4cc23 # v4.7.4
         with:
           branch: gh-pages
           folder: platform/android/MapLibreAndroid/build/dokka/html

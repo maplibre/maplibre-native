@@ -40,7 +40,7 @@ Add a `MapView` to your layout XML file:
 ```
 
 > [!TIP]
-> There are external projects such as [Ramani Maps](https://github.com/ramani-maps/ramani-maps) and [MapLibre Compose Playground](https://github.com/Rallista/maplibre-compose-playground) available to intergrate MapLibre Native Android with Compose-based projects.
+> There are external projects such as [Ramani Maps](https://github.com/ramani-maps/ramani-maps) and [MapLibre Compose Playground](https://github.com/Rallista/maplibre-compose-playground) available to integrate MapLibre Native Android with Compose-based projects.
 
 Next, initialize the map in an activity:
 
@@ -50,7 +50,7 @@ Next, initialize the map in an activity:
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
@@ -122,9 +122,9 @@ For more information, refer to the [Android API Documentation](https://maplibre.
 
 ## iOS
 
-You can find MapLibre Native iOS on [Cocoapods](https://cocoapods.org/) and on the [Swift Package Index](https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution). You can also MapLibre Native iOS [as a dependency to Xcode directly](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/gettingstarted/#Add-MapLibre-Native-as-a-dependency).
+You can find MapLibre Native iOS on [Cocoapods](https://cocoapods.org/) and on the [Swift Package Index](https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution). You can also add MapLibre Native iOS [as a dependency to Xcode directly](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/gettingstarted/#Add-MapLibre-Native-as-a-dependency).
 
-MapLibre Native iOS uses UIKit. To intergrate it with an UIKit project, you can use
+MapLibre Native iOS uses UIKit. To integrate it with an UIKit project, you can use
 
 ```swift
 class SimpleMap: UIViewController, MLNMapViewDelegate {
@@ -186,7 +186,7 @@ MapLibre Native can also be built on [Linux](platform/linux/README.md), [Windows
 
 MapLibre Native has at its core a C++ library. This is where the bulk of development is currently happening.
 
-To get started with the code base, you need to clone the the repository including all its submodules.
+To get started with the code base, you need to clone the repository including all its submodules.
 
 All contributors use pull requests from a private fork. [Fork the project](https://github.com/maplibre/maplibre-native/fork). Then run:
 
@@ -243,10 +243,6 @@ Read more about the MapLibre Sponsorship Program at [https://maplibre.org/sponso
 
 Gold:
 
-<a href="https://aws.amazon.com/location"><img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/></a>
-
-<a href="https://meta.com"><img src="https://maplibre.org/img/meta-logo.svg" alt="Logo Meta" width="25%"/></a>
-
 <a href="https://www.microsoft.com/"><img src="https://maplibre.org/img/msft-logo.svg" alt="Logo Microsoft" width="25%"/></a>
 
 Silver:
@@ -259,11 +255,11 @@ Silver:
 
 <a href="https://www.radar.com/"><img src="https://maplibre.org/img/radar-logo.svg" alt="Logo Radar" width="25%"/></a>
 
-<a href="https://www.mappedin.com/"><img src="https://maplibre.org/img/mappedin-logo.svg" alt="Logo mappedin" width="25%"/></a>
-
 <a href="https://www.mapme.com/"><img src="https://maplibre.org/img/mapme-logo.svg" alt="Logo mapme" width="25%"/></a>
 
 <a href="https://www.maptiler.com/"><img src="https://maplibre.org/img/maptiler-logo.svg" alt="Logo maptiler" width="25%"/></a>
+
+<a href="https://aws.amazon.com/location"><img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/></a>
 
 Backers and Supporters:
 

@@ -139,7 +139,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
-    NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
+    NS::String* nsSource = NS::String::string(
+        source.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
 
     const auto& device = backend.getDevice();
     auto library = NS::TransferPtr(device->newLibrary(nsSource, options.get(), &error));
@@ -152,7 +153,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         return nullptr;
     }
 
-    const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
+    const auto nsVertName = NS::String::string(
+        vertexName.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
@@ -164,7 +166,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // fragment function is optional
     MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
-        const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
+        const auto nsFragName = NS::String::string(
+            fragmentName.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
@@ -286,15 +289,15 @@ const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
 
 namespace {
 const auto clipMaskStencilMode = gfx::StencilMode{
-    /*.test=*/gfx::StencilMode::Always(),
-    /*.ref=*/0,
-    /*.mask=*/0b11111111,
-    /*.fail=*/gfx::StencilOpType::Keep,
-    /*.depthFail=*/gfx::StencilOpType::Keep,
-    /*.pass=*/gfx::StencilOpType::Replace,
+    .test = gfx::StencilMode::Always(),
+    .ref = 0,
+    .mask = 0b11111111,
+    .fail = gfx::StencilOpType::Keep,
+    .depthFail = gfx::StencilOpType::Keep,
+    .pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/gfx::DepthFunctionType::Always,
-                                              /*.mask=*/gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
+                                              .mask = gfx::DepthMaskType::ReadOnly};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,

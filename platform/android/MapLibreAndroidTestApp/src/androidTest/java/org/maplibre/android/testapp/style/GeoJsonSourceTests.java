@@ -2,6 +2,7 @@ package org.maplibre.android.testapp.style;
 
 import org.junit.Ignore;
 import org.maplibre.android.style.sources.CannotAddSourceException;
+import org.maplibre.android.style.sources.GeoJsonOptions;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.Point;
@@ -95,15 +96,15 @@ public class GeoJsonSourceTests extends EspressoTest {
   public void testUpdateCoalescingSync() {
     validateTestSetup();
     MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
-      GeoJsonSource source = new GeoJsonSource("source");
+      GeoJsonSource source = new GeoJsonSource("source", new GeoJsonOptions().withSynchronousUpdate(true));
       maplibreMap.getStyle().addSource(source);
       maplibreMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
 
-      source.setGeoJsonSync(Point.fromLngLat(0, 0));
-      source.setGeoJsonSync(Point.fromLngLat(-25, -25));
-      source.setGeoJsonSync(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
+      source.setGeoJson(Point.fromLngLat(0, 0));
+      source.setGeoJson(Point.fromLngLat(-25, -25));
+      source.setGeoJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
 
-      source.setGeoJsonSync(Point.fromLngLat(20, 55));
+      source.setGeoJson(Point.fromLngLat(20, 55));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
       assertEquals(1, maplibreMap.queryRenderedFeatures(
               maplibreMap.getProjection().toScreenLocation(
@@ -215,12 +216,12 @@ public class GeoJsonSourceTests extends EspressoTest {
   protected void testFeatureFromResourceSync(final @RawRes int resource) {
     validateTestSetup();
     MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
-      GeoJsonSource source = new GeoJsonSource("source");
+      GeoJsonSource source = new GeoJsonSource("source", new GeoJsonOptions().withSynchronousUpdate(true));
       maplibreMap.getStyle().addSource(source);
       Layer layer = new CircleLayer("layer", source.getId());
       maplibreMap.getStyle().addLayer(layer);
 
-      source.setGeoJsonSync(Feature.fromJson(ResourceUtils.readRawResource(rule.getActivity(), resource)));
+      source.setGeoJson(Feature.fromJson(ResourceUtils.readRawResource(rule.getActivity(), resource)));
 
       maplibreMap.getStyle().removeLayer(layer);
       maplibreMap.getStyle().removeSource(source);
@@ -262,7 +263,7 @@ public class GeoJsonSourceTests extends EspressoTest {
       String geoJsonString = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0,0]}}";
       for (int i = 0; i < 1000; i++) {
         // Create a GeoJSON source with the same ID each iteration
-        GeoJsonSource source = new GeoJsonSource("source");
+        GeoJsonSource source = new GeoJsonSource("source", new GeoJsonOptions().withSynchronousUpdate(true));
         try {
           maplibreMap.getStyle().addSource(source);
         } catch (CannotAddSourceException ex) {
@@ -270,7 +271,7 @@ public class GeoJsonSourceTests extends EspressoTest {
         }
 
         // Schedule a sync update via setGeoJson(String)
-        source.setGeoJsonSync(geoJsonString);
+        source.setGeoJson(geoJsonString);
       }
     });
   }

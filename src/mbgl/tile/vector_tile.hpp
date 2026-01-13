@@ -23,8 +23,10 @@ public:
 
     virtual void setData(const std::shared_ptr<const std::string>&) = 0;
 
-private:
-    TileLoader<VectorTile> loader;
+protected:
+    // this needs to be explicitly deleted in the most-derived destructor
+    // see `~VectorMVTTile`
+    std::unique_ptr<TileLoader<VectorTile>> loader;
 };
 
 } // namespace mbgl

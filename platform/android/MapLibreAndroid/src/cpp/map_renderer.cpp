@@ -73,7 +73,7 @@ void MapRenderer::reset() {
         }
 
         // Lock to make sure there is no concurrent initialisation on the gl thread
-        std::lock_guard<std::mutex> lock(initialisationMutex);
+        std::scoped_lock lock(initialisationMutex);
         rendererObserver.reset();
     } catch (const std::exception& exception) {
         Log::Error(Event::Android, std::string("MapRenderer::reset failed: ") + exception.what());
@@ -153,7 +153,7 @@ void MapRenderer::requestRender(JNIEnv& env, jni::Local<jni::Object<MapRenderer>
 void MapRenderer::update(std::shared_ptr<UpdateParameters> params) {
     try {
         // Lock on the parameters
-        std::lock_guard<std::mutex> lock(updateMutex);
+        std::scoped_lock lock(updateMutex);
         updateParameters = std::move(params);
     } catch (const std::exception& exception) {
         Log::Error(Event::Android, std::string("MapRenderer::update failed: ") + exception.what());
@@ -163,7 +163,7 @@ void MapRenderer::update(std::shared_ptr<UpdateParameters> params) {
 void MapRenderer::setObserver(std::shared_ptr<RendererObserver> _rendererObserver) {
     try {
         // Lock as the initialization can come from the main thread or the GL thread first
-        std::lock_guard<std::mutex> lock(initialisationMutex);
+        std::scoped_lock lock(initialisationMutex);
 
         rendererObserver = std::move(_rendererObserver);
 
@@ -246,7 +246,7 @@ void MapRenderer::render(JNIEnv&) {
 
 void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface>& surface) {
     // Lock as the initialization can come from the main thread or the GL thread first
-    std::lock_guard<std::mutex> lock(initialisationMutex);
+    std::scoped_lock lock(initialisationMutex);
 
     // The android system will have already destroyed the underlying
     // GL resources if this is not the first initialization and an

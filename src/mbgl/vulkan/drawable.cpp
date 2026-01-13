@@ -298,6 +298,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         // update pipeline info with per segment modifiers
         impl->pipelineInfo.setDrawMode(seg->getMode());
 
+        impl->pipelineInfo.setScissorRect(parameters.scissorRect);
+
         impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);

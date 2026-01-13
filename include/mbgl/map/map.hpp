@@ -107,6 +107,8 @@ public:
     void setConstrainMode(ConstrainMode);
     void setViewportMode(ViewportMode);
     void setSize(Size);
+    void setFrustumOffset(const EdgeInsets&);
+    EdgeInsets getFrustumOffset();
     MapOptions getMapOptions() const;
 
     // Projection Mode

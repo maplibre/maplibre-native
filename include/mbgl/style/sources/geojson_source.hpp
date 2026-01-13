@@ -35,6 +35,9 @@ struct GeoJSONOptions {
     using ClusterProperties = std::map<std::string, ClusterExpression>;
     ClusterProperties clusterProperties;
 
+    // Update options
+    bool synchronousUpdate = false;
+
     static Immutable<GeoJSONOptions> defaultOptions();
 };
 class GeoJSONData {
@@ -46,7 +49,7 @@ public:
                                                const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions());
 
     virtual ~GeoJSONData() = default;
-    virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&) = 0;
+    virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&, bool runSynchronously) = 0;
 
     // SuperclusterData
     virtual Features getChildren(std::uint32_t) = 0;
@@ -75,6 +78,8 @@ public:
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
+    bool isUpdateSynchronous() const noexcept;
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;

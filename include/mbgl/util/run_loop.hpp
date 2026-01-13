@@ -102,7 +102,7 @@ private:
 
     // Adds a WorkTask to the queue, and wakes it up.
     void push(Priority priority, std::shared_ptr<WorkTask> task) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::scoped_lock lock(mutex);
         if (priority == Priority::High) {
             highPriorityQueue.emplace(std::move(task));
         } else {

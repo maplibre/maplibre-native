@@ -28,6 +28,10 @@
     return self;
 }
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (instancetype)initWithCoder:(NSCoder *)decoder
 {
     MLNLogInfo(@"Initializing with coder.");

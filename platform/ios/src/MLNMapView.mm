@@ -998,6 +998,8 @@ public:
     _mbglView.reset();
 
     _rendererFrontend.reset();
+
+    _style = nil;
 }
 
 - (void)dealloc
@@ -3325,6 +3327,16 @@ static void *windowScreenContext = &windowScreenContext;
 -(double)tileLodZoomShift
 {
     return _mbglMap->getTileLodZoomShift();
+}
+
+-(void)setFrustumOffset:(UIEdgeInsets)frustumOffset
+{
+    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustumOffset));
+}
+
+-(UIEdgeInsets)frustumOffset
+{
+    return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
 }
 
 // MARK: - Accessibility -

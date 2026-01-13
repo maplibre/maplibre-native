@@ -49,7 +49,7 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
 
     dataMap[id] = std::make_unique<Data>();
     dataMap[id]->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, sprite](Response res) {
-        std::lock_guard<std::mutex> lock(dataMapMutex);
+        std::scoped_lock lock(dataMapMutex);
         Data* data = dataMap[sprite->id].get();
         if (res.error) {
             observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
@@ -68,7 +68,7 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
 
     dataMap[id]->spriteRequest = fileSource.request(
         Resource::spriteImage(url, pixelRatio), [this, sprite](Response res) {
-            std::lock_guard<std::mutex> lock(dataMapMutex);
+            std::scoped_lock lock(dataMapMutex);
             Data* data = dataMap[sprite->id].get();
             if (res.error) {
                 observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));

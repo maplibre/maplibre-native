@@ -31,12 +31,12 @@ void NetworkStatus::Set(Status status) {
 }
 
 void NetworkStatus::Subscribe(util::AsyncTask *async) {
-    std::lock_guard<std::mutex> lock(NetworkStatus::mtx);
+    std::scoped_lock lock(NetworkStatus::mtx);
     observers.insert(async);
 }
 
 void NetworkStatus::Unsubscribe(util::AsyncTask *async) {
-    std::lock_guard<std::mutex> lock(NetworkStatus::mtx);
+    std::scoped_lock lock(NetworkStatus::mtx);
     observers.erase(async);
 }
 
@@ -45,8 +45,8 @@ void NetworkStatus::Reachable() {
         return;
     }
 
-    std::lock_guard<std::mutex> lock(NetworkStatus::mtx);
-    for (auto async : observers) {
+    std::scoped_lock lock(NetworkStatus::mtx);
+    for (auto async : observers) { // NOLINT(bugprone-nondeterministic-pointer-iteration-order)
         async->send();
     }
 }

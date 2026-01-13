@@ -1,5 +1,43 @@
 # Changelog MapLibre Native for Android
 
+## 12.3.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
+## 12.3.0
+
+### ✨ Features and improvements
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+
+### 🐞 Bug fixes
+
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+
+## 12.2.2
+
+### 🐞 Bug fixes
+
+- Fix crash due to pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
+
+## 12.2.1
+
+### 🐞 Bug fixes
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
+## 12.2.0
+
+### ✨ Features and improvements
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+
+### 🐞 Bug fixes
+
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+- Use deprecated readParcelable on Tiramisu to avoid crash ([#3950](https://github.com/maplibre/maplibre-native/pull/3950)).
+- Handle `BufferResource::version` overflow ([#3962](https://github.com/maplibre/maplibre-native/pull/3962)).
+
 ## 12.1.3
 
 - Disable `UnsatisfiedLinkError` during local tests ([#3942](https://github.com/maplibre/maplibre-native/pull/3942)

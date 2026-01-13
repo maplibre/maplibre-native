@@ -6,6 +6,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 
 namespace mbgl {
 namespace vulkan {
@@ -44,6 +45,7 @@ public:
     // external values (used in hash)
     vk::RenderPass renderPass{};
     vk::Extent2D viewExtent{};
+    vk::Rect2D scissorRect{};
 
     // dynamic values (not part of the pipeline/ignored in hash)
     struct {
@@ -67,6 +69,7 @@ public:
     static vk::CompareOp vulkanCompareOp(const gfx::DepthFunctionType& value);
     static vk::CompareOp vulkanCompareOp(const gfx::StencilFunctionType& value);
     static vk::StencilOp vulkanStencilOp(const gfx::StencilOpType& value);
+    static vk::Rect2D vulkanScissorRect(const gfx::ScissorRect& value);
 
     void setCullMode(const gfx::CullFaceMode& value);
     void setDrawMode(const gfx::DrawModeType& value);
@@ -78,6 +81,7 @@ public:
     void setStencilMode(const gfx::StencilMode& value);
     void setRenderable(const gfx::Renderable& value);
     void setLineWidth(float value);
+    void setScissorRect(const gfx::ScissorRect& value);
 
     bool usesBlendConstants() const;
     void updateVertexInputHash();

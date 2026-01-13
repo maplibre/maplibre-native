@@ -78,7 +78,7 @@ BufferResource::BufferResource(
         const auto frameCount = backend.getMaxFrames();
         totalSize = bufferWindowSize * frameCount;
 
-        bufferWindowVersions = std::vector<std::uint16_t>(frameCount, 0);
+        bufferWindowVersions = std::vector<VersionType>(frameCount, VersionType{});
     }
 
     const auto bufferInfo = vk::BufferCreateInfo()
@@ -183,6 +183,14 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     stats.bufferUpdates++;
     stats.bufferObjUpdates++;
     version++;
+
+    if (version == std::numeric_limits<VersionType>::max()) {
+        version = VersionType{} + 1;
+
+        if (bufferWindowSize) {
+            std::ranges::fill(bufferWindowVersions, VersionType{});
+        }
+    }
 
     if (bufferWindowSize) {
         const auto frameIndex = context.getCurrentFrameResourceIndex();

@@ -9,13 +9,15 @@ namespace mbgl {
 class Tileset;
 class TileParameters;
 
-class VectorMVTTile : public VectorTile {
+class VectorMVTTile final : public VectorTile {
 public:
     VectorMVTTile(const OverscaledTileID&,
                   std::string sourceID,
                   const TileParameters&,
                   const Tileset&,
                   TileObserver* observer = nullptr);
+
+    ~VectorMVTTile() override;
 
     void setData(const std::shared_ptr<const std::string>& data) override;
 };

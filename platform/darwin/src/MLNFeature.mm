@@ -45,11 +45,15 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
 }
 
 - (NSDictionary *)geoJSONDictionary {
-    return NSDictionaryFeatureForGeometry([super geoJSONDictionary], self.attributes, self.identifier);
+    return NSDictionaryFeatureForGeometry(@{@"type": @"Empty"}, self.attributes, self.identifier);
 }
 
 - (mbgl::GeoJSON)geoJSONObject {
     return mbglFeature({[self geometryObject]}, identifier, self.attributes);
+}
+
+- (mbgl::Geometry<double>)geometryObject {
+    return mbgl::EmptyGeometry();
 }
 
 - (NSString *)description

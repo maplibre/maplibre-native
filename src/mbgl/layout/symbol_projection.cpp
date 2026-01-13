@@ -220,7 +220,7 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
         currentIndex += dir;
 
         // offset does not fit on the projected line
-        if (currentIndex < 0 || currentIndex >= static_cast<int32_t>(line.size())) {
+        if (currentIndex < 0 || std::cmp_greater_equal(currentIndex, static_cast<int32_t>(line.size()))) {
             return {};
         }
 

@@ -38,7 +38,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif

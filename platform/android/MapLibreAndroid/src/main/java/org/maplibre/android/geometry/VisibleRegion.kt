@@ -49,7 +49,9 @@ class VisibleRegion : Parcelable {
      */
     @Suppress("DEPRECATION")
     private constructor(parcel: Parcel) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        // Use deprecated method on Tiramisu to avoid platform bug
+        // https://github.com/maplibre/maplibre-native/issues/1276
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
             farLeft = parcel.readParcelable<LatLng>(LatLng::class.java.classLoader, LatLng::class.java)
             farRight = parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)
             nearLeft = parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)

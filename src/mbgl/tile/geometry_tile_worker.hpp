@@ -5,7 +5,7 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/actor/actor_ref.hpp>
+#include <mbgl/actor/optional_actor_ref.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/geometry/feature_index.hpp>
@@ -34,8 +34,8 @@ using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 
 class GeometryTileWorker {
 public:
-    GeometryTileWorker(ActorRef<GeometryTileWorker> self,
-                       ActorRef<GeometryTile> parent,
+    GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self,
+                       OptionalActorRef<GeometryTile> parent,
                        const TaggedScheduler& scheduler_,
                        OverscaledTileID,
                        std::string,
@@ -79,8 +79,8 @@ private:
 
     void checkPatternLayout(std::unique_ptr<Layout> layout);
 
-    ActorRef<GeometryTileWorker> self;
-    ActorRef<GeometryTile> parent;
+    OptionalActorRef<GeometryTileWorker> self;
+    OptionalActorRef<GeometryTile> parent;
     TaggedScheduler scheduler;
 
     const OverscaledTileID id;

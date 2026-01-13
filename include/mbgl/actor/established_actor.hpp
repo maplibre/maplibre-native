@@ -4,6 +4,7 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/message.hpp>
 #include <mbgl/actor/actor_ref.hpp>
+#include <mbgl/actor/optional_actor_ref.hpp>
 
 #include <memory>
 #include <future>
@@ -31,7 +32,8 @@ public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
     template <typename U = Object, class... Args>
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
-        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...>)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...> ||
+                 std::is_constructible_v<U, OptionalActorRef<U>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
@@ -40,7 +42,8 @@ public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
     template <typename U = Object, class... Args>
     EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
-        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...>)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...> ||
+                 std::is_constructible_v<U, OptionalActorRef<U>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
@@ -48,14 +51,16 @@ public:
 
     // Construct the `Object` from a tuple containing the constructor arguments
     // (i.e. `Object(std::get<0>(args), std::get<1>(args), ...)`)
-    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
+    template <class ArgsTuple,
+              std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value> // NOLINT(modernize-type-traits)
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args)
         : parent(parent_) {
         emplaceObject(std::forward<ArgsTuple>(args), std::make_index_sequence<ArgCount>{});
         parent.mailbox->open(scheduler);
     }
 
-    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
+    template <class ArgsTuple,
+              std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value> // NOLINT(modernize-type-traits)
     EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args) {
         EstablishedActor(*scheduler.get(), parent_, std::forward<ArgsTuple>(args));
     }
@@ -68,6 +73,14 @@ public:
     }
 
 private:
+    // Enabled for Objects with a constructor taking OptionalActorRef<Object> as the first parameter
+    template <typename U = Object, class... Args>
+    void emplaceObject(Args&&... args_)
+        requires(std::is_constructible_v<U, OptionalActorRef<U>, Args...>)
+    {
+        new (&parent.objectStorage) Object(OptionalActorRef(parent.self()), std::forward<Args>(args_)...);
+    }
+
     // Enabled for Objects with a constructor taking ActorRef<Object> as the first parameter
     template <typename U = Object, class... Args>
     void emplaceObject(Args&&... args_)
@@ -87,7 +100,7 @@ private:
     // Used to expand a tuple holding the constructor arguments
     template <class ArgsTuple, std::size_t... I>
     void emplaceObject(ArgsTuple&& args, std::index_sequence<I...>) {
-        emplaceObject(std::move(std::get<I>(std::forward<ArgsTuple>(args)))...);
+        emplaceObject(std::move(std::get<I>(std::forward<ArgsTuple>(args)))...); // NOLINT(bugprone-use-after-move)
         (void)args; // mark args as used: if it's empty tuple, it's not actually used above.
     }
 

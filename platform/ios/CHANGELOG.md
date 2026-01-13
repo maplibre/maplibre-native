@@ -2,6 +2,35 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.22.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
+## 6.22.0
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+- Fix pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
+
+## 6.21.2
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
+## 6.21.1
+
+- Include static XCFramework in GitHub release.
+
+## 6.21.0
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+- Support hiding attribution on iOS ([#3952](https://github.com/maplibre/maplibre-native/pull/3952)).
+- Support extra annotations for snapshotter for iOS ([#3963](https://github.com/maplibre/maplibre-native/pull/3963)).
+
+## 6.20.1
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+
 ## 6.20.0
 
 - Add configurable threshold for rotate gesture snapping to north ([#3914](https://github.com/maplibre/maplibre-native/pull/3914)).
