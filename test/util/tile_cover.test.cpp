@@ -78,9 +78,8 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
     // Top padding of 376 leads to capped pitch. See Transform::getMaxPitchForEdgeInsets.
     EXPECT_LE(transform.getPitch() + 0.001, util::deg2rad(60));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}}),
-        util::tileCover({transform.getState()}, 3));
+    EXPECT_EQ((std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}}),
+              util::tileCover({transform.getState()}, 3));
 }
 
 TEST(TileCover, PitchWithLargerResultSet) {
