@@ -197,7 +197,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             }
             double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
             if (pitch != startPitch || maxPitch < startPitch) {
-                state.setPitch(util::interpolate(startPitch, pitch, t));
+                state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, t)));
             }
             if (roll != startRoll) {
                 state.setRoll(util::interpolate(startRoll, roll, t));
@@ -718,7 +718,7 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     assert(height);
     // Half of fov is the field of view above perspective center.
     // 1.03 is a bit extra added to prevent parallel ground to viewport clipping plane.
-    const double tangentOfFovAboveCenterAngle = 1.03 * (0.5 + centerOffsetY / height) * 2.0 *
+    const double tangentOfFovAboveCenterAngle = (0.5 + centerOffsetY / height) * 2.0 *
                                                 tan(getFieldOfView() / 2.0);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
     return state.getMaxPitch() + getFieldOfView() / 2.0 - fovAboveCenter;
