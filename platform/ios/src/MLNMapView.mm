@@ -998,6 +998,8 @@ public:
     _mbglView.reset();
 
     _rendererFrontend.reset();
+
+    _style = nil;
 }
 
 - (void)dealloc

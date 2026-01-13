@@ -429,10 +429,7 @@ void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::Un
     const vk::Viewport viewport(0.0f, 0.0f, viewExtent.width, viewExtent.height, 0.0f, 1.0f);
 
     buffer->setViewport(0, viewport, dispatcher);
-    if (scissorRect.offset.x != 0 || scissorRect.offset.y != 0 || scissorRect.extent.width != 0 ||
-        scissorRect.extent.height != 0) {
-        buffer->setScissor(0, scissorRect, dispatcher);
-    }
+    buffer->setScissor(0, scissorRect, dispatcher);
 }
 
 std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
@@ -453,10 +450,7 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
     }
 
     dynamicStates.push_back(vk::DynamicState::eViewport);
-    if (scissorRect.offset.x != 0 || scissorRect.offset.y != 0 || scissorRect.extent.width != 0 ||
-        scissorRect.extent.height != 0) {
-        dynamicStates.push_back(vk::DynamicState::eScissor);
-    }
+    dynamicStates.push_back(vk::DynamicState::eScissor);
 
     return dynamicStates;
 }

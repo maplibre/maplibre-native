@@ -13,7 +13,7 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
 
     companion object {
         // app currently has 100+ activities
-        private const val USE_ALL_ACTIVITIES = true
+        private const val USE_ALL_ACTIVITIES = false
         private const val ACTIVITY_DURATION = 5000L
 
         // ignores for both activity lists

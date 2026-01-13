@@ -13,6 +13,11 @@
 
 @dynamic overlayBounds;
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
 + (instancetype)polylineWithCoordinates:(const CLLocationCoordinate2D *)coords
                                   count:(NSUInteger)count
 {
@@ -153,10 +158,22 @@
     return self;
 }
 
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (instancetype)initWithCoder:(NSCoder *)decoder {
     MLNLogInfo(@"Initializing with coder.");
     if (self = [super initWithCoder:decoder]) {
-        _polylines = [decoder decodeObjectOfClass:[NSArray class] forKey:@"polylines"];
+        NSSet<Class> *polylinesClasses = [NSSet setWithArray:@[[NSDictionary class], [NSArray class], [MLNPolyline class]]];
+        _polylines = [decoder decodeObjectOfClasses:polylinesClasses forKey:@"polylines"];
+
+        mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+
+        for (MLNPolyline *polyline in _polylines) {
+            bounds.extend(MLNLatLngBoundsFromCoordinateBounds(polyline.overlayBounds));
+        }
+        _overlayBounds = MLNCoordinateBoundsFromLatLngBounds(bounds);
     }
     return self;
 }

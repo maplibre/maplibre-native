@@ -132,6 +132,13 @@ else()
     add_library(mbgl-core STATIC)
 endif()
 
+# Override visibility for mbgl-core when building amalgamation
+if(MLN_CREATE_AMALGAMATION)
+    target_compile_options(mbgl-core PRIVATE
+        -fvisibility=default
+    )
+endif()
+
 list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/context.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp

@@ -62,6 +62,9 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
     }
+
+    destroyTexture();
+
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     textureDirty = true;
@@ -72,6 +75,9 @@ gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
+
+    destroyTexture();
+
     size = size_;
     textureDirty = true;
     return *this;
@@ -275,6 +281,8 @@ vk::SamplerAddressMode Texture2D::vulkanAddressMode(const gfx::TextureWrapType t
 
 void Texture2D::createTexture() {
     if (size.width == 0 || size.height == 0) return;
+
+    destroyTexture();
 
     const auto& backend = context.getBackend();
 
