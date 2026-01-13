@@ -207,6 +207,30 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
         return {};
     }
     Size size = transform.getState().getSize();
+
+    // When padding is excessive (exceeds viewport dimensions), ignore it entirely
+    // to ensure bounds can still be displayed
+    double effectivePaddingLeft = padding.left();
+    double effectivePaddingRight = padding.right();
+    double effectivePaddingTop = padding.top();
+    double effectivePaddingBottom = padding.bottom();
+
+    double totalHorizontalPadding = effectivePaddingLeft + effectivePaddingRight;
+    double totalVerticalPadding = effectivePaddingTop + effectivePaddingBottom;
+
+    if (totalHorizontalPadding >= static_cast<double>(size.width)) {
+        effectivePaddingLeft = 0;
+        effectivePaddingRight = 0;
+    }
+
+    if (totalVerticalPadding >= static_cast<double>(size.height)) {
+        effectivePaddingTop = 0;
+        effectivePaddingBottom = 0;
+    }
+
+    EdgeInsets effectivePadding{
+        effectivePaddingTop, effectivePaddingLeft, effectivePaddingBottom, effectivePaddingRight};
+
     // Calculate the bounds of the possibly rotated shape with respect to the viewport.
     ScreenCoordinate nePixel = {-INFINITY, -INFINITY};
     ScreenCoordinate swPixel = {INFINITY, INFINITY};
@@ -225,8 +249,8 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
     if (width > 0 || height > 0) {
         double scaleX = static_cast<double>(size.width) / width;
         double scaleY = static_cast<double>(size.height) / height;
-        scaleX -= (padding.left() + padding.right()) / width;
-        scaleY -= (padding.top() + padding.bottom()) / height;
+        scaleX -= (effectivePaddingLeft + effectivePaddingRight) / width;
+        scaleY -= (effectivePaddingTop + effectivePaddingBottom) / height;
         minScale = util::min(scaleX, scaleY);
     }
 
@@ -234,11 +258,6 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
     if (minScale > 0) {
         zoom = util::clamp(
             zoom + util::log2(minScale), transform.getState().getMinZoom(), transform.getState().getMaxZoom());
-    } else {
-        Log::Error(Event::General,
-                   "Unable to calculate appropriate zoom level for bounds. Vertical "
-                   "or horizontal padding is greater "
-                   "than map's height or width.");
     }
 
     // Calculate the center point of a virtual bounds that is extended in all directions by padding.
@@ -247,7 +266,7 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
 
     return CameraOptions()
         .withCenter(transform.screenCoordinateToLatLng(centerPixel))
-        .withPadding(padding)
+        .withPadding(effectivePadding)
         .withZoom(zoom);
 }
 
@@ -265,9 +284,70 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
         transform.jumpTo(CameraOptions().withBearing(bearing).withPitch(pitch));
     }
 
-    return mbgl::cameraForLatLngs(latLngs, transform, padding)
-        .withBearing(util::rad2deg(-transform.getBearing()))
-        .withPitch(util::rad2deg(transform.getPitch()));
+    CameraOptions result = mbgl::cameraForLatLngs(latLngs, transform, padding);
+
+    // When pitch != 0, the initial calculation may not correctly contain all points
+    // because the projection is non-linear. We need to iteratively refine the result
+    // by applying the camera and checking if all points fit, adjusting zoom as needed.
+    if (pitch && *pitch != 0.0 && result.zoom) {
+        const Size size = transform.getState().getSize();
+        constexpr int maxIterations = 10;
+        constexpr double tolerance = 1e-6;
+
+        for (int i = 0; i < maxIterations; ++i) {
+            transform.jumpTo(result);
+
+            // Check if all points are within the viewport (with padding)
+            double minX = padding.left();
+            double maxX = size.width - padding.right();
+            double minY = padding.top();
+            double maxY = size.height - padding.bottom();
+
+            double requiredScaleX = 1.0;
+            double requiredScaleY = 1.0;
+
+            for (const LatLng& latLng : latLngs) {
+                ScreenCoordinate pixel = transform.latLngToScreenCoordinate(latLng);
+
+                // Calculate how much we'd need to zoom out to fit this point
+                if (pixel.x < minX) {
+                    double neededScale = (size.width / 2.0 - padding.left()) / (size.width / 2.0 - pixel.x);
+                    requiredScaleX = std::min(requiredScaleX, neededScale);
+                } else if (pixel.x > maxX) {
+                    double neededScale = (size.width / 2.0 - padding.right()) / (pixel.x - size.width / 2.0);
+                    requiredScaleX = std::min(requiredScaleX, neededScale);
+                }
+
+                if (pixel.y < minY) {
+                    double neededScale = (size.height / 2.0 - padding.top()) / (size.height / 2.0 - pixel.y);
+                    requiredScaleY = std::min(requiredScaleY, neededScale);
+                } else if (pixel.y > maxY) {
+                    double neededScale = (size.height / 2.0 - padding.bottom()) / (pixel.y - size.height / 2.0);
+                    requiredScaleY = std::min(requiredScaleY, neededScale);
+                }
+            }
+
+            double requiredScale = std::min(requiredScaleX, requiredScaleY);
+
+            // If all points fit (scale >= 1), we're done
+            if (requiredScale >= 1.0 - tolerance) {
+                break;
+            }
+
+            // Adjust zoom to accommodate the points that don't fit
+            double zoomAdjustment = util::log2(requiredScale);
+            double newZoom = util::clamp(
+                *result.zoom + zoomAdjustment, transform.getState().getMinZoom(), transform.getState().getMaxZoom());
+
+            if (std::abs(newZoom - *result.zoom) < tolerance) {
+                break;
+            }
+
+            result.zoom = newZoom;
+        }
+    }
+
+    return result.withBearing(util::rad2deg(-transform.getBearing())).withPitch(util::rad2deg(transform.getPitch()));
 }
 
 CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
