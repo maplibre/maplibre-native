@@ -1,6 +1,7 @@
 #include "camera_position.hpp"
 #include "../geometry/lat_lng.hpp"
 #include <mbgl/util/constants.hpp>
+#include <mbgl/math/angles.hpp>
 
 namespace mbgl {
 namespace android {
