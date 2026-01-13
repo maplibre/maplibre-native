@@ -718,8 +718,7 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     assert(height);
     // Half of fov is the field of view above perspective center.
     // 1.03 is a bit extra added to prevent parallel ground to viewport clipping plane.
-    const double tangentOfFovAboveCenterAngle = (0.5 + centerOffsetY / height) * 2.0 *
-                                                tan(getFieldOfView() / 2.0);
+    const double tangentOfFovAboveCenterAngle = (0.5 + centerOffsetY / height) * 2.0 * tan(getFieldOfView() / 2.0);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
     return state.getMaxPitch() + getFieldOfView() / 2.0 - fovAboveCenter;
 }
