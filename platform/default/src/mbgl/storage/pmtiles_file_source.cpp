@@ -1,5 +1,6 @@
 #include <sstream>
 #include <map>
+#include <filesystem>
 
 #include <mbgl/platform/settings.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
@@ -44,6 +45,13 @@ bool acceptsURL(const std::string& url) {
 
 std::string extract_url(const std::string& url) {
     return url.substr(std::char_traits<char>::length(mbgl::util::PMTILES_PROTOCOL));
+}
+
+std::optional<std::string> extractFilePath(const std::string& url) {
+    if (url.starts_with(mbgl::util::FILE_PROTOCOL)) {
+        return url.substr(std::char_traits<char>::length(mbgl::util::FILE_PROTOCOL));
+    }
+    return std::nullopt;
 }
 } // namespace
 
@@ -207,6 +215,7 @@ private:
     std::map<std::string, std::string> metadata_cache;
     std::map<std::string, std::map<std::string, std::vector<pmtiles::entryv3>>> directory_cache;
     std::map<std::string, std::vector<std::string>> directory_cache_control;
+    std::map<std::string, std::filesystem::file_time_type> file_modification_cache;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 
     std::shared_ptr<FileSource> getFileSource() {
@@ -218,9 +227,49 @@ private:
         return fileSource;
     }
 
+    // Check if file has been modified and clear cache if needed
+    void checkAndInvalidateCache(const std::string& url) {
+        auto filePath = extractFilePath(url);
+        if (!filePath) {
+            // Not a file URL, can't check modification time
+            return;
+        }
+
+        std::error_code ec;
+        auto lastWriteTime = std::filesystem::last_write_time(*filePath, ec);
+
+        if (ec) {
+            // File doesn't exist or can't be accessed, clear cache
+            invalidateCache(url);
+            return;
+        }
+
+        if (file_modification_cache.contains(url)) {
+            if (file_modification_cache.at(url) != lastWriteTime) {
+                // File has been modified, invalidate cache
+                invalidateCache(url);
+                file_modification_cache[url] = lastWriteTime;
+            }
+        } else {
+            // First time seeing this file, store modification time
+            file_modification_cache[url] = lastWriteTime;
+        }
+    }
+
+    // Clear all cached data for a URL
+    void invalidateCache(const std::string& url) {
+        header_cache.erase(url);
+        metadata_cache.erase(url);
+        directory_cache.erase(url);
+        directory_cache_control.erase(url);
+    }
+
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
+        checkAndInvalidateCache(url);
+
         if (header_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         Resource resource(Resource::Kind::Source, url);
@@ -270,8 +319,11 @@ private:
     }
 
     void getMetadata(std::string& url, AsyncRequest* req, AsyncCallback callback) {
+        checkAndInvalidateCache(url);
+
         if (metadata_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         getHeader(
@@ -440,6 +492,8 @@ private:
                       uint64_t directoryOffset,
                       uint32_t directoryLength,
                       AsyncCallback callback) {
+        checkAndInvalidateCache(url);
+
         std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
                                           std::to_string(directoryLength);
 

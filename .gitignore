@@ -37,6 +37,7 @@ node_modules
 .cxx
 .env
 vendor/dawn/
+.build
 
 # Node binaries.
 /lib

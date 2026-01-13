@@ -103,3 +103,101 @@ TEST(PMTilesFileSource, NonExistentTile) {
 
     loop.run();
 }
+
+// Test that replacing a PMTiles file on disk while cached doesn't cause a crash
+// This reproduces a bug where stale cached header/directory data causes invalid
+// byte range requests after the underlying file is replaced with a different PMTiles file
+TEST(PMTilesFileSource, FileReplacementWhileCached) {
+    util::RunLoop loop;
+
+    // Create a temporary file path for the test
+    auto tempDir = std::filesystem::temp_directory_path();
+    auto tempPmtilesPath = tempDir / "pmtiles_replacement_test.pmtiles";
+    auto fixturesPath = std::filesystem::current_path() / "test/fixtures/storage/pmtiles";
+
+    // Copy the first PMTiles file to the temp location
+    std::filesystem::copy_file(
+        fixturesPath / "pmt_test.pmtiles", tempPmtilesPath, std::filesystem::copy_options::overwrite_existing);
+
+    std::string tempUrl = std::string(mbgl::util::PMTILES_PROTOCOL) + std::string(mbgl::util::FILE_PROTOCOL) +
+                          tempPmtilesPath.string();
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    int requestCount = 0;
+
+    // First, request TileJSON to cache the header and metadata
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        {Resource::Unknown, tempUrl}, [&, tempUrl, fixturesPath, tempPmtilesPath](Response res) {
+            req.reset();
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.data.get());
+
+            // Request multiple tiles at different zoom levels to populate cache thoroughly
+            // This ensures the directory is cached
+            auto tilesToRequest = std::make_shared<std::vector<std::tuple<int, int, int>>>(
+                std::vector<std::tuple<int, int, int>>{
+                    {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {1, 1, 1}, {2, 0, 0}, {2, 1, 1}, {2, 2, 2}, {2, 3, 3}});
+
+            // Use shared_ptr to keep the recursive lambda alive
+            auto requestNextTile = std::make_shared<std::function<void(size_t)>>();
+            *requestNextTile = [&, tilesToRequest, requestNextTile, tempUrl, fixturesPath, tempPmtilesPath](
+                                   size_t index) {
+                if (index >= tilesToRequest->size()) {
+                    // All initial tiles requested, now replace the file
+                    std::filesystem::copy_file(fixturesPath / "pmt_test_2.pmtiles",
+                                               tempPmtilesPath,
+                                               std::filesystem::copy_options::overwrite_existing);
+
+                    // Request the same tiles again with stale cache
+                    // This should expose issues with cached offsets being invalid for the new file
+                    requestCount = 0;
+                    auto requestWithStaleCache = std::make_shared<std::function<void(size_t)>>();
+                    *requestWithStaleCache =
+                        [&, tilesToRequest, requestWithStaleCache, tempUrl, fixturesPath, tempPmtilesPath](size_t idx) {
+                            if (idx >= tilesToRequest->size()) {
+                                // Also try some high zoom level tiles that might not exist
+                                req = pmtiles.request(Resource::tile(tempUrl, 1.0, 100, 200, 10, Tileset::Scheme::XYZ),
+                                                      [&](Response finalRes) {
+                                                          req.reset();
+                                                          // The request may fail or succeed, but should not crash
+                                                          // With the bug, invalid byte ranges from stale cache would
+                                                          // crash here
+                                                          (void)finalRes;
+
+                                                          // Clean up temp file
+                                                          std::filesystem::remove(tempPmtilesPath);
+                                                          loop.stop();
+                                                      });
+                                return;
+                            }
+
+                            auto [z, x, y] = (*tilesToRequest)[idx];
+                            req = pmtiles.request(Resource::tile(tempUrl, 1.0, x, y, z, Tileset::Scheme::XYZ),
+                                                  [&, idx, requestWithStaleCache](Response tileRes) {
+                                                      req.reset();
+                                                      requestCount++;
+                                                      // Note: We expect some of these to fail or return no content
+                                                      // but they should not crash
+                                                      (void)tileRes;
+                                                      (*requestWithStaleCache)(idx + 1);
+                                                  });
+                        };
+                    (*requestWithStaleCache)(0);
+                    return;
+                }
+
+                auto [z, x, y] = (*tilesToRequest)[index];
+                req = pmtiles.request(Resource::tile(tempUrl, 1.0, x, y, z, Tileset::Scheme::XYZ),
+                                      [&, index, requestNextTile](Response tileRes) {
+                                          req.reset();
+                                          (void)tileRes;
+                                          (*requestNextTile)(index + 1);
+                                      });
+            };
+
+            (*requestNextTile)(0);
+        });
+
+    loop.run();
+}
