@@ -4,6 +4,7 @@
     "allowJs": true,
     "checkJs": true,
     "module": "nodenext",
+    "target": "esnext",
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "maxNodeModuleJsDepth": 0,
