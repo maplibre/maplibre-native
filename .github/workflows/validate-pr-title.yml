@@ -1,0 +1,22 @@
+name: Validate PR title
+
+on:
+  pull_request:
+    types: [labeled, unlabeled, opened, edited]
+
+jobs:
+  validate-tags-match-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Check if labels match PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: node .github/scripts/validate-pr-title.ts
