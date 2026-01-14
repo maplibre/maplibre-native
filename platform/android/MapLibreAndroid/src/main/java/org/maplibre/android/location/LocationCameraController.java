@@ -330,7 +330,7 @@ final class LocationCameraController {
     isEnabled = enabled;
   }
 
-  private boolean isLocationTracking() {
+  boolean isLocationTracking() {
     return cameraMode == CameraMode.TRACKING
       || cameraMode == CameraMode.TRACKING_COMPASS
       || cameraMode == CameraMode.TRACKING_GPS
