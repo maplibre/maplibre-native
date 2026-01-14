@@ -3,14 +3,15 @@
     "strict": true,
     "allowJs": true,
     "checkJs": true,
-    "module": "NodeNext",
+    "module": "nodenext",
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "maxNodeModuleJsDepth": 0,
-    "noEmit": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "include": [
-    ".github/scripts/**/*.ts",
+    ".github/scripts/*.ts",
     "scripts/**/*.mjs",
     "scripts/**/*.d.ts"
   ],

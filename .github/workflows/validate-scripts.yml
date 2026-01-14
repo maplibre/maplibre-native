@@ -1,4 +1,4 @@
-name: typecheck-scripts
+name: validate-scripts
 
 on:
   workflow_dispatch:
@@ -6,13 +6,17 @@ on:
   pull_request:
 
 jobs:
-  typecheck-scripts:
+  validate-scripts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           persist-credentials: false
 
-      - run: |
+      - name: Typecheck
+        run: |
           npm install
           npx tsc -p tsconfig.json
+
+      - name: Run tests
+        run: node --test .github/scripts/**.test.ts
