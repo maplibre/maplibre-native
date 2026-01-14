@@ -315,7 +315,8 @@ void Texture2D::createTexture() {
             break;
 
         case Texture2DUsage::Blit:
-            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eSampled |
+                         vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
             imageTiling = vk::ImageTiling::eLinear;
             break;
     }

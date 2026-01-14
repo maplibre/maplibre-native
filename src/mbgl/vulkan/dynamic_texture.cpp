@@ -21,33 +21,34 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     textureToBlitVK->setSize(imageSize);
     textureToBlitVK->setFormat(texture.get()->getFormat(), gfx::TextureChannelDataType::UnsignedByte);
     textureToBlitVK->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                             .wrapU = gfx::TextureWrapType::Clamp,
-                                             .wrapV = gfx::TextureWrapType::Clamp});
+                                              .wrapU = gfx::TextureWrapType::Clamp,
+                                              .wrapV = gfx::TextureWrapType::Clamp});
     textureToBlitVK->create();
     textureToBlitVK->setUsage(Texture2DUsage::Blit);
     texturesToBlit.emplace(texHandle, textureToBlit);
 
     std::vector<std::function<void(gfx::Context&)>> deletionQueue;
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+    context.submitOneTimeCommand(
+        [&](const vk::UniqueCommandBuffer& commandBuffer) {
             textureToBlitVK->uploadSubRegion(pixelData, imageSize, 0, 0, commandBuffer, &deletionQueue);
 
             const auto barrier = vk::ImageMemoryBarrier()
-                 .setImage(textureToBlitVK->getVulkanImage())
-                 .setOldLayout(textureToBlitVK->getVulkanImageLayout())
-                 .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
-                 .setSrcAccessMask(vk::AccessFlagBits::eShaderRead)
-                 .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
-                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                 .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+                                     .setImage(textureToBlitVK->getVulkanImage())
+                                     .setOldLayout(textureToBlitVK->getVulkanImageLayout())
+                                     .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                     .setSrcAccessMask(vk::AccessFlagBits::eShaderRead)
+                                     .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
             commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eFragmentShader,
-                                        vk::PipelineStageFlagBits::eTransfer,
-                                        {},
-                                        nullptr,
-                                        nullptr,
-                                        barrier,
-                                        context.getBackend().getDispatcher());
+                                           vk::PipelineStageFlagBits::eTransfer,
+                                           {},
+                                           nullptr,
+                                           nullptr,
+                                           barrier,
+                                           context.getBackend().getDispatcher());
         },
         true);
     for (const auto& function : deletionQueue) function(context);
@@ -68,10 +69,10 @@ void DynamicTexture::uploadDeferredImages() {
             const auto& textureToBlitVK = static_cast<Texture2D*>(pair.second.get());
 
             const auto copyInfo = vk::ImageCopy()
-                 .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                 .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                 .setDstOffset({rect.x, rect.y, 0})
-                 .setExtent({rect.w, rect.h, 1});
+                                      .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                                      .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                                      .setDstOffset({rect.x, rect.y, 0})
+                                      .setExtent({rect.w, rect.h, 1});
 
             commandBuffer->copyImage(textureToBlitVK->getVulkanImage(),
                                      vk::ImageLayout::eTransferSrcOptimal,

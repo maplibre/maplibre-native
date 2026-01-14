@@ -98,6 +98,7 @@ private:
 
     void destroyTexture();
     void destroySampler();
+
 public:
     void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
