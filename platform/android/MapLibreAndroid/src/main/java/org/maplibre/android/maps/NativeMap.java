@@ -321,4 +321,10 @@ interface NativeMap {
   long getNativePtr();
 
   void addSnapshotCallback(@NonNull MapLibreMap.SnapshotReadyCallback callback);
+
+  //
+  // Cross-platform Plugin API
+  //
+
+  void registerPlugins(@NonNull long[] pluginPtrs);
 }

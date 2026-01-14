@@ -7,6 +7,7 @@
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/storage/network_status.hpp>
+#include <mbgl/plugin/cross_platform_plugin.hpp>
 
 #include "annotation/marker.hpp"
 #include "annotation/polygon.hpp"
@@ -327,6 +328,8 @@ public:
 
     void setFrustumOffset(JNIEnv&, const jni::Object<RectF>&);
 
+    void registerPlugins(JNIEnv&, const jni::Array<jni::jlong>& pluginPtrs);
+
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
     void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
@@ -368,6 +371,9 @@ private:
 
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;
+
+    // Holds raw plugin references, lifecycle is managed by client
+    std::vector<mbgl::platform::XPlatformPlugin*> plugins;
 };
 
 } // namespace android

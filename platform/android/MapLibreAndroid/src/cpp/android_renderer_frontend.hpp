@@ -48,6 +48,8 @@ public:
 
     const TaggedScheduler& getThreadPool() const override;
 
+    Renderer* getRenderer() const;
+
     // Feature querying
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate&, const RenderedQueryOptions&) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox&, const RenderedQueryOptions&) const;

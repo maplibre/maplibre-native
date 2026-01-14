@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MLNCalloutView;
 @protocol MLNFeature;
 @protocol MLNLocationManager;
+@protocol MLNXPlatformPluginBridge;
 
 /** Options for ``MLNMapView/decelerationRate``. */
 typedef CGFloat MLNMapViewDecelerationRate NS_TYPED_EXTENSIBLE_ENUM;
@@ -230,6 +231,20 @@ MLN_EXPORT
  @return An initialized map view.
  */
 - (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame,
+ style URL and cross platform plugins.
+
+ @param frame The frame for the view, measured in points.
+ @param styleURL URL of the map style to display. Specify `nil` for the default style.
+ @param plugins An array of objects conforming to `MLNXPlatformPluginBridge`
+    that enable platform-independent functionality through `XPlatformPlugin`.
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame
+                     styleURL:(nullable NSURL *)styleURL
+                      plugins:(NSArray<id<MLNXPlatformPluginBridge>> *)plugins;
 
 // MARK: Accessing the Delegate
 
