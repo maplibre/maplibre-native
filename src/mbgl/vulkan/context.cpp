@@ -168,11 +168,10 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-std::mutex mutex;
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function,
-                                   bool createCommandPool) const {
+                                   bool createCommandPool) {
     MLN_TRACE_FUNC();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
 
     vk::UniqueCommandPool newCommandPool;
     if (createCommandPool) {
@@ -326,7 +325,7 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
 
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];

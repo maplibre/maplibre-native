@@ -313,6 +313,11 @@ void Texture2D::createTexture() {
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst;
             imageTiling = vk::ImageTiling::eLinear;
             break;
+
+        case Texture2DUsage::Blit:
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
+            imageTiling = vk::ImageTiling::eLinear;
+            break;
     }
 
     const auto imageCreateInfo = vk::ImageCreateInfo()

@@ -41,6 +41,7 @@ enum class Texture2DUsage {
     ShaderInput,
     Attachment,
     Read,
+    Blit,
 };
 
 class Texture2D : public gfx::Texture2D {
@@ -97,7 +98,7 @@ private:
 
     void destroyTexture();
     void destroySampler();
-
+public:
     void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
