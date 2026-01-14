@@ -1,4 +1,4 @@
-name: Tags match PR title
+name: Validate PR title
 
 on:
   pull_request:
@@ -15,4 +15,4 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-        run: node .github/scripts/validate-labels.ts
+        run: node .github/scripts/validate-pr-title.ts
