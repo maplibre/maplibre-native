@@ -1011,6 +1011,25 @@ TEST(Transform, FreeCameraOptionsInvalidZ) {
     EXPECT_LE(transform.getFreeCameraOptions().position.value()[2], 1.0);
 }
 
+TEST(Transform, FreeCameraOptionsHighPitch) {
+    Transform transform;
+    transform.resize({100, 100});
+    transform.setMaxPitch(180.0);
+    FreeCameraOptions options;
+
+    options.position = vec3{{0.1, 0.1, 0.1}};
+    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, util::deg2rad(90.0)).m;
+    transform.setFreeCameraOptions(options);
+    EXPECT_DOUBLE_EQ(util::deg2rad(90.0), transform.getState().getPitch());
+    EXPECT_THAT(transform.getFreeCameraOptions().position.value(), Vec3NearEquals1E5(vec3{{0.1, 0.1, 0.1}}));
+
+    options.position = vec3{{0.1, 0.1, 0.1}};
+    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, util::deg2rad(135.0)).m;
+    transform.setFreeCameraOptions(options);
+    EXPECT_DOUBLE_EQ(util::deg2rad(135.0), transform.getState().getPitch());
+    EXPECT_THAT(transform.getFreeCameraOptions().position.value(), Vec3NearEquals1E5(vec3{{0.1, 0.1, 0.1}}));
+}
+
 TEST(Transform, FreeCameraOptionsInvalidOrientation) {
     // Invalid orientations that cannot be clamped into a valid range
     Transform transform;
