@@ -23,8 +23,8 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     textureToBlitVK->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
                                               .wrapU = gfx::TextureWrapType::Clamp,
                                               .wrapV = gfx::TextureWrapType::Clamp});
-    textureToBlitVK->create();
     textureToBlitVK->setUsage(Texture2DUsage::Blit);
+    textureToBlitVK->create();
     texturesToBlit.emplace(texHandle, textureToBlit);
 
     std::vector<std::function<void(gfx::Context&)>> deletionQueue;
