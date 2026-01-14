@@ -13,6 +13,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
+        with:
+          node-version-file: ".nvmrc"
+
       - name: Typecheck
         run: |
           npm install
