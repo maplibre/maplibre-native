@@ -69,7 +69,7 @@ jobs:
           node-version-file: ".nvmrc"
 
       - name: npm install
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
         working-directory: .
         shell: bash
 

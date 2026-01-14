@@ -1,0 +1,26 @@
+name: validate-scripts
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  validate-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Typecheck
+        run: |
+          npm install
+          npx tsc -p tsconfig.json
+
+      - name: Run tests
+        run: node --test .github/scripts/**.test.ts
