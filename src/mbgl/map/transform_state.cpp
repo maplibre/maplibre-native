@@ -274,10 +274,10 @@ void TransformState::updateStateFromCamera() {
 
     // Compute center point of the map
     const Point<double> mercatorPoint = {position[0] + dx * travel, position[1] + dy * travel};
+    setLatLngZoom(latLngFromMercator(mercatorPoint), scaleZoom(newScale));
+
     const double mercatorZ = position[2] + dz * travel;
     double alt_m = mercatorZ * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), 0) * util::tileSize_D;
-
-    setLatLngZoom(latLngFromMercator(mercatorPoint), scaleZoom(newScale));
     setCenterAltitude(alt_m);
     setBearing(newBearing);
     setPitch(newPitch);
