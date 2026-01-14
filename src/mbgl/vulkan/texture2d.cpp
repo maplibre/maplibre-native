@@ -190,7 +190,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     memcpy(bufferAllocation->mappedBuffer, pixelData, bufferInfo.size);
 
     const auto enqueueCommands = [&](const auto& buffer) {
-        transitionToTransferLayout(buffer);
+        transitionToTransferWriteLayout(buffer);
 
         const auto region = vk::BufferImageCopy()
                                 .setBufferOffset(0)
@@ -205,6 +205,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
         if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
             generateMips(buffer);
+        } else if (textureUsage == Texture2DUsage::Blit) {
+            transitionToTransferReadLayout(buffer);
         } else {
             transitionToShaderReadLayout(buffer);
         }
@@ -444,7 +446,7 @@ void Texture2D::destroySampler() {
     }
 }
 
-void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer) {
+void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto barrier = vk::ImageMemoryBarrier()
                              .setImage(imageAllocation->image)
                              .setOldLayout(imageLayout)
@@ -456,6 +458,28 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
     buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
+
+    imageLayout = barrier.newLayout;
+}
+
+void Texture2D::transitionToTransferReadLayout(const vk::UniqueCommandBuffer& buffer) {
+    const auto barrier = vk::ImageMemoryBarrier()
+            .setImage(imageAllocation->image)
+            .setOldLayout(imageLayout)
+            .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+            .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+            .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+            .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+            .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eTransfer,
                             {},
                             nullptr,
@@ -518,7 +542,7 @@ const vk::Sampler& Texture2D::getVulkanSampler() {
     return sampler;
 }
 
-void Texture2D::copyImage(vk::Image image) {
+void Texture2D::copyImage(vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset) {
     if (!image) return;
 
     create();
@@ -527,9 +551,10 @@ void Texture2D::copyImage(vk::Image image) {
         const auto copyInfo = vk::ImageCopy()
                                   .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
                                   .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                                  .setExtent({size.width, size.height, 1});
+                                  .setExtent({imageSize.width, imageSize.height, 1})
+                                  .setDstOffset({xOffset, yOffset, 0});
 
-        transitionToTransferLayout(commandBuffer);
+        transitionToTransferWriteLayout(commandBuffer);
         commandBuffer->copyImage(image,
                                  vk::ImageLayout::eTransferSrcOptimal,
                                  imageAllocation->image,

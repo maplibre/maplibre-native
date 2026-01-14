@@ -85,7 +85,7 @@ public:
     const vk::Image& getVulkanImage() const { return imageAllocation->image; }
     const vk::Sampler& getVulkanSampler();
 
-    void copyImage(vk::Image image);
+    void copyImage(vk::Image image, Size imageSize, uint16_t xOffset = 0, uint16_t yOffset = 0);
     std::shared_ptr<PremultipliedImage> readImage();
 
 private:
@@ -99,8 +99,8 @@ private:
     void destroyTexture();
     void destroySampler();
 
-public:
-    void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
+    void transitionToTransferWriteLayout(const vk::UniqueCommandBuffer&);
+    void transitionToTransferReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
 
