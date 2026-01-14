@@ -24,7 +24,7 @@ public:
 
     virtual PremultipliedImage readStillImage() = 0;
     virtual RendererBackend* getRendererBackend() = 0;
-    void setSize(Size);
+    virtual void setSize(Size);
 
 protected:
     HeadlessBackend(Size);

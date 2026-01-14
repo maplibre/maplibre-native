@@ -19,6 +19,7 @@ public:
     gfx::Renderable& getDefaultRenderable() override;
     PremultipliedImage readStillImage() override;
     RendererBackend* getRendererBackend() override;
+    void setSize(Size) override;
 
     class Impl {
     public:
