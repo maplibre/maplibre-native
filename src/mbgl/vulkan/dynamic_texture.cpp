@@ -42,8 +42,8 @@ void DynamicTexture::uploadDeferredImages() {
 
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
     for (const auto& pair : texturesToBlit) {
-        const auto &rect = pair.first.getRectangle();
-        const auto &textureToBlitVK = static_cast<Texture2D *>(pair.second.get());
+        const auto& rect = pair.first.getRectangle();
+        const auto& textureToBlitVK = static_cast<Texture2D*>(pair.second.get());
         textureVK->copyImage(textureToBlitVK->getVulkanImage(), {rect.w, rect.h}, rect.x, rect.y);
     }
     texturesToBlit.clear();

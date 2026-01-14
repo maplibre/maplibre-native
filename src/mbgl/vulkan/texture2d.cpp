@@ -470,14 +470,14 @@ void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& b
 
 void Texture2D::transitionToTransferReadLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto barrier = vk::ImageMemoryBarrier()
-            .setImage(imageAllocation->image)
-            .setOldLayout(imageLayout)
-            .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
-            .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
-            .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
-            .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-            .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-            .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+                             .setImage(imageAllocation->image)
+                             .setOldLayout(imageLayout)
+                             .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                             .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+                             .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+                             .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                             .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
     buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eTransfer,
