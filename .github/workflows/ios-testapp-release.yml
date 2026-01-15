@@ -1,0 +1,27 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  ios-testapp-release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup certificate
+        run: |
+          echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > platform/ios/app-swift/MapLibre.mobileprovision
+
+      - name: Update BUILD.bazel
+        run: |
+          sed -i '' 's/xcode_profile/:MapLibre.mobileprovision/' platform/ios/app-swift/BUILD.bazel
+
+      - name: Build
+        run: bazel build //platform/ios/app-swift:MapLibreApp -c opt  --ios_multi_cpus=arm64 --//:renderer=metal --action_env=SENTRY_DSN=${{ vars.SENTRY_DSN_IOS }}
+
+      - name: 'Upload app to TestFlight'
+        uses: apple-actions/upload-testflight-build@v3
+        with:
+          app-path: 'bazel-bin/platform/ios/app-swift/MapLibreApp.ipa'
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY }}

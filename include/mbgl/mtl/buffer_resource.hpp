@@ -87,6 +87,8 @@ protected:
     std::uint16_t version = 0;
     bool isIndexBuffer;
     bool persistent;
+
+    mutable bool usingVertexBuffer = false;
 };
 
 } // namespace mtl
