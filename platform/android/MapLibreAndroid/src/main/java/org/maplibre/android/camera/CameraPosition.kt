@@ -37,7 +37,8 @@ class CameraPosition
  * @param padding Padding in pixels. Specified in left, top, right, bottom order.
  * @throws NullPointerException     if target is null
  * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
- */ @Keep internal constructor(
+ */
+ @Keep internal constructor(
 
     /**
      * The location that the camera is pointing at.
@@ -113,7 +114,8 @@ class CameraPosition
      * @param padding Padding in pixels. Specified in left, top, right, bottom order.
      * @throws NullPointerException     if target is null
      * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
-     */ @Keep internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double, padding: DoubleArray?) : this(target, 0.0, zoom, tilt, bearing, 0.0, 36.86989764584402, padding)
+     */
+    @Keep internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double, padding: DoubleArray?) : this(target, 0.0, zoom, tilt, bearing, 0.0, MapLibreConstants.DEFAULT_FOV, padding)
 
     /**
      * Constructs a CameraPosition.
