@@ -34,6 +34,10 @@ TEST(Style, Properties) {
     ASSERT_EQ("", style.getName());
     ASSERT_EQ((LatLng{20, 10}), *style.getDefaultCamera().center);
 
+    style.loadJSON(R"STYLE({"centerAltitude": 999})STYLE");
+    ASSERT_EQ("", style.getName());
+    ASSERT_EQ(999, *style.getDefaultCamera().centerAltitude);
+
     style.loadJSON(R"STYLE({"bearing": 24})STYLE");
     ASSERT_EQ("", style.getName());
     ASSERT_EQ(LatLng{}, *style.getDefaultCamera().center);
@@ -46,6 +50,10 @@ TEST(Style, Properties) {
     style.loadJSON(R"STYLE({"pitch": 60})STYLE");
     ASSERT_EQ("", style.getName());
     ASSERT_EQ(60, *style.getDefaultCamera().pitch);
+
+    style.loadJSON(R"STYLE({"roll": 99})STYLE");
+    ASSERT_EQ("", style.getName());
+    ASSERT_EQ(99, *style.getDefaultCamera().roll);
 
     style.loadJSON(R"STYLE({})STYLE");
     ASSERT_EQ(Milliseconds(300), *style.getTransitionOptions().duration);

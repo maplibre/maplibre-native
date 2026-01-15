@@ -62,6 +62,7 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+    double z{state.getZ()};
 
     double lat;
     double lon;
@@ -80,7 +81,7 @@ void Transform::resize(const Size size) {
         return;
     }
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
 
     observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
 }
@@ -125,8 +126,11 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
+    double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
+    double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
+    double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov)) {
         if (animation.transitionFinishFn) {
             animation.transitionFinishFn();
         }
@@ -146,6 +150,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             startLatLng.unwrapForShortestPath(latLng);
         }
     }
+    const double startCenterAlt = state.getCenterAltitude();
 
     const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
     const Point<double> endPoint = Projection::project(latLng, state.getScale());
@@ -153,6 +158,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
+    fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
     // Minimize rotation by taking the shorter path around the circle.
     bearing = _normalizeAngle(bearing, state.getBearing());
@@ -161,6 +167,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startRoll = state.getRoll();
+    const double startFov = state.getFieldOfView();
     state.setProperties(TransformStateProperties()
                             .withPanningInProgress(unwrappedLatLng != startLatLng)
                             .withScalingInProgress(zoom != startZoom)
@@ -175,6 +183,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
             double frameZoom = util::interpolate(startZoom, zoom, t);
             state.setLatLngZoom(frameLatLng, frameZoom);
+            state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
             }
@@ -189,6 +198,12 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
             if (pitch != startPitch || maxPitch < startPitch) {
                 state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, t)));
+            }
+            if (roll != startRoll) {
+                state.setRoll(util::interpolate(startRoll, roll, t));
+            }
+            if (fov != startFov) {
+                state.setFieldOfView(util::interpolate(startFov, fov, t));
             }
         },
         duration);
@@ -212,11 +227,14 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
-
+    const double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
+    double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
+    double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov) ||
+        state.getSize().isEmpty()) {
         if (animation.transitionFinishFn) {
             animation.transitionFinishFn();
         }
@@ -226,6 +244,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     // Determine endpoints.
     LatLng startLatLng = getLatLng(LatLng::Unwrapped).wrapped();
     startLatLng.unwrapForShortestPath(latLng);
+    const double startCenterAlt = state.getCenterAltitude();
 
     const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
     const Point<double> endPoint = Projection::project(latLng, state.getScale());
@@ -233,6 +252,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
+    fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
     // Minimize rotation by taking the shorter path around the circle.
     bearing = _normalizeAngle(bearing, state.getBearing());
@@ -240,6 +260,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     const double startZoom = state.scaleZoom(state.getScale());
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startRoll = state.getRoll();
+    const double startFov = state.getFieldOfView();
 
     /// w₀: Initial visible span, measured in pixels at the initial scale.
     /// Known henceforth as a <i>screenful</i>.
@@ -353,6 +375,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             // Convert to geographic coordinates and set the new viewpoint.
             LatLng frameLatLng = Projection::unproject(framePoint, startScale);
             state.setLatLngZoom(frameLatLng, frameZoom);
+            state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
             }
@@ -364,10 +387,15 @@ void Transform::flyTo(const CameraOptions& inputCamera,
                                      util::interpolate(startEdgeInsets.bottom(), padding.bottom(), k),
                                      util::interpolate(startEdgeInsets.right(), padding.right(), k)});
             }
-            double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
 
-            if (pitch != startPitch || maxPitch < startPitch) {
-                state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, k)));
+            if (pitch != startPitch) {
+                state.setPitch(util::interpolate(startPitch, pitch, k));
+            }
+            if (roll != startRoll) {
+                state.setPitch(util::interpolate(startRoll, roll, k));
+            }
+            if (fov != startFov) {
+                state.setFieldOfView(util::interpolate(startFov, fov, k));
             }
         },
         duration);
@@ -472,6 +500,14 @@ double Transform::getPitch() const {
     return state.getPitch();
 }
 
+double Transform::getRoll() const {
+    return state.getRoll();
+}
+
+double Transform::getFieldOfView() const {
+    return state.getFieldOfView();
+}
+
 // MARK: - North Orientation
 
 void Transform::setNorthOrientation(NorthOrientation orientation) {
@@ -479,8 +515,9 @@ void Transform::setNorthOrientation(NorthOrientation orientation) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
 }
 
 NorthOrientation Transform::getNorthOrientation() const {
@@ -494,8 +531,9 @@ void Transform::setConstrainMode(mbgl::ConstrainMode mode) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
 }
 
 ConstrainMode Transform::getConstrainMode() const {
@@ -676,22 +714,16 @@ LatLng Transform::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng
 
 double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     double centerOffsetY = 0.5 * (insets.top() - insets.bottom()); // See TransformState::getCenterOffset.
+    if (centerOffsetY == 0.0) {
+        return state.getMaxPitch();
+    }
 
     const auto height = state.getSize().height;
     assert(height);
-    // For details, see description at
-    // https://github.com/mapbox/mapbox-gl-native/pull/15195 The definition of
-    // half of TransformState::fov with no inset, is: fov = arctan((height / 2)
-    // / (height * 1.5)). We use half of fov, as it is field of view above
-    // perspective center. With inset, this angle changes and
-    // tangentOfFovAboveCenterAngle = (h/2 + centerOffsetY) / (height
-    // * 1.5). 1.03 is a bit extra added to prevent parallel ground to viewport
-    // clipping plane.
-    const double tangentOfFovAboveCenterAngle = 1.03 * (height / 2.0 + centerOffsetY) / (1.5 * height);
+    // Half of fov is the field of view above perspective center.
+    const double tangentOfFovAboveCenterAngle = (0.5 + centerOffsetY / height) * 2.0 * tan(getFieldOfView() / 2.0);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
-    return pi * 0.5 - fovAboveCenter;
-    // e.g. Maximum pitch of 60 degrees is when perspective center's offset from
-    // the top is 84% of screen height.
+    return state.getMaxPitch() + getFieldOfView() / 2.0 - fovAboveCenter;
 }
 
 FreeCameraOptions Transform::getFreeCameraOptions() const {
