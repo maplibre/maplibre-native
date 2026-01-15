@@ -14,20 +14,6 @@ using namespace std::numbers;
 
 namespace mbgl {
 
-namespace {
-/*double vec2Len(const vec2& v) noexcept {
-    return std::sqrt(v[0] * v[0] + v[1] * v[1]);
-};
-
-double vec2Dot(const vec2& a, const vec2& b) noexcept {
-    return a[0] * b[0] + a[1] * b[1];
-};
-
-vec2 vec2Scale(const vec2& v, double s) noexcept {
-    return vec2{{v[0] * s, v[1] * s}};
-};*/
-} // namespace
-
 namespace util {
 namespace {
 
