@@ -133,6 +133,9 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     const double cameraToCenterDistance = getCameraToCenterDistance();
     const ScreenCoordinate offset = getCenterOffset();
 
+    const double limitedPitch = util::clamp(getPitch(), 0.0, maxMercatorHorizonAngle);
+    const double cameraToSeaLevelDistance = cameraToCenterDistance + std::abs(z) / std::cos(limitedPitch);
+
     // Find the Z distance from the viewport center point
     // [width/2 + offset.x, height/2 + offset.y] to the top edge; to point
     // [width/2 + offset.x, 0] in Z units.
@@ -143,11 +146,10 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     const double tanFovAboveCenter = (0.5 + (offset.y - frustumOffset.top()) / size.height) * 2.0 *
                                      std::tan(fov / 2.0) *
                                      (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
-    const double tanMultiple = util::clamp(
-        tanFovAboveCenter * std::tan(util::clamp(getPitch(), 0.0, maxMercatorHorizonAngle)), 0.0, 0.99);
+    const double tanMultiple = util::clamp(tanFovAboveCenter * std::tan(limitedPitch), 0.0, 0.99);
     assert(tanMultiple < 1);
     // Calculate z distance of the farthest fragment that should be rendered.
-    const double furthestDistance = cameraToCenterDistance / (1 - tanMultiple);
+    const double furthestDistance = cameraToSeaLevelDistance / (1 - tanMultiple);
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
 
