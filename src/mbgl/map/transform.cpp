@@ -130,7 +130,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
     double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov)) {
         if (animation.transitionFinishFn) {
             animation.transitionFinishFn();
         }
@@ -233,7 +233,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov) ||
+        state.getSize().isEmpty()) {
         if (animation.transitionFinishFn) {
             animation.transitionFinishFn();
         }
