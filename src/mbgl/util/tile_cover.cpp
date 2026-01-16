@@ -157,6 +157,7 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) no
 
 std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                         uint8_t z,
+                                        const Range<uint8_t> zoomRange,
                                         const std::optional<uint8_t>& overscaledZ) {
     struct Node {
         AABB aabb;
@@ -189,8 +190,9 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const auto& transform = state.transformState;
     const double numTiles = std::pow(2.0, z);
     const double worldSize = Projection::worldSize(transform.getScale());
-    const uint8_t minZoom = transform.getPitch() <= state.tileLodPitchThreshold ? z : 0;
-    const uint8_t maxZoom = z;
+    const bool allowVariableZoom = transform.getPitch() > state.tileLodPitchThreshold;
+    const uint8_t minZoom = allowVariableZoom ? zoomRange.min : z;
+    const uint8_t maxZoom = (state.useDistanceBasedTileLod && allowVariableZoom) ? zoomRange.max : z;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
@@ -199,6 +201,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                  .p;
 
     const vec3 centerCoord = {{centerPoint.x, centerPoint.y, 0.0}};
+
+    assert(transform.getFreeCameraOptions().position);
+    const vec3 cameraPositionMercator = *transform.getFreeCameraOptions().position;
+    const double nominalScale = std::pow(2.0, z);
+    const vec3 cameraCoord = vec3Scale(cameraPositionMercator, nominalScale);
+    const double cameraToCenterDistanceMercator = vec3Length(vec3Sub(cameraCoord, centerCoord)) / worldSize;
 
     const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, z, flippedY);
 
@@ -243,7 +251,17 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         }
 
         bool shouldSplitTile;
-        {
+        if (state.useDistanceBasedTileLod) {
+            const vec3 camToTileMercator = vec3Scale(node.aabb.distanceXYZ(cameraCoord), 1.0 / worldSize);
+            const double distanceToTileMercator = vec3Length(camToTileMercator);
+            const double cosPitchToTile = std::max(0.0, camToTileMercator[2] / distanceToTileMercator);
+            const double pitchExponent =
+                0.5; // 0: constant screen width, 1/2: constant screen area, 1: constant screen height
+            double tileScale = std::pow(2.0, node.zoom);
+            shouldSplitTile = distanceToTileMercator * tileScale < std::pow(cosPitchToTile, pitchExponent) *
+                                                                       cameraToCenterDistanceMercator *
+                                                                       state.tileLodScale * nominalScale;
+        } else {
             const vec3 distanceXyz = node.aabb.distanceXYZ(centerCoord);
             const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
             assert(longestDim);
@@ -268,7 +286,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             if (node.fullyVisible || frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
-                vec3 coordToLoadFirst = centerCoord;
+                vec3 coordToLoadFirst = state.useDistanceBasedTileLod ? cameraCoord : centerCoord;
                 const double dx = node.wrap * numTiles + node.x + 0.5 - coordToLoadFirst[0];
                 const double dy = node.y + 0.5 - coordToLoadFirst[1];
 
