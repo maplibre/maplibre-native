@@ -167,11 +167,21 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    submitOneTimeCommand(std::nullopt, function);
+}
+
+void Context::submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& commandPool,
+                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
     MLN_TRACE_FUNC();
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+        commandPool.has_value() ? commandPool->get() : backend.getCommandPool().get(),
+        vk::CommandBufferLevel::ePrimary,
+        1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -315,6 +325,10 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
+
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end(dispatcher);
@@ -431,6 +445,10 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
