@@ -4,11 +4,11 @@
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/vulkan/dynamic_texture.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
@@ -147,8 +147,9 @@ public:
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     void enqueueDeletion(std::function<void(Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function,
-                              bool createCommandPool = false);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
+    void submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& commandPool,
+                              const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
     void requestSurfaceUpdate(bool useDelay = true);
 
@@ -206,7 +207,9 @@ private:
         PipelineInfo pipelineInfo;
     } clipping;
 
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::mutex graphicsQueueSubmitMutex;
+#endif
 };
 
 } // namespace vulkan

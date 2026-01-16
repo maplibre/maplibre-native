@@ -6,7 +6,6 @@
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/vulkan/drawable_builder.hpp>
-#include <mbgl/vulkan/dynamic_texture.hpp>
 #include <mbgl/vulkan/offscreen_texture.hpp>
 #include <mbgl/vulkan/layer_group.hpp>
 #include <mbgl/vulkan/tile_layer_group.hpp>
@@ -168,20 +167,19 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function,
-                                   bool createCommandPool) {
-    MLN_TRACE_FUNC();
-    std::scoped_lock lock(graphicsQueueSubmitMutex);
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    submitOneTimeCommand(std::nullopt, function);
+}
 
-    vk::UniqueCommandPool newCommandPool;
-    if (createCommandPool) {
-        const vk::CommandPoolCreateInfo createInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-                                                   backend.getGraphicsQueueIndex());
-        newCommandPool = backend.getDevice()->createCommandPoolUnique(createInfo, nullptr, backend.getDispatcher());
-    }
+void Context::submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& commandPool,
+                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    MLN_TRACE_FUNC();
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        createCommandPool ? newCommandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+        commandPool.has_value() ? commandPool->get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -325,7 +323,9 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];

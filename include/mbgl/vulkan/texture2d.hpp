@@ -126,6 +126,8 @@ private:
     vk::Sampler sampler{};
 
     Texture2DUsage textureUsage{Texture2DUsage::ShaderInput};
+
+    friend class DynamicTexture;
 };
 
 } // namespace vulkan
