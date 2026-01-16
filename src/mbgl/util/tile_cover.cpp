@@ -171,12 +171,27 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         double sqrDist;
     };
 
+    auto childrenOf = [](const Node& node) -> std::vector<Node> {
+        std::vector<Node> children(4);
+        for (int i = 0; i < 4; i++) {
+            const uint32_t childX = (node.x << 1) + (i % 2);
+            const uint32_t childY = (node.y << 1) + (i >> 1);
+
+            children[i] = node;
+            children[i].aabb = node.aabb.quadrant(i);
+            children[i].zoom = node.zoom + 1;
+            children[i].x = childX;
+            children[i].y = childY;
+        }
+        return children;
+    };
+
     const auto& transform = state.transformState;
     const double numTiles = std::pow(2.0, z);
     const double worldSize = Projection::worldSize(transform.getScale());
     const uint8_t minZoom = transform.getPitch() <= state.tileLodPitchThreshold ? z : 0;
     const uint8_t maxZoom = z;
-    const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), z);
+    const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
     const auto centerPoint = TileCoordinate::fromScreenCoordinate(
@@ -227,48 +242,41 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             node.fullyVisible = intersection == IntersectionResult::Contains;
         }
 
-        const vec3 distanceXyz = node.aabb.distanceXYZ(centerCoord);
-        const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
-        assert(longestDim);
+        bool shouldSplitTile;
+        {
+            const vec3 distanceXyz = node.aabb.distanceXYZ(centerCoord);
+            const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
+            assert(longestDim);
 
-        // We're using distance based heuristics to determine if a tile should
-        // be split into quadrants or not. radiusOfMaxLvlLodInTiles defines that
-        // there's always a certain number of maxLevel tiles next to the map
-        // center. Using the fact that a parent node in quadtree is twice the
-        // size of its children (per dimension) we can define distance
-        // thresholds for each relative level:
-        // f(k) = offset + 2 + 4 + 8 + 16 + ... + 2^k
-        // This is the same as:
-        // f(k) = offset + 2^(k+1)-2
-        const double distToSplit = radiusOfMaxLvlLodInTiles + (1 << (maxZoom - node.zoom)) - 2;
+            // We're using distance based heuristics to determine if a tile should
+            // be split into quadrants or not. radiusOfMaxLvlLodInTiles defines that
+            // there's always a certain number of maxLevel tiles next to the map
+            // center. Using the fact that a parent node in quadtree is twice the
+            // size of its children (per dimension) we can define distance
+            // thresholds for each relative level:
+            // f(k) = offset + 2 + 4 + 8 + 16 + ... + 2^k
+            // This is the same as:
+            // f(k) = offset + 2^(k+1)-2
+            const double distToSplit = radiusOfMaxLvlLodInTiles + (1 << (maxZoom - node.zoom)) - 2;
+            shouldSplitTile = *longestDim * state.tileLodScale < distToSplit;
+        }
 
         // Have we reached the target depth or is the tile too far away to be any split further?
-        if (node.zoom == maxZoom || (*longestDim * state.tileLodScale > distToSplit && node.zoom >= minZoom)) {
+        if (node.zoom == maxZoom || (!shouldSplitTile && node.zoom >= minZoom)) {
             // Perform precise intersection test between the frustum and aabb.
             // This will cull < 1% false positives missed by the original test
             if (node.fullyVisible || frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
-                const double dx = node.wrap * numTiles + node.x + 0.5 - centerCoord[0];
-                const double dy = node.y + 0.5 - centerCoord[1];
+                vec3 coordToLoadFirst = centerCoord;
+                const double dx = node.wrap * numTiles + node.x + 0.5 - coordToLoadFirst[0];
+                const double dy = node.y + 0.5 - coordToLoadFirst[1];
 
                 result.push_back({id, dx * dx + dy * dy});
             }
-            continue;
-        }
-
-        for (int i = 0; i < 4; i++) {
-            const uint32_t childX = (node.x << 1) + (i % 2);
-            const uint32_t childY = (node.y << 1) + (i >> 1);
-
-            // Create child node and push to the stack for traversal
-            stack.emplace_back(node);
-            Node& child = stack.back();
-
-            child.aabb = node.aabb.quadrant(i);
-            child.zoom = node.zoom + 1;
-            child.x = childX;
-            child.y = childY;
+        } else {
+            std::vector<Node> children = childrenOf(node);
+            stack.insert(stack.end(), children.begin(), children.end());
         }
     }
 
