@@ -179,7 +179,9 @@ void Context::submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& c
 #endif
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        commandPool.has_value() ? commandPool->get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+        commandPool.has_value() ? commandPool->get() : backend.getCommandPool().get(),
+        vk::CommandBufferLevel::ePrimary,
+        1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();

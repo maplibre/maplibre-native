@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/dynamic_texture.hpp>
 
-#define DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD     1
+#define DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD 1
 
 namespace mbgl {
 namespace vulkan {
@@ -22,7 +22,8 @@ public:
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     using TexturesToBlit = std::unordered_map<gfx::TextureHandle, gfx::Texture2DPtr, gfx::TextureHandle::Hasher>;
 #else
-    using TextureBuffersToUpload = std::unordered_map<gfx::TextureHandle, UniqueBufferAllocation, gfx::TextureHandle::Hasher>;
+    using TextureBuffersToUpload =
+        std::unordered_map<gfx::TextureHandle, UniqueBufferAllocation, gfx::TextureHandle::Hasher>;
 #endif
 
 private:

@@ -16,7 +16,8 @@ DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelTy
     texture->create();
     const vk::CommandPoolCreateInfo createInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                                context.getBackend().getGraphicsQueueIndex());
-    commandPool = context.getBackend().getDevice()->createCommandPoolUnique(createInfo, nullptr, context.getBackend().getDispatcher());
+    commandPool = context.getBackend().getDevice()->createCommandPoolUnique(
+        createInfo, nullptr, context.getBackend().getDispatcher());
 }
 
 void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) {
@@ -34,10 +35,9 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     textureToBlitVK->create();
 
     std::vector<std::function<void(gfx::Context&)>> deletionQueue;
-    context.submitOneTimeCommand(commandPool,
-        [&](const vk::UniqueCommandBuffer& commandBuffer) {
-            textureToBlitVK->uploadSubRegion(pixelData, imageSize, 0, 0, commandBuffer, &deletionQueue);
-        });
+    context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
+        textureToBlitVK->uploadSubRegion(pixelData, imageSize, 0, 0, commandBuffer, &deletionQueue);
+    });
     for (const auto& function : deletionQueue) function(context);
     deletionQueue.clear();
 
@@ -53,10 +53,10 @@ void DynamicTexture::uploadDeferredImages() {
         for (const auto& pair : texturesToBlit) {
             const auto& rect = pair.first.getRectangle();
             const auto copyInfo = vk::ImageCopy()
-                    .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                    .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                    .setExtent({rect.w, rect.h, 1})
-                    .setDstOffset({rect.x, rect.y, 0});
+                                      .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                                      .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                                      .setExtent({rect.w, rect.h, 1})
+                                      .setDstOffset({rect.x, rect.y, 0});
 
             const auto& textureToBlitVK = static_cast<Texture2D*>(pair.second.get());
             commandBuffer->copyImage(textureToBlitVK->getVulkanImage(),
@@ -82,8 +82,8 @@ bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
 #else
 
 DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelType pixelType)
-        : gfx::DynamicTexture(context_, size, pixelType),
-          context(context_) {
+    : gfx::DynamicTexture(context_, size, pixelType),
+      context(context_) {
     texture->create();
 }
 
@@ -95,9 +95,9 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     const auto& allocator = backend.getAllocator();
 
     const auto bufferInfo = vk::BufferCreateInfo()
-            .setSize(static_cast<vk::DeviceSize>(rect.w) * rect.h * texture->getPixelStride())
-            .setUsage(vk::BufferUsageFlagBits::eTransferSrc)
-            .setSharingMode(vk::SharingMode::eExclusive);
+                                .setSize(static_cast<vk::DeviceSize>(rect.w) * rect.h * texture->getPixelStride())
+                                .setUsage(vk::BufferUsageFlagBits::eTransferSrc)
+                                .setSharingMode(vk::SharingMode::eExclusive);
 
     VmaAllocationCreateInfo allocationInfo = {};
 
@@ -128,14 +128,18 @@ void DynamicTexture::uploadDeferredImages() {
         for (const auto& pair : textureBuffersToUpload) {
             const auto& rect = pair.first.getRectangle();
             const auto region = vk::BufferImageCopy()
-                    .setBufferOffset(0)
-                    .setBufferRowLength(rect.w)
-                    .setImageSubresource(vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
-                    .setImageOffset(vk::Offset3D(rect.x, rect.y))
-                    .setImageExtent(vk::Extent3D(rect.w, rect.h, 1));
+                                    .setBufferOffset(0)
+                                    .setBufferRowLength(rect.w)
+                                    .setImageSubresource(
+                                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                                    .setImageOffset(vk::Offset3D(rect.x, rect.y))
+                                    .setImageExtent(vk::Extent3D(rect.w, rect.h, 1));
 
-            commandBuffer->copyBufferToImage(
-                    pair.second->buffer, textureVK->getVulkanImage(), textureVK->getVulkanImageLayout(), region, context.getBackend().getDispatcher());
+            commandBuffer->copyBufferToImage(pair.second->buffer,
+                                             textureVK->getVulkanImage(),
+                                             textureVK->getVulkanImageLayout(),
+                                             region,
+                                             context.getBackend().getDispatcher());
 
             context.renderingStats().numTextureUpdates++;
             context.renderingStats().textureUpdateBytes += rect.w * rect.h * texture->getPixelStride();
