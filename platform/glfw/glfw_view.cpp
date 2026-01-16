@@ -125,7 +125,7 @@ constexpr TileLodMode nextTileLodMode(TileLodMode current) {
     }
 }
 
-void cycleTileLodMode(mbgl::Map& map) {
+void cycleTileLodMode(mbgl::Map &map) {
     // TileLodMode::Default parameters
     static const auto defaultRadius = map.getTileLodMinRadius();
     static const auto defaultScale = map.getTileLodScale();
