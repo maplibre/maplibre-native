@@ -159,7 +159,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
                                 const vk::UniqueCommandBuffer& commandBuffer,
-                                std::vector<std::function<void(gfx::Context&)>>* deletionQueue) noexcept {
+                                DeletionQueue* deletionQueue) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();

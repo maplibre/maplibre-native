@@ -158,7 +158,7 @@ void Context::destroyResources() {
     clipping.vertexBuffer.reset();
 }
 
-void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
+void Context::enqueueDeletion(DeletionTask&& function) {
     if (frameResources.empty()) {
         function(*this);
         return;
@@ -168,10 +168,10 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
 }
 
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
-    submitOneTimeCommand(std::nullopt, function);
+    submitOneTimeCommand({}, function);
 }
 
-void Context::submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& commandPool,
+void Context::submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
                                    const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
     MLN_TRACE_FUNC();
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
@@ -179,7 +179,7 @@ void Context::submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& c
 #endif
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        commandPool.has_value() ? commandPool->get() : backend.getCommandPool().get(),
+        commandPool ? commandPool.get() : backend.getCommandPool().get(),
         vk::CommandBufferLevel::ePrimary,
         1);
 
@@ -756,7 +756,9 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 void Context::FrameResources::runDeletionQueue(Context& context) {
     MLN_TRACE_FUNC();
 
-    for (const auto& function : deletionQueue) function(context);
+    for (const auto& function : deletionQueue) {
+        function(context);
+    }
 
     deletionQueue.clear();
 }

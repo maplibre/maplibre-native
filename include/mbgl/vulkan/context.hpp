@@ -36,7 +36,6 @@ struct ClipUBO;
 namespace vulkan {
 
 class RenderPass;
-class RendererBackend;
 class ShaderProgram;
 class VertexBufferResource;
 class Texture2D;
@@ -44,6 +43,9 @@ class Texture2D;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 using UniqueUniformBufferArray = std::unique_ptr<gfx::UniformBufferArray>;
+
+using DeletionTask = std::function<void(Context&)>;
+using DeletionQueue = std::vector<DeletionTask>;
 
 class Context final : public gfx::Context {
 public:
@@ -146,9 +148,9 @@ public:
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    void enqueueDeletion(std::function<void(Context&)>&& function);
+    void enqueueDeletion(DeletionTask&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
-    void submitOneTimeCommand(const std::optional<vk::UniqueCommandPool>& commandPool,
+    void submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
                               const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
     void requestSurfaceUpdate(bool useDelay = true);
@@ -158,7 +160,7 @@ private:
         vk::UniqueCommandBuffer commandBuffer;
         vk::UniqueFence flightFrameFence;
 
-        std::vector<std::function<void(Context&)>> deletionQueue;
+        DeletionQueue deletionQueue;
 
         FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),

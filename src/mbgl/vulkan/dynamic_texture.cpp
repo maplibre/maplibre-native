@@ -1,5 +1,4 @@
 #include <mbgl/vulkan/dynamic_texture.hpp>
-#include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -7,8 +6,6 @@ namespace mbgl {
 namespace vulkan {
 
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
-
-thread_local std::optional<vk::UniqueCommandPool> commandPool;
 
 DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelType pixelType)
     : gfx::DynamicTexture(context_, size, pixelType),
@@ -34,11 +31,15 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     textureToBlitVK->setUsage(Texture2DUsage::Blit);
     textureToBlitVK->create();
 
-    std::vector<std::function<void(gfx::Context&)>> deletionQueue;
+    DeletionQueue deletionQueue;
     context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
         textureToBlitVK->uploadSubRegion(pixelData, imageSize, 0, 0, commandBuffer, &deletionQueue);
     });
-    for (const auto& function : deletionQueue) function(context);
+
+    for (const auto& function : deletionQueue) {
+        function(context);
+    }
+
     deletionQueue.clear();
 
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
