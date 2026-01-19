@@ -254,15 +254,11 @@ void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
     renderPass.setFragmentTexture(metalTexture, location);
     renderPass.setFragmentSamplerState(metalSamplerState, location);
 
-    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
-        stats.numTextureBindings++;
-    });
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings++; });
 }
 
 void Texture2D::unbind(RenderPass&, int32_t /*location*/) noexcept {
-    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
-        stats.numTextureBindings--;
-    });
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings--; });
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
