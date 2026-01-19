@@ -93,6 +93,16 @@ public:
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
 
+    void threadSafeAccessRenderingStats(const std::function<void(RenderingStats&)>& function) {
+        std::scoped_lock lock(renderingStatsMutex);
+        function(stats);
+    }
+
+    RenderingStats threadSafeCopyRenderingStats() {
+        std::scoped_lock lock(renderingStatsMutex);
+        return stats;
+    }
+
 #ifndef NDEBUG
     virtual void visualizeStencilBuffer() = 0;
     virtual void visualizeDepthBuffer(float depthRangeSize) = 0;
@@ -174,6 +184,7 @@ protected:
     virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 
+    std::mutex renderingStatsMutex;
     gfx::RenderingStats stats;
     ContextObserver* observer;
 };
