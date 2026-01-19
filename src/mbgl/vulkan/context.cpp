@@ -179,9 +179,7 @@ void Context::submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
 #endif
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        commandPool ? commandPool.get() : backend.getCommandPool().get(),
-        vk::CommandBufferLevel::ePrimary,
-        1);
+        commandPool ? commandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
