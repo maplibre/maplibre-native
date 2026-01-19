@@ -5,7 +5,7 @@ jobs:
   ios-testapp-release:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup certificate
         run: |
@@ -19,7 +19,7 @@ jobs:
         run: bazel build //platform/ios/app-swift:MapLibreApp -c opt  --ios_multi_cpus=arm64 --//:renderer=metal --action_env=SENTRY_DSN=${{ vars.SENTRY_DSN_IOS }}
 
       - name: 'Upload app to TestFlight'
-        uses: apple-actions/upload-testflight-build@v3
+        uses: apple-actions/upload-testflight-build@v4
         with:
           app-path: 'bazel-bin/platform/ios/app-swift/MapLibreApp.ipa'
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
