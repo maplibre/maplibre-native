@@ -21,9 +21,12 @@
         <!--Camera-->
         <attr name="maplibre_cameraTargetLat" format="float"/>
         <attr name="maplibre_cameraTargetLng" format="float"/>
+        <attr name="maplibre_cameraCenterAltitude" format="float"/>
         <attr name="maplibre_cameraZoom" format="float"/>
         <attr name="maplibre_cameraBearing" format="float"/>
         <attr name="maplibre_cameraTilt" format="float"/>
+        <attr name="maplibre_cameraRoll" format="float"/>
+        <attr name="maplibre_cameraFov" format="float"/>
 
         <!--Zoom-->
         <attr name="maplibre_cameraZoomMax" format="float"/>
