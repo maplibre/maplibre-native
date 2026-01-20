@@ -65,6 +65,44 @@ namespace mbgl {
  * Steps 3 and 4 are done in the shaders for all labels.
  */
 
+void getTileSkewVectors(const TransformState& state, vec2& vecEast, vec2& vecSouth) {
+    const double cosRoll = cos(state.getRoll());
+    const double sinRoll = sin(state.getRoll());
+    const double cosPitch = cos(state.getPitch());
+    const double cosBearing = cos(-state.getBearing());
+    const double sinBearing = sin(-state.getBearing());
+    vecSouth[0] = -cosBearing * cosPitch * sinRoll - sinBearing * cosRoll;
+    vecSouth[1] = -sinBearing * cosPitch * sinRoll + cosBearing * cosRoll;
+    const double vecSouthLen = std::hypot(vecSouth[0], vecSouth[1]);
+    if (vecSouthLen < 1.0e-9) {
+        vecSouth = {0, 0};
+    } else {
+        vecSouth[0] /= vecSouthLen;
+        vecSouth[1] /= vecSouthLen;
+    }
+    vecEast[0] = cosBearing * cosPitch * cosRoll - sinBearing * sinRoll;
+    vecEast[1] = sinBearing * cosPitch * cosRoll + cosBearing * sinRoll;
+    const double vecEastLen = std::hypot(vecEast[0], vecEast[1]);
+    if (vecEastLen < 1.0e-9) {
+        vecEast = {0, 0};
+    } else {
+        vecEast[0] /= vecEastLen;
+        vecEast[1] /= vecEastLen;
+    }
+}
+
+mat4 getTileSkewMatrix(const TransformState& state) {
+    vec2 vecEast, vecSouth;
+    getTileSkewVectors(state, vecEast, vecSouth);
+    mat4 m;
+    matrix::identity(m);
+    m[0] = vecEast[0];
+    m[1] = vecEast[1];
+    m[4] = vecSouth[0];
+    m[5] = vecSouth[1];
+    return m;
+}
+
 /*
  * Returns a matrix for converting from tile units to the correct label coordinate space.
  */
@@ -78,7 +116,9 @@ mat4 getLabelPlaneMatrix(const mat4& posMatrix,
     if (pitchWithMap) {
         matrix::scale(m, m, 1 / pixelsToTileUnits, 1 / pixelsToTileUnits, 1);
         if (!rotateWithMap) {
-            matrix::rotate_z(m, m, state.getBearing());
+            mat4 skew = getTileSkewMatrix(state);
+            matrix::invert(skew, skew);
+            matrix::multiply(m, m, skew);
         }
     } else {
         matrix::scale(m, m, state.getSize().width / 2.0, -(state.getSize().height / 2.0), 1.0);
@@ -102,7 +142,7 @@ mat4 getGlCoordMatrix(const mat4& posMatrix,
         matrix::multiply(m, m, posMatrix);
         matrix::scale(m, m, pixelsToTileUnits, pixelsToTileUnits, 1);
         if (!rotateWithMap) {
-            matrix::rotate_z(m, m, -state.getBearing());
+            matrix::multiply(m, m, getTileSkewMatrix(state));
         }
     } else {
         matrix::scale(m, m, 1, -1, 1);

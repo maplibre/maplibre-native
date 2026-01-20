@@ -29,8 +29,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
         if (!glyphAtlas.dynamicTexture) {
             AlphaImage dummyImage(dummySize);
             dummyImage.fill(0);
-            glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-                context, dummySize, TexturePixelType::Alpha);
+            glyphAtlas.dynamicTexture = context.createDynamicTexture(dummySize, TexturePixelType::Alpha);
             glyphAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize);
             dummyDynamicTexture[TexturePixelType::Alpha] = glyphAtlas.dynamicTexture;
         }
@@ -45,8 +44,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
         if (dynTexIndex < dynamicTextures.size()) {
             glyphAtlas.dynamicTexture = dynamicTextures[dynTexIndex++];
         } else {
-            glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-                context, dynTexSize, TexturePixelType::Alpha);
+            glyphAtlas.dynamicTexture = context.createDynamicTexture(dynTexSize, TexturePixelType::Alpha);
             dynTexSize = Size(dynTexSize.width * 2, dynTexSize.height * 2);
             dynTexIndex++;
         }
@@ -118,8 +116,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         if (!imageAtlas.dynamicTexture) {
             PremultipliedImage dummyImage(dummySize);
             dummyImage.fill(0);
-            imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-                context, dummySize, TexturePixelType::RGBA);
+            imageAtlas.dynamicTexture = context.createDynamicTexture(dummySize, TexturePixelType::RGBA);
             imageAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize);
             dummyDynamicTexture[TexturePixelType::RGBA] = imageAtlas.dynamicTexture;
         }
@@ -137,8 +134,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         if (dynTexIndex < dynamicTextures.size()) {
             imageAtlas.dynamicTexture = dynamicTextures[dynTexIndex++];
         } else {
-            imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-                context, dynTexSize, TexturePixelType::RGBA);
+            imageAtlas.dynamicTexture = context.createDynamicTexture(dynTexSize, TexturePixelType::RGBA);
             dynTexSize = Size(dynTexSize.width * 2, dynTexSize.height * 2);
             dynTexIndex++;
         }

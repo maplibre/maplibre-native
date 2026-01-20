@@ -125,14 +125,13 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
     // Top padding of 376 leads to capped pitch. See Transform::getMaxPitchForEdgeInsets.
     EXPECT_LE(transform.getPitch() + 0.001, util::deg2rad(60));
 
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}, {3, 4, 2}, {3, 5, 3}, {3, 5, 2}}),
-        util::tileCover({transform.getState()}, 3, zoomRange));
+    EXPECT_EQ((std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}}),
+              util::tileCover({transform.getState()}, 3));
 
     util::TileCoverParameters params{transform.getState()};
     params.useDistanceBasedTileLod = true;
     EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{3, 3, 4}, {3, 3, 3}, {3, 4, 4}, {3, 4, 3}, {3, 4, 2}, {3, 5, 3}, {3, 5, 2}}),
+        (std::vector<OverscaledTileID>{{3, 3, 4}, {3, 3, 3}, {3, 4, 4}, {3, 4, 3}}),
         util::tileCover(params, 3, zoomRange));
 }
 
@@ -155,17 +154,17 @@ TEST(TileCover, PitchWithLargerResultSet) {
     EXPECT_EQ((std::vector<OverscaledTileID>{{5, 15, 16},
                                              {5, 15, 17},
                                              {5, 14, 16},
-                                             {5, 14, 17},
                                              {5, 16, 16},
-                                             {5, 16, 17},
                                              {5, 15, 15},
+                                             {5, 14, 17},
+                                             {5, 16, 17},
                                              {5, 14, 15},
-                                             {5, 15, 18},
-                                             {5, 14, 18},
                                              {5, 16, 15},
+                                             {5, 15, 18},
                                              {5, 13, 16},
-                                             {5, 13, 17},
+                                             {5, 14, 18},
                                              {5, 16, 18},
+                                             {5, 13, 17},
                                              {5, 13, 18},
                                              {5, 15, 19}}),
               (std::vector<OverscaledTileID>{cover.begin(), cover.begin() + 16}));

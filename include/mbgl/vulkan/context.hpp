@@ -8,6 +8,7 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/vulkan/dynamic_texture.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
@@ -35,7 +36,6 @@ struct ClipUBO;
 namespace vulkan {
 
 class RenderPass;
-class RendererBackend;
 class ShaderProgram;
 class VertexBufferResource;
 class Texture2D;
@@ -43,6 +43,9 @@ class Texture2D;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 using UniqueUniformBufferArray = std::unique_ptr<gfx::UniformBufferArray>;
+
+using DeletionTask = std::function<void(Context&)>;
+using DeletionQueue = std::vector<DeletionTask>;
 
 class Context final : public gfx::Context {
 public:
@@ -88,6 +91,8 @@ public:
     LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
     gfx::Texture2DPtr createTexture2D() override;
+
+    gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
@@ -143,8 +148,10 @@ public:
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    void enqueueDeletion(std::function<void(Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
+    void enqueueDeletion(DeletionTask&& function);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
+    void submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
+                              const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
     void requestSurfaceUpdate(bool useDelay = true);
 
@@ -153,7 +160,7 @@ private:
         vk::UniqueCommandBuffer commandBuffer;
         vk::UniqueFence flightFrameFence;
 
-        std::vector<std::function<void(Context&)>> deletionQueue;
+        DeletionQueue deletionQueue;
 
         FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
@@ -201,6 +208,10 @@ private:
 
         PipelineInfo pipelineInfo;
     } clipping;
+
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::mutex graphicsQueueSubmitMutex;
+#endif
 };
 
 } // namespace vulkan
