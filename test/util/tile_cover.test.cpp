@@ -130,9 +130,8 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
 
     util::TileCoverParameters params{transform.getState()};
     params.useDistanceBasedTileLod = true;
-    EXPECT_EQ(
-        (std::vector<OverscaledTileID>{{3, 3, 4}, {3, 3, 3}, {3, 4, 4}, {3, 4, 3}}),
-        util::tileCover(params, 3, zoomRange));
+    EXPECT_EQ((std::vector<OverscaledTileID>{{3, 3, 4}, {3, 3, 3}, {3, 4, 4}, {3, 4, 3}}),
+              util::tileCover(params, 3, zoomRange));
 }
 
 TEST(TileCover, PitchWithLargerResultSet) {
