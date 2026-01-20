@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 
+#import <mbgl/util/feature.hpp>
 #import <mbgl/util/geometry.hpp>
 
 /**
