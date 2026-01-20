@@ -26,6 +26,9 @@ MLN_EXPORT
 /** Heading measured in degrees clockwise from true north. */
 @property (nonatomic) CLLocationDirection heading;
 
+/** Roll measured in degrees clockwise around the viewing axis. */
+@property (nonatomic) CLLocationDirection roll;
+
 /**
  Pitch toward the horizon measured in degrees, with 0 degrees resulting in a
  two-dimensional map.
