@@ -100,7 +100,7 @@ public:
     }
 
     RenderingStats threadSafeCopyRenderingStats() {
-        std::scoped_lock lock(renderingStatsMutex);
+        std::shared_lock lock(renderingStatsMutex);
         return stats;
     }
 
