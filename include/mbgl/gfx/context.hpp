@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <mutex>
+#include <shared_mutex>
 
 namespace mbgl {
 
@@ -185,7 +186,7 @@ protected:
     virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 
-    std::mutex renderingStatsMutex;
+    std::shared_mutex renderingStatsMutex;
     gfx::RenderingStats stats;
     ContextObserver* observer;
 };
