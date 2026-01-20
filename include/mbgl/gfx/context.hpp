@@ -35,11 +35,13 @@ class ShaderRegistry;
 
 class Drawable;
 class DrawableBuilder;
+class DynamicTexture;
 class ShaderProgramBase;
 class Texture2D;
 class VertexAttributeArray;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
+using DynamicTexturePtr = std::shared_ptr<DynamicTexture>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
@@ -131,6 +133,9 @@ public:
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
+
+    /// Create a dynamic texture
+    virtual DynamicTexturePtr createDynamicTexture(Size size, TexturePixelType pixelType) = 0;
 
     /// Create a render target
     virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
