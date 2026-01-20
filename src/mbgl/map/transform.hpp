@@ -91,6 +91,8 @@ public:
     // Pitch
 
     double getPitch() const;
+    double getRoll() const;
+    double getFieldOfView() const;
 
     // North Orientation
     void setNorthOrientation(NorthOrientation);
