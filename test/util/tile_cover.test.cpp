@@ -126,7 +126,7 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
     EXPECT_LE(transform.getPitch() + 0.001, util::deg2rad(60));
 
     EXPECT_EQ((std::vector<OverscaledTileID>{{3, 4, 3}, {3, 3, 3}, {3, 4, 4}, {3, 3, 4}}),
-              util::tileCover({transform.getState()}, 3));
+              util::tileCover({transform.getState()}, 3, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
     params.useDistanceBasedTileLod = true;
