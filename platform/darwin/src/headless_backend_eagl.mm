@@ -9,43 +9,39 @@ namespace gl {
 
 class EAGLBackendImpl : public HeadlessBackend::Impl {
 public:
-    EAGLBackendImpl() {
-        glContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
-        if (glContext == nil) {
-            throw std::runtime_error("Error creating GL context object");
-        }
-        glContext.multiThreaded = YES;
+  EAGLBackendImpl() {
+    glContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+    if (glContext == nil) {
+      throw std::runtime_error("Error creating GL context object");
+    }
+    glContext.multiThreaded = YES;
+  }
+
+  // Required for ARC to deallocate correctly.
+  ~EAGLBackendImpl() final = default;
+
+  gl::ProcAddress getExtensionFunctionPointer(const char* name) final {
+    static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
+    if (!framework) {
+      throw std::runtime_error("Failed to load OpenGL framework.");
     }
 
-    // Required for ARC to deallocate correctly.
-    ~EAGLBackendImpl() final = default;
+    return reinterpret_cast<gl::ProcAddress>(CFBundleGetFunctionPointerForName(
+        framework, (__bridge CFStringRef)[NSString stringWithUTF8String:name]));
+  }
 
-    gl::ProcAddress getExtensionFunctionPointer(const char* name) final {
-        static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
-        if (!framework) {
-            throw std::runtime_error("Failed to load OpenGL framework.");
-        }
+  void activateContext() final { [EAGLContext setCurrentContext:glContext]; }
 
-        return reinterpret_cast<gl::ProcAddress>(CFBundleGetFunctionPointerForName(
-            framework, (__bridge CFStringRef)[NSString stringWithUTF8String:name]));
-    }
-
-    void activateContext() final {
-        [EAGLContext setCurrentContext:glContext];
-    }
-
-    void deactivateContext() final {
-        [EAGLContext setCurrentContext:nil];
-    }
+  void deactivateContext() final { [EAGLContext setCurrentContext:nil]; }
 
 private:
-    EAGLContext* glContext = nullptr;
+  EAGLContext* glContext = nullptr;
 };
 
 void HeadlessBackend::createImpl() {
-    assert(!impl);
-    impl = std::make_unique<EAGLBackendImpl>();
+  assert(!impl);
+  impl = std::make_unique<EAGLBackendImpl>();
 }
 
-} // namespace gl
-} // namespace mbgl
+}  // namespace gl
+}  // namespace mbgl

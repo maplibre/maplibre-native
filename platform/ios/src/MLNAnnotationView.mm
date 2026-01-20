@@ -1,10 +1,10 @@
 #import "MLNAnnotationView.h"
-#import "MLNAnnotationView_Private.h"
-#import "MLNMapView_Private.h"
-#import "MLNCalloutView.h"
 #import "MLNAnnotation.h"
-#import "MLNPointAnnotation.h"
+#import "MLNAnnotationView_Private.h"
+#import "MLNCalloutView.h"
 #import "MLNLoggingConfiguration_Private.h"
+#import "MLNMapView_Private.h"
+#import "MLNPointAnnotation.h"
 
 #import "NSBundle+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
@@ -27,361 +27,350 @@
 @implementation MLNAnnotationView
 
 + (BOOL)supportsSecureCoding {
-    return YES;
+  return YES;
 }
 
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier {
-    MLNLogDebug(@"Initializing with identifier: %@", reuseIdentifier);
-    self = [super initWithFrame:CGRectZero];
-    if (self) {
-        [self commonInitWithAnnotation:nil reuseIdentifier:reuseIdentifier];
-    }
-    return self;
+  MLNLogDebug(@"Initializing with identifier: %@", reuseIdentifier);
+  self = [super initWithFrame:CGRectZero];
+  if (self) {
+    [self commonInitWithAnnotation:nil reuseIdentifier:reuseIdentifier];
+  }
+  return self;
 }
 
-- (instancetype)initWithAnnotation:(nullable id<MLNAnnotation>)annotation reuseIdentifier:(nullable NSString *)reuseIdentifier {
-    MLNLogDebug(@"Initializing with annotation: %@ reuseIdentifier: %@", annotation, reuseIdentifier);
-    self = [super initWithFrame:CGRectZero];
-    if (self) {
-        [self commonInitWithAnnotation:annotation reuseIdentifier:reuseIdentifier];
-    }
-    return self;
+- (instancetype)initWithAnnotation:(nullable id<MLNAnnotation>)annotation
+                   reuseIdentifier:(nullable NSString *)reuseIdentifier {
+  MLNLogDebug(@"Initializing with annotation: %@ reuseIdentifier: %@", annotation, reuseIdentifier);
+  self = [super initWithFrame:CGRectZero];
+  if (self) {
+    [self commonInitWithAnnotation:annotation reuseIdentifier:reuseIdentifier];
+  }
+  return self;
 }
 
-- (void)commonInitWithAnnotation:(nullable id<MLNAnnotation>)annotation reuseIdentifier:(nullable NSString *)reuseIdentifier {
-    _lastAppliedScaleTransform = CATransform3DIdentity;
-    _lastAppliedRotationTransform = CATransform3DIdentity;
-    _annotation = annotation;
-    _reuseIdentifier = [reuseIdentifier copy];
-    _enabled = YES;
+- (void)commonInitWithAnnotation:(nullable id<MLNAnnotation>)annotation
+                 reuseIdentifier:(nullable NSString *)reuseIdentifier {
+  _lastAppliedScaleTransform = CATransform3DIdentity;
+  _lastAppliedRotationTransform = CATransform3DIdentity;
+  _annotation = annotation;
+  _reuseIdentifier = [reuseIdentifier copy];
+  _enabled = YES;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)decoder {
-    MLNLogInfo(@"Initializing with coder.");
-    if (self = [super initWithCoder:decoder]) {
-        _reuseIdentifier = [decoder decodeObjectOfClass:[NSString class] forKey:@"reuseIdentifier"];
-        _annotation = [decoder decodeObjectOfClass:[NSObject class] forKey:@"annotation"];
-        _centerOffset = [decoder decodeCGVectorForKey:@"centerOffset"];
-        _scalesWithViewingDistance = [decoder decodeBoolForKey:@"scalesWithViewingDistance"];
-        _rotatesToMatchCamera = [decoder decodeBoolForKey:@"rotatesToMatchCamera"];
-        _selected = [decoder decodeBoolForKey:@"selected"];
-        _enabled = [decoder decodeBoolForKey:@"enabled"];
-        self.draggable = [decoder decodeBoolForKey:@"draggable"];
-    }
-    return self;
+  MLNLogInfo(@"Initializing with coder.");
+  if (self = [super initWithCoder:decoder]) {
+    _reuseIdentifier = [decoder decodeObjectOfClass:[NSString class] forKey:@"reuseIdentifier"];
+    _annotation = [decoder decodeObjectOfClass:[NSObject class] forKey:@"annotation"];
+    _centerOffset = [decoder decodeCGVectorForKey:@"centerOffset"];
+    _scalesWithViewingDistance = [decoder decodeBoolForKey:@"scalesWithViewingDistance"];
+    _rotatesToMatchCamera = [decoder decodeBoolForKey:@"rotatesToMatchCamera"];
+    _selected = [decoder decodeBoolForKey:@"selected"];
+    _enabled = [decoder decodeBoolForKey:@"enabled"];
+    self.draggable = [decoder decodeBoolForKey:@"draggable"];
+  }
+  return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
-    [coder encodeObject:_reuseIdentifier forKey:@"reuseIdentifier"];
-    [coder encodeObject:_annotation forKey:@"annotation"];
-    [coder encodeCGVector:_centerOffset forKey:@"centerOffset"];
-    [coder encodeBool:_scalesWithViewingDistance forKey:@"scalesWithViewingDistance"];
-    [coder encodeBool:_rotatesToMatchCamera forKey:@"rotatesToMatchCamera"];
-    [coder encodeBool:_selected forKey:@"selected"];
-    [coder encodeBool:_enabled forKey:@"enabled"];
-    [coder encodeBool:_draggable forKey:@"draggable"];
+  [super encodeWithCoder:coder];
+  [coder encodeObject:_reuseIdentifier forKey:@"reuseIdentifier"];
+  [coder encodeObject:_annotation forKey:@"annotation"];
+  [coder encodeCGVector:_centerOffset forKey:@"centerOffset"];
+  [coder encodeBool:_scalesWithViewingDistance forKey:@"scalesWithViewingDistance"];
+  [coder encodeBool:_rotatesToMatchCamera forKey:@"rotatesToMatchCamera"];
+  [coder encodeBool:_selected forKey:@"selected"];
+  [coder encodeBool:_enabled forKey:@"enabled"];
+  [coder encodeBool:_draggable forKey:@"draggable"];
 }
 
-- (void)prepareForReuse
-{
-    // Intentionally left blank. The default implementation of this method does nothing.
+- (void)prepareForReuse {
+  // Intentionally left blank. The default implementation of this method does nothing.
 }
 
-- (void)setCenterOffset:(CGVector)centerOffset
-{
-    MLNLogDebug(@"Setting centerOffset: %@", NSStringFromCGVector(centerOffset));
-    _centerOffset = centerOffset;
-    self.center = self.center;
+- (void)setCenterOffset:(CGVector)centerOffset {
+  MLNLogDebug(@"Setting centerOffset: %@", NSStringFromCGVector(centerOffset));
+  _centerOffset = centerOffset;
+  self.center = self.center;
 }
 
-- (void)setSelected:(BOOL)selected
-{
-    MLNLogDebug(@"Setting selected: %@", MLNStringFromBOOL(selected));
-    [self setSelected:selected animated:NO];
+- (void)setSelected:(BOOL)selected {
+  MLNLogDebug(@"Setting selected: %@", MLNStringFromBOOL(selected));
+  [self setSelected:selected animated:NO];
 }
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated
-{
-    MLNLogDebug(@"Setting selected: %@ animated: %@", MLNStringFromBOOL(selected), MLNStringFromBOOL(animated));
-    [self willChangeValueForKey:@"selected"];
-    _selected = selected;
-    [self didChangeValueForKey:@"selected"];
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+  MLNLogDebug(@"Setting selected: %@ animated: %@", MLNStringFromBOOL(selected),
+              MLNStringFromBOOL(animated));
+  [self willChangeValueForKey:@"selected"];
+  _selected = selected;
+  [self didChangeValueForKey:@"selected"];
 }
 
-- (CGPoint)center
-{
-    CGPoint center = super.center;
-    center.x -= _centerOffset.dx;
-    center.y -= _centerOffset.dy;
-    return center;
+- (CGPoint)center {
+  CGPoint center = super.center;
+  center.x -= _centerOffset.dx;
+  center.y -= _centerOffset.dy;
+  return center;
 }
 
-- (void)setCenter:(CGPoint)center
-{
-    MLNLogDebug(@"Setting center: %@", NSStringFromCGPoint(center));
-    center.x += _centerOffset.dx;
-    center.y += _centerOffset.dy;
+- (void)setCenter:(CGPoint)center {
+  MLNLogDebug(@"Setting center: %@", NSStringFromCGPoint(center));
+  center.x += _centerOffset.dx;
+  center.y += _centerOffset.dy;
 
-    super.center = center;
+  super.center = center;
+  [self updateScaleTransformForViewingDistance];
+  [self updateRotateTransform];
+}
+
+- (void)setScalesWithViewingDistance:(BOOL)scalesWithViewingDistance {
+  MLNLogDebug(@"Setting scaleWithViewingDistance: %@",
+              MLNStringFromBOOL(scalesWithViewingDistance));
+  if (_scalesWithViewingDistance != scalesWithViewingDistance) {
+    _scalesWithViewingDistance = scalesWithViewingDistance;
     [self updateScaleTransformForViewingDistance];
-    [self updateRotateTransform];
+  }
 }
 
-- (void)setScalesWithViewingDistance:(BOOL)scalesWithViewingDistance
-{
-    MLNLogDebug(@"Setting scaleWithViewingDistance: %@", MLNStringFromBOOL(scalesWithViewingDistance));
-    if (_scalesWithViewingDistance != scalesWithViewingDistance)
-    {
-        _scalesWithViewingDistance = scalesWithViewingDistance;
-        [self updateScaleTransformForViewingDistance];
-    }
-}
+- (void)updateScaleTransformForViewingDistance {
+  if (self.scalesWithViewingDistance == NO || self.dragState == MLNAnnotationViewDragStateDragging)
+    return;
 
-- (void)updateScaleTransformForViewingDistance
-{
-    if (self.scalesWithViewingDistance == NO || self.dragState == MLNAnnotationViewDragStateDragging) return;
+  CGFloat superviewHeight = CGRectGetHeight(self.superview.frame);
+  if (superviewHeight > 0.0) {
+    // Find the maximum amount of scale reduction to apply as the view's center moves from the top
+    // of the superview to the bottom. For example, if this view's center has moved 25% of the way
+    // from the top of the superview towards the bottom then the maximum scale reduction is 1 - .25
+    // or 75%. The range goes from a maximum of 100% to 0% as the view moves from the top to the
+    // bottom along the y axis of its superview.
+    CGFloat maxScaleReduction = 1.0 - self.center.y / superviewHeight;
 
-    CGFloat superviewHeight = CGRectGetHeight(self.superview.frame);
-    if (superviewHeight > 0.0) {
-        // Find the maximum amount of scale reduction to apply as the view's center moves from the top
-        // of the superview to the bottom. For example, if this view's center has moved 25% of the way
-        // from the top of the superview towards the bottom then the maximum scale reduction is 1 - .25
-        // or 75%. The range goes from a maximum of 100% to 0% as the view moves from the top to the bottom
-        // along the y axis of its superview.
-        CGFloat maxScaleReduction = 1.0 - self.center.y / superviewHeight;
+    // Since it is possible for the map view to report a pitch less than 0 due to the nature of
+    // how the gesture information is captured, the value is guarded with MAX.
+    CGFloat pitch = MAX(self.mapView.camera.pitch, 0);
 
-        // Since it is possible for the map view to report a pitch less than 0 due to the nature of
-        // how the gesture information is captured, the value is guarded with MAX.
-        CGFloat pitch = MAX(self.mapView.camera.pitch, 0);
+    // Return early if the map view currently has no pitch and was not previously pitched.
+    if (!pitch && !_lastPitch) return;
+    _lastPitch = pitch;
 
-        // Return early if the map view currently has no pitch and was not previously pitched.
-        if (!pitch && !_lastPitch) return;
-        _lastPitch = pitch;
+    // The pitch intensity represents how much the map view is actually pitched compared to
+    // what is possible. The value will range from 0% (not pitched at all) to 100% (pitched as much
+    // as the map view will allow). The map view's maximum pitch is defined in
+    // `mbgl::util::PITCH_MAX`.
+    CGFloat pitchIntensity = pitch / MLNDegreesFromRadians(mbgl::util::PITCH_MAX);
 
-        // The pitch intensity represents how much the map view is actually pitched compared to
-        // what is possible. The value will range from 0% (not pitched at all) to 100% (pitched as much
-        // as the map view will allow). The map view's maximum pitch is defined in `mbgl::util::PITCH_MAX`.
-        CGFloat pitchIntensity = pitch / MLNDegreesFromRadians(mbgl::util::PITCH_MAX);
+    // The pitch adjusted scale is the inverse proportion of the maximum possible scale reduction
+    // multiplied by the pitch intensity. For example, if the maximum scale reduction is 75% and the
+    // map view is 50% pitched then the annotation view should be reduced by 37.5% (.75 * .5). The
+    // reduction is then normalized for a scale of 1.0.
+    CGFloat pitchAdjustedScale = 1.0 - maxScaleReduction * pitchIntensity;
 
-        // The pitch adjusted scale is the inverse proportion of the maximum possible scale reduction
-        // multiplied by the pitch intensity. For example, if the maximum scale reduction is 75% and the
-        // map view is 50% pitched then the annotation view should be reduced by 37.5% (.75 * .5). The
-        // reduction is then normalized for a scale of 1.0.
-        CGFloat pitchAdjustedScale = 1.0 - maxScaleReduction * pitchIntensity;
-
-        // We keep track of each viewing distance scale transform that we apply. Each iteration,
-        // we can account for it so that we don't get cumulative scaling every time we move.
-        // We also avoid clobbering any existing transform passed in by the client or this SDK.
-        CATransform3D undoOfLastScaleTransform = CATransform3DInvert(_lastAppliedScaleTransform);
-        CATransform3D newScaleTransform = CATransform3DMakeScale(pitchAdjustedScale, pitchAdjustedScale, 1);
-        CATransform3D effectiveTransform = CATransform3DConcat(undoOfLastScaleTransform, newScaleTransform);
-        self.layer.transform = CATransform3DConcat(self.layer.transform, effectiveTransform);
-        _lastAppliedScaleTransform = newScaleTransform;
-    }
-}
-
-- (void)setRotatesToMatchCamera:(BOOL)rotatesToMatchCamera
-{
-    MLNLogDebug(@"Setting rotatesToMatchCamera: %@", MLNStringFromBOOL(rotatesToMatchCamera));
-    if (_rotatesToMatchCamera != rotatesToMatchCamera)
-    {
-        _rotatesToMatchCamera = rotatesToMatchCamera;
-        [self updateRotateTransform];
-    }
-}
-
-- (void)updateRotateTransform
-{
-    if (self.rotatesToMatchCamera == NO) return;
-
-    CGFloat direction = -MLNRadiansFromDegrees(self.mapView.direction);
-
-    // Return early if the map view has the same rotation as the already-applied transform.
-    if (direction == _lastDirection) return;
-    _lastDirection = direction;
-
-    // We keep track of each rotation transform that we apply. Each iteration,
-    // we can account for it so that we don't get cumulative rotation every time we move.
+    // We keep track of each viewing distance scale transform that we apply. Each iteration,
+    // we can account for it so that we don't get cumulative scaling every time we move.
     // We also avoid clobbering any existing transform passed in by the client or this SDK.
-    CATransform3D undoOfLastRotationTransform = CATransform3DInvert(_lastAppliedRotationTransform);
-    CATransform3D newRotationTransform = CATransform3DMakeRotation(direction, 0, 0, 1);
-    CATransform3D effectiveTransform = CATransform3DConcat(undoOfLastRotationTransform, newRotationTransform);
+    CATransform3D undoOfLastScaleTransform = CATransform3DInvert(_lastAppliedScaleTransform);
+    CATransform3D newScaleTransform =
+        CATransform3DMakeScale(pitchAdjustedScale, pitchAdjustedScale, 1);
+    CATransform3D effectiveTransform =
+        CATransform3DConcat(undoOfLastScaleTransform, newScaleTransform);
     self.layer.transform = CATransform3DConcat(self.layer.transform, effectiveTransform);
-    _lastAppliedRotationTransform = newRotationTransform;
+    _lastAppliedScaleTransform = newScaleTransform;
+  }
+}
+
+- (void)setRotatesToMatchCamera:(BOOL)rotatesToMatchCamera {
+  MLNLogDebug(@"Setting rotatesToMatchCamera: %@", MLNStringFromBOOL(rotatesToMatchCamera));
+  if (_rotatesToMatchCamera != rotatesToMatchCamera) {
+    _rotatesToMatchCamera = rotatesToMatchCamera;
+    [self updateRotateTransform];
+  }
+}
+
+- (void)updateRotateTransform {
+  if (self.rotatesToMatchCamera == NO) return;
+
+  CGFloat direction = -MLNRadiansFromDegrees(self.mapView.direction);
+
+  // Return early if the map view has the same rotation as the already-applied transform.
+  if (direction == _lastDirection) return;
+  _lastDirection = direction;
+
+  // We keep track of each rotation transform that we apply. Each iteration,
+  // we can account for it so that we don't get cumulative rotation every time we move.
+  // We also avoid clobbering any existing transform passed in by the client or this SDK.
+  CATransform3D undoOfLastRotationTransform = CATransform3DInvert(_lastAppliedRotationTransform);
+  CATransform3D newRotationTransform = CATransform3DMakeRotation(direction, 0, 0, 1);
+  CATransform3D effectiveTransform =
+      CATransform3DConcat(undoOfLastRotationTransform, newRotationTransform);
+  self.layer.transform = CATransform3DConcat(self.layer.transform, effectiveTransform);
+  _lastAppliedRotationTransform = newRotationTransform;
 }
 
 // MARK: - Draggable
 
-- (void)setDraggable:(BOOL)draggable
-{
-    MLNLogDebug(@"Setting draggable: %@", MLNStringFromBOOL(draggable));
-    [self willChangeValueForKey:@"draggable"];
-    _draggable = draggable;
-    [self didChangeValueForKey:@"draggable"];
+- (void)setDraggable:(BOOL)draggable {
+  MLNLogDebug(@"Setting draggable: %@", MLNStringFromBOOL(draggable));
+  [self willChangeValueForKey:@"draggable"];
+  _draggable = draggable;
+  [self didChangeValueForKey:@"draggable"];
 
-    if (draggable)
-    {
-        [self enableDrag];
-    }
-    else
-    {
-        [self disableDrag];
-    }
+  if (draggable) {
+    [self enableDrag];
+  } else {
+    [self disableDrag];
+  }
 }
 
-- (void)enableDrag
-{
-    if (!_longPressRecognizer)
-    {
-        UILongPressGestureRecognizer *recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-        recognizer.delegate = self;
-        [self addGestureRecognizer:recognizer];
-        _longPressRecognizer = recognizer;
-    }
+- (void)enableDrag {
+  if (!_longPressRecognizer) {
+    UILongPressGestureRecognizer *recognizer =
+        [[UILongPressGestureRecognizer alloc] initWithTarget:self
+                                                      action:@selector(handleLongPress:)];
+    recognizer.delegate = self;
+    [self addGestureRecognizer:recognizer];
+    _longPressRecognizer = recognizer;
+  }
 
-    if (!_panGestureRecognizer)
-    {
-        UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-        recognizer.delegate = self;
-        [self addGestureRecognizer:recognizer];
-        _panGestureRecognizer = recognizer;
-    }
+  if (!_panGestureRecognizer) {
+    UIPanGestureRecognizer *recognizer =
+        [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    recognizer.delegate = self;
+    [self addGestureRecognizer:recognizer];
+    _panGestureRecognizer = recognizer;
+  }
 }
 
-- (void)disableDrag
-{
-    [self removeGestureRecognizer:_longPressRecognizer];
-    [self removeGestureRecognizer:_panGestureRecognizer];
+- (void)disableDrag {
+  [self removeGestureRecognizer:_longPressRecognizer];
+  [self removeGestureRecognizer:_panGestureRecognizer];
 }
 
-- (void)handleLongPress:(UILongPressGestureRecognizer *)sender
-{
-    switch (sender.state) {
-        case UIGestureRecognizerStateBegan:
-            self.dragState = MLNAnnotationViewDragStateStarting;
-            break;
-        case UIGestureRecognizerStateChanged:
-            self.dragState = MLNAnnotationViewDragStateDragging;
-            break;
-        case UIGestureRecognizerStateCancelled:
-            self.dragState = MLNAnnotationViewDragStateCanceling;
-            break;
-        case UIGestureRecognizerStateEnded:
-            self.dragState = MLNAnnotationViewDragStateEnding;
-            break;
-        case UIGestureRecognizerStateFailed:
-            self.dragState = MLNAnnotationViewDragStateNone;
-            break;
-        case UIGestureRecognizerStatePossible:
-            break;
-    }
+- (void)handleLongPress:(UILongPressGestureRecognizer *)sender {
+  switch (sender.state) {
+    case UIGestureRecognizerStateBegan:
+      self.dragState = MLNAnnotationViewDragStateStarting;
+      break;
+    case UIGestureRecognizerStateChanged:
+      self.dragState = MLNAnnotationViewDragStateDragging;
+      break;
+    case UIGestureRecognizerStateCancelled:
+      self.dragState = MLNAnnotationViewDragStateCanceling;
+      break;
+    case UIGestureRecognizerStateEnded:
+      self.dragState = MLNAnnotationViewDragStateEnding;
+      break;
+    case UIGestureRecognizerStateFailed:
+      self.dragState = MLNAnnotationViewDragStateNone;
+      break;
+    case UIGestureRecognizerStatePossible:
+      break;
+  }
 }
 
-- (void)handlePan:(UIPanGestureRecognizer *)sender
-{
-    self.center = [sender locationInView:sender.view.superview];
+- (void)handlePan:(UIPanGestureRecognizer *)sender {
+  self.center = [sender locationInView:sender.view.superview];
 
-    if (sender.state == UIGestureRecognizerStateEnded) {
-        self.dragState = MLNAnnotationViewDragStateNone;
-    }
+  if (sender.state == UIGestureRecognizerStateEnded) {
+    self.dragState = MLNAnnotationViewDragStateNone;
+  }
 }
 
-- (void)setDragState:(MLNAnnotationViewDragState)dragState
-{
-    MLNLogDebug(@"Setting dragState: %lu", (unsigned long)dragState);
-    [self setDragState:dragState animated:YES];
+- (void)setDragState:(MLNAnnotationViewDragState)dragState {
+  MLNLogDebug(@"Setting dragState: %lu", (unsigned long)dragState);
+  [self setDragState:dragState animated:YES];
 }
 
-- (void)setDragState:(MLNAnnotationViewDragState)dragState animated:(BOOL)animated
-{
-    MLNLogDebug(@"Setting dragState: %lu animated: %@", (unsigned long)dragState, MLNStringFromBOOL(animated));
-    [self willChangeValueForKey:@"dragState"];
-    _dragState = dragState;
-    [self didChangeValueForKey:@"dragState"];
+- (void)setDragState:(MLNAnnotationViewDragState)dragState animated:(BOOL)animated {
+  MLNLogDebug(@"Setting dragState: %lu animated: %@", (unsigned long)dragState,
+              MLNStringFromBOOL(animated));
+  [self willChangeValueForKey:@"dragState"];
+  _dragState = dragState;
+  [self didChangeValueForKey:@"dragState"];
 
-    if (dragState == MLNAnnotationViewDragStateStarting)
-    {
-        [self.mapView.calloutViewForSelectedAnnotation dismissCalloutAnimated:animated];
-        [self.superview bringSubviewToFront:self];
+  if (dragState == MLNAnnotationViewDragStateStarting) {
+    [self.mapView.calloutViewForSelectedAnnotation dismissCalloutAnimated:animated];
+    [self.superview bringSubviewToFront:self];
+  } else if (dragState == MLNAnnotationViewDragStateCanceling) {
+    if (!self.annotation) {
+      [NSException raise:NSInvalidArgumentException
+                  format:@"Annotation property should not be nil."];
     }
-    else if (dragState == MLNAnnotationViewDragStateCanceling)
-    {
-        if (!self.annotation) {
-            [NSException raise:NSInvalidArgumentException
-                        format:@"Annotation property should not be nil."];
-        }
-        self.panGestureRecognizer.enabled = NO;
-        self.longPressRecognizer.enabled = NO;
-        self.center = [self.mapView convertCoordinate:self.annotation.coordinate toPointToView:self.mapView];
-        self.panGestureRecognizer.enabled = YES;
-        self.longPressRecognizer.enabled = YES;
-        self.dragState = MLNAnnotationViewDragStateNone;
+    self.panGestureRecognizer.enabled = NO;
+    self.longPressRecognizer.enabled = NO;
+    self.center = [self.mapView convertCoordinate:self.annotation.coordinate
+                                    toPointToView:self.mapView];
+    self.panGestureRecognizer.enabled = YES;
+    self.longPressRecognizer.enabled = YES;
+    self.dragState = MLNAnnotationViewDragStateNone;
+  } else if (dragState == MLNAnnotationViewDragStateEnding) {
+    if ([self.annotation respondsToSelector:@selector(setCoordinate:)]) {
+      CLLocationCoordinate2D coordinate = [self.mapView convertPoint:self.center
+                                                toCoordinateFromView:self.mapView];
+      [(NSObject *)self.annotation setValue:[NSValue valueWithMLNCoordinate:coordinate]
+                                     forKey:@"coordinate"];
     }
-    else if (dragState == MLNAnnotationViewDragStateEnding)
-    {
-        if ([self.annotation respondsToSelector:@selector(setCoordinate:)])
-        {
-            CLLocationCoordinate2D coordinate = [self.mapView convertPoint:self.center toCoordinateFromView:self.mapView];
-            [(NSObject *)self.annotation setValue:[NSValue valueWithMLNCoordinate:coordinate] forKey:@"coordinate"];
-        }
-    }
+  }
 }
 
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
-{
-    BOOL isDragging = self.dragState == MLNAnnotationViewDragStateDragging;
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+  BOOL isDragging = self.dragState == MLNAnnotationViewDragStateDragging;
 
-    if (gestureRecognizer == _panGestureRecognizer && !(isDragging))
-    {
-        return NO;
-    }
+  if (gestureRecognizer == _panGestureRecognizer && !(isDragging)) {
+    return NO;
+  }
 
-    return YES;
+  return YES;
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
-    return otherGestureRecognizer == _longPressRecognizer || otherGestureRecognizer == _panGestureRecognizer;
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+    shouldRecognizeSimultaneouslyWithGestureRecognizer:
+        (UIGestureRecognizer *)otherGestureRecognizer {
+  return otherGestureRecognizer == _longPressRecognizer ||
+         otherGestureRecognizer == _panGestureRecognizer;
 }
 
 // MARK: UIAccessibility methods
 
 - (BOOL)isAccessibilityElement {
-    return !self.hidden;
+  return !self.hidden;
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
-    return UIAccessibilityTraitButton | UIAccessibilityTraitAdjustable;
+  return UIAccessibilityTraitButton | UIAccessibilityTraitAdjustable;
 }
 
 - (NSString *)accessibilityLabel {
-    return [self.annotation respondsToSelector:@selector(title)] ? self.annotation.title : super.accessibilityLabel;
+  return [self.annotation respondsToSelector:@selector(title)] ? self.annotation.title
+                                                               : super.accessibilityLabel;
 }
 
 - (NSString *)accessibilityValue {
-    return [self.annotation respondsToSelector:@selector(subtitle)] ? self.annotation.subtitle : super.accessibilityValue;
+  return [self.annotation respondsToSelector:@selector(subtitle)] ? self.annotation.subtitle
+                                                                  : super.accessibilityValue;
 }
 
 - (NSString *)accessibilityHint {
-    return NSLocalizedStringWithDefaultValue(@"ANNOTATION_A11Y_HINT", nil, nil, @"Shows more info", @"Accessibility hint");
+  return NSLocalizedStringWithDefaultValue(@"ANNOTATION_A11Y_HINT", nil, nil, @"Shows more info",
+                                           @"Accessibility hint");
 }
 
 - (CGRect)accessibilityFrame {
-    CGRect accessibilityFrame = self.frame;
-    CGRect minimumFrame = CGRectInset({ self.center, CGSizeZero },
-                                      -MLNAnnotationAccessibilityElementMinimumSize.width / 2,
-                                      -MLNAnnotationAccessibilityElementMinimumSize.height / 2);
-    accessibilityFrame = CGRectUnion(accessibilityFrame, minimumFrame);
-    return accessibilityFrame;
+  CGRect accessibilityFrame = self.frame;
+  CGRect minimumFrame = CGRectInset({self.center, CGSizeZero},
+                                    -MLNAnnotationAccessibilityElementMinimumSize.width / 2,
+                                    -MLNAnnotationAccessibilityElementMinimumSize.height / 2);
+  accessibilityFrame = CGRectUnion(accessibilityFrame, minimumFrame);
+  return accessibilityFrame;
 }
 
 - (void)accessibilityIncrement {
-    [self.superview accessibilityIncrement];
+  [self.superview accessibilityIncrement];
 }
 
 - (void)accessibilityDecrement {
-    [self.superview accessibilityDecrement];
+  [self.superview accessibilityDecrement];
 }
 
 @end
