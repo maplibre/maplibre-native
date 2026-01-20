@@ -460,8 +460,6 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
     }
 
     func testMLNMapSnapshotter() throws {
-        throw XCTSkip("Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1862")
-
         let expectation = expectation(description: "MLNMapSnapshotter should produce a snapshot")
         #if os(macOS)
             var image: NSImage? {
