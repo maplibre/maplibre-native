@@ -35,9 +35,8 @@ static void TileCoverPitchedViewport(benchmark::State& state) {
 
 static void TileCoverBounds(benchmark::State& state) {
     std::size_t length = 0;
-    const Range<uint8_t> zoomRange(0, 14);
     while (state.KeepRunning()) {
-        auto tiles = util::tileCover(sanFrancisco, 8, zoomRange);
+        auto tiles = util::tileCover(sanFrancisco, 8);
         length += tiles.size();
     }
     benchmark::DoNotOptimize(length);
@@ -59,10 +58,9 @@ static const auto geomPolygon = Polygon<double>{
 
 static void TileCoverPolygon(benchmark::State& state) {
     std::size_t length = 0;
-    const Range<uint8_t> zoomRange(0, 14);
 
     while (state.KeepRunning()) {
-        auto tiles = util::tileCover(geomPolygon, 8, zoomRange);
+        auto tiles = util::tileCover(geomPolygon, 8);
         length += tiles.size();
     }
     benchmark::DoNotOptimize(length);
