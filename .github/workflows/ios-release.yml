@@ -37,29 +37,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
 
-      - name: Create tag
-        run: |
-          git tag -a ios-v${{ env.version }} -m "Publish ios-v${{ env.version }}" ${{ github.sha }}
-          git push origin ios-v${{ env.version }}
-
-      - name: Build XCFramework (Dynamic)
-        run: |
-          bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
-            --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
-          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
-
-      - name: Build XCFramework (Static)
-        # for now, just build it TODO: make a static framework release
-        run: |
-          bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
-          echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.static)" >> "$GITHUB_ENV"
-
-      - name: Create .zip with debug symbols
-        working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
-        run: |
-          zip MapLibre_ios_device.framework.dSYM.zip MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_ios_device.framework.dSYM/Contents/Info.plist
-          echo debug_symbols_ios="$(realpath MapLibre_ios_device.framework.dSYM.zip)" >> "$GITHUB_ENV"
-
       - name: Get version (release)
         if: github.event.inputs.release == 'full'
         run: |
@@ -79,6 +56,28 @@ jobs:
           fi
           echo version="$version" >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
+
+      - name: Create tag if it does not exist
+        working-directory: .
+        run: .github/scripts/ensure-tag.sh ios-v${{ env.version }} ${{ github.sha }}
+
+      - name: Build XCFramework (Dynamic)
+        run: |
+          bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
+            --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+
+      - name: Build XCFramework (Static)
+        # for now, just build it TODO: make a static framework release
+        run: |
+          bazel build //platform/ios:MapLibre.static --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
+          echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.static)" >> "$GITHUB_ENV"
+
+      - name: Create .zip with debug symbols
+        working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
+        run: |
+          zip MapLibre_ios_device.framework.dSYM.zip MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_ios_device.framework.dSYM/Contents/Info.plist
+          echo debug_symbols_ios="$(realpath MapLibre_ios_device.framework.dSYM.zip)" >> "$GITHUB_ENV"
 
       - name: Extract changelog for version
         run: |
