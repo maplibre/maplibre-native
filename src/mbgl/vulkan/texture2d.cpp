@@ -224,8 +224,10 @@ void Texture2D::uploadSubRegion(const void* pixelData,
         context.enqueueDeletion(std::move(function));
     }
 
-    context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += bufferInfo.size;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += bufferInfo.size;
+    });
 }
 
 vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::TextureChannelDataType channel) {
@@ -385,9 +387,11 @@ void Texture2D::createTexture() {
         imageLayout = imageCreateInfo.initialLayout;
     }
 
-    context.renderingStats().numCreatedTextures++;
-    context.renderingStats().numActiveTextures++;
-    context.renderingStats().memTextures += getDataSize();
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numCreatedTextures++;
+        stats.numActiveTextures++;
+        stats.memTextures += getDataSize();
+    });
 
     textureDirty = false;
     lastModified = util::MonotonicTimer::now();
@@ -431,8 +435,10 @@ void Texture2D::destroyTexture() {
 
         imageLayout = vk::ImageLayout::eUndefined;
 
-        context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= Texture2D::getDataSize();
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numActiveTextures--;
+            stats.memTextures -= Texture2D::getDataSize();
+        });
     }
 }
 
