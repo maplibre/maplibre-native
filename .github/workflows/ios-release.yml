@@ -65,6 +65,10 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+
       - name: Build XCFramework (Static)
         # for now, just build it TODO: make a static framework release
         run: |
