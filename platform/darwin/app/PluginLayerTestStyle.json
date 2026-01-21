@@ -528,60 +528,87 @@
             "source-layer": "centroids"
         },
         {   "id": "metal-rendering-layer-1",
-            "type": "plugin-layer-metal-rendering",
-            "properties": {
-                "color1":"#FFAADD",
-                "offset-x": -300,
-                "offset-y": -300
-            },
-            "paint": {
-                "scale": 2.5
-            }
-        },
-        {   "id": "metal-rendering-layer-2",
-            "type": "plugin-layer-metal-rendering",
-            "properties": {
-                "color1":"#FFAADD",
-                "offset-x": -300
-            },
-            "paint": {
-                "scale": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    5,
-                    0.5,
-                    15,
-                    3.0
-                ]
-            }
-        },
-        {   "id": "metal-rendering-layer-3",
-            "type": "plugin-layer-metal-rendering",
+                   "type": "plugin-layer-metal-rendering",
+                   "properties": {
+                       "color1":"#FFAADD",
+                       "offset-x": -300,
+                       "offset-y": -300
+                   },
+                   "paint": {
+                       "scale": 2.5
+                   }
+               },
+               {   "id": "metal-rendering-layer-2",
+                   "type": "plugin-layer-metal-rendering",
+                   "properties": {
+                       "color1":"#FFAADD",
+                       "offset-x": -300
+                   },
+                   "paint": {
+                       "scale": [
+                           "interpolate",
+                           ["linear"],
+                           ["zoom"],
+                           5,
+                           0.5,
+                           15,
+                           3.0
+                       ]
+                   }
+               },
+               {   "id": "metal-rendering-layer-3",
+                   "type": "plugin-layer-metal-rendering",
+                   "properties": {
+                       "color1":"#DDAAFF",
+                       "offset-x": 300
+                   },
+                   "paint": {
+                       "scale": [
+                           "interpolate",
+                           ["linear"],
+                           ["zoom"],
+                           5,
+                           3.0,
+                           15,
+                           0.5
+                       ],
+                       "fill-color": [
+                           "interpolate",
+                           ["linear"],
+                           ["zoom"],
+                           1,
+                           "#ff0000",
+                           22,
+                           "#00ff00"
+                       ]
+                   }
+               },
+        {   "id": "metal-rendering-layer-4",
+            "type": "plugin-layer-metal-rendering-cpp",
             "properties": {
                 "color1":"#DDAAFF",
                 "offset-x": 300
             },
             "paint": {
-                "scale": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    5,
-                    3.0,
-                    15,
-                    0.5
-                ],
-                "fill-color": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    1,
-                    "#ff0000",
-                    22,
-                    "#00ff00"
-                ]
-            }
+                          "scale": [
+                              "interpolate",
+                              ["linear"],
+                              ["zoom"],
+                              5,
+                              6.0,
+                              15,
+                              0.25
+                          ],
+                          "fill-color": [
+                              "interpolate",
+                              ["linear"],
+                              ["zoom"],
+                              1,
+                              "#ffff00",
+                              22,
+                              "#00aa00"
+                          ]
+                      }
         },
         {
             "id": "crimea-fill",

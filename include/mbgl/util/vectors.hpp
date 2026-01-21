@@ -6,6 +6,7 @@
 namespace mbgl {
 
 using vec2 = std::array<double, 2>;
+using vec2i = std::array<int, 2>;
 using vec3 = std::array<double, 3>;
 using vec3f = std::array<float, 3>;
 using vec3i = std::array<int, 3>;
