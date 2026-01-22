@@ -4,9 +4,11 @@
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/file_source_request.hpp>
 #include <mbgl/storage/main_resource_loader.hpp>
+#include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/client_options.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread.hpp>
 
@@ -94,6 +96,14 @@ public:
                             // Set the priority of existing resource to low if it's expired but usable.
                             res.setPriority(Resource::Priority::Low);
                         } else {
+                            if (NetworkStatus::Get() != NetworkStatus::Status::Online) {
+                                Log::Warning(Event::General, "using the old data because no network");
+                                // Use the old data because we're probably not going to be able to get new data
+                                Response rep = Response(response);
+                                rep.error = nullptr; // pretend it was ok
+                                callback(rep);
+                                res.setPriority(Resource::Priority::Low);
+                            }
                             // Set prior data only if it was not returned to
                             // the requester. Once we get 304 response from
                             // the network, we will forward response to the
