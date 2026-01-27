@@ -12,6 +12,14 @@ Welcome to the examples documentation of MapLibre Android.
 
     [:octicons-arrow-right-24: Getting started](getting-started.md)
 
+-   :material-information-outline:{ .lg .middle } __AttributionDialogManager__
+
+    ---
+
+    Show the default attribution dialog or open a custom “full attributions” screen.
+
+    [:octicons-arrow-right-24: Open guide](attribution-dialog-manager.md)
+
 -   :fontawesome-brands-slack:{ .lg .middle } __Find us on Slack__
 
     ---
