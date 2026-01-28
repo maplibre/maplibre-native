@@ -235,7 +235,7 @@ Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://sla
 
 ### Bounties 💰
 
-Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
+Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/jobs/step-by-step-bounties-guide/).
 
 We thank everyone who supported us financially in the past and special thanks to the people and organizations who support us with recurring donations!
 
