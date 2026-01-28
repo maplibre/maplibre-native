@@ -111,7 +111,7 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 
 #else // MLN_TRACY_ENABLE
 
-constexpr bool tracyEnabled = true;
+constexpr bool tracyEnabled = false;
 
 #define MLN_TRACE_GL_CONTEXT() ((void)0)
 #define MLN_TRACE_GL_ZONE(label) ((void)0)
