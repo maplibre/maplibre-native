@@ -4,8 +4,6 @@
 
 #ifdef MLN_TRACY_ENABLE
 
-constexpr bool tracyEnabled = true;
-
 #include <tracy/Tracy.hpp>
 #include <cstddef>
 
@@ -110,8 +108,6 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #endif
 
 #else // MLN_TRACY_ENABLE
-
-constexpr bool tracyEnabled = false;
 
 #define MLN_TRACE_GL_CONTEXT() ((void)0)
 #define MLN_TRACE_GL_ZONE(label) ((void)0)

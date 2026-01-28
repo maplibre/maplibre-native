@@ -3,9 +3,9 @@
 namespace mbgl::instrumentation {
 
 void setThreadName(const std::string &name) {
-    if constexpr (tracyEnabled) {
-        tracy::SetThreadName(name.c_str());
-    }
+#ifdef MLN_TRACY_ENABLE
+    tracy::SetThreadName(name.c_str());
+#endif
 }
 
 }; // namespace mbgl::instrumentation
