@@ -31,10 +31,17 @@ public:
     operator bool() const { return expression || legacyFilter; }
 
     friend bool operator==(const Filter& lhs, const Filter& rhs) {
+        if (lhs.legacyFilter) {
+            return lhs.legacyFilter == rhs.legacyFilter;
+        }
+
         if (!lhs.expression || !rhs.expression) {
             return lhs.expression == rhs.expression;
+        } else if (*lhs.expression == nullptr || *rhs.expression == nullptr) {
+            // checks if both are nullptrs
+            return *lhs.expression == *rhs.expression;
         } else {
-            return *(lhs.expression) == *(rhs.expression);
+            return *lhs.expression.value() == *rhs.expression.value();
         }
     }
 
