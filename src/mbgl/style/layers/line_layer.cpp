@@ -58,10 +58,6 @@ std::unique_ptr<Layer> LineLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<LineLayer>(std::move(impl_));
 }
 
-void LineLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    layout.stringify(writer);
-}
-
 // Layout properties
 
 PropertyValue<LineCapType> LineLayer::getDefaultLineCap() {

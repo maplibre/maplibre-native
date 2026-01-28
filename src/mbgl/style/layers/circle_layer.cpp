@@ -58,10 +58,6 @@ std::unique_ptr<Layer> CircleLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<CircleLayer>(std::move(impl_));
 }
 
-void CircleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    layout.stringify(writer);
-}
-
 // Layout properties
 
 PropertyValue<float> CircleLayer::getDefaultCircleSortKey() {

@@ -58,9 +58,6 @@ std::unique_ptr<Layer> RasterLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<RasterLayer>(std::move(impl_));
 }
 
-void RasterLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
-
 // Layout properties
 
 

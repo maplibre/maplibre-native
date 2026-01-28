@@ -11,7 +11,6 @@ struct TestLayerImpl : style::Layer::Impl {
         : Impl(std::move(layerID), std::move(sourceID)) {}
 
     bool hasLayoutDifference(const Layer::Impl&) const override { return false; }
-    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override {}
 
     DECLARE_LAYER_TYPE_INFO;
 };

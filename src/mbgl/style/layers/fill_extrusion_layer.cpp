@@ -58,9 +58,6 @@ std::unique_ptr<Layer> FillExtrusionLayer::cloneRef(const std::string& id_) cons
     return std::make_unique<FillExtrusionLayer>(std::move(impl_));
 }
 
-void FillExtrusionLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
-
 // Layout properties
 
 

@@ -39,9 +39,6 @@ public:
     // filter, visibility, layout properties, or data-driven paint properties.
     virtual bool hasLayoutDifference(const Layer::Impl&) const = 0;
 
-    // Utility function for automatic layer grouping.
-    virtual void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const = 0;
-
     // Returns pointer to the statically allocated layer type info structure.
     virtual const LayerTypeInfo* getTypeInfo() const noexcept = 0;
 

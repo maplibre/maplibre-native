@@ -148,15 +148,6 @@ std::unique_ptr<Layer> <%- camelize(type) %>Layer::cloneRef(const std::string& i
     return std::make_unique<<%- camelize(type) %>Layer>(std::move(impl_));
 }
 
-<% if (layoutProperties.length) { -%>
-void <%- camelize(type) %>Layer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    layout.stringify(writer);
-}
-<% } else { -%>
-void <%- camelize(type) %>Layer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
-<% } -%>
-
 // Layout properties
 
 <% for (const property of layoutProperties) { -%>

@@ -49,7 +49,6 @@ public:
     PolylineLayerImpl()
         : Layer::Impl("", "") {}
     bool hasLayoutDifference(const Layer::Impl&) const override { return false; }
-    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override {}
 
     const LayerTypeInfo* getTypeInfo() const noexcept final { return staticTypeInfo(); }
     static const LayerTypeInfo* staticTypeInfo() noexcept {

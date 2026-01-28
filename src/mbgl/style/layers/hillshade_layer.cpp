@@ -58,9 +58,6 @@ std::unique_ptr<Layer> HillshadeLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<HillshadeLayer>(std::move(impl_));
 }
 
-void HillshadeLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
-
 // Layout properties
 
 

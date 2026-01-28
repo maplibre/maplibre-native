@@ -5,9 +5,6 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/style/expression/expression.hpp>
 
-#include <string>
-#include <vector>
-#include <tuple>
 #include <optional>
 
 namespace mbgl {

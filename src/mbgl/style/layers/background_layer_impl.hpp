@@ -29,7 +29,6 @@ public:
     Impl(const Impl&);
 
     bool hasLayoutDifference(const Layer::Impl&) const override;
-    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
 public:
     BackgroundPaintProperties::Transitionable paint;
