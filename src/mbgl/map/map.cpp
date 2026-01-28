@@ -588,6 +588,14 @@ double Map::getTileLodZoomShift() const {
     return impl->tileLodZoomShift;
 }
 
+void Map::setUseDistanceBasedTileLod(bool val) {
+    impl->useDistanceBasedTileLod = val;
+}
+
+bool Map::getUseDistanceBasedTileLod() const {
+    return impl->useDistanceBasedTileLod;
+}
+
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
 }
