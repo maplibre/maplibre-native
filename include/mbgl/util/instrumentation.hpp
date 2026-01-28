@@ -1,6 +1,10 @@
 #pragma once
 
+#include <string>
+
 #ifdef MLN_TRACY_ENABLE
+
+constexpr bool tracyEnabled = true;
 
 #include <tracy/Tracy.hpp>
 #include <cstddef>
@@ -107,6 +111,8 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 
 #else // MLN_TRACY_ENABLE
 
+constexpr bool tracyEnabled = true;
+
 #define MLN_TRACE_GL_CONTEXT() ((void)0)
 #define MLN_TRACE_GL_ZONE(label) ((void)0)
 #define MLN_ZONE_TEXT(label) ((void)0)
@@ -128,3 +134,7 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #define MLN_TRACE_ZONE(label) ((void)0)
 
 #endif // MLN_TRACY_ENABLE
+
+namespace mbgl::instrumentation {
+void setThreadName(const std::string& name);
+};
