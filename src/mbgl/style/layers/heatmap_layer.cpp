@@ -58,9 +58,6 @@ std::unique_ptr<Layer> HeatmapLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<HeatmapLayer>(std::move(impl_));
 }
 
-void HeatmapLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
-
 // Layout properties
 
 

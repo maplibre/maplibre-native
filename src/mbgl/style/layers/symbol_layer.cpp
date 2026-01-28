@@ -58,10 +58,6 @@ std::unique_ptr<Layer> SymbolLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<SymbolLayer>(std::move(impl_));
 }
 
-void SymbolLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    layout.stringify(writer);
-}
-
 // Layout properties
 
 PropertyValue<bool> SymbolLayer::getDefaultIconAllowOverlap() {

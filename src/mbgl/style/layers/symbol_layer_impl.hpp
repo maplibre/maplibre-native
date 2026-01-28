@@ -126,7 +126,6 @@ public:
     using Layer::Impl::Impl;
 
     bool hasLayoutDifference(const Layer::Impl&) const override;
-    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
     void populateFontStack(std::set<FontStack>& fontStack) const final;
 
     SymbolLayoutProperties::Unevaluated layout;

@@ -12,7 +12,5 @@ bool CustomDrawableLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
     return false;
 }
 
-void CustomDrawableLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {}
-
 } // namespace style
 } // namespace mbgl

@@ -58,10 +58,6 @@ std::unique_ptr<Layer> FillLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<FillLayer>(std::move(impl_));
 }
 
-void FillLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    layout.stringify(writer);
-}
-
 // Layout properties
 
 PropertyValue<float> FillLayer::getDefaultFillSortKey() {

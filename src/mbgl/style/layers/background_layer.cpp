@@ -58,9 +58,6 @@ std::unique_ptr<Layer> BackgroundLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<BackgroundLayer>(std::move(impl_));
 }
 
-void BackgroundLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
-
 // Layout properties
 
 

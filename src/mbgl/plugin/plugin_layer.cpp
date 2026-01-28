@@ -34,8 +34,6 @@ std::unique_ptr<Layer> PluginLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<PluginLayer>(std::move(impl_));
 }
 
-void PluginLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {}
-
 Value PluginLayer::serialize() const {
     auto result = Layer::serialize();
     return result;

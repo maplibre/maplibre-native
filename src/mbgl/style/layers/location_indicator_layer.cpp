@@ -58,10 +58,6 @@ std::unique_ptr<Layer> LocationIndicatorLayer::cloneRef(const std::string& id_) 
     return std::make_unique<LocationIndicatorLayer>(std::move(impl_));
 }
 
-void LocationIndicatorLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    layout.stringify(writer);
-}
-
 // Layout properties
 
 PropertyValue<expression::Image> LocationIndicatorLayer::getDefaultBearingImage() {
