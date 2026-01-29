@@ -77,10 +77,6 @@ BufferResource BufferResource::clone() const {
 
 BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
-    if (isValid()) {
-        context.renderingStats().numBuffers--;
-        context.renderingStats().memBuffers -= size;
-    }
 
     buffer = std::move(other.buffer);
     raw = std::move(other.raw);
