@@ -1,15 +1,14 @@
 #include <mbgl/renderer/group_by_layout.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/util/rapidjson.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-#include <unordered_map>
-
 namespace mbgl {
 
-std::string layoutKey(const style::Layer::Impl& impl) {
+std::string createLayoutKey(const style::Layer::Impl& impl) {
     using namespace style::conversion;
 
     rapidjson::StringBuffer s;
@@ -27,6 +26,18 @@ std::string layoutKey(const style::Layer::Impl& impl) {
     writer.EndArray();
 
     return s.GetString();
+}
+
+GroupMap groupLayers(const std::vector<Immutable<style::LayerProperties>>& layers) {
+    MLN_TRACE_FUNC();
+
+    mbgl::unordered_map<std::string, std::vector<Immutable<style::LayerProperties>>> groupMap;
+    groupMap.reserve(layers.size());
+
+    for (auto layer : layers) {
+        groupMap[createLayoutKey(*layer->baseImpl)].push_back(std::move(layer));
+    }
+    return groupMap;
 }
 
 } // namespace mbgl
