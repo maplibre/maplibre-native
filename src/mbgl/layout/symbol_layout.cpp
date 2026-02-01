@@ -744,7 +744,7 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
 
         // if either shapedText or icon position is present, add the feature
         const Shaping& defaultShaping = getDefaultHorizontalShaping(shapedTextOrientations);
-        iconsInText = defaultShaping && defaultShaping.iconsInText;
+        iconsInText |= defaultShaping && defaultShaping.iconsInText;
         if (defaultShaping || shapedIcon) {
             addFeature(std::distance(features.begin(), it),
                        feature,
