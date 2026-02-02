@@ -158,7 +158,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 const Size& size_,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
-                                const vk::UniqueCommandBuffer& commandBuffer) noexcept {
+                                const vk::UniqueCommandBuffer& commandBuffer,
+                                DeletionQueue* deletionQueue) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
@@ -189,7 +190,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     memcpy(bufferAllocation->mappedBuffer, pixelData, bufferInfo.size);
 
     const auto enqueueCommands = [&](const auto& buffer) {
-        transitionToTransferLayout(buffer);
+        transitionToTransferWriteLayout(buffer);
 
         const auto region = vk::BufferImageCopy()
                                 .setBufferOffset(0)
@@ -204,6 +205,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
         if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
             generateMips(buffer);
+        } else if (textureUsage == Texture2DUsage::Blit) {
+            transitionToTransferReadLayout(buffer);
         } else {
             transitionToShaderReadLayout(buffer);
         }
@@ -211,10 +214,20 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
     enqueueCommands(commandBuffer);
 
-    context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](auto&) mutable { buffAlloc.reset(); });
+    const auto function = [buffAlloc = std::move(bufferAllocation)](auto&) mutable {
+        buffAlloc.reset();
+    };
 
-    context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += bufferInfo.size;
+    if (deletionQueue) {
+        deletionQueue->push_back(std::move(function));
+    } else {
+        context.enqueueDeletion(std::move(function));
+    }
+
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += bufferInfo.size;
+    });
 }
 
 vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::TextureChannelDataType channel) {
@@ -304,6 +317,12 @@ void Texture2D::createTexture() {
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst;
             imageTiling = vk::ImageTiling::eLinear;
             break;
+
+        case Texture2DUsage::Blit:
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eSampled |
+                         vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
+            imageTiling = vk::ImageTiling::eLinear;
+            break;
     }
 
     const auto imageCreateInfo = vk::ImageCreateInfo()
@@ -368,9 +387,11 @@ void Texture2D::createTexture() {
         imageLayout = imageCreateInfo.initialLayout;
     }
 
-    context.renderingStats().numCreatedTextures++;
-    context.renderingStats().numActiveTextures++;
-    context.renderingStats().memTextures += getDataSize();
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numCreatedTextures++;
+        stats.numActiveTextures++;
+        stats.memTextures += getDataSize();
+    });
 
     textureDirty = false;
     lastModified = util::MonotonicTimer::now();
@@ -414,8 +435,10 @@ void Texture2D::destroyTexture() {
 
         imageLayout = vk::ImageLayout::eUndefined;
 
-        context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= Texture2D::getDataSize();
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numActiveTextures--;
+            stats.memTextures -= Texture2D::getDataSize();
+        });
     }
 }
 
@@ -429,7 +452,7 @@ void Texture2D::destroySampler() {
     }
 }
 
-void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer) {
+void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto barrier = vk::ImageMemoryBarrier()
                              .setImage(imageAllocation->image)
                              .setOldLayout(imageLayout)
@@ -441,6 +464,28 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
     buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
+
+    imageLayout = barrier.newLayout;
+}
+
+void Texture2D::transitionToTransferReadLayout(const vk::UniqueCommandBuffer& buffer) {
+    const auto barrier = vk::ImageMemoryBarrier()
+                             .setImage(imageAllocation->image)
+                             .setOldLayout(imageLayout)
+                             .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                             .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+                             .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+                             .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                             .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eTransfer,
                             {},
                             nullptr,
@@ -503,7 +548,7 @@ const vk::Sampler& Texture2D::getVulkanSampler() {
     return sampler;
 }
 
-void Texture2D::copyImage(vk::Image image) {
+void Texture2D::copyImage(vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset) {
     if (!image) return;
 
     create();
@@ -512,9 +557,10 @@ void Texture2D::copyImage(vk::Image image) {
         const auto copyInfo = vk::ImageCopy()
                                   .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
                                   .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                                  .setExtent({size.width, size.height, 1});
+                                  .setExtent({imageSize.width, imageSize.height, 1})
+                                  .setDstOffset({xOffset, yOffset, 0});
 
-        transitionToTransferLayout(commandBuffer);
+        transitionToTransferWriteLayout(commandBuffer);
         commandBuffer->copyImage(image,
                                  vk::ImageLayout::eTransferSrcOptimal,
                                  imageAllocation->image,

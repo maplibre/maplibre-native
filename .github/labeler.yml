@@ -6,7 +6,7 @@ iOS:
   - any-glob-to-any-file:
     - 'platform/ios/**/*'
     - 'platform/darwin/**/*'
-cpp-core:
+core:
 - changed-files:
   - any-glob-to-any-file:
     - 'src/**/*'

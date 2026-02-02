@@ -41,6 +41,7 @@ enum class Texture2DUsage {
     ShaderInput,
     Attachment,
     Read,
+    Blit,
 };
 
 class Texture2D : public gfx::Texture2D {
@@ -72,7 +73,8 @@ public:
                          const Size& size,
                          uint16_t xOffset,
                          uint16_t yOffset,
-                         const vk::UniqueCommandBuffer& buffer) noexcept;
+                         const vk::UniqueCommandBuffer& buffer,
+                         std::vector<std::function<void(Context&)>>* deletionQueue = nullptr) noexcept;
 
     bool needsUpload() const noexcept override { return !!imageData; };
 
@@ -83,7 +85,7 @@ public:
     const vk::Image& getVulkanImage() const { return imageAllocation->image; }
     const vk::Sampler& getVulkanSampler();
 
-    void copyImage(vk::Image image);
+    void copyImage(vk::Image image, Size imageSize, uint16_t xOffset = 0, uint16_t yOffset = 0);
     std::shared_ptr<PremultipliedImage> readImage();
 
 private:
@@ -97,7 +99,8 @@ private:
     void destroyTexture();
     void destroySampler();
 
-    void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
+    void transitionToTransferWriteLayout(const vk::UniqueCommandBuffer&);
+    void transitionToTransferReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
 
@@ -123,6 +126,8 @@ private:
     vk::Sampler sampler{};
 
     Texture2DUsage textureUsage{Texture2DUsage::ShaderInput};
+
+    friend class DynamicTexture;
 };
 
 } // namespace vulkan

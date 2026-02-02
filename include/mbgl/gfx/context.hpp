@@ -13,6 +13,8 @@
 
 #include <memory>
 #include <string>
+#include <mutex>
+#include <shared_mutex>
 
 namespace mbgl {
 
@@ -35,11 +37,13 @@ class ShaderRegistry;
 
 class Drawable;
 class DrawableBuilder;
+class DynamicTexture;
 class ShaderProgramBase;
 class Texture2D;
 class VertexAttributeArray;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
+using DynamicTexturePtr = std::shared_ptr<DynamicTexture>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
@@ -91,6 +95,16 @@ public:
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
 
+    void threadSafeAccessRenderingStats(const std::function<void(RenderingStats&)>& function) {
+        std::scoped_lock lock(renderingStatsMutex);
+        function(stats);
+    }
+
+    RenderingStats threadSafeCopyRenderingStats() {
+        std::shared_lock lock(renderingStatsMutex);
+        return stats;
+    }
+
 #ifndef NDEBUG
     virtual void visualizeStencilBuffer() = 0;
     virtual void visualizeDepthBuffer(float depthRangeSize) = 0;
@@ -132,6 +146,9 @@ public:
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
 
+    /// Create a dynamic texture
+    virtual DynamicTexturePtr createDynamicTexture(Size size, TexturePixelType pixelType) = 0;
+
     /// Create a render target
     virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
 
@@ -169,6 +186,7 @@ protected:
     virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 
+    std::shared_mutex renderingStatsMutex;
     gfx::RenderingStats stats;
     ContextObserver* observer;
 };
