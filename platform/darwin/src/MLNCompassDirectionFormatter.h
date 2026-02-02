@@ -38,7 +38,7 @@ MLN_EXPORT
  */
 - (BOOL)getObjectValue:(out id __nullable *__nullable)obj
              forString:(NSString *)string
-      errorDescription:(out NSString *__nullable *__nullable)error;
+      errorDescription:(out NSString * __nullable * __nullable)error;
 
 @end
 

@@ -2,11 +2,10 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(SimpleMap)
+/// #-example-code(SimpleMap)
 struct SimpleMap: UIViewRepresentable {
     func makeUIView(context _: Context) -> MLNMapView {
-        let mapView = MLNMapView()
-        return mapView
+        MLNMapView()
     }
 
     func updateUIView(_: MLNMapView, context _: Context) {}

@@ -89,9 +89,9 @@ class MLNDocumentationGuideTests: XCTestCase, MLNMapViewDelegate {
         print(stopsLineWidth)
     }
 
-    func testMigratingToExpressions$Linear() {
+    func testMigratingToExpressions$Linear() throws {
         // #-example-code
-        let url = URL(string: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson")!
+        let url = try XCTUnwrap(URL(string: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"))
         let symbolSource = MLNSource(identifier: "source")
         let symbolLayer = MLNSymbolStyleLayer(identifier: "place-city-sm", source: symbolSource)
 

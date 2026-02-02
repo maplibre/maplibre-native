@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(AnnotationViewExample)
+/// #-example-code(AnnotationViewExample)
 class AnnotationViewExample: UIViewController, MLNMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +37,7 @@ class AnnotationViewExample: UIViewController, MLNMapViewDelegate {
 
     // MARK: - MLNMapViewDelegate methods
 
-    // This delegate method is where you tell the map to load a view for a specific annotation. To load a static MLNAnnotationImage, you would use `-mapView:imageForAnnotation:`.
+    /// This delegate method is where you tell the map to load a view for a specific annotation. To load a static MLNAnnotationImage, you would use `-mapView:imageForAnnotation:`.
     func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
         // This example is only concerned with point annotations.
         guard annotation is MLNPointAnnotation else {
@@ -68,8 +68,8 @@ class AnnotationViewExample: UIViewController, MLNMapViewDelegate {
     }
 }
 
-//
-// MLNAnnotationView subclass
+///
+/// MLNAnnotationView subclass
 class CustomAnnotationView: MLNAnnotationView {
     override func layoutSubviews() {
         super.layoutSubviews()

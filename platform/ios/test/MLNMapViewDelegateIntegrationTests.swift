@@ -64,7 +64,9 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
 
-    func mapView(_: MLNMapView, shapeAnnotationIsEnabled _: MLNShape) -> Bool { false }
+    func mapView(_: MLNMapView, shapeAnnotationIsEnabled _: MLNShape) -> Bool {
+        false
+    }
 
     func mapView(_: MLNMapView, didAdd _: [MLNAnnotationView]) {}
 
@@ -72,41 +74,73 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_: MLNMapView, didDeselect _: MLNAnnotationView) {}
 
-    func mapView(_: MLNMapView, alphaForShapeAnnotation _: MLNShape) -> CGFloat { 0 }
+    func mapView(_: MLNMapView, alphaForShapeAnnotation _: MLNShape) -> CGFloat {
+        0
+    }
 
-    func mapView(_: MLNMapView, viewFor _: MLNAnnotation) -> MLNAnnotationView? { nil }
+    func mapView(_: MLNMapView, viewFor _: MLNAnnotation) -> MLNAnnotationView? {
+        nil
+    }
 
-    func mapView(_: MLNMapView, imageFor _: MLNAnnotation) -> MLNAnnotationImage? { nil }
+    func mapView(_: MLNMapView, imageFor _: MLNAnnotation) -> MLNAnnotationImage? {
+        nil
+    }
 
-    func mapView(_: MLNMapView, annotationCanShowCallout _: MLNAnnotation) -> Bool { false }
+    func mapView(_: MLNMapView, annotationCanShowCallout _: MLNAnnotation) -> Bool {
+        false
+    }
 
-    func mapView(_: MLNMapView, calloutViewFor _: MLNAnnotation) -> MLNCalloutView? { nil }
+    func mapView(_: MLNMapView, calloutViewFor _: MLNAnnotation) -> MLNCalloutView? {
+        nil
+    }
 
-    func mapView(_: MLNMapView, strokeColorForShapeAnnotation _: MLNShape) -> UIColor { .black }
+    func mapView(_: MLNMapView, strokeColorForShapeAnnotation _: MLNShape) -> UIColor {
+        .black
+    }
 
-    func mapView(_: MLNMapView, fillColorForPolygonAnnotation _: MLNPolygon) -> UIColor { .black }
+    func mapView(_: MLNMapView, fillColorForPolygonAnnotation _: MLNPolygon) -> UIColor {
+        .black
+    }
 
-    func mapView(_: MLNMapView, leftCalloutAccessoryViewFor _: MLNAnnotation) -> UIView? { nil }
+    func mapView(_: MLNMapView, leftCalloutAccessoryViewFor _: MLNAnnotation) -> UIView? {
+        nil
+    }
 
-    func mapView(_: MLNMapView, lineWidthForPolylineAnnotation _: MLNPolyline) -> CGFloat { 0 }
+    func mapView(_: MLNMapView, lineWidthForPolylineAnnotation _: MLNPolyline) -> CGFloat {
+        0
+    }
 
-    func mapView(_: MLNMapView, rightCalloutAccessoryViewFor _: MLNAnnotation) -> UIView? { nil }
+    func mapView(_: MLNMapView, rightCalloutAccessoryViewFor _: MLNAnnotation) -> UIView? {
+        nil
+    }
 
     func mapView(_: MLNMapView, annotation _: MLNAnnotation, calloutAccessoryControlTapped _: UIControl) {}
 
-    func mapView(_: MLNMapView, shouldChangeFrom _: MLNMapCamera, to _: MLNMapCamera) -> Bool { false }
+    func mapView(_: MLNMapView, shouldChangeFrom _: MLNMapCamera, to _: MLNMapCamera) -> Bool {
+        false
+    }
 
-    func mapView(_: MLNMapView, shouldChangeFrom _: MLNMapCamera, to _: MLNMapCamera, reason _: MLNCameraChangeReason) -> Bool { false }
+    func mapView(_: MLNMapView, shouldChangeFrom _: MLNMapCamera, to _: MLNMapCamera, reason _: MLNCameraChangeReason) -> Bool {
+        false
+    }
 
-    func mapViewUserLocationAnchorPoint(_: MLNMapView) -> CGPoint { CGPoint(x: 100, y: 100) }
+    func mapViewUserLocationAnchorPoint(_: MLNMapView) -> CGPoint {
+        CGPoint(x: 100, y: 100)
+    }
 
-    func mapView(_: MLNMapView, didFailToLoadImage _: String) -> UIImage? { nil }
+    func mapView(_: MLNMapView, didFailToLoadImage _: String) -> UIImage? {
+        nil
+    }
 
-    func mapView(_: MLNMapView, shouldRemoveStyleImage _: String) -> Bool { false }
+    func mapView(_: MLNMapView, shouldRemoveStyleImage _: String) -> Bool {
+        false
+    }
 
     func mapView(_: MLNMapView, didChangeLocationManagerAuthorization _: MLNLocationManager) {}
 
-    func mapView(styleForDefaultUserLocationAnnotationView _: MLNMapView) -> MLNUserLocationAnnotationViewStyle { MLNUserLocationAnnotationViewStyle() }
+    func mapView(styleForDefaultUserLocationAnnotationView _: MLNMapView) -> MLNUserLocationAnnotationViewStyle {
+        MLNUserLocationAnnotationViewStyle()
+    }
 
     func mapView(_: MLNMapView, shaderWillCompile _: Int, backend _: Int, defines _: String) {}
     func mapView(_: MLNMapView, shaderDidCompile _: Int, backend _: Int, defines _: String) {}
