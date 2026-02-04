@@ -2,7 +2,7 @@
 //
 // Metal/MTLLinkedFunctions.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,71 +20,73 @@
 
 #pragma once
 
+#include "../Foundation/Foundation.hpp"
 #include "MTLDefines.hpp"
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
 
-#include <Foundation/Foundation.hpp>
-
 namespace MTL
 {
+
 class LinkedFunctions : public NS::Copying<LinkedFunctions>
 {
 public:
-    static class LinkedFunctions* alloc();
+    static LinkedFunctions* alloc();
 
-    class LinkedFunctions*        init();
+    NS::Array*              binaryFunctions() const;
+    NS::Array*              functions() const;
 
-    static class LinkedFunctions* linkedFunctions();
+    NS::Dictionary*         groups() const;
 
-    NS::Array*                    functions() const;
-    void                          setFunctions(const NS::Array* functions);
+    LinkedFunctions*        init();
 
-    NS::Array*                    binaryFunctions() const;
-    void                          setBinaryFunctions(const NS::Array* binaryFunctions);
+    static LinkedFunctions* linkedFunctions();
 
-    NS::Dictionary*               groups() const;
-    void                          setGroups(const NS::Dictionary* groups);
+    NS::Array*              privateFunctions() const;
 
-    NS::Array*                    privateFunctions() const;
-    void                          setPrivateFunctions(const NS::Array* privateFunctions);
+    void                    setBinaryFunctions(const NS::Array* binaryFunctions);
+
+    void                    setFunctions(const NS::Array* functions);
+
+    void                    setGroups(const NS::Dictionary* groups);
+
+    void                    setPrivateFunctions(const NS::Array* privateFunctions);
 };
 
 }
-
-// static method: alloc
 _MTL_INLINE MTL::LinkedFunctions* MTL::LinkedFunctions::alloc()
 {
     return NS::Object::alloc<MTL::LinkedFunctions>(_MTL_PRIVATE_CLS(MTLLinkedFunctions));
 }
 
-// method: init
-_MTL_INLINE MTL::LinkedFunctions* MTL::LinkedFunctions::init()
+_MTL_INLINE NS::Array* MTL::LinkedFunctions::binaryFunctions() const
 {
-    return NS::Object::init<MTL::LinkedFunctions>();
+    return Object::sendMessage<NS::Array*>(this, _MTL_PRIVATE_SEL(binaryFunctions));
 }
 
-// static method: linkedFunctions
-_MTL_INLINE MTL::LinkedFunctions* MTL::LinkedFunctions::linkedFunctions()
-{
-    return Object::sendMessage<MTL::LinkedFunctions*>(_MTL_PRIVATE_CLS(MTLLinkedFunctions), _MTL_PRIVATE_SEL(linkedFunctions));
-}
-
-// property: functions
 _MTL_INLINE NS::Array* MTL::LinkedFunctions::functions() const
 {
     return Object::sendMessage<NS::Array*>(this, _MTL_PRIVATE_SEL(functions));
 }
 
-_MTL_INLINE void MTL::LinkedFunctions::setFunctions(const NS::Array* functions)
+_MTL_INLINE NS::Dictionary* MTL::LinkedFunctions::groups() const
 {
-    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setFunctions_), functions);
+    return Object::sendMessage<NS::Dictionary*>(this, _MTL_PRIVATE_SEL(groups));
 }
 
-// property: binaryFunctions
-_MTL_INLINE NS::Array* MTL::LinkedFunctions::binaryFunctions() const
+_MTL_INLINE MTL::LinkedFunctions* MTL::LinkedFunctions::init()
 {
-    return Object::sendMessage<NS::Array*>(this, _MTL_PRIVATE_SEL(binaryFunctions));
+    return NS::Object::init<MTL::LinkedFunctions>();
+}
+
+_MTL_INLINE MTL::LinkedFunctions* MTL::LinkedFunctions::linkedFunctions()
+{
+    return Object::sendMessage<MTL::LinkedFunctions*>(_MTL_PRIVATE_CLS(MTLLinkedFunctions), _MTL_PRIVATE_SEL(linkedFunctions));
+}
+
+_MTL_INLINE NS::Array* MTL::LinkedFunctions::privateFunctions() const
+{
+    return Object::sendMessage<NS::Array*>(this, _MTL_PRIVATE_SEL(privateFunctions));
 }
 
 _MTL_INLINE void MTL::LinkedFunctions::setBinaryFunctions(const NS::Array* binaryFunctions)
@@ -92,21 +94,14 @@ _MTL_INLINE void MTL::LinkedFunctions::setBinaryFunctions(const NS::Array* binar
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setBinaryFunctions_), binaryFunctions);
 }
 
-// property: groups
-_MTL_INLINE NS::Dictionary* MTL::LinkedFunctions::groups() const
+_MTL_INLINE void MTL::LinkedFunctions::setFunctions(const NS::Array* functions)
 {
-    return Object::sendMessage<NS::Dictionary*>(this, _MTL_PRIVATE_SEL(groups));
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setFunctions_), functions);
 }
 
 _MTL_INLINE void MTL::LinkedFunctions::setGroups(const NS::Dictionary* groups)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setGroups_), groups);
-}
-
-// property: privateFunctions
-_MTL_INLINE NS::Array* MTL::LinkedFunctions::privateFunctions() const
-{
-    return Object::sendMessage<NS::Array*>(this, _MTL_PRIVATE_SEL(privateFunctions));
 }
 
 _MTL_INLINE void MTL::LinkedFunctions::setPrivateFunctions(const NS::Array* privateFunctions)

@@ -2,7 +2,7 @@
 //
 // Metal/MTLFence.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,32 +20,30 @@
 
 #pragma once
 
+#include "../Foundation/Foundation.hpp"
 #include "MTLDefines.hpp"
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
 
-#include <Foundation/Foundation.hpp>
-
 namespace MTL
 {
+class Device;
+
 class Fence : public NS::Referencing<Fence>
 {
 public:
-    class Device* device() const;
+    Device*     device() const;
 
-    NS::String*   label() const;
-    void          setLabel(const NS::String* label);
+    NS::String* label() const;
+    void        setLabel(const NS::String* label);
 };
 
 }
-
-// property: device
 _MTL_INLINE MTL::Device* MTL::Fence::device() const
 {
     return Object::sendMessage<MTL::Device*>(this, _MTL_PRIVATE_SEL(device));
 }
 
-// property: label
 _MTL_INLINE NS::String* MTL::Fence::label() const
 {
     return Object::sendMessage<NS::String*>(this, _MTL_PRIVATE_SEL(label));

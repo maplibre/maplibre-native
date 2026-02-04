@@ -2,7 +2,7 @@
 //
 // Foundation/NSObject.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ _NS_INLINE constexpr bool NS::Object::doesRequireMsgSendStret()
 #elif defined(__arm__)
     constexpr size_t kStructLimit = sizeof(std::uintptr_t);
 
-    return std::is_class(_Type) && (sizeof(_Type) > kStructLimit);
+    return std::is_class_v<_Type> && (sizeof(_Type) > kStructLimit);
 #else
 #error "Unsupported architecture!"
 #endif
@@ -243,7 +243,7 @@ _NS_INLINE _Ret NS::Object::sendMessageSafe(const void* pObj, SEL selector, _Arg
 
     if constexpr (!std::is_void<_Ret>::value)
     {
-        return 0;
+        return _Ret(0);
     }
 }
 
