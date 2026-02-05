@@ -45,6 +45,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/string_util.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/plugin/plugin_platform_android.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
