@@ -216,7 +216,9 @@ jobs:
 
       - name: Run release
         if: github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true'
-        uses: ./.github/workflows/ios-release.yml
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ios-release.yml --ref ${{ github.ref }}
 
   ios-build-cmake:
     needs: pre_job
