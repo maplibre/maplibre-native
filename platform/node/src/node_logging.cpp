@@ -18,7 +18,7 @@ struct NodeLogObserver::LogMessage {
 };
 
 NodeLogObserver::NodeLogObserver(v8::Local<v8::Object> target)
-    : queue(new util::AsyncQueue<LogMessage>(uv_default_loop(), [this](LogMessage &message) {
+    : queue(new util::AsyncQueue<LogMessage>(uv_default_loop(), [this](LogMessage& message) {
           Nan::HandleScope scope;
 
           auto msg = Nan::New<v8::Object>();
@@ -56,7 +56,7 @@ NodeLogObserver::~NodeLogObserver() {
     queue->stop();
 }
 
-bool NodeLogObserver::onRecord(mbgl::EventSeverity severity, mbgl::Event event, int64_t code, const std::string &text) {
+bool NodeLogObserver::onRecord(mbgl::EventSeverity severity, mbgl::Event event, int64_t code, const std::string& text) {
     queue->send({severity, event, code, text});
     return true;
 }

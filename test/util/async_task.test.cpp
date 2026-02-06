@@ -16,7 +16,7 @@ namespace {
 
 class TestWorker {
 public:
-    TestWorker(AsyncTask *async_)
+    TestWorker(AsyncTask* async_)
         : async(async_) {}
 
     void run() {
@@ -36,7 +36,7 @@ public:
     void sync(std::promise<void> barrier) { barrier.set_value(); }
 
 private:
-    AsyncTask *async;
+    AsyncTask* async;
 };
 
 } // namespace

@@ -11,7 +11,7 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 #ifdef WORK_DIRECTORY
 #ifdef WIN32
     const int result = _chdir(xstr(WORK_DIRECTORY));

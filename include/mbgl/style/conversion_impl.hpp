@@ -285,9 +285,7 @@ private:
             [](const Storage& s) { return Traits::toDouble(reinterpret_cast<const T&>(s)); },
             [](const Storage& s) { return Traits::toString(reinterpret_cast<const T&>(s)); },
             [](const Storage& s) { return Traits::toValue(reinterpret_cast<const T&>(s)); },
-            [](const Storage& s, Error& err) {
-                return Traits::toGeoJSON(reinterpret_cast<const T&>(s), err);
-            }};
+            [](const Storage& s, Error& err) { return Traits::toGeoJSON(reinterpret_cast<const T&>(s), err); }};
         return &vtable;
     }
 

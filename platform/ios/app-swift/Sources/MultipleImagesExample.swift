@@ -3,7 +3,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(MultipleImagesExample)
+/// #-example-code(MultipleImagesExample)
 class MultipleImagesExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -22,7 +22,7 @@ class MultipleImagesExample: UIViewController, MLNMapViewDelegate {
         view.addSubview(mapView)
     }
 
-    // Wait until the style is loaded before modifying the map style.
+    /// Wait until the style is loaded before modifying the map style.
     func mapView(_: MLNMapView, didFinishLoading style: MLNStyle) {
         let source = MLNVectorTileSource(identifier: "pois-nps", configurationURL: URL(string: "mbtiles://\(Bundle.main.bundlePath)/pois-nps.mbtiles")!)
 

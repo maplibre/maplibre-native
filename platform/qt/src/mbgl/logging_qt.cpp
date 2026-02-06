@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-void Log::platformRecord(EventSeverity severity, const std::string &msg) {
+void Log::platformRecord(EventSeverity severity, const std::string& msg) {
     qWarning() << "[" << Enum<EventSeverity>::toString(severity) << "] " << QString::fromStdString(msg);
 }
 

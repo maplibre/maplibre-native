@@ -19,48 +19,48 @@ namespace geojson {
  */
 class GeometryEvaluator {
 public:
-    jni::JNIEnv &env;
+    jni::JNIEnv& env;
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::EmptyGeometry &) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::EmptyGeometry&) const {
         // FIXME: mapbox-java needs to have its own Empty type.
         return GeometryCollection::New(env, {});
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::Point<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::Point<double>& geometry) const {
         return Point::New(env, geometry);
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::LineString<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::LineString<double>& geometry) const {
         return LineString::New(env, geometry);
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::MultiLineString<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::MultiLineString<double>& geometry) const {
         return MultiLineString::New(env, geometry);
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::MultiPoint<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::MultiPoint<double>& geometry) const {
         return MultiPoint::New(env, geometry);
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::Polygon<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::Polygon<double>& geometry) const {
         return Polygon::New(env, geometry);
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mbgl::MultiPolygon<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mbgl::MultiPolygon<double>& geometry) const {
         return MultiPolygon::New(env, geometry);
     }
 
-    jni::Local<jni::Object<Geometry>> operator()(const mapbox::geometry::geometry_collection<double> &geometry) const {
+    jni::Local<jni::Object<Geometry>> operator()(const mapbox::geometry::geometry_collection<double>& geometry) const {
         return GeometryCollection::New(env, geometry);
     }
 };
 
-jni::Local<jni::Object<Geometry>> Geometry::New(jni::JNIEnv &env, mbgl::Geometry<double> geometry) {
+jni::Local<jni::Object<Geometry>> Geometry::New(jni::JNIEnv& env, mbgl::Geometry<double> geometry) {
     GeometryEvaluator evaluator{env};
     return mbgl::Geometry<double>::visit(geometry, evaluator);
 }
 
-mbgl::Geometry<double> Geometry::convert(jni::JNIEnv &env, const jni::Object<Geometry> &jGeometry) {
+mbgl::Geometry<double> Geometry::convert(jni::JNIEnv& env, const jni::Object<Geometry>& jGeometry) {
     auto type = Geometry::getType(env, jGeometry);
     if (type == Point::Type()) {
         return {Point::convert(env, jni::Cast(env, jni::Class<Point>::Singleton(env), jGeometry))};
@@ -82,13 +82,13 @@ mbgl::Geometry<double> Geometry::convert(jni::JNIEnv &env, const jni::Object<Geo
     throw std::runtime_error(std::string{"Unsupported GeoJSON type: "} + type);
 }
 
-std::string Geometry::getType(jni::JNIEnv &env, const jni::Object<Geometry> &jGeometry) {
-    static auto &javaClass = jni::Class<Geometry>::Singleton(env);
+std::string Geometry::getType(jni::JNIEnv& env, const jni::Object<Geometry>& jGeometry) {
+    static auto& javaClass = jni::Class<Geometry>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::String()>(env, "type");
     return jni::Make<std::string>(env, jGeometry.Call(env, method));
 }
 
-void Geometry::registerNative(jni::JNIEnv &env) {
+void Geometry::registerNative(jni::JNIEnv& env) {
     jni::Class<Geometry>::Singleton(env);
 }
 

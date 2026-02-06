@@ -7,9 +7,9 @@
 
 // DEBUGGING
 
-const char *LOG_TAG = "Custom Layer Example";
+const char* LOG_TAG = "Custom Layer Example";
 
-const char *stringFromError(GLenum err) {
+const char* stringFromError(GLenum err) {
     switch (err) {
         case GL_INVALID_ENUM:
             return "GL_INVALID_ENUM";
@@ -55,7 +55,7 @@ struct Error : std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-void checkError(const char *cmd, const char *file, int line) {
+void checkError(const char* cmd, const char* file, int line) {
     GLenum err = GL_NO_ERROR;
     if ((err = glGetError()) != GL_NO_ERROR) {
         std::ostringstream message;
@@ -73,14 +73,12 @@ void checkError(const char *cmd, const char *file, int line) {
 }
 
 #ifndef NDEBUG
-#define GL_CHECK_ERROR(cmd)                           \
-    ([&]() {                                          \
-        struct __MBGL_C_E {                           \
-            ~__MBGL_C_E() noexcept(false) {           \
-                checkError(#cmd, __FILE__, __LINE__); \
-            }                                         \
-        } __MBGL_C_E;                                 \
-        return cmd;                                   \
+#define GL_CHECK_ERROR(cmd)                                                         \
+    ([&]() {                                                                        \
+        struct __MBGL_C_E {                                                         \
+            ~__MBGL_C_E() noexcept(false) { checkError(#cmd, __FILE__, __LINE__); } \
+        } __MBGL_C_E;                                                               \
+        return cmd;                                                                 \
     }())
 #else
 #define GL_CHECK_ERROR(cmd) (cmd)
@@ -120,10 +118,10 @@ void checkCompileStatus(GLuint shader) {
 
 // /DEBUGGING
 
-static const GLchar *vertexShaderSource =
+static const GLchar* vertexShaderSource =
     "#version 300 es\nlayout (location = 0) in vec2 a_pos; void main() { "
     "gl_Position = vec4(a_pos, 0, 1); }";
-static const GLchar *fragmentShaderSource =
+static const GLchar* fragmentShaderSource =
     "#version 300 es\nuniform highp vec4 fill_color; out highp vec4 fragColor; "
     "void main() { fragColor = fill_color; }";
 
@@ -163,7 +161,7 @@ public:
         GL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), background, GL_STATIC_DRAW));
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &) {
+    void render(const mbgl::style::CustomLayerRenderParameters&) {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "Render");
         glUseProgram(program);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -212,13 +210,13 @@ public:
 
 GLfloat ExampleCustomLayer::color[] = {0.0f, 1.0f, 0.0f, 1.0f};
 
-jlong JNICALL nativeCreateContext(JNIEnv *, jobject) {
+jlong JNICALL nativeCreateContext(JNIEnv*, jobject) {
     __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "nativeCreateContext");
     auto exampleCustomLayer = std::make_unique<ExampleCustomLayer>();
     return reinterpret_cast<jlong>(exampleCustomLayer.release());
 }
 
-void JNICALL nativeSetColor(JNIEnv *, jobject, jfloat red, jfloat green, jfloat blue, jfloat alpha) {
+void JNICALL nativeSetColor(JNIEnv*, jobject, jfloat red, jfloat green, jfloat blue, jfloat alpha) {
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "nativeSetColor: %.2f, %.2f, %.2f, %.2f", red, green, blue, alpha);
     ExampleCustomLayer::color[0] = red;
     ExampleCustomLayer::color[1] = green;
@@ -226,16 +224,16 @@ void JNICALL nativeSetColor(JNIEnv *, jobject, jfloat red, jfloat green, jfloat 
     ExampleCustomLayer::color[3] = alpha;
 }
 
-extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "OnLoad");
 
-    JNIEnv *env = nullptr;
-    vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+    JNIEnv* env = nullptr;
+    vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
 
     jclass customLayerClass = env->FindClass("org/maplibre/android/testapp/model/customlayer/ExampleCustomLayer");
 
-    JNINativeMethod methods[] = {{"createContext", "()J", reinterpret_cast<void *>(&nativeCreateContext)},
-                                 {"setColor", "(FFFF)V", reinterpret_cast<void *>(&nativeSetColor)}};
+    JNINativeMethod methods[] = {{"createContext", "()J", reinterpret_cast<void*>(&nativeCreateContext)},
+                                 {"setColor", "(FFFF)V", reinterpret_cast<void*>(&nativeSetColor)}};
 
     if (env->RegisterNatives(customLayerClass, methods, 2) < 0) {
         env->ExceptionDescribe();
@@ -245,4 +243,4 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     return JNI_VERSION_1_6;
 }
 
-extern "C" JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *, void *) {}
+extern "C" JNIEXPORT void JNICALL JNI_OnUnload(JavaVM*, void*) {}

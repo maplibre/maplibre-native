@@ -8,10 +8,10 @@
 import XCTest
 
 extension XCTestCase {
-    /// `screenshot` — Save a PNG screenshot to the UITest results
-    /// - Parameter name: friendly name to include.
-    ///  Associate an image with the Activity - See [add()](https://developer.apple.com/documentation/xctest/xctactivity/2887222-add)
-    /// - returns: XCTAttachment, which will need to be `add`ed to the `XCTActivity`
+    // `screenshot` — Save a PNG screenshot to the UITest results
+    // - Parameter name: friendly name to include.
+    //  Associate an image with the Activity - See [add()](https://developer.apple.com/documentation/xctest/xctactivity/2887222-add)
+    // - returns: XCTAttachment, which will need to be `add`ed to the `XCTActivity`
     /**
      ```
      /// rely on the calling test functions name
