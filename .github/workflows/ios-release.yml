@@ -14,7 +14,6 @@ on:
         type: string
         default: ''
         description: Version (only for pre-releases)
-  workflow_call:
 
 jobs:
   ios-build-dynamic:
