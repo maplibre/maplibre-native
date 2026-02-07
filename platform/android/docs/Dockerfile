@@ -1,3 +1,3 @@
-FROM squidfunk/mkdocs-material
+FROM zensical/zensical
 
 RUN pip install mkdocs-macros-plugin

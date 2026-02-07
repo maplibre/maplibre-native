@@ -313,14 +313,14 @@ clean:
 	        ./MapLibreAndroid/src/main/assets \
 		    ./MapLibreAndroidTestApp/src/main/assets/integration
 
-### MkDocs Documentation ########################################################
+### Zensical Documentation ########################################################
 
-.PHONY: mkdocs
-mkdocs:
-	docker build -t squidfunk/mkdocs-material docs
-	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
+.PHONY: zensical
+zensical:
+	docker build -t zensical/zensical docs
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs zensical/zensical
 
-.PHONY: mkdocs-build
-mkdocs-build:
-	docker build -t squidfunk/mkdocs-material docs
-	docker run --rm -v ${PWD}:/docs squidfunk/mkdocs-material build --strict
+.PHONY: zensical-build
+zensical-build:
+	docker build -t zensical/zensical docs
+	docker run --rm -v ${PWD}:/docs zensical/zensical build

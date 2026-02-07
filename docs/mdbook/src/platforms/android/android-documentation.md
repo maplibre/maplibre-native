@@ -6,7 +6,7 @@ We use Dokka for the MapLibre Android API documentation. The live documentation 
 
 ## Examples Documentation
 
-The documentation site with examples uses MkDocs along with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). You can check out the site [here](https://maplibre.org/maplibre-native/android/examples/).
+The documentation site with examples uses Zensical](https://zensical.org/). You can check out the site [here](https://maplibre.org/maplibre-native/android/examples/).
 
 ### Building
 
@@ -15,7 +15,7 @@ To build the Examples Documentation you need to have Docker installed.
 From `platform/android`, run:
 
 ```
-make mkdocs
+make zensical
 ```
 
 Next, visit [`http://localhost:8000/maplibre-native/android/examples/`](http://localhost:8000/maplibre-native/android/examples/).

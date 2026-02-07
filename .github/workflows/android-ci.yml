@@ -139,7 +139,7 @@ jobs:
 
       - name: Build Examples documentation
         if: matrix.renderer == 'opengl'
-        run: make mkdocs-build
+        run: make zensical-build
 
       - name: Copy developer config with API key for UI tests
         if: github.ref == 'refs/heads/main'

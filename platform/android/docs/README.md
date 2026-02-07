@@ -5,7 +5,7 @@ To build the Examples Documentation you need to have Docker installed.
 From `platform/android`, run:
 
 ```
-make mkdocs
+make zensical
 ```
 
 Next, visit http://localhost:8000/maplibre-native/android/examples/
