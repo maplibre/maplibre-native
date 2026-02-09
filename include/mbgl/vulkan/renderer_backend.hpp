@@ -94,7 +94,7 @@ protected:
     virtual void initCommandPool();
     virtual void initFrameCapture();
 
-    virtual void destroyResources();
+    void destroyResources();
 
 protected:
     vk::DynamicLoader dynamicLoader;
