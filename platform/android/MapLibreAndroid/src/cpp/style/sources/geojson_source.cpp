@@ -49,19 +49,17 @@ GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, const jni::String& sourceId, cons
     : Source(env,
              std::make_unique<mbgl::style::GeoJSONSource>(jni::Make<std::string>(env, sourceId),
                                                           convertGeoJSONOptions(env, options))),
-      converter(std::make_unique<OptionalActor<FeatureConverter>>(
-          source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
-          Scheduler::GetBackground(),
-          source.as<style::GeoJSONSource>()->impl().getOptions()
-      )) {}
+      converter(
+          std::make_unique<OptionalActor<FeatureConverter>>(source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
+                                                            Scheduler::GetBackground(),
+                                                            source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend),
-      converter(std::make_unique<OptionalActor<FeatureConverter>>(
-          source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
-          Scheduler::GetBackground(),
-          source.as<style::GeoJSONSource>()->impl().getOptions()
-      )) {}
+      converter(
+          std::make_unique<OptionalActor<FeatureConverter>>(source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
+                                                            Scheduler::GetBackground(),
+                                                            source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
 
