@@ -6,6 +6,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Setup certificate
         run: |
@@ -16,7 +18,7 @@ jobs:
           sed -i '' 's/xcode_profile/:MapLibre.mobileprovision/' platform/ios/app-swift/BUILD.bazel
 
       - name: Build
-        run: bazel build //platform/ios/app-swift:MapLibreApp -c opt  --ios_multi_cpus=arm64 --//:renderer=metal --action_env=SENTRY_DSN=${{ vars.SENTRY_DSN_IOS }}
+        run: bazel build //platform/ios/app-swift:MapLibreApp -c opt  --ios_multi_cpus=arm64 --//:renderer=metal --action_env=SENTRY_DSN=${{ vars.SENTRY_DSN_IOS }} --embed_label=maplibre_app_1.0_build_"$(date +%s)"
 
       - name: 'Upload app to TestFlight'
         uses: apple-actions/upload-testflight-build@v4
