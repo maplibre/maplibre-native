@@ -64,8 +64,7 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
               break;
             }
 
-            if (surfaceTexture != null && !paused && requestRender
-                    && (surface == null || this.sizeChanged)) {
+            if (surfaceTexture != null && !paused && requestRender) {
 
               w = width;
               h = height;
@@ -86,10 +85,6 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
               requestRender = false;
 
               // Break the guarded loop and continue to process
-              break;
-            }
-
-            if (requestRender && !paused) {
               break;
             }
 
