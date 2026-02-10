@@ -63,7 +63,7 @@ ios_application(
     ],
     infoplists = [":Info-swift.plist"],
     minimum_os_version = "16.0",
-    provisioning_profile = "MapLibre.mobileprovision",
+    provisioning_profile = "xcode_profile",
     resources = [
         "@pois_nps_mbtiles//file",
     ],
