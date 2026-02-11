@@ -4590,7 +4590,14 @@ static void *windowScreenContext = &windowScreenContext;
     CLLocationDirection direction = cameraOptions.bearing ? mbgl::util::wrap(*cameraOptions.bearing, 0., 360.) : self.direction;
     CGFloat pitch = cameraOptions.pitch ? *cameraOptions.pitch : *mapCamera.pitch;
     CLLocationDistance altitude = MLNAltitudeForZoomLevel(zoomLevel, pitch, centerCoordinate.latitude, self.frame.size);
-    return [MLNMapCamera cameraLookingAtCenterCoordinate:centerCoordinate altitude:altitude pitch:pitch heading:direction];
+
+    auto camera = [MLNMapCamera cameraLookingAtCenterCoordinate:centerCoordinate altitude:altitude pitch:pitch heading:direction];
+
+    if (cameraOptions.roll) {
+        camera.roll = cameraOptions.roll.value();
+    }
+
+    return camera;
 }
 
 /// Returns a CameraOptions object that specifies parameters for animating to
@@ -4614,6 +4621,7 @@ static void *windowScreenContext = &windowScreenContext;
     {
         options.pitch = camera.pitch;
     }
+    options.roll = camera.roll;
     return options;
 }
 

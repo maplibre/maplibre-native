@@ -105,12 +105,13 @@ BufferResource::BufferResource(
     }
 
     if (isValid()) {
-        auto& stats = context.renderingStats();
-        stats.numBuffers++;
-        stats.memBuffers += totalSize;
-        stats.totalBuffers++;
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numBuffers++;
+            stats.memBuffers += totalSize;
+            stats.totalBuffers++;
 
-        stats.totalBufferObjs++;
+            stats.totalBufferObjs++;
+        });
     }
 }
 
@@ -128,13 +129,15 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
 
 BufferResource::~BufferResource() noexcept {
     if (isValid()) {
-        context.renderingStats().numBuffers--;
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numBuffers--;
 
-        if (bufferWindowSize > 0) {
-            context.renderingStats().memBuffers -= bufferWindowSize * context.getBackend().getMaxFrames();
-        } else {
-            context.renderingStats().memBuffers -= size;
-        }
+            if (bufferWindowSize > 0) {
+                stats.memBuffers -= bufferWindowSize * context.getBackend().getMaxFrames();
+            } else {
+                stats.memBuffers -= size;
+            }
+        });
     }
 
     if (!bufferAllocation) return;
@@ -149,8 +152,10 @@ BufferResource BufferResource::clone() const {
 BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
     if (isValid()) {
-        context.renderingStats().numBuffers--;
-        context.renderingStats().memBuffers -= size;
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numBuffers--;
+            stats.memBuffers -= size;
+        });
     }
 
     size = other.size;
@@ -178,10 +183,11 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
 
     std::memcpy(data, newData, updateSize);
 
-    auto& stats = context.renderingStats();
-    stats.bufferUpdateBytes += updateSize;
-    stats.bufferUpdates++;
-    stats.bufferObjUpdates++;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.bufferUpdateBytes += updateSize;
+        stats.bufferUpdates++;
+        stats.bufferObjUpdates++;
+    });
     version++;
 
     if (version == std::numeric_limits<VersionType>::max()) {

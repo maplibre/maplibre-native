@@ -469,7 +469,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        context.renderingStats());
+        context.threadSafeCopyRenderingStats());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

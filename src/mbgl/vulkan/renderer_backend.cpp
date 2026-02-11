@@ -40,12 +40,17 @@
 #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_LEAK_LOG_FORMAT(format, ...)              \
+#define VMA_HEAVY_ASSERT(expr) VMA_ASSERT(expr)
+
+#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
     {                                                 \
         char buffer[4096];                            \
         sprintf(buffer, format, __VA_ARGS__);         \
         mbgl::Log::Info(mbgl::Event::Render, buffer); \
     }
+
+#define VMA_DEBUG_LOG(str) VMA_DEBUG_LOG_FORMAT("%s", (str))
+#define VMA_LEAK_LOG_FORMAT(...) VMA_DEBUG_LOG_FORMAT(__VA_ARGS__)
 
 #endif
 
@@ -100,7 +105,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
       allocator(nullptr) {}
 
 RendererBackend::~RendererBackend() {
-    destroyResources(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
+    destroyResources();
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {

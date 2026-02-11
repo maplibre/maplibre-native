@@ -63,7 +63,7 @@ jobs:
           persist-credentials: false
 
       - name: Cache Bazel
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -204,6 +204,21 @@ jobs:
         working-directory: .
         run: |
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+
+      # Trigger release on main if VERSION file changed
+
+      - name: VERSION file changed
+        if: github.ref == 'refs/heads/main'
+        id: version-file-ios-changed
+        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        with:
+          files: platform/ios/VERSION
+
+      - name: Run release
+        if: github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ios-release.yml --ref ${{ github.ref }}
 
   ios-build-cmake:
     needs: pre_job

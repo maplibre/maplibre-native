@@ -549,6 +549,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/i18n.cpp",
     "src/mbgl/util/i18n.hpp",
     "src/mbgl/util/identity.cpp",
+    "src/mbgl/util/instrumentation.cpp",
     "src/mbgl/util/interpolate.cpp",
     "src/mbgl/util/intersection_tests.cpp",
     "src/mbgl/util/intersection_tests.hpp",
