@@ -52,7 +52,7 @@ class ViewPagerActivity : AppCompatActivity() {
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val options = MapLibreMapOptions.createFromAttributes(context)
-            options.textureMode(true)
+            options.textureMode(false)
             options.camera(
                 CameraPosition.Builder()
                     .zoom(3.0)
