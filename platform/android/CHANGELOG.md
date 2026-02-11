@@ -1,5 +1,10 @@
 # Changelog MapLibre Native for Android
 
+## 13.0.0-pre0
+
+- Fix laggy map when using synchronous GeoJSON source [#4092](https://github.com/maplibre/maplibre-native/pull/4092).
+  This replaces the synchronous methods on `GeoJsonSource` introduced in [#3560](https://github.com/maplibre/maplibre-native/pull/3560). To migrate, pass `GeoJsonOptions` with `options.withSynchronousUpdate(true)` when constructing a `GeoJsonSource`.
+
 ## 12.3.1
 
 - Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
