@@ -18,6 +18,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/descriptor_set.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/dynamic_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/index_buffer_resource.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/offscreen_texture.hpp
@@ -63,6 +64,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/index_buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/layer_group.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/offscreen_texture.cpp

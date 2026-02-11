@@ -61,6 +61,7 @@
     {
         cameraOptions.pitch = camera.pitch;
     }
+    cameraOptions.roll = camera.roll;
 
     _mbglProjection->setCamera(cameraOptions);
 }

@@ -1,5 +1,7 @@
 #include "settings_json.hpp"
 #include <fstream>
+#include <mbgl/util/constants.hpp>
+#include <mbgl/math/angles.hpp>
 
 namespace mbgl {
 
@@ -12,9 +14,13 @@ void Settings_JSON::load() {
     if (file) {
         file >> longitude;
         file >> latitude;
+        file >> altitude;
         file >> zoom;
         file >> bearing;
         file >> pitch;
+        file >> roll;
+        file >> fov;
+        file >> maxPitch;
         file >> debug;
         file >> online;
     }
@@ -25,9 +31,13 @@ void Settings_JSON::save() {
     if (file) {
         file << longitude << std::endl;
         file << latitude << std::endl;
+        file << altitude << std::endl;
         file << zoom << std::endl;
         file << bearing << std::endl;
         file << pitch << std::endl;
+        file << roll << std::endl;
+        file << fov << std::endl;
+        file << maxPitch << std::endl;
         file << debug << std::endl;
         file << online << std::endl;
     }
@@ -36,9 +46,13 @@ void Settings_JSON::save() {
 void Settings_JSON::clear() {
     longitude = 0;
     latitude = 0;
+    altitude = 0;
     zoom = 0;
     bearing = 0;
     pitch = 0;
+    roll = 0;
+    fov = util::rad2deg(util::DEFAULT_FOV);
+    maxPitch = util::rad2deg(util::DEFAULT_PITCH_MAX);
     debug = 0;
     online = true;
 }

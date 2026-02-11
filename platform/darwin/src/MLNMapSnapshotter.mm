@@ -827,6 +827,9 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
     if (options.camera.pitch >= 0) {
         cameraOptions.pitch = MAX(0, options.camera.pitch);
     }
+    if (options.camera.roll != 0) {
+        cameraOptions.roll = options.camera.roll;
+    }
     if (cameraOptions != mbgl::CameraOptions()) {
         _mbglMapSnapshotter->setCameraOptions(cameraOptions);
     }

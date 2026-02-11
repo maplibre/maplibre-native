@@ -55,9 +55,13 @@ int main(int argc, char* argv[]) {
         argumentParser, "directory", "Action journal log directory", {"actionJournalDir"});
     args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
     args::ValueFlag<double> latValue(argumentParser, "degrees", "Latitude", {'y', "lat"});
+    args::ValueFlag<double> altValue(argumentParser, "degrees", "Altitude", {'a', "alt"});
+    args::ValueFlag<double> fovValue(argumentParser, "degrees", "FOV", {'F', "fov"});
     args::ValueFlag<double> zoomValue(argumentParser, "number", "Zoom level", {'z', "zoom"});
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
+    args::ValueFlag<double> rollValue(argumentParser, "degrees", "Roll", {'r', "roll"});
+    args::ValueFlag<double> maxPitchValue(argumentParser, "degrees", "Max Pitch", {'P', "maxPitch"});
 
     try {
         argumentParser.ParseCLI(argc, argv);
@@ -79,9 +83,13 @@ int main(int argc, char* argv[]) {
     settings.online = !offlineFlag;
     if (lonValue) settings.longitude = args::get(lonValue);
     if (latValue) settings.latitude = args::get(latValue);
+    if (altValue) settings.altitude = args::get(altValue);
+    if (fovValue) settings.fov = args::get(fovValue);
+    if (maxPitchValue) settings.maxPitch = args::get(maxPitchValue);
     if (zoomValue) settings.zoom = args::get(zoomValue);
     if (bearingValue) settings.bearing = args::get(bearingValue);
     if (pitchValue) settings.pitch = args::get(pitchValue);
+    if (rollValue) settings.roll = args::get(rollValue);
 
     const bool fullscreen = fullscreenFlag ? args::get(fullscreenFlag) : false;
     const bool benchmark = benchmarkFlag ? args::get(benchmarkFlag) : false;
@@ -147,6 +155,8 @@ int main(int argc, char* argv[]) {
                   clientOptions,
                   actionJournalOptions);
 
+    map.setBounds(mbgl::BoundOptions().withMaxPitch(settings.maxPitch));
+
     backend.setMap(&map);
 
     if (!style.empty() && style.find("://") == std::string::npos) {
@@ -155,9 +165,12 @@ int main(int argc, char* argv[]) {
 
     map.jumpTo(mbgl::CameraOptions()
                    .withCenter(mbgl::LatLng{settings.latitude, settings.longitude})
+                   .withCenterAltitude(settings.altitude)
                    .withZoom(settings.zoom)
                    .withBearing(settings.bearing)
-                   .withPitch(settings.pitch));
+                   .withPitch(settings.pitch)
+                   .withRoll(settings.roll)
+                   .withFov(settings.fov));
     map.setDebug(mbgl::MapDebugOptions(settings.debug));
 
     if (testDirValue) view->setTestDirectory(args::get(testDirValue));
@@ -237,15 +250,21 @@ int main(int argc, char* argv[]) {
     mbgl::CameraOptions camera = map.getCameraOptions();
     settings.latitude = camera.center->latitude();
     settings.longitude = camera.center->longitude();
+    settings.altitude = *camera.centerAltitude;
     settings.zoom = *camera.zoom;
     settings.bearing = *camera.bearing;
     settings.pitch = *camera.pitch;
+    settings.roll = *camera.roll;
+    settings.fov = *camera.fov;
     settings.debug = mbgl::EnumType(map.getDebug());
     settings.save();
     mbgl::Log::Info(mbgl::Event::General,
                     "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
-                        std::to_string(settings.longitude) + "\" --zoom=\"" + std::to_string(settings.zoom) +
-                        "\" --bearing=\"" + std::to_string(settings.bearing) + "\"");
+                        std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
+                        "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
+                        std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
+                        "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
+                        std::to_string(settings.maxPitch) + "\"");
 
     view = nullptr;
 

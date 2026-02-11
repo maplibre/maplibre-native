@@ -184,9 +184,11 @@ void Texture2D::createMetalTexture() noexcept {
 
     if (metalTexture) {
         textureDirty = false;
-        context.renderingStats().numCreatedTextures++;
-        context.renderingStats().numActiveTextures++;
-        context.renderingStats().memTextures += getDataSize();
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numCreatedTextures++;
+            stats.numActiveTextures++;
+            stats.memTextures += getDataSize();
+        });
     }
 }
 
@@ -205,8 +207,10 @@ void Texture2D::destroyMetalTexture() noexcept {
     }
 
     metalTexture.reset();
-    context.renderingStats().numActiveTextures--;
-    context.renderingStats().memTextures -= getDataSize();
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numActiveTextures--;
+        stats.memTextures -= getDataSize();
+    });
 }
 
 gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
@@ -250,11 +254,11 @@ void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
     renderPass.setFragmentTexture(metalTexture, location);
     renderPass.setFragmentSamplerState(metalSamplerState, location);
 
-    context.renderingStats().numTextureBindings++;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings++; });
 }
 
 void Texture2D::unbind(RenderPass&, int32_t /*location*/) noexcept {
-    context.renderingStats().numTextureBindings--;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings--; });
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
@@ -277,8 +281,10 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     const MTL::Region region = MTL::Region::Make2D(xOffset, yOffset, size_.width, size_.height);
     const NS::UInteger bytesPerRow = size_.width * getPixelStride();
     metalTexture->replaceRegion(region, 0, pixelData, bytesPerRow);
-    context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += bytesPerRow * size_.height;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += bytesPerRow * size_.height;
+    });
 }
 
 void Texture2D::upload() noexcept {

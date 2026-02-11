@@ -45,6 +45,8 @@ public:
     double zoom = 0;
     double bearing = 0;
     double pitch = 0;
+    double roll = 0;
+    double centerAltitude = 0;
 
     // Statically evaluate layer properties to determine what font stacks are used.
     std::set<FontStack> fontStacks() const;

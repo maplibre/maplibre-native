@@ -1,5 +1,7 @@
 #include "camera_position.hpp"
 #include "../geometry/lat_lng.hpp"
+#include <mbgl/util/constants.hpp>
+#include <mbgl/math/angles.hpp>
 
 namespace mbgl {
 namespace android {
@@ -8,12 +10,19 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
                                                             mbgl::CameraOptions options,
                                                             float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
-    static auto constructor =
-        javaClass.GetConstructor<jni::Object<LatLng>, double, double, double, jni::Array<jni::jdouble>>(env);
+    static auto constructor = javaClass.GetConstructor<jni::Object<LatLng>,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       double,
+                                                       jni::Array<jni::jdouble>>(env);
 
     // wrap LatLng values coming from core
     auto center = options.center.value();
     center.wrap();
+    double centerAltitude = options.centerAltitude.value_or(0);
 
     // convert bearing, measured in radians counterclockwise from true north.
     // Wrapped to [−π rad, π rad). Android binding from 0 to 360 degrees
@@ -27,6 +36,8 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
 
     // convert tilt, core ranges from  [0 rad, 1,0472 rad], android ranges from 0 to 60
     double tilt_degrees = options.pitch.value_or(0);
+    double roll_degrees = options.roll.value_or(0);
+    double fov_degrees = options.fov.value_or(util::rad2deg(util::DEFAULT_FOV));
 
     std::vector<jdouble> paddingVect;
     auto insets = options.padding.value_or(EdgeInsets{0, 0, 0, 0});
@@ -37,8 +48,16 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
     paddingVect.push_back(insets.bottom() * pixelRatio);
     padding.SetRegion<std::vector<jni::jdouble>>(env, 0, paddingVect);
 
-    return javaClass.New(
-        env, constructor, LatLng::New(env, center), options.zoom.value_or(0), tilt_degrees, bearing_degrees, padding);
+    return javaClass.New(env,
+                         constructor,
+                         LatLng::New(env, center),
+                         centerAltitude,
+                         options.zoom.value_or(0),
+                         tilt_degrees,
+                         bearing_degrees,
+                         roll_degrees,
+                         fov_degrees,
+                         padding);
 }
 
 mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
@@ -50,11 +69,15 @@ mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
     static auto tilt = javaClass.GetField<jni::jdouble>(env, "tilt");
     static auto zoom = javaClass.GetField<jni::jdouble>(env, "zoom");
     static auto paddingField = javaClass.GetField<jni::Array<jni::jdouble>>(env, "padding");
+    static auto centerAltitude = javaClass.GetField<jni::jdouble>(env, "centerAltitude");
+    static auto roll = javaClass.GetField<jni::jdouble>(env, "roll");
+    static auto fov = javaClass.GetField<jni::jdouble>(env, "fov");
 
     auto padding = position.Get(env, paddingField);
     auto center = LatLng::getLatLng(env, position.Get(env, target));
 
     return mbgl::CameraOptions{center,
+                               position.Get(env, centerAltitude),
                                padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
                                                                                 padding.Get(env, 0) * pixelRatio,
                                                                                 padding.Get(env, 3) * pixelRatio,
@@ -63,7 +86,9 @@ mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
                                {},
                                position.Get(env, zoom),
                                position.Get(env, bearing),
-                               position.Get(env, tilt)};
+                               position.Get(env, tilt),
+                               position.Get(env, roll),
+                               position.Get(env, fov)};
 }
 
 void CameraPosition::registerNative(jni::JNIEnv& env) {

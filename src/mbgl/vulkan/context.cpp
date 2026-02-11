@@ -42,8 +42,9 @@ constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
 namespace {
+std::mutex glslangMutex;
 uint32_t glslangRefCount = 0;
-}
+} // namespace
 
 class RenderbufferResource : public gfx::RenderbufferResource {
 public:
@@ -54,8 +55,11 @@ Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_),
       globalUniformBuffers(DescriptorSetType::Global, 0, 0, shaders::globalUBOCount) {
-    if (glslangRefCount++ == 0) {
-        glslang::InitializeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (glslangRefCount++ == 0) {
+            glslang::InitializeProcess();
+        }
     }
 
     initFrameResources();
@@ -66,8 +70,11 @@ Context::~Context() noexcept {
 
     destroyResources();
 
-    if (--glslangRefCount == 0) {
-        glslang::FinalizeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (--glslangRefCount == 0) {
+            glslang::FinalizeProcess();
+        }
     }
 
 #if !defined(NDEBUG)
@@ -158,7 +165,7 @@ void Context::destroyResources() {
     clipping.vertexBuffer.reset();
 }
 
-void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
+void Context::enqueueDeletion(DeletionTask&& function) {
     if (frameResources.empty()) {
         function(*this);
         return;
@@ -167,11 +174,19 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    submitOneTimeCommand({}, function);
+}
+
+void Context::submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
+                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
     MLN_TRACE_FUNC();
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+        commandPool ? commandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -315,6 +330,10 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
+
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end(dispatcher);
@@ -431,6 +450,10 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
@@ -738,7 +761,9 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 void Context::FrameResources::runDeletionQueue(Context& context) {
     MLN_TRACE_FUNC();
 
-    for (const auto& function : deletionQueue) function(context);
+    for (const auto& function : deletionQueue) {
+        function(context);
+    }
 
     deletionQueue.clear();
 }

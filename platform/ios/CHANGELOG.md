@@ -2,6 +2,17 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.23.0
+
+- Add basic support for setting camera roll ([#4061](https://github.com/maplibre/maplibre-native/pull/4059)).
+- Make rendering stats thread safe ([#4059](https://github.com/maplibre/maplibre-native/pull/4059)).
+
+## 6.22.2
+
+- Metal backend resource for MacOS fixes ([#4020](https://github.com/maplibre/maplibre-native/pull/4020)).
+- Port several iOS fixes from GrabMaps ([#4023](https://github.com/maplibre/maplibre-native/pull/4023)).
+- Metal: only update offset if we call setVertexBuffer previously ([#4049](https://github.com/maplibre/maplibre-native/pull/4049)).
+
 ## 6.22.1
 
 - Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
