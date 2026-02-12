@@ -2,7 +2,7 @@
 //
 // Foundation/NSPrivate.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,6 +33,19 @@
 
 #if defined(NS_PRIVATE_IMPLEMENTATION)
 
+#include <dlfcn.h>
+
+namespace NS::Private
+{
+    template <typename _Type>
+    inline _Type const LoadSymbol(const char* pSymbol)
+    {
+        const _Type* pAddress = static_cast<_Type*>(dlsym(RTLD_DEFAULT, pSymbol));
+
+        return pAddress ? *pAddress : _Type();
+    }
+} // NS::Private
+
 #ifdef METALCPP_SYMBOL_VISIBILITY_HIDDEN
 #define _NS_PRIVATE_VISIBILITY __attribute__((visibility("hidden")))
 #else
@@ -52,9 +65,16 @@
 #define _NS_PRIVATE_DEF_CLS(symbol) void* s_k##symbol _NS_PRIVATE_VISIBILITY = _NS_PRIVATE_OBJC_LOOKUP_CLASS(symbol)
 #define _NS_PRIVATE_DEF_PRO(symbol) void* s_k##symbol _NS_PRIVATE_VISIBILITY = _NS_PRIVATE_OBJC_GET_PROTOCOL(symbol)
 #define _NS_PRIVATE_DEF_SEL(accessor, symbol) SEL s_k##accessor _NS_PRIVATE_VISIBILITY = sel_registerName(symbol)
+
+#if defined(__MAC_26_0) || defined(__IPHONE_26_0) || defined(__TVOS_26_0)
 #define _NS_PRIVATE_DEF_CONST(type, symbol)              \
     _NS_EXTERN type const NS##symbol _NS_PRIVATE_IMPORT; \
-    type const                       NS::symbol = (nullptr != &NS##symbol) ? NS##symbol : nullptr
+    type const                       NS::symbol = (nullptr != &NS##symbol) ? NS##symbol : type()
+#else
+#define _NS_PRIVATE_DEF_CONST(type, symbol) \
+    _NS_EXTERN type const MTL##symbol _NS_PRIVATE_IMPORT; \
+    type const             NS::symbol = Private::LoadSymbol<type>("NS" #symbol)
+#endif
 
 #else
 
@@ -236,6 +256,8 @@ namespace Private
             "globallyUniqueString");
         _NS_PRIVATE_DEF_SEL(hash,
             "hash");
+        _NS_PRIVATE_DEF_SEL(hasPerformanceProfile_,
+            "hasPerformanceProfile:");
         _NS_PRIVATE_DEF_SEL(hostName,
             "hostName");
         _NS_PRIVATE_DEF_SEL(infoDictionary,
@@ -294,6 +316,8 @@ namespace Private
             "integerValue");
         _NS_PRIVATE_DEF_SEL(intValue,
             "intValue");
+        _NS_PRIVATE_DEF_SEL(isDeviceCertified_,
+            "isDeviceCertifiedFor:");
         _NS_PRIVATE_DEF_SEL(isEqual_,
             "isEqual:");
         _NS_PRIVATE_DEF_SEL(isEqualToNumber_,

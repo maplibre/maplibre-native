@@ -2,7 +2,7 @@
 //
 // Metal/MTLPixelFormat.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@
 
 #pragma once
 
+#include "../Foundation/Foundation.hpp"
 #include "MTLDefines.hpp"
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
-
-#include <Foundation/Foundation.hpp>
 
 namespace MTL
 {
@@ -70,6 +69,8 @@ _MTL_ENUM(NS::UInteger, PixelFormat) {
     PixelFormatRG11B10Float = 92,
     PixelFormatRGB9E5Float = 93,
     PixelFormatBGR10A2Unorm = 94,
+    PixelFormatBGR10_XR = 554,
+    PixelFormatBGR10_XR_sRGB = 555,
     PixelFormatRG32Uint = 103,
     PixelFormatRG32Sint = 104,
     PixelFormatRG32Float = 105,
@@ -78,6 +79,8 @@ _MTL_ENUM(NS::UInteger, PixelFormat) {
     PixelFormatRGBA16Uint = 113,
     PixelFormatRGBA16Sint = 114,
     PixelFormatRGBA16Float = 115,
+    PixelFormatBGRA10_XR = 552,
+    PixelFormatBGRA10_XR_sRGB = 553,
     PixelFormatRGBA32Uint = 123,
     PixelFormatRGBA32Sint = 124,
     PixelFormatRGBA32Float = 125,
@@ -164,10 +167,7 @@ _MTL_ENUM(NS::UInteger, PixelFormat) {
     PixelFormatDepth32Float_Stencil8 = 260,
     PixelFormatX32_Stencil8 = 261,
     PixelFormatX24_Stencil8 = 262,
-    PixelFormatBGRA10_XR = 552,
-    PixelFormatBGRA10_XR_sRGB = 553,
-    PixelFormatBGR10_XR = 554,
-    PixelFormatBGR10_XR_sRGB = 555,
+    PixelFormatUnspecialized = 263,
 };
 
 }

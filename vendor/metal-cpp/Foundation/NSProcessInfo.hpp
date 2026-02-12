@@ -2,7 +2,7 @@
 //
 // Foundation/NSProcessInfo.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ namespace NS
 {
 _NS_CONST(NotificationName, ProcessInfoThermalStateDidChangeNotification);
 _NS_CONST(NotificationName, ProcessInfoPowerStateDidChangeNotification);
+_NS_CONST(NotificationName, ProcessInfoPerformanceProfileDidChangeNotification);
 
 _NS_ENUM(NS::Integer, ProcessInfoThermalState) {
     ProcessInfoThermalStateNominal = 0,
@@ -54,6 +55,13 @@ _NS_OPTIONS(std::uint64_t, ActivityOptions) {
     ActivityBackground = 0x000000FFULL,
     ActivityLatencyCritical = 0xFF00000000ULL,
 };
+
+typedef NS::Integer DeviceCertification;
+_NS_CONST(DeviceCertification, DeviceCertificationiPhonePerformanceGaming);
+
+typedef NS::Integer ProcessPerformanceProfile;
+_NS_CONST(ProcessPerformanceProfile, ProcessPerformanceProfileDefault);
+_NS_CONST(ProcessPerformanceProfile, ProcessPerformanceProfileSustained);
 
 class ProcessInfo : public Referencing<ProcessInfo>
 {
@@ -101,6 +109,10 @@ public:
 
     bool                    isiOSAppOnMac() const;
     bool                    isMacCatalystApp() const;
+
+    bool                    isDeviceCertified(DeviceCertification performanceTier) const;
+    bool                    hasPerformanceProfile(ProcessPerformanceProfile performanceProfile) const;
+
 };
 }
 
@@ -108,6 +120,12 @@ public:
 
 _NS_PRIVATE_DEF_CONST(NS::NotificationName, ProcessInfoThermalStateDidChangeNotification);
 _NS_PRIVATE_DEF_CONST(NS::NotificationName, ProcessInfoPowerStateDidChangeNotification);
+
+// The linker searches for these symbols in the Metal framework, be sure to link it in as well:
+_NS_PRIVATE_DEF_CONST(NS::NotificationName, ProcessInfoPerformanceProfileDidChangeNotification);
+_NS_PRIVATE_DEF_CONST(NS::DeviceCertification, DeviceCertificationiPhonePerformanceGaming);
+_NS_PRIVATE_DEF_CONST(NS::ProcessPerformanceProfile, ProcessPerformanceProfileDefault);
+_NS_PRIVATE_DEF_CONST(NS::ProcessPerformanceProfile, ProcessPerformanceProfileSustained);
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -349,6 +367,20 @@ _NS_INLINE bool NS::ProcessInfo::isiOSAppOnMac() const
 _NS_INLINE bool NS::ProcessInfo::isMacCatalystApp() const
 {
     return Object::sendMessageSafe<bool>(this, _NS_PRIVATE_SEL(isMacCatalystApp));
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+_NS_INLINE bool NS::ProcessInfo::isDeviceCertified(DeviceCertification performanceTier) const
+{
+    return Object::sendMessageSafe<bool>(this, _NS_PRIVATE_SEL(isDeviceCertified_), performanceTier);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+_NS_INLINE bool NS::ProcessInfo::hasPerformanceProfile(ProcessPerformanceProfile performanceProfile) const
+{
+    return Object::sendMessageSafe<bool>(this, _NS_PRIVATE_SEL(hasPerformanceProfile_), performanceProfile);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------

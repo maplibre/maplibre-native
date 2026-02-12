@@ -2,7 +2,7 @@
 //
 // Foundation/NSSharedPtr.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include "NSDefines.hpp"
 
 namespace NS
@@ -37,6 +38,11 @@ public:
      * Destroy this SharedPtr, decreasing the reference count.
      */
     ~SharedPtr();
+
+    /**
+     * Create a new null pointer.
+     */
+    SharedPtr(std::nullptr_t) noexcept;
 
     /**
      * SharedPtr copy constructor.
@@ -159,29 +165,32 @@ _NS_INLINE NS::SharedPtr<_Class>::SharedPtr()
 }
 
 template <class _Class>
-_NS_INLINE NS::SharedPtr<_Class>::~SharedPtr()
+_NS_INLINE NS::SharedPtr<_Class>::~SharedPtr<_Class>() __attribute__((no_sanitize("undefined")))
 {
-    if (m_pObject)
-    {
-        m_pObject->release();
-    }
+    m_pObject->release();
 }
 
 template <class _Class>
-_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const NS::SharedPtr<_Class>& other) noexcept
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(std::nullptr_t) noexcept
+    : m_pObject(nullptr)
+{
+}
+
+template <class _Class>
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const SharedPtr<_Class>& other) noexcept
     : m_pObject(other.m_pObject->retain())
 {
 }
 
 template <class _Class>
 template <class _OtherClass>
-_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const NS::SharedPtr<_OtherClass>& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> *) noexcept
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(const SharedPtr<_OtherClass>& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> *) noexcept
     : m_pObject(reinterpret_cast<_Class*>(other.get()->retain()))
 {
 }
 
 template <class _Class>
-_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(NS::SharedPtr<_Class>&& other) noexcept
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(SharedPtr<_Class>&& other) noexcept
     : m_pObject(other.m_pObject)
 {
     other.m_pObject = nullptr;
@@ -189,7 +198,7 @@ _NS_INLINE NS::SharedPtr<_Class>::SharedPtr(NS::SharedPtr<_Class>&& other) noexc
 
 template <class _Class>
 template <class _OtherClass>
-_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(NS::SharedPtr<_OtherClass>&& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> *) noexcept
+_NS_INLINE NS::SharedPtr<_Class>::SharedPtr(SharedPtr<_OtherClass>&& other, typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>> *) noexcept
     : m_pObject(reinterpret_cast<_Class*>(other.get()))
 {
     other.detach();
@@ -214,7 +223,7 @@ _NS_INLINE NS::SharedPtr<_Class>::operator bool() const
 }
 
 template <class _Class>
-_NS_INLINE void NS::SharedPtr<_Class>::reset()
+_NS_INLINE void NS::SharedPtr<_Class>::reset() __attribute__((no_sanitize("undefined")))
 {
     m_pObject->release();
     m_pObject = nullptr;
@@ -227,44 +236,37 @@ _NS_INLINE void NS::SharedPtr<_Class>::detach()
 }
 
 template <class _Class>
-_NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_Class>& other)
+_NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(const SharedPtr<_Class>& other) __attribute__((no_sanitize("undefined")))
 {
-    if (m_pObject != other.m_pObject)
-    {
-        if (m_pObject)
-        {
-            m_pObject->release();
-        }
-        m_pObject = other.m_pObject->retain();
-    }
+    _Class* pOldObject = m_pObject;
+
+    m_pObject = other.m_pObject->retain();
+
+    pOldObject->release();
+
     return *this;
 }
 
 template <class _Class>
 template <class _OtherClass>
 typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>, NS::SharedPtr<_Class> &>
-_NS_INLINE NS::SharedPtr<_Class>::operator=(const SharedPtr<_OtherClass>& other)
+_NS_INLINE NS::SharedPtr<_Class>::operator=(const SharedPtr<_OtherClass>& other) __attribute__((no_sanitize("undefined")))
 {
-    if (m_pObject != other.get())
-    {
-        if (m_pObject)
-        {
-            m_pObject->release();
-        }
-        m_pObject = reinterpret_cast<_Class*>(other.get()->retain());
-    }
+    _Class* pOldObject = m_pObject;
+
+    m_pObject = reinterpret_cast<_Class*>(other.get()->retain());
+
+    pOldObject->release();
+
     return *this;
 }
 
 template <class _Class>
-_NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Class>&& other)
+_NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Class>&& other) __attribute__((no_sanitize("undefined")))
 {
     if (m_pObject != other.m_pObject)
     {
-        if (m_pObject)
-        {
-            m_pObject->release();
-        }
+        m_pObject->release();
         m_pObject = other.m_pObject;
     }
     else
@@ -279,14 +281,11 @@ _NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Cl
 template <class _Class>
 template <class _OtherClass>
 typename std::enable_if_t<std::is_convertible_v<_OtherClass *, _Class *>, NS::SharedPtr<_Class> &>
-_NS_INLINE NS::SharedPtr<_Class>::operator=(SharedPtr<_OtherClass>&& other)
+_NS_INLINE NS::SharedPtr<_Class>::operator=(SharedPtr<_OtherClass>&& other) __attribute__((no_sanitize("undefined")))
 {
     if (m_pObject != other.get())
     {
-        if (m_pObject)
-        {
-            m_pObject->release();
-        }
+        m_pObject->release();
         m_pObject = reinterpret_cast<_Class*>(other.get());
         other.detach();
     }
