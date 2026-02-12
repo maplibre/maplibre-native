@@ -90,11 +90,38 @@ android {
                 }
             }
         }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=OFF", "-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=OFF", "-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
+                }
+            }
+        }
     }
 
     sourceSets {
         getByName("opengl") {
             java.srcDirs("src/opengl/java/")
+        }
+        getByName("webgpuDawn") {
+            java.srcDirs("src/webgpu/java")
+            manifest.srcFile("src/webgpu/AndroidManifest.xml")
+        }
+        getByName("webgpuWgpu") {
+            java.srcDirs("src/webgpu/java")
+            manifest.srcFile("src/webgpu/AndroidManifest.xml")
         }
     }
 
