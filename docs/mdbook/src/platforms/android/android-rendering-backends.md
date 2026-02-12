@@ -47,7 +47,7 @@ Each flavor sets different CMake arguments:
 
 - `opengl`: `-DMLN_WITH_OPENGL=ON`
 - `vulkan`: `-DMLN_WITH_VULKAN=ON`
-- `webgpuDawn`: `-DMLN_WITH_WEBGPU=ON -DMLN_WEBGPU_IMPL_DAWN=ON`
-- `webgpuWgpu`: `-DMLN_WITH_WEBGPU=ON -DMLN_WEBGPU_IMPL_WGPU=ON`
+- `webgpuDawn`: `-DMLN_WITH_WEBGPU=ON`, `-DMLN_WEBGPU_IMPL_DAWN=ON`
+- `webgpuWgpu`: `-DMLN_WITH_WEBGPU=ON`, `-DMLN_WEBGPU_IMPL_WGPU=ON`
 
 Only one backend is active per build. Renderer-specific Java code lives in `src/opengl/`, `src/vulkan/`, or `src/webgpu/` source sets.
