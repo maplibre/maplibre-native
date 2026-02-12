@@ -394,7 +394,9 @@ jobs:
       - name: Pre-build wgpu-native for aarch64-linux-android
         working-directory: vendor/wgpu-native
         run: |
-          export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+          NDK_PREBUILT="$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64"
+          RESOURCE_DIR=$("$NDK_PREBUILT/bin/clang" --print-resource-dir)
+          export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$NDK_PREBUILT/sysroot --target=aarch64-linux-android26 -isystem $RESOURCE_DIR/include"
           cargo build --release --target aarch64-linux-android --no-default-features --features vulkan,wgsl,spirv,glsl
 
       - name: Configure AWS Credentials
