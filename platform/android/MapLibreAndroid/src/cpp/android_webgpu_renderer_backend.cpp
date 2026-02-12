@@ -237,8 +237,8 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
 
     createSurface();
 
-    const w = ANativeWindow_getWidth(window);
-    const h = ANativeWindow_getHeight(window);
+    const int w = ANativeWindow_getWidth(window);
+    const int h = ANativeWindow_getHeight(window);
     if (w > 0 && h > 0) {
         impl->framebufferSize = {static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
         size = impl->framebufferSize;
