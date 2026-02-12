@@ -20,7 +20,7 @@
 #include <thread>
 
 static void wgpuLogCallback(WGPULogLevel level, WGPUStringView message, void* /*userdata*/) {
-    const androidLevel = ANDROID_LOG_INFO;
+    int androidLevel = ANDROID_LOG_INFO;
     switch (level) {
         case WGPULogLevel_Error:
             androidLevel = ANDROID_LOG_ERROR;
