@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7ea106a5.js";
+            window.path_to_searchindex_js = "searchindex-cc313397.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-fd1359ca.js"></script>
@@ -567,7 +567,7 @@ Confirm that no errors are shown.</p>
 <p>You can also build targets from the command line. For example, if you want to build your own XCFramework, see the ‘Build XCFramework’ step in the <a href=".github/workflows/ios-ci.yml">iOS CI workflow</a>.</p>
 <h2 id="cmake"><a class="header" href="#cmake">CMake</a></h2>
 <p>It is also possible to generate an Xcode project using CMake. As of February 2025, targets <code>mbgl-core</code>, <code>ios-sdk-static</code> and <code>app</code> (Objective-C development app) are supported.</p>
-<pre><code>cmake --preset ios -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID
+<pre><code>cmake --preset ios-metal -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID
 xed build-ios/MapLibre\ Native.xcodeproj
 </code></pre>
 <h2 id="distribution"><a class="header" href="#distribution">Distribution</a></h2>
