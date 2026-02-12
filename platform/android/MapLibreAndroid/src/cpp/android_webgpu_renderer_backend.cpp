@@ -41,7 +41,7 @@ static void wgpuLogCallback(WGPULogLevel level, WGPUStringView message, void* /*
             break;
     }
     if (message.data && message.length > 0) {
-        __android_log_print(androidLevel, "wgpu-native", "%.*s", (int)message.length, message.data);
+        __android_log_print(androidLevel, "wgpu-native", "%.*s", static_cast<int>(message.length), message.data);
     }
 }
 
@@ -237,8 +237,8 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
 
     createSurface();
 
-    int w = ANativeWindow_getWidth(window);
-    int h = ANativeWindow_getHeight(window);
+    const w = ANativeWindow_getWidth(window);
+    const h = ANativeWindow_getHeight(window);
     if (w > 0 && h > 0) {
         impl->framebufferSize = {static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
         size = impl->framebufferSize;
