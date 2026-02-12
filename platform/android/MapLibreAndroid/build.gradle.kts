@@ -116,12 +116,12 @@ android {
             java.srcDirs("src/opengl/java/")
         }
         getByName("webgpuDawn") {
-            java.srcDirs("src/webgpu/java")
-            manifest.srcFile("src/webgpu/AndroidManifest.xml")
+            java.srcDirs("src/vulkan/java")
+            manifest.srcFile("src/vulkan/AndroidManifest.xml")
         }
         getByName("webgpuWgpu") {
-            java.srcDirs("src/webgpu/java")
-            manifest.srcFile("src/webgpu/AndroidManifest.xml")
+            java.srcDirs("src/vulkan/java")
+            manifest.srcFile("src/vulkan/AndroidManifest.xml")
         }
     }
 
