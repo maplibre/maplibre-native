@@ -186,6 +186,40 @@
       }
     },
     {
+      "name": "android-webgpu-dawn",
+      "displayName": "Android WebGPU (Dawn)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-android-webgpu-dawn",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+        "CMAKE_ANDROID_NDK": "$env{ANDROID_NDK}",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-26",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_DAWN": "ON"
+      }
+    },
+    {
+      "name": "android-webgpu-wgpu",
+      "displayName": "Android WebGPU (wgpu-native)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-android-webgpu-wgpu",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+        "CMAKE_ANDROID_NDK": "$env{ANDROID_NDK}",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-26",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON"
+      }
+    },
+    {
       "name": "linux-opengl-node",
       "inherits": "linux",
       "binaryDir": "${sourceDir}/build",

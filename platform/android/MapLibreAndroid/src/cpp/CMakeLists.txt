@@ -215,6 +215,22 @@ if(MLN_WITH_VULKAN)
     )
 endif()
 
+if(MLN_WITH_WEBGPU)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_webgpu_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_webgpu_renderer_backend.hpp
+    )
+    target_compile_definitions(maplibre PRIVATE MLN_RENDER_BACKEND_WEBGPU=1)
+    if(MLN_WEBGPU_IMPL_DAWN AND TARGET mbgl-vendor-dawn)
+        target_compile_definitions(maplibre PRIVATE MLN_WEBGPU_IMPL_DAWN=1)
+        target_link_libraries(maplibre PRIVATE mbgl-vendor-dawn)
+    elseif(MLN_WEBGPU_IMPL_WGPU AND TARGET mbgl-vendor-wgpu)
+        target_compile_definitions(maplibre PRIVATE MLN_WEBGPU_IMPL_WGPU=1)
+        target_link_libraries(maplibre PRIVATE mbgl-vendor-wgpu)
+    endif()
+endif()
+
 target_include_directories(
   maplibre
   PRIVATE ${PROJECT_SOURCE_DIR}
