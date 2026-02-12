@@ -6,6 +6,10 @@ Two WebGPU implementations are supported: **Dawn** (Google, C++) and **wgpu-nati
 
 Dawn is fetched and built from source via CMake `FetchContent`, so no extra setup is needed. First build is slow (~20 min) because of Dawn's dependencies (abseil, SPIRV-Tools, Tint, etc.).
 
+**Android Studio:** Open the **Build Variants** panel (View > Tool Windows > Build Variants) and select `webgpuDawnDebug` for both `:MapLibreAndroid` and `:MapLibreAndroidTestApp`, then run normally.
+
+**Terminal:**
+
 ```bash
 cd platform/android
 ./gradlew :MapLibreAndroidTestApp:installWebgpuDawnDebug
@@ -42,6 +46,10 @@ cargo build --release --target aarch64-linux-android
 This produces `vendor/wgpu-native/target/aarch64-linux-android/release/libwgpu_native.a`, which the CMake build picks up automatically.
 
 ### 2. Build and install
+
+**Android Studio:** Select `webgpuWgpuDebug` in the Build Variants panel and run.
+
+**Terminal:**
 
 ```bash
 cd platform/android
