@@ -22,12 +22,23 @@
 static void wgpuLogCallback(WGPULogLevel level, WGPUStringView message, void* /*userdata*/) {
     int androidLevel = ANDROID_LOG_INFO;
     switch (level) {
-        case WGPULogLevel_Error: androidLevel = ANDROID_LOG_ERROR; break;
-        case WGPULogLevel_Warn: androidLevel = ANDROID_LOG_WARN; break;
-        case WGPULogLevel_Info: androidLevel = ANDROID_LOG_INFO; break;
-        case WGPULogLevel_Debug: androidLevel = ANDROID_LOG_DEBUG; break;
-        case WGPULogLevel_Trace: androidLevel = ANDROID_LOG_VERBOSE; break;
-        default: break;
+        case WGPULogLevel_Error:
+            androidLevel = ANDROID_LOG_ERROR;
+            break;
+        case WGPULogLevel_Warn:
+            androidLevel = ANDROID_LOG_WARN;
+            break;
+        case WGPULogLevel_Info:
+            androidLevel = ANDROID_LOG_INFO;
+            break;
+        case WGPULogLevel_Debug:
+            androidLevel = ANDROID_LOG_DEBUG;
+            break;
+        case WGPULogLevel_Trace:
+            androidLevel = ANDROID_LOG_VERBOSE;
+            break;
+        default:
+            break;
     }
     if (message.data && message.length > 0) {
         __android_log_print(androidLevel, "wgpu-native", "%.*s", (int)message.length, message.data);
@@ -65,18 +76,14 @@ public:
 
     void swap() override { backend.presentSurface(); }
 
-    const mbgl::webgpu::RendererBackend& getBackend() const override {
-        return backend;
-    }
+    const mbgl::webgpu::RendererBackend& getBackend() const override { return backend; }
 
     const WGPUCommandEncoder& getCommandEncoder() const override {
         static WGPUCommandEncoder dummy = nullptr;
         return dummy;
     }
 
-    WGPURenderPassEncoder getRenderPassEncoder() const override {
-        return nullptr;
-    }
+    WGPURenderPassEncoder getRenderPassEncoder() const override { return nullptr; }
 
     WGPUTextureView getColorTextureView() override {
         return static_cast<WGPUTextureView>(backend.getCurrentTextureView());
@@ -120,7 +127,6 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
       gfx::Renderable({64, 64}, std::make_unique<AndroidWebGPURenderableResource>(*this)),
       impl(std::make_unique<Impl>()),
       window(window_) {
-
 #if MLN_WEBGPU_IMPL_WGPU
     startStderrToLogcat();
     wgpuSetLogLevel(WGPULogLevel_Warn);
@@ -321,7 +327,8 @@ void AndroidWebGPURendererBackend::configureSurface(uint32_t width, uint32_t hei
 #if MLN_WEBGPU_IMPL_DAWN
     WGPUStatus capStatus = wgpuSurfaceGetCapabilities(impl->surface, impl->adapter, &capabilities);
 #elif MLN_WEBGPU_IMPL_WGPU
-    WGPUStatus capStatus = wgpuSurfaceGetCapabilities(impl->surface, static_cast<WGPUAdapter>(impl->adapter), &capabilities);
+    WGPUStatus capStatus = wgpuSurfaceGetCapabilities(
+        impl->surface, static_cast<WGPUAdapter>(impl->adapter), &capabilities);
 #endif
 
     WGPUCompositeAlphaMode selectedAlphaMode = WGPUCompositeAlphaMode_Opaque;
@@ -478,8 +485,7 @@ void* AndroidWebGPURendererBackend::getCurrentTextureView() {
     }
 
     auto status = static_cast<WGPUSurfaceGetCurrentTextureStatus>(surfaceTexture.status);
-    if (status == WGPUSurfaceGetCurrentTextureStatus_Outdated ||
-        status == WGPUSurfaceGetCurrentTextureStatus_Lost) {
+    if (status == WGPUSurfaceGetCurrentTextureStatus_Outdated || status == WGPUSurfaceGetCurrentTextureStatus_Lost) {
         wgpuTextureRelease(surfaceTexture.texture);
         configureSurface(impl->framebufferSize.width, impl->framebufferSize.height);
         return nullptr;
