@@ -393,7 +393,9 @@ jobs:
 
       - name: Pre-build wgpu-native for aarch64-linux-android
         working-directory: vendor/wgpu-native
-        run: cargo build --release --target aarch64-linux-android --no-default-features --features vulkan,wgsl,spirv,glsl
+        run: |
+          export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+          cargo build --release --target aarch64-linux-android --no-default-features --features vulkan,wgsl,spirv,glsl
 
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
