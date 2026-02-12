@@ -16,6 +16,7 @@
 
 #if MLN_WEBGPU_IMPL_WGPU
 #include <android/log.h>
+#include <mutex>
 #include <unistd.h>
 #include <thread>
 
@@ -47,20 +48,23 @@ static void wgpuLogCallback(WGPULogLevel level, WGPUStringView message, void* /*
 
 // Redirect stderr to logcat so Rust panic messages are visible
 static void startStderrToLogcat() {
-    int pipefd[2];
-    if (pipe(pipefd) == -1) return;
-    dup2(pipefd[1], STDERR_FILENO);
-    close(pipefd[1]);
+    static std::once_flag flag;
+    std::call_once(flag, [] {
+        int pipefd[2];
+        if (pipe(pipefd) == -1) return;
+        dup2(pipefd[1], STDERR_FILENO);
+        close(pipefd[1]);
 
-    std::thread([fd = pipefd[0]]() {
-        char buf[1024];
-        ssize_t n;
-        while ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
-            buf[n] = '\0';
-            __android_log_print(ANDROID_LOG_ERROR, "wgpu-native-stderr", "%s", buf);
-        }
-        close(fd);
-    }).detach();
+        std::thread([fd = pipefd[0]]() {
+            char buf[1024];
+            ssize_t n;
+            while ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
+                buf[n] = '\0';
+                __android_log_print(ANDROID_LOG_ERROR, "wgpu-native-stderr", "%s", buf);
+            }
+            close(fd);
+        }).detach();
+    });
 }
 #endif
 
