@@ -57,12 +57,21 @@ void HTTPFileSource::Impl::cancel(HTTPRequest* req) {
 
     if (requestsVector.empty()) {
         m_pending.erase(it);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 4)
+        // Qt 5.9.4 introduced HTTP/2, in the ideal world we would like to know if this reply
+        // is from a HTTP/2 connection. At this point in time we cannot check it. If HTTP/2 is
+        // in use we may not abort the connection.
+        Q_UNUSED(reply);
+#else
+        // Works fine with HTTP/1
         if (reply) reply->abort();
+#endif
     }
 }
 
 void HTTPFileSource::Impl::onReplyFinished() {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) return;
 
 #if defined(Q_OS_WASM)
     const QUrl& url = reply->url();
@@ -80,14 +89,26 @@ void HTTPFileSource::Impl::onReplyFinished() {
         return;
     }
 
-    QByteArray data = reply->readAll();
-    QVector<HTTPRequest*>& requestsVector = it.value().second;
+    // Error handling
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Network error for URL" << url << ":" << reply->errorString();
 
-    // Cannot use the iterator to walk the requestsVector
-    // because calling handleNetworkReply() might get
-    // requests added to the requestsVector.
-    while (!requestsVector.isEmpty()) {
-        requestsVector.takeFirst()->handleNetworkReply(reply, data);
+        QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        if (!statusCode.isValid()) {
+            qWarning() << "No HTTP status code received; possible connection/protocol failure.";
+        }
+
+        m_manager->clearConnectionCache();
+    } else {
+        QByteArray data = reply->readAll();
+        QVector<HTTPRequest*>& requestsVector = it.value().second;
+
+        // Cannot use the iterator to walk the requestsVector
+        // because calling handleNetworkReply() might get
+        // requests added to the requestsVector.
+        while (!requestsVector.isEmpty()) {
+            requestsVector.takeFirst()->handleNetworkReply(reply, data);
+        }
     }
 
     m_pending.erase(it);
