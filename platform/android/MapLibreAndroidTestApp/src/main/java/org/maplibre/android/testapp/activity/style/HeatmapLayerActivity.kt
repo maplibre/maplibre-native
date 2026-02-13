@@ -36,7 +36,7 @@ class HeatmapLayerActivity : AppCompatActivity() {
                         Style.Builder()
                             .fromUri(TestStyles.getPredefinedStyleWithFallback("Pastel"))
                             .withSource(createEarthquakeSource())
-                            .withLayer(createHeatmapLayer())
+														.withLayerAbove(createHeatmapLayer(), "country_label")
                             .withLayerBelow(createCircleLayer(), HEATMAP_LAYER_ID)
                     )
                 } catch (exception: URISyntaxException) {
