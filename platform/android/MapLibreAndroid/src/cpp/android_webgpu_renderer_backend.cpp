@@ -203,6 +203,20 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
     wgpu::DeviceDescriptor deviceDesc = {};
 #if MLN_WEBGPU_IMPL_DAWN
     deviceDesc.label = "MapLibre Android WebGPU Device";
+    deviceDesc.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
+            Log::Error(Event::Render,
+                       std::string("Dawn error [") + std::to_string(static_cast<int>(type)) + "] " +
+                           (message.data ? std::string(message.data, message.length) : std::string()));
+        });
+    deviceDesc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                     [](const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::StringView message) {
+                                         Log::Error(Event::Render,
+                                                    std::string("Dawn device lost [") +
+                                                        std::to_string(static_cast<int>(reason)) + "] " +
+                                                        (message.data ? std::string(message.data, message.length)
+                                                                      : std::string()));
+                                     });
     deviceDesc.requiredFeatures = requiredFeatures.data();
 #elif MLN_WEBGPU_IMPL_WGPU
     deviceDesc.requiredFeatures = reinterpret_cast<const WGPUFeatureName*>(requiredFeatures.data());
