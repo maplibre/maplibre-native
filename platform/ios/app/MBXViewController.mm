@@ -2433,9 +2433,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     /// This is hte same style as above but copied locally and the three instances of the metal plug-in layer added to the style
     /// Look for "type": "plugin-layer-metal-rendering" in the PluginLayerTestStyle.json for an example of how the layer is defined
-    [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
-    [self.styleURLs addObject:url];
+    if (url) {
+        [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
+        [self.styleURLs addObject:url];
+    }
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
