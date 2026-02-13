@@ -36,7 +36,7 @@
 
 #ifdef ENABLE_VMA_DEBUG
 
-#define VMA_DEBUG_MARGIN 16
+#define VMA_DEBUG_MARGIN 4
 #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
@@ -51,6 +51,14 @@
 
 #define VMA_DEBUG_LOG(str) VMA_DEBUG_LOG_FORMAT("%s", (str))
 #define VMA_LEAK_LOG_FORMAT(...) VMA_DEBUG_LOG_FORMAT(__VA_ARGS__)
+
+#else
+
+// - triggering VMA_ASSERT_LEAK in `VmaDeviceMemoryBlock::Destroy` without any log printed by
+// `VmaBlockMetadata_TLSF::DebugLogAllAllocations` (since all blocks are free).
+// - VMA_LEAK_LOG_FORMAT logs generate an equal number of alloc/free events.
+// - https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/276
+#undef VMA_ASSERT_LEAK
 
 #endif
 
