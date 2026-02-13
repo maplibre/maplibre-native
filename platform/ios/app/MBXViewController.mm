@@ -110,7 +110,8 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
     MBXSettingsRuntimeStylingCustomDrawableLayer,
-    MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles
+    MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles,
+    MBXSettingsRuntimeStylingHeatmapLayer
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
@@ -488,7 +489,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",
                 @"Add Custom Drawable Layer",
-                @"Add FourSquare POIs PMTiles Layer"
+                @"Add FourSquare POIs PMTiles Layer",
+                @"Add Earthquake Heatmap"
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -723,6 +725,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     break;
                 case MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles:
                     [self addFoursquarePOIsPMTilesLayer];
+                    break;
+                case MBXSettingsRuntimeStylingHeatmapLayer:
+                    [self addEarthquakeHeatmap];
                     break;
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
@@ -1125,6 +1130,92 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         @18, @8
     ]];
     [self.mapView.style addLayer:circleLayer];
+}
+
+// Earthquake Heatmap
+
+- (void)addEarthquakeHeatmap {
+    NSURL *earthquakesURL = [NSURL URLWithString:@"https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson"];
+    MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"earthquakes" URL:earthquakesURL options:nil];
+    [self.mapView.style addSource:source];
+
+    // Heatmap layer - visible at low zoom, fades out by zoom 9
+    MLNHeatmapStyleLayer *heatmapLayer = [[MLNHeatmapStyleLayer alloc] initWithIdentifier:@"earthquakes-heat" source:source];
+    heatmapLayer.maximumZoomLevel = 9;
+
+    // Weight by earthquake magnitude
+    heatmapLayer.heatmapWeight = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"get", @"mag"],
+        @0, @0,
+        @6, @1
+    ]];
+
+    // Increase intensity with zoom
+    heatmapLayer.heatmapIntensity = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"zoom"],
+        @0, @1,
+        @9, @3
+    ]];
+
+    // Color ramp from transparent blue to dark red
+    heatmapLayer.heatmapColor = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"heatmap-density"],
+        @0,   @"rgba(33,102,172,0)",
+        @0.2, @"rgb(103,169,207)",
+        @0.4, @"rgb(209,229,240)",
+        @0.6, @"rgb(253,219,199)",
+        @0.8, @"rgb(239,138,98)",
+        @1,   @"rgb(178,24,43)"
+    ]];
+
+    // Increase radius with zoom
+    heatmapLayer.heatmapRadius = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"zoom"],
+        @0, @2,
+        @9, @20
+    ]];
+
+    // Fade out heatmap at high zoom
+    heatmapLayer.heatmapOpacity = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"zoom"],
+        @7, @1,
+        @9, @0
+    ]];
+
+    [self.mapView.style addLayer:heatmapLayer];
+
+    // Circle layer - visible at high zoom, fades in from zoom 7
+    MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"earthquakes-circle" source:source];
+
+    circleLayer.circleRadius = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"zoom"],
+        @7, @[@"interpolate", @[@"linear"], @[@"get", @"mag"], @1, @1, @6, @4],
+        @16, @[@"interpolate", @[@"linear"], @[@"get", @"mag"], @1, @5, @6, @50]
+    ]];
+
+    circleLayer.circleColor = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"get", @"mag"],
+        @1, @"rgba(33,102,172,0)",
+        @2, @"rgb(103,169,207)",
+        @3, @"rgb(209,229,240)",
+        @4, @"rgb(253,219,199)",
+        @5, @"rgb(239,138,98)",
+        @6, @"rgb(178,24,43)"
+    ]];
+
+    circleLayer.circleOpacity = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"zoom"],
+        @7, @0,
+        @8, @1
+    ]];
+
+    circleLayer.circleStrokeColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
+    circleLayer.circleStrokeWidth = [NSExpression expressionForConstantValue:@1];
+
+    [self.mapView.style insertLayer:circleLayer belowLayer:heatmapLayer];
+
+    // Move camera to show earthquake data (Central America / Pacific region)
+    [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(15.0, -94.0) zoomLevel:5 animated:YES];
 }
 
 - (void)styleBuildingExtrusions
