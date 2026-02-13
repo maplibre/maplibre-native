@@ -2,6 +2,7 @@
 
 #include "source.hpp"
 #include <mbgl/style/sources/geojson_source.hpp>
+#include <mbgl/actor/optional_actor.hpp>
 #include "../../geojson/geometry.hpp"
 #include "../../geojson/feature.hpp"
 #include "../../geojson/feature_collection.hpp"
@@ -55,11 +56,6 @@ private:
     void setFeature(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
     void setGeometry(jni::JNIEnv&, const jni::Object<geojson::Geometry>&);
 
-    void setGeoJSONStringSync(jni::JNIEnv&, const jni::String&);
-    void setFeatureCollectionSync(jni::JNIEnv&, const jni::Object<geojson::FeatureCollection>&);
-    void setFeatureSync(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
-    void setGeometrySync(jni::JNIEnv&, const jni::Object<geojson::Geometry>&);
-
     void setURL(jni::JNIEnv&, const jni::String&);
 
     jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&,
@@ -79,7 +75,7 @@ private:
     std::unique_ptr<Update> awaitingUpdate;
     std::unique_ptr<Update> update;
     std::shared_ptr<ThreadPool> threadPool;
-    std::unique_ptr<Actor<FeatureConverter>> converter;
+    std::unique_ptr<OptionalActor<FeatureConverter>> converter;
 
     template <class JNIType>
     void setCollectionAsync(jni::JNIEnv&, const jni::Object<JNIType>&);
