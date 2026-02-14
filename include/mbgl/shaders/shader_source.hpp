@@ -29,6 +29,7 @@ enum class BuiltIn {
     HeatmapShader,
     HeatmapTextureShader,
     HillshadePrepareShader,
+    ColorReliefShader,
     HillshadeShader,
     LineShader,
     LineGradientShader,

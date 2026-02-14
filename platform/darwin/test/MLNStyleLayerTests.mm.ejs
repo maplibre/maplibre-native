@@ -27,7 +27,7 @@
     return @"<%- type %>";
 }
 
-<% if (type !== 'background' && type !== 'raster' && type !== 'hillshade') { -%>
+<% if (type !== 'background' && type !== 'raster' && type !== 'hillshade' && type !== 'color-relief') { -%>
 - (void)testPredicates {
     MLNPointFeature *feature = [[MLNPointFeature alloc] init];
     MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"sourceID" shape:feature options:nil];

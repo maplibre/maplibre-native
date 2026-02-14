@@ -51,7 +51,9 @@ type::Type parseType(v8::Local<v8::Object> type) {
         {"formatted", type::Formatted},
         {"number-format", type::String},
         {"resolvedImage", type::Image},
-        {"variableAnchorOffsetCollection", type::VariableAnchorOffsetCollection}};
+        {"variableAnchorOffsetCollection", type::VariableAnchorOffsetCollection},
+        {"numberArray", type::Array(type::Number)},
+        {"colorArray", type::Array(type::Color)}};
 
     v8::Local<v8::Value> v8kind = Nan::Get(type, Nan::New("kind").ToLocalChecked()).ToLocalChecked();
     std::string kind(*v8::String::Utf8Value(v8::Isolate::GetCurrent(), v8kind));

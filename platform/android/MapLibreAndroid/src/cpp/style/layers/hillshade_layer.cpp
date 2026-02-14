@@ -50,6 +50,17 @@ jni::Local<jni::Object<>> HillshadeLayer::getHillshadeIlluminationDirection(jni:
         *convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(*layer).getHillshadeIlluminationDirection()));
 }
 
+jni::Local<jni::Object<>> HillshadeLayer::getHillshadeIlluminationAltitude(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::HillshadeLayer::getDefaultHillshadeIlluminationAltitude()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(*layer).getHillshadeIlluminationAltitude()));
+}
+
 jni::Local<jni::Object<>> HillshadeLayer::getHillshadeIlluminationAnchor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     auto layer = layerPtr.get();
@@ -185,6 +196,15 @@ void HillshadeLayer::setHillshadeAccentColorTransition(jni::JNIEnv&, jlong durat
     toHillshadeLayer(*layer).setHillshadeAccentColorTransition(options);
 }
 
+jni::Local<jni::Object<>> HillshadeLayer::getHillshadeMethod(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::HillshadeLayer::getDefaultHillshadeMethod()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(*layer).getHillshadeMethod()));
+}
+
 // HillshadeJavaLayerPeerFactory
 
 HillshadeJavaLayerPeerFactory::~HillshadeJavaLayerPeerFactory() = default;
@@ -226,6 +246,7 @@ void HillshadeJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         "initialize",
         "finalize",
         METHOD(&HillshadeLayer::getHillshadeIlluminationDirection, "nativeGetHillshadeIlluminationDirection"),
+        METHOD(&HillshadeLayer::getHillshadeIlluminationAltitude, "nativeGetHillshadeIlluminationAltitude"),
         METHOD(&HillshadeLayer::getHillshadeIlluminationAnchor, "nativeGetHillshadeIlluminationAnchor"),
         METHOD(&HillshadeLayer::getHillshadeExaggerationTransition, "nativeGetHillshadeExaggerationTransition"),
         METHOD(&HillshadeLayer::setHillshadeExaggerationTransition, "nativeSetHillshadeExaggerationTransition"),
@@ -238,7 +259,8 @@ void HillshadeJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&HillshadeLayer::getHillshadeHighlightColor, "nativeGetHillshadeHighlightColor"),
         METHOD(&HillshadeLayer::getHillshadeAccentColorTransition, "nativeGetHillshadeAccentColorTransition"),
         METHOD(&HillshadeLayer::setHillshadeAccentColorTransition, "nativeSetHillshadeAccentColorTransition"),
-        METHOD(&HillshadeLayer::getHillshadeAccentColor, "nativeGetHillshadeAccentColor"));
+        METHOD(&HillshadeLayer::getHillshadeAccentColor, "nativeGetHillshadeAccentColor"),
+        METHOD(&HillshadeLayer::getHillshadeMethod, "nativeGetHillshadeMethod"));
 }
 
 } // namespace android

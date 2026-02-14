@@ -44,7 +44,7 @@ struct AccuracyRadiusColor : PaintProperty<Color> {
 };
 
 struct Bearing : PaintProperty<Rotation> {
-    static Rotation defaultValue() { return 0; }
+    static Rotation defaultValue() { return 0.f; }
 };
 
 struct BearingImageSize : PaintProperty<float> {

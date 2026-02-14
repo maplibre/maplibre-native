@@ -507,6 +507,7 @@ public class PropertyFactory {
 
   /**
    * Distance of halo to the icon outline. 
+
 The unit is in density-independent pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.
    *
    * @param value a Float value
@@ -518,6 +519,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
 
   /**
    * Distance of halo to the icon outline. 
+
 The unit is in density-independent pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.
    *
    * @param expression an expression statement
@@ -1428,23 +1430,43 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The direction of the light source used to generate the hillshading with 0 as the top of the viewport if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `viewport` and due north if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `map`.
+   * The direction of the light source(s) used to generate the hillshading with 0 as the top of the viewport if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `viewport` and due north if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `map`. Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
    *
-   * @param value a Float value
-   * @return property wrapper around Float
+   * @param value a Float[] value
+   * @return property wrapper around Float[]
    */
-  public static PropertyValue<Float> hillshadeIlluminationDirection(Float value) {
+  public static PropertyValue<Float[]> hillshadeIlluminationDirection(Float[] value) {
     return new PaintPropertyValue<>("hillshade-illumination-direction", value);
   }
 
   /**
-   * The direction of the light source used to generate the hillshading with 0 as the top of the viewport if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `viewport` and due north if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `map`.
+   * The direction of the light source(s) used to generate the hillshading with 0 as the top of the viewport if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `viewport` and due north if {@link Property.HILLSHADE_ILLUMINATION_ANCHOR} is set to `map`. Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
    */
   public static PropertyValue<Expression> hillshadeIlluminationDirection(Expression expression) {
     return new PaintPropertyValue<>("hillshade-illumination-direction", expression);
+  }
+
+  /**
+   * The altitude of the light source(s) used to generate the hillshading with 0 as sunset and 90 as noon. Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
+   *
+   * @param value a Float[] value
+   * @return property wrapper around Float[]
+   */
+  public static PropertyValue<Float[]> hillshadeIlluminationAltitude(Float[] value) {
+    return new PaintPropertyValue<>("hillshade-illumination-altitude", value);
+  }
+
+  /**
+   * The altitude of the light source(s) used to generate the hillshading with 0 as sunset and 90 as noon. Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> hillshadeIlluminationAltitude(Expression expression) {
+    return new PaintPropertyValue<>("hillshade-illumination-altitude", expression);
   }
 
   /**
@@ -1488,27 +1510,17 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The shading color of areas that face away from the light source.
+   * The shading color of areas that face away from the light source(s). Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
    *
-   * @param value a int color value
-   * @return property wrapper around String color
+   * @param value a String[] value
+   * @return property wrapper around String[]
    */
-  public static PropertyValue<String> hillshadeShadowColor(@ColorInt int value) {
-    return new PaintPropertyValue<>("hillshade-shadow-color", colorToRgbaString(value));
-  }
-
-  /**
-   * The shading color of areas that face away from the light source.
-   *
-   * @param value a String value
-   * @return property wrapper around String
-   */
-  public static PropertyValue<String> hillshadeShadowColor(String value) {
+  public static PropertyValue<String[]> hillshadeShadowColor(String[] value) {
     return new PaintPropertyValue<>("hillshade-shadow-color", value);
   }
 
   /**
-   * The shading color of areas that face away from the light source.
+   * The shading color of areas that face away from the light source(s). Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1518,27 +1530,17 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The shading color of areas that faces towards the light source.
+   * The shading color of areas that faces towards the light source(s). Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
    *
-   * @param value a int color value
-   * @return property wrapper around String color
+   * @param value a String[] value
+   * @return property wrapper around String[]
    */
-  public static PropertyValue<String> hillshadeHighlightColor(@ColorInt int value) {
-    return new PaintPropertyValue<>("hillshade-highlight-color", colorToRgbaString(value));
-  }
-
-  /**
-   * The shading color of areas that faces towards the light source.
-   *
-   * @param value a String value
-   * @return property wrapper around String
-   */
-  public static PropertyValue<String> hillshadeHighlightColor(String value) {
+  public static PropertyValue<String[]> hillshadeHighlightColor(String[] value) {
     return new PaintPropertyValue<>("hillshade-highlight-color", value);
   }
 
   /**
-   * The shading color of areas that faces towards the light source.
+   * The shading color of areas that faces towards the light source(s). Only when {@link Property.HILLSHADE_METHOD} is set to `multidirectional` can you specify multiple light sources.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1575,6 +1577,76 @@ The unit is in density-independent pixels only for SDF sprites that were created
    */
   public static PropertyValue<Expression> hillshadeAccentColor(Expression expression) {
     return new PaintPropertyValue<>("hillshade-accent-color", expression);
+  }
+
+  /**
+   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> hillshadeMethod(@Property.HILLSHADE_METHOD String value) {
+    return new PaintPropertyValue<>("hillshade-method", value);
+  }
+
+  /**
+   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> hillshadeMethod(Expression expression) {
+    return new PaintPropertyValue<>("hillshade-method", expression);
+  }
+
+  /**
+   * The opacity at which the color-relief will be drawn.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> colorReliefOpacity(Float value) {
+    return new PaintPropertyValue<>("color-relief-opacity", value);
+  }
+
+  /**
+   * The opacity at which the color-relief will be drawn.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> colorReliefOpacity(Expression expression) {
+    return new PaintPropertyValue<>("color-relief-opacity", expression);
+  }
+
+  /**
+   * Defines the color of each pixel based on its elevation. Should be an expression that uses `["elevation"]` as input.
+   *
+   * @param value a int color value
+   * @return property wrapper around String color
+   */
+  public static PropertyValue<String> colorReliefColor(@ColorInt int value) {
+    return new PaintPropertyValue<>("color-relief-color", colorToRgbaString(value));
+  }
+
+  /**
+   * Defines the color of each pixel based on its elevation. Should be an expression that uses `["elevation"]` as input.
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> colorReliefColor(String value) {
+    return new PaintPropertyValue<>("color-relief-color", value);
+  }
+
+  /**
+   * Defines the color of each pixel based on its elevation. Should be an expression that uses `["elevation"]` as input.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> colorReliefColor(Expression expression) {
+    return new PaintPropertyValue<>("color-relief-color", expression);
   }
 
   /**
@@ -2228,7 +2300,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Font stack to use for displaying text.
+   * Fonts to use for displaying text. If the `glyphs` root property is specified, this array is joined together and interpreted as a font stack name. Otherwise, it is interpreted as a cascading fallback list of local font names.
    *
    * @param value a String[] value
    * @return property wrapper around String[]
@@ -2238,7 +2310,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Font stack to use for displaying text.
+   * Fonts to use for displaying text. If the `glyphs` root property is specified, this array is joined together and interpreted as a font stack name. Otherwise, it is interpreted as a cascading fallback list of local font names.
    *
    * @param value a String[] value
    * @return property wrapper around String[]
@@ -2395,7 +2467,9 @@ The unit is in density-independent pixels only for SDF sprites that were created
  When present, this property takes precedence over {@link Property.TEXT_ANCHOR}, {@link PropertyFactory#textVariableAnchor}, {@link PropertyFactory#textOffset}, and {@link PropertyFactory#textRadialOffset}. 
 
  ```json 
+
  { "text-variable-anchor-offset": ["top", [0, 4], "left", [3,0], "bottom", [1, 1]] } 
+
  ``` 
 
  When the renderer chooses the `top` anchor, `[0, 4]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted down by 4 ems. 
@@ -2417,7 +2491,9 @@ The unit is in density-independent pixels only for SDF sprites that were created
  When present, this property takes precedence over {@link Property.TEXT_ANCHOR}, {@link PropertyFactory#textVariableAnchor}, {@link PropertyFactory#textOffset}, and {@link PropertyFactory#textRadialOffset}. 
 
  ```json 
+
  { "text-variable-anchor-offset": ["top", [0, 4], "left", [3,0], "bottom", [1, 1]] } 
+
  ``` 
 
  When the renderer chooses the `top` anchor, `[0, 4]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted down by 4 ems. 

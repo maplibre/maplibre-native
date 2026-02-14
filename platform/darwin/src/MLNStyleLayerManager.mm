@@ -2,6 +2,7 @@
 
 #import "MLNBackgroundStyleLayer_Private.h"
 #import "MLNCircleStyleLayer_Private.h"
+#import "MLNColorReliefStyleLayer_Private.h"
 #import "MLNFillExtrusionStyleLayer_Private.h"
 #import "MLNFillStyleLayer_Private.h"
 #import "MLNHeatmapStyleLayer_Private.h"
@@ -52,6 +53,11 @@ LayerManagerDarwin::LayerManagerDarwin() {
     addLayerTypeCoreOnly(std::make_unique<HillshadeLayerFactory>());
 #elif !defined(MBGL_LAYER_HILLSHADE_DISABLE_ALL)
     addLayerType(std::make_unique<HillshadeStyleLayerPeerFactory>());
+#endif
+#if defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_RUNTIME)
+    addLayerTypeCoreOnly(std::make_unique<ColorReliefLayerFactory>());
+#elif !defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_ALL)
+    addLayerType(std::make_unique<ColorReliefStyleLayerPeerFactory>());
 #endif
 #if defined(MBGL_LAYER_FILL_EXTRUSION_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<FillExtrusionLayerFactory>());

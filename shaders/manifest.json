@@ -138,6 +138,13 @@
         "uses_ubos": true
     },
     {
+        "name": "ColorReliefShader",
+        "header": "color_relief",
+        "glsl_vert": "color_relief.vertex.glsl",
+        "glsl_frag": "color_relief.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "HillshadeShader",
         "header": "hillshade",
         "glsl_vert": "hillshade.vertex.glsl",

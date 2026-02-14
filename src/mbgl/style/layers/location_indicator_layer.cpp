@@ -194,7 +194,7 @@ TransitionOptions LocationIndicatorLayer::getAccuracyRadiusColorTransition() con
 }
 
 PropertyValue<Rotation> LocationIndicatorLayer::getDefaultBearing() {
-    return {0};
+    return {0.f};
 }
 
 const PropertyValue<Rotation>& LocationIndicatorLayer::getBearing() const {

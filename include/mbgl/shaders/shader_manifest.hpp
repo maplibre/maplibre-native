@@ -23,6 +23,7 @@
 #include <mbgl/shaders/gl/heatmap.hpp>
 #include <mbgl/shaders/gl/heatmap_texture.hpp>
 #include <mbgl/shaders/gl/hillshade_prepare.hpp>
+#include <mbgl/shaders/gl/color_relief.hpp>
 #include <mbgl/shaders/gl/hillshade.hpp>
 #include <mbgl/shaders/gl/line.hpp>
 #include <mbgl/shaders/gl/line_gradient.hpp>

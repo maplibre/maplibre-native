@@ -75,7 +75,7 @@ float getElevation(float2 coord, float bias, texture2d<float, access::sample> im
     // Convert encoded elevation value to meters
     float4 data = image.sample(image_sampler, coord) * 255.0;
     data.a = -1.0;
-    return dot(data, unpack) / 4.0;
+    return dot(data, unpack);
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
@@ -87,8 +87,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
     float2 epsilon = 1.0 / tileProps.dimension;
+    float tileSize = tileProps.dimension.x - 2.0;
 
-    // queried pixels:
+    // queried pixels (using Sobel operator kernel):
     // +-----------+
     // |   |   |   |
     // | a | b | c |
@@ -102,7 +103,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // | g | h | i |
     // |   |   |   |
     // +-----------+
-
     float a = getElevation(in.pos + float2(-epsilon.x, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
     float b = getElevation(in.pos + float2(0, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
     float c = getElevation(in.pos + float2(epsilon.x, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
@@ -113,27 +113,24 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float h = getElevation(in.pos + float2(0, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
     float i = getElevation(in.pos + float2(epsilon.x, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
 
-    // here we divide the x and y slopes by 8 * pixel size
-    // where pixel size (aka meters/pixel) is:
-    // circumference of the world / (pixels per tile * number of tiles)
-    // which is equivalent to: 8 * 40075016.6855785 / (512 * pow(2, u_zoom))
-    // which can be reduced to: pow(2, 19.25619978527 - u_zoom)
-    // we want to vertically exaggerate the hillshading though, because otherwise
-    // it is barely noticeable at low zooms. to do this, we multiply this by some
-    // scale factor pow(2, (u_zoom - u_maxzoom) * a) where a is an arbitrary value
-    // Here we use a=0.3 which works out to the expression below. see
-    // nickidlugash's awesome breakdown for more info
-    // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
-    float exaggeration = tileProps.zoom < 2.0 ? 0.4 : tileProps.zoom < 4.5 ? 0.35 : 0.3;
+    // Convert the raw pixel-space derivative (slope) into world-space slope.
+    // The conversion factor is: tileSize / (8 * meters_per_pixel).
+    // meters_per_pixel is calculated as pow(2.0, 28.2562 - u_zoom).
+    // The exaggeration factor is applied to scale the effect at lower zooms.
+    float exaggerationFactor = tileProps.zoom < 2.0 ? 0.4 : tileProps.zoom < 4.5 ? 0.35 : 0.3;
+    float exaggeration = tileProps.zoom < 15.0 ? (tileProps.zoom - 15.0) * exaggerationFactor : 0.0;
 
     float2 deriv = float2(
         (c + f + f + i) - (a + d + d + g),
         (g + h + h + i) - (a + b + b + c)
-    ) /  pow(2.0, (tileProps.zoom - tileProps.maxzoom) * exaggeration + 19.2562 - tileProps.zoom);
+    ) * tileSize / pow(2.0, exaggeration + (28.2562 - tileProps.zoom));
 
+    // Encode the derivative into the color channels (r and g)
+    // The derivative is scaled from world-space slope to the range [0, 1] for texture storage.
+    // The maximum possible world-space derivative is assumed to be 4 (hence division by 8.0).
     float4 color = clamp(float4(
-        deriv.x / 2.0 + 0.5,
-        deriv.y / 2.0 + 0.5,
+        deriv.x / 8.0 + 0.5,
+        deriv.y / 8.0 + 0.5,
         1.0,
         1.0), 0.0, 1.0);
 

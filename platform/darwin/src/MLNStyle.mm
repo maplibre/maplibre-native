@@ -10,6 +10,7 @@
 #import "MLNSymbolStyleLayer.h"
 #import "MLNHeatmapStyleLayer.h"
 #import "MLNHillshadeStyleLayer.h"
+#import "MLNColorReliefStyleLayer.h"
 #import "MLNRasterStyleLayer.h"
 #import "MLNBackgroundStyleLayer.h"
 #import "MLNStyleLayerManager.h"
