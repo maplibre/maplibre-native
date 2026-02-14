@@ -17,30 +17,38 @@ DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelTy
         createInfo, nullptr, context.getBackend().getDispatcher());
 }
 
+DynamicTexture::~DynamicTexture() {
+    for (auto& texture : texturesToBlit) {
+        texture.second->destroy(false);
+    }
+
+    if (texture) {
+        static_cast<Texture2D&>(*texture).destroy(false);
+    }
+}
+
 void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) {
     std::scoped_lock lock(mutex);
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
 
-    gfx::Texture2DPtr textureToBlit = context.createTexture2D();
+    auto textureToBlit = std::static_pointer_cast<Texture2D>(context.createTexture2D());
     texturesToBlit.emplace(texHandle, textureToBlit);
 
-    const auto& textureToBlitVK = static_cast<Texture2D*>(textureToBlit.get());
-    textureToBlitVK->setSize(imageSize);
-    textureToBlitVK->setFormat(texture.get()->getFormat(), gfx::TextureChannelDataType::UnsignedByte);
-    textureToBlitVK->setUsage(Texture2DUsage::Blit);
-    textureToBlitVK->create();
+    textureToBlit->setSize(imageSize);
+    textureToBlit->setFormat(texture.get()->getFormat(), gfx::TextureChannelDataType::UnsignedByte);
+    textureToBlit->setUsage(Texture2DUsage::Blit);
+    textureToBlit->create();
 
-    DeletionQueue deletionQueue;
-    context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
-        textureToBlitVK->uploadSubRegion(pixelData, imageSize, 0, 0, commandBuffer, &deletionQueue);
-    });
+    const auto& device = context.getBackend().getDevice();
+    const auto& dispatcher = context.getBackend().getDispatcher();
 
-    for (const auto& function : deletionQueue) {
-        function(context);
-    }
+    const vk::CommandBufferAllocateInfo allocateInfo(commandPool.get(), vk::CommandBufferLevel::ePrimary, 1);
+    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
+    const auto& commandBuffer = commandBuffers.front();
 
-    deletionQueue.clear();
+    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
+    textureToBlit->uploadSubRegion(pixelData, imageSize, 0, 0, commandBuffer, true);
 
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
 }
@@ -49,7 +57,7 @@ void DynamicTexture::uploadDeferredImages() {
     std::scoped_lock lock(mutex);
 
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+    context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
         textureVK->transitionToTransferWriteLayout(commandBuffer);
         for (const auto& pair : texturesToBlit) {
             const auto& rect = pair.first.getRectangle();
@@ -69,13 +77,23 @@ void DynamicTexture::uploadDeferredImages() {
         }
         textureVK->transitionToShaderReadLayout(commandBuffer);
     });
+
+    for (auto& texture : texturesToBlit) {
+        texture.second->destroy(false);
+    }
+
     texturesToBlit.clear();
 }
 
 bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
     if (gfx::DynamicTexture::removeTexture(texHandle)) {
         std::scoped_lock lock(mutex);
-        texturesToBlit.erase(texHandle);
+
+        const auto& tex = texturesToBlit.find(texHandle);
+        if (tex != texturesToBlit.end()) {
+            tex->second->destroy(false);
+            texturesToBlit.erase(tex);
+        }
         return true;
     }
     return false;
@@ -86,6 +104,12 @@ DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelTy
     : gfx::DynamicTexture(context_, size, pixelType),
       context(context_) {
     texture->create();
+}
+
+DynamicTexture::~DynamicTexture() {
+    for (auto& buffer : textureBuffersToUpload) {
+        buffer.destroy(false);
+    }
 }
 
 void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) {
@@ -124,7 +148,7 @@ void DynamicTexture::uploadDeferredImages() {
     std::scoped_lock lock(mutex);
 
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+    context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
         textureVK->transitionToTransferWriteLayout(commandBuffer);
         for (const auto& pair : textureBuffersToUpload) {
             const auto& rect = pair.first.getRectangle();
@@ -147,13 +171,22 @@ void DynamicTexture::uploadDeferredImages() {
         }
         textureVK->transitionToShaderReadLayout(commandBuffer);
     });
+
+    for (auto& buffer : textureBuffersToUpload) {
+        buffer.destroy(false);
+    }
+
     textureBuffersToUpload.clear();
 }
 
 bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
     if (gfx::DynamicTexture::removeTexture(texHandle)) {
         std::scoped_lock lock(mutex);
-        textureBuffersToUpload.erase(texHandle);
+        const auto& buffer = textureBuffersToUpload.find(texHandle);
+        if (buffer != textureBuffersToUpload.end()) {
+            buffer->second->destroy(false);
+            textureBuffersToUpload.erase(buffer);
+        }
         return true;
     }
     return false;
