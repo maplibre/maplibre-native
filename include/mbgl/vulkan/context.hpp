@@ -211,7 +211,9 @@ private:
         PipelineInfo pipelineInfo;
     } clipping;
 
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::mutex graphicsQueueSubmitMutex;
+#endif
 
     MBGL_STORE_THREAD(tid);
 };

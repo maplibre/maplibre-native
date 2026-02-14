@@ -186,7 +186,10 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
 
 void Context::submitOneTimeCommand(const vk::UniqueCommandBuffer& commandBuffer) {
     MLN_TRACE_FUNC();
+
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
@@ -339,7 +342,10 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];

@@ -107,8 +107,8 @@ DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelTy
 }
 
 DynamicTexture::~DynamicTexture() {
-    for (auto& buffer : textureBuffersToUpload) {
-        buffer.destroy(false);
+    if (texture) {
+        static_cast<Texture2D&>(*texture).destroy(false);
     }
 }
 
@@ -148,7 +148,7 @@ void DynamicTexture::uploadDeferredImages() {
     std::scoped_lock lock(mutex);
 
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
-    context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
+    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
         textureVK->transitionToTransferWriteLayout(commandBuffer);
         for (const auto& pair : textureBuffersToUpload) {
             const auto& rect = pair.first.getRectangle();
@@ -166,15 +166,13 @@ void DynamicTexture::uploadDeferredImages() {
                                              region,
                                              context.getBackend().getDispatcher());
 
-            context.renderingStats().numTextureUpdates++;
-            context.renderingStats().textureUpdateBytes += rect.w * rect.h * texture->getPixelStride();
+            context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+                stats.numTextureUpdates++;
+                stats.textureUpdateBytes += rect.w * rect.h * texture->getPixelStride();
+            });
         }
         textureVK->transitionToShaderReadLayout(commandBuffer);
     });
-
-    for (auto& buffer : textureBuffersToUpload) {
-        buffer.destroy(false);
-    }
 
     textureBuffersToUpload.clear();
 }
@@ -182,11 +180,7 @@ void DynamicTexture::uploadDeferredImages() {
 bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
     if (gfx::DynamicTexture::removeTexture(texHandle)) {
         std::scoped_lock lock(mutex);
-        const auto& buffer = textureBuffersToUpload.find(texHandle);
-        if (buffer != textureBuffersToUpload.end()) {
-            buffer->second->destroy(false);
-            textureBuffersToUpload.erase(buffer);
-        }
+        textureBuffersToUpload.erase(texHandle);
         return true;
     }
     return false;

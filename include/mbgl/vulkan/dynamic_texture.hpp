@@ -3,7 +3,7 @@
 #include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 
-#define DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD 1
+#define DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD 0
 
 namespace mbgl {
 namespace vulkan {
