@@ -128,6 +128,10 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
 }
 
 BufferResource::~BufferResource() noexcept {
+    destroy(true);
+}
+
+void BufferResource::destroy(bool deferred) {
     if (isValid()) {
         context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
             stats.numBuffers--;
@@ -140,9 +144,15 @@ BufferResource::~BufferResource() noexcept {
         });
     }
 
-    if (!bufferAllocation) return;
+    if (!bufferAllocation) {
+        return;
+    }
 
-    context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
+    if (deferred) {
+        context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
+    } else {
+        bufferAllocation.reset();
+    }
 }
 
 BufferResource BufferResource::clone() const {

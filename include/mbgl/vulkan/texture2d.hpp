@@ -65,6 +65,7 @@ public:
     bool isModifiedAfter(const std::chrono::duration<double>& t) const { return t < lastModified; }
 
     void create() noexcept override;
+    void destroy(bool deferred = true) noexcept;
 
     void upload() noexcept override;
     void upload(const void* pixelData, const Size& size_) noexcept override;
@@ -74,7 +75,7 @@ public:
                          uint16_t xOffset,
                          uint16_t yOffset,
                          const vk::UniqueCommandBuffer& buffer,
-                         std::vector<std::function<void(Context&)>>* deletionQueue = nullptr) noexcept;
+                         bool submit) noexcept;
 
     bool needsUpload() const noexcept override { return !!imageData; };
 
@@ -96,8 +97,8 @@ private:
     void createTexture();
     void createSampler();
 
-    void destroyTexture();
-    void destroySampler();
+    void destroyTexture(bool deferred = true);
+    void destroySampler(bool deferred = true);
 
     void transitionToTransferWriteLayout(const vk::UniqueCommandBuffer&);
     void transitionToTransferReadLayout(const vk::UniqueCommandBuffer&);
