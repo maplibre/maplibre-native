@@ -608,10 +608,11 @@ final class MapGestureDetector {
 
         // normalize the pixel delta change, ranging from 0 to screen height, to a constant zoom change range
         double normalizedDeltaChange = normalize(pixelDeltaChange, 0, screenHeight, 0, QUICK_ZOOM_MAX_ZOOM_CHANGE);
+        // adjust with a multiplier
+        normalizedDeltaChange *= uiSettings.getZoomRate();
 
-        // calculate target zoom and adjust for a multiplier
+        // calculate target zoom
         double targetZoom = (zoomedOut ? startZoom - normalizedDeltaChange : startZoom + normalizedDeltaChange);
-        targetZoom *= uiSettings.getZoomRate();
 
         transform.setZoom(targetZoom, focalPoint);
       } else {
