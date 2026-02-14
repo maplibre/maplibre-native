@@ -42,8 +42,9 @@ constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
 namespace {
+std::mutex glslangMutex;
 uint32_t glslangRefCount = 0;
-}
+} // namespace
 
 class RenderbufferResource : public gfx::RenderbufferResource {
 public:
@@ -54,8 +55,11 @@ Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_),
       globalUniformBuffers(DescriptorSetType::Global, 0, 0, shaders::globalUBOCount) {
-    if (glslangRefCount++ == 0) {
-        glslang::InitializeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (glslangRefCount++ == 0) {
+            glslang::InitializeProcess();
+        }
     }
 
     initFrameResources();
@@ -66,8 +70,11 @@ Context::~Context() noexcept {
 
     destroyResources();
 
-    if (--glslangRefCount == 0) {
-        glslang::FinalizeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (--glslangRefCount == 0) {
+            glslang::FinalizeProcess();
+        }
     }
 
 #if !defined(NDEBUG)

@@ -12,7 +12,7 @@ if(POLICY CMP0169)
     cmake_policy(SET CMP0169 OLD)
 endif()
 
-set(MLN_DAWN_GIT_VERSION "v20251014.163906" CACHE STRING "Git ref (branch, tag, or commit) used when fetching Dawn")
+set(MLN_DAWN_GIT_VERSION "v20260210.203301" CACHE STRING "Git ref (branch, tag, or commit) used when fetching Dawn")
 
 message(STATUS "Configuring Dawn WebGPU implementation (${MLN_DAWN_GIT_VERSION})")
 

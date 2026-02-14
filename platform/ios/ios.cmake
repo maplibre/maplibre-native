@@ -10,6 +10,8 @@ target_link_libraries(
         mbgl-vendor-filesystem
 )
 
+set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
+
 file(GLOB_RECURSE IOS_SDK_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/platform/darwin/src/*.m"
     "${PROJECT_SOURCE_DIR}/platform/darwin/src/*.mm"
