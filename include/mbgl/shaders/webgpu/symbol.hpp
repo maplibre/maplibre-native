@@ -41,6 +41,7 @@ struct SymbolDrawableUBO {
     pitch_with_map: u32,
     is_size_zoom_constant: u32,
     is_size_feature_constant: u32,
+    is_offset: u32,
 
     size_t: f32,
     size: f32,
@@ -175,7 +176,9 @@ fn main(in: VertexInput) -> VertexOutput {
     );
     let perspective_ratio = clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
 
-    size *= perspective_ratio;
+    if (drawable.is_offset == 0u) {
+        size *= perspective_ratio;
+    }
 
     let is_text = drawable.is_text_prop != 0u;
     let fontScale = select(size, size / 24.0, is_text);
@@ -348,7 +351,9 @@ fn main(in: VertexInput) -> VertexOutput {
     );
     let perspective_ratio = clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
 
-    size *= perspective_ratio;
+    if (drawable.is_offset == 0u) {
+        size *= perspective_ratio;
+    }
 
     let is_text = drawable.is_text_prop != 0u;
     let fontScale = select(size, size / 24.0, is_text);
@@ -597,7 +602,9 @@ fn main(in: VertexInput) -> VertexOutput {
     );
     let perspective_ratio = clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
 
-    size *= perspective_ratio;
+    if (drawable.is_offset == 0u) {
+        size *= perspective_ratio;
+    }
 
     let fontScale = size / 24.0;
 
