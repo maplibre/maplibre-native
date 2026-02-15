@@ -311,6 +311,118 @@ jobs:
         with:
           flavor: ${{ matrix.flavor }}
 
+  android-build-webgpu-dawn:
+    runs-on: ubuntu-24.04
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    defaults:
+      run:
+        working-directory: platform/android
+    env:
+      IS_LOCAL_DEVELOPMENT: false
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-android-ci
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
+      - name: Build WebGPU Dawn library for arm64-v8a
+        run: ./gradlew :MapLibreAndroid:assembleWebgpuDawnDebug -Pmaplibre.abis=arm64-v8a
+
+      - name: Show sccache stats
+        run: sccache --show-stats
+
+  android-build-webgpu-wgpu:
+    runs-on: ubuntu-24.04
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    defaults:
+      run:
+        working-directory: platform/android
+    env:
+      IS_LOCAL_DEVELOPMENT: false
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-android-ci
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
+        with:
+          toolchain: stable
+
+      - name: Add Android Rust target
+        run: rustup target add aarch64-linux-android
+
+      - name: Install Android NDK
+        run: yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "ndk;28.1.13356709" > /dev/null || true
+
+      - name: Configure cargo for Android NDK linker
+        run: |
+          NDK_BIN="$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          mkdir -p ../../vendor/wgpu-native/.cargo
+          cat > ../../vendor/wgpu-native/.cargo/config.toml << EOF
+          [target.aarch64-linux-android]
+          linker = "$NDK_BIN/aarch64-linux-android26-clang"
+          EOF
+
+      - name: Pre-build wgpu-native for aarch64-linux-android
+        working-directory: vendor/wgpu-native
+        run: |
+          NDK_PREBUILT="$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64"
+          RESOURCE_DIR=$("$NDK_PREBUILT/bin/clang" --print-resource-dir)
+          export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$NDK_PREBUILT/sysroot --target=aarch64-linux-android26 -isystem $RESOURCE_DIR/include"
+          cargo build --release --target aarch64-linux-android --no-default-features --features vulkan,wgsl,spirv,glsl
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
+      - name: Build WebGPU wgpu-native library for arm64-v8a
+        run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=arm64-v8a
+
+      - name: Show sccache stats
+        run: sccache --show-stats
+
   android-ci-result:
     runs-on: ubuntu-latest
     permissions:
@@ -322,9 +434,11 @@ jobs:
       - android-build
       - android-build-cpp-test
       - android-build-render-test
+      - android-build-webgpu-dawn
+      - android-build-webgpu-wgpu
     steps:
       - name: Set success=true
-        if: needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        if: needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success' && needs.android-build-webgpu-dawn.result == 'success' && needs.android-build-webgpu-wgpu.result == 'success'
         run: echo success=true > "$GITHUB_ENV"
 
       - name: Mark result as failed
