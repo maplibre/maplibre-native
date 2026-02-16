@@ -653,4 +653,3 @@ void MLNMapViewWebGPUImpl::deactivate() {
         return;
     }
 }
-
