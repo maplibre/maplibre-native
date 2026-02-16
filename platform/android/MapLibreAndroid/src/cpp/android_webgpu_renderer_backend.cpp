@@ -486,8 +486,8 @@ void AndroidWebGPURendererBackend::resizeFramebuffer(int width, int height) {
 }
 
 PremultipliedImage AndroidWebGPURendererBackend::readFramebuffer() {
-    if (!impl->currentTexture || !impl->device || !impl->queue ||
-        impl->framebufferSize.width == 0 || impl->framebufferSize.height == 0) {
+    if (!impl->currentTexture || !impl->device || !impl->queue || impl->framebufferSize.width == 0 ||
+        impl->framebufferSize.height == 0) {
         return PremultipliedImage(impl->framebufferSize.isEmpty() ? Size(2, 2) : impl->framebufferSize);
     }
 
@@ -557,12 +557,11 @@ PremultipliedImage AndroidWebGPURendererBackend::readFramebuffer() {
     MapContext mapContext;
 
     WGPUBufferMapCallbackInfo callbackInfo = {};
-    callbackInfo.callback =
-        [](WGPUMapAsyncStatus status, WGPUStringView, void* userdata1, void*) {
-            auto* ctx = static_cast<MapContext*>(userdata1);
-            ctx->status = status;
-            ctx->completed = true;
-        };
+    callbackInfo.callback = [](WGPUMapAsyncStatus status, WGPUStringView, void* userdata1, void*) {
+        auto* ctx = static_cast<MapContext*>(userdata1);
+        ctx->status = status;
+        ctx->completed = true;
+    };
     callbackInfo.userdata1 = &mapContext;
 
 #if MLN_WEBGPU_IMPL_DAWN
