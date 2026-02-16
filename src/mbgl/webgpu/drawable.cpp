@@ -814,7 +814,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
-                                                             vertexLayouts.size(),
+                                                             static_cast<uint32_t>(vertexLayouts.size()),
                                                              colorMode,
                                                              depthMode,
                                                              stencilMode,
@@ -935,8 +935,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
-            const uint32_t instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
-            const uint32_t indexOffset = mlSegment.indexOffset;
+            const uint32_t instanceCount = instanceAttributes ? static_cast<uint32_t>(instanceAttributes->getMaxCount()) : 1;
+            const uint32_t indexOffset = static_cast<uint32_t>(mlSegment.indexOffset);
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
 
