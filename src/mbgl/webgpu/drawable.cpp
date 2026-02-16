@@ -841,11 +841,17 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    wgpuRenderPassEncoderSetScissorRect(renderPassEncoder,
-                                        parameters.scissorRect.x,
-                                        parameters.scissorRect.y,
-                                        parameters.scissorRect.width,
-                                        parameters.scissorRect.height);
+    // Clamp scissor to actual renderable size (may differ due to Vulkan extent clamping)
+    {
+        const auto rtSize = parameters.backend.getDefaultRenderable().getSize();
+        const uint32_t sx = static_cast<uint32_t>(parameters.scissorRect.x);
+        const uint32_t sy = static_cast<uint32_t>(parameters.scissorRect.y);
+        const uint32_t sw = (sx < rtSize.width) ? std::min(parameters.scissorRect.width, rtSize.width - sx) : 0;
+        const uint32_t sh = (sy < rtSize.height) ? std::min(parameters.scissorRect.height, rtSize.height - sy) : 0;
+        if (sw > 0 && sh > 0) {
+            wgpuRenderPassEncoderSetScissorRect(renderPassEncoder, sx, sy, sw, sh);
+        }
+    }
 
     uint32_t bufferSlot = 0;
     for (const auto& binding : uniqueBindings) {
