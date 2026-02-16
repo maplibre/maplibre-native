@@ -31,8 +31,10 @@
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#endif
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -7804,8 +7806,12 @@ static void *windowScreenContext = &windowScreenContext;
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
 
+#if MLN_RENDER_BACKEND_METAL
             const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
-            id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
+            id encoder = (__bridge id)renderPass.getMetalEncoder().get();
+#else
+            id encoder = nil;
+#endif
 
             MLNMapView *strongMapView = weakMapView;
 

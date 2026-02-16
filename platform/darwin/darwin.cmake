@@ -169,25 +169,35 @@ add_custom_target(mbgl-darwin-style-code
     DEPENDS ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
 )
 
-add_library(
-    custom-layer-examples
-    EXCLUDE_FROM_ALL
-    "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
-    "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
-    "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
-    "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm"
-)
+# Custom layer examples use OpenGL ES / Metal APIs directly and are not
+# available for WebGPU builds.
+if(NOT MLN_WITH_WEBGPU)
+    set(_custom_layer_sources
+        "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
+        "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
+        "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
+    )
+    if(MLN_WITH_METAL)
+        list(APPEND _custom_layer_sources "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm")
+    endif()
 
-target_link_libraries(
-    custom-layer-examples
-    PUBLIC ios-sdk-static
-    PRIVATE mbgl-compiler-options mbgl-core
-)
+    add_library(
+        custom-layer-examples
+        EXCLUDE_FROM_ALL
+        ${_custom_layer_sources}
+    )
 
-target_include_directories(
-    custom-layer-examples
-    PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/app"
-    PRIVATE
-        "${PROJECT_SOURCE_DIR}/src" # FIXME: should not use private headers
-)
+    target_link_libraries(
+        custom-layer-examples
+        PUBLIC ios-sdk-static
+        PRIVATE mbgl-compiler-options mbgl-core
+    )
+
+    target_include_directories(
+        custom-layer-examples
+        PUBLIC
+            "${CMAKE_CURRENT_LIST_DIR}/app"
+        PRIVATE
+            "${PROJECT_SOURCE_DIR}/src" # FIXME: should not use private headers
+    )
+endif()

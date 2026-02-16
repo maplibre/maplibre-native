@@ -13,6 +13,8 @@
     - [Documentation](./platforms/ios/ios-documentation.md)
     - [Release](./platforms/ios/release.md)
     - [Development Apps](./platforms/ios/dev-apps.md)
+    - [Rendering Backends](./platforms/ios/ios-rendering-backends.md)
+      - [WebGPU](./platforms/ios/ios-webgpu.md)
   - [macOS](./platforms/macos/README.md)
   - [Linux](./platforms/linux/README.md)
     - [Using Docker](./platforms/linux/using-docker.md)
