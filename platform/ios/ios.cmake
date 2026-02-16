@@ -24,10 +24,12 @@ file(GLOB_RECURSE IOS_SDK_RESOURCE_FILES
 )
 
 
-if(NOT MLN_WITH_OPENGL)
-    list(FILTER IOS_SDK_SOURCE_FILES EXCLUDE REGEX ".*(OpenGL|gl).*")
-elseif(NOT MLN_WITH_METAL)
-    list(FILTER IOS_SDK_SOURCE_FILES EXCLUDE REGEX ".*Metal.*")
+if(MLN_WITH_METAL)
+    list(FILTER IOS_SDK_SOURCE_FILES EXCLUDE REGEX ".*(OpenGL|gl|WebGPU).*")
+elseif(MLN_WITH_WEBGPU)
+    list(FILTER IOS_SDK_SOURCE_FILES EXCLUDE REGEX ".*(OpenGL|gl|Metal).*")
+else()
+    list(FILTER IOS_SDK_SOURCE_FILES EXCLUDE REGEX ".*(Metal|WebGPU).*")
 endif()
 
 set(FRAMEWORK_BUNDLE_DIR ${CMAKE_CURRENT_BINARY_DIR}/Mapbox.bundle)
@@ -92,6 +94,8 @@ set_target_properties(ios-sdk-static PROPERTIES
 
 if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
+elseif(MLN_WITH_WEBGPU)
+    message(STATUS "Configuring WebGPU renderer backend")
 endif()
 
 target_include_directories(
@@ -105,15 +109,27 @@ include("${CMAKE_CURRENT_LIST_DIR}/vendor/calloutview.cmake")
 target_link_libraries(
     ios-sdk-static
         PUBLIC mbgl-core
-        PRIVATE mbgl-compiler-options mbgl-vendor-calloutview mbgl-vendor-metal-cpp mbgl-vendor-polylabel
+        PRIVATE mbgl-compiler-options mbgl-vendor-calloutview mbgl-vendor-polylabel
         "-framework CoreText"
         "-framework CoreImage"
         "-framework CoreGraphics"
         "-framework QuartzCore"
         "-framework UIKit"
-        "-framework MetalKit"
         "-framework ImageIO"
 )
+
+if(MLN_WITH_METAL)
+    target_link_libraries(ios-sdk-static PRIVATE mbgl-vendor-metal-cpp "-framework MetalKit")
+elseif(MLN_WITH_WEBGPU)
+    target_link_libraries(ios-sdk-static PRIVATE "-framework Metal")
+    if(MLN_WEBGPU_IMPL_DAWN AND TARGET mbgl-vendor-dawn)
+        target_compile_definitions(ios-sdk-static PRIVATE MLN_WEBGPU_IMPL_DAWN=1)
+        target_link_libraries(ios-sdk-static PRIVATE mbgl-vendor-dawn)
+    elseif(MLN_WEBGPU_IMPL_WGPU AND TARGET mbgl-vendor-wgpu)
+        target_compile_definitions(ios-sdk-static PRIVATE MLN_WEBGPU_IMPL_WGPU=1)
+        target_link_libraries(ios-sdk-static PRIVATE mbgl-vendor-wgpu)
+    endif()
+endif()
 
 target_link_options(ios-sdk-static INTERFACE -ObjC)
 

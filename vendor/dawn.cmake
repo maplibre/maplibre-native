@@ -57,18 +57,48 @@ set(DAWN_BUILD_SAMPLES OFF CACHE BOOL "Disable Dawn samples" FORCE)
 set(DAWN_BUILD_TESTS OFF CACHE BOOL "Disable Dawn tests" FORCE)
 set(DAWN_BUILD_BENCHMARKS OFF CACHE BOOL "Disable Dawn benchmarks" FORCE)
 set(DAWN_BUILD_NODE_BINDINGS OFF CACHE BOOL "Disable Dawn Node bindings" FORCE)
+set(TINT_BUILD_CMD_TOOLS OFF CACHE BOOL "Disable Tint command line tools" FORCE)
 set(DAWN_WERROR OFF CACHE BOOL "Disable -Werror in Dawn" FORCE)
+set(DAWN_BUILD_PROTOBUF OFF CACHE BOOL "Disable protobuf for cross-compilation" FORCE)
 
-if(NOT TARGET dawn::webgpu_dawn)
+# GLFW is not available on iOS (Dawn auto-detects it via UNIX AND NOT ANDROID)
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(DAWN_USE_GLFW OFF CACHE BOOL "Disable GLFW on iOS" FORCE)
+endif()
+
+# The Xcode generator does not properly handle $<TARGET_OBJECTS:...> in add_library(),
+# which breaks Dawn's bundle_libraries() macro. Disable the monolithic library for Xcode
+# and link individual Dawn component targets instead.
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+    set(DAWN_BUILD_MONOLITHIC_LIBRARY "OFF" CACHE STRING "" FORCE)
+endif()
+
+if(NOT TARGET dawn_native)
     if(APPLE)
         enable_language(OBJC OBJCXX)
     endif()
     add_subdirectory(${DAWN_DIR} ${DAWN_BUILD_DIR})
 endif()
 
+# Tint's MSL validator includes Metal headers which use GNU anonymous structs.
+# Tint compiles with -pedantic-errors, turning these into build errors.
+if(TARGET tint_lang_msl_validate)
+    target_compile_options(tint_lang_msl_validate PRIVATE
+        -Wno-gnu-anonymous-struct -Wno-nested-anon-types)
+endif()
+
 add_library(mbgl-vendor-dawn INTERFACE)
 
-target_link_libraries(mbgl-vendor-dawn INTERFACE dawn::webgpu_dawn)
+if(TARGET dawn::webgpu_dawn)
+    target_link_libraries(mbgl-vendor-dawn INTERFACE dawn::webgpu_dawn)
+else()
+    # Xcode path: link individual Dawn component targets.
+    # Use BUILD_INTERFACE to avoid export-set requirements.
+    target_link_libraries(mbgl-vendor-dawn INTERFACE
+        $<BUILD_INTERFACE:dawn_native>
+        $<BUILD_INTERFACE:dawn_proc>
+    )
+endif()
 
 target_include_directories(mbgl-vendor-dawn
     SYSTEM INTERFACE

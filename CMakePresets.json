@@ -33,6 +33,26 @@
       }
     },
     {
+      "name": "ios-webgpu-dawn",
+      "displayName": "iOS WebGPU (Dawn)",
+      "inherits": "ios",
+      "binaryDir": "${sourceDir}/build-ios-webgpu-dawn",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_DAWN": "ON"
+      }
+    },
+    {
+      "name": "ios-webgpu-wgpu",
+      "displayName": "iOS WebGPU (wgpu-native)",
+      "inherits": "ios",
+      "binaryDir": "${sourceDir}/build-ios-webgpu-wgpu",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON"
+      }
+    },
+    {
       "name": "macos",
       "hidden": true,
       "generator": "Ninja",

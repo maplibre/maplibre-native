@@ -1192,7 +1192,15 @@ if(TARGET mbgl-vendor-wgpu)
     list(APPEND EXPORT_TARGETS mbgl-vendor-wgpu)
 endif()
 
-export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
+# The Xcode generator with Dawn component targets (no monolithic library) breaks export()
+# because dawn_native/dawn_proc aren't in an export set. Skip export in that case.
+set(_can_export TRUE)
+if(TARGET mbgl-vendor-dawn AND NOT TARGET dawn::webgpu_dawn)
+    set(_can_export FALSE)
+endif()
+if(_can_export)
+    export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
+endif()
 
 if(MLN_WITH_VULKAN)
     include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
