@@ -953,7 +953,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
-                                             mlSegment.indexLength, // indexCount
+                                             static_cast<uint32_t>(mlSegment.indexLength), // indexCount
                                              instanceCount,         // instanceCount
                                              indexOffset,           // firstIndex
                                              baseVertex,            // baseVertex
