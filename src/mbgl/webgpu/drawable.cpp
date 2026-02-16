@@ -938,8 +938,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    // Draw indexed geometry - loop through segments (exactly like Metal does)
-    // int segmentCount = 0;
+    // Dawn on iOS disables baseVertex in drawIndexed(), so we adjust the vertex
+    // buffer offset per-segment instead.
+    std::size_t prevVertexOffset = 0;
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
@@ -950,16 +951,34 @@ void Drawable::draw(PaintParameters& parameters) const {
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
 
-            // Check if encoder is valid before drawing
             if (!renderPassEncoder) {
                 Log::Error(Event::Render, "Render pass encoder became null before draw!");
                 return;
             }
 
-            // Make sure we have valid indices
-            if (mlSegment.indexLength == 0) {
-                Log::Warning(Event::Render, "Skipping draw with 0 indices");
-                continue;
+            if (mlSegment.vertexOffset != prevVertexOffset) {
+                uint32_t rebindSlot = 0;
+                for (const auto& binding : uniqueBindings) {
+                    if (!binding.buffer || !binding.buffer->getBuffer()) {
+                        continue;
+                    }
+                    const uint64_t bufferSize = binding.buffer->getSizeInBytes();
+                    uint64_t adjustedOffset = binding.baseOffset;
+                    if (binding.stepMode == WGPUVertexStepMode_Vertex) {
+                        adjustedOffset += static_cast<uint64_t>(mlSegment.vertexOffset) * binding.stride;
+                    }
+                    if (adjustedOffset >= bufferSize) {
+                        rebindSlot++;
+                        continue;
+                    }
+                    wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder,
+                                                         rebindSlot,
+                                                         binding.buffer->getBuffer(),
+                                                         adjustedOffset,
+                                                         bufferSize - adjustedOffset);
+                    rebindSlot++;
+                }
+                prevVertexOffset = mlSegment.vertexOffset;
             }
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
