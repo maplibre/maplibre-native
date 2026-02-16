@@ -841,11 +841,19 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    wgpuRenderPassEncoderSetScissorRect(renderPassEncoder,
-                                        parameters.scissorRect.x,
-                                        parameters.scissorRect.y,
-                                        parameters.scissorRect.width,
-                                        parameters.scissorRect.height);
+    // Clamp scissor to the current render pass size (not the default renderable,
+    // which may be different during offscreen passes like hillshade prepare).
+    {
+        const auto& webgpuRP = static_cast<const webgpu::RenderPass&>(*parameters.renderPass);
+        const auto rtSize = webgpuRP.getDescriptor().renderable.getSize();
+        const uint32_t sx = static_cast<uint32_t>(parameters.scissorRect.x);
+        const uint32_t sy = static_cast<uint32_t>(parameters.scissorRect.y);
+        const uint32_t sw = (sx < rtSize.width) ? std::min(parameters.scissorRect.width, rtSize.width - sx) : 0;
+        const uint32_t sh = (sy < rtSize.height) ? std::min(parameters.scissorRect.height, rtSize.height - sy) : 0;
+        if (sw > 0 && sh > 0) {
+            wgpuRenderPassEncoderSetScissorRect(renderPassEncoder, sx, sy, sw, sh);
+        }
+    }
 
     uint32_t bufferSlot = 0;
     for (const auto& binding : uniqueBindings) {
