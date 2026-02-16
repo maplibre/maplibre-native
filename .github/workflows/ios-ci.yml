@@ -235,6 +235,46 @@ jobs:
       - name: Build mbgl-core
         run: cmake --build build-ios --target mbgl-core ios-sdk-static app
 
+  ios-build-webgpu-dawn:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Configure build with CMake
+        run: cmake --preset ios-webgpu-dawn
+
+      - name: Build mbgl-core and iOS SDK
+        run: cmake --build build-ios-webgpu-dawn --target mbgl-core ios-sdk-static
+
+  ios-build-webgpu-wgpu:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
+        with:
+          toolchain: stable
+
+      - name: Add iOS Rust target
+        run: rustup target add aarch64-apple-ios
+
+      - name: Configure build with CMake
+        run: cmake --preset ios-webgpu-wgpu
+
+      - name: Build mbgl-core and iOS SDK
+        run: cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
+
   ios-ci-result:
     runs-on: ubuntu-latest
     if: needs.pre_job.outputs.should_skip != 'true' && always()
@@ -242,7 +282,9 @@ jobs:
       - pre_job
       - ios-build
       - ios-build-cmake
+      - ios-build-webgpu-dawn
+      - ios-build-webgpu-wgpu
     steps:
       - name: Mark result as failed
-        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success'
+        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success' || needs.ios-build-webgpu-dawn.result != 'success' || needs.ios-build-webgpu-wgpu.result != 'success'
         run: exit 1
