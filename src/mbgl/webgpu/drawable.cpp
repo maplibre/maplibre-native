@@ -815,7 +815,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
-                                                             vertexLayouts.size(),
+                                                             static_cast<uint32_t>(vertexLayouts.size()),
                                                              colorMode,
                                                              depthMode,
                                                              stencilMode,
