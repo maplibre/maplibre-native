@@ -841,9 +841,11 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    // Clamp scissor to actual renderable size (may differ due to Vulkan extent clamping)
+    // Clamp scissor to the current render pass size (not the default renderable,
+    // which may be different during offscreen passes like hillshade prepare).
     {
-        const auto rtSize = parameters.backend.getDefaultRenderable().getSize();
+        const auto& webgpuRP = static_cast<const webgpu::RenderPass&>(*parameters.renderPass);
+        const auto rtSize = webgpuRP.getDescriptor().renderable.getSize();
         const uint32_t sx = static_cast<uint32_t>(parameters.scissorRect.x);
         const uint32_t sy = static_cast<uint32_t>(parameters.scissorRect.y);
         const uint32_t sw = (sx < rtSize.width) ? std::min(parameters.scissorRect.width, rtSize.width - sx) : 0;
