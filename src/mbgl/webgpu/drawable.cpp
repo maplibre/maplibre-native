@@ -935,7 +935,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
-            const uint32_t instanceCount = instanceAttributes ? static_cast<uint32_t>(instanceAttributes->getMaxCount()) : 1;
+            const uint32_t instanceCount = instanceAttributes ? static_cast<uint32_t>(instanceAttributes->getMaxCount())
+                                                              : 1;
             const uint32_t indexOffset = static_cast<uint32_t>(mlSegment.indexOffset);
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
@@ -954,10 +955,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
                                              static_cast<uint32_t>(mlSegment.indexLength), // indexCount
-                                             instanceCount,         // instanceCount
-                                             indexOffset,           // firstIndex
-                                             baseVertex,            // baseVertex
-                                             baseInstance);         // firstInstance
+                                             instanceCount,                                // instanceCount
+                                             indexOffset,                                  // firstIndex
+                                             baseVertex,                                   // baseVertex
+                                             baseInstance);                                // firstInstance
 
             context.renderingStats().numDrawCalls++;
         }
