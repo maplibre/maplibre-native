@@ -8,6 +8,7 @@
 #import "MBXEmbeddedMapViewController.h"
 #import "MBXOfflinePacksTableViewController.h"
 #import "MBXOrnamentsViewController.h"
+#import "MBXSnapshotTestViewController.h"
 #import "MBXState.h"
 #import "MBXStateManager.h"
 #import "MBXUserLocationAnnotationView.h"
@@ -133,6 +134,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
   MBXSettingsMiscellaneousOrnamentsPlacement,
   MBXSettingsMiscellaneousLatLngBoundsWithPadding,
   MBXSettingsMiscellaneousCycleTileLOD,
+  MBXSettingsMiscellaneousLiveSnapshot,
   MBXSettingsMiscellaneousPrintLogFile,
   MBXSettingsMiscellaneousDeleteLogFile
 };
@@ -521,7 +523,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [NSString
             stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
         @"View Route Simulation", @"Ornaments Placement", @"Lat Long bounds with padding",
-        [NSString stringWithFormat:@"Cycle tile LOD mode: %@", [self getTileLodModeName]]
+        [NSString stringWithFormat:@"Cycle tile LOD mode: %@", [self getTileLodModeName]],
+        @"Live Snapshot"
       ]];
 
       break;
@@ -870,6 +873,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneousCycleTileLOD:
           [self cycleTileLodMode];
           break;
+        case MBXSettingsMiscellaneousLiveSnapshot: {
+          MBXSnapshotTestViewController *vc = [[MBXSnapshotTestViewController alloc] init];
+          vc.sourceMapView = self.mapView;
+          [self.navigationController pushViewController:vc animated:YES];
+          break;
+        }
         default:
           NSAssert(NO, @"All miscellaneous setting rows should be implemented");
           break;

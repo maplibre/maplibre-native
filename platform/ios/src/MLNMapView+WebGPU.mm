@@ -22,6 +22,12 @@
 #endif
 
 #include <cassert>
+#include <cstring>
+
+#if MLN_WEBGPU_IMPL_WGPU
+#include <chrono>
+#include <thread>
+#endif
 
 @interface MLNWebGPUView : UIView
 @end
@@ -40,7 +46,7 @@ public:
     void bind() override {}
 
     void swap() override {
-        backend.presentSurface();
+        backend.markNeedsPresent();
     }
 
     const mbgl::webgpu::RendererBackend& getBackend() const override {
@@ -89,6 +95,7 @@ public:
 
     WGPUTexture currentTexture = nullptr;
     WGPUTextureView currentTextureView = nullptr;
+    bool needsPresent = false;
 
     mbgl::Size framebufferSize;
 
@@ -107,7 +114,15 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
     // Required when not using the monolithic Dawn library.
     dawnProcSetProcs(&dawn::native::GetProcs());
 
-    impl->instance = std::make_unique<dawn::native::Instance>();
+    WGPUInstanceFeatureName instanceFeatures[] = {WGPUInstanceFeatureName_TimedWaitAny};
+    WGPUInstanceLimits instanceLimits = WGPU_INSTANCE_LIMITS_INIT;
+    instanceLimits.timedWaitAnyMaxCount = 64;
+
+    WGPUInstanceDescriptor instanceDesc = WGPU_INSTANCE_DESCRIPTOR_INIT;
+    instanceDesc.requiredFeatureCount = 1;
+    instanceDesc.requiredFeatures = instanceFeatures;
+    instanceDesc.requiredLimits = &instanceLimits;
+    impl->instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
     wgpu::RequestAdapterOptions metalOpts = {};
     metalOpts.backendType = wgpu::BackendType::Metal;
@@ -276,7 +291,7 @@ void MLNMapViewWebGPUImpl::createView() {
 
     CAMetalLayer* metalLayer = (CAMetalLayer*)impl->webGPUView.layer;
     metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    metalLayer.framebufferOnly = YES;
+    metalLayer.framebufferOnly = NO;
 
     CGSize drawableSize = CGSizeMake(mapView.bounds.size.width * scaleFactor,
                                      mapView.bounds.size.height * scaleFactor);
@@ -391,7 +406,7 @@ void MLNMapViewWebGPUImpl::configureSurface(uint32_t width, uint32_t height) {
     config.device = static_cast<WGPUDevice>(impl->device);
 #endif
     config.format = impl->surfaceFormat;
-    config.usage = WGPUTextureUsage_RenderAttachment;
+    config.usage = WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc;
     config.alphaMode = selectedAlphaMode;
     config.width = width;
     config.height = height;
@@ -464,14 +479,7 @@ void* MLNMapViewWebGPUImpl::getCurrentTextureView() {
         return nullptr;
     }
 
-    if (impl->currentTextureView) {
-        wgpuTextureViewRelease(impl->currentTextureView);
-        impl->currentTextureView = nullptr;
-    }
-    if (impl->currentTexture) {
-        wgpuTextureRelease(impl->currentTexture);
-        impl->currentTexture = nullptr;
-    }
+    presentSurface();
 
     WGPUSurfaceTexture surfaceTexture = {};
     wgpuSurfaceGetCurrentTexture(impl->surface, &surfaceTexture);
@@ -514,14 +522,19 @@ void* MLNMapViewWebGPUImpl::getCurrentTextureView() {
     return impl->currentTextureView;
 }
 
+void MLNMapViewWebGPUImpl::markNeedsPresent() {
+    impl->needsPresent = true;
+}
+
 void MLNMapViewWebGPUImpl::presentSurface() {
-    if (!impl->surface || !impl->surfaceConfigured) {
+    if (!impl->surface || !impl->surfaceConfigured || !impl->needsPresent) {
         return;
     }
 
+    impl->needsPresent = false;
+
     if (impl->currentTextureView) {
         wgpuSurfacePresent(impl->surface);
-
         wgpuTextureViewRelease(impl->currentTextureView);
         impl->currentTextureView = nullptr;
     }
@@ -635,7 +648,151 @@ void MLNMapViewWebGPUImpl::layoutChanged() {
 }
 
 UIImage* MLNMapViewWebGPUImpl::snapshot() {
-    return nil; // TODO: implement snapshot
+    if (!impl->currentTexture || !impl->device || !impl->queue ||
+        impl->framebufferSize.width == 0 || impl->framebufferSize.height == 0) {
+        return nil;
+    }
+
+    const auto& fbSize = impl->framebufferSize;
+    constexpr uint32_t bytesPerPixel = 4;
+    constexpr uint32_t bytesPerRowAlignment = 256u;
+    const uint32_t rowStride = fbSize.width * bytesPerPixel;
+    const uint32_t alignedRowStride = ((rowStride + bytesPerRowAlignment - 1) / bytesPerRowAlignment) *
+                                      bytesPerRowAlignment;
+    const uint64_t alignedDataSize = static_cast<uint64_t>(alignedRowStride) * fbSize.height;
+
+#if MLN_WEBGPU_IMPL_DAWN
+    auto device = impl->device.Get();
+    auto queue = impl->queue.Get();
+#elif MLN_WEBGPU_IMPL_WGPU
+    auto device = static_cast<WGPUDevice>(impl->device);
+    auto queue = static_cast<WGPUQueue>(impl->queue);
+#endif
+
+#if MLN_WEBGPU_IMPL_DAWN
+    wgpuDeviceTick(device);
+#endif
+
+    WGPUBufferDescriptor bufferDesc = {};
+#if MLN_WEBGPU_IMPL_DAWN
+    WGPUStringView bufferLabel = {"Snapshot Buffer", strlen("Snapshot Buffer")};
+    bufferDesc.label = bufferLabel;
+#endif
+    bufferDesc.size = alignedDataSize;
+    bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
+
+    WGPUBuffer stagingBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+    if (!stagingBuffer) {
+        return nil;
+    }
+
+    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+    if (encoder) {
+        WGPUTexelCopyTextureInfo src = {};
+        src.texture = impl->currentTexture;
+        src.mipLevel = 0;
+        src.origin = {0, 0, 0};
+        src.aspect = WGPUTextureAspect_All;
+
+        WGPUTexelCopyBufferInfo dst = {};
+        dst.buffer = stagingBuffer;
+        dst.layout.offset = 0;
+        dst.layout.bytesPerRow = alignedRowStride;
+        dst.layout.rowsPerImage = fbSize.height;
+
+        WGPUExtent3D copySize = {fbSize.width, fbSize.height, 1};
+        wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &copySize);
+
+        WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, nullptr);
+        wgpuQueueSubmit(queue, 1, &commands);
+        wgpuCommandBufferRelease(commands);
+        wgpuCommandEncoderRelease(encoder);
+    }
+
+    struct MapContext {
+        WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
+        bool completed = false;
+    };
+    MapContext mapContext;
+
+    WGPUBufferMapCallbackInfo callbackInfo = {};
+    callbackInfo.callback =
+        [](WGPUMapAsyncStatus status, WGPUStringView, void* userdata1, void*) {
+            auto* ctx = static_cast<MapContext*>(userdata1);
+            ctx->status = status;
+            ctx->completed = true;
+        };
+    callbackInfo.userdata1 = &mapContext;
+
+#if MLN_WEBGPU_IMPL_DAWN
+    callbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
+    WGPUFuture future = wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, alignedDataSize, callbackInfo);
+
+    WGPUInstance instance = impl->instance->Get();
+    if (instance) {
+        WGPUFutureWaitInfo waitInfo = {};
+        waitInfo.future = future;
+        waitInfo.completed = false;
+        wgpuInstanceWaitAny(instance, 1, &waitInfo, UINT64_MAX);
+    }
+#elif MLN_WEBGPU_IMPL_WGPU
+    callbackInfo.mode = WGPUCallbackMode_AllowProcessEvents;
+    wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, alignedDataSize, callbackInfo);
+
+    for (int i = 0; i < 1000 && !mapContext.completed; ++i) {
+        wgpuDevicePoll(device, true, nullptr);
+        if (!mapContext.completed) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+#endif
+
+    UIImage* result = nil;
+
+    if (mapContext.status == WGPUMapAsyncStatus_Success) {
+        const auto* mappedData = static_cast<const uint8_t*>(
+            wgpuBufferGetConstMappedRange(stagingBuffer, 0, alignedDataSize));
+        if (mappedData) {
+            auto rgbaData = std::make_unique<uint8_t[]>(static_cast<size_t>(rowStride) * fbSize.height);
+            const bool swizzle = (impl->surfaceFormat == WGPUTextureFormat_BGRA8Unorm);
+            for (uint32_t row = 0; row < fbSize.height; ++row) {
+                const auto* src = mappedData + static_cast<size_t>(row) * alignedRowStride;
+                auto* dst = rgbaData.get() + static_cast<size_t>(row) * rowStride;
+                if (swizzle) {
+                    for (uint32_t x = 0; x < fbSize.width; ++x) {
+                        dst[x * 4 + 0] = src[x * 4 + 2];
+                        dst[x * 4 + 1] = src[x * 4 + 1];
+                        dst[x * 4 + 2] = src[x * 4 + 0];
+                        dst[x * 4 + 3] = src[x * 4 + 3];
+                    }
+                } else {
+                    std::memcpy(dst, src, rowStride);
+                }
+            }
+
+            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+            CGContextRef ctx = CGBitmapContextCreate(
+                rgbaData.get(), fbSize.width, fbSize.height, 8, rowStride,
+                colorSpace, kCGImageAlphaPremultipliedLast);
+            if (ctx) {
+                CGImageRef cgImage = CGBitmapContextCreateImage(ctx);
+                if (cgImage) {
+                    const CGFloat scale = impl->webGPUView.contentScaleFactor;
+                    result = [UIImage imageWithCGImage:cgImage scale:scale orientation:UIImageOrientationUp];
+                    CGImageRelease(cgImage);
+                }
+                CGContextRelease(ctx);
+            }
+            CGColorSpaceRelease(colorSpace);
+        }
+    }
+
+    wgpuBufferUnmap(stagingBuffer);
+    wgpuBufferRelease(stagingBuffer);
+
+    presentSurface();
+
+    return result;
 }
 
 MLNBackendResource* MLNMapViewWebGPUImpl::getObject() {

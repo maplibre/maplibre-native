@@ -21,6 +21,7 @@ class MLNMapViewWebGPUImpl final : public MLNMapViewImpl,
   void* getDepthStencilView() override;
   mbgl::Size getFramebufferSize() const override;
   void presentSurface();
+  void markNeedsPresent();
 
   // Implementation of MLNMapViewImpl
  public:
