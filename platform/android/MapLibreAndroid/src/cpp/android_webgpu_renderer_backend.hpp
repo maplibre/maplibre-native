@@ -33,6 +33,7 @@ public:
     mbgl::Size getFramebufferSize() const override;
 
     void presentSurface();
+    void markNeedsPresent();
 
 protected:
     void activate() override {}
