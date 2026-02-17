@@ -162,8 +162,7 @@ void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
 
 bool AndroidRendererFrontend::getTileCacheEnabled() const {
     if (!mapRenderer.isRendererInitialized()) {
-        Log::Warning(Event::Android,
-                     "getTileCacheEnabled called before renderer is initialized. Returning false.");
+        Log::Warning(Event::Android, "getTileCacheEnabled called before renderer is initialized. Returning false.");
         return false;
     }
     return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();

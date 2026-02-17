@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Test for verifying that calling setTileCacheEnabled and setPrefetchZoomDelta
  * before the renderer is initialized does not crash.
- * 
+ *
  * This test addresses issue where these methods caused a SIGSEGV crash when
  * called in getMapAsync callback before the style was fully loaded.
  */
