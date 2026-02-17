@@ -84,6 +84,10 @@ ActorRef<Renderer> MapRenderer::actor() const {
     return *rendererRef;
 }
 
+bool MapRenderer::isRendererInitialized() const {
+    return rendererRef != nullptr;
+}
+
 void MapRenderer::schedule(std::function<void()>&& scheduled) {
     MLN_TRACE_FUNC();
     try {

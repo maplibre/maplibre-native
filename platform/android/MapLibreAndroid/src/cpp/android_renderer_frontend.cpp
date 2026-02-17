@@ -151,14 +151,30 @@ const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
 }
 
 void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
+    if (!mapRenderer.isRendererInitialized()) {
+        Log::Warning(Event::Android,
+                     "setTileCacheEnabled called before renderer is initialized. "
+                     "This call will be ignored. Please ensure the style is fully loaded before calling this method.");
+        return;
+    }
     mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
 }
 
 bool AndroidRendererFrontend::getTileCacheEnabled() const {
+    if (!mapRenderer.isRendererInitialized()) {
+        Log::Warning(Event::Android,
+                     "getTileCacheEnabled called before renderer is initialized. Returning false.");
+        return false;
+    }
     return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
 }
 
 void AndroidRendererFrontend::reduceMemoryUse() {
+    if (!mapRenderer.isRendererInitialized()) {
+        Log::Warning(Event::Android,
+                     "reduceMemoryUse called before renderer is initialized. This call will be ignored.");
+        return;
+    }
     mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
 }
 
