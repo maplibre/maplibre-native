@@ -648,6 +648,11 @@ const std::string panGestureOp("panGesture");
 const std::string gfxProbeOp("probeGFX");
 const std::string gfxProbeStartOp("probeGFXStart");
 const std::string gfxProbeEndOp("probeGFXEnd");
+const std::string setTileLodMinRadiusOp("setTileLodMinRadius");
+const std::string setTileLodScaleOp("setTileLodScale");
+const std::string setTileLodPitchThresholdOp("setTileLodPitchThreshold");
+const std::string setTileLodZoomShiftOp("setTileLodZoomShift");
+const std::string setUseDistanceBasedTileLodOp("setUseDistanceBasedTileLod");
 } // namespace TestOperationNames
 
 using namespace TestOperationNames;
@@ -1319,6 +1324,50 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 metricProbe.memVertexBuffers.peak -= ctx.baselineGfxProbe.memVertexBuffers.peak;
                 metricProbe.memTextures.peak -= ctx.baselineGfxProbe.memTextures.peak;
                 ctx.getMetadata().metrics.gfx.insert({mark, metricProbe});
+                return true;
+            });
+            
+        } else if (operationArray[0].GetString() == setTileLodMinRadiusOp) {
+            // setTileLodMinRadius
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double minRadius = operationArray[1].GetDouble();
+            result.emplace_back([minRadius](TestContext& ctx) {
+                ctx.getMap().setTileLodMinRadius(minRadius);
+                return true;
+            });
+
+        } else if (operationArray[0].GetString() == setTileLodScaleOp) {
+            // setTileLodScale
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double scale = operationArray[1].GetDouble();
+            result.emplace_back([scale](TestContext& ctx) {
+                ctx.getMap().setTileLodScale(scale);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setTileLodPitchThresholdOp) {
+            // setTileLodPitchThreshold
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double pitchThreshold = operationArray[1].GetDouble();
+            result.emplace_back([pitchThreshold](TestContext& ctx) {
+                ctx.getMap().setTileLodPitchThreshold(pitchThreshold);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setTileLodZoomShiftOp) {
+            // setTileLodZoomShift
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double zoomShift = operationArray[1].GetDouble();
+            result.emplace_back([zoomShift](TestContext& ctx) {
+                ctx.getMap().setTileLodZoomShift(zoomShift);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setUseDistanceBasedTileLodOp) {
+            // setUseDistanceBasedTileLod
+            result.emplace_back([](TestContext& ctx) {
+                ctx.getMap().setUseDistanceBasedTileLod(true);
                 return true;
             });
         } else {

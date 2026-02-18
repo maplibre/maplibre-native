@@ -259,7 +259,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                 0.5; // 0: constant screen width, 1/2: constant screen area, 1: constant screen height
             double tileScale = std::pow(2.0, node.zoom);
             shouldSplitTile = distanceToTileMercator * tileScale < std::pow(cosPitchToTile, pitchExponent) *
-                                                                       cameraToCenterDistanceMercator *
+                                                                       cameraToCenterDistanceMercator /
                                                                        state.tileLodScale * nominalScale;
         } else {
             const vec3 distanceXyz = node.aabb.distanceXYZ(centerCoord);
