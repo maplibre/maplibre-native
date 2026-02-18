@@ -1326,7 +1326,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 ctx.getMetadata().metrics.gfx.insert({mark, metricProbe});
                 return true;
             });
-            
+
         } else if (operationArray[0].GetString() == setTileLodMinRadiusOp) {
             // setTileLodMinRadius
             assert(operationArray.Size() == 2u);
