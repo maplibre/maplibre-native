@@ -234,7 +234,8 @@ private:
 
     bool ensureUrlCacheIsValid(const std::string& url, const Response& response) {
         if (!url_cache.contains(url)) {
-            url_cache.emplace(url, URLCacheEntry{.modified = response.modified, .expires = response.expires, .etag = response.etag});
+            url_cache.emplace(
+                url, URLCacheEntry{.modified = response.modified, .expires = response.expires, .etag = response.etag});
             return true;
         }
 
@@ -530,8 +531,7 @@ private:
                 }
 
                 if (!ensureUrlCacheIsValid(url, response)) {
-                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                               error_cache_miss));
+                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other, error_cache_miss));
                     return;
                 }
 
