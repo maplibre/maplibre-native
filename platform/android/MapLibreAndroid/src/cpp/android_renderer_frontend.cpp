@@ -170,6 +170,8 @@ bool AndroidRendererFrontend::getTileCacheEnabled() const {
         if (pendingTileCacheEnabled.has_value()) {
             return pendingTileCacheEnabled.value();
         }
+        // Return true as the default value since tileCacheEnabled defaults to true
+        // in RenderOrchestrator (see render_orchestrator.hpp)
         Log::Warning(Event::Android, "getTileCacheEnabled called before renderer is initialized. Returning true.");
         return true;
     }

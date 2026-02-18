@@ -161,6 +161,6 @@ class EarlyInitializationTest {
         assertTrue("Test timed out waiting for style", styleLatch.await(30, TimeUnit.SECONDS))
         assertFalse("Exception was thrown", exceptionThrown)
         assertNotNull("Tile cache value should be readable after style load", tileCacheValueAfterStyleLoad)
-        assertEquals("Tile cache should be false as we set it", false, tileCacheValueAfterStyleLoad)
+        assertFalse("Tile cache should be false as we set it", tileCacheValueAfterStyleLoad!!)
     }
 }
