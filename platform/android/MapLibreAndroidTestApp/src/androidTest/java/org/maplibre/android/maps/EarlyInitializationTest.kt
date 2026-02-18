@@ -126,4 +126,41 @@ class EarlyInitializationTest {
         assertFalse("Exception was thrown when calling early initialization methods", exceptionThrown)
         assertNotNull("MapLibreMap should be initialized", mapLibreMap)
     }
+
+    /**
+     * Test that setTileCacheEnabled value set before style load is properly applied
+     * after the style finishes loading.
+     */
+    @Test
+    fun testTileCacheEnabledValueAppliedAfterStyleLoad() {
+        val styleLatch = CountDownLatch(1)
+        var tileCacheValueAfterStyleLoad: Boolean? = null
+        var exceptionThrown = false
+
+        rule.runOnUiThread {
+            mapView = rule.activity.findViewById(R.id.mapView)
+            mapView?.getMapAsync { map ->
+                try {
+                    // Set tileCacheEnabled to false before style is loaded
+                    // This value should be queued and applied once renderer is ready
+                    map.tileCacheEnabled = false
+
+                    // Wait for style to load and then check the value
+                    map.getStyle { _ ->
+                        tileCacheValueAfterStyleLoad = map.tileCacheEnabled
+                        styleLatch.countDown()
+                    }
+                } catch (e: Exception) {
+                    exceptionThrown = true
+                    styleLatch.countDown()
+                }
+            }
+        }
+
+        // Wait for the style to load and value to be checked
+        assertTrue("Test timed out waiting for style", styleLatch.await(30, TimeUnit.SECONDS))
+        assertFalse("Exception was thrown", exceptionThrown)
+        assertNotNull("Tile cache value should be readable after style load", tileCacheValueAfterStyleLoad)
+        assertEquals("Tile cache should be false as we set it", false, tileCacheValueAfterStyleLoad)
+    }
 }

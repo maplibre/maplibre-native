@@ -68,10 +68,15 @@ public:
     void reduceMemoryUse();
 
 private:
+    void applyPendingTileCacheEnabled();
+
     MapRenderer& mapRenderer;
     util::RunLoop* mapRunLoop;
     std::unique_ptr<util::AsyncTask> updateAsyncTask;
     std::shared_ptr<UpdateParameters> updateParams;
+
+    // Pending tile cache state - queued when set before renderer initialization
+    std::optional<bool> pendingTileCacheEnabled;
 };
 
 } // namespace android

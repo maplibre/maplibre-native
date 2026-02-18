@@ -116,6 +116,9 @@ void AndroidRendererFrontend::init(jni::JNIEnv& env, const jni::Object<MapRender
                     android::UniqueEnv _env = android::AttachEnv();
                     auto mapRendererRef = weakMapRenderer->get(*_env);
                     if (mapRendererRef) {
+                        // Apply any pending operations now that the renderer may be initialized
+                        self->applyPendingTileCacheEnabled();
+
                         self->mapRenderer.update(std::move(self->updateParams));
                         self->mapRenderer.requestRender(*_env, mapRendererRef);
                     }
@@ -152,9 +155,10 @@ const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
 
 void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
     if (!mapRenderer.isRendererInitialized()) {
-        Log::Warning(Event::Android,
-                     "setTileCacheEnabled called before renderer is initialized. "
-                     "This call will be ignored. Please ensure the style is fully loaded before calling this method.");
+        Log::Info(Event::Android,
+                  "setTileCacheEnabled called before renderer is initialized. "
+                  "The value will be applied once the renderer is ready.");
+        pendingTileCacheEnabled = enabled;
         return;
     }
     mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
@@ -162,8 +166,12 @@ void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
 
 bool AndroidRendererFrontend::getTileCacheEnabled() const {
     if (!mapRenderer.isRendererInitialized()) {
-        Log::Warning(Event::Android, "getTileCacheEnabled called before renderer is initialized. Returning false.");
-        return false;
+        // If we have a pending value, return that
+        if (pendingTileCacheEnabled.has_value()) {
+            return pendingTileCacheEnabled.value();
+        }
+        Log::Warning(Event::Android, "getTileCacheEnabled called before renderer is initialized. Returning true.");
+        return true;
     }
     return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
 }
@@ -175,6 +183,14 @@ void AndroidRendererFrontend::reduceMemoryUse() {
         return;
     }
     mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
+}
+
+void AndroidRendererFrontend::applyPendingTileCacheEnabled() {
+    if (pendingTileCacheEnabled.has_value() && mapRenderer.isRendererInitialized()) {
+        Log::Info(Event::Android, "Applying pending tileCacheEnabled value.");
+        mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, pendingTileCacheEnabled.value());
+        pendingTileCacheEnabled.reset();
+    }
 }
 
 std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::string& sourceID,
