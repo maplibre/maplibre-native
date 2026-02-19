@@ -186,11 +186,12 @@ public:
     /// A negative values typically improves performance but reduces quality.
     /// For instance, a value of -1 reduces the zoom level by 1 and this
     /// reduces the number of tiles by a factor of 4 for the same camera view.
-    /// - `UseDistanceBasedTileLod` uses an alternate tile cover algorithm based
-    /// on the distance from camera to tile. This algorithm causes tiles closer
-    /// to the camera to be rendered at higher LOD, in contrast with the default
-    /// algorithm, which renders the highest LOD at the center of the screen.
-    /// The distance based algorithm observes `TileLodScale` and
+    /// - `TileLodMode` selects the tile cover algorithm. The possible algorithms
+    /// are "default" and "distance". When "distance" is selected, the tile LOD is
+    /// based on the distance from camera to tile. This algorithm causes tiles
+    /// closer to the camera to be rendered at higher LOD, in contrast with the
+    /// default algorithm, which renders the highest LOD at the center of the
+    /// screen. The distance based algorithm observes `TileLodScale` and
     /// `TileLodPitchThreshold` and ignores `TileLodMinRadius` and
     /// `TileLodZoomShift`.
     void setTileLodMinRadius(double radius);
@@ -201,8 +202,8 @@ public:
     double getTileLodPitchThreshold() const;
     void setTileLodZoomShift(double shift);
     double getTileLodZoomShift() const;
-    void setUseDistanceBasedTileLod(bool val);
-    bool getUseDistanceBasedTileLod() const;
+    void setTileLodMode(TileLodMode mode);
+    TileLodMode getTileLodMode() const;
 
     ClientOptions getClientOptions() const;
 

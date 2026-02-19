@@ -138,7 +138,7 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
                                        .tileLodMinRadius = parameters.tileLodMinRadius,
                                        .tileLodScale = parameters.tileLodScale,
                                        .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
-                                       .useDistanceBasedTileLod = parameters.useDistanceBasedTileLod},
+                                       .tileLodMode = parameters.tileLodMode},
                                       static_cast<uint8_t>(transformState.getZoom()),
                                       zoomRange);
     for (auto tile : idealTiles) {

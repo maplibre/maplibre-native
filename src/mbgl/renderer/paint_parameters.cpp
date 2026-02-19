@@ -64,7 +64,7 @@ PaintParameters::PaintParameters(gfx::Context& context_,
                                  double tileLodMinRadius_,
                                  double tileLodScale_,
                                  double tileLodPitchThreshold_,
-                                 bool useDistanceBasedTileLod_,
+                                 TileLodMode tileLodMode_,
                                  const gfx::ScissorRect& scissorRect_)
     : context(context_),
       backend(backend_),
@@ -84,7 +84,7 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       tileLodMinRadius(tileLodMinRadius_),
       tileLodScale(tileLodScale_),
       tileLodPitchThreshold(tileLodPitchThreshold_),
-      useDistanceBasedTileLod(useDistanceBasedTileLod_),
+      tileLodMode(tileLodMode_),
       scissorRect(scissorRect_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
 

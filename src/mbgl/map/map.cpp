@@ -588,12 +588,12 @@ double Map::getTileLodZoomShift() const {
     return impl->tileLodZoomShift;
 }
 
-void Map::setUseDistanceBasedTileLod(bool val) {
-    impl->useDistanceBasedTileLod = val;
+void Map::setTileLodMode(TileLodMode mode) {
+    impl->tileLodMode = mode;
 }
 
-bool Map::getUseDistanceBasedTileLod() const {
-    return impl->useDistanceBasedTileLod;
+TileLodMode Map::getTileLodMode() const {
+    return impl->tileLodMode;
 }
 
 ClientOptions Map::getClientOptions() const {

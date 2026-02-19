@@ -71,5 +71,5 @@ extern const std::string setTileLodMinRadiusOp;
 extern const std::string setTileLodScaleOp;
 extern const std::string setTileLodPitchThresholdOp;
 extern const std::string setTileLodZoomShiftOp;
-extern const std::string setUseDistanceBasedTileLodOp;
+extern const std::string setTileLodModeOp;
 } // namespace TestOperationNames

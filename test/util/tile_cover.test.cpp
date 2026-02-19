@@ -49,7 +49,7 @@ TEST(TileCover, Pitch) {
               util::tileCover({transform.getState()}, 2, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 2}, {2, 2, 2}, {2, 1, 1}, {2, 2, 1}}),
               util::tileCover(params, 2, zoomRange));
 }
@@ -72,7 +72,7 @@ TEST(TileCover, PitchIssue15442) {
               util::tileCover({transform.getState()}, 2, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{
                   {2, 2, 1}, {2, 3, 1}, {2, 2, 0}, {2, 3, 0}, {2, 1, {2, 0, 0}}, {2, 1, {2, 1, 0}}}),
               util::tileCover(params, 2, zoomRange));
@@ -98,7 +98,7 @@ TEST(TileCover, HighPitch) {
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{2, 1, 1}, {2, 2, 1}, {2, 1, 2}, {2, 2, 2}, {2, 1, 0}, {2, 2, 0}, {2, 3, 0}}),
         util::tileCover(params, 2, zoomRange));
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 1},
                                              {2, 2, 1},
                                              {3, 3, 4},
@@ -129,7 +129,7 @@ TEST(TileCover, PitchOverAllowedByContentInsets) {
               util::tileCover({transform.getState()}, 3, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{3, 3, 4}, {3, 3, 3}, {3, 4, 4}, {3, 4, 3}}),
               util::tileCover(params, 3, zoomRange));
 }
@@ -202,7 +202,7 @@ TEST(TileCover, CoordinatesAreUnwrapped) {
         util::tileCover({transform.getState()}, 1, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{1, 0, {1, 1, 0}}, {1, 1, {1, 0, 0}}, {1, 0, {1, 1, 1}}, {1, 1, {1, 0, 1}}}),
         util::tileCover(params, 1, zoomRange));
@@ -225,7 +225,7 @@ TEST(TileCover, DifferentOverscaledZ) {
         util::tileCover({transform.getState()}, 2, zoomRange, 3));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{3, 0, {2, 1, 1}}, {3, 0, {2, 2, 1}}, {3, 0, {2, 1, 2}}, {3, 0, {2, 2, 2}}}),
         util::tileCover(params, 2, zoomRange, 3));
@@ -252,7 +252,7 @@ TEST(TileCover, DifferentOverscaledZWithPitch) {
               util::tileCover({transform.getState()}, 3, zoomRange, 5));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{5, 0, {3, 3, 3}},
                                              {5, 0, {3, 4, 3}},
                                              {5, 0, {3, 3, 2}},
@@ -278,7 +278,7 @@ TEST(TileCover, DifferentOverscaledZWrapped) {
         util::tileCover({transform.getState()}, 1, zoomRange, 2));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ(
         (std::vector<OverscaledTileID>{{2, 0, {1, 1, 0}}, {2, 1, {1, 0, 0}}, {2, 0, {1, 1, 1}}, {2, 1, {1, 0, 1}}}),
         util::tileCover(params, 1, zoomRange, 2));
@@ -299,7 +299,7 @@ TEST(TileCover, FlippedY) {
               util::tileCover({transform.getState()}, 1, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {1, 1, 1}}),
               util::tileCover(params, 1, zoomRange));
 }
@@ -321,7 +321,7 @@ TEST(TileCover, FlippedYPitch) {
               util::tileCover({transform.getState()}, 2, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{2, 1, 2}, {2, 2, 2}, {2, 1, 1}, {2, 2, 1}}),
               util::tileCover(params, 2, zoomRange));
 }
@@ -341,7 +341,7 @@ TEST(TileCover, FlippedYHelsinki) {
               util::tileCover({transform.getState()}, 11, zoomRange));
 
     util::TileCoverParameters params{transform.getState()};
-    params.useDistanceBasedTileLod = true;
+    params.tileLodMode = TileLodMode::Distance;
     EXPECT_EQ((std::vector<OverscaledTileID>{{11, 1165, 592}, {11, 1166, 592}, {11, 1165, 593}, {11, 1166, 593}}),
               util::tileCover(params, 11, zoomRange));
 }

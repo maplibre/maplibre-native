@@ -192,7 +192,8 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double worldSize = Projection::worldSize(transform.getScale());
     const bool allowVariableZoom = transform.getPitch() > state.tileLodPitchThreshold;
     const uint8_t minZoom = allowVariableZoom ? zoomRange.min : z;
-    const uint8_t maxZoom = (state.useDistanceBasedTileLod && allowVariableZoom) ? zoomRange.max : z;
+    const uint8_t maxZoom = ((state.tileLodMode == TileLodMode::Distance) && allowVariableZoom) ? zoomRange.max
+                                                                                                     : z;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
@@ -251,7 +252,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         }
 
         bool shouldSplitTile;
-        if (state.useDistanceBasedTileLod) {
+        if (state.tileLodMode == TileLodMode::Distance) {
             const vec3 camToTileMercator = vec3Scale(node.aabb.distanceXYZ(cameraCoord), 1.0 / worldSize);
             const double distanceToTileMercator = vec3Length(camToTileMercator);
             const double cosPitchToTile = std::max(0.0, camToTileMercator[2] / distanceToTileMercator);
@@ -286,7 +287,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             if (node.fullyVisible || frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate) {
                 const OverscaledTileID id = {
                     node.zoom == maxZoom ? overscaledZoom : node.zoom, node.wrap, node.zoom, node.x, node.y};
-                vec3 coordToLoadFirst = state.useDistanceBasedTileLod ? cameraCoord : centerCoord;
+                vec3 coordToLoadFirst = (state.tileLodMode == TileLodMode::Distance) ? cameraCoord : centerCoord;
                 const double dx = node.wrap * numTiles + node.x + 0.5 - coordToLoadFirst[0];
                 const double dy = node.y + 0.5 - coordToLoadFirst[1];
 

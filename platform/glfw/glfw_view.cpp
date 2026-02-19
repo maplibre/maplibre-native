@@ -100,7 +100,7 @@ public:
 
 namespace {
 
-enum class TileLodMode {
+enum class TileLodProfile {
     Default,       // Default Tile LOD parameters
     NoLod,         // Disable LOD
     Reduced,       // Reduce LOD away from camera
@@ -108,63 +108,63 @@ enum class TileLodMode {
     DistanceBased, // Use distance-based algorithm
 };
 
-constexpr TileLodMode nextTileLodMode(TileLodMode current) {
+constexpr TileLodProfile nextTileLodProfile(TileLodProfile current) {
     switch (current) {
-        case TileLodMode::Default:
-            return TileLodMode::NoLod;
-        case TileLodMode::NoLod:
-            return TileLodMode::Reduced;
-        case TileLodMode::Reduced:
-            return TileLodMode::Aggressive;
-        case TileLodMode::Aggressive:
-            return TileLodMode::DistanceBased;
-        case TileLodMode::DistanceBased:
-            return TileLodMode::Default;
+        case TileLodProfile::Default:
+            return TileLodProfile::NoLod;
+        case TileLodProfile::NoLod:
+            return TileLodProfile::Reduced;
+        case TileLodProfile::Reduced:
+            return TileLodProfile::Aggressive;
+        case TileLodProfile::Aggressive:
+            return TileLodProfile::DistanceBased;
+        case TileLodProfile::DistanceBased:
+            return TileLodProfile::Default;
         default:
-            return TileLodMode::Default;
+            return TileLodProfile::Default;
     }
 }
 
-void cycleTileLodMode(mbgl::Map &map) {
-    // TileLodMode::Default parameters
+void cycleTileLodProfile(mbgl::Map &map) {
+    // TileLodProfile::Default parameters
     static const auto defaultRadius = map.getTileLodMinRadius();
     static const auto defaultScale = map.getTileLodScale();
     static const auto defaultTilePitchThreshold = map.getTileLodPitchThreshold();
-    static const auto defaultUseDistanceBasedTileLod = map.getUseDistanceBasedTileLod();
+    static const auto defaultTileLodMode = map.getTileLodMode();
 
-    static TileLodMode mode = TileLodMode::Default;
-    mode = nextTileLodMode(mode);
+    static TileLodProfile profile = TileLodProfile::Default;
+    profile = nextTileLodProfile(profile);
 
-    switch (mode) {
-        case TileLodMode::Default:
+    switch (profile) {
+        case TileLodProfile::Default:
             map.setTileLodMinRadius(defaultRadius);
             map.setTileLodScale(defaultScale);
             map.setTileLodPitchThreshold(defaultTilePitchThreshold);
-            map.setUseDistanceBasedTileLod(defaultUseDistanceBasedTileLod);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
+            map.setTileLodMode(defaultTileLodMode);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD profile: default");
             break;
-        case TileLodMode::NoLod:
+        case TileLodProfile::NoLod:
             // When LOD is off we set a maximum PitchThreshold
             map.setTileLodPitchThreshold(std::numbers::pi);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: disabled");
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD profile: disabled");
             break;
-        case TileLodMode::Reduced:
+        case TileLodProfile::Reduced:
             map.setTileLodMinRadius(2);
             map.setTileLodScale(1.5);
             map.setTileLodPitchThreshold(std::numbers::pi / 4);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: reduced");
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD profile: reduced");
             break;
-        case TileLodMode::Aggressive:
+        case TileLodProfile::Aggressive:
             map.setTileLodMinRadius(1);
             map.setTileLodScale(2);
             map.setTileLodPitchThreshold(0);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: aggressive");
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD profile: aggressive");
             break;
-        case TileLodMode::DistanceBased:
+        case TileLodProfile::DistanceBased:
             map.setTileLodScale(1);
             map.setTileLodPitchThreshold(0);
-            map.setUseDistanceBasedTileLod(true);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: distance-based");
+            map.setTileLodMode(mbgl::TileLodMode::Distance);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD profile: distance-based");
             break;
     }
     map.triggerRepaint();
@@ -662,7 +662,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->invalidate();
             } break;
             case GLFW_KEY_F6: {
-                cycleTileLodMode(*view->map);
+                cycleTileLodProfile(*view->map);
             } break;
             case GLFW_KEY_F7: {
                 tileLodZoomShift(*view->map, false);

@@ -215,7 +215,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         updateParameters->tileLodMinRadius,
         updateParameters->tileLodScale,
         updateParameters->tileLodPitchThreshold,
-        updateParameters->useDistanceBasedTileLod,
+        updateParameters->tileLodMode,
         scissorRect,
     };
 

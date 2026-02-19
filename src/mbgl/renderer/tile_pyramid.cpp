@@ -114,7 +114,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                                                      .tileLodMinRadius = parameters.tileLodMinRadius,
                                                      .tileLodScale = parameters.tileLodScale,
                                                      .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
-                                                     .useDistanceBasedTileLod = parameters.useDistanceBasedTileLod};
+                                                     .tileLodMode = parameters.tileLodMode};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
@@ -177,8 +177,9 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // levels. Child tiles are used from the cache, but not created.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
-        int32_t maxZoom = parameters.useDistanceBasedTileLod ? zoomRange.max
-                                                             : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
+                              ? zoomRange.max
+                              : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
         tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {

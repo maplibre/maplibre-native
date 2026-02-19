@@ -4,7 +4,7 @@
     "test": {
       "maxPitch": 85,
       "operations": [
-          ["setUseDistanceBasedTileLod"],
+          ["setTileLodMode", "distance"],
           ["wait"]
       ]
     }

@@ -612,6 +612,15 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     return metadata;
 }
 
+mbgl::TileLodMode parseTileLodMode(const std::string& mode_str) {
+    if (mode_str == "distance") {
+        return mbgl::TileLodMode::Distance;
+    } else if (mode_str == "default") {
+        return mbgl::TileLodMode::Default;
+    }
+    return mbgl::TileLodMode::Default;
+}
+
 namespace TestOperationNames {
 const std::string waitOp("wait");
 const std::string sleepOp("sleep");
@@ -652,7 +661,7 @@ const std::string setTileLodMinRadiusOp("setTileLodMinRadius");
 const std::string setTileLodScaleOp("setTileLodScale");
 const std::string setTileLodPitchThresholdOp("setTileLodPitchThreshold");
 const std::string setTileLodZoomShiftOp("setTileLodZoomShift");
-const std::string setUseDistanceBasedTileLodOp("setUseDistanceBasedTileLod");
+const std::string setTileLodModeOp("setTileLodMode");
 } // namespace TestOperationNames
 
 using namespace TestOperationNames;
@@ -1364,10 +1373,13 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 ctx.getMap().setTileLodZoomShift(zoomShift);
                 return true;
             });
-        } else if (operationArray[0].GetString() == setUseDistanceBasedTileLodOp) {
-            // setUseDistanceBasedTileLod
-            result.emplace_back([](TestContext& ctx) {
-                ctx.getMap().setUseDistanceBasedTileLod(true);
+        } else if (operationArray[0].GetString() == setTileLodModeOp) {
+            // setTileLodMode
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsString());
+            mbgl::TileLodMode mode = parseTileLodMode(operationArray[1].GetString());
+            result.emplace_back([mode](TestContext& ctx) {
+                ctx.getMap().setTileLodMode(mode);
                 return true;
             });
         } else {

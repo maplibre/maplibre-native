@@ -125,7 +125,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                             .tileLodMinRadius = updateParameters->tileLodMinRadius,
                                             .tileLodScale = updateParameters->tileLodScale,
                                             .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
-                                            .useDistanceBasedTileLod = updateParameters->useDistanceBasedTileLod},
+                                            .tileLodMode = updateParameters->tileLodMode},
                                            zoom,
                                            zoomRange);
 

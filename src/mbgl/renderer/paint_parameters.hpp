@@ -62,7 +62,7 @@ public:
                     double tileLodMinRadius,
                     double tileLodScale,
                     double tileLodPitchThreshold,
-                    bool useDistanceBasedTileLod,
+                    TileLodMode tileLodMode,
                     const gfx::ScissorRect&);
     ~PaintParameters();
 
@@ -140,7 +140,7 @@ public:
     double tileLodMinRadius;
     double tileLodScale;
     double tileLodPitchThreshold;
-    bool useDistanceBasedTileLod;
+    TileLodMode tileLodMode;
 
     gfx::ScissorRect scissorRect;
 };

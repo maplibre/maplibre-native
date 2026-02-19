@@ -136,7 +136,7 @@ void Map::Impl::onUpdate() {
                                .tileLodScale = tileLodScale,
                                .tileLodPitchThreshold = tileLodPitchThreshold,
                                .tileLodZoomShift = tileLodZoomShift,
-                               .useDistanceBasedTileLod = useDistanceBasedTileLod};
+                               .tileLodMode = tileLodMode};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
