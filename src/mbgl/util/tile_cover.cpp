@@ -192,8 +192,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double worldSize = Projection::worldSize(transform.getScale());
     const bool allowVariableZoom = transform.getPitch() > state.tileLodPitchThreshold;
     const uint8_t minZoom = allowVariableZoom ? zoomRange.min : z;
-    const uint8_t maxZoom = ((state.tileLodMode == TileLodMode::Distance) && allowVariableZoom) ? zoomRange.max
-                                                                                                     : z;
+    const uint8_t maxZoom = ((state.tileLodMode == TileLodMode::Distance) && allowVariableZoom) ? zoomRange.max : z;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
