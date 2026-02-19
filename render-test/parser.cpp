@@ -614,9 +614,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
 }
 
 namespace mbgl {
-MBGL_DEFINE_ENUM(TileLodMode,
-                 {{TileLodMode::Default, "default"},
-                  {TileLodMode::Distance, "distance"}});
+MBGL_DEFINE_ENUM(TileLodMode, {{TileLodMode::Default, "default"}, {TileLodMode::Distance, "distance"}});
 }
 
 namespace TestOperationNames {
