@@ -25,6 +25,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/compression.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/enum.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/run_loop.hpp>
@@ -612,13 +613,10 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     return metadata;
 }
 
-mbgl::TileLodMode parseTileLodMode(const std::string& mode_str) {
-    if (mode_str == "distance") {
-        return mbgl::TileLodMode::Distance;
-    } else if (mode_str == "default") {
-        return mbgl::TileLodMode::Default;
-    }
-    return mbgl::TileLodMode::Default;
+namespace mbgl {
+MBGL_DEFINE_ENUM(TileLodMode,
+                 {{TileLodMode::Default, "default"},
+                  {TileLodMode::Distance, "distance"}});
 }
 
 namespace TestOperationNames {
@@ -1377,7 +1375,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             // setTileLodMode
             assert(operationArray.Size() == 2u);
             assert(operationArray[1].IsString());
-            mbgl::TileLodMode mode = parseTileLodMode(operationArray[1].GetString());
+            mbgl::TileLodMode mode = mbgl::Enum<mbgl::TileLodMode>::toEnum(operationArray[1].GetString()).value();
             result.emplace_back([mode](TestContext& ctx) {
                 ctx.getMap().setTileLodMode(mode);
                 return true;
