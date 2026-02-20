@@ -64,11 +64,11 @@ jobs:
 
       - name: Remove stale git lock files
         run: find .git -type f -name "*.lock" -delete 2>/dev/null || true
-        working-directory: ${{ github.workspace }}
+        working-directory: .
 
       - name: Update submodules
         run: git submodule update --init --recursive
-        working-directory: ${{ github.workspace }}
+        working-directory: .
 
       - name: Cache Bazel
         uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
