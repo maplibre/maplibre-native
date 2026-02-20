@@ -50,6 +50,7 @@
     <string name="activity_query_source_features">Query source features</string>
     <string name="activity_symbol_layer">Symbols</string>
     <string name="activity_add_sprite">Add Custom Sprite</string>
+    <string name="activity_plugin_map">Simple Map with Plugin</string>
     <string name="activity_simple_map">Simple Map</string>
     <string name="activity_map_change">Map Change Events</string>
     <string name="activity_map_visibility">Visibility Map</string>

@@ -93,6 +93,9 @@ objc_library(
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         ],
     }),
+    hdrs = [
+    "//platform/darwin:darwin_plugin_hdrs"
+    ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
         "-fmodules",
@@ -221,6 +224,16 @@ objc_library(
     ],
 )
 
+
+cc_library(
+    name = "hpp_headers",
+    hdrs = [
+        "//:src/mbgl/plugin/plugin_manager.hpp",
+    ],
+    includes = ["."],   # public include prefix
+    visibility = ["//visibility:public"],
+)
+
 # sdk for the dynamic target. Lacking the resources bundle since for dynamic
 # they are in the main package.
 objc_library(
@@ -239,6 +252,7 @@ objc_library(
     deps = [
         ":objc-sdk",
         ":objcpp-sdk",
+        ":hpp_headers",
     ],
 )
 
@@ -271,6 +285,10 @@ objc_library(
         "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
+        "//platform/darwin:app/StyleFilterExample.h",
+        "//platform/darwin:app/StyleFilterExample.mm",
+        "//platform/darwin:app/PluginLayerExampleMetalRenderingCPP.hpp",
+        "//platform/darwin:app/PluginLayerExampleMetalRenderingCPP.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
         "//platform/ios:ios_app_srcs",

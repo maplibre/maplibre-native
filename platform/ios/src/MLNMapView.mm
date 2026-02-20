@@ -30,9 +30,11 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/plugin/plugin_map_layer.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -82,6 +84,9 @@
 #import "MLNPluginLayer.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
+#include "MLNStyleFilter.h"
+#include "MLNStyleFilter_Private.h"
+#import "MLNCPPPlugins.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -242,6 +247,22 @@ int processIsTranslated() {
 }
 
 #endif
+
+
+//
+
+extern "C" {
+__attribute__((used))
+__attribute__((visibility("default")))
+void _force_link_MapLayerTypeObjC() {
+    (void)sizeof(mbgl::plugin::LayerProperty);
+    (void)sizeof(mbgl::plugin::MapLayerType);
+    (void)sizeof(mbgl::plugin::DrawingContext);
+    (void)sizeof(mbgl::plugin::RenderingContext);
+    (void)sizeof(mbgl::plugin::MapLayer);
+}
+}
+
 
 class MLNAnnotationContext;
 
@@ -451,6 +472,9 @@ public:
 
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
+
+// Style Filters
+@property NSMutableArray *styleFilters;
 
 @end
 
@@ -7729,6 +7753,9 @@ static void *windowScreenContext = &windowScreenContext;
  */
 -(void)addPluginLayerType:(Class)pluginLayerClass {
 
+
+    
+    
     auto layerManager = mbgl::LayerManager::get();
     auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
 
@@ -7860,6 +7887,42 @@ static void *windowScreenContext = &windowScreenContext;
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
 }
+
+/**
+ Adds a style filter to the map view
+ */
+-(void)addStyleFilter:(MLNStyleFilter *)styleFilter {
+    
+    if (!self.styleFilters) {
+        self.styleFilters = [NSMutableArray array];
+    }
+    [self.styleFilters addObject:styleFilter];
+    
+    auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
+    coreStyleFilter->_filterStyleFunction = [styleFilter](const std::string &filterData) -> const std::string {
+        
+       
+        std::string tempResult;
+
+        @autoreleasepool {
+            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)filterData.data()
+                                                      length:filterData.size()
+                                                freeWhenDone:NO];
+            NSData *filteredData = [styleFilter filterData:sourceData];
+            tempResult = std::string((const char*)[filteredData bytes], [filteredData length]);
+
+        }
+        return tempResult;
+        
+    };
+    
+    // Set the ivar
+    [styleFilter setFilter:coreStyleFilter];
+    
+    _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
+    
+}
+
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
 {

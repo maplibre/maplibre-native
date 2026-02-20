@@ -978,6 +978,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_map_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_style_preprocessor.cpp
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
