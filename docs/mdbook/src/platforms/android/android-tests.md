@@ -69,6 +69,17 @@ Now download the `actual.png` in `metrics/integration/render-tests/background-co
 
 Of we don't want to commit this change. But know you can add and debug (Android) render tests.
 
+### Adding Alternate Expected Images
+
+You can add alternate expected images by coping the `actual.png` to a file that starts with `expected`. You can use the following command:
+
+```
+render_test_name=tile-lod/zoom-shift
+adb exec-out run-as org.maplibre.render_test_runner cat files/metrics/integration/render-tests/$render_test_name/actual.png > metrics/integration/render-tests/$render_test_name/expected-android.png
+```
+
+Which will pull `tile-lod/zoom-shift/actual.png` and save it as `tile-lod/zoom-shift/expected-android.png`.
+
 ## Instrumentation Tests
 
 To run the instrumentation tests, choose the "Instrumentation Tests" run configuration.
