@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-eb425fd8.js";
+            window.path_to_searchindex_js = "searchindex-245f40a6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-fd1359ca.js"></script>
@@ -727,8 +727,8 @@ xed platform/macos/MapLibre.xcodeproj
 <pre><code class="language-sh">cmake --preset macos-metal
 </code></pre>
 <p>Build and run the render tests:</p>
-<pre><code class="language-sh">cmake --build build-macos --target mbgl-render-test-runner
-build-macos/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
+<pre><code class="language-sh">cmake --build build-macos-metal --target mbgl-render-test-runner
+build-macos-metal/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
 </code></pre>
 <p>Build and run the C++ Tests:</p>
 <pre><code class="language-sh">cmake --build build-macos-metal --target mbgl-test-runner
