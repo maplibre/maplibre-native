@@ -63,7 +63,7 @@ cmake --preset macos-metal
 Build and run the render tests:
 
 ```sh
-cmake --build build-macos --target mbgl-render-test-runner
+cmake --build build-macos-metal --target mbgl-render-test-runner
 build-macos/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
 ```
 
