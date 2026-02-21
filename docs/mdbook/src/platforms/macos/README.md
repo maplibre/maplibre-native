@@ -64,7 +64,7 @@ Build and run the render tests:
 
 ```sh
 cmake --build build-macos-metal --target mbgl-render-test-runner
-build-macos/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
+build-macos-metal/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
 ```
 
 Build and run the C++ Tests:
