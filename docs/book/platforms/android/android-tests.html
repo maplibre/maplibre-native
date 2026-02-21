@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-cc313397.js";
+            window.path_to_searchindex_js = "../../searchindex-eb425fd8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-fd1359ca.js"></script>
@@ -250,6 +250,12 @@ adb shell "run-as org.maplibre.render_test_runner unzip -o /data/local/tmp/data.
 <p>Now download the <code>actual.png</code> in <code>metrics/integration/render-tests/background-color/literal</code> with the Device Explorer. Replace the corresponding <code>expected.png</code> on your local file system. Upload the new render test data again and run the test app once more.</p>
 <img width="800" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/04734c6a-9cf1-489a-b9bb-8d857581261c">
 <p>Of we don’t want to commit this change. But know you can add and debug (Android) render tests.</p>
+<h3 id="adding-alternate-expected-images"><a class="header" href="#adding-alternate-expected-images">Adding Alternate Expected Images</a></h3>
+<p>You can add alternate expected images by coping the <code>actual.png</code> to a file that starts with <code>expected</code>. You can use the following command:</p>
+<pre><code>render_test_name=tile-lod/zoom-shift
+adb exec-out run-as org.maplibre.render_test_runner cat files/metrics/integration/render-tests/$render_test_name/actual.png &gt; metrics/integration/render-tests/$render_test_name/expected-android.png
+</code></pre>
+<p>Which will pull <code>tile-lod/zoom-shift/actual.png</code> and save it as <code>tile-lod/zoom-shift/expected-android.png</code>.</p>
 <h2 id="instrumentation-tests"><a class="header" href="#instrumentation-tests">Instrumentation Tests</a></h2>
 <p>To run the instrumentation tests, choose the “Instrumentation Tests” run configuration.</p>
 <p>Your device needs remain unlocked for the duration of the tests.</p>
