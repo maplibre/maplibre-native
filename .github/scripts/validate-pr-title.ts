@@ -36,12 +36,12 @@ export function validateTitle({
 }
 
 if (import.meta.main) {
-  if (!process.env.PR_TITLE) {
+  if (process.env.PR_TITLE === undefined) {
     console.log('::error::PR_TITLE environment variable is not set');
     process.exit(1);
   }
 
-  if (!process.env.PR_LABELS) {
+  if (process.env.PR_LABELS === undefined) {
     console.log('::error::PR_LABELS environment variable is not set');
     process.exit(1);
   }

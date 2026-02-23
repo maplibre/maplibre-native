@@ -17,6 +17,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("SimpleMap") {
                     SimpleMap().edgesIgnoringSafeArea(.all)
                 }
+                NavigationLink("Change Camera Pitch & Roll") {
+                    CameraSliderExample()
+                }
                 #if MLN_RENDER_BACKEND_METAL
                     NavigationLink("CustomStyleLayer (Metal)") {
                         CustomStyleLayerExample().edgesIgnoringSafeArea(.all)

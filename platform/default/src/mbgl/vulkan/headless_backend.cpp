@@ -91,7 +91,7 @@ PremultipliedImage HeadlessBackend::readStillImage() {
     texture->setSize(size);
 
     contextImpl.waitFrame();
-    texture->copyImage(resourceImpl.getAcquiredImage());
+    texture->copyImage(resourceImpl.getAcquiredImage(), size);
 
     return std::move(*texture->readImage());
 }

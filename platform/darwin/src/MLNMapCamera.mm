@@ -94,6 +94,7 @@
         _altitude = altitude;
         _pitch = pitch;
         _heading = heading;
+        _roll = 0;
     }
     return self;
 }
@@ -108,6 +109,7 @@
         _altitude = [coder decodeDoubleForKey:@"altitude"];
         _pitch = [coder decodeDoubleForKey:@"pitch"];
         _heading = [coder decodeDoubleForKey:@"heading"];
+        _roll = [coder decodeDoubleForKey:@"roll"];
     }
     return self;
 }
@@ -119,14 +121,17 @@
     [coder encodeDouble:_altitude forKey:@"altitude"];
     [coder encodeDouble:_pitch forKey:@"pitch"];
     [coder encodeDouble:_heading forKey:@"heading"];
+    [coder encodeDouble:_roll forKey:@"roll"];
 }
 
 - (id)copyWithZone:(nullable NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initWithCenterCoordinate:_centerCoordinate
-                                                              altitude:_altitude
-                                                                 pitch:_pitch
-                                                               heading:_heading];
+        MLNMapCamera *copy = [[[self class] allocWithZone:zone] initWithCenterCoordinate:_centerCoordinate
+                                                                                                                                                         altitude:_altitude
+                                                                                                                                                                pitch:_pitch
+                                                                                                                                                            heading:_heading];
+        copy.roll = _roll;
+        return copy;
 }
 
 + (NSSet<NSString *> *)keyPathsForValuesAffectingViewingDistance {
@@ -146,8 +151,8 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; centerCoordinate = %f, %f; altitude = %.0fm; heading = %.0f°; pitch = %.0f°>",
-            NSStringFromClass([self class]), (void *)self, _centerCoordinate.latitude, _centerCoordinate.longitude, _altitude, _heading, _pitch];
+        return [NSString stringWithFormat:@"<%@: %p; centerCoordinate = %f, %f; altitude = %.0fm; heading = %.0f°; pitch = %.0f°; roll = %.0f°>",
+            NSStringFromClass([self class]), (void *)self, _centerCoordinate.latitude, _centerCoordinate.longitude, _altitude, _heading, _pitch, _roll];
 }
 
 - (BOOL)isEqual:(id)other
@@ -165,7 +170,8 @@
     return (_centerCoordinate.latitude == otherCamera.centerCoordinate.latitude
             && _centerCoordinate.longitude == otherCamera.centerCoordinate.longitude
             && _altitude == otherCamera.altitude
-            && _pitch == otherCamera.pitch && _heading == otherCamera.heading);
+            && _pitch == otherCamera.pitch && _heading == otherCamera.heading
+            && _roll == otherCamera.roll);
 }
 
 - (BOOL)isEqualToMapCamera:(MLNMapCamera *)otherCamera
@@ -179,13 +185,14 @@
             && MLNEqualFloatWithAccuracy(_centerCoordinate.longitude, otherCamera.centerCoordinate.longitude, 1e-8)
             && MLNEqualFloatWithAccuracy(_altitude, otherCamera.altitude, 1e-6)
             && MLNEqualFloatWithAccuracy(_pitch, otherCamera.pitch, 1e-2)
-            && MLNEqualFloatWithAccuracy(_heading, otherCamera.heading, 1e-2));
+            && MLNEqualFloatWithAccuracy(_heading, otherCamera.heading, 1e-2)
+            && MLNEqualFloatWithAccuracy(_roll, otherCamera.roll, 1e-2));
 }
 
 - (NSUInteger)hash
 {
     return (@(_centerCoordinate.latitude).hash + @(_centerCoordinate.longitude).hash
-            + @(_altitude).hash + @(_pitch).hash + @(_heading).hash);
+            + @(_altitude).hash + @(_pitch).hash + @(_heading).hash + @(_roll).hash);
 }
 
 @end

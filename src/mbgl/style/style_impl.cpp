@@ -115,9 +115,11 @@ void Style::Impl::parse(const std::string& json_) {
 
     name = parser.name;
     defaultCamera.center = parser.latLng;
+    defaultCamera.centerAltitude = parser.centerAltitude;
     defaultCamera.zoom = parser.zoom;
     defaultCamera.bearing = parser.bearing;
     defaultCamera.pitch = parser.pitch;
+    defaultCamera.roll = parser.roll;
 
     setLight(std::make_unique<Light>(parser.light));
 

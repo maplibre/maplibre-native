@@ -19,6 +19,7 @@
 
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
+#include <mbgl/gl/dynamic_texture.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/texture2d.hpp>
@@ -578,6 +579,12 @@ gfx::Texture2DPtr Context::createTexture2D() {
     MLN_TRACE_FUNC();
 
     return std::make_shared<gl::Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    MLN_TRACE_FUNC();
+
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {

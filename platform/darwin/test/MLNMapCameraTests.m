@@ -104,4 +104,72 @@
     XCTAssertEqual(camera.viewingDistance, 10000);
 }
 
+- (void)testRollProperty {
+    MLNMapCamera *camera = [MLNMapCamera camera];
+    XCTAssertEqual(camera.roll, 0, @"Default camera should have zero roll.");
+
+    camera.roll = 45;
+    XCTAssertEqual(camera.roll, 45, @"Roll should be set correctly.");
+
+    camera.roll = -30;
+    XCTAssertEqual(camera.roll, -30, @"Roll should accept negative values.");
+
+    camera.roll = 180;
+    XCTAssertEqual(camera.roll, 180, @"Roll should accept 180 degrees.");
+}
+
+- (void)testRollInCopy {
+    MLNMapCamera *camera = [MLNMapCamera camera];
+    camera.roll = 30;
+
+    MLNMapCamera *copy = [camera copy];
+    XCTAssertEqual(copy.roll, 30, @"Copied camera should preserve roll value.");
+}
+
+- (void)testRollInEncoding {
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(40.0, -80.0);
+    MLNMapCamera *camera = [MLNMapCamera cameraLookingAtCenterCoordinate:coord
+                                                                altitude:1000
+                                                                   pitch:45
+                                                                 heading:90];
+    camera.roll = 25;
+
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:camera requiringSecureCoding:YES error:NULL];
+    MLNMapCamera *decodedCamera = [NSKeyedUnarchiver unarchivedObjectOfClass:[MLNMapCamera class] fromData:data error:NULL];
+
+    XCTAssertEqual(decodedCamera.roll, 25, @"Decoded camera should preserve roll value.");
+}
+
+- (void)testRollInEquality {
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(40.0, -80.0);
+    MLNMapCamera *camera1 = [MLNMapCamera cameraLookingAtCenterCoordinate:coord
+                                                                 altitude:1000
+                                                                    pitch:45
+                                                                  heading:90];
+    camera1.roll = 30;
+
+    MLNMapCamera *camera2 = [MLNMapCamera cameraLookingAtCenterCoordinate:coord
+                                                                 altitude:1000
+                                                                    pitch:45
+                                                                  heading:90];
+    camera2.roll = 30;
+
+    XCTAssertTrue([camera1 isEqual:camera2], @"Cameras with same roll should be equal.");
+    XCTAssertTrue([camera1 isEqualToMapCamera:camera2], @"Cameras with same roll should be equal (isEqualToMapCamera).");
+
+    camera2.roll = 35;
+    XCTAssertFalse([camera1 isEqual:camera2], @"Cameras with different roll should not be equal.");
+    XCTAssertFalse([camera1 isEqualToMapCamera:camera2], @"Cameras with different roll should not be equal (isEqualToMapCamera).");
+}
+
+- (void)testRollInHash {
+    MLNMapCamera *camera1 = [MLNMapCamera camera];
+    camera1.roll = 45;
+
+    MLNMapCamera *camera2 = [MLNMapCamera camera];
+    camera2.roll = 45;
+
+    XCTAssertEqual(camera1.hash, camera2.hash, @"Cameras with same properties including roll should have same hash.");
+}
+
 @end

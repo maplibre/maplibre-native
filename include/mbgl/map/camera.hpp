@@ -21,6 +21,10 @@ struct CameraOptions {
         center = o;
         return *this;
     }
+    CameraOptions& withCenterAltitude(const std::optional<double>& o) {
+        centerAltitude = o;
+        return *this;
+    }
     CameraOptions& withPadding(const std::optional<EdgeInsets>& p) {
         padding = p;
         return *this;
@@ -41,9 +45,20 @@ struct CameraOptions {
         pitch = o;
         return *this;
     }
+    CameraOptions& withRoll(const std::optional<double>& o) {
+        roll = o;
+        return *this;
+    }
+    CameraOptions& withFov(const std::optional<double>& o) {
+        fov = o;
+        return *this;
+    }
 
     /** Coordinate at the center of the map. */
     std::optional<LatLng> center;
+
+    /** Altitude of the center of the map, in meters above sea level. */
+    std::optional<double> centerAltitude;
 
     /** Padding around the interior of the view that affects the frame of
         reference for `center`. */
@@ -63,11 +78,18 @@ struct CameraOptions {
     /** Pitch toward the horizon measured in degrees , with 0 deg resulting in a
         two-dimensional map. */
     std::optional<double> pitch;
+
+    /** Camera roll, measured in degrees. */
+    std::optional<double> roll;
+
+    /** Camera vertical field of view, measured in degrees. */
+    std::optional<double> fov;
 };
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
     return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
-           a.bearing == b.bearing && a.pitch == b.pitch;
+           a.bearing == b.bearing && a.pitch == b.pitch && a.roll == b.roll && a.fov == b.fov &&
+           a.centerAltitude == b.centerAltitude;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
@@ -134,7 +156,6 @@ struct FreeCameraOptions {
        0, 0]
 
         Orientation can be set freely but certain constraints still apply
-         - Orientation must be representable with only pitch and bearing.
          - Pitch has an upper limit */
     std::optional<vec4> orientation = std::nullopt;
 
@@ -151,9 +172,9 @@ struct FreeCameraOptions {
        bearing can't be deduced from the viewing direction */
     void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt) noexcept;
 
-    /** Helper function for setting the orientation of the camera as a pitch and
-       a bearing. Both values are in degrees */
-    void setPitchBearing(double pitch, double bearing) noexcept;
+    /** Helper function for setting the orientation of the camera as a roll, pitch, and
+       a bearing. All values are in degrees */
+    void setRollPitchBearing(double roll, double pitch, double bearing) noexcept;
 };
 
 } // namespace mbgl
