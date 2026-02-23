@@ -179,12 +179,12 @@ public:
     }
     virtual void setInterleavedBuffer(InterleavedVertexBuffer&) {}
 
-    template <typename T>
+    template <typename VertexFormat>
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) {
         interleavedVertexBuffer = &buffer;
 
         if (vertexOffset == 0) {
-            vertexOffset = interleavedVertexBuffer->extendVertexFormat<T>();
+            vertexOffset = interleavedVertexBuffer->extendVertexFormat<VertexFormat>();
         }
     }
 #endif
@@ -413,7 +413,7 @@ public:
 #else
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
-        this->setInterleavedBuffer<BaseVertex>(buffer);
+        this->template setInterleavedBuffer<BaseVertex>(buffer);
     }
 #endif
 
@@ -564,7 +564,9 @@ public:
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
 #else
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
-    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override { this->setInterleavedBuffer<Vertex>(buffer); }
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->template setInterleavedBuffer<Vertex>(buffer);
+    }
 #endif
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
@@ -693,7 +695,9 @@ public:
 #else
     using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::
         setInterleavedBuffer;
-    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override { this->setInterleavedBuffer<Vertex>(buffer); }
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->template setInterleavedBuffer<Vertex>(buffer);
+    }
 #endif
 
 private:
