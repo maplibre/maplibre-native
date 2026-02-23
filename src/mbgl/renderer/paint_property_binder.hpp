@@ -37,29 +37,31 @@ struct InterleavedVertexBuffer {
 
     template <typename T>
     void set(std::size_t index, std::size_t offset, const T& value) {
-        auto data = get<T>(index, offset);
-
-        memcpy((void*)&data, &value, sizeof(value));
+        assert(stride * index + offset + sizeof(T) <= sharedVertexVector->bytes());
+        const void* data = reinterpret_cast<const void*>(sharedVertexVector->data() + stride * index + offset);
+        memcpy(const_cast<void*>(data), &value, sizeof(value));
     }
 
     template <typename T>
     const T& get(std::size_t index, std::size_t offset) {
-        size_t space = sizeof(T);
-        void* data = (void*)(sharedVertexVector->data() + stride * index + offset);
-        void* ptr = std::align(alignof(T), sizeof(T), data, space);
-        assert(ptr);
-
-        return *reinterpret_cast<const T*>(ptr);
+        assert(stride * index + offset + sizeof(T) <= sharedVertexVector->bytes());
+        return *reinterpret_cast<const T*>(sharedVertexVector->data() + stride * index + offset);
     }
 
     template <typename T>
-    void extendVertexFormat() {
-        constexpr auto alignment = alignof(T) - 1;
-        stride += (sizeof(T) + alignment) & ~alignment;
-    }
+    size_t extendVertexFormat() { 
+        constexpr auto alignment = alignof(T);
 
-    // manual alignment needed
-    void extendVertexFormat(std::size_t size) { stride += size; }
+        size_t offset = stride & (alignment - 1);
+        if (offset != 0) {
+            offset = alignment - offset;
+        }
+
+        size_t vertexOffset = stride + offset;
+        stride += sizeof(T) + offset;
+
+        return vertexOffset;
+    }
 };
 #endif
 
@@ -175,9 +177,17 @@ public:
     virtual std::size_t getVertexCount() const {
         return interleavedVertexBuffer ? interleavedVertexBuffer->vertexCount : 0;
     }
-#endif
+    virtual void setInterleavedBuffer(InterleavedVertexBuffer&) {}
 
-    virtual size_t getVertexSize() const = 0;
+    template <typename T>
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) {
+        interleavedVertexBuffer = &buffer;
+
+        if (vertexOffset == 0) {
+            vertexOffset = interleavedVertexBuffer->extendVertexFormat<T>();
+        }
+    }
+#endif
 
     static std::unique_ptr<PaintPropertyBinder> create(const PossiblyEvaluatedType& value, float zoom, T defaultValue);
 
@@ -224,8 +234,6 @@ public:
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t) const override {
         return {ZoomInterpolatedVertexType<A>{0}};
     }
-
-    std::size_t getVertexSize() const override { return 0; }
 
 #ifndef USE_INTERLEAVED_BINDER_BUFFER
     std::size_t getVertexCount() const override { return 0; }
@@ -275,8 +283,6 @@ public:
     std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t) const override {
         return {ZoomInterpolatedVertexType<As>{0}...};
     }
-
-    std::size_t getVertexSize() const override { return 0; }
 
 #ifndef USE_INTERLEAVED_BINDER_BUFFER
     std::size_t getVertexCount() const override { return 0; }
@@ -401,11 +407,14 @@ public:
         return {ZoomInterpolatedVertexType<A>{concatenate(value.a1, value.a1)}};
     }
 
-    std::size_t getVertexSize() const override { return sizeof(BaseVertex); }
-
 #ifndef USE_INTERLEAVED_BINDER_BUFFER
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
     gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedVertexVector; }
+#else
+    using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->setInterleavedBuffer<BaseVertex>(buffer);
+    }
 #endif
 
 private:
@@ -550,11 +559,14 @@ public:
 
     bool isInterpolated() const override { return true; }
 
-    std::size_t getVertexSize() const override { return sizeof(Vertex); }
-
 #ifndef USE_INTERLEAVED_BINDER_BUFFER
     gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedVertexVector; }
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
+#else
+    using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->setInterleavedBuffer<Vertex>(buffer);
+    }
 #endif
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
@@ -677,11 +689,14 @@ public:
                 ZoomInterpolatedVertexType<A2>{concatenate(zoomValue.a1, zoomValue.a1)}};
     }
 
-    std::size_t getVertexSize() const override { return sizeof(Vertex); }
-
 #ifndef USE_INTERLEAVED_BINDER_BUFFER
     std::size_t getVertexCount() const override { return patternToVertexVector.elements(); }
     gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedPatternToVertexVector; }
+#else
+    using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->setInterleavedBuffer<Vertex>(buffer);
+    }
 #endif
 
 private:
@@ -798,14 +813,7 @@ public:
 
 #ifdef USE_INTERLEAVED_BINDER_BUFFER
         (([&] {
-             auto& elem = binders.template get<Ps>();
-             const auto size = elem->getVertexSize();
-
-             if (size > 0) {
-                 elem->interleavedVertexBuffer = &interleavedVertexBuffer;
-                 elem->vertexOffset = interleavedVertexBuffer.stride;
-                 interleavedVertexBuffer.extendVertexFormat(size);
-             }
+            binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
          }()),
          ...);
 #endif
@@ -818,11 +826,7 @@ public:
         interleavedVertexBuffer = std::move(other.interleavedVertexBuffer);
 
         (([&] {
-             auto& elem = binders.template get<Ps>();
-
-             if (elem->getVertexSize() > 0) {
-                 elem->interleavedVertexBuffer = &interleavedVertexBuffer;
-             }
+             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
          }()),
          ...);
 #endif
@@ -849,7 +853,7 @@ public:
 
 #ifdef USE_INTERLEAVED_BINDER_BUFFER
         interleavedVertexBuffer.vertexCount += length - interleavedVertexBuffer.vertexCount;
-        interleavedVertexBuffer.sharedVertexVector->updateModified();
+        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
 #endif
     }
 
@@ -859,7 +863,7 @@ public:
         util::ignore({(binders.template get<Ps>()->updateVertexVectors(states, layer, imagePositions), 0)...});
 
 #ifdef USE_INTERLEAVED_BINDER_BUFFER
-        interleavedVertexBuffer.sharedVertexVector->updateModified();
+        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
 #endif
     }
 
@@ -869,7 +873,7 @@ public:
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
 
 #ifdef USE_INTERLEAVED_BINDER_BUFFER
-        interleavedVertexBuffer.sharedVertexVector->updateModified();
+        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
 #endif
     }
 
