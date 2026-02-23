@@ -49,7 +49,7 @@ struct InterleavedVertexBuffer {
     }
 
     template <typename T>
-    size_t extendVertexFormat() { 
+    size_t extendVertexFormat() {
         constexpr auto alignment = alignof(T);
 
         size_t offset = stride & (alignment - 1);
@@ -564,9 +564,7 @@ public:
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
 #else
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
-    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
-        this->setInterleavedBuffer<Vertex>(buffer);
-    }
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override { this->setInterleavedBuffer<Vertex>(buffer); }
 #endif
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
@@ -693,10 +691,9 @@ public:
     std::size_t getVertexCount() const override { return patternToVertexVector.elements(); }
     gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedPatternToVertexVector; }
 #else
-    using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::setInterleavedBuffer;
-    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
-        this->setInterleavedBuffer<Vertex>(buffer);
-    }
+    using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::
+        setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override { this->setInterleavedBuffer<Vertex>(buffer); }
 #endif
 
 private:
@@ -813,7 +810,7 @@ public:
 
 #ifdef USE_INTERLEAVED_BINDER_BUFFER
         (([&] {
-            binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
          }()),
          ...);
 #endif
