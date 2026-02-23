@@ -49,6 +49,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("ClusteringExample") {
                     ClusteringExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("FeatureStateExample") {
+                    FeatureStateExample()
+                }
                 NavigationLink("ObserverExample") {
                     ObserverExampleViewUIViewControllerRepresentable()
                 }
