@@ -108,7 +108,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
 
       - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
@@ -144,7 +144,7 @@ jobs:
           cat changelog_for_version.md
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}

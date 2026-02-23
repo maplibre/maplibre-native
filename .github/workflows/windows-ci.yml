@@ -45,7 +45,7 @@ jobs:
       - name: Get all Windows files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
+        uses: tj-actions/changed-files@7dee1b0c1557f278e5c7dc244927139d78c0e22a # v47.0.4
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -76,7 +76,7 @@ jobs:
 
       - name: Restore vcpkg binary cache
         id: vcpkg-cache
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -102,7 +102,7 @@ jobs:
 
       - name: Save vcpkg binary cache
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -143,7 +143,7 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
 
       - name: Restore vcpkg binary cache
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
