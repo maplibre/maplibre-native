@@ -230,7 +230,7 @@ jobs:
           submodules: recursive
 
       - name: Configure build with CMake
-        run: cmake --preset ios
+        run: cmake --preset ios-metal
 
       - name: Build mbgl-core
         run: cmake --build build-ios --target mbgl-core ios-sdk-static app

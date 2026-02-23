@@ -63,6 +63,7 @@ public:
         shared->cancel();
         if (task) {
             [task cancel];
+            task = nil;
         }
     }
 

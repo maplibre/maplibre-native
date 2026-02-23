@@ -66,6 +66,8 @@ Context::Context(RendererBackend& backend_)
 }
 
 Context::~Context() noexcept {
+    MBGL_VERIFY_THREAD(tid);
+
     backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
     destroyResources();
@@ -143,6 +145,8 @@ void Context::initFrameResources() {
 }
 
 void Context::destroyResources() {
+    MBGL_VERIFY_THREAD(tid);
+
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
     for (auto& frame : frameResources) {
@@ -166,6 +170,8 @@ void Context::destroyResources() {
 }
 
 void Context::enqueueDeletion(DeletionTask&& function) {
+    MBGL_VERIFY_THREAD(tid);
+
     if (frameResources.empty()) {
         function(*this);
         return;
@@ -175,32 +181,19 @@ void Context::enqueueDeletion(DeletionTask&& function) {
 }
 
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
-    submitOneTimeCommand({}, function);
+    submitOneTimeCommand(backend.getCommandPool(), function);
 }
 
-void Context::submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
-                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+void Context::submitOneTimeCommand(const vk::UniqueCommandBuffer& commandBuffer) {
     MLN_TRACE_FUNC();
+
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::scoped_lock lock(graphicsQueueSubmitMutex);
 #endif
 
-    const vk::CommandBufferAllocateInfo allocateInfo(
-        commandPool ? commandPool.get() : backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
-
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
-    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
-    auto& commandBuffer = commandBuffers.front();
-
-    backend.setDebugName(commandBuffer.get(), "OneTimeSubmitCommandBuffer");
-
-    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
-    function(commandBuffer);
-    commandBuffer->end(dispatcher);
-
     const auto submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
-
     const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()), nullptr, dispatcher);
     backend.getGraphicsQueue().submit(submitInfo, fence.get(), dispatcher);
 
@@ -209,6 +202,22 @@ void Context::submitOneTimeCommand(const vk::UniqueCommandPool& commandPool,
     if (waitFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
     }
+}
+
+void Context::submitOneTimeCommand(const vk::UniqueCommandPool& pool,
+                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+
+    const vk::CommandBufferAllocateInfo allocateInfo(pool.get(), vk::CommandBufferLevel::ePrimary, 1);
+    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
+    const auto& commandBuffer = commandBuffers.front();
+
+    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
+    function(commandBuffer);
+    commandBuffer->end(dispatcher);
+
+    submitOneTimeCommand(commandBuffer);
 }
 
 void Context::requestSurfaceUpdate(bool useDelay) {
@@ -226,6 +235,8 @@ void Context::requestSurfaceUpdate(bool useDelay) {
 
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
+
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
     auto& frame = frameResources[frameResourceIndex];
@@ -240,6 +251,7 @@ void Context::waitFrame() const {
 
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
 
     frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
 
@@ -330,6 +342,7 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::scoped_lock lock(graphicsQueueSubmitMutex);
 #endif
@@ -640,7 +653,7 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
         dummyTexture2D->setSize(size);
 
         submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
-            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer);
+            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer, false);
         });
     }
 
