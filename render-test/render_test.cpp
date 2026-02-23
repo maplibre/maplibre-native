@@ -185,7 +185,7 @@ void runWithAlternateSources(TestRunner& runner, TestMetadata& metadata, bool& e
 } // namespace
 namespace mbgl {
 
-int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
+int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testStatus) {
     int returnCode = 0;
     bool recycleMap;
     bool shuffle;
@@ -226,6 +226,8 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     metadatas.reserve(testPaths.size());
 
     TestStatistics stats;
+    const uint32_t totalTests = static_cast<uint32_t>(testPaths.size());
+    uint32_t completedTests = 0;
 
     for (auto& testPath : testPaths) {
         TestMetadata metadata = parseTestMetadata(testPath);
@@ -324,7 +326,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
 
         metadatas.push_back(std::move(metadata));
         if (testStatus) {
-            testStatus();
+            testStatus({.completed = ++completedTests, .total = totalTests});
         }
     }
 
