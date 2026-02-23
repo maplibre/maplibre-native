@@ -59,8 +59,16 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
-          submodules: recursive
+          submodules: false
           persist-credentials: false
+
+      - name: Remove stale git lock files
+        run: find .git -type f -name "*.lock" -delete 2>/dev/null || true
+        working-directory: .
+
+      - name: Update submodules
+        run: git submodule update --init --recursive
+        working-directory: .
 
       - name: Cache Bazel
         uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
