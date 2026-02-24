@@ -72,6 +72,9 @@ public:
     // any thread.
     ActorRef<Renderer> actor() const;
 
+    // Check if the renderer is initialized and ready to use.
+    bool isRendererInitialized() const;
+
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
     void schedule(std::function<void()>&& scheduled) override;
