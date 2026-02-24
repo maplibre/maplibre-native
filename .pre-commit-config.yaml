@@ -22,7 +22,7 @@ repos:
     rev: v20.1.8
     hooks:
       - id: clang-format
-        files: '.*\.(hpp|cpp|h)'
+        files: '.*\.(hpp|cpp|h|mm)'
         exclude: 'vendor/.*'
 
   - repo: https://github.com/keith/pre-commit-buildifier
