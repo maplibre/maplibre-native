@@ -1,17 +1,17 @@
 #import "MLNCustomStyleLayer.h"
 #import "MLNCustomStyleLayer_Private.h"
 
-#import "MLNMapView_Private.h"
-#import "MLNStyle_Private.h"
-#import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
+#import "MLNMapView_Private.h"
+#import "MLNStyleLayer_Private.h"
+#import "MLNStyle_Private.h"
 
 #if MLN_RENDER_BACKEND_METAL
 #import <MetalKit/MetalKit.h>
 #endif
 
-#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/math/wrap.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
@@ -28,44 +28,42 @@ class MLNCustomLayerHost;
 @implementation MLNCustomStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
-    auto layer = std::make_unique<mbgl::style::CustomLayer>(
-        identifier.UTF8String,
-        std::make_unique<MLNCustomLayerHost>(self)
-    );
-    return self = [super initWithPendingLayer:std::move(layer)];
+  auto layer = std::make_unique<mbgl::style::CustomLayer>(
+      identifier.UTF8String, std::make_unique<MLNCustomLayerHost>(self));
+  return self = [super initWithPendingLayer:std::move(layer)];
 }
 
 - (mbgl::style::CustomLayer *)rawLayer {
-    return (mbgl::style::CustomLayer *)super.rawLayer;
+  return (mbgl::style::CustomLayer *)super.rawLayer;
 }
 
 - (MLNMapView *)mapView {
-    if ([self.style.stylable isKindOfClass:[MLNMapView class]]) {
-        return (MLNMapView *)self.style.stylable;
-    }
-    return nil;
+  if ([self.style.stylable isKindOfClass:[MLNMapView class]]) {
+    return (MLNMapView *)self.style.stylable;
+  }
+  return nil;
 }
 
 #if TARGET_OS_IPHONE
 - (EAGLContext *)context {
-    return self.mapView.context;
+  return self.mapView.context;
 }
 #else
 - (CGLContextObj)context {
-    return self.mapView.context;
+  return self.mapView.context;
 }
 #endif
 
 - (void)addToStyle:(MLNStyle *)style belowLayer:(MLNStyleLayer *)otherLayer {
-    self.style = style;
-    self.style.customLayers[self.identifier] = self;
-    [super addToStyle:style belowLayer:otherLayer];
+  self.style = style;
+  self.style.customLayers[self.identifier] = self;
+  [super addToStyle:style belowLayer:otherLayer];
 }
 
 - (void)removeFromStyle:(MLNStyle *)style {
-    [super removeFromStyle:style];
-    self.style.customLayers[self.identifier] = nil;
-    self.style = nil;
+  [super removeFromStyle:style];
+  self.style.customLayers[self.identifier] = nil;
+  self.style = nil;
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
@@ -78,74 +76,75 @@ class MLNCustomLayerHost;
 }
 
 - (void)setNeedsDisplay {
-    [self.mapView setNeedsRerender];
+  [self.mapView setNeedsRerender];
 }
 
 @end
 
 class MLNCustomLayerHost : public mbgl::style::CustomLayerHost {
 public:
-    MLNCustomLayerHost(MLNCustomStyleLayer *styleLayer) {
-        layerRef = styleLayer;
-        layer = nil;
+  MLNCustomLayerHost(MLNCustomStyleLayer *styleLayer) {
+    layerRef = styleLayer;
+    layer = nil;
+  }
+
+  void initialize() {
+    if (layerRef == nil)
+      return;
+    else if (layer == nil)
+      layer = layerRef;
+
+    if (layer.mapView) {
+      [layer didMoveToMapView:layer.mapView];
     }
+  }
 
-    void initialize() {
-        if (layerRef == nil) return;
-        else if (layer == nil) layer = layerRef;
-
-        if (layer.mapView) {
-            [layer didMoveToMapView:layer.mapView];
-        }
-    }
-
-    void render(const mbgl::style::CustomLayerRenderParameters& parameters) {
-        if (!layer) return;
+  void render(const mbgl::style::CustomLayerRenderParameters &parameters) {
+    if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        MTL::RenderCommandEncoder* ptr =
-            static_cast<const mbgl::style::mtl::CustomLayerRenderParameters&>(parameters).encoder.get();
-        id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
-        layer.renderEncoder = encoder;
+    MTL::RenderCommandEncoder *ptr =
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .encoder.get();
+    id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+    layer.renderEncoder = encoder;
 #endif
 
-        MLNStyleLayerDrawingContext drawingContext = {
-            .size = CGSizeMake(parameters.width, parameters.height),
-            .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
-            .zoomLevel = parameters.zoom,
-            .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
-            .pitch = static_cast<CGFloat>(parameters.pitch),
-            .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-            .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
-        };
+    MLNStyleLayerDrawingContext drawingContext = {
+        .size = CGSizeMake(parameters.width, parameters.height),
+        .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+        .zoomLevel = parameters.zoom,
+        .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+        .pitch = static_cast<CGFloat>(parameters.pitch),
+        .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)};
 
-        if (layer.mapView) {
-            [layer drawInMapView:layer.mapView withContext:drawingContext];
-        }
+    if (layer.mapView) {
+      [layer drawInMapView:layer.mapView withContext:drawingContext];
     }
+  }
 
-    void contextLost() {
+  void contextLost() {}
+
+  void deinitialize() {
+    if (layer == nil) return;
+
+    if (layer.mapView) {
+      [layer willMoveFromMapView:layer.mapView];
     }
-
-    void deinitialize() {
-        if (layer == nil) return;
-
-        if (layer.mapView) {
-            [layer willMoveFromMapView:layer.mapView];
-        }
-        layerRef = layer;
-        layer = nil;
-    }
+    layerRef = layer;
+    layer = nil;
+  }
 
 private:
-    __weak MLNCustomStyleLayer * layerRef;
-    MLNCustomStyleLayer * layer = nil;
+  __weak MLNCustomStyleLayer *layerRef;
+  MLNCustomStyleLayer *layer = nil;
 };
 
 namespace mbgl {
 
-MLNStyleLayer* CustomStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
-    return [[MLNCustomStyleLayer alloc] initWithRawLayer:rawLayer];
+MLNStyleLayer *CustomStyleLayerPeerFactory::createPeer(style::Layer *rawLayer) {
+  return [[MLNCustomStyleLayer alloc] initWithRawLayer:rawLayer];
 }
 
 }  // namespace mbgl
