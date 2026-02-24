@@ -1,6 +1,8 @@
-#import "NSBundle+MLNAdditions.h"
-#import "UIImage+MLNAdditions.h"
+#import <UIKit/UIKit.h>
 
+#import "NSBundle+MLNAdditions.h"
+
+#include <mbgl/style/image.hpp>
 #include <mbgl/util/image+MLNAdditions.hpp>
 
 const MLNExceptionName MLNResourceNotFoundException = @"MLNResourceNotFoundException";
