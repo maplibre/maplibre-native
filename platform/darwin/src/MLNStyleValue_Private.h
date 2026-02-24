@@ -61,7 +61,7 @@ id MLNJSONObjectFromMBGLExpression(const mbgl::style::expression::Expression &mb
 template <typename MBGLType, typename ObjCType, typename MBGLElement = MBGLType,
           typename ObjCEnum = ObjCType>
 class MLNStyleValueTransformer {
- public:
+public:
   /// Convert an mbgl property value into an mgl style value
   NSExpression *toExpression(const mbgl::style::PropertyValue<MBGLType> &mbglValue) {
     PropertyExpressionEvaluator evaluator;
@@ -139,7 +139,7 @@ class MLNStyleValueTransformer {
     return *value;
   }
 
- private:  // Private utilities for converting from mgl to mbgl values
+private:  // Private utilities for converting from mgl to mbgl values
   /**
    As hack to allow converting enum => string values, we accept a second, dummy parameter in
    the toRawStyleSpecValue() methods for converting 'atomic' (non-style-function) values.
@@ -307,7 +307,7 @@ class MLNStyleValueTransformer {
     }
   }
 
- private:  // Private utilities for converting from mbgl to mgl values
+private:  // Private utilities for converting from mbgl to mgl values
   // Bool
   static NSNumber *toMLNRawStyleValue(const bool mbglStopValue) { return @(mbglStopValue); }
 
@@ -390,7 +390,7 @@ class MLNStyleValueTransformer {
 
   /// Converts all types of mbgl property values into an equivalent NSExpression.
   class PropertyExpressionEvaluator {
-   public:
+  public:
     NSExpression *operator()(const mbgl::style::Undefined) const { return nil; }
 
     NSExpression *operator()(const MBGLType &value) const {
