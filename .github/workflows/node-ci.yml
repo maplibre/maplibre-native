@@ -255,7 +255,7 @@ jobs:
         id: render_tests
         if: runner.os == 'macOS'
         continue-on-error: true
-        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json --debug
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
