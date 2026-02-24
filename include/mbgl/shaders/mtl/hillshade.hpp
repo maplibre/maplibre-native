@@ -218,6 +218,7 @@ void igor_hillshade(float2 deriv, device const HillshadeTilePropsUBO& tileProps,
     fragColor = half4(props.shadows[0] * shadow_strength + props.highlights[0] * highlight_strength);
 }
 
+// Encode debugging information into the output color
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                             device const HillshadeTilePropsUBO* tilePropsVector [[buffer(idHillshadeTilePropsUBO)]],
@@ -254,9 +255,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         standard_hillshade(deriv, tileProps, props, fragColor);
     }
 
-    printf("scaleFactor: %f\n", scaleFactor);
-    printf("deriv.x: %f, deriv.y: %f\n", deriv.x, deriv.y);
-    printf("exaggeration: %f\n", tileProps.exaggeration);
+    // Encode debugging information into the output color
+    fragColor = half4(scaleFactor, deriv.x, deriv.y, tileProps.exaggeration);
 
     return fragColor;
 }
