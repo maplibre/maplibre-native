@@ -254,6 +254,10 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         standard_hillshade(deriv, tileProps, props, fragColor);
     }
 
+    printf("scaleFactor: %f\n", scaleFactor);
+    printf("deriv.x: %f, deriv.y: %f\n", deriv.x, deriv.y);
+    printf("exaggeration: %f\n", tileProps.exaggeration);
+
     return fragColor;
 }
 )";
