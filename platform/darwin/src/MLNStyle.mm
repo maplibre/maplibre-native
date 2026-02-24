@@ -2,11 +2,11 @@
 
 #import "MLNBackgroundStyleLayer.h"
 #import "MLNCircleStyleLayer.h"
+#import "MLNColorReliefStyleLayer.h"
 #import "MLNFillExtrusionStyleLayer.h"
 #import "MLNFillStyleLayer.h"
 #import "MLNHeatmapStyleLayer.h"
 #import "MLNHillshadeStyleLayer.h"
-#import "MLNColorReliefStyleLayer.h"
 #import "MLNLineStyleLayer.h"
 #import "MLNMapView_Private.h"
 #import "MLNRasterStyleLayer.h"

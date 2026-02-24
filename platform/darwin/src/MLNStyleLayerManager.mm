@@ -55,9 +55,9 @@ LayerManagerDarwin::LayerManagerDarwin() {
   addLayerType(std::make_unique<HillshadeStyleLayerPeerFactory>());
 #endif
 #if defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_RUNTIME)
-    addLayerTypeCoreOnly(std::make_unique<ColorReliefLayerFactory>());
+  addLayerTypeCoreOnly(std::make_unique<ColorReliefLayerFactory>());
 #elif !defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_ALL)
-    addLayerType(std::make_unique<ColorReliefStyleLayerPeerFactory>());
+  addLayerType(std::make_unique<ColorReliefStyleLayerPeerFactory>());
 #endif
 #if defined(MBGL_LAYER_FILL_EXTRUSION_DISABLE_RUNTIME)
   addLayerTypeCoreOnly(std::make_unique<FillExtrusionLayerFactory>());
