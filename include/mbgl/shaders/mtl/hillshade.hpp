@@ -85,6 +85,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
     float2 pos = float2(vertx.texture_pos) / 8192.0;
+    // Metal's texture coordinate origin differs from some renderers;
+    // restore Y-flip to match prepare pass and historical behavior.
+    pos.y = 1.0 - pos.y;
 
     return {
         .position    = position,
