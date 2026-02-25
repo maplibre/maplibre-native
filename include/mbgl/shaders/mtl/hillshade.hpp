@@ -234,7 +234,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float4 pixel = image.sample(image_sampler, in.pos);
 
     // Scale the derivative based on the mercator distortion at this latitude
-    float scaleFactor = cos(radians((tileProps.latrange.x - tileProps.latrange.y) * in.pos.y + tileProps.latrange.y));
+    float latitude = (tileProps.latrange.x - tileProps.latrange.y) * in.pos.y + tileProps.latrange.y;
+    float scaleFactor = cos(radians(latitude));
 
     // The derivative is scaled back from [0, 1] texture range to world-space slope
     // Texture range [0, 1] corresponds to slope range [-4, 4]
