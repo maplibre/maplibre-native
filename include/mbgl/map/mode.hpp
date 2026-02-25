@@ -19,6 +19,11 @@ enum class MapMode : EnumType {
     Tile        ///< a once-off still image of a single tile
 };
 
+enum class MapProjectionType : EnumType {
+    Mercator,
+    Globe,
+};
+
 /// We can choose to constrain the map both horizontally or vertically, only
 /// vertically e.g. while panning, or screen to the specified bounds.
 enum class ConstrainMode : EnumType {

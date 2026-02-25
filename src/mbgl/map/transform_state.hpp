@@ -101,6 +101,10 @@ struct TransformStateProperties {
         frustumOffset = val;
         return *this;
     }
+    TransformStateProperties& withMapProjection(const std::optional<MapProjectionType>& val) {
+        mapProjection = val;
+        return *this;
+    }
 
     std::optional<double> x;
     std::optional<double> y;
@@ -122,6 +126,7 @@ struct TransformStateProperties {
     std::optional<NorthOrientation> northOrientation;
     std::optional<ViewportMode> viewPortMode;
     std::optional<EdgeInsets> frustumOffset;
+    std::optional<MapProjectionType> mapProjection;
 };
 
 class TransformState {
@@ -214,6 +219,8 @@ public:
     void setYSkew(double);
     bool getAxonometric() const;
     void setAxonometric(bool);
+    MapProjectionType getMapProjection() const;
+    void setMapProjection(MapProjectionType);
 
     // State
     bool isChanging() const;
@@ -318,6 +325,7 @@ private:
     double xSkew = 0.0;
     double ySkew = 1.0;
     bool axonometric = false;
+    MapProjectionType mapProjection = MapProjectionType::Mercator;
 
     EdgeInsets edgeInsets;
     mutable util::Camera camera;

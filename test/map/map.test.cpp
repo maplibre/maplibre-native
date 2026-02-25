@@ -426,6 +426,16 @@ TEST(Map, ProjectionMode) {
     EXPECT_EQ(*options.ySkew, 0.0);
 }
 
+TEST(Map, MapProjection) {
+    MapTest<> test;
+
+    test.map.setMapProjection(MapProjectionType::Globe);
+    EXPECT_EQ(test.map.getMapProjection(), MapProjectionType::Globe);
+
+    test.map.setMapProjection(MapProjectionType::Mercator);
+    EXPECT_EQ(test.map.getMapProjection(), MapProjectionType::Mercator);
+}
+
 TEST(Map, BoundOptions) {
     MapTest<> test;
 

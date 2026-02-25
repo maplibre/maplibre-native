@@ -114,6 +114,8 @@ public:
     // Projection Mode
     void setProjectionMode(const ProjectionMode&);
     ProjectionMode getProjectionMode() const;
+    void setMapProjection(MapProjectionType);
+    MapProjectionType getMapProjection() const;
 
     // Projection
     ScreenCoordinate pixelForLatLng(const LatLng&) const;

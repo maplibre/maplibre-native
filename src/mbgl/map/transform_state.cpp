@@ -108,6 +108,9 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.frustumOffset) {
         setFrustumOffset(*properties.frustumOffset);
     }
+    if (properties.mapProjection) {
+        setMapProjection(*properties.mapProjection);
+    }
 }
 
 // MARK: - Matrix
@@ -723,6 +726,17 @@ bool TransformState::getAxonometric() const {
 void TransformState::setAxonometric(bool val) {
     if (axonometric != val) {
         axonometric = val;
+        requestMatricesUpdate = true;
+    }
+}
+
+MapProjectionType TransformState::getMapProjection() const {
+    return mapProjection;
+}
+
+void TransformState::setMapProjection(MapProjectionType projection) {
+    if (mapProjection != projection) {
+        mapProjection = projection;
         requestMatricesUpdate = true;
     }
 }
