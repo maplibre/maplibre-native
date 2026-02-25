@@ -120,6 +120,7 @@ void Style::Impl::parse(const std::string& json_) {
     defaultCamera.bearing = parser.bearing;
     defaultCamera.pitch = parser.pitch;
     defaultCamera.roll = parser.roll;
+    defaultProjection = parser.projection;
 
     setLight(std::make_unique<Light>(parser.light));
 
@@ -256,6 +257,10 @@ std::string Style::Impl::getName() const {
 
 CameraOptions Style::Impl::getDefaultCamera() const {
     return defaultCamera;
+}
+
+MapProjectionType Style::Impl::getDefaultProjection() const {
+    return defaultProjection;
 }
 
 std::vector<Source*> Style::Impl::getSources() {

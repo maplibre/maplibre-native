@@ -436,6 +436,19 @@ TEST(Map, MapProjection) {
     EXPECT_EQ(test.map.getMapProjection(), MapProjectionType::Mercator);
 }
 
+TEST(Map, StyleProjectionIsApplied) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(R"STYLE({
+        "version": 8,
+        "projection": { "type": "globe" },
+        "sources": {},
+        "layers": []
+    })STYLE");
+
+    EXPECT_EQ(test.map.getMapProjection(), MapProjectionType::Globe);
+}
+
 TEST(Map, BoundOptions) {
     MapTest<> test;
 

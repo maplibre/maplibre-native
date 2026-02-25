@@ -7,6 +7,7 @@
 
 #include <mbgl/text/glyph.hpp>
 
+#include <mbgl/map/mode.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/font_stack.hpp>
@@ -47,12 +48,14 @@ public:
     double pitch = 0;
     double roll = 0;
     double centerAltitude = 0;
+    MapProjectionType projection = MapProjectionType::Mercator;
 
     // Statically evaluate layer properties to determine what font stacks are used.
     std::set<FontStack> fontStacks() const;
 
 private:
     void parseTransition(const JSValue&);
+    void parseProjection(const JSValue&);
     void parseLight(const JSValue&);
     void parseSources(const JSValue&);
     void parseSprites(const JSValue&);

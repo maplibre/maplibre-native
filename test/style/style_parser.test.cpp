@@ -257,6 +257,38 @@ TEST(StyleParser, FontStacksMatchExpression) {
     ASSERT_EQ(expected, result);
 }
 
+TEST(StyleParser, ProjectionType) {
+    style::Parser parser;
+    parser.parse(R"({
+        "version": 8,
+        "projection": { "type": "globe" },
+        "sources": {},
+        "layers": []
+    })");
+
+    EXPECT_EQ(parser.projection, MapProjectionType::Globe);
+}
+
+TEST(StyleParser, InvalidProjectionTypeFallsBackToMercator) {
+    FixtureLog log;
+    style::Parser parser;
+    parser.parse(R"({
+        "version": 8,
+        "projection": { "type": "invalid" },
+        "sources": {},
+        "layers": []
+    })");
+
+    EXPECT_EQ(parser.projection, MapProjectionType::Mercator);
+    const FixtureLogObserver::LogMessage message{
+        EventSeverity::Warning,
+        Event::ParseStyle,
+        int64_t(-1),
+        "projection type must be \"mercator\" or \"globe\"",
+    };
+    EXPECT_EQ(log.count(message), 1u);
+}
+
 TEST(StyleParser, FontStacksStepExpression) {
     style::Parser parser;
     parser.parse(R"({

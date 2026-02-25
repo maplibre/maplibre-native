@@ -49,6 +49,12 @@ CameraOptions Style::getDefaultCamera() const {
     return impl->getDefaultCamera();
 }
 
+MapProjectionType Style::getDefaultProjection() const {
+    MLN_TRACE_FUNC();
+
+    return impl->getDefaultProjection();
+}
+
 TransitionOptions Style::getTransitionOptions() const {
     MLN_TRACE_FUNC();
 

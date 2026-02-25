@@ -152,6 +152,7 @@ void Map::Impl::onStyleLoading() {
 }
 
 void Map::Impl::onStyleLoaded() {
+    transform.setMapProjection(style->getDefaultProjection());
     if (!cameraMutated) {
         jumpTo(style->getDefaultCamera());
     }

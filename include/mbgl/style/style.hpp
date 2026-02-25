@@ -2,6 +2,7 @@
 
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/map/camera.hpp>
+#include <mbgl/map/mode.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/util/geo.hpp>
@@ -35,6 +36,7 @@ public:
     // Defaults
     std::string getName() const;
     CameraOptions getDefaultCamera() const;
+    MapProjectionType getDefaultProjection() const;
 
     // TransitionOptions
     TransitionOptions getTransitionOptions() const;
