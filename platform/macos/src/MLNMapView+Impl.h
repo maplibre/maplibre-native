@@ -30,8 +30,6 @@ public:
   // Called by the view delegate when it's time to render.
   void render();
 
-  virtual MLNBackendResource* getObject() = 0;
-
   // mbgl::MapObserver implementation
   void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;
   void onCameraIsChanging() override;
