@@ -13,7 +13,6 @@
 
 ### 🐞 Bug fixes
 - Fix incorrect shader selection for text labels with inline images ([#4082](https://github.com/maplibre/maplibre-native/pull/4082)) (by [ciscorn]
-- core: Fix Vulkan dynamic texture threading ([#4102](https://github.com/maplibre/maplibre-native/pull/4102)) (by [adrian-cojocaru]
 
 ## 6.3.0
 - Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
