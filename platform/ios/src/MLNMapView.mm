@@ -11,6 +11,7 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/texture2d.hpp>
+#include <mbgl/plugin/plugin_file_source.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>

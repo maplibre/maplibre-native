@@ -391,7 +391,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
                 state.setPitch(util::interpolate(startPitch, pitch, k));
             }
             if (roll != startRoll) {
-                state.setPitch(util::interpolate(startRoll, roll, k));
+                state.setRoll(util::interpolate(startRoll, roll, k));
             }
             if (fov != startFov) {
                 state.setFieldOfView(util::interpolate(startFov, fov, k));

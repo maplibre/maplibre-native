@@ -113,6 +113,7 @@ private:
         Property<Point<double>> latlng;
         Property<double> zoom, bearing, pitch;
         Property<EdgeInsets> padding;
+        Property<double> roll, fov, centerAltitude;
     };
 
     void startTransition(const CameraOptions&, const Duration&, Animation&);
@@ -134,6 +135,15 @@ private:
         }
         if (properties.pitch.animation) {
             f(*properties.pitch.animation);
+        }
+        if (properties.roll.animation) {
+            f(*properties.roll.animation);
+        }
+        if (properties.fov.animation) {
+            f(*properties.fov.animation);
+        }
+        if (properties.centerAltitude.animation) {
+            f(*properties.centerAltitude.animation);
         }
     }
 
