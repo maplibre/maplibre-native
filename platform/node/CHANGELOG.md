@@ -5,6 +5,33 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+- Node - Update NAN and node-pre-gyp  ([#4128](https://github.com/maplibre/maplibre-native/pull/4128)) (by [acalcutt](https://github.com/acalcutt))
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)) (by [acalcutt](https://github.com/acalcutt))
+- android: make RemovedUnusedImagesTest less flaky? ([#4129](https://github.com/maplibre/maplibre-native/pull/4129)) (by [louwers](https://github.com/louwers))
+- Use Vulkan as default rendering backend MapLibre Android ([#4127](https://github.com/maplibre/maplibre-native/pull/4127)) (by [louwers](https://github.com/louwers))
+- ios: apply clang-format to Objective-C++ sources ([#4060](https://github.com/maplibre/maplibre-native/pull/4060)) (by [louwers](https://github.com/louwers))
+- ios-ci: fix stale git lock file crash on self-hosted runner ([#4120](https://github.com/maplibre/maplibre-native/pull/4120)) (by [app/copilot-swe-agent](https://github.com/app/copilot-swe-agent))
+- Show progress on device when Android render test is running ([#4119](https://github.com/maplibre/maplibre-native/pull/4119)) (by [louwers](https://github.com/louwers))
+- Fix macOS render test build command ([#4122](https://github.com/maplibre/maplibre-native/pull/4122)) (by [xabbu42](https://github.com/xabbu42))
+- Distance-based tile LOD ([#4057](https://github.com/maplibre/maplibre-native/pull/4057)) (by [NathanMOlson](https://github.com/NathanMOlson))
+- Fix vulnerability by upgrading to newest minimatch version ([#4118](https://github.com/maplibre/maplibre-native/pull/4118)) (by [thurnbauermatthi](https://github.com/thurnbauermatthi))
+- Fix incorrect shader selection for text labels with inline images ([#4082](https://github.com/maplibre/maplibre-native/pull/4082)) (by [ciscorn](https://github.com/ciscorn))
+- core: Fix Vulkan dynamic texture threading ([#4102](https://github.com/maplibre/maplibre-native/pull/4102)) (by [adrian-cojocaru](https://github.com/adrian-cojocaru))
+- webgpu: clamp scissor rect to renderable size ([#4106](https://github.com/maplibre/maplibre-native/pull/4106)) (by [birkskyum](https://github.com/birkskyum))
+- core: Disable VMA leak check ([#4100](https://github.com/maplibre/maplibre-native/pull/4100)) (by [adrian-cojocaru](https://github.com/adrian-cojocaru))
+- core: fix narrowing conversion warnings in webgpu drawable ([#4104](https://github.com/maplibre/maplibre-native/pull/4104)) (by [birkskyum](https://github.com/birkskyum))
+- Fix crashing of iOS test apps and add Heatmap ([#4099](https://github.com/maplibre/maplibre-native/pull/4099)) (by [birkskyum](https://github.com/birkskyum))
+- set font for local glyph rasterizer GLFW app Apple platforms ([#4098](https://github.com/maplibre/maplibre-native/pull/4098)) (by [louwers](https://github.com/louwers))
+- Split iOS CMake preset into ios (base) + ios-metal ([#4096](https://github.com/maplibre/maplibre-native/pull/4096)) (by [birkskyum](https://github.com/birkskyum))
+- simplify backend selection on android ([#4095](https://github.com/maplibre/maplibre-native/pull/4095)) (by [birkskyum](https://github.com/birkskyum))
+- webgpu: bump wgpu-native and dawn ([#4094](https://github.com/maplibre/maplibre-native/pull/4094)) (by [birkskyum](https://github.com/birkskyum))
+- fix Android Vulkan instrumentation tests ([#4091](https://github.com/maplibre/maplibre-native/pull/4091)) (by [adrian-cojocaru](https://github.com/adrian-cojocaru))
+- Bake build ID into test app for iOS ([#4093](https://github.com/maplibre/maplibre-native/pull/4093)) (by [louwers](https://github.com/louwers))
+## 6.3.1-pre.0
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
 ## 6.3.0
 - Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
 - Updated NAN to v2.23.0 to support node v24 ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
