@@ -8,6 +8,7 @@
 
 #include "background_layer.hpp"
 #include "circle_layer.hpp"
+#include "color_relief_layer.hpp"
 #include "custom_layer.hpp"
 #include "fill_extrusion_layer.hpp"
 #include "fill_layer.hpp"
@@ -58,6 +59,11 @@ LayerManagerAndroid::LayerManagerAndroid() {
     addLayerTypeCoreOnly(std::make_unique<HillshadeLayerFactory>());
 #elif !defined(MBGL_LAYER_HILLSHADE_DISABLE_ALL)
     addLayerType(std::make_unique<HillshadeJavaLayerPeerFactory>());
+#endif
+#if defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_RUNTIME)
+    addLayerTypeCoreOnly(std::make_unique<ColorReliefLayerFactory>());
+#elif !defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_ALL)
+    addLayerType(std::make_unique<ColorReliefJavaLayerPeerFactory>());
 #endif
 #if defined(MBGL_LAYER_FILL_EXTRUSION_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<FillExtrusionLayerFactory>());

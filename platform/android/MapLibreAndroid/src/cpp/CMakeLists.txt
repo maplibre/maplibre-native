@@ -147,6 +147,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/layers/background_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.hpp
+            ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.cpp
+            ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.cpp
