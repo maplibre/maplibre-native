@@ -8,22 +8,28 @@
   "configurePresets": [
     {
       "name": "ios",
-      "displayName": "iOS",
+      "hidden": true,
       "generator": "Xcode",
-      "description": "Create Xcode project for iOS",
-      "binaryDir": "${sourceDir}/build-ios",
+      "description": "Base iOS preset",
       "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
-        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0",
-        "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF"
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0"
       },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "ios-metal",
+      "displayName": "iOS Metal",
+      "inherits": "ios",
+      "binaryDir": "${sourceDir}/build-ios",
+      "cacheVariables": {
+        "MLN_WITH_METAL": "ON"
       }
     },
     {

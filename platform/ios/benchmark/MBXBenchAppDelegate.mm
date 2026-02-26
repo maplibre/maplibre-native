@@ -7,18 +7,17 @@
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-
 #ifndef MLN_LOGGING_DISABLED
-    [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
+  [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
 #endif
 
-    [MLNSettings useWellKnownTileServer:MLNMapTiler];
+  [MLNSettings useWellKnownTileServer:MLNMapTiler];
 
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = [MBXBenchViewController new];
-    [self.window makeKeyAndVisible];
+  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  self.window.rootViewController = [MBXBenchViewController new];
+  [self.window makeKeyAndVisible];
 
-    return YES;
+  return YES;
 }
 
 @end

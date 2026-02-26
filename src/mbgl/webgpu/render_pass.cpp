@@ -110,6 +110,11 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         colorAttachment.clearValue = value;
     } else {
         colorAttachment.loadOp = WGPULoadOp_Load;
+#if MLN_WEBGPU_IMPL_WGPU
+        // wgpu-native requires clearValue to be set even when using LoadOp_Load
+        const WGPUColor defaultClearValue{0.0, 0.0, 0.0, 0.0};
+        colorAttachment.clearValue = defaultClearValue;
+#endif
     }
 
     WGPURenderPassDepthStencilAttachment depthAttachment = {};
@@ -175,6 +180,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         auto size = descriptor.renderable.getSize();
         wgpuRenderPassEncoderSetViewport(
             impl->encoder, 0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height), 0.0f, 1.0f);
+        wgpuRenderPassEncoderSetScissorRect(impl->encoder, 0, 0, size.width, size.height);
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to begin render pass");
         impl->colorView = nullptr;

@@ -106,11 +106,11 @@ jobs:
           persist-credentials: false
 
       - name: Get OS Architecture
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
+        if: runner.os == 'macOS' || runner.os == 'Linux'
         run: uname -m
 
       - name: Install dependencies (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -141,7 +141,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v4
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -193,14 +193,14 @@ jobs:
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
           key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
 
       - name: Configure maplibre-native (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         run: |
           cmake --preset macos-metal-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
@@ -218,7 +218,7 @@ jobs:
 
       - name: Restore vcpkg binary cache
         if: runner.os == 'Windows'
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -242,7 +242,7 @@ jobs:
           cmake --preset windows-arm64-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
+        if: runner.os == 'macOS' || runner.os == 'Linux'
         run: |
           cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
@@ -254,15 +254,20 @@ jobs:
       - name: Run render tests on macOS
         id: render_tests
         if: runner.os == 'macOS'
-        continue-on-error: ${{ runner.arch == 'X64' }}
+        continue-on-error: true
         run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
+          if-no-files-found: ignore
+
+      - name: Fail macOS render tests when required
+        if: runner.os == 'macOS' && steps.render_tests.outcome == 'failure' && runner.arch != 'X64'
+        run: exit 1
 
       - name: Test (Linux)
         working-directory: platform/node
@@ -270,7 +275,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'macOS'
         continue-on-error: true  # flaky on CI
         working-directory: platform/node
         run: npm test

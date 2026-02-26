@@ -167,6 +167,10 @@ template std::optional<PropertyExpression<TextTransformType>> convertFunctionToE
     const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<TranslateAnchorType>> convertFunctionToExpression<TranslateAnchorType>(
     const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<std::vector<Color>>> convertFunctionToExpression<std::vector<Color>>(
+    const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<HillshadeMethodType>> convertFunctionToExpression<HillshadeMethodType>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Formatted>> convertFunctionToExpression<Formatted>(const Convertible&,
                                                                                              Error&,
                                                                                              bool);
@@ -217,7 +221,19 @@ bool interpolatable(type::Type type) noexcept {
                       [&](const type::ColorType&) { return true; },
                       [&](const type::PaddingType&) { return true; },
                       [&](const type::VariableAnchorOffsetCollectionType&) { return true; },
-                      [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
+                      [&](const type::Array& array) {
+                          // Arrays are interpolatable if they have a fixed size and item type is Number,
+                          // OR if the item type itself is interpolatable (e.g., Array<Color>)
+                          if (array.N && array.itemType == type::Number) {
+                              return true;
+                          }
+                          // Variable-length Number arrays (like line-dasharray) are not interpolatable
+                          // because interpolating between different dasharray patterns doesn't make semantic sense
+                          if (!array.N && array.itemType == type::Number) {
+                              return false;
+                          }
+                          return interpolatable(array.itemType);
+                      },
                       [&](const auto&) { return false; });
 }
 
@@ -355,16 +371,31 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         error.message = "function value must specify stops";
         return std::nullopt;
     }
-
     if (!isArray(*stopsValue)) {
         error.message = "function stops must be an array";
         return std::nullopt;
     }
-
     if (arrayLength(*stopsValue) == 0) {
         error.message = "function must have at least one stop";
         return std::nullopt;
     }
+
+    // For std::vector<Color> (hillshade color arrays), parse stops as the item type
+    // This allows zoom function interpolation of individual colors
+    // Other array types (translate, dasharray, etc) use the full type
+    type::Type stopType = type;
+    bool isColorArray = false;
+    type.match(
+        [&](const type::Array& arr) {
+            // Check if this is an array of Color
+            arr.itemType.match(
+                [&](const type::ColorType&) {
+                    stopType = arr.itemType;
+                    isColorArray = true;
+                },
+                [](const auto&) {});
+        },
+        [](const auto&) {});
 
     std::map<double, std::unique_ptr<Expression>> stops;
     for (std::size_t i = 0; i < arrayLength(*stopsValue); ++i) {
@@ -386,14 +417,12 @@ std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const 
         }
 
         std::optional<std::unique_ptr<Expression>> e = convertLiteral(
-            type, arrayMember(stopValue, 1), error, convertTokens);
+            stopType, arrayMember(stopValue, 1), error, convertTokens);
         if (!e) {
             return std::nullopt;
         }
-
         stops.emplace(*t, std::move(*e));
     }
-
     return {std::move(stops)};
 }
 
@@ -555,7 +584,28 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
 
-    auto expr = step(type, makeInput(true), std::move(*stops));
+    // For std::vector<Color> arrays, create step with item type
+    type::Type exprType = type;
+    bool isColorArray = false;
+    type.match(
+        [&](const type::Array& arr) {
+            // Check if this is an array of Color
+            arr.itemType.match(
+                [&](const type::ColorType&) {
+                    exprType = arr.itemType;
+                    isColorArray = true;
+                },
+                [](const auto&) {});
+        },
+        [](const auto&) {});
+
+    auto expr = step(exprType, makeInput(true), std::move(*stops));
+
+    // For color arrays with camera functions, return the step directly
+    if (isColorArray && !def) {
+        return expr;
+    }
+
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
@@ -575,7 +625,28 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
         return std::nullopt;
     }
 
-    auto expr = interpolate(type, exponential(*base), makeInput(true), std::move(*stops));
+    // For std::vector<Color> arrays, create interpolation with item type
+    type::Type exprType = type;
+    bool isColorArray = false;
+    type.match(
+        [&](const type::Array& arr) {
+            // Check if this is an array of Color
+            arr.itemType.match(
+                [&](const type::ColorType&) {
+                    exprType = arr.itemType;
+                    isColorArray = true;
+                },
+                [](const auto&) {});
+        },
+        [](const auto&) {});
+
+    auto expr = interpolate(exprType, exponential(*base), makeInput(true), std::move(*stops));
+
+    // For color arrays with camera functions, return the interpolation directly
+    if (isColorArray && !def) {
+        return expr;
+    }
+
     return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 

@@ -42,8 +42,7 @@ Texture2D::Texture2D(Context& context_)
     : context(context_) {}
 
 Texture2D::~Texture2D() {
-    destroyTexture();
-    destroySampler();
+    destroy(true);
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
@@ -62,6 +61,9 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
     }
+
+    destroyTexture();
+
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     textureDirty = true;
@@ -72,6 +74,9 @@ gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
+
+    destroyTexture();
+
     size = size_;
     textureDirty = true;
     return *this;
@@ -126,6 +131,11 @@ void Texture2D::create() noexcept {
     }
 }
 
+void Texture2D::destroy(bool deferred) noexcept {
+    destroyTexture(deferred);
+    destroySampler(deferred);
+}
+
 void Texture2D::upload() noexcept {
     if (!imageData) return;
 
@@ -145,14 +155,15 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     const auto& encoder = context.createCommandEncoder();
     const auto& encoderImpl = static_cast<const CommandEncoder&>(*encoder);
 
-    uploadSubRegion(pixelData, size_, xOffset, yOffset, encoderImpl.getCommandBuffer());
+    uploadSubRegion(pixelData, size_, xOffset, yOffset, encoderImpl.getCommandBuffer(), false);
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData,
                                 const Size& size_,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
-                                const vk::UniqueCommandBuffer& commandBuffer) noexcept {
+                                const vk::UniqueCommandBuffer& commandBuffer,
+                                bool submit) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
@@ -182,33 +193,38 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
     memcpy(bufferAllocation->mappedBuffer, pixelData, bufferInfo.size);
 
-    const auto enqueueCommands = [&](const auto& buffer) {
-        transitionToTransferLayout(buffer);
+    transitionToTransferWriteLayout(commandBuffer);
 
-        const auto region = vk::BufferImageCopy()
-                                .setBufferOffset(0)
-                                .setBufferRowLength(size_.width)
-                                .setImageSubresource(
-                                    vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
-                                .setImageOffset(vk::Offset3D(xOffset, yOffset))
-                                .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
+    const auto region = vk::BufferImageCopy()
+                            .setBufferOffset(0)
+                            .setBufferRowLength(size_.width)
+                            .setImageSubresource(vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                            .setImageOffset(vk::Offset3D(xOffset, yOffset))
+                            .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
 
-        buffer->copyBufferToImage(
-            bufferAllocation->buffer, imageAllocation->image, imageLayout, region, backend.getDispatcher());
+    commandBuffer->copyBufferToImage(
+        bufferAllocation->buffer, imageAllocation->image, imageLayout, region, backend.getDispatcher());
 
-        if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
-            generateMips(buffer);
-        } else {
-            transitionToShaderReadLayout(buffer);
-        }
-    };
+    if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
+        generateMips(commandBuffer);
+    } else if (textureUsage == Texture2DUsage::Blit) {
+        transitionToTransferReadLayout(commandBuffer);
+    } else {
+        transitionToShaderReadLayout(commandBuffer);
+    }
 
-    enqueueCommands(commandBuffer);
+    if (submit) {
+        commandBuffer->end(context.getBackend().getDispatcher());
+        context.submitOneTimeCommand(commandBuffer);
+        bufferAllocation.reset();
+    } else {
+        context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](auto&) mutable { buffAlloc.reset(); });
+    }
 
-    context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](auto&) mutable { buffAlloc.reset(); });
-
-    context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += bufferInfo.size;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += bufferInfo.size;
+    });
 }
 
 vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::TextureChannelDataType channel) {
@@ -267,6 +283,8 @@ vk::SamplerAddressMode Texture2D::vulkanAddressMode(const gfx::TextureWrapType t
 void Texture2D::createTexture() {
     if (size.width == 0 || size.height == 0) return;
 
+    destroyTexture();
+
     const auto& backend = context.getBackend();
 
     const auto format = vulkanFormat(pixelFormat, channelType);
@@ -294,6 +312,12 @@ void Texture2D::createTexture() {
 
         case Texture2DUsage::Read:
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst;
+            imageTiling = vk::ImageTiling::eLinear;
+            break;
+
+        case Texture2DUsage::Blit:
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eSampled |
+                         vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
             imageTiling = vk::ImageTiling::eLinear;
             break;
     }
@@ -360,9 +384,11 @@ void Texture2D::createTexture() {
         imageLayout = imageCreateInfo.initialLayout;
     }
 
-    context.renderingStats().numCreatedTextures++;
-    context.renderingStats().numActiveTextures++;
-    context.renderingStats().memTextures += getDataSize();
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numCreatedTextures++;
+        stats.numActiveTextures++;
+        stats.memTextures += getDataSize();
+    });
 
     textureDirty = false;
     lastModified = util::MonotonicTimer::now();
@@ -400,28 +426,39 @@ void Texture2D::createSampler() {
     lastModified = util::MonotonicTimer::now();
 }
 
-void Texture2D::destroyTexture() {
+void Texture2D::destroyTexture(bool deferred) {
     if (imageAllocation) {
-        context.enqueueDeletion([allocation = std::move(imageAllocation)](auto&) mutable { allocation.reset(); });
+        if (deferred) {
+            context.enqueueDeletion([allocation = std::move(imageAllocation)](auto&) mutable { allocation.reset(); });
+        } else {
+            imageAllocation.reset();
+        }
 
         imageLayout = vk::ImageLayout::eUndefined;
 
-        context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= Texture2D::getDataSize();
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numActiveTextures--;
+            stats.memTextures -= Texture2D::getDataSize();
+        });
     }
 }
 
-void Texture2D::destroySampler() {
+void Texture2D::destroySampler(bool deferred) {
     if (sampler) {
-        context.enqueueDeletion([sampler_ = std::move(sampler)](auto& context_) mutable {
-            context_.getBackend().getDevice()->destroySampler(sampler_, nullptr, context_.getBackend().getDispatcher());
-        });
+        if (deferred) {
+            context.enqueueDeletion([sampler_ = std::move(sampler)](auto& context_) mutable {
+                context_.getBackend().getDevice()->destroySampler(
+                    sampler_, nullptr, context_.getBackend().getDispatcher());
+            });
+        } else {
+            context.getBackend().getDevice()->destroySampler(sampler, nullptr, context.getBackend().getDispatcher());
+        }
 
         sampler = nullptr;
     }
 }
 
-void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer) {
+void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto barrier = vk::ImageMemoryBarrier()
                              .setImage(imageAllocation->image)
                              .setOldLayout(imageLayout)
@@ -433,6 +470,28 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
     buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
+
+    imageLayout = barrier.newLayout;
+}
+
+void Texture2D::transitionToTransferReadLayout(const vk::UniqueCommandBuffer& buffer) {
+    const auto barrier = vk::ImageMemoryBarrier()
+                             .setImage(imageAllocation->image)
+                             .setOldLayout(imageLayout)
+                             .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                             .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+                             .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+                             .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                             .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eTransfer,
                             {},
                             nullptr,
@@ -495,7 +554,7 @@ const vk::Sampler& Texture2D::getVulkanSampler() {
     return sampler;
 }
 
-void Texture2D::copyImage(vk::Image image) {
+void Texture2D::copyImage(vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset) {
     if (!image) return;
 
     create();
@@ -504,9 +563,10 @@ void Texture2D::copyImage(vk::Image image) {
         const auto copyInfo = vk::ImageCopy()
                                   .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
                                   .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                                  .setExtent({size.width, size.height, 1});
+                                  .setExtent({imageSize.width, imageSize.height, 1})
+                                  .setDstOffset({xOffset, yOffset, 0});
 
-        transitionToTransferLayout(commandBuffer);
+        transitionToTransferWriteLayout(commandBuffer);
         commandBuffer->copyImage(image,
                                  vk::ImageLayout::eTransferSrcOptimal,
                                  imageAllocation->image,

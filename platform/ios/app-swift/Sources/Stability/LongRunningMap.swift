@@ -27,21 +27,32 @@ struct LongRunningMapView: View {
     let DURATION = 72.0 * 60.0 * 60.0
 
     @Environment(\.dismiss) var dismiss
+    @State private var remainingTime: TimeInterval = 72.0 * 60.0 * 60.0
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             UserMapView()
             NavigationMapView()
         }
+        .edgesIgnoringSafeArea(.bottom)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
+            remainingTime = DURATION
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
         }
-        .onReceive(Timer.publish(every: DURATION, on: .current, in: .default).autoconnect()) { _ in
-            printMemoryUsage()
-            dismiss()
+        .onReceive(Timer.publish(every: 1.0, on: .current, in: .default).autoconnect()) { _ in
+            if remainingTime > 0 {
+                remainingTime -= 1.0
+            } else {
+                printMemoryUsage()
+                dismiss()
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            CountdownBadge(remainingTime: remainingTime)
+                .padding(16)
         }
     }
 }

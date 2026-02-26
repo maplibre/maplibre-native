@@ -618,7 +618,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                 entry.sampler = texture->getSampler();
                                 break;
                             }
-                            case ShaderProgram::BindingType::Texture: {
+                            case ShaderProgram::BindingType::Texture:
+                            case ShaderProgram::BindingType::UnfilterableTexture: {
                                 Texture2D* texture = findTextureForBinding(bindingInfo.binding, false);
                                 if (!texture) {
                                     validBindings = false;
@@ -814,7 +815,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
-                                                             vertexLayouts.size(),
+                                                             static_cast<uint32_t>(vertexLayouts.size()),
                                                              colorMode,
                                                              depthMode,
                                                              stencilMode,
@@ -841,13 +842,18 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    if (parameters.scissorRect.x != 0 || parameters.scissorRect.y != 0 || parameters.scissorRect.width != 0 ||
-        parameters.scissorRect.height != 0) {
-        wgpuRenderPassEncoderSetScissorRect(renderPassEncoder,
-                                            parameters.scissorRect.x,
-                                            parameters.scissorRect.y,
-                                            parameters.scissorRect.width,
-                                            parameters.scissorRect.height);
+    // Clamp scissor to the current render pass size (not the default renderable,
+    // which may be different during offscreen passes like hillshade prepare).
+    {
+        const auto& webgpuRP = static_cast<const webgpu::RenderPass&>(*parameters.renderPass);
+        const auto rtSize = webgpuRP.getDescriptor().renderable.getSize();
+        const uint32_t sx = static_cast<uint32_t>(parameters.scissorRect.x);
+        const uint32_t sy = static_cast<uint32_t>(parameters.scissorRect.y);
+        const uint32_t sw = (sx < rtSize.width) ? std::min(parameters.scissorRect.width, rtSize.width - sx) : 0;
+        const uint32_t sh = (sy < rtSize.height) ? std::min(parameters.scissorRect.height, rtSize.height - sy) : 0;
+        if (sw > 0 && sh > 0) {
+            wgpuRenderPassEncoderSetScissorRect(renderPassEncoder, sx, sy, sw, sh);
+        }
     }
 
     uint32_t bufferSlot = 0;
@@ -938,8 +944,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
-            const uint32_t instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
-            const uint32_t indexOffset = mlSegment.indexOffset;
+            const uint32_t instanceCount = instanceAttributes ? static_cast<uint32_t>(instanceAttributes->getMaxCount())
+                                                              : 1;
+            const uint32_t indexOffset = static_cast<uint32_t>(mlSegment.indexOffset);
             const int32_t baseVertex = static_cast<int32_t>(mlSegment.vertexOffset);
             const uint32_t baseInstance = 0;
 
@@ -956,11 +963,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
 
             wgpuRenderPassEncoderDrawIndexed(renderPassEncoder,
-                                             mlSegment.indexLength, // indexCount
-                                             instanceCount,         // instanceCount
-                                             indexOffset,           // firstIndex
-                                             baseVertex,            // baseVertex
-                                             baseInstance);         // firstInstance
+                                             static_cast<uint32_t>(mlSegment.indexLength), // indexCount
+                                             instanceCount,                                // instanceCount
+                                             indexOffset,                                  // firstIndex
+                                             baseVertex,                                   // baseVertex
+                                             baseInstance);                                // firstInstance
 
             context.renderingStats().numDrawCalls++;
         }

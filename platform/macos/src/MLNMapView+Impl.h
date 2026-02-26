@@ -9,7 +9,7 @@
 typedef struct _CGLContextObject* CGLContextObj;
 
 class MLNMapViewImpl : public mbgl::MapObserver {
- public:
+public:
   static std::unique_ptr<MLNMapViewImpl> Create(MLNMapView*);
 
   MLNMapViewImpl(MLNMapView*);
@@ -21,6 +21,11 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   virtual mbgl::PremultipliedImage readStillImage() = 0;
 
   virtual CGLContextObj getCGLContextObj() { return nullptr; }
+
+#if MLN_RENDER_BACKEND_METAL
+  // Returns the backend resource for Metal rendering in custom layers
+  virtual MLNBackendResource* getObject() { return nullptr; }
+#endif
 
   // Called by the view delegate when it's time to render.
   void render();
@@ -58,7 +63,7 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
   void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
- protected:
+protected:
   /// Cocoa map view that this adapter bridges to.
   __weak MLNMapView* mapView = nullptr;
 };

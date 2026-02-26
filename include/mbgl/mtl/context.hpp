@@ -98,6 +98,8 @@ public:
 
     gfx::Texture2DPtr createTexture2D() override;
 
+    gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
+
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;

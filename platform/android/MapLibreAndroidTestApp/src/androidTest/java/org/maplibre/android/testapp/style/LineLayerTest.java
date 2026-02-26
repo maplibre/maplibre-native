@@ -375,7 +375,7 @@ public class LineLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {0f, 0f};
     layer.setProperties(lineTranslate(propertyValue));
-    assertEquals(layer.getLineTranslate().getValue(), propertyValue);
+    assertArrayEquals(layer.getLineTranslate().getValue(), propertyValue);
   }
 
   @Test
@@ -552,7 +552,7 @@ public class LineLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {};
     layer.setProperties(lineDasharray(propertyValue));
-    assertEquals(layer.getLineDasharray().getValue(), propertyValue);
+    assertArrayEquals(layer.getLineDasharray().getValue(), propertyValue);
   }
 
   @Test

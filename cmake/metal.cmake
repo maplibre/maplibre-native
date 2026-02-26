@@ -16,6 +16,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/dynamic_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/index_buffer_resource.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/layer_group.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/mtl_fwd.hpp
@@ -43,6 +44,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade_prepare.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/color_relief.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
@@ -58,6 +60,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/index_buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/mtl.cpp
@@ -84,6 +87,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/color_relief.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
