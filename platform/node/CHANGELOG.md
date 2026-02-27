@@ -5,6 +5,11 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+## 6.4.0
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
 ## 6.3.1-pre.0
 ### ✨ Features and improvements
 - core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)) (by [acalcutt](https://github.com/acalcutt))
