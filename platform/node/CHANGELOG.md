@@ -7,11 +7,6 @@
 
 ## 6.4.0
 ### ✨ Features and improvements
-
-### 🐞 Bug fixes
-
-## 6.3.1-pre.0
-### ✨ Features and improvements
 - core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)) (by [acalcutt](https://github.com/acalcutt))
 - Node - Update NAN and node-pre-gyp  ([#4128](https://github.com/maplibre/maplibre-native/pull/4128)) (by [acalcutt](https://github.com/acalcutt))
 - Distance-based tile LOD ([#4057](https://github.com/maplibre/maplibre-native/pull/4057)) (by [NathanMOlson](https://github.com/NathanMOlson))
