@@ -72,17 +72,16 @@ static std::string errorTypeToString(wgpu::ErrorType type) {
         case wgpu::ErrorType::OutOfMemory: return "OutOfMemory";
         case wgpu::ErrorType::Internal: return "Internal";
         case wgpu::ErrorType::Unknown: return "Unknown";
-        case wgpu::ErrorType::DeviceLost: return "DeviceLost";
         default: return "Unknown";
     }
 }
 
 static std::string deviceLostReasonToString(wgpu::DeviceLostReason reason) {
     switch (reason) {
-        case wgpu::DeviceLostReason::Undefined: return "Undefined";
+        case wgpu::DeviceLostReason::Unknown: return "Unknown";
         case wgpu::DeviceLostReason::Destroyed: return "Destroyed";
-        case wgpu::DeviceLostReason::InstanceDropped: return "InstanceDropped";
         case wgpu::DeviceLostReason::FailedCreation: return "FailedCreation";
+        case wgpu::DeviceLostReason::CallbackCancelled: return "CallbackCancelled";
         default: return "Unknown";
     }
 }
