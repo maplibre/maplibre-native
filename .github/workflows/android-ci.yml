@@ -363,6 +363,10 @@ jobs:
         working-directory: platform/android
     env:
       IS_LOCAL_DEVELOPMENT: false
+      ANDROID_ARCH: arm64-v8a
+      RUST_TARGET: aarch64-linux-android
+      C_COMPILER: aarch64-linux-android26-clang
+      BINDGEN_TARGET: aarch64-linux-android26
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
@@ -377,7 +381,7 @@ jobs:
           toolchain: stable
 
       - name: Add Android Rust target
-        run: rustup target add aarch64-linux-android
+        run: rustup target add ${{ env.RUST_TARGET }}
 
       - name: Configure cargo for Android NDK linker
         run: |
@@ -385,18 +389,20 @@ jobs:
           NDK_BIN="$LATEST_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
           mkdir -p ../../vendor/wgpu-native/.cargo
           cat > ../../vendor/wgpu-native/.cargo/config.toml << EOF
-          [target.aarch64-linux-android]
-          linker = "$NDK_BIN/aarch64-linux-android26-clang"
+          [target.${{ env.RUST_TARGET }}]
+          linker = "$NDK_BIN/${{ env.C_COMPILER }}"
           EOF
 
-      - name: Pre-build wgpu-native for aarch64-linux-android
+      - name: Pre-build wgpu-native for Android
         working-directory: vendor/wgpu-native
         run: |
           LATEST_NDK=$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
           NDK_PREBUILT="$LATEST_NDK/toolchains/llvm/prebuilt/linux-x86_64"
           RESOURCE_DIR=$("$NDK_PREBUILT/bin/clang" --print-resource-dir)
-          export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$NDK_PREBUILT/sysroot --target=aarch64-linux-android26 -isystem $RESOURCE_DIR/include"
-          cargo build --release --target aarch64-linux-android --no-default-features --features vulkan,wgsl,spirv,glsl
+          export BINDGEN_EXTRA_CLANG_ARGS=$(echo "${{ env.RUST_TARGET }}" | tr '-' '_')
+          ENV_VAR="BINDGEN_EXTRA_CLANG_ARGS_$BINDGEN_EXTRA_CLANG_ARGS"
+          export $ENV_VAR="--sysroot=$NDK_PREBUILT/sysroot --target=${{ env.BINDGEN_TARGET }} -isystem $RESOURCE_DIR/include"
+          cargo build --release --target ${{ env.RUST_TARGET }} --no-default-features --features vulkan,wgsl,spirv,glsl
 
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
@@ -416,8 +422,8 @@ jobs:
             echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
           fi
 
-      - name: Build WebGPU wgpu-native library for arm64-v8a
-        run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=arm64-v8a
+      - name: Build WebGPU wgpu-native library for Android
+        run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=${{ env.ANDROID_ARCH }}
 
       - name: Show sccache stats
         run: sccache --show-stats
