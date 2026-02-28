@@ -7,8 +7,10 @@
 #import "MLNMapView+Metal.h"
 #elif MLN_RENDER_BACKEND_WEBGPU
 #import "MLNMapView+WebGPU.h"
-#else  // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_OPENGL
 #import "MLNMapView+OpenGL.h"
+#else
+#error "No render backend defined"
 #endif
 
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
@@ -16,8 +18,11 @@ std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
   return std::make_unique<MLNMapViewMetalImpl>(nativeView);
 #elif MLN_RENDER_BACKEND_WEBGPU
   return std::make_unique<MLNMapViewWebGPUImpl>(nativeView);
-#else  // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_OPENGL
   return std::make_unique<MLNMapViewOpenGLImpl>(nativeView);
+#else
+#error "No render backend defined"
+  return nullptr;
 #endif
 }
 
