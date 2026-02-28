@@ -31,7 +31,8 @@ if(APPLE)
         set(_wgpu_lib_arch "x86_64-apple-darwin")
     endif()
     set(_wgpu_lib_name "libwgpu_native.a")
-    set(_wgpu_lib_suffix ".dylib")
+elseif(ANDROID)
+    include("${CMAKE_CURRENT_LIST_DIR}/wgpu.android.cmake")
 elseif(WIN32)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_wgpu_lib_arch "x86_64-pc-windows-msvc")
@@ -39,7 +40,6 @@ elseif(WIN32)
         set(_wgpu_lib_arch "i686-pc-windows-msvc")
     endif()
     set(_wgpu_lib_name "wgpu_native.lib")
-    set(_wgpu_lib_suffix ".dll")
 else() # Linux
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
         set(_wgpu_lib_arch "aarch64-unknown-linux-gnu")
@@ -47,22 +47,28 @@ else() # Linux
         set(_wgpu_lib_arch "x86_64-unknown-linux-gnu")
     endif()
     set(_wgpu_lib_name "libwgpu_native.a")
-    set(_wgpu_lib_suffix ".so")
 endif()
 
 # Look for prebuilt wgpu-native library
+# Search platform-specific path first to prefer cross-compiled libraries
 set(_wgpu_lib_search_paths
-    "${_mln_wgpu_source_dir}/target/release"
     "${_mln_wgpu_source_dir}/target/${_wgpu_lib_arch}/release"
+    "${_mln_wgpu_source_dir}/target/release"
     "${_mln_wgpu_source_dir}/lib"
     "${_mln_wgpu_source_dir}/build/release"
 )
 
-find_library(WGPU_LIBRARY
-    NAMES wgpu_native libwgpu_native
-    PATHS ${_wgpu_lib_search_paths}
-    NO_DEFAULT_PATH
-)
+# On Android, prefer the static library to avoid needing to ship a separate .so
+if(ANDROID)
+    mln_wgpu_android_find_library()
+else()
+    find_library(WGPU_LIBRARY
+        NAMES wgpu_native libwgpu_native
+        PATHS ${_wgpu_lib_search_paths}
+        NO_DEFAULT_PATH
+        NO_CMAKE_FIND_ROOT_PATH
+    )
+endif()
 
 # If not found, try to build it using cargo
 if(NOT WGPU_LIBRARY)
@@ -235,6 +241,8 @@ elseif(WIN32)
         bcrypt
         ntdll
     )
+elseif(ANDROID)
+    mln_wgpu_android_link_library(mbgl-vendor-wgpu)
 else() # Linux
     # wgpu-native on Linux might need these depending on the build configuration
     find_package(Threads REQUIRED)
