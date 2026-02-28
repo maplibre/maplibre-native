@@ -68,10 +68,13 @@ list(APPEND _wgpu_lib_search_paths
 )
 
 # On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
-if(ANDROID)
-    mln_wgpu_android_find_library()
-elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    mln_wgpu_ios_find_library()
+if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    foreach(_search_path ${_wgpu_lib_search_paths})
+        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+            set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+            break()
+        endif()
+    endforeach()
 else()
     find_library(WGPU_LIBRARY
         NAMES wgpu_native libwgpu_native
@@ -130,10 +133,13 @@ if(NOT WGPU_LIBRARY)
     endif()
 
     # Try to find the library again
-    if(ANDROID)
-        mln_wgpu_android_find_library()
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        mln_wgpu_ios_find_library()
+    if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        foreach(_search_path ${_wgpu_lib_search_paths})
+            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+                break()
+            endif()
+        endforeach()
     else()
         find_library(WGPU_LIBRARY
             NAMES wgpu_native libwgpu_native
