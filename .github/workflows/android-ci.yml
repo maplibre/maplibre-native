@@ -379,12 +379,10 @@ jobs:
       - name: Add Android Rust target
         run: rustup target add aarch64-linux-android
 
-      - name: Install Android NDK
-        run: yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "ndk;28.1.13356709" > /dev/null || true
-
       - name: Configure cargo for Android NDK linker
         run: |
-          NDK_BIN="$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          LATEST_NDK=$(ls -1d $ANDROID_SDK_ROOT/ndk/* | sort -V | tail -n 1)
+          NDK_BIN="$LATEST_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
           mkdir -p ../../vendor/wgpu-native/.cargo
           cat > ../../vendor/wgpu-native/.cargo/config.toml << EOF
           [target.aarch64-linux-android]
@@ -394,7 +392,8 @@ jobs:
       - name: Pre-build wgpu-native for aarch64-linux-android
         working-directory: vendor/wgpu-native
         run: |
-          NDK_PREBUILT="$ANDROID_SDK_ROOT/ndk/28.1.13356709/toolchains/llvm/prebuilt/linux-x86_64"
+          LATEST_NDK=$(ls -1d $ANDROID_SDK_ROOT/ndk/* | sort -V | tail -n 1)
+          NDK_PREBUILT="$LATEST_NDK/toolchains/llvm/prebuilt/linux-x86_64"
           RESOURCE_DIR=$("$NDK_PREBUILT/bin/clang" --print-resource-dir)
           export BINDGEN_EXTRA_CLANG_ARGS_aarch64_linux_android="--sysroot=$NDK_PREBUILT/sysroot --target=aarch64-linux-android26 -isystem $RESOURCE_DIR/include"
           cargo build --release --target aarch64-linux-android --no-default-features --features vulkan,wgsl,spirv,glsl
