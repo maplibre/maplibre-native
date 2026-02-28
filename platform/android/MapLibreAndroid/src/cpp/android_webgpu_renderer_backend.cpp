@@ -23,26 +23,16 @@
 #include <thread>
 
 static void wgpuLogCallback(WGPULogLevel level, WGPUStringView message, void* /*userdata*/) {
-    int androidLevel = ANDROID_LOG_INFO;
-    switch (level) {
-        case WGPULogLevel_Error:
-            androidLevel = ANDROID_LOG_ERROR;
-            break;
-        case WGPULogLevel_Warn:
-            androidLevel = ANDROID_LOG_WARN;
-            break;
-        case WGPULogLevel_Info:
-            androidLevel = ANDROID_LOG_INFO;
-            break;
-        case WGPULogLevel_Debug:
-            androidLevel = ANDROID_LOG_DEBUG;
-            break;
-        case WGPULogLevel_Trace:
-            androidLevel = ANDROID_LOG_VERBOSE;
-            break;
-        default:
-            break;
-    }
+    const int androidLevel = [&]() {
+        switch (level) {
+            case WGPULogLevel_Error: return ANDROID_LOG_ERROR;
+            case WGPULogLevel_Warn: return ANDROID_LOG_WARN;
+            case WGPULogLevel_Info: return ANDROID_LOG_INFO;
+            case WGPULogLevel_Debug: return ANDROID_LOG_DEBUG;
+            case WGPULogLevel_Trace: return ANDROID_LOG_VERBOSE;
+            default: return ANDROID_LOG_INFO;
+        }
+    }();
     if (message.data && message.length > 0) {
         __android_log_print(androidLevel, "wgpu-native", "%.*s", static_cast<int>(message.length), message.data);
     }
