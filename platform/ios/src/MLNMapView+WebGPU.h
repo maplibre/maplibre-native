@@ -8,12 +8,12 @@
 class MLNMapViewWebGPUImpl final : public MLNMapViewImpl,
                                    public mbgl::webgpu::RendererBackend,
                                    public mbgl::gfx::Renderable {
- public:
+public:
   MLNMapViewWebGPUImpl(MLNMapView*);
   ~MLNMapViewWebGPUImpl() override;
 
   // Implementation of mbgl::gfx::RendererBackend
- public:
+public:
   mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
   // webgpu::RendererBackend overrides
@@ -24,7 +24,7 @@ class MLNMapViewWebGPUImpl final : public MLNMapViewImpl,
   void markNeedsPresent();
 
   // Implementation of MLNMapViewImpl
- public:
+public:
   mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
   void setOpaque(bool) override;
@@ -37,7 +37,7 @@ class MLNMapViewWebGPUImpl final : public MLNMapViewImpl,
   void layoutChanged() override;
   MLNBackendResource* getObject() override;
 
- private:
+private:
   void activate() override;
   void deactivate() override;
 

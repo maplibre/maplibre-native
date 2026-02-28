@@ -7607,8 +7607,7 @@ static void *windowScreenContext = &windowScreenContext;
 #if MLN_RENDER_BACKEND_METAL
       const mbgl::mtl::RenderPass &renderPass =
           static_cast<mbgl::mtl::RenderPass &>(*paintParameters.renderPass);
-      id encoder =
-          (__bridge id)renderPass.getMetalEncoder().get();
+      id encoder = (__bridge id)renderPass.getMetalEncoder().get();
 #else
       id encoder = nil;
 #endif
