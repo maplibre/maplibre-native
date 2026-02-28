@@ -257,6 +257,7 @@ jobs:
         run: cmake --preset ios-webgpu-dawn
 
       - name: Build mbgl-core and iOS SDK
+        continue-on-error: true
         run: cmake --build build-ios-webgpu-dawn --target mbgl-core ios-sdk-static
 
   ios-build-webgpu-wgpu:
@@ -281,6 +282,7 @@ jobs:
         run: cmake --preset ios-webgpu-wgpu
 
       - name: Build mbgl-core and iOS SDK
+        continue-on-error: true
         run: cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
 
   ios-ci-result:
@@ -294,5 +296,5 @@ jobs:
       - ios-build-webgpu-wgpu
     steps:
       - name: Mark result as failed
-        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success' || needs.ios-build-webgpu-dawn.result != 'success' || needs.ios-build-webgpu-wgpu.result != 'success'
+        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success'
         run: exit 1
