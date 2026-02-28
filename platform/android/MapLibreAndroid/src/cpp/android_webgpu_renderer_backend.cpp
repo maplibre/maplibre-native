@@ -26,12 +26,18 @@
 static void wgpuLogCallback(WGPULogLevel level, WGPUStringView message, void* /*userdata*/) {
     const int androidLevel = [&]() {
         switch (level) {
-            case WGPULogLevel_Error: return ANDROID_LOG_ERROR;
-            case WGPULogLevel_Warn: return ANDROID_LOG_WARN;
-            case WGPULogLevel_Info: return ANDROID_LOG_INFO;
-            case WGPULogLevel_Debug: return ANDROID_LOG_DEBUG;
-            case WGPULogLevel_Trace: return ANDROID_LOG_VERBOSE;
-            default: return ANDROID_LOG_INFO;
+            case WGPULogLevel_Error:
+                return ANDROID_LOG_ERROR;
+            case WGPULogLevel_Warn:
+                return ANDROID_LOG_WARN;
+            case WGPULogLevel_Info:
+                return ANDROID_LOG_INFO;
+            case WGPULogLevel_Debug:
+                return ANDROID_LOG_DEBUG;
+            case WGPULogLevel_Trace:
+                return ANDROID_LOG_VERBOSE;
+            default:
+                return ANDROID_LOG_INFO;
         }
     }();
     if (message.data && message.length > 0) {
@@ -67,22 +73,33 @@ namespace android {
 #if MLN_WEBGPU_IMPL_DAWN
 static std::string errorTypeToString(wgpu::ErrorType type) {
     switch (type) {
-        case wgpu::ErrorType::NoError: return "NoError";
-        case wgpu::ErrorType::Validation: return "Validation";
-        case wgpu::ErrorType::OutOfMemory: return "OutOfMemory";
-        case wgpu::ErrorType::Internal: return "Internal";
-        case wgpu::ErrorType::Unknown: return "Unknown";
-        default: return "Unknown";
+        case wgpu::ErrorType::NoError:
+            return "NoError";
+        case wgpu::ErrorType::Validation:
+            return "Validation";
+        case wgpu::ErrorType::OutOfMemory:
+            return "OutOfMemory";
+        case wgpu::ErrorType::Internal:
+            return "Internal";
+        case wgpu::ErrorType::Unknown:
+            return "Unknown";
+        default:
+            return "Unknown";
     }
 }
 
 static std::string deviceLostReasonToString(wgpu::DeviceLostReason reason) {
     switch (reason) {
-        case wgpu::DeviceLostReason::Unknown: return "Unknown";
-        case wgpu::DeviceLostReason::Destroyed: return "Destroyed";
-        case wgpu::DeviceLostReason::FailedCreation: return "FailedCreation";
-        case wgpu::DeviceLostReason::CallbackCancelled: return "CallbackCancelled";
-        default: return "Unknown";
+        case wgpu::DeviceLostReason::Unknown:
+            return "Unknown";
+        case wgpu::DeviceLostReason::Destroyed:
+            return "Destroyed";
+        case wgpu::DeviceLostReason::FailedCreation:
+            return "FailedCreation";
+        case wgpu::DeviceLostReason::CallbackCancelled:
+            return "CallbackCancelled";
+        default:
+            return "Unknown";
     }
 }
 #endif
