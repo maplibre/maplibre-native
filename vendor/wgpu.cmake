@@ -60,12 +60,7 @@ set(_wgpu_lib_search_paths
 
 # On Android, prefer the static library to avoid needing to ship a separate .so
 if(ANDROID)
-    foreach(_search_path ${_wgpu_lib_search_paths})
-        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-            set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-            break()
-        endif()
-    endforeach()
+    mln_wgpu_android_find_library()
 else()
     find_library(WGPU_LIBRARY
         NAMES wgpu_native libwgpu_native
@@ -247,13 +242,7 @@ elseif(WIN32)
         ntdll
     )
 elseif(ANDROID)
-    find_package(Threads REQUIRED)
-    target_link_libraries(mbgl-vendor-wgpu INTERFACE
-        Threads::Threads
-        ${CMAKE_DL_LIBS}
-        log
-        android
-    )
+    mln_wgpu_android_link_library(mbgl-vendor-wgpu)
 else() # Linux
     # wgpu-native on Linux might need these depending on the build configuration
     find_package(Threads REQUIRED)

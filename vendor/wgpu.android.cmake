@@ -8,3 +8,22 @@ elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86")
     set(_wgpu_lib_arch "i686-linux-android")
 endif()
 set(_wgpu_lib_name "libwgpu_native.a")
+
+macro(mln_wgpu_android_find_library)
+    foreach(_search_path ${_wgpu_lib_search_paths})
+        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+            set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+            break()
+        endif()
+    endforeach()
+endmacro()
+
+macro(mln_wgpu_android_link_library target)
+    find_package(Threads REQUIRED)
+    target_link_libraries(${target} INTERFACE
+        Threads::Threads
+        ${CMAKE_DL_LIBS}
+        log
+        android
+    )
+endmacro()
