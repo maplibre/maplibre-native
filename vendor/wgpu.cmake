@@ -68,23 +68,26 @@ list(APPEND _wgpu_lib_search_paths
 )
 
 # On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
-if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    foreach(_search_path ${_wgpu_lib_search_paths})
-        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-            set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-            break()
-        endif()
-    endforeach()
-else()
-    find_library(WGPU_LIBRARY
-        NAMES wgpu_native libwgpu_native
-        PATHS ${_wgpu_lib_search_paths}
-        NO_DEFAULT_PATH
-        NO_CMAKE_FIND_ROOT_PATH
-    )
-endif()
+macro(mln_wgpu_find_library)
+    if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        foreach(_search_path ${_wgpu_lib_search_paths})
+            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+                break()
+            endif()
+        endforeach()
+    else()
+        find_library(WGPU_LIBRARY
+            NAMES wgpu_native libwgpu_native
+            PATHS ${_wgpu_lib_search_paths}
+            NO_DEFAULT_PATH
+            NO_CMAKE_FIND_ROOT_PATH
+        )
+    endif()
+endmacro()
 
-# If not found, try to build it using cargo
+mln_wgpu_find_library()
+
 if(NOT WGPU_LIBRARY)
     message(STATUS "Pre-built wgpu-native library not found, attempting to build from source...")
 
@@ -133,20 +136,7 @@ if(NOT WGPU_LIBRARY)
     endif()
 
     # Try to find the library again
-    if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        foreach(_search_path ${_wgpu_lib_search_paths})
-            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-                break()
-            endif()
-        endforeach()
-    else()
-        find_library(WGPU_LIBRARY
-            NAMES wgpu_native libwgpu_native
-            PATHS ${_wgpu_lib_search_paths}
-            NO_DEFAULT_PATH
-        )
-    endif()
+    mln_wgpu_find_library()
 
     if(NOT WGPU_LIBRARY)
         message(FATAL_ERROR "Failed to locate wgpu-native library after building")
