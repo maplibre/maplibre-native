@@ -63,7 +63,7 @@ set(DAWN_BUILD_PROTOBUF OFF CACHE BOOL "Disable protobuf for cross-compilation" 
 
 # GLFW is not available on iOS (Dawn auto-detects it via UNIX AND NOT ANDROID)
 if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    set(DAWN_USE_GLFW OFF CACHE BOOL "Disable GLFW on iOS" FORCE)
+    include("${CMAKE_CURRENT_LIST_DIR}/dawn.ios.cmake")
 endif()
 
 # The Xcode generator does not properly handle $<TARGET_OBJECTS:...> in add_library(),

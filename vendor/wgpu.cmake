@@ -26,12 +26,7 @@ endif()
 # Platform-specific library names and paths
 if(APPLE)
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        if(CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
-            set(_wgpu_lib_arch "aarch64-apple-ios-sim")
-        else()
-            set(_wgpu_lib_arch "aarch64-apple-ios")
-        endif()
-        set(_wgpu_cargo_features "--no-default-features;--features;metal,wgsl,spirv,glsl")
+        include("${CMAKE_CURRENT_LIST_DIR}/wgpu.ios.cmake")
     else()
         if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
             set(_wgpu_lib_arch "aarch64-apple-darwin")
@@ -63,14 +58,8 @@ endif()
 set(_wgpu_lib_search_paths
     "${_mln_wgpu_source_dir}/target/${_wgpu_lib_arch}/release"
 )
-# With the Xcode generator, CMAKE_OSX_SYSROOT is "iphoneos" at configure time even when
-# the user builds for simulator. Search both iOS architectures so the right one is found.
 if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    if(_wgpu_lib_arch STREQUAL "aarch64-apple-ios")
-        list(APPEND _wgpu_lib_search_paths "${_mln_wgpu_source_dir}/target/aarch64-apple-ios-sim/release")
-    else()
-        list(APPEND _wgpu_lib_search_paths "${_mln_wgpu_source_dir}/target/aarch64-apple-ios/release")
-    endif()
+    mln_wgpu_ios_append_search_paths(_wgpu_lib_search_paths)
 endif()
 list(APPEND _wgpu_lib_search_paths
     "${_mln_wgpu_source_dir}/target/release"
@@ -82,12 +71,7 @@ list(APPEND _wgpu_lib_search_paths
 if(ANDROID)
     mln_wgpu_android_find_library()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    foreach(_search_path ${_wgpu_lib_search_paths})
-        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-            set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-            break()
-        endif()
-    endforeach()
+    mln_wgpu_ios_find_library()
 else()
     find_library(WGPU_LIBRARY
         NAMES wgpu_native libwgpu_native
@@ -125,17 +109,9 @@ if(NOT WGPU_LIBRARY)
         list(APPEND _cargo_extra_args ${_wgpu_cargo_features})
     endif()
 
-    # On iOS, bindgen's clang_macro_fallback() uses a separate clang process that
-    # doesn't inherit the .clang_arg() settings from build.rs. We must set
-    # BINDGEN_EXTRA_CLANG_ARGS so it can find system headers (needed for UINT32_MAX etc.)
     set(_cargo_env_prefix "")
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        execute_process(
-            COMMAND xcrun --sdk iphoneos --show-sdk-path
-            OUTPUT_VARIABLE _ios_sdk_path
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        set(_cargo_env_prefix ${CMAKE_COMMAND} -E env "BINDGEN_EXTRA_CLANG_ARGS=--target=arm64-apple-ios -isysroot ${_ios_sdk_path}")
+        mln_wgpu_ios_setup_cargo_env(_cargo_env_prefix)
     endif()
 
     execute_process(
@@ -154,13 +130,10 @@ if(NOT WGPU_LIBRARY)
     endif()
 
     # Try to find the library again
-    if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        foreach(_search_path ${_wgpu_lib_search_paths})
-            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-                break()
-            endif()
-        endforeach()
+    if(ANDROID)
+        mln_wgpu_android_find_library()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        mln_wgpu_ios_find_library()
     else()
         find_library(WGPU_LIBRARY
             NAMES wgpu_native libwgpu_native
