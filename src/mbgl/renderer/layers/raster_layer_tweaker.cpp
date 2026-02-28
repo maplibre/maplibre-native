@@ -100,8 +100,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                    TranslateAnchorType::Viewport,
                                    false,
                                    false,
-                                   drawable,
-                                   !parameters.state.isChanging());
+                                   drawable);
         }
 
 #if MLN_UBO_CONSOLIDATION
