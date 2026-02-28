@@ -24,7 +24,7 @@ You can find an app that uses GLFW in [`platform/glfw`](https://github.com/mapli
 
 ## Rendering Backends
 
-Originally the project only supported OpenGL 2.0. In 2023, the [renderer was modularized](https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md) allowing for the implementation of alternate rendering backends. The first alternate rendering backend that was implemented was [Metal](https://maplibre.org/news/2024-01-19-metal-support-for-maplibre-native-ios-is-here/), followed by [Vulkan](https://maplibre.org/news/2024-12-12-maplibre-android-vulkan/), and recently [WebGPU](https://maplibre.org/news/2025-02-webgpu/).
+Originally the project only supported OpenGL 2.0. In 2023, the [renderer was modularized](https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md) allowing for the implementation of alternate rendering backends. The first alternate rendering backend that was implemented was [Metal](https://maplibre.org/news/2024-01-19-metal-support-for-maplibre-native-ios-is-here/), followed by [Vulkan](https://maplibre.org/news/2024-12-12-maplibre-android-vulkan/), and recently WebGPU.
 
 What platforms support which rendering backend can be found below.
 
