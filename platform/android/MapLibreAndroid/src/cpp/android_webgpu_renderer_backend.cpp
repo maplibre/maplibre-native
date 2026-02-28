@@ -92,7 +92,7 @@ public:
     AndroidWebGPURenderableResource(AndroidWebGPURendererBackend& backend_)
         : backend(backend_) {}
 
-    void bind() override { assert(false); }
+    void bind() override {}
 
     void swap() override { backend.markNeedsPresent(); }
 
