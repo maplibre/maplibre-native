@@ -151,20 +151,21 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
         return;
     }
 
-    size_t selectedIndex = 0;
-    for (size_t i = 0; i < adapters.size(); ++i) {
-        WGPUAdapterInfo info = WGPU_ADAPTER_INFO_INIT;
-        if (wgpuAdapterGetInfo(adapters[i].Get(), &info) == WGPUStatus_Success) {
-            if (info.backendType == WGPUBackendType_Vulkan) {
-                selectedIndex = i;
+    auto findVulkanAdapter = [&]() -> dawn::native::Adapter* {
+        for (auto& a : adapters) {
+            WGPUAdapterInfo info = WGPU_ADAPTER_INFO_INIT;
+            if (wgpuAdapterGetInfo(a.Get(), &info) == WGPUStatus_Success) {
+                const auto backendType = info.backendType;
                 wgpuAdapterInfoFreeMembers(info);
-                break;
+                if (backendType == WGPUBackendType_Vulkan) {
+                    return &a;
+                }
             }
-            wgpuAdapterInfoFreeMembers(info);
         }
-    }
+        return &adapters.front();
+    };
 
-    dawn::native::Adapter& selectedAdapter = adapters[selectedIndex];
+    dawn::native::Adapter& selectedAdapter = *findVulkanAdapter();
 
     WGPUSupportedFeatures features = {};
     wgpuAdapterGetFeatures(selectedAdapter.Get(), &features);
