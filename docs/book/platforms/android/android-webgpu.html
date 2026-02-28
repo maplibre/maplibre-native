@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - MapLibre Native Developer Documentation</title>
+        <title>WebGPU - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon-735396af.svg">
-        <link rel="shortcut icon" href="favicon-e797cf1c.png">
-        <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
-        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../../favicon-735396af.svg">
+        <link rel="shortcut icon" href="../../favicon-e797cf1c.png">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="diff-a3e96580.css">
+        <link rel="stylesheet" href="../../diff-a3e96580.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-4c017c9e.js";
+            window.path_to_searchindex_js = "../../searchindex-4c017c9e.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-df56bb4b.js"></script>
+        <script src="../../toc-df56bb4b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -143,7 +143,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -178,7 +178,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
 
@@ -212,18 +212,55 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><em><a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It’s a C++ library that powers
-vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em><a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a></em>, a fork of the
-Mapbox Style Spec. Since it is derived from Mapbox’s original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
-<p>This documentation is intended for developers of MapLibre Native. If you are interested in <em>using</em> MapLibre Native, check out the <a href="https://github.com/maplibre/maplibre-native?tab=readme-ov-file#maplibre-native">main <code>README.md</code></a> on GitHub.</p>
+                        <h1 id="webgpu-on-android"><a class="header" href="#webgpu-on-android">WebGPU on Android</a></h1>
+<p>Two WebGPU implementations are supported: <strong>Dawn</strong> (Google, C++) and <strong>wgpu-native</strong> (Rust). Both use Vulkan internally on Android. The Gradle product flavors are <code>webgpuDawn</code> and <code>webgpuWgpu</code>, sharing the <code>src/webgpu/</code> Java source set.</p>
+<h2 id="building-with-dawn"><a class="header" href="#building-with-dawn">Building with Dawn</a></h2>
+<p>Dawn is fetched and built from source via CMake <code>FetchContent</code>, so no extra setup is needed. First build is slow (~20 min) because of Dawn’s dependencies (abseil, SPIRV-Tools, Tint, etc.).</p>
+<p><strong>Android Studio:</strong> Open the <strong>Build Variants</strong> panel (View &gt; Tool Windows &gt; Build Variants) and select <code>webgpuDawnDebug</code> for both <code>:MapLibreAndroid</code> and <code>:MapLibreAndroidTestApp</code>, then run normally.</p>
+<p><strong>Terminal:</strong></p>
+<pre><code class="language-bash">cd platform/android
+./gradlew :MapLibreAndroidTestApp:installWebgpuDawnDebug
+</code></pre>
+<h2 id="building-with-wgpu-native"><a class="header" href="#building-with-wgpu-native">Building with wgpu-native</a></h2>
+<p>wgpu-native requires a pre-built static library for the target ABI. The <code>webgpuWgpu</code> flavor is currently limited to <code>arm64-v8a</code>.</p>
+<h3 id="1-cross-compile-wgpu-native-for-android"><a class="header" href="#1-cross-compile-wgpu-native-for-android">1. Cross-compile wgpu-native for Android</a></h3>
+<p>Install the Rust Android target:</p>
+<pre><code class="language-bash">rustup target add aarch64-linux-android
+</code></pre>
+<p>Point cargo at the NDK linker. Create or edit <code>~/.cargo/config.toml</code>:</p>
+<pre><code class="language-toml">[target.aarch64-linux-android]
+linker = "&lt;NDK_PATH&gt;/toolchains/llvm/prebuilt/&lt;host&gt;/bin/aarch64-linux-android26-clang"
+</code></pre>
+<p>Replace <code>&lt;NDK_PATH&gt;</code> with the path to your Android NDK and <code>&lt;host&gt;</code> with your platform (e.g. <code>darwin-x86_64</code> on macOS).</p>
+<p>Then build:</p>
+<pre><code class="language-bash">cd vendor/wgpu-native
+cargo build --release --target aarch64-linux-android
+</code></pre>
+<p>This produces <code>vendor/wgpu-native/target/aarch64-linux-android/release/libwgpu_native.a</code>, which the CMake build picks up automatically.</p>
+<h3 id="2-build-and-install"><a class="header" href="#2-build-and-install">2. Build and install</a></h3>
+<p><strong>Android Studio:</strong> Select <code>webgpuWgpuDebug</code> in the Build Variants panel and run.</p>
+<p><strong>Terminal:</strong></p>
+<pre><code class="language-bash">cd platform/android
+./gradlew :MapLibreAndroidTestApp:installWebgpuWgpuDebug
+</code></pre>
+<h2 id="debugging-wgpu-native"><a class="header" href="#debugging-wgpu-native">Debugging wgpu-native</a></h2>
+<p>wgpu-native logs are routed to Android logcat under the <code>wgpu-native</code> tag (warnings and errors by default). Rust panic messages appear under <code>wgpu-native-stderr</code>. Filter with:</p>
+<pre><code class="language-bash">adb logcat -s wgpu-native:W wgpu-native-stderr:E
+</code></pre>
+<p>To increase verbosity, change <code>WGPULogLevel_Warn</code> to <code>WGPULogLevel_Info</code> (or <code>Debug</code> / <code>Trace</code>) in <code>android_webgpu_renderer_backend.cpp</code>.</p>
+<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
+<p>The native backend is in <code>MapLibreAndroid/src/cpp/android_webgpu_renderer_backend.cpp</code>. It uses <code>#if MLN_WEBGPU_IMPL_DAWN</code> / <code>#elif MLN_WEBGPU_IMPL_WGPU</code> for the API differences, same pattern as the desktop backends.</p>
+<p>wgpu-native’s adapter request forces <code>backendType = Vulkan</code> — without this it may pick GL on some emulators, which can’t present to an ANativeWindow surface.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../platforms/android/android-rendering-backends.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
 
-                            <a rel="next prefetch" href="platforms/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../platforms/ios/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -233,8 +270,11 @@ Mapbox Style Spec. Since it is derived from Mapbox’s original work it also use
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../platforms/android/android-rendering-backends.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
 
-                    <a rel="next prefetch" href="platforms/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../platforms/ios/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -254,13 +294,13 @@ Mapbox Style Spec. Since it is derived from Mapbox’s original work it also use
         </script>
 
 
-        <script src="elasticlunr-ef4e11c1.min.js"></script>
-        <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
 
-        <script src="clipboard-1626706a.min.js"></script>
-        <script src="highlight-abc7f01d.js"></script>
-        <script src="book-a0b12cfe.js"></script>
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-abc7f01d.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

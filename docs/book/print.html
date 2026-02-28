@@ -74,10 +74,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-245f40a6.js";
+            window.path_to_searchindex_js = "searchindex-4c017c9e.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-fd1359ca.js"></script>
+        <script src="toc-df56bb4b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -529,6 +529,93 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 <p>Once the PR is merged, the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow will run automatically to make the release.</p>
 </li>
 </ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rendering-backends-1"><a class="header" href="#rendering-backends-1">Rendering Backends</a></h1>
+<p>The rendering backend is selected at build time through Gradle product flavors.</p>
+<h2 id="available-backends"><a class="header" href="#available-backends">Available backends</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Flavor</th><th>Backend</th><th>Status</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>opengl</code></td><td>OpenGL ES</td><td>Stable</td><td>Default, widest device compatibility</td></tr>
+<tr><td><code>vulkan</code></td><td>Vulkan</td><td>Stable</td><td>Better performance on modern devices</td></tr>
+<tr><td><code>webgpuDawn</code></td><td>WebGPU (Dawn)</td><td>Experimental</td><td>Uses Vulkan internally, see <a href="#webgpu-on-android">WebGPU</a></td></tr>
+<tr><td><code>webgpuWgpu</code></td><td>WebGPU (wgpu-native)</td><td>Experimental</td><td>Uses Vulkan internally, arm64-v8a only, see <a href="#webgpu-on-android">WebGPU</a></td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="building-with-a-specific-backend"><a class="header" href="#building-with-a-specific-backend">Building with a specific backend</a></h2>
+<p>The flavor name is part of the Gradle task. For the test app:</p>
+<pre><code class="language-bash">cd platform/android
+
+# OpenGL ES
+./gradlew :MapLibreAndroidTestApp:installOpenglDebug
+
+# Vulkan
+./gradlew :MapLibreAndroidTestApp:installVulkanDebug
+
+# WebGPU (Dawn)
+./gradlew :MapLibreAndroidTestApp:installWebgpuDawnDebug
+
+# WebGPU (wgpu-native)
+./gradlew :MapLibreAndroidTestApp:installWebgpuWgpuDebug
+</code></pre>
+<p>The same pattern applies to the library module (<code>MapLibreAndroid</code>):</p>
+<pre><code class="language-bash">./gradlew :MapLibreAndroid:assembleVulkanRelease
+</code></pre>
+<h2 id="selecting-in-android-studio"><a class="header" href="#selecting-in-android-studio">Selecting in Android Studio</a></h2>
+<p>In Android Studio, use the <strong>Build Variants</strong> panel (View &gt; Tool Windows &gt; Build Variants) to pick the renderer flavor. Each module will show a dropdown combining the flavor and build type, e.g. <code>vulkanDebug</code> or <code>openglRelease</code>.</p>
+<h2 id="how-it-works"><a class="header" href="#how-it-works">How it works</a></h2>
+<p>Each flavor sets different CMake arguments:</p>
+<ul>
+<li><code>opengl</code>: <code>-DMLN_WITH_OPENGL=ON</code></li>
+<li><code>vulkan</code>: <code>-DMLN_WITH_VULKAN=ON</code></li>
+<li><code>webgpuDawn</code>: <code>-DMLN_WITH_WEBGPU=ON</code>, <code>-DMLN_WEBGPU_IMPL_DAWN=ON</code></li>
+<li><code>webgpuWgpu</code>: <code>-DMLN_WITH_WEBGPU=ON</code>, <code>-DMLN_WEBGPU_IMPL_WGPU=ON</code></li>
+</ul>
+<p>Only one backend is active per build. Renderer-specific Java code lives in <code>src/opengl/</code>, <code>src/vulkan/</code>, or <code>src/webgpu/</code> source sets.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="webgpu-on-android"><a class="header" href="#webgpu-on-android">WebGPU on Android</a></h1>
+<p>Two WebGPU implementations are supported: <strong>Dawn</strong> (Google, C++) and <strong>wgpu-native</strong> (Rust). Both use Vulkan internally on Android. The Gradle product flavors are <code>webgpuDawn</code> and <code>webgpuWgpu</code>, sharing the <code>src/webgpu/</code> Java source set.</p>
+<h2 id="building-with-dawn"><a class="header" href="#building-with-dawn">Building with Dawn</a></h2>
+<p>Dawn is fetched and built from source via CMake <code>FetchContent</code>, so no extra setup is needed. First build is slow (~20 min) because of Dawn’s dependencies (abseil, SPIRV-Tools, Tint, etc.).</p>
+<p><strong>Android Studio:</strong> Open the <strong>Build Variants</strong> panel (View &gt; Tool Windows &gt; Build Variants) and select <code>webgpuDawnDebug</code> for both <code>:MapLibreAndroid</code> and <code>:MapLibreAndroidTestApp</code>, then run normally.</p>
+<p><strong>Terminal:</strong></p>
+<pre><code class="language-bash">cd platform/android
+./gradlew :MapLibreAndroidTestApp:installWebgpuDawnDebug
+</code></pre>
+<h2 id="building-with-wgpu-native"><a class="header" href="#building-with-wgpu-native">Building with wgpu-native</a></h2>
+<p>wgpu-native requires a pre-built static library for the target ABI. The <code>webgpuWgpu</code> flavor is currently limited to <code>arm64-v8a</code>.</p>
+<h3 id="1-cross-compile-wgpu-native-for-android"><a class="header" href="#1-cross-compile-wgpu-native-for-android">1. Cross-compile wgpu-native for Android</a></h3>
+<p>Install the Rust Android target:</p>
+<pre><code class="language-bash">rustup target add aarch64-linux-android
+</code></pre>
+<p>Point cargo at the NDK linker. Create or edit <code>~/.cargo/config.toml</code>:</p>
+<pre><code class="language-toml">[target.aarch64-linux-android]
+linker = "&lt;NDK_PATH&gt;/toolchains/llvm/prebuilt/&lt;host&gt;/bin/aarch64-linux-android26-clang"
+</code></pre>
+<p>Replace <code>&lt;NDK_PATH&gt;</code> with the path to your Android NDK and <code>&lt;host&gt;</code> with your platform (e.g. <code>darwin-x86_64</code> on macOS).</p>
+<p>Then build:</p>
+<pre><code class="language-bash">cd vendor/wgpu-native
+cargo build --release --target aarch64-linux-android
+</code></pre>
+<p>This produces <code>vendor/wgpu-native/target/aarch64-linux-android/release/libwgpu_native.a</code>, which the CMake build picks up automatically.</p>
+<h3 id="2-build-and-install"><a class="header" href="#2-build-and-install">2. Build and install</a></h3>
+<p><strong>Android Studio:</strong> Select <code>webgpuWgpuDebug</code> in the Build Variants panel and run.</p>
+<p><strong>Terminal:</strong></p>
+<pre><code class="language-bash">cd platform/android
+./gradlew :MapLibreAndroidTestApp:installWebgpuWgpuDebug
+</code></pre>
+<h2 id="debugging-wgpu-native"><a class="header" href="#debugging-wgpu-native">Debugging wgpu-native</a></h2>
+<p>wgpu-native logs are routed to Android logcat under the <code>wgpu-native</code> tag (warnings and errors by default). Rust panic messages appear under <code>wgpu-native-stderr</code>. Filter with:</p>
+<pre><code class="language-bash">adb logcat -s wgpu-native:W wgpu-native-stderr:E
+</code></pre>
+<p>To increase verbosity, change <code>WGPULogLevel_Warn</code> to <code>WGPULogLevel_Info</code> (or <code>Debug</code> / <code>Trace</code>) in <code>android_webgpu_renderer_backend.cpp</code>.</p>
+<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
+<p>The native backend is in <code>MapLibreAndroid/src/cpp/android_webgpu_renderer_backend.cpp</code>. It uses <code>#if MLN_WEBGPU_IMPL_DAWN</code> / <code>#elif MLN_WEBGPU_IMPL_WGPU</code> for the API differences, same pattern as the desktop backends.</p>
+<p>wgpu-native’s adapter request forces <code>backendType = Vulkan</code> — without this it may pick GL on some emulators, which can’t present to an ANativeWindow surface.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="maplibre-ios-developer-guide"><a class="header" href="#maplibre-ios-developer-guide">MapLibre iOS Developer Guide</a></h1>
 <h2 id="bazel"><a class="header" href="#bazel">Bazel</a></h2>
