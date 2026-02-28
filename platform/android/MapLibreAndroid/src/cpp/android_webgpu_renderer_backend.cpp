@@ -63,6 +63,30 @@ static void startStderrToLogcat() {
 namespace mbgl {
 namespace android {
 
+#if MLN_WEBGPU_IMPL_DAWN
+static std::string errorTypeToString(wgpu::ErrorType type) {
+    switch (type) {
+        case wgpu::ErrorType::NoError: return "NoError";
+        case wgpu::ErrorType::Validation: return "Validation";
+        case wgpu::ErrorType::OutOfMemory: return "OutOfMemory";
+        case wgpu::ErrorType::Internal: return "Internal";
+        case wgpu::ErrorType::Unknown: return "Unknown";
+        case wgpu::ErrorType::DeviceLost: return "DeviceLost";
+        default: return "Unknown";
+    }
+}
+
+static std::string deviceLostReasonToString(wgpu::DeviceLostReason reason) {
+    switch (reason) {
+        case wgpu::DeviceLostReason::Undefined: return "Undefined";
+        case wgpu::DeviceLostReason::Destroyed: return "Destroyed";
+        case wgpu::DeviceLostReason::InstanceDropped: return "InstanceDropped";
+        case wgpu::DeviceLostReason::FailedCreation: return "FailedCreation";
+        default: return "Unknown";
+    }
+}
+#endif
+
 class AndroidWebGPURenderableResource final : public webgpu::RenderableResource {
 public:
     AndroidWebGPURenderableResource(AndroidWebGPURendererBackend& backend_)
@@ -211,14 +235,14 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
     deviceDesc.label = "MapLibre Android WebGPU Device";
     deviceDesc.SetUncapturedErrorCallback([](const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
         Log::Error(Event::Render,
-                   std::string("Dawn error [") + std::to_string(static_cast<int>(type)) + "] " +
+                   std::string("Dawn error [") + errorTypeToString(type) + "] " +
                        (message.data ? std::string(message.data, message.length) : std::string()));
     });
     deviceDesc.SetDeviceLostCallback(
         wgpu::CallbackMode::AllowSpontaneous,
         [](const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::StringView message) {
             Log::Error(Event::Render,
-                       std::string("Dawn device lost [") + std::to_string(static_cast<int>(reason)) + "] " +
+                       std::string("Dawn device lost [") + deviceLostReasonToString(reason) + "] " +
                            (message.data ? std::string(message.data, message.length) : std::string()));
         });
     deviceDesc.requiredFeatures = requiredFeatures.data();
