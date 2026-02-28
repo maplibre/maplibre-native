@@ -68,18 +68,22 @@ public:
     AndroidWebGPURenderableResource(AndroidWebGPURendererBackend& backend_)
         : backend(backend_) {}
 
-    void bind() override {}
+    void bind() override { assert(false); }
 
     void swap() override { backend.markNeedsPresent(); }
 
     const mbgl::webgpu::RendererBackend& getBackend() const override { return backend; }
 
     const WGPUCommandEncoder& getCommandEncoder() const override {
+        assert(false);
         static WGPUCommandEncoder dummy = nullptr;
         return dummy;
     }
 
-    WGPURenderPassEncoder getRenderPassEncoder() const override { return nullptr; }
+    WGPURenderPassEncoder getRenderPassEncoder() const override {
+        assert(false);
+        return nullptr;
+    }
 
     WGPUTextureView getColorTextureView() override {
         return static_cast<WGPUTextureView>(backend.getCurrentTextureView());
