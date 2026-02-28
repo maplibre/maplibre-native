@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/scoped.hpp>
 #include <mbgl/webgpu/context.hpp>
 
 #include <webgpu/webgpu.h>
@@ -546,6 +547,11 @@ PremultipliedImage AndroidWebGPURendererBackend::readFramebuffer() {
         return {fbSize, std::move(data)};
     }
 
+    mbgl::Scoped scopedCleanup([stagingBuffer]() {
+        wgpuBufferUnmap(stagingBuffer);
+        wgpuBufferRelease(stagingBuffer);
+    });
+
     WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
     if (encoder) {
         WGPUTexelCopyTextureInfo src = {};
@@ -636,9 +642,6 @@ PremultipliedImage AndroidWebGPURendererBackend::readFramebuffer() {
     } else {
         Log::Error(Event::Render, "WebGPU readFramebuffer: buffer mapping failed");
     }
-
-    wgpuBufferUnmap(stagingBuffer);
-    wgpuBufferRelease(stagingBuffer);
 
     presentSurface();
 
