@@ -120,31 +120,31 @@ TransitionOptions ColorReliefLayer::getColorReliefOpacityTransition() const {
     return impl().paint.template get<ColorReliefOpacity>().options;
 }
 
-PropertyValue<ResamplingType> ColorReliefLayer::getDefaultResampling() {
+PropertyValue<ResamplingType> ColorReliefLayer::getDefaultColorReliefResampling() {
     return {ResamplingType::Linear};
 }
 
-const PropertyValue<ResamplingType>& ColorReliefLayer::getResampling() const {
-    return impl().paint.template get<Resampling>().value;
+const PropertyValue<ResamplingType>& ColorReliefLayer::getColorReliefResampling() const {
+    return impl().paint.template get<ColorReliefResampling>().value;
 }
 
-void ColorReliefLayer::setResampling(const PropertyValue<ResamplingType>& value) {
-    if (value == getResampling())
+void ColorReliefLayer::setColorReliefResampling(const PropertyValue<ResamplingType>& value) {
+    if (value == getColorReliefResampling())
         return;
     auto impl_ = mutableImpl();
-    impl_->paint.template get<Resampling>().value = value;
+    impl_->paint.template get<ColorReliefResampling>().value = value;
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
 
-void ColorReliefLayer::setResamplingTransition(const TransitionOptions& options) {
+void ColorReliefLayer::setColorReliefResamplingTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
-    impl_->paint.template get<Resampling>().options = options;
+    impl_->paint.template get<ColorReliefResampling>().options = options;
     baseImpl = std::move(impl_);
 }
 
-TransitionOptions ColorReliefLayer::getResamplingTransition() const {
-    return impl().paint.template get<Resampling>().options;
+TransitionOptions ColorReliefLayer::getColorReliefResamplingTransition() const {
+    return impl().paint.template get<ColorReliefResampling>().options;
 }
 
 using namespace conversion;
@@ -156,10 +156,10 @@ constexpr uint8_t kPaintPropertyCount = 6u;
 enum class Property : uint8_t {
     ColorReliefColor,
     ColorReliefOpacity,
-    Resampling,
+    ColorReliefResampling,
     ColorReliefColorTransition,
     ColorReliefOpacityTransition,
-    ResamplingTransition,
+    ColorReliefResamplingTransition,
 };
 
 template <typename T>
@@ -181,14 +181,14 @@ StyleProperty getLayerProperty(const ColorReliefLayer& layer, Property property)
             return makeStyleProperty(layer.getColorReliefColor());
         case Property::ColorReliefOpacity:
             return makeStyleProperty(layer.getColorReliefOpacity());
-        case Property::Resampling:
-            return makeStyleProperty(layer.getResampling());
+        case Property::ColorReliefResampling:
+            return makeStyleProperty(layer.getColorReliefResampling());
         case Property::ColorReliefColorTransition:
             return makeStyleProperty(layer.getColorReliefColorTransition());
         case Property::ColorReliefOpacityTransition:
             return makeStyleProperty(layer.getColorReliefOpacityTransition());
-        case Property::ResamplingTransition:
-            return makeStyleProperty(layer.getResamplingTransition());
+        case Property::ColorReliefResamplingTransition:
+            return makeStyleProperty(layer.getColorReliefResamplingTransition());
     }
     return {};
 }
@@ -267,8 +267,8 @@ std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& na
         return std::nullopt;
     }
 
-    if (property == Property::ResamplingTransition) {
-        setResamplingTransition(*transition);
+    if (property == Property::ColorReliefResamplingTransition) {
+        setColorReliefResamplingTransition(*transition);
         return std::nullopt;
     }
 

@@ -355,7 +355,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
             demTexture->setImage(demImagePtr);
             const auto& evaluated = static_cast<const ColorReliefLayerProperties&>(*evaluatedProperties).evaluated;
-            const bool nearest = evaluated.get<Resampling>() == ResamplingType::Nearest;
+            const bool nearest = evaluated.get<ColorReliefResampling>() == ResamplingType::Nearest;
             const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
             demTexture->setSamplerConfiguration({.filter = filter,
                                                  .wrapU = gfx::TextureWrapType::Clamp,
@@ -397,7 +397,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         std::shared_ptr<gfx::Texture2D> demTexture = context.createTexture2D();
         demTexture->setImage(demImagePtr);
         const auto& evaluated = static_cast<const ColorReliefLayerProperties&>(*evaluatedProperties).evaluated;
-        const bool nearest = evaluated.get<Resampling>() == ResamplingType::Nearest;
+        const bool nearest = evaluated.get<ColorReliefResampling>() == ResamplingType::Nearest;
         const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
         demTexture->setSamplerConfiguration({.filter = filter,
                                              .wrapU = gfx::TextureWrapType::Clamp,

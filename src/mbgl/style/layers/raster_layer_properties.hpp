@@ -48,7 +48,7 @@ struct RasterSaturation : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
 };
 
-struct Resampling : PaintProperty<ResamplingType> {
+struct RasterStandardResampling : PaintProperty<ResamplingType> {
     static ResamplingType defaultValue() { return ResamplingType::Linear; }
 };
 
@@ -61,7 +61,7 @@ class RasterPaintProperties : public Properties<
     RasterOpacity,
     RasterResampling,
     RasterSaturation,
-    Resampling
+    RasterStandardResampling
 > {};
 
 class RasterLayerProperties final : public LayerProperties {

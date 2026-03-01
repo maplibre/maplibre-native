@@ -282,31 +282,31 @@ TransitionOptions HillshadeLayer::getHillshadeShadowColorTransition() const {
     return impl().paint.template get<HillshadeShadowColor>().options;
 }
 
-PropertyValue<ResamplingType> HillshadeLayer::getDefaultResampling() {
+PropertyValue<ResamplingType> HillshadeLayer::getDefaultHillshadeResampling() {
     return {ResamplingType::Linear};
 }
 
-const PropertyValue<ResamplingType>& HillshadeLayer::getResampling() const {
-    return impl().paint.template get<Resampling>().value;
+const PropertyValue<ResamplingType>& HillshadeLayer::getHillshadeResampling() const {
+    return impl().paint.template get<HillshadeResampling>().value;
 }
 
-void HillshadeLayer::setResampling(const PropertyValue<ResamplingType>& value) {
-    if (value == getResampling())
+void HillshadeLayer::setHillshadeResampling(const PropertyValue<ResamplingType>& value) {
+    if (value == getHillshadeResampling())
         return;
     auto impl_ = mutableImpl();
-    impl_->paint.template get<Resampling>().value = value;
+    impl_->paint.template get<HillshadeResampling>().value = value;
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
 
-void HillshadeLayer::setResamplingTransition(const TransitionOptions& options) {
+void HillshadeLayer::setHillshadeResamplingTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
-    impl_->paint.template get<Resampling>().options = options;
+    impl_->paint.template get<HillshadeResampling>().options = options;
     baseImpl = std::move(impl_);
 }
 
-TransitionOptions HillshadeLayer::getResamplingTransition() const {
-    return impl().paint.template get<Resampling>().options;
+TransitionOptions HillshadeLayer::getHillshadeResamplingTransition() const {
+    return impl().paint.template get<HillshadeResampling>().options;
 }
 
 using namespace conversion;
@@ -324,7 +324,7 @@ enum class Property : uint8_t {
     HillshadeIlluminationDirection,
     HillshadeMethod,
     HillshadeShadowColor,
-    Resampling,
+    HillshadeResampling,
     HillshadeAccentColorTransition,
     HillshadeExaggerationTransition,
     HillshadeHighlightColorTransition,
@@ -333,7 +333,7 @@ enum class Property : uint8_t {
     HillshadeIlluminationDirectionTransition,
     HillshadeMethodTransition,
     HillshadeShadowColorTransition,
-    ResamplingTransition,
+    HillshadeResamplingTransition,
 };
 
 template <typename T>
@@ -379,8 +379,8 @@ StyleProperty getLayerProperty(const HillshadeLayer& layer, Property property) {
             return makeStyleProperty(layer.getHillshadeMethod());
         case Property::HillshadeShadowColor:
             return makeStyleProperty(layer.getHillshadeShadowColor());
-        case Property::Resampling:
-            return makeStyleProperty(layer.getResampling());
+        case Property::HillshadeResampling:
+            return makeStyleProperty(layer.getHillshadeResampling());
         case Property::HillshadeAccentColorTransition:
             return makeStyleProperty(layer.getHillshadeAccentColorTransition());
         case Property::HillshadeExaggerationTransition:
@@ -397,8 +397,8 @@ StyleProperty getLayerProperty(const HillshadeLayer& layer, Property property) {
             return makeStyleProperty(layer.getHillshadeMethodTransition());
         case Property::HillshadeShadowColorTransition:
             return makeStyleProperty(layer.getHillshadeShadowColorTransition());
-        case Property::ResamplingTransition:
-            return makeStyleProperty(layer.getResamplingTransition());
+        case Property::HillshadeResamplingTransition:
+            return makeStyleProperty(layer.getHillshadeResamplingTransition());
     }
     return {};
 }
@@ -561,8 +561,8 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
         return std::nullopt;
     }
 
-    if (property == Property::ResamplingTransition) {
-        setResamplingTransition(*transition);
+    if (property == Property::HillshadeResamplingTransition) {
+        setHillshadeResamplingTransition(*transition);
         return std::nullopt;
     }
 

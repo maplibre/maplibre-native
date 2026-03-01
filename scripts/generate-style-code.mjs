@@ -353,6 +353,14 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
   };
 });
 
+function propertyClassName(property, type) {
+  if (property.name === "resampling") {
+    if (type === "raster") return "RasterStandardResampling";
+    return camelize(type + "-" + property.name);
+  }
+  return camelize(property.name);
+}
+
 function setupGlobalEjsHelpers() {
   const funcs = {
     layoutPropertyType,
@@ -362,6 +370,7 @@ function setupGlobalEjsHelpers() {
     defaultValue,
     paintPropertyType,
     propertyValueType,
+    propertyClassName,
     camelize,
     camelizeWithLeadingLowercase
   };

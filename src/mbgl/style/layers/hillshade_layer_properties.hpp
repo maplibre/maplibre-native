@@ -48,7 +48,7 @@ struct HillshadeShadowColor : PaintProperty<std::vector<Color>> {
     static std::vector<Color> defaultValue() { return {Color::black()}; }
 };
 
-struct Resampling : PaintProperty<ResamplingType> {
+struct HillshadeResampling : PaintProperty<ResamplingType> {
     static ResamplingType defaultValue() { return ResamplingType::Linear; }
 };
 
@@ -61,7 +61,7 @@ class HillshadePaintProperties : public Properties<
     HillshadeIlluminationDirection,
     HillshadeMethod,
     HillshadeShadowColor,
-    Resampling
+    HillshadeResampling
 > {};
 
 class HillshadeLayerProperties final : public LayerProperties {
