@@ -19,6 +19,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/wgsl_preprocessor.cpp
@@ -35,6 +36,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/color_relief.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
@@ -55,6 +57,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/dynamic_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/index_buffer_resource.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
@@ -73,6 +76,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade_prepare.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/color_relief.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
@@ -91,6 +95,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/index_buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp

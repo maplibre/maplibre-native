@@ -132,6 +132,13 @@ else()
     add_library(mbgl-core STATIC)
 endif()
 
+# Override visibility for mbgl-core when building amalgamation
+if(MLN_CREATE_AMALGAMATION)
+    target_compile_options(mbgl-core PRIVATE
+        -fvisibility=default
+    )
+endif()
+
 list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/context.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
@@ -165,6 +172,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/dynamic_texture_atlas.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/gpu_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/color_relief_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
@@ -244,6 +252,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/heatmap_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/hillshade_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/color_relief_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/layer_manager.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/line_layer_factory.hpp
@@ -355,6 +364,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/heatmap_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/hillshade_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/color_relief_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/line_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/raster_layer.hpp
@@ -494,6 +504,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/fill_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/heatmap_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/hillshade_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/color_relief_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/layer_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/line_layer_factory.cpp
@@ -577,6 +588,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_heatmap_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_hillshade_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_hillshade_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_color_relief_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_color_relief_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/color_relief_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/color_relief_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_line_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_line_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_raster_layer.cpp
@@ -675,6 +690,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/hillshade_conversions.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source_options.cpp
@@ -760,6 +776,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_properties.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_properties.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/color_relief_layer_properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_impl.hpp
@@ -912,6 +933,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/i18n.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/i18n.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/instrumentation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/interpolate.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/intersection_tests.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/intersection_tests.hpp

@@ -18,6 +18,7 @@
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
@@ -52,9 +53,14 @@ std::array<float, 2> RenderHillshadeLayer::getLatRange(const UnwrappedTileID& id
     return {{static_cast<float>(latlng0.latitude()), static_cast<float>(latlng1.latitude())}};
 }
 
+// Keep old function for backward compatibility during transition
 std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-    float azimuthal = util::deg2radf(evaluated.get<HillshadeIlluminationDirection>());
+
+    // Get first element from vectors (for backward compatibility)
+    std::vector<float> directions = evaluated.get<HillshadeIlluminationDirection>();
+    float azimuthal = util::deg2radf(directions.empty() ? 335.0f : directions[0]);
+
     if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport)
         azimuthal = azimuthal - static_cast<float>(parameters.state.getBearing());
     return {{evaluated.get<HillshadeExaggeration>(), azimuthal}};
@@ -175,9 +181,11 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     if (!hillshadePrepareShader) {
         hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);
     }
+
     if (!hillshadeShader) {
         hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
     }
+
     if (!hillshadePrepareShader || !hillshadeShader) {
         removeAllDrawables();
         return;
@@ -278,7 +286,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
             std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
             texture->setImage(bucket.getDEMData().getImagePtr());
-            texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+            // Use Nearest filtering to match GL JS behavior - the Sobel kernel samples exact pixel values
+            texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                               .wrapU = gfx::TextureWrapType::Clamp,
                                               .wrapV = gfx::TextureWrapType::Clamp});
             hillshadePrepareBuilder->setTexture(texture, idHillshadeImageTexture);

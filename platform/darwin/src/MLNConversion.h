@@ -8,14 +8,14 @@ namespace conversion {
 
 // A wrapper class for `id`, so as not to confuse ARC.
 class Holder {
- public:
+public:
   Holder(const id v) : value(v) {}
   const id value;
 };
 
 template <>
 class ConversionTraits<Holder> {
- public:
+public:
   static bool isUndefined(const Holder& holder) {
     const id value = holder.value;
     return !value || value == [NSNull null];
@@ -146,7 +146,7 @@ class ConversionTraits<Holder> {
     }
   }
 
- private:
+private:
   static bool _isBool(const id value) {
     if (![value isKindOfClass:[NSNumber class]]) return false;
     // char: 32-bit boolean

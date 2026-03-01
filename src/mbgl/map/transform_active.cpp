@@ -27,8 +27,11 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
 
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
+    double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
+    double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
+    double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov)) {
         if (animationOptions.transitionFinishFn) {
             animationOptions.transitionFinishFn();
         }
@@ -55,6 +58,7 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
+    fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
     // Minimize rotation by taking the shorter path around the circle.
     bearing = normalizeAngle(bearing, state.getBearing());
@@ -63,6 +67,9 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startRoll = state.getRoll();
+    const double startFov = state.getFieldOfView();
+    const double startCenterAlt = state.getCenterAltitude();
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
     auto animation = std::make_shared<Animation>(Clock::now(),
                                                  duration,
@@ -142,6 +149,40 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
             .set = true,
         };
     }
+    if (!properties.roll.set || roll != startRoll) {
+        if (properties.roll.set && properties.roll.current != properties.roll.target && properties.roll.animation) {
+            animationFinishFrame(*properties.roll.animation);
+        }
+        properties.roll = {
+            .animation = animation,
+            .current = startRoll,
+            .target = roll,
+            .set = true,
+        };
+    }
+    if (!properties.fov.set || fov != startFov) {
+        if (properties.fov.set && properties.fov.current != properties.fov.target && properties.fov.animation) {
+            animationFinishFrame(*properties.fov.animation);
+        }
+        properties.fov = {
+            .animation = animation,
+            .current = startFov,
+            .target = fov,
+            .set = true,
+        };
+    }
+    if (!properties.centerAltitude.set || centerAlt != startCenterAlt) {
+        if (properties.centerAltitude.set && properties.centerAltitude.current != properties.centerAltitude.target &&
+            properties.centerAltitude.animation) {
+            animationFinishFrame(*properties.centerAltitude.animation);
+        }
+        properties.centerAltitude = {
+            .animation = animation,
+            .current = startCenterAlt,
+            .target = centerAlt,
+            .set = true,
+        };
+    }
 
     startTransition(camera, duration, *animation);
 }
@@ -159,8 +200,12 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
 
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
+    double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
+    double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
+    double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov) ||
+        state.getSize().isEmpty()) {
         if (animationOptions.transitionFinishFn) {
             animationOptions.transitionFinishFn();
         }
@@ -177,6 +222,7 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
+    fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
     // Minimize rotation by taking the shorter path around the circle.
     bearing = normalizeAngle(bearing, state.getBearing());
@@ -184,6 +230,9 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
     const double startZoom = state.scaleZoom(state.getScale());
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startRoll = state.getRoll();
+    const double startFov = state.getFieldOfView();
+    const double startCenterAlt = state.getCenterAltitude();
 
     /// w₀: Initial visible span, measured in pixels at the initial scale.
     /// Known henceforth as a <i>screenful</i>.
@@ -355,6 +404,40 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
             .set = true,
         };
     }
+    if (!properties.roll.set || roll != startRoll) {
+        if (properties.roll.set && properties.roll.current != properties.roll.target && properties.roll.animation) {
+            animationFinishFrame(*properties.roll.animation);
+        }
+        properties.roll = {
+            .animation = animation,
+            .current = startRoll,
+            .target = roll,
+            .set = true,
+        };
+    }
+    if (!properties.fov.set || fov != startFov) {
+        if (properties.fov.set && properties.fov.current != properties.fov.target && properties.fov.animation) {
+            animationFinishFrame(*properties.fov.animation);
+        }
+        properties.fov = {
+            .animation = animation,
+            .current = startFov,
+            .target = fov,
+            .set = true,
+        };
+    }
+    if (!properties.centerAltitude.set || centerAlt != startCenterAlt) {
+        if (properties.centerAltitude.set && properties.centerAltitude.current != properties.centerAltitude.target &&
+            properties.centerAltitude.animation) {
+            animationFinishFrame(*properties.centerAltitude.animation);
+        }
+        properties.centerAltitude = {
+            .animation = animation,
+            .current = startCenterAlt,
+            .target = centerAlt,
+            .set = true,
+        };
+    }
 
     startTransition(camera, duration, *animation);
 }
@@ -418,7 +501,7 @@ void TransformActive::startTransition(const CameraOptions& camera, const Duratio
 
 bool TransformActive::inTransition() const {
     return properties.latlng.set || properties.zoom.set || properties.bearing.set || properties.padding.set ||
-           properties.pitch.set;
+           properties.pitch.set || properties.roll.set || properties.fov.set || properties.centerAltitude.set;
 }
 
 void TransformActive::updateTransitions(const TimePoint& now) {
@@ -491,6 +574,31 @@ void TransformActive::updateTransitions(const TimePoint& now) {
 
             if (properties.pitch.set && properties.pitch.animation && properties.pitch.animation->anchor) {
                 state.moveLatLng(properties.pitch.animation->anchorLatLng, *properties.pitch.animation->anchor);
+            }
+        }
+
+        if (properties.roll.set && properties.roll.animation) {
+            const double roll_t = properties.roll.animation->interpolant(now);
+            state.setRoll(util::interpolate(properties.roll.current, properties.roll.target, roll_t));
+            if (animationTransitionFrame(*properties.roll.animation, roll_t)) {
+                properties.roll.set = false;
+            }
+        }
+
+        if (properties.fov.set && properties.fov.animation) {
+            const double fov_t = properties.fov.animation->interpolant(now);
+            state.setFieldOfView(util::interpolate(properties.fov.current, properties.fov.target, fov_t));
+            if (animationTransitionFrame(*properties.fov.animation, fov_t)) {
+                properties.fov.set = false;
+            }
+        }
+
+        if (properties.centerAltitude.set && properties.centerAltitude.animation) {
+            const double alt_t = properties.centerAltitude.animation->interpolant(now);
+            state.setCenterAltitude(
+                util::interpolate(properties.centerAltitude.current, properties.centerAltitude.target, alt_t));
+            if (animationTransitionFrame(*properties.centerAltitude.animation, alt_t)) {
+                properties.centerAltitude.set = false;
             }
         }
 

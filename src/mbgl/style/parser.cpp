@@ -69,6 +69,13 @@ StyleParseResult Parser::parse(const std::string& json) {
         }
     }
 
+    if (document.HasMember("centerAltitude")) {
+        const JSValue& value = document["centerAltitude"];
+        if (value.IsNumber()) {
+            centerAltitude = value.GetDouble();
+        }
+    }
+
     if (document.HasMember("zoom")) {
         const JSValue& value = document["zoom"];
         if (value.IsNumber()) {
@@ -87,6 +94,13 @@ StyleParseResult Parser::parse(const std::string& json) {
         const JSValue& value = document["pitch"];
         if (value.IsNumber()) {
             pitch = value.GetDouble();
+        }
+    }
+
+    if (document.HasMember("roll")) {
+        const JSValue& value = document["roll"];
+        if (value.IsNumber()) {
+            roll = value.GetDouble();
         }
     }
 

@@ -1,0 +1,26 @@
+name: node-create-bump-version-pr
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        type: choice
+        description: 'Type of version bump'
+        options:
+          - major
+          - minor
+          - patch
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+
+jobs:
+  bump-version-pr:
+    uses: maplibre/reusable-workflows/.github/workflows/create-bump-version-pr.yml@main
+    with:
+      version: ${{ github.event.inputs.release_type }}
+      preid: 'pre'
+      package-folders: 'platform/node'
+      changelog-path: 'platform/node/CHANGELOG.md'
+      nvmrc-path: 'platform/node/.nvmrc'

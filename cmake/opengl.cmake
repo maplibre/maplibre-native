@@ -37,6 +37,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/color_relief.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
@@ -113,6 +114,7 @@ list(APPEND INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_texture_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_layer_ubo.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/color_relief_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_prepare_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
@@ -127,10 +129,11 @@ list(APPEND INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/buffer_allocator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/dynamic_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
 )
 list(APPEND SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_info.cpp
@@ -139,6 +142,7 @@ list(APPEND SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp

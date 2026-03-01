@@ -29,8 +29,16 @@ struct TransformStateProperties {
         y = val;
         return *this;
     }
+    TransformStateProperties& withZ(const std::optional<double>& val) {
+        z = val;
+        return *this;
+    }
     TransformStateProperties& withScale(const std::optional<double>& val) {
         scale = val;
+        return *this;
+    }
+    TransformStateProperties& withFov(const std::optional<double>& val) {
+        fov = val;
         return *this;
     }
     TransformStateProperties& withBearing(const std::optional<double>& val) {
@@ -39,6 +47,10 @@ struct TransformStateProperties {
     }
     TransformStateProperties& withPitch(const std::optional<double>& val) {
         pitch = val;
+        return *this;
+    }
+    TransformStateProperties& withRoll(const std::optional<double>& val) {
+        roll = val;
         return *this;
     }
     TransformStateProperties& withXSkew(const std::optional<double>& val) {
@@ -92,9 +104,12 @@ struct TransformStateProperties {
 
     std::optional<double> x;
     std::optional<double> y;
-    std::optional<double> bearing;
+    std::optional<double> z;
+    std::optional<double> fov;
     std::optional<double> scale;
+    std::optional<double> bearing;
     std::optional<double> pitch;
+    std::optional<double> roll;
     std::optional<double> xSkew;
     std::optional<double> ySkew;
     std::optional<bool> axonometric;
@@ -147,6 +162,7 @@ public:
 
     // Position
     LatLng getLatLng(LatLng::WrapMode = LatLng::Unwrapped) const;
+    double getCenterAltitude() const;
     double pixel_x() const;
     double pixel_y() const;
 
@@ -164,6 +180,8 @@ public:
     void setX(double);
     double getY() const;
     void setY(double);
+    double getZ() const;
+    void setZ(double);
 
     // Bounds
     void setLatLngBounds(LatLngBounds);
@@ -176,14 +194,19 @@ public:
     double getMinPitch() const;
     void setMaxPitch(double);
     double getMaxPitch() const;
+    double getMinFieldOfView() const;
+    double getMaxFieldOfView() const;
 
     // Rotation
     double getBearing() const;
     void setBearing(double);
     float getFieldOfView() const;
+    void setFieldOfView(double);
     float getCameraToCenterDistance() const;
     double getPitch() const;
     void setPitch(double);
+    double getRoll() const;
+    void setRoll(double);
 
     double getXSkew() const;
     void setXSkew(double);
@@ -222,6 +245,7 @@ public:
         point on screen. */
     void moveLatLng(const LatLng&, const ScreenCoordinate&);
     void setLatLngZoom(const LatLng& latLng, double zoom);
+    void setCenterAltitude(double alt_m);
 
     void constrain(double& scale, double& x, double& y) const;
     bool constrainScreen(double& scale_, double& x_, double& y_) const;
@@ -248,7 +272,9 @@ private:
 
     // Limit the amount of pitch
     double minPitch = util::PITCH_MIN;
-    double maxPitch = util::PITCH_MAX;
+    double maxPitch = util::DEFAULT_PITCH_MAX;
+    double minFov = util::deg2rad(0.1);
+    double maxFov = util::deg2rad(150.0);
 
     NorthOrientation orientation = NorthOrientation::Upwards;
 
@@ -283,15 +309,12 @@ private:
     bool gestureInProgress = false;
 
     // map position
-    double x = 0, y = 0;
+    double x = 0, y = 0, z = 0;
     double bearing = 0;
     double scale = 1;
-    // This fov value is somewhat arbitrary. The altitude of the camera used
-    // to be defined as 1.5 screen heights above the ground, which was an
-    // arbitrary choice. This is the fov equivalent to that value calculated
-    // with: `fov = 2 * arctan((height / 2) / (height * 1.5))`
-    double fov = 0.6435011087932844;
+    double fov = util::DEFAULT_FOV;
     double pitch = 0.0;
+    double roll = 0.0;
     double xSkew = 0.0;
     double ySkew = 1.0;
     bool axonometric = false;

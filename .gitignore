@@ -20,6 +20,7 @@ local.properties
 .DS_Store
 .cache
 compile_commands.json
+.build
 /build
 /build-*
 **/.idea

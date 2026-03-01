@@ -78,6 +78,7 @@
     <string name="description_textureview_resize">Resize a map rendered on a TextureView</string>
     <string name="description_textureview_animate">Animate a map rendered on a TextureView</string>
     <string name="description_textureview_transparent">Enable a transparent surface on TextureView</string>
+    <string name="description_surfaceview_resize">Resize a map rendered on a SurfaceView</string>
     <string name="description_overlay">Blend an overlay on a map</string>
     <string name="description_grid_source">Example Custom Geometry Source</string>
     <string name="description_no_style">Load a map without providing a style URI or JSON</string>

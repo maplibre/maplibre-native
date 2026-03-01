@@ -100,7 +100,7 @@ public abstract class CameraTest extends BaseTest {
     invoke(maplibreMap, (uiController, maplibreMap) -> {
       final LatLng moveTarget = new LatLng(1.0000000001, 1.0000000003);
       final float moveZoom = 15.5f;
-      final float moveTilt = 45.5f;
+      final float moveTilt = 35.5f;
       final float moveBearing = 12.5f;
       final double[] movePadding = new double[] {0, 500, 350, 1};
 

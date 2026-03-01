@@ -10,6 +10,7 @@
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/drawable_builder.hpp>
 #include <mbgl/webgpu/draw_scope_resource.hpp>
+#include <mbgl/webgpu/dynamic_texture.hpp>
 #include <mbgl/webgpu/offscreen_texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
@@ -123,6 +124,10 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialC
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {

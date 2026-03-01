@@ -81,7 +81,7 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_OPENGL=ON", "-DMLN_WITH_VULKAN=OFF")
+                    arguments("-DMLN_WITH_OPENGL=ON")
                 }
             }
         }
@@ -89,7 +89,7 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
+                    arguments("-DMLN_WITH_VULKAN=ON")
                 }
             }
         }

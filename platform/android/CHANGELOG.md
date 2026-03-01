@@ -1,5 +1,9 @@
 # Changelog MapLibre Native for Android
 
+## 13.0.0
+
+- Use Vulkan as rendering backend for the `org.maplibre.gl:android-sdk` package. You can still use OpenGL ES with the `org.maplibre.gl:android-sdk-opengl` package.
+
 ## 12.3.1
 
 - Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
