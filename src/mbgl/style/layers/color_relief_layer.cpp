@@ -120,17 +120,46 @@ TransitionOptions ColorReliefLayer::getColorReliefOpacityTransition() const {
     return impl().paint.template get<ColorReliefOpacity>().options;
 }
 
+PropertyValue<ResamplingType> ColorReliefLayer::getDefaultResampling() {
+    return {ResamplingType::Linear};
+}
+
+const PropertyValue<ResamplingType>& ColorReliefLayer::getResampling() const {
+    return impl().paint.template get<Resampling>().value;
+}
+
+void ColorReliefLayer::setResampling(const PropertyValue<ResamplingType>& value) {
+    if (value == getResampling())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<Resampling>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void ColorReliefLayer::setResamplingTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<Resampling>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions ColorReliefLayer::getResamplingTransition() const {
+    return impl().paint.template get<Resampling>().options;
+}
+
 using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 4u;
+constexpr uint8_t kPaintPropertyCount = 6u;
 
 enum class Property : uint8_t {
     ColorReliefColor,
     ColorReliefOpacity,
+    Resampling,
     ColorReliefColorTransition,
     ColorReliefOpacityTransition,
+    ResamplingTransition,
 };
 
 template <typename T>
@@ -141,8 +170,10 @@ constexpr uint8_t toUint8(T t) noexcept {
 constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
     {{"color-relief-color", toUint8(Property::ColorReliefColor)},
      {"color-relief-opacity", toUint8(Property::ColorReliefOpacity)},
+     {"resampling", toUint8(Property::Resampling)},
      {"color-relief-color-transition", toUint8(Property::ColorReliefColorTransition)},
-     {"color-relief-opacity-transition", toUint8(Property::ColorReliefOpacityTransition)}});
+     {"color-relief-opacity-transition", toUint8(Property::ColorReliefOpacityTransition)},
+     {"resampling-transition", toUint8(Property::ResamplingTransition)}});
 
 StyleProperty getLayerProperty(const ColorReliefLayer& layer, Property property) {
     switch (property) {
@@ -150,10 +181,14 @@ StyleProperty getLayerProperty(const ColorReliefLayer& layer, Property property)
             return makeStyleProperty(layer.getColorReliefColor());
         case Property::ColorReliefOpacity:
             return makeStyleProperty(layer.getColorReliefOpacity());
+        case Property::Resampling:
+            return makeStyleProperty(layer.getResampling());
         case Property::ColorReliefColorTransition:
             return makeStyleProperty(layer.getColorReliefColorTransition());
         case Property::ColorReliefOpacityTransition:
             return makeStyleProperty(layer.getColorReliefOpacityTransition());
+        case Property::ResamplingTransition:
+            return makeStyleProperty(layer.getResamplingTransition());
     }
     return {};
 }
@@ -205,6 +240,16 @@ std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& na
         setColorReliefOpacity(*typedValue);
         return std::nullopt;
     }
+    if (property == Property::Resampling) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<ResamplingType>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setResampling(*typedValue);
+        return std::nullopt;
+    }
 
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
@@ -219,6 +264,11 @@ std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& na
 
     if (property == Property::ColorReliefOpacityTransition) {
         setColorReliefOpacityTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::ResamplingTransition) {
+        setResamplingTransition(*transition);
         return std::nullopt;
     }
 

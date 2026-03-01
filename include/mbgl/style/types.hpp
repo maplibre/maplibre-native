@@ -43,6 +43,11 @@ enum class RasterResamplingType : bool {
     Nearest
 };
 
+enum class ResamplingType : bool {
+    Linear,
+    Nearest
+};
+
 enum class HillshadeIlluminationAnchorType : bool {
     Map,
     Viewport

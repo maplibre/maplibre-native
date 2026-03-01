@@ -282,11 +282,38 @@ TransitionOptions RasterLayer::getRasterSaturationTransition() const {
     return impl().paint.template get<RasterSaturation>().options;
 }
 
+PropertyValue<ResamplingType> RasterLayer::getDefaultResampling() {
+    return {ResamplingType::Linear};
+}
+
+const PropertyValue<ResamplingType>& RasterLayer::getResampling() const {
+    return impl().paint.template get<Resampling>().value;
+}
+
+void RasterLayer::setResampling(const PropertyValue<ResamplingType>& value) {
+    if (value == getResampling())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<Resampling>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void RasterLayer::setResamplingTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<Resampling>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions RasterLayer::getResamplingTransition() const {
+    return impl().paint.template get<Resampling>().options;
+}
+
 using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 16u;
+constexpr uint8_t kPaintPropertyCount = 18u;
 
 enum class Property : uint8_t {
     RasterBrightnessMax,
@@ -297,6 +324,7 @@ enum class Property : uint8_t {
     RasterOpacity,
     RasterResampling,
     RasterSaturation,
+    Resampling,
     RasterBrightnessMaxTransition,
     RasterBrightnessMinTransition,
     RasterContrastTransition,
@@ -305,6 +333,7 @@ enum class Property : uint8_t {
     RasterOpacityTransition,
     RasterResamplingTransition,
     RasterSaturationTransition,
+    ResamplingTransition,
 };
 
 template <typename T>
@@ -321,6 +350,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"raster-opacity", toUint8(Property::RasterOpacity)},
      {"raster-resampling", toUint8(Property::RasterResampling)},
      {"raster-saturation", toUint8(Property::RasterSaturation)},
+     {"resampling", toUint8(Property::Resampling)},
      {"raster-brightness-max-transition", toUint8(Property::RasterBrightnessMaxTransition)},
      {"raster-brightness-min-transition", toUint8(Property::RasterBrightnessMinTransition)},
      {"raster-contrast-transition", toUint8(Property::RasterContrastTransition)},
@@ -328,7 +358,8 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"raster-hue-rotate-transition", toUint8(Property::RasterHueRotateTransition)},
      {"raster-opacity-transition", toUint8(Property::RasterOpacityTransition)},
      {"raster-resampling-transition", toUint8(Property::RasterResamplingTransition)},
-     {"raster-saturation-transition", toUint8(Property::RasterSaturationTransition)}});
+     {"raster-saturation-transition", toUint8(Property::RasterSaturationTransition)},
+     {"resampling-transition", toUint8(Property::ResamplingTransition)}});
 
 StyleProperty getLayerProperty(const RasterLayer& layer, Property property) {
     switch (property) {
@@ -348,6 +379,8 @@ StyleProperty getLayerProperty(const RasterLayer& layer, Property property) {
             return makeStyleProperty(layer.getRasterResampling());
         case Property::RasterSaturation:
             return makeStyleProperty(layer.getRasterSaturation());
+        case Property::Resampling:
+            return makeStyleProperty(layer.getResampling());
         case Property::RasterBrightnessMaxTransition:
             return makeStyleProperty(layer.getRasterBrightnessMaxTransition());
         case Property::RasterBrightnessMinTransition:
@@ -364,6 +397,8 @@ StyleProperty getLayerProperty(const RasterLayer& layer, Property property) {
             return makeStyleProperty(layer.getRasterResamplingTransition());
         case Property::RasterSaturationTransition:
             return makeStyleProperty(layer.getRasterSaturationTransition());
+        case Property::ResamplingTransition:
+            return makeStyleProperty(layer.getResamplingTransition());
     }
     return {};
 }
@@ -450,6 +485,16 @@ std::optional<Error> RasterLayer::setPropertyInternal(const std::string& name, c
         setRasterResampling(*typedValue);
         return std::nullopt;
     }
+    if (property == Property::Resampling) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<ResamplingType>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setResampling(*typedValue);
+        return std::nullopt;
+    }
 
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
@@ -494,6 +539,11 @@ std::optional<Error> RasterLayer::setPropertyInternal(const std::string& name, c
 
     if (property == Property::RasterSaturationTransition) {
         setRasterSaturationTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::ResamplingTransition) {
+        setResamplingTransition(*transition);
         return std::nullopt;
     }
 

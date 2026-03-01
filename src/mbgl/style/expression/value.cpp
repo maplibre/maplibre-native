@@ -415,6 +415,9 @@ template struct ValueConverter<TranslateAnchorType>;
 template type::Type valueTypeToExpressionType<RasterResamplingType>();
 template struct ValueConverter<RasterResamplingType>;
 
+template type::Type valueTypeToExpressionType<ResamplingType>();
+template struct ValueConverter<ResamplingType>;
+
 template type::Type valueTypeToExpressionType<HillshadeIlluminationAnchorType>();
 template struct ValueConverter<HillshadeIlluminationAnchorType>;
 

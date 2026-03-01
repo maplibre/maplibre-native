@@ -85,8 +85,8 @@ template std::optional<LightAnchorType> Converter<LightAnchorType>::operator()(c
 template std::optional<LineCapType> Converter<LineCapType>::operator()(const Convertible&, Error&) const;
 template std::optional<LineJoinType> Converter<LineJoinType>::operator()(const Convertible&, Error&) const;
 template std::optional<RasterResamplingType> Converter<RasterResamplingType>::operator()(const Convertible&,
-                                                                                         Error&) const;
-template std::optional<SymbolAnchorType> Converter<SymbolAnchorType>::operator()(const Convertible&, Error&) const;
+                                                                                         Error&) const;template std::optional<ResamplingType> Converter<ResamplingType>::operator()(const Convertible&,
+                                                                              Error&) const;template std::optional<SymbolAnchorType> Converter<SymbolAnchorType>::operator()(const Convertible&, Error&) const;
 template std::optional<SymbolPlacementType> Converter<SymbolPlacementType>::operator()(const Convertible&,
                                                                                        Error&) const;
 template std::optional<SymbolZOrderType> Converter<SymbolZOrderType>::operator()(const Convertible&, Error&) const;

@@ -48,6 +48,10 @@ struct RasterSaturation : PaintProperty<float> {
     static float defaultValue() { return 0.f; }
 };
 
+struct Resampling : PaintProperty<ResamplingType> {
+    static ResamplingType defaultValue() { return ResamplingType::Linear; }
+};
+
 class RasterPaintProperties : public Properties<
     RasterBrightnessMax,
     RasterBrightnessMin,
@@ -56,7 +60,8 @@ class RasterPaintProperties : public Properties<
     RasterHueRotate,
     RasterOpacity,
     RasterResampling,
-    RasterSaturation
+    RasterSaturation,
+    Resampling
 > {};
 
 class RasterLayerProperties final : public LayerProperties {
