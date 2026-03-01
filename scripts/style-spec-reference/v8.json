@@ -22,7 +22,11 @@
         "styleeditor:slimmode": true,
         "styleeditor:comment": "Style generated 1677776383",
         "styleeditor:version": "3.14.159265",
-        "example:object": { "String": "one", "Number": 2, "Boolean": false }
+        "example:object": {
+          "String": "one",
+          "Number": 2,
+          "Boolean": false
+        }
       }
     },
     "center": {
@@ -116,12 +120,20 @@
         "horizon-fog-blend": 0.5,
         "fog-color": "#0000ff",
         "fog-ground-blend": 0.5,
-        "atmosphere-blend": ["interpolate",
-          ["linear"],
-          ["zoom"],
-          0,1,
-          10,1,
-          12,0
+        "atmosphere-blend": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          0,
+          1,
+          10,
+          1,
+          12,
+          0
         ]
       }
     },
@@ -131,10 +143,16 @@
       "example": {
         "type": [
           "interpolate",
-          ["linear"],
-          ["zoom"],
-          10, "vertical-perspective",
-          12, "mercator"
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          "vertical-perspective",
+          12,
+          "mercator"
         ]
       }
     },
@@ -162,15 +180,15 @@
         "maplibre-streets": {
           "type": "vector",
           "tiles": [
-              "http://a.example.com/tiles/{z}/{x}/{y}.pbf",
-              "http://b.example.com/tiles/{z}/{x}/{y}.pbf"
+            "http://a.example.com/tiles/{z}/{x}/{y}.pbf",
+            "http://b.example.com/tiles/{z}/{x}/{y}.pbf"
           ],
           "maxzoom": 14
         },
         "wms-imagery": {
           "type": "raster",
           "tiles": [
-              "http://a.example.com/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=example"
+            "http://a.example.com/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=example"
           ],
           "tileSize": 256
         }
@@ -203,22 +221,32 @@
       "value": "fontFaces",
       "doc": "The `font-faces` property can be used to specify what font files to use for rendering text. Font faces contain information needed to render complex texts such as [Devanagari](https://en.wikipedia.org/wiki/Devanagari), [Khmer](https://en.wikipedia.org/wiki/Khmer_script) among many others.<h2>Unicode range</h2>The optional `unicode-range` property can be used to only use a particular font file for characters within the specified unicode range(s). Its value should be an array of strings, each indicating a start and end of a unicode range, similar to the [CSS descriptor with the same name](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/unicode-range). This allows specifying multiple non-consecutive unicode ranges. When not specified, the default value is `U+0-10FFFF`, meaning the font file will be used for all unicode characters.\n\nRefer to the [Unicode Character Code Charts](https://www.unicode.org/charts/) to see ranges for scripts supported by Unicode. To see what unicode code-points are available in a font, use a tool like [FontDrop](https://fontdrop.info/).\n\n<h2>Font Resolution</h2>For every name in a symbol layer’s [`text-font`](./layers.md/#text-font) array, characters are matched if they are covered one of the by the font files in the corresponding entry of the `font-faces` map. Any still-unmatched characters then fall back to the [`glyphs`](./glyphs.md) URL if provided.\n\n<h2>Supported Fonts</h2>What type of fonts are supported is implementation-defined. Unsupported fonts are ignored.",
       "example": {
-        "Noto Sans Regular": [{
-          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansKhmer/hinted/ttf/NotoSansKhmer-Regular.ttf",
-          "unicode-range": ["U+1780-17FF"]
-        },
-        {
-          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Regular.ttf",
-          "unicode-range": ["U+0900-097F"]
-        },
-        {
-          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansMyanmar/hinted/ttf/NotoSansMyanmar-Regular.ttf",
-          "unicode-range": ["U+1000-109F"]
-        },
-        {
-          "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansEthiopic/hinted/ttf/NotoSansEthiopic-Regular.ttf",
-          "unicode-range": ["U+1200-137F"]
-        }],
+        "Noto Sans Regular": [
+          {
+            "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansKhmer/hinted/ttf/NotoSansKhmer-Regular.ttf",
+            "unicode-range": [
+              "U+1780-17FF"
+            ]
+          },
+          {
+            "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Regular.ttf",
+            "unicode-range": [
+              "U+0900-097F"
+            ]
+          },
+          {
+            "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansMyanmar/hinted/ttf/NotoSansMyanmar-Regular.ttf",
+            "unicode-range": [
+              "U+1000-109F"
+            ]
+          },
+          {
+            "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansEthiopic/hinted/ttf/NotoSansEthiopic-Regular.ttf",
+            "unicode-range": [
+              "U+1200-137F"
+            ]
+          }
+        ],
         "Unifont": "https://ftp.gnu.org/gnu/unifont/unifont-15.0.01/unifont-15.0.01.ttf"
       },
       "sdk-support": {
@@ -538,7 +566,7 @@
     },
     "redFactor": {
       "type": "number",
-      "default": 1.0,
+      "default": 1,
       "doc": "Value that will be multiplied by the red channel value when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
@@ -550,7 +578,7 @@
     },
     "blueFactor": {
       "type": "number",
-      "default": 1.0,
+      "default": 1,
       "doc": "Value that will be multiplied by the blue channel value when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
@@ -562,7 +590,7 @@
     },
     "greenFactor": {
       "type": "number",
-      "default": 1.0,
+      "default": 1,
       "doc": "Value that will be multiplied by the green channel value when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
@@ -574,7 +602,7 @@
     },
     "baseShift": {
       "type": "number",
-      "default": 0.0,
+      "default": 0,
       "doc": "Value that will be added to the encoding mix when decoding. Only used on custom encodings.",
       "sdk-support": {
         "basic functionality": {
@@ -1675,7 +1703,9 @@
     },
     "icon-padding": {
       "type": "padding",
-      "default": [2],
+      "default": [
+        2
+      ],
       "units": "pixels",
       "doc": "Size of additional area round the icon bounding box used for detecting symbol collisions.",
       "requires": [
@@ -2748,8 +2778,7 @@
       "default": "visible",
       "doc": "Whether this layer is displayed.",
       "sdk-support": {
-        "basic functionality": {
-        }
+        "basic functionality": {}
       },
       "property-type": "constant"
     }
@@ -2907,7 +2936,14 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["var_1_name", "var_1_value", "...", "var_n_name", "var_n_value", "expression"],
+              "parameters": [
+                "var_1_name",
+                "var_1_value",
+                "...",
+                "var_n_name",
+                "var_n_value",
+                "expression"
+              ],
               "output-type": "any"
             }
           ],
@@ -2929,7 +2965,25 @@
             }
           ]
         },
-        "example": ["let", "someNumber", 500, ["interpolate", ["linear"], ["var", "someNumber"], 274, "#edf8e9", 1551, "#006d2c"]],
+        "example": [
+          "let",
+          "someNumber",
+          500,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "var",
+              "someNumber"
+            ],
+            274,
+            "#edf8e9",
+            1551,
+            "#006d2c"
+          ]
+        ],
         "group": "Variable binding",
         "sdk-support": {
           "basic functionality": {
@@ -2944,7 +2998,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["var_name"],
+              "parameters": [
+                "var_name"
+              ],
               "output-type": "any"
             }
           ],
@@ -2956,7 +3012,10 @@
             }
           ]
         },
-        "example": ["var", "density"],
+        "example": [
+          "var",
+          "density"
+        ],
         "group": "Variable binding",
         "sdk-support": {
           "basic functionality": {
@@ -2971,11 +3030,15 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["json_object"],
+              "parameters": [
+                "json_object"
+              ],
               "output-type": "object"
             },
             {
-              "parameters": ["json_array"],
+              "parameters": [
+                "json_array"
+              ],
               "output-type": "array"
             }
           ],
@@ -2990,7 +3053,13 @@
             }
           ]
         },
-        "example": ["literal", ["DIN Offc Pro Italic", "Arial Unicode MS Regular"]],
+        "example": [
+          "literal",
+          [
+            "DIN Offc Pro Italic",
+            "Arial Unicode MS Regular"
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3005,15 +3074,24 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value"],
+              "parameters": [
+                "value"
+              ],
               "output-type": "array"
             },
             {
-              "parameters": ["type", "value"],
+              "parameters": [
+                "type",
+                "value"
+              ],
               "output-type": "array<type>"
             },
             {
-              "parameters": ["type", "length", "value"],
+              "parameters": [
+                "type",
+                "length",
+                "value"
+              ],
               "output-type": "array<type, length>"
             }
           ],
@@ -3034,7 +3112,19 @@
             }
           ]
         },
-        "example": ["array", "string", 3, ["literal", ["a", "b", "c"]]],
+        "example": [
+          "array",
+          "string",
+          3,
+          [
+            "literal",
+            [
+              "a",
+              "b",
+              "c"
+            ]
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3049,7 +3139,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["index", "array"],
+              "parameters": [
+                "index",
+                "array"
+              ],
               "output-type": "T"
             }
           ],
@@ -3066,7 +3159,18 @@
             }
           ]
         },
-        "example": ["at", 1, ["literal", ["a", "b", "c"]]],
+        "example": [
+          "at",
+          1,
+          [
+            "literal",
+            [
+              "a",
+              "b",
+              "c"
+            ]
+          ]
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3081,11 +3185,17 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["item", "array"],
+              "parameters": [
+                "item",
+                "array"
+              ],
               "output-type": "boolean"
             },
             {
-              "parameters": ["substring", "string"],
+              "parameters": [
+                "substring",
+                "string"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -3112,7 +3222,11 @@
             }
           ]
         },
-        "example": ["in", "$type", "Point"],
+        "example": [
+          "in",
+          "$type",
+          "Point"
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3127,11 +3241,19 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["item", "array", "from_index?"],
+              "parameters": [
+                "item",
+                "array",
+                "from_index?"
+              ],
               "output-type": "number"
             },
             {
-              "parameters": ["substring", "string", "from_index?"],
+              "parameters": [
+                "substring",
+                "string",
+                "from_index?"
+              ],
               "output-type": "number"
             }
           ],
@@ -3163,7 +3285,17 @@
             }
           ]
         },
-        "example": ["index-of", "foo", ["baz", "bar", "hello", "foo", "world"]],
+        "example": [
+          "index-of",
+          "foo",
+          [
+            "baz",
+            "bar",
+            "hello",
+            "foo",
+            "world"
+          ]
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3178,11 +3310,19 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["array", "start_index", "end_index?"],
+              "parameters": [
+                "array",
+                "start_index",
+                "end_index?"
+              ],
               "output-type": "array<T>"
             },
             {
-              "parameters": ["string", "start_index", "end_index?"],
+              "parameters": [
+                "string",
+                "start_index",
+                "end_index?"
+              ],
               "output-type": "string"
             }
           ],
@@ -3209,7 +3349,15 @@
             }
           ]
         },
-        "example": ["slice", ["get", "name"], 0, 3],
+        "example": [
+          "slice",
+          [
+            "get",
+            "name"
+          ],
+          0,
+          3
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -3224,7 +3372,14 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["condition_1", "output_1", "...", "condition_n", "output_n", "fallback"],
+              "parameters": [
+                "condition_1",
+                "output_1",
+                "...",
+                "condition_n",
+                "output_n",
+                "fallback"
+              ],
               "output-type": "any"
             }
           ],
@@ -3244,7 +3399,19 @@
             }
           ]
         },
-        "example": ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.5],
+        "example": [
+          "case",
+          [
+            "boolean",
+            [
+              "feature-state",
+              "hover"
+            ],
+            false
+          ],
+          1,
+          0.5
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -3259,7 +3426,15 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input", "label_1", "output_1", "...", "label_n", "output_n", "fallback"],
+              "parameters": [
+                "input",
+                "label_1",
+                "output_1",
+                "...",
+                "label_n",
+                "output_n",
+                "fallback"
+              ],
               "output-type": "any"
             }
           ],
@@ -3286,7 +3461,18 @@
             }
           ]
         },
-        "example": ["match", ["get", "building_type"], "residential", "#f00", "commercial", "#0f0", "#000"],
+        "example": [
+          "match",
+          [
+            "get",
+            "building_type"
+          ],
+          "residential",
+          "#f00",
+          "commercial",
+          "#0f0",
+          "#000"
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -3301,7 +3487,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["expression_1", "...", "expression_n"],
+              "parameters": [
+                "expression_1",
+                "...",
+                "expression_n"
+              ],
               "output-type": "any"
             }
           ],
@@ -3312,7 +3502,24 @@
             }
           ]
         },
-        "example": ["coalesce", ["image", ["concat", ["get", "icon"], "_15"]], ["image", "marker_15"]],
+        "example": [
+          "coalesce",
+          [
+            "image",
+            [
+              "concat",
+              [
+                "get",
+                "icon"
+              ],
+              "_15"
+            ]
+          ],
+          [
+            "image",
+            "marker_15"
+          ]
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -3327,7 +3534,15 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input", "output_0", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "parameters": [
+                "input",
+                "output_0",
+                "stop_1_input",
+                "stop_1_output",
+                "...",
+                "stop_n_input",
+                "stop_n_output"
+              ],
               "output-type": "any"
             }
           ],
@@ -3354,7 +3569,18 @@
             }
           ]
         },
-        "example": ["step", ["get", "point_count"], 20, 100, 30, 750, 40],
+        "example": [
+          "step",
+          [
+            "get",
+            "point_count"
+          ],
+          20,
+          100,
+          30,
+          750,
+          40
+        ],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -3369,7 +3595,15 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "parameters": [
+                "interpolation_type",
+                "input",
+                "stop_1_input",
+                "stop_1_output",
+                "...",
+                "stop_n_input",
+                "stop_n_output"
+              ],
               "output-type": "number | array<number> | color | array<color> | projection"
             }
           ],
@@ -3396,7 +3630,22 @@
             }
           ]
         },
-        "example": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.05, ["get", "height"]],
+        "example": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          0,
+          15.05,
+          [
+            "get",
+            "height"
+          ]
+        ],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -3411,7 +3660,15 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "parameters": [
+                "interpolation_type",
+                "input",
+                "stop_1_input",
+                "stop_1_output",
+                "...",
+                "stop_n_input",
+                "stop_n_output"
+              ],
               "output-type": "color | array<color>"
             }
           ],
@@ -3434,7 +3691,19 @@
             }
           ]
         },
-        "example": ["interpolate-hcl", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"],
+        "example": [
+          "interpolate-hcl",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          "#f00",
+          15.05,
+          "#00f"
+        ],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -3449,7 +3718,15 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "parameters": [
+                "interpolation_type",
+                "input",
+                "stop_1_input",
+                "stop_1_output",
+                "...",
+                "stop_n_input",
+                "stop_n_output"
+              ],
               "output-type": "color | array<color>"
             }
           ],
@@ -3472,7 +3749,19 @@
             }
           ]
         },
-        "example": ["interpolate-lab", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"],
+        "example": [
+          "interpolate-lab",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          "#f00",
+          15.05,
+          "#00f"
+        ],
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -3492,7 +3781,9 @@
             }
           ]
         },
-        "example": ["ln2"],
+        "example": [
+          "ln2"
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3512,7 +3803,9 @@
             }
           ]
         },
-        "example": ["pi"],
+        "example": [
+          "pi"
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3532,7 +3825,9 @@
             }
           ]
         },
-        "example": ["e"],
+        "example": [
+          "e"
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -3547,7 +3842,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value"],
+              "parameters": [
+                "value"
+              ],
               "output-type": "string"
             }
           ],
@@ -3558,7 +3855,13 @@
             }
           ]
         },
-        "example": ["typeof", ["get", "name"]],
+        "example": [
+          "typeof",
+          [
+            "get",
+            "name"
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3573,7 +3876,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value_1", "...", "value_n"],
+              "parameters": [
+                "value_1",
+                "...",
+                "value_n"
+              ],
               "output-type": "string"
             }
           ],
@@ -3584,7 +3891,13 @@
             }
           ]
         },
-        "example": ["string", ["get", "name"]],
+        "example": [
+          "string",
+          [
+            "get",
+            "name"
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3599,7 +3912,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value_1", "...", "value_n"],
+              "parameters": [
+                "value_1",
+                "...",
+                "value_n"
+              ],
               "output-type": "number"
             }
           ],
@@ -3610,7 +3927,13 @@
             }
           ]
         },
-        "example": ["number", ["get", "population"]],
+        "example": [
+          "number",
+          [
+            "get",
+            "population"
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3625,7 +3948,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value_1", "...", "value_n"],
+              "parameters": [
+                "value_1",
+                "...",
+                "value_n"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -3636,7 +3963,14 @@
             }
           ]
         },
-        "example": ["boolean", ["feature-state", "hover"], false],
+        "example": [
+          "boolean",
+          [
+            "feature-state",
+            "hover"
+          ],
+          false
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3651,7 +3985,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value_1", "...", "value_n"],
+              "parameters": [
+                "value_1",
+                "...",
+                "value_n"
+              ],
               "output-type": "object"
             }
           ],
@@ -3662,7 +4000,13 @@
             }
           ]
         },
-        "example": ["object", ["get", "some-property"]],
+        "example": [
+          "object",
+          [
+            "get",
+            "some-property"
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3677,7 +4021,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["options"],
+              "parameters": [
+                "options"
+              ],
               "output-type": "collator"
             }
           ],
@@ -3688,7 +4034,14 @@
             }
           ]
         },
-        "example": ["collator", {"case-sensitive": true, "diacritic-sensitive": true, "locale": "fr"}],
+        "example": [
+          "collator",
+          {
+            "case-sensitive": true,
+            "diacritic-sensitive": true,
+            "locale": "fr"
+          }
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3703,7 +4056,13 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "style_overrides_1?", "...", "input_n", "style_overrides_n?"],
+              "parameters": [
+                "input_1",
+                "style_overrides_1?",
+                "...",
+                "input_n",
+                "style_overrides_n?"
+              ],
               "output-type": "formatted"
             }
           ],
@@ -3718,7 +4077,32 @@
             }
           ]
         },
-        "example": ["format", ["upcase", ["get", "FacilityName"]], {"font-scale": 0.8}, "\n\n", {}, ["downcase", ["get", "Comments"]], {"font-scale": 0.6, "vertical-align": "center"}],
+        "example": [
+          "format",
+          [
+            "upcase",
+            [
+              "get",
+              "FacilityName"
+            ]
+          ],
+          {
+            "font-scale": 0.8
+          },
+          "\n\n",
+          {},
+          [
+            "downcase",
+            [
+              "get",
+              "Comments"
+            ]
+          ],
+          {
+            "font-scale": 0.6,
+            "vertical-align": "center"
+          }
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3758,7 +4142,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["image_name"],
+              "parameters": [
+                "image_name"
+              ],
               "output-type": "image"
             }
           ],
@@ -3769,7 +4155,10 @@
             }
           ]
         },
-        "example": ["image", "marker_15"],
+        "example": [
+          "image",
+          "marker_15"
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3784,7 +4173,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input", "format_options"],
+              "parameters": [
+                "input",
+                "format_options"
+              ],
               "output-type": "string"
             }
           ],
@@ -3799,7 +4191,17 @@
             }
           ]
         },
-        "example": ["number-format", ["get", "mag"], {"min-fraction-digits": 1, "max-fraction-digits": 1}],
+        "example": [
+          "number-format",
+          [
+            "get",
+            "mag"
+          ],
+          {
+            "min-fraction-digits": 1,
+            "max-fraction-digits": 1
+          }
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3814,7 +4216,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value"],
+              "parameters": [
+                "value"
+              ],
               "output-type": "string"
             }
           ],
@@ -3825,7 +4229,13 @@
             }
           ]
         },
-        "example": ["to-string", ["get", "mag"]],
+        "example": [
+          "to-string",
+          [
+            "get",
+            "mag"
+          ]
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3840,7 +4250,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value_1", "...", "value_n"],
+              "parameters": [
+                "value_1",
+                "...",
+                "value_n"
+              ],
               "output-type": "number"
             }
           ],
@@ -3851,7 +4265,10 @@
             }
           ]
         },
-        "example": ["to-number", "someProperty"],
+        "example": [
+          "to-number",
+          "someProperty"
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3866,7 +4283,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value"],
+              "parameters": [
+                "value"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -3877,7 +4296,10 @@
             }
           ]
         },
-        "example": ["to-boolean", "someProperty"],
+        "example": [
+          "to-boolean",
+          "someProperty"
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3892,7 +4314,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["color"],
+              "parameters": [
+                "color"
+              ],
               "output-type": "array"
             }
           ],
@@ -3903,7 +4327,10 @@
             }
           ]
         },
-        "example": ["to-rgba", "#ff0000"],
+        "example": [
+          "to-rgba",
+          "#ff0000"
+        ],
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
@@ -3918,7 +4345,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["value_1", "...", "value_n"],
+              "parameters": [
+                "value_1",
+                "...",
+                "value_n"
+              ],
               "output-type": "color"
             }
           ],
@@ -3929,7 +4360,10 @@
             }
           ]
         },
-        "example": ["to-color", "#edf8e9"],
+        "example": [
+          "to-color",
+          "#edf8e9"
+        ],
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -3944,7 +4378,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["red", "green", "blue"],
+              "parameters": [
+                "red",
+                "green",
+                "blue"
+              ],
               "output-type": "color"
             }
           ],
@@ -3963,7 +4401,12 @@
             }
           ]
         },
-        "example": ["rgb", 255, 0, 0],
+        "example": [
+          "rgb",
+          255,
+          0,
+          0
+        ],
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
@@ -3978,7 +4421,12 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["red", "green", "blue", "alpha"],
+              "parameters": [
+                "red",
+                "green",
+                "blue",
+                "alpha"
+              ],
               "output-type": "color"
             }
           ],
@@ -4001,7 +4449,13 @@
             }
           ]
         },
-        "example": ["rgba", 255, 0, 0, 1],
+        "example": [
+          "rgba",
+          255,
+          0,
+          0,
+          1
+        ],
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
@@ -4016,7 +4470,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["property_name", "object?"],
+              "parameters": [
+                "property_name",
+                "object?"
+              ],
               "output-type": "any"
             }
           ],
@@ -4033,7 +4490,10 @@
             }
           ]
         },
-        "example": ["get", "someProperty"],
+        "example": [
+          "get",
+          "someProperty"
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -4048,7 +4508,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["property_name", "object?"],
+              "parameters": [
+                "property_name",
+                "object?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -4065,7 +4528,10 @@
             }
           ]
         },
-        "example": ["has", "someProperty"],
+        "example": [
+          "has",
+          "someProperty"
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -4080,7 +4546,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["array_or_string"],
+              "parameters": [
+                "array_or_string"
+              ],
               "output-type": "number"
             }
           ],
@@ -4091,7 +4559,13 @@
             }
           ]
         },
-        "example": ["length", ["get", "myArray"]],
+        "example": [
+          "length",
+          [
+            "get",
+            "myArray"
+          ]
+        ],
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
@@ -4111,7 +4585,9 @@
             }
           ]
         },
-        "example": ["properties"],
+        "example": [
+          "properties"
+        ],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -4126,7 +4602,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["property_name"],
+              "parameters": [
+                "property_name"
+              ],
               "output-type": "any"
             }
           ],
@@ -4137,7 +4615,10 @@
             }
           ]
         },
-        "example": ["feature-state", "hover"],
+        "example": [
+          "feature-state",
+          "hover"
+        ],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -4157,7 +4638,13 @@
             }
           ]
         },
-        "example": ["==", ["geometry-type"], "Polygon"],
+        "example": [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "Polygon"
+        ],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -4177,7 +4664,9 @@
             }
           ]
         },
-        "example": ["id"],
+        "example": [
+          "id"
+        ],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -4197,7 +4686,22 @@
             }
           ]
         },
-        "example": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.05, ["get", "height"]],
+        "example": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          0,
+          15.05,
+          [
+            "get",
+            "height"
+          ]
+        ],
         "group": "Zoom",
         "sdk-support": {
           "basic functionality": {
@@ -4217,7 +4721,9 @@
             }
           ]
         },
-        "example": ["heatmap-density"],
+        "example": [
+          "heatmap-density"
+        ],
         "group": "Heatmap",
         "sdk-support": {
           "basic functionality": {
@@ -4237,7 +4743,9 @@
             }
           ]
         },
-        "example": ["elevation"],
+        "example": [
+          "elevation"
+        ],
         "group": "Color Relief",
         "sdk-support": {
           "basic functionality": {
@@ -4257,7 +4765,9 @@
             }
           ]
         },
-        "example": ["line-progress"],
+        "example": [
+          "line-progress"
+        ],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -4277,7 +4787,9 @@
             }
           ]
         },
-        "example": ["accumulated"],
+        "example": [
+          "accumulated"
+        ],
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -4292,7 +4804,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "number"
             }
           ],
@@ -4303,7 +4819,11 @@
             }
           ]
         },
-        "example": ["+", 2, 3],
+        "example": [
+          "+",
+          2,
+          3
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4318,7 +4838,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "number"
             }
           ],
@@ -4329,7 +4853,11 @@
             }
           ]
         },
-        "example": ["*", 2, 3],
+        "example": [
+          "*",
+          2,
+          3
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4344,11 +4872,16 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "input_2"],
+              "parameters": [
+                "input_1",
+                "input_2"
+              ],
               "output-type": "number"
             },
             {
-              "parameters": ["single_input"],
+              "parameters": [
+                "single_input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4370,7 +4903,10 @@
             }
           ]
         },
-        "example": ["-", 10],
+        "example": [
+          "-",
+          10
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4385,7 +4921,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "input_2"],
+              "parameters": [
+                "input_1",
+                "input_2"
+              ],
               "output-type": "number"
             }
           ],
@@ -4402,7 +4941,17 @@
             }
           ]
         },
-        "example": ["/", ["get", "population"], ["get", "sq-km"]],
+        "example": [
+          "/",
+          [
+            "get",
+            "population"
+          ],
+          [
+            "get",
+            "sq-km"
+          ]
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4417,7 +4966,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "input_2"],
+              "parameters": [
+                "input_1",
+                "input_2"
+              ],
               "output-type": "number"
             }
           ],
@@ -4434,7 +4986,11 @@
             }
           ]
         },
-        "example": ["%", 10, 3],
+        "example": [
+          "%",
+          10,
+          3
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4449,7 +5005,10 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "input_2"],
+              "parameters": [
+                "input_1",
+                "input_2"
+              ],
               "output-type": "number"
             }
           ],
@@ -4466,7 +5025,11 @@
             }
           ]
         },
-        "example": ["^", 2, 3],
+        "example": [
+          "^",
+          2,
+          3
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4481,7 +5044,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4493,7 +5058,10 @@
             }
           ]
         },
-        "example": ["sqrt", 9],
+        "example": [
+          "sqrt",
+          9
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4508,7 +5076,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4519,7 +5089,10 @@
             }
           ]
         },
-        "example": ["log10", 8],
+        "example": [
+          "log10",
+          8
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4534,7 +5107,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4545,7 +5120,10 @@
             }
           ]
         },
-        "example": ["ln", 8],
+        "example": [
+          "ln",
+          8
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4560,7 +5138,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4571,7 +5151,10 @@
             }
           ]
         },
-        "example": ["log2", 8],
+        "example": [
+          "log2",
+          8
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4586,7 +5169,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4597,7 +5182,10 @@
             }
           ]
         },
-        "example": ["sin", 1],
+        "example": [
+          "sin",
+          1
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4612,7 +5200,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4623,7 +5213,10 @@
             }
           ]
         },
-        "example": ["cos", 1],
+        "example": [
+          "cos",
+          1
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4638,7 +5231,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4649,7 +5244,10 @@
             }
           ]
         },
-        "example": ["tan", 1],
+        "example": [
+          "tan",
+          1
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4664,7 +5262,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4675,7 +5275,10 @@
             }
           ]
         },
-        "example": ["asin", 1],
+        "example": [
+          "asin",
+          1
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4690,7 +5293,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4701,7 +5306,10 @@
             }
           ]
         },
-        "example": ["acos", 1],
+        "example": [
+          "acos",
+          1
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4716,7 +5324,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4727,7 +5337,10 @@
             }
           ]
         },
-        "example": ["atan", 1],
+        "example": [
+          "atan",
+          1
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4742,7 +5355,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "number"
             }
           ],
@@ -4753,7 +5370,11 @@
             }
           ]
         },
-        "example": ["min", 1, 2],
+        "example": [
+          "min",
+          1,
+          2
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4768,7 +5389,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "number"
             }
           ],
@@ -4779,7 +5404,11 @@
             }
           ]
         },
-        "example": ["max", 1, 2],
+        "example": [
+          "max",
+          1,
+          2
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4794,7 +5423,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4805,7 +5436,10 @@
             }
           ]
         },
-        "example": ["round", 1.5],
+        "example": [
+          "round",
+          1.5
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4820,7 +5454,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4831,7 +5467,10 @@
             }
           ]
         },
-        "example": ["abs", -1.5],
+        "example": [
+          "abs",
+          -1.5
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4846,7 +5485,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4857,7 +5498,10 @@
             }
           ]
         },
-        "example": ["ceil", 1.5],
+        "example": [
+          "ceil",
+          1.5
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4872,7 +5516,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "number"
             }
           ],
@@ -4883,7 +5529,10 @@
             }
           ]
         },
-        "example": ["floor", 1.5],
+        "example": [
+          "floor",
+          1.5
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4898,7 +5547,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["geojson"],
+              "parameters": [
+                "geojson"
+              ],
               "output-type": "number"
             }
           ],
@@ -4909,7 +5560,16 @@
             }
           ]
         },
-        "example": ["distance", {"type": "Point", "coordinates": [0, 0]}],
+        "example": [
+          "distance",
+          {
+            "type": "Point",
+            "coordinates": [
+              0,
+              0
+            ]
+          }
+        ],
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
@@ -4924,7 +5584,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "input_2", "collator?"],
+              "parameters": [
+                "input_1",
+                "input_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -4944,7 +5608,11 @@
             }
           ]
         },
-        "example": ["==", "$type", "Polygon"],
+        "example": [
+          "==",
+          "$type",
+          "Polygon"
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -4964,7 +5632,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "input_2", "collator?"],
+              "parameters": [
+                "input_1",
+                "input_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -4984,7 +5656,11 @@
             }
           ]
         },
-        "example": ["!=", "cluster", true],
+        "example": [
+          "!=",
+          "cluster",
+          true
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5004,11 +5680,19 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["string_1", "string_2", "collator?"],
+              "parameters": [
+                "string_1",
+                "string_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             },
             {
-              "parameters": ["number_1", "number_2", "collator?"],
+              "parameters": [
+                "number_1",
+                "number_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5028,7 +5712,14 @@
             }
           ]
         },
-        "example": [">", ["get", "mag"], 2],
+        "example": [
+          ">",
+          [
+            "get",
+            "mag"
+          ],
+          2
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5048,11 +5739,19 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["string_1", "string_2", "collator?"],
+              "parameters": [
+                "string_1",
+                "string_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             },
             {
-              "parameters": ["number_1", "number_2", "collator?"],
+              "parameters": [
+                "number_1",
+                "number_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5072,7 +5771,14 @@
             }
           ]
         },
-        "example": ["<", ["get", "mag"], 2],
+        "example": [
+          "<",
+          [
+            "get",
+            "mag"
+          ],
+          2
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5092,11 +5798,19 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["string_1", "string_2", "collator?"],
+              "parameters": [
+                "string_1",
+                "string_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             },
             {
-              "parameters": ["number_1", "number_2", "collator?"],
+              "parameters": [
+                "number_1",
+                "number_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5116,7 +5830,14 @@
             }
           ]
         },
-        "example": [">=", ["get", "mag"], 6],
+        "example": [
+          ">=",
+          [
+            "get",
+            "mag"
+          ],
+          6
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5136,11 +5857,19 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["string_1", "string_2", "collator?"],
+              "parameters": [
+                "string_1",
+                "string_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             },
             {
-              "parameters": ["number_1", "number_2", "collator?"],
+              "parameters": [
+                "number_1",
+                "number_2",
+                "collator?"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5160,7 +5889,14 @@
             }
           ]
         },
-        "example": ["<=", ["get", "mag"], 6],
+        "example": [
+          "<=",
+          [
+            "get",
+            "mag"
+          ],
+          6
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5180,7 +5916,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5191,7 +5931,25 @@
             }
           ]
         },
-        "example": ["all", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]],
+        "example": [
+          "all",
+          [
+            ">=",
+            [
+              "get",
+              "mag"
+            ],
+            4
+          ],
+          [
+            "<",
+            [
+              "get",
+              "mag"
+            ],
+            5
+          ]
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5206,7 +5964,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5217,7 +5979,25 @@
             }
           ]
         },
-        "example": ["any", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]],
+        "example": [
+          "any",
+          [
+            ">=",
+            [
+              "get",
+              "mag"
+            ],
+            4
+          ],
+          [
+            "<",
+            [
+              "get",
+              "mag"
+            ],
+            5
+          ]
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5232,7 +6012,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5243,7 +6025,13 @@
             }
           ]
         },
-        "example": ["!", ["has", "point_count"]],
+        "example": [
+          "!",
+          [
+            "has",
+            "point_count"
+          ]
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5258,7 +6046,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["geojson"],
+              "parameters": [
+                "geojson"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5269,7 +6059,36 @@
             }
           ]
         },
-        "example": ["within", {"type": "Polygon", "coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]]}],
+        "example": [
+          "within",
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  5
+                ],
+                [
+                  5,
+                  5
+                ],
+                [
+                  5,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            ]
+          }
+        ],
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
@@ -5284,7 +6103,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "boolean"
             }
           ],
@@ -5295,7 +6116,10 @@
             }
           ]
         },
-        "example": ["is-supported-script", "दिल्ली"],
+        "example": [
+          "is-supported-script",
+          "दिल्ली"
+        ],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -5310,7 +6134,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "string"
             }
           ],
@@ -5321,7 +6147,13 @@
             }
           ]
         },
-        "example": ["upcase", ["get", "name"]],
+        "example": [
+          "upcase",
+          [
+            "get",
+            "name"
+          ]
+        ],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -5336,7 +6168,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input"],
+              "parameters": [
+                "input"
+              ],
               "output-type": "string"
             }
           ],
@@ -5347,7 +6181,13 @@
             }
           ]
         },
-        "example": ["downcase", ["get", "name"]],
+        "example": [
+          "downcase",
+          [
+            "get",
+            "name"
+          ]
+        ],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -5362,7 +6202,11 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input_1", "...", "input_n"],
+              "parameters": [
+                "input_1",
+                "...",
+                "input_n"
+              ],
               "output-type": "string"
             }
           ],
@@ -5373,7 +6217,14 @@
             }
           ]
         },
-        "example": ["concat", "square-rgb-", ["get", "color"]],
+        "example": [
+          "concat",
+          "square-rgb-",
+          [
+            "get",
+            "color"
+          ]
+        ],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -5388,7 +6239,9 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["collator"],
+              "parameters": [
+                "collator"
+              ],
               "output-type": "string"
             }
           ],
@@ -5399,10 +6252,17 @@
             }
           ]
         },
-        "example": ["resolved-locale", [
-          "collator",
-          {"case-sensitive": true, "diacritic-sensitive": false, "locale": "de"}
-        ]],
+        "example": [
+          "resolved-locale",
+          [
+            "collator",
+            {
+              "case-sensitive": true,
+              "diacritic-sensitive": false,
+              "locale": "de"
+            }
+          ]
+        ],
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -5636,7 +6496,7 @@
       "type": "number",
       "minimum": 0,
       "doc": "The exaggeration of the terrain - how high it will look.",
-      "default": 1.0,
+      "default": 1,
       "sdk-support": {
         "basic functionality": {
           "js": "2.2.0",
@@ -7431,7 +8291,7 @@
     },
     "raster-resampling": {
       "type": "enum",
-      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter. Advised to use the generic esampling paint property instead.",
       "values": {
         "linear": {
           "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
@@ -7472,6 +8332,33 @@
       },
       "expression": {
         "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "resampling": {
+      "type": "enum",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter",
+      "values": {
+        "linear": {
+          "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
+        },
+        "nearest": {
+          "doc": "Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled"
+        }
+      },
+      "default": "linear",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/7154",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4117",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4117"
+        }
+      },
+      "expression": {
+        "interpolated": false,
         "parameters": [
           "zoom"
         ]
@@ -7688,6 +8575,33 @@
         ]
       },
       "property-type": "data-constant"
+    },
+    "resampling": {
+      "type": "enum",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter",
+      "values": {
+        "linear": {
+          "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
+        },
+        "nearest": {
+          "doc": "Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled"
+        }
+      },
+      "default": "linear",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/7154",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4117",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4117"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "paint_color-relief": {
@@ -7718,10 +8632,16 @@
       "doc": "Defines the color of each pixel based on its elevation. Should be an expression that uses `[\"elevation\"]` as input.",
       "example": [
         "interpolate",
-        ["linear"],
-        ["elevation"],
-        0, "black",
-        8849, "white"
+        [
+          "linear"
+        ],
+        [
+          "elevation"
+        ],
+        0,
+        "black",
+        8849,
+        "white"
       ],
       "transition": false,
       "sdk-support": {
@@ -7739,6 +8659,33 @@
         ]
       },
       "property-type": "color-ramp"
+    },
+    "resampling": {
+      "type": "enum",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter",
+      "values": {
+        "linear": {
+          "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
+        },
+        "nearest": {
+          "doc": "Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled"
+        }
+      },
+      "default": "linear",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/7154",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4117",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4117"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "paint_background": {
