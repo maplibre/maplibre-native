@@ -170,10 +170,10 @@ constexpr uint8_t toUint8(T t) noexcept {
 constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
     {{"color-relief-color", toUint8(Property::ColorReliefColor)},
      {"color-relief-opacity", toUint8(Property::ColorReliefOpacity)},
-     {"resampling", toUint8(Property::Resampling)},
+     {"resampling", toUint8(Property::ColorReliefResampling)},
      {"color-relief-color-transition", toUint8(Property::ColorReliefColorTransition)},
      {"color-relief-opacity-transition", toUint8(Property::ColorReliefOpacityTransition)},
-     {"resampling-transition", toUint8(Property::ResamplingTransition)}});
+     {"resampling-transition", toUint8(Property::ColorReliefResamplingTransition)}});
 
 StyleProperty getLayerProperty(const ColorReliefLayer& layer, Property property) {
     switch (property) {
@@ -240,14 +240,14 @@ std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& na
         setColorReliefOpacity(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::Resampling) {
+    if (property == Property::ColorReliefResampling) {
         Error error;
         const auto& typedValue = convert<PropertyValue<ResamplingType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        setResampling(*typedValue);
+        setColorReliefResampling(*typedValue);
         return std::nullopt;
     }
 

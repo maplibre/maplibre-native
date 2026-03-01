@@ -350,7 +350,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"hillshade-illumination-direction", toUint8(Property::HillshadeIlluminationDirection)},
      {"hillshade-method", toUint8(Property::HillshadeMethod)},
      {"hillshade-shadow-color", toUint8(Property::HillshadeShadowColor)},
-     {"resampling", toUint8(Property::Resampling)},
+     {"resampling", toUint8(Property::HillshadeResampling)},
      {"hillshade-accent-color-transition", toUint8(Property::HillshadeAccentColorTransition)},
      {"hillshade-exaggeration-transition", toUint8(Property::HillshadeExaggerationTransition)},
      {"hillshade-highlight-color-transition", toUint8(Property::HillshadeHighlightColorTransition)},
@@ -359,7 +359,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"hillshade-illumination-direction-transition", toUint8(Property::HillshadeIlluminationDirectionTransition)},
      {"hillshade-method-transition", toUint8(Property::HillshadeMethodTransition)},
      {"hillshade-shadow-color-transition", toUint8(Property::HillshadeShadowColorTransition)},
-     {"resampling-transition", toUint8(Property::ResamplingTransition)}});
+     {"resampling-transition", toUint8(Property::HillshadeResamplingTransition)}});
 
 StyleProperty getLayerProperty(const HillshadeLayer& layer, Property property) {
     switch (property) {
@@ -504,14 +504,14 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
         setHillshadeMethod(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::Resampling) {
+    if (property == Property::HillshadeResampling) {
         Error error;
         const auto& typedValue = convert<PropertyValue<ResamplingType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        setResampling(*typedValue);
+        setHillshadeResampling(*typedValue);
         return std::nullopt;
     }
 
