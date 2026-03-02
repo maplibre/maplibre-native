@@ -70,8 +70,7 @@ public:
 
 }; // class LocationIndicatorLayer
 
-class LocationIndicatorJavaLayerPeerFactory final : public JavaLayerPeerFactory,
-                                                    public mbgl::LocationIndicatorLayerFactory {
+class LocationIndicatorJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::LocationIndicatorLayerFactory {
 public:
     ~LocationIndicatorJavaLayerPeerFactory() override;
 

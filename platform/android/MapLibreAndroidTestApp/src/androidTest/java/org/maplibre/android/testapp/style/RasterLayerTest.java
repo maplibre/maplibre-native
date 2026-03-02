@@ -259,4 +259,17 @@ public class RasterLayerTest extends BaseLayerTest {
     layer.setProperties(rasterFadeDuration(propertyValue));
     assertEquals(layer.getRasterFadeDuration().getValue(), propertyValue);
   }
+
+  @Test
+  @UiThreadTest
+  public void testResamplingAsConstant() {
+    Timber.i("resampling");
+    assertNotNull(layer);
+    assertNull(layer.getResampling().getValue());
+
+    // Set and Get
+    String propertyValue = RESAMPLING_LINEAR;
+    layer.setProperties(resampling(propertyValue));
+    assertEquals(layer.getResampling().getValue(), propertyValue);
+  }
 }
