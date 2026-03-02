@@ -64,8 +64,8 @@ public:
 
   void onDidFailLoadingStyle(const std::string &errorMessage) {
     MLNMapSnapshotter *strongSnapshotter = snapshotter;
-    if ([strongSnapshotter.delegate respondsToSelector:@selector(mapSnapshotterDidFail:
-                                                                             withError:)]) {
+    if ([strongSnapshotter.delegate
+            respondsToSelector:@selector(mapSnapshotterDidFail:withError:)]) {
       NSString *description = @(errorMessage.c_str());
       NSDictionary *userInfo = @{
         NSLocalizedDescriptionKey : NSLocalizedStringWithDefaultValue(
@@ -83,8 +83,8 @@ public:
 
   void onDidFinishLoadingStyle() {
     MLNMapSnapshotter *strongSnapshotter = snapshotter;
-    if ([strongSnapshotter.delegate respondsToSelector:@selector(mapSnapshotter:
-                                                           didFinishLoadingStyle:)]) {
+    if ([strongSnapshotter.delegate
+            respondsToSelector:@selector(mapSnapshotter:didFinishLoadingStyle:)]) {
       [strongSnapshotter.delegate mapSnapshotter:snapshotter
                            didFinishLoadingStyle:snapshotter.style];
     }
@@ -92,8 +92,8 @@ public:
 
   void onStyleImageMissing(const std::string &imageName) {
     MLNMapSnapshotter *strongSnapshotter = snapshotter;
-    if ([strongSnapshotter.delegate respondsToSelector:@selector(mapSnapshotter:
-                                                           didFailLoadingImageNamed:)]) {
+    if ([strongSnapshotter.delegate
+            respondsToSelector:@selector(mapSnapshotter:didFailLoadingImageNamed:)]) {
       [strongSnapshotter.delegate mapSnapshotter:snapshotter
                         didFailLoadingImageNamed:@(imageName.c_str())];
     }
@@ -964,8 +964,8 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
 }
 
 - (CGFloat)lineWidthForPolylineAnnotation:(MLNPolyline *)annotation {
-  if ([self.delegate respondsToSelector:@selector(mapSnapshotter:
-                                            lineWidthForPolylineAnnotation:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(mapSnapshotter:lineWidthForPolylineAnnotation:)]) {
     return [self.delegate mapSnapshotter:self lineWidthForPolylineAnnotation:annotation];
   }
 

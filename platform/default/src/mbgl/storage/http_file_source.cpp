@@ -40,16 +40,16 @@ namespace mbgl {
 
 class HTTPFileSource::Impl {
 public:
-    Impl(const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_);
+    Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_);
     ~Impl();
 
-    static int handleSocket(CURL *handle, curl_socket_t s, int action, void *userp, void *socketp);
-    static int startTimeout(CURLM *multi, long timeout_ms, void *userp);
-    static void onTimeout(HTTPFileSource::Impl *context);
+    static int handleSocket(CURL* handle, curl_socket_t s, int action, void* userp, void* socketp);
+    static int startTimeout(CURLM* multi, long timeout_ms, void* userp);
+    static void onTimeout(HTTPFileSource::Impl* context);
 
     void perform(curl_socket_t s, util::RunLoop::Event event);
-    CURL *getHandle();
-    void returnHandle(CURL *handle);
+    CURL* getHandle();
+    void returnHandle(CURL* handle);
     void checkMultiInfo();
 
     // Used as the CURL timer function to periodically check for socket updates.
@@ -57,14 +57,14 @@ public:
 
     // CURL multi handle that we use to request multiple URLs at the same time,
     // without having to block and spawn threads.
-    CURLM *multi = nullptr;
+    CURLM* multi = nullptr;
 
     // CURL share handles are used for sharing session state (e.g.)
-    CURLSH *share = nullptr;
+    CURLSH* share = nullptr;
 
     // A queue that we use for storing reusable CURL easy handles to avoid
     // creating and destroying them all the time.
-    std::queue<CURL *> handles;
+    std::queue<CURL*> handles;
 
     void setResourceOptions(ResourceOptions options);
     ResourceOptions getResourceOptions();
@@ -81,16 +81,16 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl *, Resource, FileSource::Callback);
+    HTTPRequest(HTTPFileSource::Impl*, Resource, FileSource::Callback);
     ~HTTPRequest() override;
 
     void handleResult(CURLcode code);
 
 private:
-    static size_t headerCallback(char *buffer, size_t size, size_t nmemb, void *userp);
-    static size_t writeCallback(void *contents, size_t size, size_t nmemb, void *userp);
+    static size_t headerCallback(char* buffer, size_t size, size_t nmemb, void* userp);
+    static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
 
-    HTTPFileSource::Impl *context = nullptr;
+    HTTPFileSource::Impl* context = nullptr;
     Resource resource;
     FileSource::Callback callback;
 
@@ -101,13 +101,13 @@ private:
     std::optional<std::string> retryAfter;
     std::optional<std::string> xRateLimitReset;
 
-    CURL *handle = nullptr;
-    curl_slist *headers = nullptr;
+    CURL* handle = nullptr;
+    curl_slist* headers = nullptr;
 
     char error[CURL_ERROR_SIZE] = {0};
 };
 
-HTTPFileSource::Impl::Impl(const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_)
+HTTPFileSource::Impl::Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
     : resourceOptions(resourceOptions_.clone()),
       clientOptions(clientOptions_.clone()) {
     if (curl_global_init(CURL_GLOBAL_ALL)) {
@@ -138,7 +138,7 @@ HTTPFileSource::Impl::~Impl() {
     timeout.stop();
 }
 
-CURL *HTTPFileSource::Impl::getHandle() {
+CURL* HTTPFileSource::Impl::getHandle() {
     if (!handles.empty()) {
         auto handle = handles.front();
         handles.pop();
@@ -148,20 +148,20 @@ CURL *HTTPFileSource::Impl::getHandle() {
     }
 }
 
-void HTTPFileSource::Impl::returnHandle(CURL *handle) {
+void HTTPFileSource::Impl::returnHandle(CURL* handle) {
     curl_easy_reset(handle);
     handles.push(handle);
 }
 
 void HTTPFileSource::Impl::checkMultiInfo() {
-    CURLMsg *message = nullptr;
+    CURLMsg* message = nullptr;
     int pending = 0;
 
     while ((message = curl_multi_info_read(multi, &pending))) {
         switch (message->msg) {
             case CURLMSG_DONE: {
-                HTTPRequest *baton = nullptr;
-                curl_easy_getinfo(message->easy_handle, CURLINFO_PRIVATE, (char *)&baton);
+                HTTPRequest* baton = nullptr;
+                curl_easy_getinfo(message->easy_handle, CURLINFO_PRIVATE, (char*)&baton);
                 assert(baton);
                 baton->handleResult(message->data.result);
             } break;
@@ -189,9 +189,9 @@ void HTTPFileSource::Impl::perform(curl_socket_t s, util::RunLoop::Event events)
 }
 
 int HTTPFileSource::Impl::handleSocket(
-    CURL * /* handle */, curl_socket_t s, int action, void *userp, void * /* socketp */) {
+    CURL* /* handle */, curl_socket_t s, int action, void* userp, void* /* socketp */) {
     assert(userp);
-    auto context = reinterpret_cast<Impl *>(userp);
+    auto context = reinterpret_cast<Impl*>(userp);
 
     switch (action) {
         case CURL_POLL_IN: {
@@ -222,7 +222,7 @@ int HTTPFileSource::Impl::handleSocket(
     return 0;
 }
 
-void HTTPFileSource::Impl::onTimeout(Impl *context) {
+void HTTPFileSource::Impl::onTimeout(Impl* context) {
     int running_handles;
     CURLMcode error = curl_multi_socket_action(context->multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
     if (error != CURLM_OK) {
@@ -231,9 +231,9 @@ void HTTPFileSource::Impl::onTimeout(Impl *context) {
     context->checkMultiInfo();
 }
 
-int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, void *userp) {
+int HTTPFileSource::Impl::startTimeout(CURLM* /* multi */, long timeout_ms, void* userp) {
     assert(userp);
-    auto context = reinterpret_cast<Impl *>(userp);
+    auto context = reinterpret_cast<Impl*>(userp);
 
     // A timeout of 0 ms means that the timer will invoked in the next loop iteration.
     timeout_ms = std::max<long>(timeout_ms, 0);
@@ -264,7 +264,7 @@ ClientOptions HTTPFileSource::Impl::getClientOptions() {
     return clientOptions.clone();
 }
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, FileSource::Callback callback_)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context_, Resource resource_, FileSource::Callback callback_)
     : context(context_),
       resource(std::move(resource_)),
       callback(std::move(callback_)),
@@ -326,15 +326,15 @@ HTTPRequest::~HTTPRequest() {
 
 // This function is called when we have new data for a request. We just append
 // it to the string containing the previous data.
-size_t HTTPRequest::writeCallback(void *const contents, const size_t size, const size_t nmemb, void *userp) {
+size_t HTTPRequest::writeCallback(void* const contents, const size_t size, const size_t nmemb, void* userp) {
     assert(userp);
-    auto impl = reinterpret_cast<HTTPRequest *>(userp);
+    auto impl = reinterpret_cast<HTTPRequest*>(userp);
 
     if (!impl->data) {
         impl->data = std::make_shared<std::string>();
     }
 
-    impl->data->append(static_cast<char *>(contents), size * nmemb);
+    impl->data->append(static_cast<char*>(contents), size * nmemb);
     return size * nmemb;
 }
 
@@ -344,7 +344,7 @@ namespace {
 // string at the beginning, it returns the length of the header string == begin
 // of the value, otherwise it returns npos. The comparison of the header is
 // ASCII-case-insensitive.
-size_t headerMatches(const char *const header, const char *const buffer, const size_t length) {
+size_t headerMatches(const char* const header, const char* const buffer, const size_t length) {
     const size_t headerLength = strlen(header);
     if (length < headerLength) {
         return std::string::npos;
@@ -357,9 +357,9 @@ size_t headerMatches(const char *const header, const char *const buffer, const s
 }
 } // namespace
 
-size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const size_t nmemb, void *userp) {
+size_t HTTPRequest::headerCallback(char* const buffer, const size_t size, const size_t nmemb, void* userp) {
     assert(userp);
-    auto baton = reinterpret_cast<HTTPRequest *>(userp);
+    auto baton = reinterpret_cast<HTTPRequest*>(userp);
 
     if (!baton->response) {
         baton->response = std::make_unique<Response>();
@@ -455,12 +455,12 @@ void HTTPRequest::handleResult(CURLcode code) {
     callback_(response_);
 }
 
-HTTPFileSource::HTTPFileSource(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions)
+HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {}
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource, Callback callback) {
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 
