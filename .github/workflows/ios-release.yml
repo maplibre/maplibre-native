@@ -63,6 +63,7 @@ jobs:
         run: curl -sL https://sentry.io/get-cli/ | sh
 
       - name: Upload Debug Symbols to Sentry
+        working-directory: .
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
