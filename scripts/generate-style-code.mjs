@@ -353,6 +353,10 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
   };
 });
 
+/**
+ * @param {any} property
+ * @param {string} type
+ */
 function propertyClassName(property, type) {
   if (property.name === "resampling") {
     if (type === "raster") return "RasterStandardResampling";
