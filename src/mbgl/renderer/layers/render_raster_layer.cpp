@@ -166,7 +166,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
             if (bucket.texture2d) {
                 const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
-                const bool nearest = evaluated.get<RasterStandardResampling>() == ResamplingType::Nearest || evaluated.get<RasterResampling>() == RasterResamplingType::Nearest;
+                const bool nearest = evaluated.get<RasterStandardResampling>() == ResamplingType::Nearest ||
+                                     evaluated.get<RasterResampling>() == RasterResamplingType::Nearest;
                 const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
 
                 bucket.texture2d->setSamplerConfiguration(

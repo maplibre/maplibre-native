@@ -357,9 +357,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             const auto& evaluated = static_cast<const ColorReliefLayerProperties&>(*evaluatedProperties).evaluated;
             const bool nearest = evaluated.get<ColorReliefResampling>() == ResamplingType::Nearest;
             const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
-            demTexture->setSamplerConfiguration({.filter = filter,
-                                                 .wrapU = gfx::TextureWrapType::Clamp,
-                                                 .wrapV = gfx::TextureWrapType::Clamp});
+            demTexture->setSamplerConfiguration(
+                {.filter = filter, .wrapU = gfx::TextureWrapType::Clamp, .wrapV = gfx::TextureWrapType::Clamp});
             drawable.setTexture(demTexture, idColorReliefImageTexture);
 
             if (elevationStopsTexture) {
@@ -399,9 +398,8 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = static_cast<const ColorReliefLayerProperties&>(*evaluatedProperties).evaluated;
         const bool nearest = evaluated.get<ColorReliefResampling>() == ResamplingType::Nearest;
         const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
-        demTexture->setSamplerConfiguration({.filter = filter,
-                                             .wrapU = gfx::TextureWrapType::Clamp,
-                                             .wrapV = gfx::TextureWrapType::Clamp});
+        demTexture->setSamplerConfiguration(
+            {.filter = filter, .wrapU = gfx::TextureWrapType::Clamp, .wrapV = gfx::TextureWrapType::Clamp});
         builder->setTexture(demTexture, idColorReliefImageTexture);
 
         // Bind color ramp textures

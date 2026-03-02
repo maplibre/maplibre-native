@@ -290,9 +290,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             const bool nearest = evaluated.get<HillshadeResampling>() == ResamplingType::Nearest;
             const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
             // Use Nearest filtering to match GL JS behavior - the Sobel kernel samples exact pixel values
-            texture->setSamplerConfiguration({.filter = filter,
-                                              .wrapU = gfx::TextureWrapType::Clamp,
-                                              .wrapV = gfx::TextureWrapType::Clamp});
+            texture->setSamplerConfiguration(
+                {.filter = filter, .wrapU = gfx::TextureWrapType::Clamp, .wrapV = gfx::TextureWrapType::Clamp});
             hillshadePrepareBuilder->setTexture(texture, idHillshadeImageTexture);
 
             hillshadePrepareBuilder->flush(context);
