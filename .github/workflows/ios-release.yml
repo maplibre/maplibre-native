@@ -58,6 +58,17 @@ jobs:
             MapLibre.dynamic.xcframework.zip
             MapLibre_ios_device.framework.dSYM.zip
 
+      - name: Install sentry-cli
+        if: env.SENTRY_DSN != ''
+        run: curl -sL https://sentry.io/get-cli/ | sh
+
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: DSYM_PATH=${{ env.debug_symbols_ios }} ./.github/scripts/sentry_upload_symbols.sh
+
   # ios-build-static:
   #   runs-on: macos-14
   #   defaults:
@@ -113,17 +124,6 @@ jobs:
       - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
           node-version-file: ".nvmrc"
-
-      - name: Install sentry-cli
-        if: env.SENTRY_DSN != ''
-        run: curl -sL https://sentry.io/get-cli/ | sh
-
-      - name: Upload Debug Symbols to Sentry
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        run: DSYM_PATH=xcframework ./.github/scripts/sentry_upload_symbols.sh
 
       - name: Get version (release)
         if: github.event.inputs.release == 'full'
