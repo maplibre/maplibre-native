@@ -59,7 +59,6 @@ jobs:
             MapLibre_ios_device.framework.dSYM.zip
 
       - name: Install sentry-cli
-        if: env.SENTRY_DSN != ''
         run: curl -sL https://sentry.io/get-cli/ | sh
 
       - name: Upload Debug Symbols to Sentry
