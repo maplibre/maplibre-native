@@ -169,9 +169,10 @@ jobs:
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           name: ios-v${{ env.version }}
+          working_directory: .
           files: |
-            xcframework/MapLibre.dynamic.xcframework.zip
-            xcframework/MapLibre_ios_device.framework.dSYM.zip
+            MapLibre.dynamic.xcframework.zip
+            MapLibre_ios_device.framework.dSYM.zip
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
