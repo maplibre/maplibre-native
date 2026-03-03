@@ -112,8 +112,8 @@ fun configureMavenPublication(
 
 
 afterEvaluate {
-    configureMavenPublication("opengl", "defaultrelease", "", "")
-    configureMavenPublication("opengl", "defaultdebug", "-debug", " (Debug)", "Debug")
+    configureMavenPublication("vulkan", "defaultrelease", "", "")
+    configureMavenPublication("vulkan", "defaultdebug", "-debug", " (Debug)", "Debug")
     configureMavenPublication("vulkan", "vulkanrelease", "-vulkan", "(Vulkan)")
     configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
     // Right now this is the same as the first, but in the future we might release a major version

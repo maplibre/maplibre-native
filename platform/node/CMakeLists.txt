@@ -12,15 +12,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 add_node_module(
     mbgl-node
     INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
-    NAN_VERSION 2.23.0
+    NAN_VERSION 2.25.0
     EXCLUDE_NODE_ABIS
         46
         47
         48
         51
-        120  # Node 21
-        131  # Node 23
-        141  # Node 25
 )
 
 if(WIN32)

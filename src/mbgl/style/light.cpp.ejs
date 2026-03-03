@@ -20,7 +20,9 @@
 namespace mbgl {
 namespace style {
 
-static LightObserver nullObserver;
+namespace {
+LightObserver nullObserver;
+} // namespace
 
 Light::Light(Immutable<Light::Impl> impl_) : impl(std::move(impl_)), observer(&nullObserver) {}
 

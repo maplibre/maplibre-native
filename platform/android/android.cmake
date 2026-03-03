@@ -91,6 +91,14 @@ if(MLN_WITH_VULKAN)
     )
 endif()
 
+if(MLN_WITH_WEBGPU)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp
+    )
+endif()
+
 target_include_directories(
     mbgl-core
     PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include

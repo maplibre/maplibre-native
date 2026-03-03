@@ -1,10 +1,23 @@
 #include <mbgl/render_test.hpp>
 #include "test_runner_common.hpp"
 
-#include <functional>
-
 using namespace mbgl;
 using namespace mbgl::android;
+
+void updateProgress(JNIEnv* env, struct android_app* app, int completed, int total) {
+    jobject nativeActivity = app->activity->clazz;
+    jclass acl = env->GetObjectClass(nativeActivity);
+    jmethodID updateMethod = env->GetMethodID(acl, "updateProgress", "(II)V");
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(acl);
+        return;
+    }
+    if (updateMethod != nullptr) {
+        env->CallVoidMethod(nativeActivity, updateMethod, completed, total);
+    }
+    env->DeleteLocalRef(acl);
+}
 
 void android_main(struct android_app* app) {
     mbgl::android::theJVM = app->activity->vm;
@@ -24,7 +37,7 @@ void android_main(struct android_app* app) {
         unZipFile(env, zipFile, storagePath);
 
         auto runTestWithManifest =
-            [&storagePath, &app, &outFd, &outEvents, &source](const std::string& manifest) -> bool {
+            [&storagePath, &app, &env, &outFd, &outEvents, &source](const std::string& manifest) -> bool {
             const std::string configFile = storagePath + manifest;
             std::vector<std::string> arguments = {"mbgl-render-test-runner", "-p", configFile, "-u", "rebaseline"};
             std::vector<char*> argv;
@@ -33,8 +46,7 @@ void android_main(struct android_app* app) {
             }
             argv.push_back(nullptr);
 
-            int finishedTestCount = 0;
-            std::function<void()> testStatus = [&]() {
+            std::function<void(mbgl::TestStatus)> testStatus = [&](mbgl::TestStatus status) {
                 auto result = ALooper_pollOnce(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
                 if (result == ALOOPER_POLL_ERROR) {
                     throw std::runtime_error("ALooper_pollOnce returned an error");
@@ -45,7 +57,9 @@ void android_main(struct android_app* app) {
                 }
 
                 mbgl::Log::Info(mbgl::Event::General,
-                                "Current finished tests number is '" + std::to_string(++finishedTestCount) + "'");
+                                "Current finished tests number is '" + std::to_string(status.completed) + "/" +
+                                    std::to_string(status.total) + "'");
+                updateProgress(env, app, static_cast<int>(status.completed), static_cast<int>(status.total));
             };
             mbgl::Log::Info(mbgl::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "'");
             bool result = mbgl::runRenderTests(argv.size() - 1, argv.data(), testStatus) == 0;

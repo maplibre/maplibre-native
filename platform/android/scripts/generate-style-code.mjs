@@ -119,6 +119,10 @@ global.propertyType = function propertyType(property) {
         return 'String';
       case 'color':
         return 'String';
+      case 'numberArray':
+        return 'Float[]';
+      case 'colorArray':
+        return 'String[]';
       case 'padding':
         return 'Float[]';
       case 'variableAnchorOffsetCollection':
@@ -145,6 +149,10 @@ global.propertyJavaType = function propertyType(property) {
          return 'String';
        case 'color':
          return 'String';
+       case 'numberArray':
+         return 'float[]';
+       case 'colorArray':
+         return 'String[]';
        case 'array':
          return `${propertyJavaType({type:property.value})}[]`;
        default:
@@ -164,6 +172,10 @@ global.propertyJNIType = function propertyJNIType(property) {
         return 'String';
       case 'color':
         return 'String';
+      case 'numberArray':
+        return 'jarray<jfloat>';
+      case 'colorArray':
+        return 'jarray<jstring>';
       case 'array':
         return `jarray<${propertyType({type:property.value})}[]>`;
       default:
@@ -197,6 +209,10 @@ global.propertyNativeType = function (property) {
     return `${camelize(property.name)}Type`;
   case 'color':
     return `Color`;
+  case 'numberArray':
+    return 'std::vector<float>';
+  case 'colorArray':
+    return 'std::vector<Color>';
   case 'padding':
     return 'Padding';
   case 'variableAnchorOffsetCollection':
@@ -237,6 +253,10 @@ global.defaultExpressionJava = function(property) {
         return "string";
       case 'color':
         return 'toColor';
+      case 'numberArray':
+        return 'array';
+      case 'colorArray':
+        return 'array';
       case 'padding':
         return 'toPadding';
       case 'array':
@@ -271,6 +291,10 @@ global.defaultValueJava = function(property) {
         return snakeCaseUpper(property.name) + "_" + snakeCaseUpper(Object.keys(property.values)[0]);
       case 'color':
         return '"rgba(255,128,0,0.7)"';
+      case 'numberArray':
+        return 'new Float[] {1.0f, 2.0f}';
+      case 'colorArray':
+        return 'new String[] {"rgba(255,0,0,1)", "rgba(0,0,255,1)"}';
       case 'padding':
         return '{2.0f, 2.0f, 2.0f, 2.0f}';
       case 'variableAnchorOffsetCollection':
@@ -409,6 +433,10 @@ global.evaluatedType = function (property) {
     return (isLightProperty(property) ? 'Light' : '') + `${camelize(property.name)}Type`;
   case 'color':
     return `Color`;
+  case 'numberArray':
+    return 'std::vector<float>';
+  case 'colorArray':
+    return 'std::vector<Color>';
   case 'array':
     if (property.length) {
       return `std::array<${evaluatedType({type: property.value})}, ${property.length}>`;

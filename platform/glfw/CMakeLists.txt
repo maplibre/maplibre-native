@@ -31,6 +31,13 @@ set_property(
     PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
 )
 
+if(APPLE)
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_apple_init.mm
+    )
+endif()
+
 if(MLN_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
     target_sources(

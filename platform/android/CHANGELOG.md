@@ -4,6 +4,8 @@
 
 ### ✨ Features and improvements
 
+- 💥 **Breaking:** Use Vulkan as rendering backend for the `org.maplibre.gl:android-sdk` package. You can still use OpenGL ES with the `org.maplibre.gl:android-sdk-opengl` package.
+
 - core, android: add support for camera roll ([#3011](https://github.com/maplibre/maplibre-native/pull/3011)).
 - Add multithreaded upload to dynamic texture on Vulkan [Core feature] ([#4028](https://github.com/maplibre/maplibre-native/pull/4028)).
 - core: Avoid unnecessary raster buffer updates ([#4085](https://github.com/maplibre/maplibre-native/pull/4085)).
