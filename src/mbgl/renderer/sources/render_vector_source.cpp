@@ -40,7 +40,7 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                 }
             }
             if (isMLT && *isMLT) {
-                return std::make_unique<VectorMLTTile>(tileID, baseImpl->id, parameters, tileset, observer_);
+                return std::make_unique<VectorMLTTile>(tileID, baseImpl->id, parameters, tileset, observer_, mltSupportsFastPFOR);
             } else {
                 return std::make_unique<VectorMVTTile>(tileID, baseImpl->id, parameters, tileset, observer_);
             }
