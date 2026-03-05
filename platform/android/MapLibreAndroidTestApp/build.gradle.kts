@@ -81,7 +81,7 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_OPENGL=ON", "-DMLN_WITH_VULKAN=OFF")
+                    arguments("-DMLN_WITH_OPENGL=ON")
                 }
             }
         }
@@ -89,7 +89,26 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
+                    arguments("-DMLN_WITH_VULKAN=ON")
+                }
+            }
+        }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
                 }
             }
         }

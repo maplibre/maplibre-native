@@ -116,6 +116,7 @@ set(MLN_GENERATED_DARWIN_STYLE_SOURCE
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLight.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNBackgroundStyleLayer.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNCircleStyleLayer.mm"
+    "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNColorReliefStyleLayer.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNFillExtrusionStyleLayer.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNFillStyleLayer.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNHeatmapStyleLayer.mm"
@@ -127,6 +128,7 @@ set(MLN_GENERATED_DARWIN_STYLE_SOURCE
 
 set(MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNBackgroundStyleLayer.h"
+    "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNColorReliefStyleLayer.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNFillExtrusionStyleLayer.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNHeatmapStyleLayer.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLight.h"
@@ -141,6 +143,7 @@ set(MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS
 set(MLN_GENERATED_DARWIN_STYLE_HEADERS
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNRasterStyleLayer_Private.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNBackgroundStyleLayer_Private.h"
+    "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNColorReliefStyleLayer_Private.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNFillExtrusionStyleLayer_Private.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNHeatmapStyleLayer_Private.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLineStyleLayer_Private.h"
@@ -169,25 +172,35 @@ add_custom_target(mbgl-darwin-style-code
     DEPENDS ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
 )
 
-add_library(
-    custom-layer-examples
-    EXCLUDE_FROM_ALL
-    "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
-    "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
-    "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
-    "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm"
-)
+# Custom layer examples use OpenGL ES / Metal APIs directly and are not
+# available for WebGPU builds.
+if(NOT MLN_WITH_WEBGPU)
+    set(_custom_layer_sources
+        "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
+        "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
+        "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
+    )
+    if(MLN_WITH_METAL)
+        list(APPEND _custom_layer_sources "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm")
+    endif()
 
-target_link_libraries(
-    custom-layer-examples
-    PUBLIC ios-sdk-static
-    PRIVATE mbgl-compiler-options mbgl-core
-)
+    add_library(
+        custom-layer-examples
+        EXCLUDE_FROM_ALL
+        ${_custom_layer_sources}
+    )
 
-target_include_directories(
-    custom-layer-examples
-    PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/app"
-    PRIVATE
-        "${PROJECT_SOURCE_DIR}/src" # FIXME: should not use private headers
-)
+    target_link_libraries(
+        custom-layer-examples
+        PUBLIC ios-sdk-static
+        PRIVATE mbgl-compiler-options mbgl-core
+    )
+
+    target_include_directories(
+        custom-layer-examples
+        PUBLIC
+            "${CMAKE_CURRENT_LIST_DIR}/app"
+        PRIVATE
+            "${PROJECT_SOURCE_DIR}/src" # FIXME: should not use private headers
+    )
+endif()

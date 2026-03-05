@@ -8,14 +8,14 @@
                          device:(id<MTLDevice>)device
            renderPassDescriptor:(MTLRenderPassDescriptor *)renderPassDescriptor
                   commandBuffer:(id<MTLCommandBuffer>)commandBuffer {
-    self = [super init];
-    if (self) {
-        _mtkView = mtkView;
-        _device = device;
-        _renderPassDescriptor = renderPassDescriptor;
-        _commandBuffer = commandBuffer;
-    }
-    return self;
+  self = [super init];
+  if (self) {
+    _mtkView = mtkView;
+    _device = device;
+    _renderPassDescriptor = renderPassDescriptor;
+    _commandBuffer = commandBuffer;
+  }
+  return self;
 }
 
 @end
@@ -27,8 +27,8 @@
 @implementation MLNBackendResource
 
 - (instancetype)init {
-    self = [super init];
-    return self;
+  self = [super init];
+  return self;
 }
 
 @end

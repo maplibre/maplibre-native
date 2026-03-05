@@ -186,7 +186,7 @@ public class LocationIndicatorLayerTest extends BaseLayerTest {
     // Set and Get
     Double[] propertyValue = new Double[] {0.0, 0.0, 0.0};
     layer.setProperties(location(propertyValue));
-    assertEquals(layer.getLocation().getValue(), propertyValue);
+    assertArrayEquals(layer.getLocation().getValue(), propertyValue);
   }
 
   @Test

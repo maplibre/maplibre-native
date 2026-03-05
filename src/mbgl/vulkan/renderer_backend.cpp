@@ -12,6 +12,7 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
+#include <mbgl/shaders/vulkan/color_relief.hpp>
 #include <mbgl/shaders/vulkan/custom_geometry.hpp>
 #include <mbgl/shaders/vulkan/custom_symbol_icon.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
@@ -36,16 +37,29 @@
 
 #ifdef ENABLE_VMA_DEBUG
 
-#define VMA_DEBUG_MARGIN 16
+#define VMA_DEBUG_MARGIN 4
 #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_LEAK_LOG_FORMAT(format, ...)              \
+#define VMA_HEAVY_ASSERT(expr) VMA_ASSERT(expr)
+
+#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
     {                                                 \
         char buffer[4096];                            \
         sprintf(buffer, format, __VA_ARGS__);         \
         mbgl::Log::Info(mbgl::Event::Render, buffer); \
     }
+
+#define VMA_DEBUG_LOG(str) VMA_DEBUG_LOG_FORMAT("%s", (str))
+#define VMA_LEAK_LOG_FORMAT(...) VMA_DEBUG_LOG_FORMAT(__VA_ARGS__)
+
+#else
+
+// - triggering VMA_ASSERT_LEAK in `VmaDeviceMemoryBlock::Destroy` without any log printed by
+// `VmaBlockMetadata_TLSF::DebugLogAllAllocations` (since all blocks are free).
+// - VMA_LEAK_LOG_FORMAT logs generate an equal number of alloc/free events.
+// - https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/276
+#undef VMA_ASSERT_LEAK
 
 #endif
 
@@ -100,7 +114,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
       allocator(nullptr) {}
 
 RendererBackend::~RendererBackend() {
-    destroyResources(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
+    destroyResources();
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
@@ -666,6 +680,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::ColorReliefShader,
                   shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
