@@ -7,47 +7,38 @@
       "description": "Tests that color-relief renders correctly above a vector (fill) layer. Layer order mirrors the reference WDB_COLOR_RELIEF_DARK style: bathymetry-color-relief → bathymetry-hillshade → land-fill (vector, sandwiched) → terrain-color-relief (above vector!) → terrain-hillshade. This specifically targets a Metal rendering regression where color-relief placed above a vector layer failed to render, while OpenGL rendered it correctly."
     }
   },
-  "center": [-113.26903, 35.9654],
-  "zoom": 11,
+  "center": [0, 45],
+  "zoom": 1,
   "sources": {
     "dem-ocean-color-relief": {
       "type": "raster-dem",
       "tiles": [
         "local://tiles/{z}-{x}-{y}.ocean.webp"
-      ],
-      "maxzoom": 2,
-      "tileSize": 256
+      ]
     },
     "dem-ocean-hillshade": {
       "type": "raster-dem",
       "tiles": [
         "local://tiles/{z}-{x}-{y}.ocean.webp"
-      ],
-      "maxzoom": 2,
-      "tileSize": 256
+      ]
     },
     "osm-basemap": {
       "type": "vector",
       "tiles": [
         "local://tiles/{z}-{x}-{y}.osm_basemap.pbf"
-      ],
-      "maxzoom": 11
+      ]
     },
     "dem-terrain-color-relief": {
       "type": "raster-dem",
       "tiles": [
         "local://tiles/{z}-{x}-{y}.terrain.png"
-      ],
-      "maxzoom": 15,
-      "tileSize": 256
+      ]
     },
     "dem-terrain-hillshade": {
       "type": "raster-dem",
       "tiles": [
         "local://tiles/{z}-{x}-{y}.terrain.png"
-      ],
-      "maxzoom": 15,
-      "tileSize": 256
+      ]
     }
   },
   "layers": [
