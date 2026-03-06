@@ -186,8 +186,8 @@ void RenderColorReliefLayer::updateColorRamp() {
         std::memcpy(&bits, &elev, sizeof(bits));
         elevationStopsData->data[i * 4 + 0] = static_cast<uint8_t>((bits >> 24) & 0xFF); // MSB
         elevationStopsData->data[i * 4 + 1] = static_cast<uint8_t>((bits >> 16) & 0xFF);
-        elevationStopsData->data[i * 4 + 2] = static_cast<uint8_t>((bits >>  8) & 0xFF);
-        elevationStopsData->data[i * 4 + 3] = static_cast<uint8_t>((bits      ) & 0xFF); // LSB
+        elevationStopsData->data[i * 4 + 2] = static_cast<uint8_t>((bits >> 8) & 0xFF);
+        elevationStopsData->data[i * 4 + 3] = static_cast<uint8_t>((bits) & 0xFF); // LSB
 
         // Store colors without premultiplication for proper interpolation
         Color color = colorStopsVector[i];
