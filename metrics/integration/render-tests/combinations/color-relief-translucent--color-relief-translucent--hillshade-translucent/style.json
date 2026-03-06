@@ -4,7 +4,8 @@
     "test": {
       "height": 256,
       "width": 256,
-      "description": "Same as the fill-sandwich test but without the fill layer, to verify that two color-relief layers with hillshade render correctly on all backends (Metal, Vulkan, WebGPU) when no vector layer is present. Used to isolate whether the fill layer is the cause of the rendering regression."
+      "allowed": 0.01,
+      "description": "Same as the fill-sandwich test but without the fill layer, to verify that two color-relief layers with hillshade render correctly on all backends (Metal, Vulkan, WebGPU) when no vector layer is present. Used to isolate whether the fill layer is the cause of the rendering regression. A small allowed difference (0.01) accounts for sub-pixel floating-point variation in hillshade between OpenGL and non-OpenGL backends."
     }
   },
   "center": [0, 45],

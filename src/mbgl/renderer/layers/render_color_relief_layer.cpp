@@ -43,9 +43,12 @@ RenderColorReliefLayer::RenderColorReliefLayer(Immutable<ColorReliefLayer::Impl>
       unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 
-    // Initialize color ramp data with RGBA format (4 floats per stop)
+    // Initialize color ramp data
     colorRampSize = 256;
-    elevationStopsData = std::make_shared<std::vector<float>>(colorRampSize * 4);
+    // Elevation stops are stored as RGBA8 with each pixel encoding one float value
+    // using IEEE 754 byte packing (R=byte3, G=byte2, B=byte1, A=byte0).
+    // RGBA8 is universally supported on all Vulkan implementations; RGBA32F is not.
+    elevationStopsData = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
     colorStops = std::make_shared<PremultipliedImage>(Size{colorRampSize, 1});
 
     // Initialize with default color ramp immediately to avoid uninitialized state
@@ -169,16 +172,22 @@ void RenderColorReliefLayer::updateColorRamp() {
     }
 
     // Resize and prepare structures
-    elevationStopsData->resize(rampSize * 4); // RGBA float for compatibility
+    elevationStopsData->resize({rampSize, 1});
     colorStops->resize({rampSize, 1});
     this->colorRampSize = rampSize;
 
     for (uint32_t i = 0; i < rampSize; ++i) {
-        // Store elevation in the R channel of an RGBA float vector
-        (*elevationStopsData)[i * 4 + 0] = elevationStopsVector[i]; // R = elevation
-        (*elevationStopsData)[i * 4 + 1] = 0.0f;                    // G = unused
-        (*elevationStopsData)[i * 4 + 2] = 0.0f;                    // B = unused
-        (*elevationStopsData)[i * 4 + 3] = 1.0f;                    // A = unused
+        // Encode float elevation as 4 bytes (IEEE 754 bit pattern, big-endian order).
+        // The shader decodes this as: value = (R<<24 | G<<16 | B<<8 | A) reinterpreted as float.
+        // This RGBA8 encoding is universally supported on all Vulkan/OpenGL implementations,
+        // unlike RGBA32F which is not mandatory for sampled images in the Vulkan spec.
+        float elev = elevationStopsVector[i];
+        uint32_t bits;
+        std::memcpy(&bits, &elev, sizeof(bits));
+        elevationStopsData->data[i * 4 + 0] = static_cast<uint8_t>((bits >> 24) & 0xFF); // MSB
+        elevationStopsData->data[i * 4 + 1] = static_cast<uint8_t>((bits >> 16) & 0xFF);
+        elevationStopsData->data[i * 4 + 2] = static_cast<uint8_t>((bits >>  8) & 0xFF);
+        elevationStopsData->data[i * 4 + 3] = static_cast<uint8_t>((bits      ) & 0xFF); // LSB
 
         // Store colors without premultiplication for proper interpolation
         Color color = colorStopsVector[i];
@@ -250,9 +259,10 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
             elevationStopsTexture = context.createTexture2D();
         }
 
-        // Use RGBA32F instead of R32F for llvmpipe compatibility
-        elevationStopsTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::Float);
-        elevationStopsTexture->upload(elevationStopsData->data(), Size{colorRampSize, 1});
+        // Upload elevation stops as RGBA8 (float encoded as 4 bytes, big-endian IEEE 754).
+        // RGBA8 is universally supported as a sampled image on all Vulkan implementations,
+        // whereas RGBA32F is not mandatory and may be unsupported on mobile Android GPUs.
+        elevationStopsTexture->setImage(elevationStopsData);
         elevationStopsTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                                         .wrapU = gfx::TextureWrapType::Clamp,
                                                         .wrapV = gfx::TextureWrapType::Clamp});
@@ -374,7 +384,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         builder->setShader(colorReliefShader);
-        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+        builder->setEnableDepth(false);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setRenderPass(renderPass);
