@@ -52,8 +52,11 @@ private:
     uint32_t colorRampSize = 256;
     bool colorRampChanged = true;
 
-    // FIX 1: Changed type and name to correctly hold float elevation data
-    std::shared_ptr<std::vector<float>> elevationStopsData; // Elevation values for each stop
+    // Elevation stops encoded as RGBA8 (4 bytes per float, IEEE 754 bit pattern).
+    // Using RGBA8 instead of RGBA32F ensures compatibility across all Vulkan implementations
+    // (RGBA32F sampled image is not mandatory in Vulkan spec; RGBA32F may be unsupported on
+    // mobile Android Vulkan drivers such as Adreno, causing all-brown rendering).
+    std::shared_ptr<PremultipliedImage> elevationStopsData; // Elevation values encoded into RGBA8
 
     std::shared_ptr<PremultipliedImage> colorStops; // RGB colors for each stop
 
