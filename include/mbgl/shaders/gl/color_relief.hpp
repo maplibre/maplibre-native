@@ -70,8 +70,10 @@ float getElevationStop(int stop, int color_ramp_size) {
     // Elevation stops are packed as IEEE 754 float bytes into RGBA8 (big-endian: R=MSB, A=LSB).
     // RGBA8 is universally supported; RGBA32F sampled images are not mandatory in Vulkan.
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    vec4 enc = texture(u_elevation_stops, vec2(x, 0.5)) * 255.0;
-    // Reconstruct the 32-bit IEEE 754 bit pattern from 4 bytes
+    // round() is critical: texture() returns normalized floats (byte/255.0), and the
+    // multiply-back can produce e.g. 64.999 instead of 65.0. Without round(), uint()
+    // truncation would corrupt the IEEE 754 bit pattern and produce wrong elevation values.
+    vec4 enc = round(texture(u_elevation_stops, vec2(x, 0.5)) * 255.0);
     uint bits = (uint(enc.r) << 24u) | (uint(enc.g) << 16u) | (uint(enc.b) << 8u) | uint(enc.a);
     return uintBitsToFloat(bits);
 }

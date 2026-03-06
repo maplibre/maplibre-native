@@ -103,7 +103,7 @@ float getElevationStop(int stop, int color_ramp_size, texture2d<float, access::s
     // RGBA8 is universally supported; RGBA32F sampled images are not mandatory in Vulkan
     // and may be unsupported on mobile Android GPUs.
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    float4 enc = elevationStops.sample(elevation_sampler, float2(x, 0.5)) * 255.0;
+    float4 enc = round(elevationStops.sample(elevation_sampler, float2(x, 0.5)) * 255.0);
     uint bits = (uint(enc.r) << 24u) | (uint(enc.g) << 16u) | (uint(enc.b) << 8u) | uint(enc.a);
     return as_type<float>(bits);
 }

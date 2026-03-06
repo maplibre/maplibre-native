@@ -108,7 +108,7 @@ fn getElevationStop(stop: i32, color_ramp_size: i32) -> f32 {
     // Elevation stops are packed as IEEE 754 float bytes into RGBA8 (big-endian: R=MSB, A=LSB).
     // RGBA8 is universally supported; RGBA32F sampled images are not mandatory in Vulkan
     // and may be unsupported on mobile Android GPUs.
-    let enc = textureLoad(elevation_stops_texture, vec2<i32>(stop, 0), 0) * 255.0;
+    let enc = round(textureLoad(elevation_stops_texture, vec2<i32>(stop, 0), 0) * 255.0);
     let bits = (u32(enc.r) << 24u) | (u32(enc.g) << 16u) | (u32(enc.b) << 8u) | u32(enc.a);
     return bitcast<f32>(bits);
 }
