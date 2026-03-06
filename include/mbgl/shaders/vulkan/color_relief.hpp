@@ -109,9 +109,13 @@ float getElevation(vec2 coord, vec4 unpack) {
 }
 
 float getElevationStop(int stop, int color_ramp_size) {
-    // Elevation stops are plain float values, not terrain-RGB encoded
+    // Elevation stops are packed as IEEE 754 float bytes into RGBA8 (big-endian: R=MSB, A=LSB).
+    // RGBA8 is universally supported; RGBA32F sampled images are not mandatory in Vulkan
+    // and may be unsupported on mobile Android GPUs, causing wrong/undefined sampling results.
     float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return texture(elevation_stops_sampler, vec2(x, 0.5)).r;
+    vec4 enc = texture(elevation_stops_sampler, vec2(x, 0.5)) * 255.0;
+    uint bits = (uint(enc.r) << 24u) | (uint(enc.g) << 16u) | (uint(enc.b) << 8u) | uint(enc.a);
+    return uintBitsToFloat(bits);
 }
 
 vec4 getColorStop(int stop, int color_ramp_size) {

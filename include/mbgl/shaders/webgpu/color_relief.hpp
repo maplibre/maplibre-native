@@ -105,8 +105,12 @@ fn getElevation(coord: vec2<f32>, unpack: vec4<f32>) -> f32 {
 }
 
 fn getElevationStop(stop: i32, color_ramp_size: i32) -> f32 {
-    // Use textureLoad for RGBA32Float texture (not filterable in WebGPU)
-    return textureLoad(elevation_stops_texture, vec2<i32>(stop, 0), 0).r;
+    // Elevation stops are packed as IEEE 754 float bytes into RGBA8 (big-endian: R=MSB, A=LSB).
+    // RGBA8 is universally supported; RGBA32F sampled images are not mandatory in Vulkan
+    // and may be unsupported on mobile Android GPUs.
+    let enc = textureLoad(elevation_stops_texture, vec2<i32>(stop, 0), 0) * 255.0;
+    let bits = (u32(enc.r) << 24u) | (u32(enc.g) << 16u) | (u32(enc.b) << 8u) | u32(enc.a);
+    return bitcast<f32>(bits);
 }
 
 fn getColorStop(stop: i32, color_ramp_size: i32) -> vec4<f32> {

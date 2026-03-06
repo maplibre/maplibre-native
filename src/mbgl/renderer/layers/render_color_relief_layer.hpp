@@ -6,7 +6,6 @@
 #include <mbgl/style/layers/color_relief_layer_properties.hpp>
 #include <mbgl/util/image.hpp>
 #include <memory>
-#include <vector> // Added for std::vector<float>
 
 namespace mbgl {
 namespace gfx {
