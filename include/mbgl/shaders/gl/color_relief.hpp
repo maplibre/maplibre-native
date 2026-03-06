@@ -66,11 +66,12 @@ float getElevation(vec2 coord) {
     return dot(data, u_unpack);
 }
 
-float getElevationStop(int stop) {
+float getElevationStop(int stop, int color_ramp_size) {
     // Elevation stops are packed as IEEE 754 float bytes into RGBA8 (big-endian: R=MSB, A=LSB).
     // RGBA8 is universally supported; RGBA32F sampled images are not mandatory in Vulkan.
-    float x = (float(stop) + 0.5) / float(u_color_ramp_size);
+    float x = (float(stop) + 0.5) / float(color_ramp_size);
     vec4 enc = texture(u_elevation_stops, vec2(x, 0.5)) * 255.0;
+    // Reconstruct the 32-bit IEEE 754 bit pattern from 4 bytes
     uint bits = (uint(enc.r) << 24u) | (uint(enc.g) << 16u) | (uint(enc.b) << 8u) | uint(enc.a);
     return uintBitsToFloat(bits);
 }
@@ -89,7 +90,7 @@ void main() {
 
     while (r - l > 1) {
         int m = (r + l) / 2;
-        float el_m = getElevationStop(m);
+        float el_m = getElevationStop(m, u_color_ramp_size);
         if (el < el_m) {
             r = m;
         } else {
@@ -98,8 +99,8 @@ void main() {
     }
 
     // Get elevation values for interpolation
-    float el_l = getElevationStop(l);
-    float el_r = getElevationStop(r);
+    float el_l = getElevationStop(l, u_color_ramp_size);
+    float el_r = getElevationStop(r, u_color_ramp_size);
 
     // Get colors for interpolation
     vec4 color_l = getColorStop(l);
