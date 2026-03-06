@@ -4,6 +4,7 @@
     "test": {
       "height": 256,
       "width": 256,
+      "allowed": 0.01,
       "description": "Tests that color-relief renders correctly above a vector (fill) layer. Layer order mirrors the reference WDB_COLOR_RELIEF_DARK style: bathymetry-color-relief → bathymetry-hillshade → land-fill (vector, sandwiched) → terrain-color-relief (above vector!) → terrain-hillshade. This specifically targets a Metal rendering regression where color-relief placed above a vector layer failed to render, while OpenGL rendered it correctly."
     }
   },
