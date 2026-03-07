@@ -3,8 +3,6 @@
 #include <mbgl/style/expression/number_format.hpp>
 #include <unordered_map>
 
-
-
 namespace mbgl {
 namespace style {
 namespace expression {
@@ -66,7 +64,6 @@ EvaluationResult NumberFormat::evaluate(const EvaluationContext& params) const {
         }
         evaluatedUnit = toString(*unitResult);
     }
-   
 
     uint8_t evaluatedMinFractionDigits = 0;
     if (minFractionDigits) {
@@ -114,9 +111,10 @@ bool NumberFormat::operator==(const Expression& e) const noexcept {
             return false;
         }
         if ((unit && (!rhs->unit || *unit != *rhs->unit)) || (!unit && rhs->unit)) {
-             return false;
+            return false;
         }
-        if ((minFractionDigits && (!rhs->minFractionDigits || *minFractionDigits != *rhs->minFractionDigits)) || (!minFractionDigits && rhs->minFractionDigits)) {
+        if ((minFractionDigits && (!rhs->minFractionDigits || *minFractionDigits != *rhs->minFractionDigits)) ||
+            (!minFractionDigits && rhs->minFractionDigits)) {
             return false;
         }
         if ((maxFractionDigits && (!rhs->maxFractionDigits || *maxFractionDigits != *rhs->maxFractionDigits)) ||
@@ -187,7 +185,6 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
             return ParseResult();
         }
     }
-    
 
     const std::optional<Convertible> minFractionDigitsOption = objectMember(options, minFractionDigitsKey);
     ParseResult minFractionDigitsResult;
