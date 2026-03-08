@@ -23,14 +23,14 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
     MLN_TRACE_FUNC();
 
     assert(data_);
-    
+
     // Reset state if relayout is needed or if this is the first data update
     if (needsRelayout || !data) {
         reset();
     }
-    
+
     data = std::move(data_);
-    
+
     data->getTile(
         id.canonical,
         [this, self = weakFactory.makeWeakPtr(), capturedData = data.get()](TileFeatures features) {
