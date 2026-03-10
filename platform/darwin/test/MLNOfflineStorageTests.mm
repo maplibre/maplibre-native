@@ -754,12 +754,12 @@
                                   @"Adding contents of sideload_sat.db should add one pack.");
                    MLNOfflinePack *lastPack =
                        [MLNOfflineStorage sharedOfflineStorage].packs.lastObject;
-                   XCTAssertNotNil(lastPack,
-                                  @"Pack should exist after adding contents.");
+                   XCTAssertNotNil(lastPack, @"Pack should exist after adding contents.");
                    XCTAssertNotNil(lastPack.regionID,
-                                  @"Region ID should not be nil after a pack is added.");
-                   XCTAssertGreaterThan(lastPack.regionID.longLongValue, 0,
-                                       @"Region ID should be greater than 0 after a pack is added.");
+                                   @"Region ID should not be nil after a pack is added.");
+                   XCTAssertGreaterThan(
+                       lastPack.regionID.longLongValue, 0,
+                       @"Region ID should be greater than 0 after a pack is added.");
                  }];
 
   // Invalid database type
