@@ -18,7 +18,7 @@ jobs:
           {artifactName: ios-cpp-unit-tests, xcTestFile: CppUnitTests.xctest.zip, ipaFile: CppUnitTestsApp.ipa, name: "iOS C++ Unit Tests"},
         ]
       fail-fast: true
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4

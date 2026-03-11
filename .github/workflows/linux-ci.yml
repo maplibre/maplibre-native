@@ -211,7 +211,7 @@ jobs:
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
@@ -257,7 +257,7 @@ jobs:
   linux-ci-result:
     name: Linux CI Result
     if: needs.pre_job.outputs.should_skip != 'true' && always()
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs:
       - pre_job
       - linux-build-and-test
