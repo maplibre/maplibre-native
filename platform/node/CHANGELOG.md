@@ -5,6 +5,15 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+## 6.4.0
+### ✨ Features and improvements
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)) (by [acalcutt](https://github.com/acalcutt))
+- Node - Update NAN and node-pre-gyp  ([#4128](https://github.com/maplibre/maplibre-native/pull/4128)) (by [acalcutt](https://github.com/acalcutt))
+- Distance-based tile LOD ([#4057](https://github.com/maplibre/maplibre-native/pull/4057)) (by [NathanMOlson](https://github.com/NathanMOlson))
+
+### 🐞 Bug fixes
+- Fix incorrect shader selection for text labels with inline images ([#4082](https://github.com/maplibre/maplibre-native/pull/4082)) (by [ciscorn]
+
 ## 6.3.0
 - Updated supported node versions to v20, v22, and v24. Support for node v18 has been removed. ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
 - Updated NAN to v2.23.0 to support node v24 ([#3760](https://github.com/maplibre/maplibre-native/pull/3760))
