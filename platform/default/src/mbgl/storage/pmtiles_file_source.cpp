@@ -30,6 +30,8 @@
 #endif
 
 namespace {
+constexpr const char* error_cache_miss = "CACHE_MISS";
+
 // https://github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md#3-header
 constexpr int pmtilesHeaderOffset = 0;
 constexpr int pmtilesHeaderLength = 127;
@@ -45,6 +47,12 @@ bool acceptsURL(const std::string& url) {
 std::string extract_url(const std::string& url) {
     return url.substr(std::char_traits<char>::length(mbgl::util::PMTILES_PROTOCOL));
 }
+
+struct URLCacheEntry {
+    std::optional<mbgl::Timestamp> modified = std::nullopt;
+    std::optional<mbgl::Timestamp> expires = std::nullopt;
+    std::optional<std::string> etag = std::nullopt;
+};
 } // namespace
 
 // temporary, remove this when it's available in `pmtiles.hpp`
@@ -147,7 +155,7 @@ public:
                     tileResource.dataRange = std::make_pair(tileAddress.first,
                                                             tileAddress.first + tileAddress.second - 1);
 
-                    tasks[req] = getFileSource()->request(tileResource, [=](const Response& tileResponse) {
+                    tasks[req] = getFileSource()->request(tileResource, [=, this](const Response& tileResponse) {
                         Response response;
                         response.noContent = true;
 
@@ -156,6 +164,11 @@ public:
                                 tileResponse.error->reason,
                                 std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
                             ref.invoke(&FileSourceRequest::setResponse, response);
+                            return;
+                        }
+
+                        if (!ensureUrlCacheIsValid(url, response)) {
+                            request_tile(req, resource, ref);
                             return;
                         }
 
@@ -203,6 +216,7 @@ private:
     ClientOptions clientOptions;
 
     std::shared_ptr<FileSource> fileSource;
+    std::map<std::string, URLCacheEntry> url_cache;
     std::map<std::string, pmtiles::headerv3> header_cache;
     std::map<std::string, std::string> metadata_cache;
     std::map<std::string, std::map<std::string, std::vector<pmtiles::entryv3>>> directory_cache;
@@ -216,6 +230,31 @@ private:
         }
 
         return fileSource;
+    }
+
+    bool ensureUrlCacheIsValid(const std::string& url, const Response& response) {
+        if (!url_cache.contains(url)) {
+            url_cache.emplace(
+                url, URLCacheEntry{.modified = response.modified, .expires = response.expires, .etag = response.etag});
+            return true;
+        }
+
+        auto cache_entry = url_cache.at(url);
+
+        if (cache_entry.etag != response.etag || cache_entry.expires != response.expires ||
+            cache_entry.modified != response.modified) {
+            return false;
+        }
+
+        return true;
+    }
+
+    void clearUrlCaches(const std::string& url) {
+        url_cache.erase(url);
+        header_cache.erase(url);
+        metadata_cache.erase(url);
+        directory_cache.erase(url);
+        directory_cache_control.erase(url);
     }
 
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
@@ -249,6 +288,11 @@ private:
                     return;
                 }
 
+                if (!ensureUrlCacheIsValid(url, response)) {
+                    getHeader(url, req, callback);
+                    return;
+                }
+
                 try {
                     pmtiles::headerv3 header = pmtiles::deserialize_header(response.data->substr(0, 127));
 
@@ -269,150 +313,155 @@ private:
             });
     }
 
-    void getMetadata(std::string& url, AsyncRequest* req, AsyncCallback callback) {
+    void getMetadata(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (metadata_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
         }
 
-        getHeader(
-            url,
-            req,
-            [=, this](std::unique_ptr<Response::Error> error) { // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
-                if (error) {
-                    callback(std::move(error));
-                    return;
-                }
+        getHeader(url,
+                  req,
+                  [=, this](std::unique_ptr<Response::Error> error) { // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
+                      if (error) {
+                          callback(std::move(error));
+                          return;
+                      }
 
-                pmtiles::headerv3 header = header_cache.at(url);
+                      pmtiles::headerv3 header = header_cache.at(url);
 
-                auto parse_callback = [=, this](const std::string& data) {
-                    Document doc;
+                      auto parse_callback = [=, this](const std::string& data) {
+                          Document doc;
 
-                    auto& allocator = doc.GetAllocator();
+                          auto& allocator = doc.GetAllocator();
 
-                    if (!data.empty()) {
-                        doc.Parse(data);
-                    }
+                          if (!data.empty()) {
+                              doc.Parse(data);
+                          }
 
-                    if (!doc.IsObject()) {
-                        doc.SetObject();
-                    }
+                          if (!doc.IsObject()) {
+                              doc.SetObject();
+                          }
 
-                    doc.AddMember("tilejson", "3.0.0", allocator);
+                          doc.AddMember("tilejson", "3.0.0", allocator);
 
-                    if (!doc.HasMember("scheme")) {
-                        doc.AddMember("scheme", rapidjson::Value(), allocator);
-                    }
+                          if (!doc.HasMember("scheme")) {
+                              doc.AddMember("scheme", rapidjson::Value(), allocator);
+                          }
 
-                    doc["scheme"] = rapidjson::Value().SetString("xyz");
+                          doc["scheme"] = rapidjson::Value().SetString("xyz");
 
-                    if (!doc.HasMember("tiles")) {
-                        doc.AddMember("tiles", rapidjson::Value(), allocator);
-                    }
+                          if (!doc.HasMember("tiles")) {
+                              doc.AddMember("tiles", rapidjson::Value(), allocator);
+                          }
 
-                    if (!doc["tiles"].IsArray()) {
-                        doc["tiles"] = rapidjson::Value().SetArray().PushBack(
-                            rapidjson::Value().SetString(std::string(util::PMTILES_PROTOCOL + url), allocator),
-                            allocator);
-                    }
+                          if (!doc["tiles"].IsArray()) {
+                              doc["tiles"] = rapidjson::Value().SetArray().PushBack(
+                                  rapidjson::Value().SetString(std::string(util::PMTILES_PROTOCOL + url), allocator),
+                                  allocator);
+                          }
 
-                    // Translate tile type field to source encoding.
-                    if (header.tile_type == pmtiles::TILETYPE_MLT) {
-                        doc.AddMember("encoding", "mlt", allocator);
-                    }
+                          // Translate tile type field to source encoding.
+                          if (header.tile_type == pmtiles::TILETYPE_MLT) {
+                              doc.AddMember("encoding", "mlt", allocator);
+                          }
 
-                    if (!doc.HasMember("bounds")) {
-                        doc.AddMember("bounds", rapidjson::Value(), allocator);
-                    }
+                          if (!doc.HasMember("bounds")) {
+                              doc.AddMember("bounds", rapidjson::Value(), allocator);
+                          }
 
-                    if (!doc["bounds"].IsArray()) {
-                        doc["bounds"] = rapidjson::Value()
-                                            .SetArray()
-                                            .PushBack(static_cast<double>(header.min_lon_e7) / 1e7, allocator)
-                                            .PushBack(static_cast<double>(header.min_lat_e7) / 1e7, allocator)
-                                            .PushBack(static_cast<double>(header.max_lon_e7) / 1e7, allocator)
-                                            .PushBack(static_cast<double>(header.max_lat_e7) / 1e7, allocator);
-                    }
+                          if (!doc["bounds"].IsArray()) {
+                              doc["bounds"] = rapidjson::Value()
+                                                  .SetArray()
+                                                  .PushBack(static_cast<double>(header.min_lon_e7) / 1e7, allocator)
+                                                  .PushBack(static_cast<double>(header.min_lat_e7) / 1e7, allocator)
+                                                  .PushBack(static_cast<double>(header.max_lon_e7) / 1e7, allocator)
+                                                  .PushBack(static_cast<double>(header.max_lat_e7) / 1e7, allocator);
+                          }
 
-                    if (!doc.HasMember("center")) {
-                        doc.AddMember("center", rapidjson::Value(), allocator);
-                    }
+                          if (!doc.HasMember("center")) {
+                              doc.AddMember("center", rapidjson::Value(), allocator);
+                          }
 
-                    if (!doc["center"].IsArray()) {
-                        doc["center"] = rapidjson::Value()
-                                            .SetArray()
-                                            .PushBack(static_cast<double>(header.center_lon_e7) / 1e7, allocator)
-                                            .PushBack(static_cast<double>(header.center_lat_e7) / 1e7, allocator)
-                                            .PushBack(header.center_zoom, allocator);
-                    }
+                          if (!doc["center"].IsArray()) {
+                              doc["center"] = rapidjson::Value()
+                                                  .SetArray()
+                                                  .PushBack(static_cast<double>(header.center_lon_e7) / 1e7, allocator)
+                                                  .PushBack(static_cast<double>(header.center_lat_e7) / 1e7, allocator)
+                                                  .PushBack(header.center_zoom, allocator);
+                          }
 
-                    if (!doc.HasMember("minzoom")) {
-                        doc.AddMember("minzoom", rapidjson::Value(), allocator);
-                    }
+                          if (!doc.HasMember("minzoom")) {
+                              doc.AddMember("minzoom", rapidjson::Value(), allocator);
+                          }
 
-                    auto& minzoom = doc["minzoom"];
+                          auto& minzoom = doc["minzoom"];
 
-                    if (minzoom.IsString()) {
-                        minzoom.SetInt(std::atoi(minzoom.GetString()));
-                    }
+                          if (minzoom.IsString()) {
+                              minzoom.SetInt(std::atoi(minzoom.GetString()));
+                          }
 
-                    if (!minzoom.IsNumber()) {
-                        minzoom = rapidjson::Value().SetUint(header.min_zoom);
-                    }
+                          if (!minzoom.IsNumber()) {
+                              minzoom = rapidjson::Value().SetUint(header.min_zoom);
+                          }
 
-                    doc["minzoom"] = minzoom;
+                          doc["minzoom"] = minzoom;
 
-                    if (!doc.HasMember("maxzoom")) {
-                        doc.AddMember("maxzoom", rapidjson::Value(), allocator);
-                    }
+                          if (!doc.HasMember("maxzoom")) {
+                              doc.AddMember("maxzoom", rapidjson::Value(), allocator);
+                          }
 
-                    auto& maxzoom = doc["maxzoom"];
+                          auto& maxzoom = doc["maxzoom"];
 
-                    if (maxzoom.IsString()) {
-                        maxzoom.SetInt(std::atoi(maxzoom.GetString()));
-                    }
+                          if (maxzoom.IsString()) {
+                              maxzoom.SetInt(std::atoi(maxzoom.GetString()));
+                          }
 
-                    if (!maxzoom.IsNumber()) {
-                        maxzoom = rapidjson::Value().SetUint(header.max_zoom);
-                    }
+                          if (!maxzoom.IsNumber()) {
+                              maxzoom = rapidjson::Value().SetUint(header.max_zoom);
+                          }
 
-                    doc["maxzoom"] = maxzoom;
+                          doc["maxzoom"] = maxzoom;
 
-                    std::string metadata = serialize(doc);
-                    metadata_cache.emplace(url, metadata);
+                          std::string metadata = serialize(doc);
+                          metadata_cache.emplace(url, metadata);
 
-                    callback(std::unique_ptr<Response::Error>());
-                };
+                          callback(std::unique_ptr<Response::Error>());
+                      };
 
-                if (header.json_metadata_bytes > 0) {
-                    Resource resource(Resource::Kind::Source, url);
-                    resource.loadingMethod = Resource::LoadingMethod::Network;
-                    resource.dataRange = std::make_pair(header.json_metadata_offset,
-                                                        header.json_metadata_offset + header.json_metadata_bytes - 1);
+                      if (header.json_metadata_bytes > 0) {
+                          Resource resource(Resource::Kind::Source, url);
+                          resource.loadingMethod = Resource::LoadingMethod::Network;
+                          resource.dataRange = std::make_pair(
+                              header.json_metadata_offset,
+                              header.json_metadata_offset + header.json_metadata_bytes - 1);
 
-                    tasks[req] = getFileSource()->request(resource, [=](const Response& responseMetadata) {
-                        if (responseMetadata.error) {
-                            callback(std::make_unique<Response::Error>(
-                                responseMetadata.error->reason,
-                                std::string("Error fetching PMTiles metadata: ") + responseMetadata.error->message));
+                          tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
+                              if (response.error) {
+                                  callback(std::make_unique<Response::Error>(
+                                      response.error->reason,
+                                      std::string("Error fetching PMTiles metadata: ") + response.error->message));
 
-                            return;
-                        }
+                                  return;
+                              }
 
-                        std::string data = *responseMetadata.data;
+                              if (!ensureUrlCacheIsValid(url, response)) {
+                                  getMetadata(url, req, callback);
+                                  return;
+                              }
 
-                        if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
-                            data = util::decompress(data);
-                        }
+                              std::string data = *response.data;
 
-                        parse_callback(data);
-                    });
+                              if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
+                                  data = util::decompress(data);
+                              }
 
-                    return;
-                }
+                              parse_callback(data);
+                          });
 
-                parse_callback(std::string());
-            });
+                          return;
+                      }
+
+                      parse_callback(std::string());
+                  });
     }
 
     void storeDirectory(const std::string& url,
@@ -481,6 +530,11 @@ private:
                     return;
                 }
 
+                if (!ensureUrlCacheIsValid(url, response)) {
+                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other, error_cache_miss));
+                    return;
+                }
+
                 try {
                     std::string directoryData = *response.data;
 
@@ -523,6 +577,31 @@ private:
             directoryLength,
             [=, this](std::unique_ptr<Response::Error> error) { // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
                 if (error) {
+                    if (error->message == error_cache_miss) {
+                        getHeader(url, req, [=, this](std::unique_ptr<Response::Error> headerError) {
+                            if (headerError) {
+                                callback(
+                                    std::make_pair<uint64_t, uint32_t>(0, 0),
+                                    std::make_unique<Response::Error>(
+                                        Response::Error::Reason::Other,
+                                        std::string("Error fetching PMTiles tile address: ") + headerError->message));
+                                return;
+                            }
+
+                            pmtiles::headerv3 header = header_cache.at(url);
+
+                            getTileAddress(url,
+                                           req,
+                                           tileID,
+                                           header.root_dir_offset,
+                                           static_cast<std::uint32_t>(header.root_dir_bytes),
+                                           0,
+                                           callback);
+                        });
+
+                        return;
+                    }
+
                     callback(std::make_pair(0, 0), std::move(error));
                     return;
                 }
