@@ -2,7 +2,7 @@
 //
 // Metal/MTLTypes.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,16 +20,17 @@
 
 #pragma once
 
+#include "../Foundation/Foundation.hpp"
 #include "MTLDefines.hpp"
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
 
-#include <Foundation/Foundation.hpp>
-
-#include "MTLTypes.hpp"
-
 namespace MTL
 {
+struct SamplePosition;
+
+using Coordinate2D = MTL::SamplePosition;
+
 struct Origin
 {
     Origin() = default;
@@ -76,15 +77,11 @@ struct Region
     MTL::Size     size;
 } _MTL_PACKED;
 
-struct SamplePosition;
-
-using Coordinate2D = SamplePosition;
-
 struct SamplePosition
 {
     SamplePosition() = default;
 
-    SamplePosition(float _x, float _y);
+    SamplePosition(float x, float y);
 
     static SamplePosition Make(float x, float y);
 
@@ -98,11 +95,10 @@ struct ResourceID
 } _MTL_PACKED;
 
 }
-
-_MTL_INLINE MTL::Origin::Origin(NS::UInteger _x, NS::UInteger _y, NS::UInteger _z)
-    : x(_x)
-    , y(_y)
-    , z(_z)
+_MTL_INLINE MTL::Origin::Origin(NS::UInteger x, NS::UInteger y, NS::UInteger z)
+    : x(x)
+    , y(y)
+    , z(z)
 {
 }
 
@@ -111,10 +107,10 @@ _MTL_INLINE MTL::Origin MTL::Origin::Make(NS::UInteger x, NS::UInteger y, NS::UI
     return Origin(x, y, z);
 }
 
-_MTL_INLINE MTL::Size::Size(NS::UInteger _width, NS::UInteger _height, NS::UInteger _depth)
-    : width(_width)
-    , height(_height)
-    , depth(_depth)
+_MTL_INLINE MTL::Size::Size(NS::UInteger width, NS::UInteger height, NS::UInteger depth)
+    : width(width)
+    , height(height)
+    , depth(depth)
 {
 }
 
@@ -156,9 +152,9 @@ _MTL_INLINE MTL::Region MTL::Region::Make3D(NS::UInteger x, NS::UInteger y, NS::
     return Region(x, y, z, width, height, depth);
 }
 
-_MTL_INLINE MTL::SamplePosition::SamplePosition(float _x, float _y)
-    : x(_x)
-    , y(_y)
+_MTL_INLINE MTL::SamplePosition::SamplePosition(float x, float y)
+    : x(x)
+    , y(y)
 {
 }
 

@@ -2,7 +2,7 @@
 //
 // Metal/Metal.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include "MTLAccelerationStructure.hpp"
 #include "MTLAccelerationStructureCommandEncoder.hpp"
 #include "MTLAccelerationStructureTypes.hpp"
+#include "MTLAllocation.hpp"
 #include "MTLArgument.hpp"
 #include "MTLArgumentEncoder.hpp"
 #include "MTLBinaryArchive.hpp"
@@ -62,6 +63,7 @@
 #include "MTLIOCompressor.hpp"
 #include "MTLLibrary.hpp"
 #include "MTLLinkedFunctions.hpp"
+#include "MTLLogState.hpp"
 #include "MTLParallelRenderCommandEncoder.hpp"
 #include "MTLPipeline.hpp"
 #include "MTLPixelFormat.hpp"
@@ -70,6 +72,7 @@
 #include "MTLRenderCommandEncoder.hpp"
 #include "MTLRenderPass.hpp"
 #include "MTLRenderPipeline.hpp"
+#include "MTLResidencySet.hpp"
 #include "MTLResource.hpp"
 #include "MTLResourceStateCommandEncoder.hpp"
 #include "MTLResourceStatePass.hpp"
@@ -80,5 +83,38 @@
 #include "MTLVertexDescriptor.hpp"
 #include "MTLVisibleFunctionTable.hpp"
 #include "MTLVersion.hpp"
+#include "MTLTensor.hpp"
+#include "MTLResourceViewPool.hpp"
+#include "MTLTextureViewPool.hpp"
+#include "MTLDataType.hpp"
+#include "MTL4ArgumentTable.hpp"
+#include "MTL4BinaryFunction.hpp"
+#include "MTL4CommandAllocator.hpp"
+#include "MTL4CommandBuffer.hpp"
+#include "MTL4CommandEncoder.hpp"
+#include "MTL4CommandQueue.hpp"
+#include "MTL4Counters.hpp"
+#include "MTL4RenderPass.hpp"
+#include "MTL4RenderCommandEncoder.hpp"
+#include "MTL4ComputeCommandEncoder.hpp"
+#include "MTL4MachineLearningCommandEncoder.hpp"
+#include "MTL4Compiler.hpp"
+#include "MTL4CompilerTask.hpp"
+#include "MTL4LibraryDescriptor.hpp"
+#include "MTL4FunctionDescriptor.hpp"
+#include "MTL4LibraryFunctionDescriptor.hpp"
+#include "MTL4SpecializedFunctionDescriptor.hpp"
+#include "MTL4StitchedFunctionDescriptor.hpp"
+#include "MTL4PipelineState.hpp"
+#include "MTL4ComputePipeline.hpp"
+#include "MTL4RenderPipeline.hpp"
+#include "MTL4MachineLearningPipeline.hpp"
+#include "MTL4TileRenderPipeline.hpp"
+#include "MTL4MeshRenderPipeline.hpp"
+#include "MTL4PipelineDataSetSerializer.hpp"
+#include "MTL4Archive.hpp"
+#include "MTL4CommitFeedback.hpp"
+#include "MTL4BinaryFunctionDescriptor.hpp"
+#include "MTL4LinkingDescriptor.hpp"
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------

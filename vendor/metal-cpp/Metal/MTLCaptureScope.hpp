@@ -2,7 +2,7 @@
 //
 // Metal/MTLCaptureScope.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,8 +25,7 @@
 #include "MTLDefines.hpp"
 #include "MTLPrivate.hpp"
 
-#include "../Foundation/NSObject.hpp"
-#include "../Foundation/NSString.hpp"
+#include "../Foundation/Foundation.hpp"
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 

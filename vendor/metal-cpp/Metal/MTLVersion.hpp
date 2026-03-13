@@ -2,7 +2,7 @@
 //
 // Metal/MTLVersion.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#define METALCPP_VERSION_MAJOR 306
-#define METALCPP_VERSION_MINOR 5
-#define METALCPP_VERSION_PATCH 16
+#define METALCPP_VERSION_MAJOR 370
+#define METALCPP_VERSION_MINOR 63
+#define METALCPP_VERSION_PATCH 1
 
 #define METALCPP_SUPPORTS_VERSION(major, minor, patch) \
     ((major < METALCPP_VERSION_MAJOR) || \
