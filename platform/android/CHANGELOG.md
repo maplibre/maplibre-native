@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 13.0.1
+
+### 🐞 Bug fixes
+
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+
 ## 13.0.0
 
 ### ✨ Features and improvements
