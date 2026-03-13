@@ -1,5 +1,12 @@
 # Changelog MapLibre Native for Android
 
+## 13.0.1
+
+### 🐞 Bug fixes
+
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+- core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166))
+
 ## 13.0.0
 
 ### ✨ Features and improvements
