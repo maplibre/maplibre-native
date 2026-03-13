@@ -1,6 +1,5 @@
-import MapLibre
-
 import MachO
+import MapLibre
 
 struct RandomNumberGeneratorWithSeed: RandomNumberGenerator {
     private var state1: UInt64

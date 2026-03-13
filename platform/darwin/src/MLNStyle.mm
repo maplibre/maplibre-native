@@ -236,7 +236,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
   [self removeSource:source error:nil];
 }
 
-- (BOOL)removeSource:(MLNSource *)source error:(NSError *__nullable *__nullable)outError {
+- (BOOL)removeSource:(MLNSource *)source error:(NSError * __nullable * __nullable)outError {
   MLNLogDebug(@"Removing source: %@", source);
 
   if (!source.rawSource) {

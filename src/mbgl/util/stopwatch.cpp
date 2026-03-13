@@ -29,7 +29,7 @@ stopwatch::stopwatch(std::string name_, EventSeverity severity_, Event event_)
       event(event_),
       start(Clock::now()) {}
 
-void stopwatch::report(const std::string &name_) {
+void stopwatch::report(const std::string& name_) {
     Duration duration = Clock::now() - start;
 
     const auto logMsg = name_ + ": " +
