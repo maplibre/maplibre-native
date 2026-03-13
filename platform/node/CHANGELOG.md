@@ -5,17 +5,9 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
-- Add Style URL Activity to Android Test App ([#4170](https://github.com/maplibre/maplibre-native/pull/4170)) (by [@acalcutt](https://github.com/acalcutt))
-- core: Remove global uniform usage for render target shaders ([#4145](https://github.com/maplibre/maplibre-native/pull/4145)) (by [@adrian-cojocaru](https://github.com/adrian-cojocaru))
-- Fix changelog extraction in Node release workflow ([#4168](https://github.com/maplibre/maplibre-native/pull/4168)) (by [@acalcutt](https://github.com/acalcutt))
-- # core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
-- update remaining workflows to ubuntu-24.04 ([#4167](https://github.com/maplibre/maplibre-native/pull/4167)) (by [@louwers](https://github.com/louwers))
-- Pin `tinyobjloader` submodule ([#4165](https://github.com/maplibre/maplibre-native/pull/4165)) (by [@adrian-cojocaru](https://github.com/adrian-cojocaru))
-- Expose Offline Region ID property on MLNOfflinePack for Darwin/iOS ([#4161](https://github.com/maplibre/maplibre-native/pull/4161)) (by [@nitrag](https://github.com/nitrag))
 ## 6.4.1-pre.0
-### ✨ Features and improvements
-
 ### 🐞 Bug fixes
+- # core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
 
 ## 6.4.0
 ### ✨ Features and improvements
