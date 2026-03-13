@@ -22,29 +22,30 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                                         const bool needsRendering,
                                         const bool needsRelayout,
                                         const TileParameters& parameters) {
-    tilePyramid.update(
-        layers,
-        needsRendering,
-        needsRelayout,
-        parameters,
-        *baseImpl,
-        util::tileSize_I,
-        tileset.zoomRange,
-        tileset.bounds,
-        [&](const OverscaledTileID& tileID, TileObserver* observer_) -> std::unique_ptr<VectorTile> {
-            if (!isMLT.has_value()) {
-                auto impl = staticImmutableCast<style::TileSource::Impl>(baseImpl);
-                assert(impl->tileset); // we should have one by now
-                if (impl->tileset) {
-                    isMLT = (impl->tileset->vectorEncoding == Tileset::VectorEncoding::MLT);
-                }
-            }
-            if (isMLT && *isMLT) {
-                return std::make_unique<VectorMLTTile>(tileID, baseImpl->id, parameters, tileset, observer_);
-            } else {
-                return std::make_unique<VectorMVTTile>(tileID, baseImpl->id, parameters, tileset, observer_);
-            }
-        });
+    tilePyramid.update(layers,
+                       needsRendering,
+                       needsRelayout,
+                       parameters,
+                       *baseImpl,
+                       util::tileSize_I,
+                       tileset.zoomRange,
+                       tileset.bounds,
+                       [&](const OverscaledTileID& tileID, TileObserver* observer_) -> std::unique_ptr<VectorTile> {
+                           if (!isMLT.has_value()) {
+                               auto impl = staticImmutableCast<style::TileSource::Impl>(baseImpl);
+                               assert(impl->tileset); // we should have one by now
+                               if (impl->tileset) {
+                                   isMLT = (impl->tileset->vectorEncoding == Tileset::VectorEncoding::MLT);
+                               }
+                           }
+                           if (isMLT && *isMLT) {
+                               return std::make_unique<VectorMLTTile>(
+                                   tileID, baseImpl->id, parameters, tileset, observer_, mltSupportsFastPFOR);
+                           } else {
+                               return std::make_unique<VectorMVTTile>(
+                                   tileID, baseImpl->id, parameters, tileset, observer_);
+                           }
+                       });
 }
 
 } // namespace mbgl
