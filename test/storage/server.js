@@ -179,13 +179,18 @@ app.get('/load/:number', function(req, res) {
 });
 
 app.get('/online/*style', function(req, res) {
-    const file = path.join(import.meta.dirname, "../fixtures/map/online", req.params.style);
+    const stylePath = [].concat(req.params.style).join('/');
+    const file = path.join(import.meta.dirname, "../fixtures/map/online", stylePath);
     res.sendFile(file); // Set disposition and send it.
     // res.status(200).send();
     // res.send('Request ' + req.params.style);
 });
 
-var server = app.listen(3000, function () {
+var server = app.listen(3000, function (error) {
+    if (error) {
+        process.stderr.write('Failed to start server: ' + error.message + '\n');
+        process.exit(1);
+    }
     // Tell parent that we're now listening.
     process.stdout.write("OK");
 });
