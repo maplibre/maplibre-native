@@ -36,7 +36,7 @@ app.get('/test', function (req, res) {
     res.send(content);
 });
 
-app.get('/stale/*', function() {
+app.get('/stale/*path', function() {
     // Never respond.
 });
 
@@ -169,11 +169,11 @@ app.get('/delayed', function(req, res) {
 });
 
 
-app.get('/load/:number(\\d+)', function(req, res) {
+app.get('/load/:number', function(req, res) {
     res.send('Request ' + req.params.number);
 });
 
-app.get('/online/:style(*)', function(req, res) {
+app.get('/online/*style', function(req, res) {
     const file = path.join(import.meta.dirname, "../fixtures/map/online", req.params.style);
     res.sendFile(file); // Set disposition and send it.
     // res.status(200).send();
