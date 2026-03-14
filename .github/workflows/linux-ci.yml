@@ -236,7 +236,16 @@ jobs:
       - name: Start server
         run: |
           npm install
-          node test/storage/server.js &
+          # 'sleep infinity' keeps the server's stdin open across GitHub Actions steps.
+          # The server watches for stdin EOF as a self-termination signal, so without
+          # this the server exits as soon as this step's shell closes its stdin pipe.
+          sleep infinity | node test/storage/server.js &
+          disown
+          # Wait for the server to be ready
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:3000/test >/dev/null 2>&1 && echo "Server ready on port 3000" && break
+            sleep 1
+          done
 
       - name: Generate coverage report
         run: |
