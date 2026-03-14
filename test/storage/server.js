@@ -170,7 +170,12 @@ app.get('/delayed', function(req, res) {
 
 
 app.get('/load/:number', function(req, res) {
-    res.send('Request ' + req.params.number);
+    const number = parseInt(req.params.number, 10);
+    if (isNaN(number)) {
+        res.status(400).send('Bad Request');
+        return;
+    }
+    res.send('Request ' + number);
 });
 
 app.get('/online/*style', function(req, res) {
