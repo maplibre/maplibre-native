@@ -109,6 +109,8 @@ public:
     // Projection mode
     void setProjectionMode(const ProjectionMode&);
     ProjectionMode getProjectionMode() const;
+    void setMapProjection(MapProjectionType);
+    MapProjectionType getMapProjection() const;
 
     // Transitions
     bool inTransition() const;

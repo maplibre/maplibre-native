@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add map projection API and apply style projection defaults.
 - [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)
 - [core] All CMake properties are now prefixed `MLN_*` [1054](https://github.com/maplibre/maplibre-native/pull/1054).

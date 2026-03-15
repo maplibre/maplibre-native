@@ -55,6 +55,12 @@ TEST(Style, Properties) {
     ASSERT_EQ("", style.getName());
     ASSERT_EQ(99, *style.getDefaultCamera().roll);
 
+    style.loadJSON(R"STYLE({"projection": {"type": "globe"}})STYLE");
+    ASSERT_EQ(MapProjectionType::Globe, style.getDefaultProjection());
+
+    style.loadJSON(R"STYLE({"projection": {"type": "mercator"}})STYLE");
+    ASSERT_EQ(MapProjectionType::Mercator, style.getDefaultProjection());
+
     style.loadJSON(R"STYLE({})STYLE");
     ASSERT_EQ(Milliseconds(300), *style.getTransitionOptions().duration);
     ASSERT_EQ(std::optional<Duration>{}, style.getTransitionOptions().delay);
@@ -69,6 +75,7 @@ TEST(Style, Properties) {
     ASSERT_EQ(0, *style.getDefaultCamera().zoom);
     ASSERT_EQ(0, *style.getDefaultCamera().bearing);
     ASSERT_EQ(0, *style.getDefaultCamera().pitch);
+    ASSERT_EQ(MapProjectionType::Mercator, style.getDefaultProjection());
 }
 
 TEST(Style, DuplicateSource) {

@@ -104,6 +104,10 @@ StyleParseResult Parser::parse(const std::string& json) {
         }
     }
 
+    if (document.HasMember("projection")) {
+        parseProjection(document["projection"]);
+    }
+
     if (document.HasMember("transition")) {
         parseTransition(document["transition"]);
     }
@@ -223,6 +227,36 @@ void Parser::parseTransition(const JSValue& value) {
     }
 
     transition = std::move(*converted);
+}
+
+void Parser::parseProjection(const JSValue& value) {
+    if (!value.IsObject()) {
+        Log::Warning(Event::ParseStyle, "projection must be an object");
+        return;
+    }
+
+    if (!value.HasMember("type")) {
+        Log::Warning(Event::ParseStyle, "projection object must define a type");
+        return;
+    }
+
+    const JSValue& typeValue = value["type"];
+    if (!typeValue.IsString()) {
+        Log::Warning(Event::ParseStyle, "projection type must be a string");
+        return;
+    }
+
+    const std::string type{typeValue.GetString(), typeValue.GetStringLength()};
+    if (type == "mercator") {
+        projection = MapProjectionType::Mercator;
+        return;
+    }
+    if (type == "globe") {
+        projection = MapProjectionType::Globe;
+        return;
+    }
+
+    Log::Warning(Event::ParseStyle, "projection type must be \"mercator\" or \"globe\"");
 }
 
 void Parser::parseLight(const JSValue& value) {

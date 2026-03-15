@@ -78,6 +78,7 @@ public:
 
     std::string getName() const;
     CameraOptions getDefaultCamera() const;
+    MapProjectionType getDefaultProjection() const;
 
     TransitionOptions getTransitionOptions() const;
     void setTransitionOptions(const TransitionOptions&);
@@ -126,6 +127,7 @@ private:
     // Defaults
     std::string name;
     CameraOptions defaultCamera;
+    MapProjectionType defaultProjection = MapProjectionType::Mercator;
 
     // SpriteLoaderObserver implementation.
     void onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>>) override;

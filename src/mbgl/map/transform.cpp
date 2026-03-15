@@ -566,6 +566,14 @@ ProjectionMode Transform::getProjectionMode() const {
         .withYSkew(state.getYSkew());
 }
 
+void Transform::setMapProjection(MapProjectionType projection) {
+    state.setMapProjection(projection);
+}
+
+MapProjectionType Transform::getMapProjection() const {
+    return state.getMapProjection();
+}
+
 // MARK: - Transition
 
 void Transform::startTransition(const CameraOptions& camera,

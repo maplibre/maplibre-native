@@ -421,6 +421,15 @@ ProjectionMode Map::getProjectionMode() const {
     return impl->transform.getProjectionMode();
 }
 
+void Map::setMapProjection(MapProjectionType projection) {
+    impl->transform.setMapProjection(projection);
+    impl->onUpdate();
+}
+
+MapProjectionType Map::getMapProjection() const {
+    return impl->transform.getMapProjection();
+}
+
 // MARK: - Projection
 
 ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {

@@ -213,6 +213,7 @@ if(MLN_CREATE_AMALGAMATION)
         POST_BUILD
         COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
+            $<TARGET_FILE:mlt-cpp>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
             $<TARGET_FILE:mbgl-harfbuzz>

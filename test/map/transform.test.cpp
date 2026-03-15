@@ -524,6 +524,16 @@ TEST(Transform, ProjectionMode) {
     EXPECT_EQ(*options.ySkew, 0.0);
 }
 
+TEST(Transform, MapProjection) {
+    Transform transform;
+
+    transform.setMapProjection(MapProjectionType::Globe);
+    EXPECT_EQ(transform.getMapProjection(), MapProjectionType::Globe);
+
+    transform.setMapProjection(MapProjectionType::Mercator);
+    EXPECT_EQ(transform.getMapProjection(), MapProjectionType::Mercator);
+}
+
 TEST(Transform, IsPanning) {
     Transform transform;
 
