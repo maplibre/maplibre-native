@@ -205,6 +205,16 @@ jni::Local<jni::Object<>> HillshadeLayer::getHillshadeMethod(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(*layer).getHillshadeMethod()));
 }
 
+jni::Local<jni::Object<>> HillshadeLayer::getResampling(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::HillshadeLayer::getDefaultHillshadeResampling()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toHillshadeLayer(*layer).getHillshadeResampling()));
+}
+
 // HillshadeJavaLayerPeerFactory
 
 HillshadeJavaLayerPeerFactory::~HillshadeJavaLayerPeerFactory() = default;
@@ -260,7 +270,8 @@ void HillshadeJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&HillshadeLayer::getHillshadeAccentColorTransition, "nativeGetHillshadeAccentColorTransition"),
         METHOD(&HillshadeLayer::setHillshadeAccentColorTransition, "nativeSetHillshadeAccentColorTransition"),
         METHOD(&HillshadeLayer::getHillshadeAccentColor, "nativeGetHillshadeAccentColor"),
-        METHOD(&HillshadeLayer::getHillshadeMethod, "nativeGetHillshadeMethod"));
+        METHOD(&HillshadeLayer::getHillshadeMethod, "nativeGetHillshadeMethod"),
+        METHOD(&HillshadeLayer::getResampling, "nativeGetResampling"));
 }
 
 } // namespace android
