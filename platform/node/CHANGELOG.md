@@ -7,7 +7,7 @@
 
 ## 6.4.1-pre.0
 ### 🐞 Bug fixes
-- # core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
+- core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
 
 ## 6.4.0
 ### ✨ Features and improvements
