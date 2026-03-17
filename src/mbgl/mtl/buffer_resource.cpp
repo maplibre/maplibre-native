@@ -142,7 +142,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
             if (!newBuffer) {
                 throw std::bad_alloc();
             }
-            // assert(newBuffer);
+            assert(newBuffer);
             if (newBuffer) {
                 buffer = std::move(newBuffer);
                 stats.totalBuffers++;
