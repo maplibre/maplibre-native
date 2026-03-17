@@ -42,7 +42,7 @@ BufferResource::BufferResource(Context& context_,
         auto& device = context.getBackend().getDevice();
         buffer = NS::TransferPtr((data && size) ? device->newBuffer(data, size, usage)
                                                 : device->newBuffer(size, usage));
-        
+
         if (!buffer) {
             throw std::bad_alloc();
         }
@@ -142,7 +142,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
             if (!newBuffer) {
                 throw std::bad_alloc();
             }
-            //assert(newBuffer);
+            // assert(newBuffer);
             if (newBuffer) {
                 buffer = std::move(newBuffer);
                 stats.totalBuffers++;

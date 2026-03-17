@@ -279,7 +279,7 @@ public:
     std::optional<std::chrono::duration<double>> getAttributeUpdateTime() const { return attributeUpdateTime; }
 
     bool markedForDeletion = false;
-    
+
 protected:
     bool enabled = true;
     bool enableColor = true;

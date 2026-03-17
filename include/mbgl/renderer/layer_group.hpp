@@ -135,15 +135,12 @@ public:
         for (auto* drawable : sortedDrawables) {
             try {
                 f(*drawable);
-            }
-            catch (...) {
+            } catch (...) {
                 drawable->markedForDeletion = true;
                 Log::Warning(Event::Render, "Visit drawable error");
             }
         }
-        removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return drawable.markedForDeletion;
-        });
+        removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.markedForDeletion; });
         return sortedDrawables.size();
     }
 
@@ -226,16 +223,13 @@ public:
             if (item) {
                 try {
                     f(*item);
-                }
-                catch (...) {
+                } catch (...) {
                     item->markedForDeletion = true;
                     Log::Warning(Event::Render, "Visit drawable error");
                 }
             }
         }
-        removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return drawable.markedForDeletion;
-        });
+        removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.markedForDeletion; });
         return drawables.size();
     }
 

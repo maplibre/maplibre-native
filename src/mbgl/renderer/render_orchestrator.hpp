@@ -114,8 +114,7 @@ public:
             if (pair.second) {
                 try {
                     f(*pair.second);
-                }
-                catch (...) {
+                } catch (...) {
                     Log::Warning(Event::Render, "Visit layer error");
                 }
             }
@@ -128,8 +127,7 @@ public:
             if (rit->second) {
                 try {
                     f(*rit->second);
-                }
-                catch (...) {
+                } catch (...) {
                     Log::Warning(Event::Render, "Visit layer error");
                 }
             }
