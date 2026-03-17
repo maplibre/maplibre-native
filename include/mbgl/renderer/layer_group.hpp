@@ -133,8 +133,17 @@ public:
     std::size_t visitDrawables(Func f) {
         assert(drawablesByTile.size() == sortedDrawables.size());
         for (auto* drawable : sortedDrawables) {
-            f(*drawable);
+            try {
+                f(*drawable);
+            }
+            catch (...) {
+                drawable->markedForDeletion = true;
+                Log::Warning(Event::Render, "Visit drawable error");
+            }
         }
+        removeDrawablesIf([&](gfx::Drawable& drawable) {
+            return drawable.markedForDeletion;
+        });
         return sortedDrawables.size();
     }
 
@@ -213,11 +222,20 @@ public:
 
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(Func f) {
-        for (const auto& item : drawables) {
+        for (auto& item : drawables) {
             if (item) {
-                f(*item);
+                try {
+                    f(*item);
+                }
+                catch (...) {
+                    item->markedForDeletion = true;
+                    Log::Warning(Event::Render, "Visit drawable error");
+                }
             }
         }
+        removeDrawablesIf([&](gfx::Drawable& drawable) {
+            return drawable.markedForDeletion;
+        });
         return drawables.size();
     }
 

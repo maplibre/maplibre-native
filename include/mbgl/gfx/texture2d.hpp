@@ -78,11 +78,11 @@ public:
 
     /// @brief Create the texture with default initialized memory.
     /// @note Be sure to configure a valid size and format.
-    virtual void create() noexcept = 0;
+    virtual void create() = 0;
 
     /// @brief Upload image data to the texture resource
     /// @param pixelData Image data to transfer
-    virtual void upload(const void* pixelData, const Size& size_) noexcept = 0;
+    virtual void upload(const void* pixelData, const Size& size_) = 0;
 
     /// @brief Upload image data to the texture resource
     /// @tparam Image Image object type
@@ -120,7 +120,7 @@ public:
 
     /// @brief Upload staged image data if present and required.
     /// @see needsUpload
-    virtual void upload() noexcept = 0;
+    virtual void upload() = 0;
 
     /// @brief Check whether the texture needs upload
     /// @return bool

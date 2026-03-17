@@ -112,7 +112,12 @@ public:
     void visitLayerGroups(Func f) {
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
-                f(*pair.second);
+                try {
+                    f(*pair.second);
+                }
+                catch (...) {
+                    Log::Warning(Event::Render, "Visit layer error");
+                }
             }
         }
     }
@@ -121,7 +126,12 @@ public:
     void visitLayerGroupsReversed(Func f) {
         for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
             if (rit->second) {
-                f(*rit->second);
+                try {
+                    f(*rit->second);
+                }
+                catch (...) {
+                    Log::Warning(Event::Render, "Visit layer error");
+                }
             }
         }
     }
