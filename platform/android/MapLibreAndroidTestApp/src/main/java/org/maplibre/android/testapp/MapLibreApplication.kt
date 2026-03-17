@@ -49,6 +49,7 @@ open class MapLibreApplication : MultiDexApplication() {
         StrictMode.setVmPolicy(
             VmPolicy.Builder()
                 .detectLeakedSqlLiteObjects()
+                .detectLeakedClosableObjects()
                 .penaltyLog()
                 .penaltyDeath()
                 .build()

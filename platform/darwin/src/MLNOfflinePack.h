@@ -122,6 +122,18 @@ MLN_EXPORT
 @interface MLNOfflinePack : NSObject
 
 /**
+ The unique identifier of the offline region associated with this pack.
+
+ This identifier is an auto-incrementing value assigned by the offline database
+ when the region is created. It is stable across application launches and can be
+ used to distinguish between different offline packs.
+
+ The value is `nil` for packs that have not yet been saved to the database. In
+ Swift, this property is typed as `NSNumber?`.
+ */
+@property (nonatomic, readonly, nullable) NSNumber *regionId;
+
+/**
  The region for which the pack manages resources.
  */
 @property (nonatomic, readonly) id<MLNOfflineRegion> region;

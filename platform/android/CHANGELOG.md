@@ -1,5 +1,31 @@
 # Changelog MapLibre Native for Android
 
+## 13.0.1
+
+### 🐞 Bug fixes
+
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+- core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166))
+
+## 13.0.0
+
+### ✨ Features and improvements
+
+- 💥 **Breaking:** Use Vulkan as rendering backend for the `org.maplibre.gl:android-sdk` package. You can still use OpenGL ES with the `org.maplibre.gl:android-sdk-opengl` package.
+
+- core, android: add support for camera roll ([#3011](https://github.com/maplibre/maplibre-native/pull/3011)).
+- Add multithreaded upload to dynamic texture on Vulkan [Core feature] ([#4028](https://github.com/maplibre/maplibre-native/pull/4028)).
+- core: Avoid unnecessary raster buffer updates ([#4085](https://github.com/maplibre/maplibre-native/pull/4085)).
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965))
+
+### 🐞 Bug fixes
+
+- Fix laggy map when using synchronous GeoJSON source [#4092](https://github.com/maplibre/maplibre-native/pull/4092).
+  This replaces the synchronous methods on `GeoJsonSource` introduced in [#3560](https://github.com/maplibre/maplibre-native/pull/3560). To migrate, pass `GeoJsonOptions` with `options.withSynchronousUpdate(true)` when constructing a `GeoJsonSource`.
+- Do not capture this in Android GeoJSONSource ([#3976](https://github.com/maplibre/maplibre-native/pull/3976)).
+- Fix Vulkan headless backend resize ([#4030](https://github.com/maplibre/maplibre-native/pull/4030)).
+- Disable scissor test when clearing on OpenGL ([#4029](https://github.com/maplibre/maplibre-native/pull/4029)).
+
 ## 12.3.1
 
 - Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).

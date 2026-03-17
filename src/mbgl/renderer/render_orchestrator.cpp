@@ -200,6 +200,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodScale = updateParameters->tileLodScale,
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
+                                  .tileLodMode = updateParameters->tileLodMode,
                                   .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);

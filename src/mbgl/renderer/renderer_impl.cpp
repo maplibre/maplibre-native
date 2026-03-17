@@ -186,7 +186,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     observer->onWillStartRenderingFrame();
 
     const TransformState& state = renderTreeParameters.transformParams.state;
-    const Size& size = state.getSize();
+    const Size& size = staticData->backendSize;
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
     const gfx::ScissorRect scissorRect = {
         .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
@@ -195,8 +195,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 #else
         .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
-        .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
-        .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
+        .width = size.width - static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
+        .height = size.height - static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
     };
 
     PaintParameters parameters{
@@ -215,6 +215,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         updateParameters->tileLodMinRadius,
         updateParameters->tileLodScale,
         updateParameters->tileLodPitchThreshold,
+        updateParameters->tileLodMode,
         scissorRect,
     };
 

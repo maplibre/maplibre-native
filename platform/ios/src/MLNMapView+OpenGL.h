@@ -10,37 +10,37 @@
 class MLNMapViewOpenGLImpl final : public MLNMapViewImpl,
                                    public mbgl::gl::RendererBackend,
                                    public mbgl::gfx::Renderable {
- public:
+public:
   MLNMapViewOpenGLImpl(MLNMapView*);
   ~MLNMapViewOpenGLImpl() override;
 
- public:
+public:
   void restoreFramebufferBinding();
 
 #ifdef MLN_RECREATE_GL_IN_AN_EMERGENCY
- private:
+private:
   void emergencyRecreateGL();
 #endif
 
   // Implementation of mbgl::gfx::RendererBackend
- public:
+public:
   mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
- private:
+private:
   void activate() override;
   void deactivate() override;
   // End implementation of mbgl::gfx::RendererBackend
 
   // Implementation of mbgl::gl::RendererBackend
- public:
+public:
   void updateAssumedState() override;
 
- private:
+private:
   mbgl::gl::ProcAddress getExtensionFunctionPointer(const char* name) override;
   // End implementation of mbgl::gl::Rendererbackend
 
   // Implementation of MLNMapViewImpl
- public:
+public:
   mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
   EAGLContext* getEAGLContext() override;

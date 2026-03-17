@@ -28,6 +28,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getHillshadeIlluminationDirection(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getHillshadeIlluminationAltitude(jni::JNIEnv&);
+
     jni::Local<jni::Object<jni::ObjectTag>> getHillshadeIlluminationAnchor(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getHillshadeExaggeration(jni::JNIEnv&);
@@ -45,6 +47,8 @@ public:
     jni::Local<jni::Object<jni::ObjectTag>> getHillshadeAccentColor(jni::JNIEnv&);
     void setHillshadeAccentColorTransition(jni::JNIEnv&, jlong duration, jlong delay);
     jni::Local<jni::Object<TransitionOptions>> getHillshadeAccentColorTransition(jni::JNIEnv&);
+
+    jni::Local<jni::Object<jni::ObjectTag>> getHillshadeMethod(jni::JNIEnv&);
 
 }; // class HillshadeLayer
 

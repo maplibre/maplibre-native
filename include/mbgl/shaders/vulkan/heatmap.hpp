@@ -98,7 +98,7 @@ void main() {
     // weight * u_intensity * GAUSS_COEF * exp(-0.5 * 3.0^2 * S^2) == ZERO
     // Which solves to:
     // S = sqrt(-2.0 * log(ZERO / (weight * u_intensity * GAUSS_COEF))) / 3.0
-    const float S = sqrt(-2.0 * log(ZERO / weight / props.intensity / GAUSS_COEF)) / 3.0;
+    const float S = sqrt(-2.0 * log(ZERO / (max(weight, ZERO) * max(props.intensity, ZERO) * GAUSS_COEF))) / 3.0;
 
     // Pass the varying in units of radius
     const vec2 extrude = S * unscaled_extrude;
@@ -110,7 +110,7 @@ void main() {
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
     gl_Position = drawable.matrix * vec4(floor(in_position * 0.5) + scaled_extrude, 0, 1);
-    applySurfaceTransform();
+    gl_Position.y *= -1.0;
 
     frag_weight = weight;
     frag_extrude = extrude;
