@@ -117,6 +117,33 @@
         <attr name="maplibre_uiAttributionMarginBottom" format="dimension"/>
         <attr name="maplibre_uiAttributionTintColor" format="color"/>
 
+        <!--Scale Bar-->
+        <attr name="maplibre_uiScaleBar" format="boolean"/>
+        <attr name="maplibre_uiScaleBarGravity">
+            <flag name="top" value="0x30"/>
+            <flag name="bottom" value="0x50"/>
+            <flag name="left" value="0x03"/>
+            <flag name="right" value="0x05"/>
+            <flag name="center_vertical" value="0x10"/>
+            <flag name="fill_vertical" value="0x70"/>
+            <flag name="center_horizontal" value="0x01"/>
+            <flag name="fill_horizontal" value="0x07"/>
+            <flag name="center" value="0x11"/>
+            <flag name="fill" value="0x77"/>
+            <flag name="clip_vertical" value="0x80"/>
+            <flag name="clip_horizontal" value="0x08"/>
+            <flag name="start" value="0x00800003"/>
+            <flag name="end" value="0x00800005"/>
+        </attr>
+        <attr name="maplibre_uiScaleBarMarginLeft" format="dimension"/>
+        <attr name="maplibre_uiScaleBarMarginTop" format="dimension"/>
+        <attr name="maplibre_uiScaleBarMarginRight" format="dimension"/>
+        <attr name="maplibre_uiScaleBarMarginBottom" format="dimension"/>
+        <attr name="maplibre_uiScaleBarMetric" format="boolean"/>
+        <attr name="maplibre_uiScaleBarPrimaryColor" format="color"/>
+        <attr name="maplibre_uiScaleBarSecondaryColor" format="color"/>
+        <attr name="maplibre_uiScaleBarTextColor" format="color"/>
+
         <!-- Use TextureView-->
         <attr name="maplibre_renderTextureMode" format="boolean"/>
         <attr name="maplibre_renderTextureTranslucentSurface" format="boolean"/>

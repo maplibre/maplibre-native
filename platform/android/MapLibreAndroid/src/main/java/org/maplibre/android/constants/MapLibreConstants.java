@@ -244,4 +244,16 @@ public class MapLibreConstants {
   public static final String STATE_INCREASE_ROTATE_THRESHOLD = "maplibre_increaseRotateThreshold";
   public static final String STATE_DISABLE_ROTATE_WHEN_SCALING = "maplibre_disableRotateWhenScaling";
   public static final String STATE_INCREASE_SCALE_THRESHOLD = "maplibre_increaseScaleThreshold";
+
+  // Scale bar state keys
+  public static final String STATE_SCALE_BAR_ENABLED = "maplibre_scaleBarEnabled";
+  public static final String STATE_SCALE_BAR_GRAVITY = "maplibre_scaleBarGravity";
+  public static final String STATE_SCALE_BAR_MARGIN_LEFT = "maplibre_scaleBarMarginLeft";
+  public static final String STATE_SCALE_BAR_MARGIN_TOP = "maplibre_scaleBarMarginTop";
+  public static final String STATE_SCALE_BAR_MARGIN_RIGHT = "maplibre_scaleBarMarginRight";
+  public static final String STATE_SCALE_BAR_MARGIN_BOTTOM = "maplibre_scaleBarMarginBottom";
+  public static final String STATE_SCALE_BAR_METRIC = "maplibre_scaleBarMetric";
+  public static final String STATE_SCALE_BAR_PRIMARY_COLOR = "maplibre_scaleBarPrimaryColor";
+  public static final String STATE_SCALE_BAR_SECONDARY_COLOR = "maplibre_scaleBarSecondaryColor";
+  public static final String STATE_SCALE_BAR_TEXT_COLOR = "maplibre_scaleBarTextColor";
 }

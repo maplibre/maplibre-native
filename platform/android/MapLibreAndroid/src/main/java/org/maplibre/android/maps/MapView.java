@@ -30,6 +30,7 @@ import org.maplibre.android.exceptions.MapLibreConfigurationException;
 import org.maplibre.android.location.LocationComponent;
 import org.maplibre.android.maps.renderer.MapRenderer;
 import org.maplibre.android.maps.widgets.CompassView;
+import org.maplibre.android.maps.widgets.ScaleBarView;
 import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.utils.BitmapUtils;
@@ -233,6 +234,16 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     logoView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
     logoView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.maplibre_logo_icon));
     return logoView;
+  }
+
+  protected ScaleBarView initialiseScaleBarView() {
+    ScaleBarView scaleBarView = new ScaleBarView(this.getContext());
+    addView(scaleBarView);
+    scaleBarView.setTag("scaleBarView");
+    scaleBarView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+    scaleBarView.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
+    scaleBarView.setContentDescription(getResources().getString(R.string.maplibre_scaleBarContentDescription));
+    return scaleBarView;
   }
 
   private FocalPointChangeListener createFocalPointChangeListener() {

@@ -25,6 +25,7 @@ import org.maplibre.android.R;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.maps.widgets.CompassView;
+import org.maplibre.android.maps.widgets.ScaleBarView;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.utils.ColorUtils;
 
@@ -54,6 +55,11 @@ public final class UiSettings {
   @Nullable
   ImageView logoView;
   private final int[] logoMargins = new int[4];
+
+  @VisibleForTesting
+  @Nullable
+  ScaleBarView scaleBarView;
+  private final int[] scaleBarMargins = new int[4];
 
   private final float pixelRatio;
 
@@ -95,7 +101,10 @@ public final class UiSettings {
   boolean isAttributionInitialized = false;
   @VisibleForTesting
   boolean isLogoInitialized = false;
+  @VisibleForTesting
+  boolean isScaleBarInitialized = false;
   private double clockwiseBearing;
+  private double metersPerPixelAtLatitude;
 
   UiSettings(@NonNull Projection projection, @NonNull FocalPointChangeListener listener,
              float pixelRatio, MapView mapView) {
@@ -117,6 +126,9 @@ public final class UiSettings {
     if (options.getAttributionEnabled()) {
       initialiseAttribution(context, options);
     }
+    if (options.getScaleBarEnabled()) {
+      initialiseScaleBar(options, resources);
+    }
   }
 
   void onSaveInstanceState(@NonNull Bundle outState) {
@@ -124,6 +136,7 @@ public final class UiSettings {
     saveCompass(outState);
     saveLogo(outState);
     saveAttribution(outState);
+    saveScaleBar(outState);
     saveDeselectMarkersOnTap(outState);
     saveFocalPoint(outState);
   }
@@ -133,6 +146,7 @@ public final class UiSettings {
     restoreCompass(savedInstanceState);
     restoreLogo(savedInstanceState);
     restoreAttribution(savedInstanceState);
+    restoreScaleBar(savedInstanceState);
     restoreDeselectMarkersOnTap(savedInstanceState);
     restoreFocalPoint(savedInstanceState);
   }
@@ -317,6 +331,73 @@ public final class UiSettings {
       savedInstanceState.getInt(MapLibreConstants.STATE_ATTRIBUTION_MARGIN_TOP),
       savedInstanceState.getInt(MapLibreConstants.STATE_ATTRIBUTION_MARGIN_RIGHT),
       savedInstanceState.getInt(MapLibreConstants.STATE_ATTRIBUTION_MARGIN_BOTTOM));
+  }
+
+  private void initialiseScaleBar(MapLibreMapOptions options, @NonNull Resources resources) {
+    isScaleBarInitialized = true;
+    scaleBarView = mapView.initialiseScaleBarView();
+    setScaleBarEnabled(options.getScaleBarEnabled());
+    setScaleBarGravity(options.getScaleBarGravity());
+    int[] scaleBarMargins = options.getScaleBarMargins();
+    if (scaleBarMargins != null) {
+      setScaleBarMargins(scaleBarMargins[0], scaleBarMargins[1], scaleBarMargins[2], scaleBarMargins[3]);
+    } else {
+      int fourDp = (int) resources.getDimension(R.dimen.maplibre_four_dp);
+      setScaleBarMargins(fourDp, fourDp, fourDp, fourDp);
+    }
+    setScaleBarIsMetric(options.getScaleBarIsMetric());
+    int primaryColor = options.getScaleBarPrimaryColor();
+    if (primaryColor != -1) {
+      setScaleBarPrimaryColor(primaryColor);
+    }
+    int secondaryColor = options.getScaleBarSecondaryColor();
+    if (secondaryColor != -1) {
+      setScaleBarSecondaryColor(secondaryColor);
+    }
+    int textColor = options.getScaleBarTextColor();
+    if (textColor != -1) {
+      setScaleBarTextColor(textColor);
+    }
+  }
+
+  private void saveScaleBar(Bundle outState) {
+    outState.putBoolean(MapLibreConstants.STATE_SCALE_BAR_ENABLED, isScaleBarEnabled());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_GRAVITY, getScaleBarGravity());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_LEFT, getScaleBarMarginLeft());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_TOP, getScaleBarMarginTop());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_RIGHT, getScaleBarMarginRight());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_BOTTOM, getScaleBarMarginBottom());
+    outState.putBoolean(MapLibreConstants.STATE_SCALE_BAR_METRIC, isScaleBarIsMetric());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_PRIMARY_COLOR, getScaleBarPrimaryColor());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_SECONDARY_COLOR, getScaleBarSecondaryColor());
+    outState.putInt(MapLibreConstants.STATE_SCALE_BAR_TEXT_COLOR, getScaleBarTextColor());
+  }
+
+  private void restoreScaleBar(Bundle savedInstanceState) {
+    boolean scaleBarEnabled = savedInstanceState.getBoolean(MapLibreConstants.STATE_SCALE_BAR_ENABLED);
+    if (scaleBarEnabled && !isScaleBarInitialized) {
+      scaleBarView = mapView.initialiseScaleBarView();
+      isScaleBarInitialized = true;
+    }
+    setScaleBarEnabled(savedInstanceState.getBoolean(MapLibreConstants.STATE_SCALE_BAR_ENABLED));
+    setScaleBarGravity(savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_GRAVITY));
+    setScaleBarMargins(savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_LEFT),
+      savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_TOP),
+      savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_RIGHT),
+      savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_MARGIN_BOTTOM));
+    setScaleBarIsMetric(savedInstanceState.getBoolean(MapLibreConstants.STATE_SCALE_BAR_METRIC));
+    int primaryColor = savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_PRIMARY_COLOR, -1);
+    if (primaryColor != -1) {
+      setScaleBarPrimaryColor(primaryColor);
+    }
+    int secondaryColor = savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_SECONDARY_COLOR, -1);
+    if (secondaryColor != -1) {
+      setScaleBarSecondaryColor(secondaryColor);
+    }
+    int textColor = savedInstanceState.getInt(MapLibreConstants.STATE_SCALE_BAR_TEXT_COLOR, -1);
+    if (textColor != -1) {
+      setScaleBarTextColor(textColor);
+    }
   }
 
   public long getFlingAnimationBaseTime() {
@@ -513,6 +594,11 @@ public final class UiSettings {
     clockwiseBearing = -cameraPosition.bearing;
     if (compassView != null) {
       compassView.update(clockwiseBearing);
+    }
+    // Update scale bar with current meters per pixel
+    if (scaleBarView != null && scaleBarView.isEnabled()) {
+      metersPerPixelAtLatitude = projection.getMetersPerPixelAtLatitude(cameraPosition.target.getLatitude());
+      scaleBarView.update(metersPerPixelAtLatitude);
     }
   }
 
@@ -781,6 +867,222 @@ public final class UiSettings {
   @Px
   public int getAttributionMarginBottom() {
     return attributionsMargins[3];
+  }
+
+  /**
+   * <p>
+   * Enables or disables the scale bar. The scale bar is an icon on the map that indicates the
+   * scale of the map at the current zoom level and latitude.
+   * </p>
+   * By default, the scale bar is disabled.
+   *
+   * @param scaleBarEnabled True to enable the scale bar; false to disable the scale bar.
+   */
+  public void setScaleBarEnabled(boolean scaleBarEnabled) {
+    if (scaleBarEnabled && !isScaleBarInitialized) {
+      initialiseScaleBar(mapView.maplibreMapOptions, mapView.getContext().getResources());
+    }
+    if (scaleBarView != null) {
+      scaleBarView.setEnabled(scaleBarEnabled);
+      scaleBarView.update(metersPerPixelAtLatitude);
+    }
+  }
+
+  /**
+   * Returns whether the scale bar is enabled.
+   *
+   * @return True if the scale bar is enabled; false if the scale bar is disabled.
+   */
+  public boolean isScaleBarEnabled() {
+    if (scaleBarView != null) {
+      return scaleBarView.isEnabled();
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * <p>
+   * Sets the gravity of the scale bar view. Use this to change the corner of the map view that the
+   * scale bar is displayed in.
+   * </p>
+   * By default, the scale bar is in the top left corner.
+   *
+   * @param gravity Android SDK Gravity.
+   */
+  @UiThread
+  public void setScaleBarGravity(int gravity) {
+    if (scaleBarView != null) {
+      setWidgetGravity(scaleBarView, gravity);
+    }
+  }
+
+  /**
+   * Returns the gravity value of the ScaleBarView
+   *
+   * @return The gravity
+   */
+  public int getScaleBarGravity() {
+    if (scaleBarView != null) {
+      return ((FrameLayout.LayoutParams) scaleBarView.getLayoutParams()).gravity;
+    } else {
+      return -1;
+    }
+  }
+
+  /**
+   * Sets the margins of the scale bar view in pixels. Use this to change the distance of the scale bar from the
+   * map view edge.
+   *
+   * @param left   The left margin in pixels.
+   * @param top    The top margin in pixels.
+   * @param right  The right margin in pixels.
+   * @param bottom The bottom margin in pixels.
+   */
+  @UiThread
+  public void setScaleBarMargins(@Px int left, @Px int top, @Px int right, @Px int bottom) {
+    if (scaleBarView != null) {
+      setWidgetMargins(scaleBarView, scaleBarMargins, left, top, right, bottom);
+    }
+  }
+
+  /**
+   * Returns the left side margin of ScaleBarView in pixels.
+   *
+   * @return The left margin in pixels
+   */
+  @Px
+  public int getScaleBarMarginLeft() {
+    return scaleBarMargins[0];
+  }
+
+  /**
+   * Returns the top side margin of ScaleBarView in pixels.
+   *
+   * @return The top margin in pixels
+   */
+  @Px
+  public int getScaleBarMarginTop() {
+    return scaleBarMargins[1];
+  }
+
+  /**
+   * Returns the right side margin of ScaleBarView in pixels.
+   *
+   * @return The right margin in pixels
+   */
+  @Px
+  public int getScaleBarMarginRight() {
+    return scaleBarMargins[2];
+  }
+
+  /**
+   * Returns the bottom side margin of ScaleBarView in pixels.
+   *
+   * @return The bottom margin in pixels
+   */
+  @Px
+  public int getScaleBarMarginBottom() {
+    return scaleBarMargins[3];
+  }
+
+  /**
+   * Sets whether the scale bar uses the metric system.
+   *
+   * @param isMetric True to use metric (meters/km), false for imperial (feet/miles)
+   */
+  public void setScaleBarIsMetric(boolean isMetric) {
+    if (scaleBarView != null) {
+      scaleBarView.setMetric(isMetric);
+    }
+  }
+
+  /**
+   * Returns whether the scale bar uses the metric system.
+   *
+   * @return True if using metric, false for imperial
+   */
+  public boolean isScaleBarIsMetric() {
+    if (scaleBarView != null) {
+      return scaleBarView.isMetric();
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Sets the primary color of the scale bar.
+   *
+   * @param color the color for odd-numbered bars and border
+   */
+  public void setScaleBarPrimaryColor(@ColorInt int color) {
+    if (scaleBarView != null) {
+      scaleBarView.setPrimaryColor(color);
+    }
+  }
+
+  /**
+   * Returns the primary color of the scale bar.
+   *
+   * @return the primary color
+   */
+  @ColorInt
+  public int getScaleBarPrimaryColor() {
+    if (scaleBarView != null) {
+      return scaleBarView.getPrimaryColor();
+    } else {
+      return -1;
+    }
+  }
+
+  /**
+   * Sets the secondary color of the scale bar.
+   *
+   * @param color the color for even-numbered bars and background
+   */
+  public void setScaleBarSecondaryColor(@ColorInt int color) {
+    if (scaleBarView != null) {
+      scaleBarView.setSecondaryColor(color);
+    }
+  }
+
+  /**
+   * Returns the secondary color of the scale bar.
+   *
+   * @return the secondary color
+   */
+  @ColorInt
+  public int getScaleBarSecondaryColor() {
+    if (scaleBarView != null) {
+      return scaleBarView.getSecondaryColor();
+    } else {
+      return -1;
+    }
+  }
+
+  /**
+   * Sets the text color of the scale bar labels.
+   *
+   * @param color the color for scale bar labels
+   */
+  public void setScaleBarTextColor(@ColorInt int color) {
+    if (scaleBarView != null) {
+      scaleBarView.setTextColor(color);
+    }
+  }
+
+  /**
+   * Returns the text color of the scale bar labels.
+   *
+   * @return the text color
+   */
+  @ColorInt
+  public int getScaleBarTextColor() {
+    if (scaleBarView != null) {
+      return scaleBarView.getTextColor();
+    } else {
+      return -1;
+    }
   }
 
   /**
@@ -1230,6 +1532,9 @@ public final class UiSettings {
     setCompassMargins(getCompassMarginLeft(), getCompassMarginTop(), getCompassMarginRight(), getCompassMarginBottom());
     setAttributionMargins(getAttributionMarginLeft(), getAttributionMarginTop(), getAttributionMarginRight(),
       getAttributionMarginBottom());
+    setScaleBarEnabled(isScaleBarEnabled());
+    setScaleBarMargins(getScaleBarMarginLeft(), getScaleBarMarginTop(), getScaleBarMarginRight(),
+      getScaleBarMarginBottom());
   }
 
   private void setWidgetGravity(@NonNull final View view, int gravity) {

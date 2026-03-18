@@ -61,6 +61,17 @@ public class MapLibreMapOptions implements Parcelable {
   private int attributionGravity = Gravity.BOTTOM | Gravity.START;
   private int[] attributionMargins;
 
+  private boolean scaleBarEnabled = false;
+  private int scaleBarGravity = Gravity.TOP | Gravity.START;
+  private int[] scaleBarMargins;
+  private boolean scaleBarIsMetric = true;
+  @ColorInt
+  private int scaleBarPrimaryColor = UNDEFINED_COLOR;
+  @ColorInt
+  private int scaleBarSecondaryColor = UNDEFINED_COLOR;
+  @ColorInt
+  private int scaleBarTextColor = UNDEFINED_COLOR;
+
   private double minZoom = MapLibreConstants.MINIMUM_ZOOM;
   private double maxZoom = MapLibreConstants.MAXIMUM_ZOOM;
   private double minPitch = MapLibreConstants.MINIMUM_PITCH;
@@ -131,6 +142,14 @@ public class MapLibreMapOptions implements Parcelable {
     attributionGravity = in.readInt();
     attributionMargins = in.createIntArray();
     attributionTintColor = in.readInt();
+
+    scaleBarEnabled = in.readByte() != 0;
+    scaleBarGravity = in.readInt();
+    scaleBarMargins = in.createIntArray();
+    scaleBarIsMetric = in.readByte() != 0;
+    scaleBarPrimaryColor = in.readInt();
+    scaleBarSecondaryColor = in.readInt();
+    scaleBarTextColor = in.readInt();
 
     minZoom = in.readDouble();
     maxZoom = in.readDouble();
@@ -281,6 +300,29 @@ public class MapLibreMapOptions implements Parcelable {
           FOUR_DP * pxlRatio)),
         (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiAttributionMarginBottom,
           FOUR_DP * pxlRatio))});
+
+      maplibreMapOptions.scaleBarEnabled(typedArray.getBoolean(
+        R.styleable.maplibre_MapView_maplibre_uiScaleBar, false));
+      maplibreMapOptions.scaleBarGravity(typedArray.getInt(
+        R.styleable.maplibre_MapView_maplibre_uiScaleBarGravity, Gravity.TOP | Gravity.START));
+      maplibreMapOptions.scaleBarMargins(new int[] {
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiScaleBarMarginLeft,
+          FOUR_DP * pxlRatio)),
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiScaleBarMarginTop,
+          FOUR_DP * pxlRatio)),
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiScaleBarMarginRight,
+          FOUR_DP * pxlRatio)),
+        (int) (typedArray.getDimension(R.styleable.maplibre_MapView_maplibre_uiScaleBarMarginBottom,
+          FOUR_DP * pxlRatio))});
+      maplibreMapOptions.scaleBarIsMetric(typedArray.getBoolean(
+        R.styleable.maplibre_MapView_maplibre_uiScaleBarMetric, true));
+      maplibreMapOptions.scaleBarPrimaryColor(typedArray.getColor(
+        R.styleable.maplibre_MapView_maplibre_uiScaleBarPrimaryColor, UNDEFINED_COLOR));
+      maplibreMapOptions.scaleBarSecondaryColor(typedArray.getColor(
+        R.styleable.maplibre_MapView_maplibre_uiScaleBarSecondaryColor, UNDEFINED_COLOR));
+      maplibreMapOptions.scaleBarTextColor(typedArray.getColor(
+        R.styleable.maplibre_MapView_maplibre_uiScaleBarTextColor, UNDEFINED_COLOR));
+
       maplibreMapOptions.textureMode(
         typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_renderTextureMode, false));
       maplibreMapOptions.translucentTextureSurface(
@@ -584,6 +626,90 @@ public class MapLibreMapOptions implements Parcelable {
   @NonNull
   public MapLibreMapOptions attributionTintColor(@ColorInt int color) {
     attributionTintColor = color;
+    return this;
+  }
+
+  /**
+   * Specifies the visibility state of the scale bar for a map view.
+   *
+   * @param enabled True and scale bar is shown
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarEnabled(boolean enabled) {
+    scaleBarEnabled = enabled;
+    return this;
+  }
+
+  /**
+   * Specifies the gravity state of the scale bar for a map view.
+   *
+   * @param gravity Android SDK Gravity.
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarGravity(int gravity) {
+    scaleBarGravity = gravity;
+    return this;
+  }
+
+  /**
+   * Specifies the margin state of the scale bar for a map view
+   *
+   * @param margins 4 long array for LTRB margins
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarMargins(int[] margins) {
+    scaleBarMargins = margins;
+    return this;
+  }
+
+  /**
+   * Specifies if the scale bar uses metric units.
+   *
+   * @param isMetric True to use metric (meters/km), false for imperial (feet/miles)
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarIsMetric(boolean isMetric) {
+    scaleBarIsMetric = isMetric;
+    return this;
+  }
+
+  /**
+   * Specifies the primary color of the scale bar.
+   *
+   * @param color the color for odd-numbered bars and border
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarPrimaryColor(@ColorInt int color) {
+    scaleBarPrimaryColor = color;
+    return this;
+  }
+
+  /**
+   * Specifies the secondary color of the scale bar.
+   *
+   * @param color the color for even-numbered bars and background
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarSecondaryColor(@ColorInt int color) {
+    scaleBarSecondaryColor = color;
+    return this;
+  }
+
+  /**
+   * Specifies the text color of the scale bar.
+   *
+   * @param color the color for scale bar labels
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions scaleBarTextColor(@ColorInt int color) {
+    scaleBarTextColor = color;
     return this;
   }
 
@@ -1222,6 +1348,72 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * Get the current configured visibility state for the scale bar.
+   *
+   * @return Visibility state of the scale bar
+   */
+  public boolean getScaleBarEnabled() {
+    return scaleBarEnabled;
+  }
+
+  /**
+   * Get the current configured gravity state for the scale bar.
+   *
+   * @return Gravity state of the scale bar
+   */
+  public int getScaleBarGravity() {
+    return scaleBarGravity;
+  }
+
+  /**
+   * Get the current configured margins for the scale bar.
+   *
+   * @return Margins state of the scale bar
+   */
+  public int[] getScaleBarMargins() {
+    return scaleBarMargins;
+  }
+
+  /**
+   * Get whether the scale bar uses metric units.
+   *
+   * @return True if using metric, false for imperial
+   */
+  public boolean getScaleBarIsMetric() {
+    return scaleBarIsMetric;
+  }
+
+  /**
+   * Get the current configured primary color for the scale bar.
+   *
+   * @return the primary color
+   */
+  @ColorInt
+  public int getScaleBarPrimaryColor() {
+    return scaleBarPrimaryColor;
+  }
+
+  /**
+   * Get the current configured secondary color for the scale bar.
+   *
+   * @return the secondary color
+   */
+  @ColorInt
+  public int getScaleBarSecondaryColor() {
+    return scaleBarSecondaryColor;
+  }
+
+  /**
+   * Get the current configured text color for the scale bar.
+   *
+   * @return the text color
+   */
+  @ColorInt
+  public int getScaleBarTextColor() {
+    return scaleBarTextColor;
+  }
+
+  /**
    * Get the current configured debug state for a map view.
    *
    * @return True indicates debug is enabled.
@@ -1325,6 +1517,14 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeIntArray(attributionMargins);
     dest.writeInt(attributionTintColor);
 
+    dest.writeByte((byte) (scaleBarEnabled ? 1 : 0));
+    dest.writeInt(scaleBarGravity);
+    dest.writeIntArray(scaleBarMargins);
+    dest.writeByte((byte) (scaleBarIsMetric ? 1 : 0));
+    dest.writeInt(scaleBarPrimaryColor);
+    dest.writeInt(scaleBarSecondaryColor);
+    dest.writeInt(scaleBarTextColor);
+
     dest.writeDouble(minZoom);
     dest.writeDouble(maxZoom);
     dest.writeDouble(minPitch);
@@ -1401,6 +1601,24 @@ public class MapLibreMapOptions implements Parcelable {
     if (attributionGravity != options.attributionGravity) {
       return false;
     }
+    if (scaleBarEnabled != options.scaleBarEnabled) {
+      return false;
+    }
+    if (scaleBarGravity != options.scaleBarGravity) {
+      return false;
+    }
+    if (scaleBarIsMetric != options.scaleBarIsMetric) {
+      return false;
+    }
+    if (scaleBarPrimaryColor != options.scaleBarPrimaryColor) {
+      return false;
+    }
+    if (scaleBarSecondaryColor != options.scaleBarSecondaryColor) {
+      return false;
+    }
+    if (scaleBarTextColor != options.scaleBarTextColor) {
+      return false;
+    }
     if (Double.compare(options.minZoom, minZoom) != 0) {
       return false;
     }
@@ -1444,6 +1662,9 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
     if (!Arrays.equals(attributionMargins, options.attributionMargins)) {
+      return false;
+    }
+    if (!Arrays.equals(scaleBarMargins, options.scaleBarMargins)) {
       return false;
     }
     if (apiBaseUri != null ? !apiBaseUri.equals(options.apiBaseUri) : options.apiBaseUri != null) {
@@ -1517,6 +1738,13 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + (attributionEnabled ? 1 : 0);
     result = 31 * result + attributionGravity;
     result = 31 * result + Arrays.hashCode(attributionMargins);
+    result = 31 * result + (scaleBarEnabled ? 1 : 0);
+    result = 31 * result + scaleBarGravity;
+    result = 31 * result + Arrays.hashCode(scaleBarMargins);
+    result = 31 * result + (scaleBarIsMetric ? 1 : 0);
+    result = 31 * result + scaleBarPrimaryColor;
+    result = 31 * result + scaleBarSecondaryColor;
+    result = 31 * result + scaleBarTextColor;
     temp = Double.doubleToLongBits(minZoom);
     result = 31 * result + (int) (temp ^ (temp >>> 32));
     temp = Double.doubleToLongBits(maxZoom);
