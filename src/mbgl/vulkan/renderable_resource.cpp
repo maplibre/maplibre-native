@@ -97,18 +97,20 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         // update values based on surface limits
         extent.width = std::min(std::max(w, capabilities.minImageExtent.width), capabilities.maxImageExtent.width);
         extent.height = std::min(std::max(h, capabilities.minImageExtent.height), capabilities.maxImageExtent.height);
-    }
 
-    if (hasSurfaceTransformSupport()) {
-        if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
-            capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
-            std::swap(extent.width, extent.height);
+        if (hasSurfaceTransformSupport()) {
+            if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
+                capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
+                std::swap(extent.width, extent.height);
+            }
         }
     }
 
     uint32_t swapchainImageCount = capabilities.minImageCount + 1;
     // check surface limits (0 is unlimited)
-    if (capabilities.maxImageCount > 0) swapchainImageCount = std::min(swapchainImageCount, capabilities.maxImageCount);
+    if (capabilities.maxImageCount > 0) {
+        swapchainImageCount = std::min(swapchainImageCount, capabilities.maxImageCount);
+    }
 
     auto swapchainCreateInfo = vk::SwapchainCreateInfoKHR()
                                    .setSurface(surface.get())
