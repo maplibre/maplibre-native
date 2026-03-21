@@ -92,9 +92,13 @@ jobs:
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: vulkan
             runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: webgpu-wgpu
+            runner: { os: ubuntu-latest, arch: x64 }
           - renderer: opengl
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
           - renderer: vulkan
+            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+          - renderer: webgpu-wgpu
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
