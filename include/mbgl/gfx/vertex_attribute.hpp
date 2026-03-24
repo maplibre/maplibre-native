@@ -459,8 +459,7 @@ protected:
             const auto rawSize = static_cast<uint32_t>(binder->interleavedVertexBuffer->stride);
             const bool isInterpolated = binder->isInterpolated();
             const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-            // assert(rawSize == static_cast<uint32_t>(isInterpolated ? sizeof(typename InterpType::Value)
-            //                                                        : sizeof(typename Type::Value)));
+
             assert(interleavedSharedVector->getRawCount() / binder->interleavedVertexBuffer->stride ==
                    binder->getVertexCount());
             attrib->setSharedRawData(
