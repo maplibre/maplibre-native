@@ -7,6 +7,10 @@ namespace mbgl {
 namespace vulkan {
 
 SurfaceRenderableResource::~SurfaceRenderableResource() {
+    if (!backend.getDevice()) {
+        return;
+    }
+
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
     // specific order
