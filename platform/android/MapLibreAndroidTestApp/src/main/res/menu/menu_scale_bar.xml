@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_toggle_units"
+        android:title="Switch to Imperial"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_position_top_start"
+        android:title="Position: Top Start"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_position_top_end"
+        android:title="Position: Top End"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_position_bottom_start"
+        android:title="Position: Bottom Start"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_position_bottom_end"
+        android:title="Position: Bottom End"
+        app:showAsAction="never" />
+</menu>

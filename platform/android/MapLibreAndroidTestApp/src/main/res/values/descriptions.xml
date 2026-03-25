@@ -85,6 +85,7 @@
     <string name="description_no_style">Load a map without providing a style URI or JSON</string>
     <string name="description_vector_tile">Load MVT data</string>
     <string name="description_local_glyph">Suzhou using Droid Sans for Chinese glyphs</string>
+    <string name="description_scale_bar">Display map scale indicator with metric/imperial units</string>
     <string name="description_hillshade">Example raster-dem source and hillshade layer</string>
     <string name="description_heatmaplayer">Use HeatmapLayer to visualise earthquakes</string>
     <string name="description_gesture_detector">Manipulate gestures detector\'s settings</string>
