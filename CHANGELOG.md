@@ -4,6 +4,12 @@
 
 ### ✨ New features
 
+- [android] Add native ScaleBarView widget for Android platform parity with iOS ([#XXXX](https://github.com/maplibre/maplibre-native/pull/XXXX))
+  - Canvas-based scale bar with metric and imperial unit support
+  - Customizable colors (primary, secondary, text)
+  - RTL layout support
+  - Configurable via XML attributes and UiSettings API
+  - Fade animations when scale goes out of range
 - *...Add new stuff here...*
 - [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)

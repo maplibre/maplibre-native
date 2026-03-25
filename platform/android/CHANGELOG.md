@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+- Add native ScaleBarView widget for platform parity with iOS ([#XXXX](https://github.com/maplibre/maplibre-native/pull/XXXX))
+  - Canvas-based scale bar with metric and imperial unit support
+  - Customizable colors (primary, secondary, text) via `UiSettings`
+  - RTL layout support
+  - Configurable via XML attributes (`maplibre_uiScaleBar*`) and programmatically
+  - Fade animations when scale goes out of range
+  - Content description for accessibility
+
 ## 13.0.1
 
 ### 🐞 Bug fixes
