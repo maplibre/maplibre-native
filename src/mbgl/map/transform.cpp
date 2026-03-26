@@ -107,6 +107,16 @@ void Transform::jumpTo(const CameraOptions& camera) {
  * values for any options not included in `options`.
  */
 void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animation) {
+    // Guard against zero-dimension viewports early — constrainCameraAndZoomToBounds
+    // performs projection math that produces NaN when the viewport has no area,
+    // which then causes LatLng's constructor to throw a fatal C++ exception.
+    if (state.getSize().isEmpty()) {
+        if (animation.transitionFinishFn) {
+            animation.transitionFinishFn();
+        }
+        return;
+    }
+
     CameraOptions camera = inputCamera;
 
     Duration duration = animation.duration.value_or(Duration::zero());
@@ -220,6 +230,16 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 void Transform::flyTo(const CameraOptions& inputCamera,
                       const AnimationOptions& animation,
                       bool linearZoomInterpolation) {
+    // Guard against zero-dimension viewports early — constrainCameraAndZoomToBounds
+    // performs projection math that produces NaN when the viewport has no area,
+    // which then causes LatLng's constructor to throw a fatal C++ exception.
+    if (state.getSize().isEmpty()) {
+        if (animation.transitionFinishFn) {
+            animation.transitionFinishFn();
+        }
+        return;
+    }
+
     CameraOptions camera = inputCamera;
 
     double zoom = camera.zoom.value_or(getZoom());
@@ -233,8 +253,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
 
-    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov) ||
-        state.getSize().isEmpty()) {
+    if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || std::isnan(roll) || std::isnan(fov)) {
         if (animation.transitionFinishFn) {
             animation.transitionFinishFn();
         }
