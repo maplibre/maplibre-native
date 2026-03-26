@@ -430,8 +430,9 @@ void Drawable::bindTextures(RenderPass& renderPass) const noexcept {
         if (const auto& texture = textures[id]) {
             if (const auto& location = shader->getSamplerLocation(id)) {
                 if (isTerrain) {
-                    Log::Info(Event::Render, "TERRAIN: Binding texture id=" + std::to_string(id) +
-                             " to location=" + std::to_string(*location));
+                    Log::Info(Event::Render,
+                              "TERRAIN: Binding texture id=" + std::to_string(id) +
+                                  " to location=" + std::to_string(*location));
 
                     // Check if texture has a Metal texture
                     auto& mtlTexture = static_cast<mtl::Texture2D&>(*texture);
@@ -706,8 +707,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
 
     if (getName() == "terrain-tile") {
-        Log::Info(Event::Render, "Drawable::upload for terrain-tile: texturesNeedUpload=" +
-                 std::to_string(texturesNeedUpload) + ", textureCount=" + std::to_string(textures.size()));
+        Log::Info(Event::Render,
+                  "Drawable::upload for terrain-tile: texturesNeedUpload=" + std::to_string(texturesNeedUpload) +
+                      ", textureCount=" + std::to_string(textures.size()));
     }
 
     if (texturesNeedUpload) {

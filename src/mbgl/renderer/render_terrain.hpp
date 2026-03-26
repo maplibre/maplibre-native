@@ -33,7 +33,7 @@ class Context;
 class Drawable;
 class ShaderRegistry;
 class Texture2D;
-}
+} // namespace gfx
 
 /**
  * @brief Manages 3D terrain rendering using DEM (Digital Elevation Model) data
@@ -126,8 +126,8 @@ public:
         std::shared_ptr<gfx::IndexBuffer> indexBuffer;
         size_t vertexCount;
         size_t indexCount;
-        std::vector<int16_t> vertices;  // Raw vertex data (x, y pairs as short2)
-        std::vector<uint16_t> indices;  // Raw index data
+        std::vector<int16_t> vertices; // Raw vertex data (x, y pairs as short2)
+        std::vector<uint16_t> indices; // Raw index data
     };
 
     const TerrainMesh& getMesh(gfx::Context& context);

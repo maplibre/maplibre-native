@@ -36,8 +36,7 @@
 namespace mbgl {
 
 RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
-    : impl(std::move(impl_)) {
-}
+    : impl(std::move(impl_)) {}
 
 RenderTerrain::~RenderTerrain() = default;
 
@@ -71,10 +70,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // TEMP: Always rebuild to pick up latest code changes
     // Clear and recreate layer group every time until terrain is stable
     if (layerGroup && tilesWithDrawables.size() > 0) {
-        Log::Info(Event::Render, "Force rebuilding terrain layer group (had " +
-                  std::to_string(tilesWithDrawables.size()) + " old drawables)");
-        activateLayerGroup(false, changes);  // Deactivate old layer group
-        layerGroup.reset();  // Clear the layer group to force recreation
+        Log::Info(Event::Render,
+                  "Force rebuilding terrain layer group (had " + std::to_string(tilesWithDrawables.size()) +
+                      " old drawables)");
+        activateLayerGroup(false, changes); // Deactivate old layer group
+        layerGroup.reset();                 // Clear the layer group to force recreation
         tilesWithDrawables.clear();
     }
 
@@ -131,7 +131,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
 
         // Get the underlying Tile and cast to RasterDEMTile
         const auto& tile = renderTile.getTile();
-        Log::Info(Event::Render, "Terrain tile " + util::toString(tileID) + " kind=" + std::to_string(static_cast<int>(tile.kind)));
+        Log::Info(Event::Render,
+                  "Terrain tile " + util::toString(tileID) + " kind=" + std::to_string(static_cast<int>(tile.kind)));
 
         if (tile.kind != Tile::Kind::RasterDEM) {
             Log::Warning(Event::Render, "Terrain tile " + util::toString(tileID) + " is not RasterDEM type");
@@ -158,8 +159,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             continue;
         }
 
-        Log::Info(Event::Render, "Terrain creating texture for tile " + util::toString(tileID) +
-                  " (DEM size: " + std::to_string(imagePtr->size.width) + "x" + std::to_string(imagePtr->size.height) + ")");
+        Log::Info(Event::Render,
+                  "Terrain creating texture for tile " + util::toString(tileID) + " (DEM size: " +
+                      std::to_string(imagePtr->size.width) + "x" + std::to_string(imagePtr->size.height) + ")");
 
         // Create DEM texture from the data
         auto demTexture = createDEMTexture(context, demData);
@@ -169,7 +171,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
 
         // Create terrain drawable for this tile
-        auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, texturePool.getRenderTarget(renderTile.id)->getTexture());
+        auto drawable = createDrawableForTile(
+            context, shaders, tileID, demTexture, texturePool.getRenderTarget(renderTile.id)->getTexture());
         if (drawable) {
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = true;
@@ -179,8 +182,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     }
 
     if (newDrawables > 0) {
-        Log::Info(Event::Render, "Terrain created " + std::to_string(newDrawables) + " new drawables (total: " +
-                  std::to_string(tilesWithDrawables.size()) + ")");
+        Log::Info(Event::Render,
+                  "Terrain created " + std::to_string(newDrawables) +
+                      " new drawables (total: " + std::to_string(tilesWithDrawables.size()) + ")");
     }
 }
 
@@ -269,18 +273,16 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
     }
 
     // Store mesh data with raw vertices and indices
-    mesh = TerrainMesh{
-        nullptr, // vertexBuffer - will be created when creating drawable
-        nullptr, // indexBuffer - will be created when creating drawable
-        vertices.size() / 4, // 4 shorts per vertex (x, y, u, v)
-        indices.size(),
-        std::move(vertices),
-        std::move(indices)
-    };
+    mesh = TerrainMesh{nullptr,             // vertexBuffer - will be created when creating drawable
+                       nullptr,             // indexBuffer - will be created when creating drawable
+                       vertices.size() / 4, // 4 shorts per vertex (x, y, u, v)
+                       indices.size(),
+                       std::move(vertices),
+                       std::move(indices)};
 
     Log::Info(Event::General,
               "Terrain mesh generated: " + std::to_string(mesh->vertexCount) + " vertices, " +
-              std::to_string(mesh->indexCount) + " indices");
+                  std::to_string(mesh->indexCount) + " indices");
 }
 
 std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& context, const DEMData& demData) {
@@ -291,8 +293,9 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
         return nullptr;
     }
 
-    Log::Info(Event::Render, "Creating DEM texture: size=" + std::to_string(imagePtr->size.width) + "x" +
-              std::to_string(imagePtr->size.height) + ", bytes=" + std::to_string(imagePtr->bytes()));
+    Log::Info(Event::Render,
+              "Creating DEM texture: size=" + std::to_string(imagePtr->size.width) + "x" +
+                  std::to_string(imagePtr->size.height) + ", bytes=" + std::to_string(imagePtr->bytes()));
 
     // DEBUG: Check actual pixel values in the image
     if (imagePtr->data && imagePtr->bytes() > 0) {
@@ -301,10 +304,8 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
         std::string pixelValues = "First 10 DEM pixels (RGBA): ";
         for (size_t i = 0; i < std::min(size_t(10), imagePtr->bytes() / 4); i++) {
             size_t offset = i * 4;
-            pixelValues += "[" + std::to_string(pixels[offset]) + "," +
-                          std::to_string(pixels[offset+1]) + "," +
-                          std::to_string(pixels[offset+2]) + "," +
-                          std::to_string(pixels[offset+3]) + "] ";
+            pixelValues += "[" + std::to_string(pixels[offset]) + "," + std::to_string(pixels[offset + 1]) + "," +
+                           std::to_string(pixels[offset + 2]) + "," + std::to_string(pixels[offset + 3]) + "] ";
         }
         Log::Info(Event::Render, pixelValues);
     }
@@ -321,11 +322,9 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
     Log::Info(Event::Render, "DEM texture image data set successfully");
 
     // Configure sampler - use linear filtering for smooth elevation interpolation
-    texture->setSamplerConfiguration({
-        .filter = gfx::TextureFilterType::Linear,
-        .wrapU = gfx::TextureWrapType::Clamp,
-        .wrapV = gfx::TextureWrapType::Clamp
-    });
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                      .wrapU = gfx::TextureWrapType::Clamp,
+                                      .wrapV = gfx::TextureWrapType::Clamp});
 
     Log::Info(Event::Render, "DEM texture created and configured successfully");
     return texture;
@@ -334,7 +333,7 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
 std::shared_ptr<gfx::Texture2D> RenderTerrain::createTestMapTexture(gfx::Context& context) {
     // Create a simple test texture with a checkerboard pattern
     // This will be replaced with actual render-to-texture output later
-    const uint32_t size = 512; // 512x512 texture
+    const uint32_t size = 512;       // 512x512 texture
     const uint32_t checkerSize = 64; // Size of each checker square
 
     // Create RGBA pixel data
@@ -364,10 +363,7 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createTestMapTexture(gfx::Context
     }
 
     // Create PremultipliedImage from raw data
-    auto image = std::make_shared<PremultipliedImage>(
-        Size{size, size},
-        std::move(imageData)
-    );
+    auto image = std::make_shared<PremultipliedImage>(Size{size, size}, std::move(imageData));
 
     // Create texture
     auto texture = context.createTexture2D();
@@ -380,21 +376,19 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createTestMapTexture(gfx::Context
     texture->setImage(image);
 
     // Configure sampler
-    texture->setSamplerConfiguration({
-        .filter = gfx::TextureFilterType::Linear,
-        .wrapU = gfx::TextureWrapType::Repeat,
-        .wrapV = gfx::TextureWrapType::Repeat
-    });
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                      .wrapU = gfx::TextureWrapType::Repeat,
+                                      .wrapV = gfx::TextureWrapType::Repeat});
 
     Log::Info(Event::Render, "Test map texture created: " + std::to_string(size) + "x" + std::to_string(size));
     return texture;
 }
 
 std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context& context,
-                                                                      gfx::ShaderRegistry& shaders,
-                                                                      const OverscaledTileID& tileID,
-                                                                      std::shared_ptr<gfx::Texture2D> demTexture,
-                                                                      std::shared_ptr<gfx::Texture2D> mapTexture) {
+                                                                    gfx::ShaderRegistry& shaders,
+                                                                    const OverscaledTileID& tileID,
+                                                                    std::shared_ptr<gfx::Texture2D> demTexture,
+                                                                    std::shared_ptr<gfx::Texture2D> mapTexture) {
     // Ensure mesh is generated
     const auto& terrainMesh = getMesh(context);
 
@@ -421,11 +415,11 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     // NOTE: Using Translucent pass because Opaque pass renders in REVERSE order (high index = back)
     // TEMP: Disable depth testing to render on top of everything
     builder->setShader(terrainShader);
-    builder->setRenderPass(RenderPass::Translucent);  // Translucent pass renders in forward order (high index = front)
-    builder->setDepthType(gfx::DepthMaskType::ReadOnly);  // Don't write depth
+    builder->setRenderPass(RenderPass::Translucent); // Translucent pass renders in forward order (high index = front)
+    builder->setDepthType(gfx::DepthMaskType::ReadOnly); // Don't write depth
     builder->setColorMode(gfx::ColorMode::unblended());
-    builder->setEnableDepth(false);  // Disable depth testing
-    builder->setIs3D(false);  // Treat as 2D for now
+    builder->setEnableDepth(false); // Disable depth testing
+    builder->setIs3D(false);        // Treat as 2D for now
 
     // Set vertex data - copy vertices to raw buffer
     std::vector<uint8_t> vertexData(terrainMesh.vertices.size() * sizeof(int16_t));
@@ -435,8 +429,8 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     // Set index data and segments
     // Create a single segment covering the entire terrain mesh
     SegmentVector segments;
-    segments.emplace_back(0, // vertex offset
-                          0, // index offset
+    segments.emplace_back(0,                       // vertex offset
+                          0,                       // index offset
                           terrainMesh.vertexCount, // vertex count
                           terrainMesh.indexCount); // index count
 

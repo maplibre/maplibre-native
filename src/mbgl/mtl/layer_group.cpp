@@ -20,8 +20,9 @@ LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::st
 
 void LayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (getName() == "terrain") {
-        mbgl::Log::Info(mbgl::Event::Render, "LayerGroup::upload for terrain, enabled=" + std::to_string(enabled) +
-                       ", drawableCount=" + std::to_string(getDrawableCount()));
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "LayerGroup::upload for terrain, enabled=" + std::to_string(enabled) +
+                            ", drawableCount=" + std::to_string(getDrawableCount()));
     }
 
     if (!enabled) {
@@ -42,18 +43,19 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
     });
 
     if (getName() == "terrain") {
-        mbgl::Log::Info(mbgl::Event::Render, "LayerGroup::upload for terrain uploaded " +
-                       std::to_string(uploadedCount) + " drawables");
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "LayerGroup::upload for terrain uploaded " + std::to_string(uploadedCount) + " drawables");
     }
 }
 
 void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // Terrain debug logging BEFORE early return
     if (getName() == "terrain") {
-        mbgl::Log::Info(mbgl::Event::Render, "LayerGroup::render for terrain ENTRY, enabled=" + std::to_string(enabled) +
-                       ", drawableCount=" + std::to_string(getDrawableCount()) +
-                       ", hasRenderPass=" + std::to_string(parameters.renderPass != nullptr) +
-                       ", pass=" + std::to_string(static_cast<int>(parameters.pass)));
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "LayerGroup::render for terrain ENTRY, enabled=" + std::to_string(enabled) +
+                            ", drawableCount=" + std::to_string(getDrawableCount()) +
+                            ", hasRenderPass=" + std::to_string(parameters.renderPass != nullptr) +
+                            ", pass=" + std::to_string(static_cast<int>(parameters.pass)));
     }
 
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
@@ -66,9 +68,10 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     // Terrain debug logging
     if (getName() == "terrain") {
-        mbgl::Log::Info(mbgl::Event::Render, "LayerGroup::render for terrain, drawableCount=" + std::to_string(getDrawableCount()) +
-                       ", pass=" + std::to_string(static_cast<int>(parameters.pass)) +
-                       " (Pass3D=4, should match!)");
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "LayerGroup::render for terrain, drawableCount=" + std::to_string(getDrawableCount()) +
+                            ", pass=" + std::to_string(static_cast<int>(parameters.pass)) +
+                            " (Pass3D=4, should match!)");
     }
 
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
@@ -78,8 +81,9 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             if (getName() == "terrain") {
-                mbgl::Log::Info(mbgl::Event::Render, "Terrain drawable skipped: enabled=" + std::to_string(drawable.getEnabled()) +
-                               ", hasPass=" + std::to_string(drawable.hasRenderPass(parameters.pass)));
+                mbgl::Log::Info(mbgl::Event::Render,
+                                "Terrain drawable skipped: enabled=" + std::to_string(drawable.getEnabled()) +
+                                    ", hasPass=" + std::to_string(drawable.hasRenderPass(parameters.pass)));
             }
             return;
         }
@@ -98,7 +102,8 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     });
 
     if (getName() == "terrain") {
-        mbgl::Log::Info(mbgl::Event::Render, "LayerGroup::render for terrain drew " + std::to_string(drawnCount) + " drawables");
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "LayerGroup::render for terrain drew " + std::to_string(drawnCount) + " drawables");
     }
 }
 
