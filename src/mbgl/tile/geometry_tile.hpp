@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/actor/actor.hpp>
+#include <mbgl/actor/optional_actor.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/renderer/image_manager.hpp>
@@ -114,7 +114,7 @@ private:
     TaggedScheduler threadPool;
 
     const std::shared_ptr<Mailbox> mailbox;
-    Actor<GeometryTileWorker> worker;
+    OptionalActor<GeometryTileWorker> worker;
 
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;

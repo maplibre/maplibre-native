@@ -91,7 +91,7 @@ struct RenderingStats {
 
     RenderingStats& operator+=(const RenderingStats&);
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     std::string toString(std::string_view separator) const;
 #endif
 };

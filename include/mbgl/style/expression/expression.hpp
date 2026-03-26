@@ -51,6 +51,15 @@ public:
           feature(feature_),
           colorRampParameter(std::move(colorRampParameter_)) {}
 
+    EvaluationContext(std::optional<float> zoom_,
+                      GeometryTileFeature const* feature_,
+                      std::optional<double> colorRampParameter_,
+                      std::optional<float> elevation_) noexcept
+        : zoom(std::move(zoom_)),
+          feature(feature_),
+          colorRampParameter(std::move(colorRampParameter_)),
+          elevation(std::move(elevation_)) {}
+
     EvaluationContext& withFormattedSection(const Value* formattedSection_) noexcept {
         formattedSection = formattedSection_;
         return *this;
@@ -71,10 +80,16 @@ public:
         return *this;
     };
 
+    EvaluationContext& withElevation(float elevation_) noexcept {
+        elevation = elevation_;
+        return *this;
+    };
+
     std::optional<float> zoom;
     std::optional<mbgl::Value> accumulated;
     GeometryTileFeature const* feature = nullptr;
     std::optional<double> colorRampParameter;
+    std::optional<float> elevation;
     // Contains formatted section object, std::unordered_map<std::string, Value>.
     const Value* formattedSection = nullptr;
     const FeatureState* featureState = nullptr;
@@ -195,14 +210,15 @@ enum class Kind : int32_t {
 
 enum class Dependency : uint32_t {
     None = 0,
-    Feature = 1 << 0,  // Data reference
-    Image = 1 << 1,    // Image reference (equivalent to not "runtime constant")
-    Zoom = 1 << 2,     // Zoom level
-    Location = 1 << 3, // Not used yet, "distance-from-center" not supported
-    Bind = 1 << 4,     // Create variable binding ("let")
-    Var = 1 << 5,      // Use variable binding
-    Override = 1 << 6, // Property override
-    MaskCount = 7,
+    Feature = 1 << 0,   // Data reference
+    Image = 1 << 1,     // Image reference (equivalent to not "runtime constant")
+    Zoom = 1 << 2,      // Zoom level
+    Location = 1 << 3,  // Not used yet, "distance-from-center" not supported
+    Bind = 1 << 4,      // Create variable binding ("let")
+    Var = 1 << 5,       // Use variable binding
+    Override = 1 << 6,  // Property override
+    Elevation = 1 << 7, // Elevation from DEM
+    MaskCount = 8,
     All = (1 << MaskCount) - 1,
 };
 

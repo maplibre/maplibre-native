@@ -22,6 +22,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
+    $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
     ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/fixture_log_observer.cpp
@@ -51,7 +52,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/style/conversion/raster_dem_options.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/source_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
@@ -253,7 +254,7 @@ if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
-if (WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Linux)
+if (WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Linux OR MLN_WITH_WEBGPU)
     target_compile_definitions(
         mbgl-test
         PRIVATE USE_CPP_TEST_SERVER

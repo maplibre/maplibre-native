@@ -91,6 +91,8 @@ public:
     // Pitch
 
     double getPitch() const;
+    double getRoll() const;
+    double getFieldOfView() const;
 
     // North Orientation
     void setNorthOrientation(NorthOrientation);
@@ -131,6 +133,10 @@ public:
 
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
+
+    // Frustum
+    void setFrustumOffset(const EdgeInsets&);
+    EdgeInsets getFrustumOffset();
 
 private:
     TransformObserver& observer;

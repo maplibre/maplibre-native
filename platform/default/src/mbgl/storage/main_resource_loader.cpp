@@ -195,7 +195,7 @@ public:
     void resume() { thread->resume(); }
 
     void setResourceOptions(ResourceOptions options) {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         resourceOptions = options;
         assetFileSource->setResourceOptions(options.clone());
         databaseFileSource->setResourceOptions(options.clone());
@@ -206,12 +206,12 @@ public:
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return resourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         clientOptions = options;
         assetFileSource->setClientOptions(options.clone());
         databaseFileSource->setClientOptions(options.clone());
@@ -222,7 +222,7 @@ public:
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return clientOptions.clone();
     }
 

@@ -8,12 +8,13 @@ import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.maplibre.android.annotations.PolygonOptions
 import org.maplibre.android.annotations.PolylineOptions
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
-class AnnotationManagerTest {
+class AnnotationManagerTest : BaseTest() {
 
     private val aNativeMapView: NativeMap = Mockito.mock(NativeMapView::class.java)
     private val aMapView = Mockito.mock(MapView::class.java)

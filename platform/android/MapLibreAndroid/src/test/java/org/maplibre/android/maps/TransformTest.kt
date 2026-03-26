@@ -8,12 +8,13 @@ import io.mockk.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
-class TransformTest {
+class TransformTest : BaseTest() {
 
     private lateinit var mapView: MapView
     private lateinit var nativeMapView: NativeMap

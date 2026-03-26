@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-nunicode)
     return()
 endif()
 
-if(MLN_WITH_QT OR MLN_CORE_INCLUDE_DEPS)
+if(MLN_WITH_QT)
     add_library(mbgl-vendor-nunicode OBJECT)
 else()
     add_library(mbgl-vendor-nunicode STATIC)

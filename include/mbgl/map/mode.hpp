@@ -35,6 +35,11 @@ enum class ViewportMode : EnumType {
     FlippedY,
 };
 
+enum class TileLodMode : uint8_t {
+    Default, ///< Default TileLOD algorithm
+    Distance ///< Distance-based TileLOD algorithm
+};
+
 enum class MapDebugOptions : EnumType {
     NoDebug = 0,
     TileBorders = 1 << 1,

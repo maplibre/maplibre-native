@@ -1,3 +1,4 @@
+#include <chrono>
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/fixture_log_observer.hpp>
@@ -9,6 +10,7 @@
 #include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/client_options.hpp>
 
 #include <memory>
 
@@ -32,6 +34,10 @@ TEST(Style, Properties) {
     ASSERT_EQ("", style.getName());
     ASSERT_EQ((LatLng{20, 10}), *style.getDefaultCamera().center);
 
+    style.loadJSON(R"STYLE({"centerAltitude": 999})STYLE");
+    ASSERT_EQ("", style.getName());
+    ASSERT_EQ(999, *style.getDefaultCamera().centerAltitude);
+
     style.loadJSON(R"STYLE({"bearing": 24})STYLE");
     ASSERT_EQ("", style.getName());
     ASSERT_EQ(LatLng{}, *style.getDefaultCamera().center);
@@ -44,6 +50,10 @@ TEST(Style, Properties) {
     style.loadJSON(R"STYLE({"pitch": 60})STYLE");
     ASSERT_EQ("", style.getName());
     ASSERT_EQ(60, *style.getDefaultCamera().pitch);
+
+    style.loadJSON(R"STYLE({"roll": 99})STYLE");
+    ASSERT_EQ("", style.getName());
+    ASSERT_EQ(99, *style.getDefaultCamera().roll);
 
     style.loadJSON(R"STYLE({})STYLE");
     ASSERT_EQ(Milliseconds(300), *style.getTransitionOptions().duration);
@@ -108,6 +118,43 @@ TEST(Style, RemoveSourceInUse) {
 #endif
 
     EXPECT_EQ(log.count(logMessage), 1u);
+}
+
+TEST(Style, LoadJSONCancelsPendingLoadURL) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<::StubFileSource>(
+        ResourceOptions::Default(), ClientOptions(), StubFileSource::ResponseType::Manual);
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    // Start loading a URL (this will be pending)
+    auto url = "http://some-url";
+    fileSource->styleResponse = [](const Resource&) {
+        Response result;
+        result.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/style_vector.json"));
+        return result;
+    };
+    style.loadURL(url);
+
+    // Before the URL request completes, load JSON directly
+    const std::string json = R"STYLE({
+        "version": 8,
+        "name": "Test Style",
+        "sources": {},
+        "layers": []
+    })STYLE";
+    style.loadJSON(json);
+
+    // The style should now be loaded with our JSON content
+    ASSERT_EQ("Test Style", style.getName());
+    ASSERT_EQ("", style.getURL());
+    ASSERT_TRUE(style.getJSON().find("Test Style") != std::string::npos);
+
+    fileSource->respondToAll();
+
+    // The style should still show our JSON content, not the URL content
+    ASSERT_EQ("Test Style", style.getName());
+    ASSERT_NE("Streets", style.getName());
 }
 
 TEST(Style, SourceImplsOrder) {

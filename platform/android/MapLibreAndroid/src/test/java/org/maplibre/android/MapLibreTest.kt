@@ -20,7 +20,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import java.io.File
 
-class MapLibreTest {
+class MapLibreTest : BaseTest() {
     private var context: Context? = null
     private var appContext: Context? = null
 

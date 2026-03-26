@@ -30,6 +30,10 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                 }
             }
             encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
+
+            const auto& texture = rpd->colorAttachments()->object(0)->texture();
+            width = texture->width();
+            height = texture->height();
         }
     }
 
@@ -80,6 +84,7 @@ void RenderPass::resetState() {
 
     currentCullMode = MTL::CullModeNone;
     currentWinding = MTL::WindingClockwise;
+    currentScissorRect = {.x = 0, .y = 0, .width = 0, .height = 0};
 }
 
 namespace {
@@ -127,7 +132,7 @@ void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::
                 return;
             }
         }
-        vertexBinds[index] = BindInfo{&buf, actualSize, offset};
+        vertexBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindVertex(encoder, offset, index, actualSize);
 }
@@ -153,7 +158,7 @@ void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std
                 return;
             }
         }
-        fragmentBinds[index] = BindInfo{&buf, actualSize, offset};
+        fragmentBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindFragment(encoder, offset, index, actualSize);
 }
@@ -235,6 +240,20 @@ void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
     if (winding != currentWinding) {
         encoder->setFrontFacingWinding(winding);
         currentWinding = winding;
+    }
+}
+
+void RenderPass::setScissorRect(MTL::ScissorRect rect) {
+    if (rect.x != currentScissorRect.x || rect.y != currentScissorRect.y || rect.width != currentScissorRect.width ||
+        rect.height != currentScissorRect.height) {
+        if (rect.width + rect.x > width) {
+            rect.width = width - rect.x;
+        }
+        if (rect.height + rect.y > height) {
+            rect.height = height - rect.y;
+        }
+        encoder->setScissorRect(rect);
+        currentScissorRect = rect;
     }
 }
 

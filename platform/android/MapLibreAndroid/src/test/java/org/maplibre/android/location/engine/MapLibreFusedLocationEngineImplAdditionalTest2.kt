@@ -11,6 +11,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
@@ -18,7 +19,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(MockitoJUnitRunner::class)
-class MapLibreFusedLocationEngineImplAdditionalTest2 {
+class MapLibreFusedLocationEngineImplAdditionalTest2 : BaseTest() {
     private val engines = ArrayList<LocationEngineProxy<*>>()
     private var mockLocationManager: LocationManager? = null
     private var location = Location(PROVIDER)

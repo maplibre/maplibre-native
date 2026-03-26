@@ -3,8 +3,9 @@ package org.maplibre.android.utils
 import android.graphics.Color
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 
-class ColorUtilsTest {
+class ColorUtilsTest : BaseTest() {
 
     @Test
     fun rgbaToColor_decimalComponent() {

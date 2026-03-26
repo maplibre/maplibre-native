@@ -20,6 +20,7 @@ local.properties
 .DS_Store
 .cache
 compile_commands.json
+.build
 /build
 /build-*
 **/.idea
@@ -36,6 +37,7 @@ compile_commands.json
 node_modules
 .cxx
 .env
+vendor/dawn/
 
 # Node binaries.
 /lib

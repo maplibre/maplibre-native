@@ -532,6 +532,16 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) double tileLodZoomShift;
 
+/**
+ Frustum offset used to disable rendering of elements at the edge of the screen
+
+ Offset applied to camera frustum and scissor rectangle. The camrea frustum is modified
+ to avoid loading geometry that's behind UI elements at the top of the screen. The scissor
+ rectangle is used to avoid shading fragments that are behind UI elements at the edges of
+ the screen. All values are in logical pixels.
+ */
+@property (nonatomic, assign) UIEdgeInsets frustumOffset;
+
 // MARK: Displaying the User’s Location
 
 /**
@@ -854,6 +864,15 @@ vertically on the map.
  programmatically.
  */
 @property (nonatomic, getter=isRotateEnabled) BOOL rotateEnabled;
+
+/**
+The threshold, measured in degrees, that determines when the map's bearing will snap to north.
+For example, with a toleranceForSnappingToNorth of 7, if the user rotates the map within 7 degrees
+of north, the map will automatically snap to exact north.
+
+ The default value of this property is 7.
+ */
+@property (nonatomic) CGFloat toleranceForSnappingToNorth;
 
 /**
  A Boolean value that determines whether the user may change the pitch (tilt) of

@@ -70,11 +70,14 @@ ZoomCurveOrError findZoomCurve(const expression::Expression& e) {
                 result = childResult;
             } else if (!result && childResult) {
                 result = {ParsingError{
-                    R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)",
-                    ""}};
+                    .message =
+                        R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)",
+                    .key = ""}};
             } else if (result && childResult && result != childResult) {
                 result = {ParsingError{
-                    R"(Only one zoom-based "step" or "interpolate" subexpression may be used in an expression.)", ""}};
+                    .message =
+                        R"(Only one zoom-based "step" or "interpolate" subexpression may be used in an expression.)",
+                    .key = ""}};
             }
         }
     });

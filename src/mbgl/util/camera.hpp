@@ -25,14 +25,13 @@ public:
     vec3 up() const noexcept;
 
     const Quaternion& getOrientation() const noexcept { return orientation; }
-    void getOrientation(double& pitch, double& bearing) const noexcept;
-    void setOrientation(double pitch, double bearing) noexcept;
+    void getOrientation(double& roll, double& pitch, double& bearing) const noexcept;
+    void setOrientation(double roll, double pitch, double bearing) noexcept;
     void setOrientation(const Quaternion& orientation_) noexcept;
     void setPosition(const vec3& position) noexcept;
 
     // Computes orientation using forward and up vectors of the provided
-    // coordinate frame. Only bearing and pitch components will be used. Does
-    // not return a value if input is invalid
+    // coordinate frame. Does not return a value if input is invalid
     static std::optional<Quaternion> orientationFromFrame(const vec3& forward, const vec3& up) noexcept;
 
 private:

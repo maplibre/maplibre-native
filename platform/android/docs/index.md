@@ -39,6 +39,10 @@ You can learn how to use the API from MapLibre Android by stuying the source cod
 - [The official Wikipedia app for Android](https://github.com/wikimedia/apps-android-wikipedia) ([source code](https://github.com/search?q=repo%3Awikimedia%2Fapps-android-wikipedia%20maplibre&type=code)).
 - [MapLibreAndroidTestApp](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp). This app is part of the MapLibre Native repository and is used for (automated) testing. Many of the examples in this documentation site come directly from this app.
 
+MapLibre Android is distributed under the BSD 2-Clause License. Refer to the [full list of licenses](https://github.com/maplibre/maplibre-native/blob/main/platform/android/LICENSE.md).
+
+MapLibre iOS is based in part of the work of the [FreeType](https://freetype.org/) Team.
+
 ## See Also
 
 - [MapLibre Android API Documentation](https://maplibre.org/maplibre-native/android/api/)

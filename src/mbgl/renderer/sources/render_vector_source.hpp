@@ -17,6 +17,9 @@ private:
                         bool needsRelayout,
                         const TileParameters&) override;
     const std::optional<Tileset>& getTileset() const override;
+
+private:
+    std::optional<bool> isMLT;
 };
 
 } // namespace mbgl

@@ -228,11 +228,13 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson with a single feature. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson with a single feature.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param feature the GeoJSON [Feature] to set
      */
+
     fun setGeoJson(feature: Feature?) {
         if (detached) {
             return
@@ -242,11 +244,13 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson with a single geometry. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson with a single geometry.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
+
     fun setGeoJson(geometry: Geometry?) {
         if (detached) {
             return
@@ -256,8 +260,9 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
@@ -266,67 +271,19 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
+        var featureCollection = featureCollection
         if (featureCollection != null && featureCollection.features() != null) {
             val features = featureCollection.features()
             val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
-        } else {
-            nativeSetFeatureCollection(featureCollection)
+            featureCollection = FeatureCollection.fromFeatures(featuresCopy)
         }
-    }
-
-
-    /**
-     * Updates the GeoJson with a single feature. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param feature the GeoJSON [Feature] to set
-     */
-    fun setGeoJsonSync(feature: Feature?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetFeatureSync(feature)
+        nativeSetFeatureCollection(featureCollection)
     }
 
     /**
-     * Updates the GeoJson with a single geometry. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param geometry the GeoJSON [Geometry] to set
-     */
-    fun setGeoJsonSync(geometry: Geometry?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetGeometrySync(geometry)
-    }
-
-    /**
-     * Updates the GeoJson. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param featureCollection the GeoJSON FeatureCollection
-     */
-    fun setGeoJsonSync(featureCollection: FeatureCollection?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        if (featureCollection != null && featureCollection.features() != null) {
-            val features = featureCollection.features()
-            val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollectionSync(FeatureCollection.fromFeatures(featuresCopy))
-        } else {
-            nativeSetFeatureCollectionSync(featureCollection)
-        }
-    }
-
-    /**
-     * Updates the GeoJson. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param json the raw GeoJson FeatureCollection string
      */
@@ -336,20 +293,6 @@ class GeoJsonSource : Source {
         }
         checkThread()
         nativeSetGeoJsonString(json)
-    }
-
-    /**
-     * Updates the GeoJson. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param json the raw GeoJson FeatureCollection string
-     */
-    fun setGeoJsonSync(json: String) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetGeoJsonStringSync(json)
     }
 
     /**
@@ -544,18 +487,6 @@ class GeoJsonSource : Source {
     private external fun nativeSetGeometry(geometry: Geometry?)
 
     @Keep
-    private external fun nativeSetGeoJsonStringSync(geoJson: String)
-
-    @Keep
-    private external fun nativeSetFeatureCollectionSync(geoJson: FeatureCollection?)
-
-    @Keep
-    private external fun nativeSetFeatureSync(feature: Feature?)
-
-    @Keep
-    private external fun nativeSetGeometrySync(geometry: Geometry?)
-
-    @Keep
     private external fun querySourceFeatures(filter: Array<Any>?): Array<Feature>
 
     @Keep
@@ -566,6 +497,9 @@ class GeoJsonSource : Source {
 
     @Keep
     private external fun nativeGetClusterExpansionZoom(feature: Feature): Int
+
+    @Keep
+    private external fun nativeIsUpdateSynchronous(): Boolean
 
     @Keep
     @Throws(Throwable::class)

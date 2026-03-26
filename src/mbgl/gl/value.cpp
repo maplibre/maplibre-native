@@ -358,15 +358,17 @@ const constexpr ScissorTest::Type ScissorTest::Default;
 void ScissorTest::Set(const Type& value) {
     MLN_TRACE_ZONE(ScissorTest::Set);
     MLN_TRACE_FUNC_GL();
-    MBGL_CHECK_ERROR(value ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST));
+    bool enabled = value.x != 0 || value.y != 0 || value.width != 0 || value.height != 0;
+    MBGL_CHECK_ERROR(enabled ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST));
+    MBGL_CHECK_ERROR(glScissor(value.x, value.y, value.width, value.height));
 }
 
 ScissorTest::Type ScissorTest::Get() {
     MLN_TRACE_ZONE(ScissorTest::Get);
     MLN_TRACE_FUNC_GL();
-    Type scissorTest;
-    MBGL_CHECK_ERROR(scissorTest = glIsEnabled(GL_SCISSOR_TEST));
-    return scissorTest;
+    GLint scissor[4];
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_SCISSOR_BOX, scissor));
+    return {scissor[0], scissor[1], static_cast<uint32_t>(scissor[2]), static_cast<uint32_t>(scissor[3])};
 }
 
 const constexpr BindFramebuffer::Type BindFramebuffer::Default;

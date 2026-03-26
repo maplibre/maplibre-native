@@ -9,6 +9,7 @@
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <array>
@@ -62,7 +63,9 @@ public:
                     uint64_t frameCount,
                     double tileLodMinRadius,
                     double tileLodScale,
-                    double tileLodPitchThreshold);
+                    double tileLodPitchThreshold,
+                    TileLodMode tileLodMode,
+                    const gfx::ScissorRect&);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -140,6 +143,9 @@ public:
     double tileLodMinRadius;
     double tileLodScale;
     double tileLodPitchThreshold;
+    TileLodMode tileLodMode;
+
+    gfx::ScissorRect scissorRect;
 };
 
 } // namespace mbgl
