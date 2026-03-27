@@ -205,7 +205,12 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(icon->id);
         const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, version});
+        // When the slot is reused without re-uploading pixels (same image id and size), the GPU
+        // texture still holds previously-uploaded data. Store a stale version so that
+        // populateImagePatches will apply the latest pixels via a sub-region upload instead of
+        // skipping the update because the version numbers already match.
+        const auto storedVersion = texHandle.isUploadNeeded() ? version : (version > 0u ? version - 1u : 0u);
+        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, storedVersion});
     }
 
     imageAtlas.patternPositions.reserve(patterns.size());
@@ -233,8 +238,9 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(pattern->id);
         const auto version = it != versionMap.end() ? it->second : 0;
+        const auto storedVersion = texHandle.isUploadNeeded() ? version : (version > 0u ? version - 1u : 0u);
         imageAtlas.patternPositions.emplace(pattern->id,
-                                            ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
+                                            ImagePosition{rectWithoutExtraPadding(rect), *pattern, storedVersion});
     }
 
     return imageAtlas;
