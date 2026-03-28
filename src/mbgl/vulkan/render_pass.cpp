@@ -15,12 +15,20 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     resource.bind();
 
-    std::array<vk::ClearValue, 2> clearValues;
+    std::vector<vk::ClearValue> clearValues;
 
-    if (descriptor.clearColor.has_value())
-        clearValues[0].setColor(descriptor.clearColor.value().operator std::array<float, 4>());
-    clearValues[1].depthStencil.setDepth(descriptor.clearDepth.value_or(1.0f));
-    clearValues[1].depthStencil.setStencil(descriptor.clearStencil.value_or(0));
+    if (descriptor.clearColor.has_value()) {
+        vk::ClearValue value;
+        value.setColor(descriptor.clearColor.value().operator std::array<float, 4>());
+        clearValues.emplace_back(value);
+    }
+
+    if (descriptor.clearDepth.has_value() || descriptor.clearStencil.has_value()) {
+        vk::ClearValue value;
+        value.depthStencil.setDepth(descriptor.clearDepth.value_or(1.0f));
+        value.depthStencil.setStencil(descriptor.clearStencil.value_or(0));
+        clearValues.emplace_back(value);
+    }
 
     const auto renderPassBeginInfo = vk::RenderPassBeginInfo()
                                          .setRenderPass(resource.getRenderPass().get())
