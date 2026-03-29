@@ -5,6 +5,16 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+- core: Fix crash during exception stack unwind ([#4188](https://github.com/maplibre/maplibre-native/pull/4188)) (by [@adrian-cojocaru](https://github.com/adrian-cojocaru))
+- link mlt-cpp ([#4183](https://github.com/maplibre/maplibre-native/pull/4183)) (by [@Murmele](https://github.com/Murmele))
+- core: Fix vulkan surface rotation ([#4182](https://github.com/maplibre/maplibre-native/pull/4182)) (by [@adrian-cojocaru](https://github.com/adrian-cojocaru))
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)) (by [@TimSylvester](https://github.com/TimSylvester))
+- core: Skip empty dynamic texture submissions ([#4177](https://github.com/maplibre/maplibre-native/pull/4177)) (by [@adrian-cojocaru](https://github.com/adrian-cojocaru))
+## 6.4.1
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
 ## 6.4.1-pre.0
 ### 🐞 Bug fixes
 - core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
