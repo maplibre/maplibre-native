@@ -452,14 +452,17 @@ protected:
             return;
         }
 
-        if (const auto& sharedVector = binder->getSharedVertexVector()) {
-            const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
+        if (binder->interleavedVertexBuffer) {
+            const auto& interleavedSharedVector = binder->interleavedVertexBuffer->sharedVertexVector;
+
+            const auto rawSize = static_cast<uint32_t>(binder->interleavedVertexBuffer->stride);
             const bool isInterpolated = binder->isInterpolated();
             const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-            assert(rawSize == static_cast<uint32_t>(isInterpolated ? sizeof(typename InterpType::Value)
-                                                                   : sizeof(typename Type::Value)));
-            assert(sharedVector->getRawCount() == binder->getVertexCount());
-            attrib->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
+
+            assert(interleavedSharedVector->getRawCount() / binder->interleavedVertexBuffer->stride ==
+                   binder->getVertexCount());
+            attrib->setSharedRawData(
+                std::move(interleavedSharedVector), static_cast<uint32_t>(binder->vertexOffset), 0, rawSize, dataType);
         } else {
             const auto vertexCount = binder->getVertexCount();
             for (std::size_t i = 0; i < vertexCount; ++i) {
