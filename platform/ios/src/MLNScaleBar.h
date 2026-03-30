@@ -1,6 +1,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 
+MLN_EXPORT
 @interface MLNScaleBar : UIView
 
 // Sets the scale and redraws the scale bar
