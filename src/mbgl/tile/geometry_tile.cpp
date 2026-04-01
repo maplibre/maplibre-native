@@ -537,7 +537,7 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
     }
 
     for (const auto& sourceLayer : *options.sourceLayers) {
-        // Go throught all sourceLayers, if any
+        // Go through all sourceLayers, if any
         // to gather all the features
         auto layer = getData()->getLayer(sourceLayer);
 

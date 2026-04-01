@@ -878,7 +878,7 @@ using namespace mbgl::style::conversion;
 EvaluationResult Distance::evaluate(const EvaluationContext& params) const {
     if (!params.feature || !params.canonical) {
         return EvaluationError{
-            "distance expression requirs valid feature and canonical "
+            "distance expression requires valid feature and canonical "
             "information."};
     }
     auto geometryType = params.feature->getType();

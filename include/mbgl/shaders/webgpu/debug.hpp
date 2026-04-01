@@ -43,7 +43,7 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = debug.matrix * vec4<f32>(scaled_pos, 0.0, 1.0);
 
     // This vertex shader expects a EXTENT x EXTENT quad,
-    // The UV co-ordinates for the overlay texture can be calculated using that knowledge
+    // The UV coordinates for the overlay texture can be calculated using that knowledge
     out.uv = vec2<f32>(f32(in.position.x), f32(in.position.y)) / 8192.0;
 
     return out;

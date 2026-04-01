@@ -279,7 +279,7 @@ const BufferResource& Context::getTileIndexBuffer() {
 
 const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
     if (!emptyVertexBuffer) {
-        // This buffer is bound to vertex attribtue indexes when the uniforms are used instead and
+        // This buffer is bound to vertex attribute indexes when the uniforms are used instead and
         // shaders are expected not to access the attribute values, but Metal requires a binding.
         // This buffer could also hold a single default value applied for all vertices, in which case
         // it could not be shared (See `MTL::VertexStepFunctionConstant` in the vertex attribute

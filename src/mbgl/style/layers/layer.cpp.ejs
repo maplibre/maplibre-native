@@ -98,7 +98,7 @@ layerCapabilities['heatmap']        = defaults.require('Source')
 layerCapabilities['raster']         = defaults.require('Source').set('TileKind', 'Raster').finalize();
 layerCapabilities['location-indicator']     = defaults.finalize();
 
-// Splits lines that are over 120 characters at the firts occurance of '='.
+// Splits lines that are over 120 characters at the first occurrence of '='.
 const split120Line = line => {
     const ident = '           ';
     if (line.length + ident.length > 120) {

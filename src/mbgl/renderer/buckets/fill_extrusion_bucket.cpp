@@ -63,7 +63,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      std::size_t index,
                                      const CanonicalTileID& canonical) {
     for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
+        // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
         std::size_t totalVertices = 0;

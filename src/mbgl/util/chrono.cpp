@@ -27,7 +27,7 @@ std::string rfc1123(Timestamp timestamp) {
     // Buffer size 30 is OK assuming the year has 4 digits. However, In theory,
     // it might have more digits. Under gcc 8.3.0 with -Os optimization flag,
     // there is compiler warning complaining about the buffer size might be too
-    // small. Inceasing the buffer to 32 fixes the warning.
+    // small. Increasing the buffer to 32 fixes the warning.
     char buffer[32];
     snprintf(buffer,
              32,

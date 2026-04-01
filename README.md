@@ -169,7 +169,7 @@ There is an [npm package](https://www.npmjs.com/package/@maplibre/maplibre-gl-na
 
 ## Qt
 
-Please check out the [`maplibre/maplibre-native-qt` repository](https://github.com/maplibre/maplibre-native-qt) to learn how to intergrate MapLibre Native with a Qt project.
+Please check out the [`maplibre/maplibre-native-qt` repository](https://github.com/maplibre/maplibre-native-qt) to learn how to integrate MapLibre Native with a Qt project.
 
 ## Compose Multiplatform
 

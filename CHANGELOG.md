@@ -66,7 +66,7 @@
 
   Default minimum tile update interval value is `Duration::zero()`.
 
-- [core] Indroduce `distance` expression. ([#16397](https://github.com/mapbox/mapbox-gl-native/pull/16397))
+- [core] Introduce `distance` expression. ([#16397](https://github.com/mapbox/mapbox-gl-native/pull/16397))
 
   The `distance` expression returns the shortest distance between two geometries. The returned value can be consumed as an input into another expression for changing a paint or layout property or filtering features by distance.
 
@@ -162,7 +162,7 @@
 
 - [core] Add Renderer::clearData() ([#16323](https://github.com/mapbox/mapbox-gl-native/pull/16323))
 
-  The newly added `Renderer::clearData()` method allows to clear render data and thus save memory and make sure outdated tiles are not shown. It clears data more agressively than `Renderer::reduceMemoryUse()` does, as it clears not only the cache but all orchestration data, including the data used by the currently rendered frame.
+  The newly added `Renderer::clearData()` method allows to clear render data and thus save memory and make sure outdated tiles are not shown. It clears data more aggressively than `Renderer::reduceMemoryUse()` does, as it clears not only the cache but all orchestration data, including the data used by the currently rendered frame.
 
 - [android] Add jni binding for styleable snapshotter ([#16286](https://github.com/mapbox/mapbox-gl-native/pull/16286))
 
@@ -225,7 +225,7 @@
 
 - [android] Update toGeoJSON in android_conversion.hpp ([#16243](https://github.com/mapbox/mapbox-gl-native/pull/16243))
 
-  Before this chage, `toGeoJSON` method in `android_conversion.hpp` could not convert an Object (Map in android) to GeoJSON object.
+  Before this change, `toGeoJSON` method in `android_conversion.hpp` could not convert an Object (Map in android) to GeoJSON object.
 
   But `within` expression needs to accept an Object and then convert it to the GeoJSON object, now `toGeoJSON` method can convert both string and Object to GeoJSON.
 
@@ -289,7 +289,7 @@
 
 - [offline] Offline tool does not hang on 404 error ([#16240](https://github.com/mapbox/mapbox-gl-native/pull/16240))
 
-  The missing resource gets skipped and teh offline region download continues.
+  The missing resource gets skipped and the offline region download continues.
 
 ##### ⚠️  Breaking changes
 
@@ -300,7 +300,7 @@
   Breaking code example:
   `auto fs = FileSourceManager::getFileSource(); fs->..`
 
-  Posible fix:
+  Possible fix:
   `std::shared_ptr<FileSource> fs = `;
 
 - The `mbgl::OnlineFileSource` class cannot be used directly ([#16238](https://github.com/mapbox/mapbox-gl-native/pull/16238))
@@ -341,7 +341,7 @@
 
   The new `Source::setPrefetchZoomDelta(optional<uint8_t>)` method allows overriding default tile prefetch setting that is defined by the Map instance.
 
-- [core] Add support for `within expression`. Implement the use of `within expression` with paint propery and filter expression. ([#16157](https://github.com/mapbox/mapbox-gl-native/pull/16157))
+- [core] Add support for `within expression`. Implement the use of `within expression` with paint property and filter expression. ([#16157](https://github.com/mapbox/mapbox-gl-native/pull/16157))
 
   The `within expression` enables checking whether a feature is inside a pre-defined geometry set/boundary or not. This `within expression` returns a boolean value, `true` indicates that the feature being evaluated is inside the geometry set. The returned value can be then consumed as input by another expression or used directly by a paint/layer property.
 
@@ -361,7 +361,7 @@
 
 - [core] Don't provide multiple responses with the same data for 304 replies ([#16200](https://github.com/mapbox/mapbox-gl-native/pull/16200))
 
-  In cases when cached resource is useable, yet don't have an expiration timestamp, we provided data to the requester from the cache and the same data was returned once 304 response was received from the network.
+  In cases when cached resource is usable, yet don't have an expiration timestamp, we provided data to the requester from the cache and the same data was returned once 304 response was received from the network.
 
 - [core] Fix potential visual artifact for line-dasharray ([#16202](https://github.com/mapbox/mapbox-gl-native/pull/16202))
 
@@ -468,7 +468,7 @@
 
 - [core] Retain thread pool in GeoJSONSource ([#15992](https://github.com/mapbox/mapbox-gl-native/pull/15992))
 
-  Otherwise, the construction of the `Immutable<Source::Impl>` in background thread might never yeld.
+  Otherwise, the construction of the `Immutable<Source::Impl>` in background thread might never yield.
 
 - [core] Fix supercluster lambdas capturing ([#15989](https://github.com/mapbox/mapbox-gl-native/pull/15989))
 

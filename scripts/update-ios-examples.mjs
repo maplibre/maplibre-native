@@ -124,7 +124,7 @@ async function updateDocumentation(documentationPath, examples) {
   }
 
   if (status.tag === 'find-codeblock') {
-    throw Error(`Ended evalution while looking for codeblock with id '${status.id}'`);
+    throw Error(`Ended evaluation while looking for codeblock with id '${status.id}'`);
   }
 
   if (status.tag === 'skip-to-codeblock-end') {

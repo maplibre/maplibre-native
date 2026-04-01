@@ -42,7 +42,7 @@ std::string toString(const CanonicalTileID&);
 } // namespace util
 
 // Has integer z/x/y coordinates
-// overscaledZ describes the zoom level this tile is intented to represent, e.g.
+// overscaledZ describes the zoom level this tile is intended to represent, e.g.
 // when parsing data z is never larger than the source's maxzoom z/x/y describe
 // the
 class OverscaledTileID {
