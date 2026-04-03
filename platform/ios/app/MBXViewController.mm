@@ -995,7 +995,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 };
 
 - (void)addTestShapes:(NSUInteger)featuresCount {
-  for (int featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
+  for (NSUInteger featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
     double deltaLongitude = featureIndex * 0.01;
     double deltaLatitude = -featureIndex * 0.01;
 

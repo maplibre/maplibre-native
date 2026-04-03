@@ -1,5 +1,18 @@
 # Changelog MapLibre Native for Android
 
+## 13.0.2
+
+### ✨ Features and improvements
+
+- core: Skip empty dynamic texture submissions ([#4177](https://github.com/maplibre/maplibre-native/pull/4177)).
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)).
+- core: Use interleaved buffer for paint property binders ([#4124](https://github.com/maplibre/maplibre-native/pull/4124)).
+
+### 🐞 Bug fixes
+
+- core: Fix vulkan surface rotation ([#4182](https://github.com/maplibre/maplibre-native/pull/4182)).
+- core: Fix crash during exception stack unwind ([#4188](https://github.com/maplibre/maplibre-native/pull/4188)).
+
 ## 13.0.1
 
 ### 🐞 Bug fixes
