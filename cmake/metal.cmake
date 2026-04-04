@@ -92,6 +92,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/terrain.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
 )

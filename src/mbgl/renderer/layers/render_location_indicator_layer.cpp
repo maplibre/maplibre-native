@@ -1070,7 +1070,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/4, getID())) {
+        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/4, getID(), false)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;

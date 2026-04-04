@@ -16,8 +16,11 @@
 namespace mbgl {
 namespace mtl {
 
-TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
+TileLayerGroup::TileLayerGroup(int32_t layerIndex_,
+                               std::size_t initialCapacity,
+                               std::string name_,
+                               bool renderToTerrain_)
+    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled || !getDrawableCount()) {
