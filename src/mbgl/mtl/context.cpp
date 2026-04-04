@@ -218,12 +218,12 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain) {
+    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain) {
+    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name, renderToTerrain);
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
