@@ -892,8 +892,10 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
   }
 
   // Create the snapshotter
-  auto localFontFamilyName =
-      config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;
+  std::optional<std::string> localFontFamilyName =
+      config.localFontFamilyName
+          ? std::optional<std::string>(std::string(config.localFontFamilyName.UTF8String))
+          : std::nullopt;
   _delegateHost = std::make_unique<MLNMapSnapshotterDelegateHost>(self);
   _mbglMapSnapshotter = std::make_unique<mbgl::MapSnapshotter>(
       size, pixelRatio, resourceOptions, clientOptions, *_delegateHost, localFontFamilyName);
