@@ -8,6 +8,12 @@
 
 #include <cassert>
 
+// FIXME: https://github.com/maplibre/maplibre-native/issues/4206
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wthread-safety-analysis"
+#endif
+
 namespace mbgl {
 
 inline std::exception_ptr getCantLoadTileError() {
@@ -214,5 +220,8 @@ void TileLoader<T>::loadFromNetwork() {
         } while (!shared_->aborted);
     });
 }
-
 } // namespace mbgl
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
