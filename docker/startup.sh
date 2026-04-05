@@ -13,6 +13,9 @@ fi
 
 export PATH="$PATH:~/.local/bin/"
 
+# Allow GPG to prompt for passwords in the current terminal (e.g. when using `pass` over SSH)
+export GPG_TTY=$(tty)
+
 
 # Work in progress:  install and configure Swift and pre-commit
 # Detect if current CPU is x64 or ARM64 and download the appropriate binary
