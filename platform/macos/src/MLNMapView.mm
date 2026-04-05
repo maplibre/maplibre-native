@@ -317,8 +317,10 @@ public:
 
   MLNRendererConfiguration *config = [MLNRendererConfiguration currentConfiguration];
 
-  auto localFontFamilyName =
-      config.localFontFamilyName ? std::string(config.localFontFamilyName.UTF8String) : nullptr;
+  std::optional<std::string> localFontFamilyName =
+      config.localFontFamilyName
+          ? std::optional<std::string>(std::string(config.localFontFamilyName.UTF8String))
+          : std::nullopt;
   auto renderer = std::make_unique<mbgl::Renderer>(_mbglView->getRendererBackend(),
                                                    config.scaleFactor, localFontFamilyName);
   BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
