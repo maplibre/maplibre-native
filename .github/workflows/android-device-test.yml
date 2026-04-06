@@ -128,7 +128,7 @@ jobs:
         run:
           echo "run_device_test=true" >> "$GITHUB_ENV"
 
-      - uses: LouisBrunner/checks-action@dfcbcf801bff1ea7f1414824fc28f2cd697b35da # v3.0.0
+      - uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -211,7 +211,7 @@ jobs:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@dfcbcf801bff1ea7f1414824fc28f2cd697b35da # v3.0.0
+      - uses: LouisBrunner/checks-action@937cbbcde3259005b50746dc91cde29098aac2ff # v3.1.0
         if: always()
         with:
           token: ${{ steps.generate_token_2.outputs.token }}
