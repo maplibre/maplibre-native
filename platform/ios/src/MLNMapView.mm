@@ -1800,8 +1800,9 @@ public:
 
   UIApplication *application = [UIApplication sharedApplication];
 
-  if (window && [application.delegate respondsToSelector:@selector
-                                      (application:supportedInterfaceOrientationsForWindow:)]) {
+  if (window &&
+      [application.delegate
+          respondsToSelector:@selector(application:supportedInterfaceOrientationsForWindow:)]) {
     self.applicationSupportedInterfaceOrientations = [application.delegate application:application
                                                supportedInterfaceOrientationsForWindow:window];
     return;
@@ -2166,14 +2167,14 @@ public:
 - (BOOL)_shouldChangeFromCamera:(nonnull MLNMapCamera *)oldCamera
                        toCamera:(nonnull MLNMapCamera *)newCamera {
   // Check delegates first
-  if ([self.delegate respondsToSelector:@selector(mapView:
-                                            shouldChangeFromCamera:toCamera:reason:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(mapView:shouldChangeFromCamera:toCamera:reason:)]) {
     return [self.delegate mapView:self
            shouldChangeFromCamera:oldCamera
                          toCamera:newCamera
                            reason:self.cameraChangeReasonBitmask];
-  } else if ([self.delegate respondsToSelector:@selector(mapView:
-                                                   shouldChangeFromCamera:toCamera:)]) {
+  } else if ([self.delegate
+                 respondsToSelector:@selector(mapView:shouldChangeFromCamera:toCamera:)]) {
     return [self.delegate mapView:self shouldChangeFromCamera:oldCamera toCamera:newCamera];
   } else {
     return YES;
@@ -2780,8 +2781,8 @@ public:
 }
 
 - (void)handleCalloutAccessoryTapGesture:(UITapGestureRecognizer *)tap {
-  if ([self.delegate respondsToSelector:@selector(mapView:
-                                               annotation:calloutAccessoryControlTapped:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(mapView:annotation:calloutAccessoryControlTapped:)]) {
     MLNAssert([tap.view isKindOfClass:[UIControl class]], @"Tapped view %@ is not a UIControl",
               tap.view);
     id<MLNAnnotation> selectedAnnotation = self.selectedAnnotation;
@@ -5530,8 +5531,8 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     // consult delegate for left and/or right accessory views
-    if ([self.delegate respondsToSelector:@selector(mapView:
-                                              leftCalloutAccessoryViewForAnnotation:)]) {
+    if ([self.delegate
+            respondsToSelector:@selector(mapView:leftCalloutAccessoryViewForAnnotation:)]) {
       calloutView.leftAccessoryView = [self.delegate mapView:self
                        leftCalloutAccessoryViewForAnnotation:annotation];
 
@@ -5544,8 +5545,8 @@ static void *windowScreenContext = &windowScreenContext;
       }
     }
 
-    if ([self.delegate respondsToSelector:@selector(mapView:
-                                              rightCalloutAccessoryViewForAnnotation:)]) {
+    if ([self.delegate
+            respondsToSelector:@selector(mapView:rightCalloutAccessoryViewForAnnotation:)]) {
       calloutView.rightAccessoryView = [self.delegate mapView:self
                        rightCalloutAccessoryViewForAnnotation:annotation];
 
@@ -5640,8 +5641,8 @@ static void *windowScreenContext = &windowScreenContext;
     [self.delegate mapView:self didSelectAnnotation:annotation];
   }
 
-  if (annotationView && [self.delegate respondsToSelector:@selector(mapView:
-                                                              didSelectAnnotationView:)]) {
+  if (annotationView &&
+      [self.delegate respondsToSelector:@selector(mapView:didSelectAnnotationView:)]) {
     [self.delegate mapView:self didSelectAnnotationView:annotationView];
   }
 
@@ -5787,8 +5788,8 @@ static void *windowScreenContext = &windowScreenContext;
       [self.delegate mapView:self didDeselectAnnotation:annotation];
     }
 
-    if (annotationView && [self.delegate respondsToSelector:@selector(mapView:
-                                                                didDeselectAnnotationView:)]) {
+    if (annotationView &&
+        [self.delegate respondsToSelector:@selector(mapView:didDeselectAnnotationView:)]) {
       [self.delegate mapView:self didDeselectAnnotationView:annotationView];
     }
 
@@ -6551,8 +6552,8 @@ static void *windowScreenContext = &windowScreenContext;
   }
 
   if (@available(iOS 14, *)) {
-    if ([self.delegate respondsToSelector:@selector(mapView:
-                                              didChangeLocationManagerAuthorization:)]) {
+    if ([self.delegate
+            respondsToSelector:@selector(mapView:didChangeLocationManagerAuthorization:)]) {
       [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
     }
   }
@@ -6763,8 +6764,8 @@ static void *windowScreenContext = &windowScreenContext;
   }
 
   if (![self isSuppressingChangeDelimiters]) {
-    if ([self.delegate respondsToSelector:@selector(mapView:
-                                              regionWillChangeWithReason:animated:)]) {
+    if ([self.delegate
+            respondsToSelector:@selector(mapView:regionWillChangeWithReason:animated:)]) {
       [self.delegate mapView:self
           regionWillChangeWithReason:self.cameraChangeReasonBitmask
                             animated:animated];
@@ -6798,8 +6799,8 @@ static void *windowScreenContext = &windowScreenContext;
   [self updateScaleBar];
 
   if (![self isSuppressingChangeDelimiters]) {
-    BOOL respondsToSelector = [self.delegate respondsToSelector:@selector(mapView:
-                                                                    regionDidChangeAnimated:)];
+    BOOL respondsToSelector =
+        [self.delegate respondsToSelector:@selector(mapView:regionDidChangeAnimated:)];
     BOOL respondsToSelectorWithReason =
         [self.delegate respondsToSelector:@selector(mapView:regionDidChangeWithReason:animated:)];
 
@@ -6888,8 +6889,9 @@ static void *windowScreenContext = &windowScreenContext;
     [self.style didChangeValueForKey:@"layers"];
   }
 
-  if ([self.delegate respondsToSelector:@selector
-                     (mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(
+                                 mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)]) {
     if (!_renderingStats) {
       _renderingStats = [[MLNRenderingStats alloc] init];
     }
@@ -6899,15 +6901,14 @@ static void *windowScreenContext = &windowScreenContext;
                                     fullyRendered:fullyRendered
                                    renderingStats:_renderingStats];
   } else if ([self.delegate
-                 respondsToSelector:@selector
-                 (mapViewDidFinishRenderingFrame:
-                                   fullyRendered:frameEncodingTime:frameRenderingTime:)]) {
+                 respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:
+                                              frameEncodingTime:frameRenderingTime:)]) {
     [self.delegate mapViewDidFinishRenderingFrame:self
                                     fullyRendered:fullyRendered
                                 frameEncodingTime:stats.encodingTime
                                frameRenderingTime:stats.renderingTime];
-  } else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:
-                                                                          fullyRendered:)]) {
+  } else if ([self.delegate
+                 respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)]) {
     [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered];
   }
 }
@@ -7060,8 +7061,9 @@ static void *windowScreenContext = &windowScreenContext;
     return;
   }
 
-  if ([self.delegate respondsToSelector:@selector
-                     (mapView:tileDidTriggerAction:x:y:z:wrap:overscaledZ:sourceID:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(
+                                 mapView:tileDidTriggerAction:x:y:z:wrap:overscaledZ:sourceID:)]) {
     [self.delegate mapView:self
         tileDidTriggerAction:operation
                            x:x
