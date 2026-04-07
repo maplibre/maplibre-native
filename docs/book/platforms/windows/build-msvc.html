@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-71783a31.js";
+            window.path_to_searchindex_js = "../../searchindex-1e55480c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-d0bf464d.js"></script>
@@ -238,7 +238,7 @@ cd maplibre-native
 <p>Just add the <code>-G "Microsoft Visual Studio 17 2022"</code> (or the corresponding Visual Studio version you have) option from the configure command:</p>
 <pre><code class="language-cmd">cmake --preset windows-&lt;preset&gt; -G "Microsoft Windows 2022"
 </code></pre>
-<p>Once configure is done, open the file <code>build-windows-&lt;preset&gt;\Mapbox GL Native.sln</code>. Build the target <code>ALL_BUILD</code> to build all targets, or pick a specific target. Don’t forget to pick a build configuration (<code>Release</code>, <code>RelWithDebInfo</code>, <code>MinSizeRel</code> or <code>Debug</code>), otherwise the project will be built with default configuration (<code>Debug</code>).</p>
+<p>Once configure is done, open the file <code>build-windows-&lt;preset&gt;\MapLibre Native.sln</code>. Build the target <code>ALL_BUILD</code> to build all targets, or pick a specific target. Don’t forget to pick a build configuration (<code>Release</code>, <code>RelWithDebInfo</code>, <code>MinSizeRel</code> or <code>Debug</code>), otherwise the project will be built with default configuration (<code>Debug</code>).</p>
 <h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
 <p>If all went well and target <code>mbgl-render</code> or <code>ALL_BUILD</code> was chosen, there should now be a <code>build-windows-&lt;preset&gt;\bin\mbgl-render.exe</code> binary that you can run to generate map tile images. To test that it is working properly, run the following command.</p>
 <pre><code class="language-cmd">.\build-windows-&lt;preset&gt;\bin\mbgl-render.exe --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
