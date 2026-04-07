@@ -1,4 +1,3 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
     "@rules_swift//swift:swift.bzl",
@@ -76,39 +75,6 @@ filegroup(
 filegroup(
     name = "generated_test_srcs",
     srcs = MLN_GENERATED_DARWIN_TEST_CODE,
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "test_ejs_templates",
-    srcs = [
-        "test/MLNDocumentationGuideTests.swift",
-        "test/MLNLightTest.mm.ejs",
-        "test/MLNStyleLayerTests.mm.ejs",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "generator_data",
-    srcs = [
-        "src/MLNLight.h.ejs",
-        "src/MLNLight.mm.ejs",
-        "src/MLNStyleLayer.h.ejs",
-        "src/MLNStyleLayer.mm.ejs",
-        "src/MLNStyleLayer_Private.h.ejs",
-    ],
-)
-
-js_run_binary(
-    name = "generated_code",
-    srcs = [
-        ":generator_data",
-        ":test_ejs_templates",
-    ],
-    outs = MLN_GENERATED_DARWIN_STYLE_SOURCE +
-           MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
-    tool = ":generate-style-code-script",
     visibility = ["//visibility:public"],
 )
 
@@ -325,20 +291,7 @@ exports_files(
     MLN_DARWIN_OBJCPP_HEADERS,
 )
 
-js_binary(
-    name = "generate-style-code-script",
-    data = [
-        "scripts/style-spec-cocoa-conventions-v8.json",
-        "scripts/style-spec-overrides-v8.json",
-        "//:node_modules/csscolorparser",
-        "//:node_modules/lodash",
-        "//:style-code",
-        "//:style-spec",
-    ],
-    entry_point = "scripts/generate-style-code.mjs",
-)
-
-js_library(
+filegroup(
     name = "symbols-to-check",
     srcs = [
         ":darwin_objc_hdrs",

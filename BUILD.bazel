@@ -1,6 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
-load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     "//bazel:core.bzl",
@@ -28,30 +26,21 @@ load(
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
-# Generate code required by the core
-
-js_run_binary(
+# Checked-in generated files required by the core
+filegroup(
     name = "generated_style_code",
-    srcs = glob(
-        ["**/*.ejs"],
-        allow_empty = False,
-    ),
-    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
+    srcs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
            MLN_PRIVATE_GENERATED_STYLE_HEADERS +
            MLN_GENERATED_STYLE_SOURCE,
-    tool = ":generate-style-code-script",
+    visibility = ["//visibility:private"],
 )
 
-js_run_binary(
+filegroup(
     name = "generated_shaders",
-    srcs = ["shaders/manifest.json"] + glob(
-        ["shaders/*.glsl"],
-        allow_empty = False,
-    ),
-    outs = MLN_GENERATED_SHADER_HEADERS +
+    srcs = MLN_GENERATED_SHADER_HEADERS +
            MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_OPENGL_SHADER_HEADERS,
-    tool = ":generate-shader-code-script",
+    visibility = ["//visibility:private"],
 )
 
 # This header only target strips the __generated__ prefix for the compiler
@@ -265,43 +254,6 @@ exports_files(
         "scripts/style-spec-reference/v8.json",
     ],
     visibility = ["//visibility:public"],
-)
-
-npm_link_all_packages(
-    name = "node_modules",
-)
-
-js_binary(
-    name = "generate-style-code-script",
-    data = [
-        ":node_modules/csscolorparser",
-        ":style-code",
-        ":style-spec",
-    ],
-    entry_point = "scripts/generate-style-code.mjs",
-)
-
-js_binary(
-    name = "generate-shader-code-script",
-    entry_point = "shaders/generate_shader_code.mjs",
-)
-
-js_library(
-    name = "style-spec",
-    srcs = ["scripts/style-spec.mjs"],
-    data = glob([
-        "scripts/style-spec-reference/*.json",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
-js_library(
-    name = "style-code",
-    srcs = ["scripts/style-code.mjs"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":node_modules/ejs",
-    ],
 )
 
 cc_library(

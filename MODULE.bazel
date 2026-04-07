@@ -5,44 +5,12 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_apple", version = "4.5.2")
 bazel_dep(name = "rules_swift", version = "3.6.0")
 bazel_dep(name = "rules_xcodeproj", version = "4.0.0")
-bazel_dep(name = "aspect_rules_js", version = "3.0.3")
-bazel_dep(name = "rules_nodejs", version = "6.7.3")
 bazel_dep(name = "libuv", version = "1.48.0.bcr.1")
 bazel_dep(name = "apple_support", version = "2.5.2", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_shell", version = "0.7.1")
 bazel_dep(name = "rules_swift_package_manager", version = "1.14.0")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
-
-node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
-node.toolchain(node_version = "24.13.0")
-use_repo(
-    node,
-    "nodejs",
-    "nodejs_darwin_amd64",
-    "nodejs_darwin_arm64",
-    "nodejs_host",
-    "nodejs_toolchains",
-)
-
-register_toolchains("@nodejs_toolchains//:all")
-
-register_toolchains("//bazel/tools/node:all")
-
-npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
-npm.npm_translate_lock(
-    name = "npm",
-    data = ["package.json"],
-    pnpm_lock = "//:pnpm-lock.yaml",
-    verify_node_modules_ignored = "//:.bazelignore",
-)
-use_repo(npm, "npm")
-
-pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
-
-# Allows developers to use the matching pnpm version, for example:
-# bazel run -- @pnpm --dir /home/runner/work/rules_js/rules_js install
-use_repo(pnpm, "pnpm")
 
 provisioning_profile_repository = use_extension("@rules_apple//apple:apple.bzl", "provisioning_profile_repository_extension")
 provisioning_profile_repository.setup()
