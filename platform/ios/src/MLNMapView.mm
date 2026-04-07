@@ -6365,7 +6365,7 @@ static void *windowScreenContext = &windowScreenContext;
       completionHandler:^{
         MLNMapView *strongSelf = weakSelf;
         if (strongSelf.userTrackingState == MLNUserTrackingStateBegan ||
-            strongSelf.userTrackingState == MLNDistanceThresholdForCameraPause) {
+            strongSelf.userTrackingState == MLNUserTrackingStateBeginSignificantTransition) {
           strongSelf.userTrackingState = MLNUserTrackingStateChanged;
         }
         if (completion) {
