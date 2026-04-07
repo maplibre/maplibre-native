@@ -473,6 +473,12 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(*this, size, type);
 }
 
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const Color& backgroundColor) {
+    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
+}
+
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
                                                                        gfx::TextureChannelDataType type,
                                                                        bool depth,

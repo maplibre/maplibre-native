@@ -81,7 +81,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
         const auto matrix = getTileMatrix(
-            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable, false, false);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, zoom);
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}

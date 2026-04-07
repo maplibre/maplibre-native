@@ -18,6 +18,7 @@ class FileSource;
 namespace style {
 
 class Light;
+class Terrain;
 class Source;
 class Layer;
 
@@ -45,6 +46,12 @@ public:
     const Light* getLight() const;
 
     void setLight(std::unique_ptr<Light>);
+
+    // Terrain
+    Terrain* getTerrain();
+    const Terrain* getTerrain() const;
+
+    void setTerrain(std::unique_ptr<Terrain>);
 
     // Images
     std::optional<Image> getImage(const std::string&) const;

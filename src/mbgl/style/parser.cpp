@@ -5,6 +5,7 @@
 #include <mbgl/style/conversion/source.hpp>
 #include <mbgl/style/conversion/layer.hpp>
 #include <mbgl/style/conversion/light.hpp>
+#include <mbgl/style/conversion/terrain.hpp>
 #include <mbgl/style/conversion/sprite.hpp>
 #include <mbgl/style/conversion/transition_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
@@ -110,6 +111,10 @@ StyleParseResult Parser::parse(const std::string& json) {
 
     if (document.HasMember("light")) {
         parseLight(document["light"]);
+    }
+
+    if (document.HasMember("terrain")) {
+        parseTerrain(document["terrain"]);
     }
 
     if (document.HasMember("sources")) {
@@ -234,6 +239,17 @@ void Parser::parseLight(const JSValue& value) {
     }
 
     light = *converted;
+}
+
+void Parser::parseTerrain(const JSValue& value) {
+    conversion::Error error;
+    std::optional<Terrain> converted = conversion::convert<Terrain>(value, error);
+    if (!converted) {
+        Log::Warning(Event::ParseStyle, error.message);
+        return;
+    }
+
+    terrain = *converted;
 }
 
 void Parser::parseSources(const JSValue& value) {

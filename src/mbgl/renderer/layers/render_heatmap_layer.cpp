@@ -181,7 +181,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         activateRenderTarget(renderTarget, isRenderable, changes);
 
         // Set up tile layer group
-        auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
+        auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID(), true);
         if (!tileLayerGroup) {
             return;
         }
@@ -340,7 +340,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up texture layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
+        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID(), true)) {
             if (textureTweaker) {
                 layerGroup_->addLayerTweaker(textureTweaker);
             }

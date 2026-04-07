@@ -164,7 +164,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -261,7 +261,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             bucket.renderTargetPrepared = true;
             addRenderTarget(renderTarget, changes);
 
-            auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
+            auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID(), false);
             if (!singleTileLayerGroup) {
                 return;
             }

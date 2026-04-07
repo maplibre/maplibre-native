@@ -218,12 +218,18 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
+                                                std::size_t initialCapacity,
+                                                std::string name,
+                                                bool renderToTerrain) {
+    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
+                                        std::size_t initialCapacity,
+                                        std::string name,
+                                        bool renderToTerrain) {
+    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name, renderToTerrain);
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
@@ -236,6 +242,12 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
     return std::make_shared<RenderTarget>(*this, size, type);
+}
+
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const Color& backgroundColor) {
+    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}

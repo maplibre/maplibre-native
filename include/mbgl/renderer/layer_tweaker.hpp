@@ -56,7 +56,8 @@ public:
                               bool nearClipped,
                               bool inViewportPixelUnits,
                               const gfx::Drawable& drawable,
-                              bool aligned = false);
+                              bool aligned = false,
+                              bool renderToTerrain = true);
 
 protected:
     /// Determine whether this tweaker should apply to the given drawable

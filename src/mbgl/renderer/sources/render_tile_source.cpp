@@ -234,7 +234,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             auto inserted = debugLayerGroups.insert(
                 std::make_pair(type,
                                context.createTileLayerGroup(
-                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName))));
+                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName), true)));
             assert(inserted.second);
             it = inserted.first;
         }

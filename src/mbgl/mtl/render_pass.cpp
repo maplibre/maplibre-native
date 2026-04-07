@@ -78,6 +78,8 @@ void RenderPass::resetState() {
         fragmentBinds[i].reset();
         fragmentTextureBindings[i].reset();
         fragmentSamplerStates[i].reset();
+        vertexTextureBindings[i].reset();
+        vertexSamplerStates[i].reset();
     }
 
     currentCullMode = MTL::CullModeNone;
@@ -195,6 +197,26 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
         if (fragmentSamplerStates[location] != state) {
             fragmentSamplerStates[location] = state;
             encoder->setFragmentSamplerState(state.get(), location);
+        }
+    }
+}
+
+void RenderPass::setVertexTexture(const MTLTexturePtr& texture, int32_t location) {
+    assert(0 <= location && location < maxBinds);
+    if (0 <= location && location < maxBinds) {
+        if (vertexTextureBindings[location] != texture) {
+            vertexTextureBindings[location] = texture;
+            encoder->setVertexTexture(texture.get(), location);
+        }
+    }
+}
+
+void RenderPass::setVertexSamplerState(const MTLSamplerStatePtr& state, int32_t location) {
+    assert(0 <= location && location < maxBinds);
+    if (0 <= location && location < maxBinds) {
+        if (vertexSamplerStates[location] != state) {
+            vertexSamplerStates[location] = state;
+            encoder->setVertexSamplerState(state.get(), location);
         }
     }
 }

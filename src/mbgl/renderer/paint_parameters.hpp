@@ -3,6 +3,7 @@
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_light.hpp>
 #include <mbgl/renderer/render_source.hpp>
+#include <mbgl/renderer/texture_pool.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
@@ -58,6 +59,7 @@ public:
                     RenderStaticData&,
                     LineAtlas&,
                     PatternAtlas&,
+                    TexturePool&,
                     uint64_t frameCount,
                     double tileLodMinRadius,
                     double tileLodScale,
@@ -78,6 +80,7 @@ public:
     RenderStaticData& staticData;
     LineAtlas& lineAtlas;
     PatternAtlas& patternAtlas;
+    TexturePool& texturePool;
 
     RenderPass pass = RenderPass::Opaque;
     MapMode mapMode;

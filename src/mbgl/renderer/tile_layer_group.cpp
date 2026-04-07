@@ -8,13 +8,17 @@
 
 namespace mbgl {
 
-LayerGroupBase::LayerGroupBase(int32_t layerIndex_, std::string name_, Type type_)
+LayerGroupBase::LayerGroupBase(int32_t layerIndex_, std::string name_, Type type_, bool renderToTerrain_)
     : type(type_),
       layerIndex(layerIndex_),
-      name(std::move(name_)) {}
+      name(std::move(name_)),
+      renderToTerrain(renderToTerrain_) {}
 
-TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::TileLayerGroup) {
+TileLayerGroup::TileLayerGroup(int32_t layerIndex_,
+                               std::size_t initialCapacity,
+                               std::string name_,
+                               bool renderToTerrain_)
+    : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::TileLayerGroup, renderToTerrain_) {
     drawablesByTile.reserve(initialCapacity);
 }
 

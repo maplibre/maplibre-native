@@ -49,7 +49,10 @@ public:
     };
 
 protected:
-    LayerGroupBase(int32_t layerIndex, std::string name = std::string(), Type type = Type::Invalid);
+    LayerGroupBase(int32_t layerIndex,
+                   std::string name = std::string(),
+                   Type type = Type::Invalid,
+                   bool renderToTerrain_ = false);
 
 public:
     LayerGroupBase(const LayerGroupBase&) = delete;
@@ -107,12 +110,15 @@ public:
     /// Get the mutable uniform buffer array attached to this layer group
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
+    bool shouldRenderToTerrain() { return renderToTerrain; }
+
 protected:
     const Type type;
     bool enabled = true;
     int32_t layerIndex;
     std::vector<LayerTweakerWeakPtr> layerTweakers;
     std::string name;
+    bool renderToTerrain;
 };
 
 /**
@@ -120,7 +126,7 @@ protected:
  */
 class TileLayerGroup : public LayerGroupBase {
 public:
-    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
     ~TileLayerGroup() override;
 
     std::size_t getDrawableCount() const override;
@@ -202,7 +208,7 @@ private:
  */
 class LayerGroup : public LayerGroupBase {
 public:
-    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
     ~LayerGroup() override;
 
     std::size_t getDrawableCount() const override;

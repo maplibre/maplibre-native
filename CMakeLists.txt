@@ -184,6 +184,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_terrain.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/texture_pool.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.cpp
@@ -208,6 +210,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/terrain_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
@@ -311,6 +314,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source_options.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/terrain.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/assertion.hpp
@@ -386,6 +390,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/style_property.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/transition_options.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/terrain.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/terrain_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/undefined.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/variable_anchor_offset_collection.hpp
@@ -673,6 +679,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/resource_transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/storage/response.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/collection.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/terrain.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/terrain_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/color_ramp_property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/constant.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/sprite.cpp
@@ -693,6 +701,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/terrain.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/tileset.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/transition_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.cpp

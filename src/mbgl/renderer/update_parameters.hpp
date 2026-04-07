@@ -3,6 +3,7 @@
 #include <mbgl/map/mode.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/style/light.hpp>
+#include <mbgl/style/terrain.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/layer.hpp>
@@ -34,6 +35,7 @@ public:
     const bool spriteLoaded;
     const style::TransitionOptions transitionOptions;
     const Immutable<style::Light::Impl> light;
+    const std::optional<Immutable<style::Terrain::Impl>> terrain;
     const Immutable<std::vector<Immutable<style::Image::Impl>>> images;
     const Immutable<std::vector<Immutable<style::Source::Impl>>> sources;
     const Immutable<std::vector<Immutable<style::Layer::Impl>>> layers;

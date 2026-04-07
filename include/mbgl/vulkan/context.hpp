@@ -97,6 +97,10 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
+    RenderTargetPtr createRenderTarget(const Size size,
+                                       const gfx::TextureChannelDataType type,
+                                       const Color& backgroundColor) override;
+
     void resetState(gfx::DepthMode, gfx::ColorMode) override {}
 
     bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,

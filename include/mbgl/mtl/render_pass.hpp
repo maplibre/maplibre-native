@@ -41,6 +41,12 @@ public:
     /// Set the sampler for a texture binding
     void setFragmentSamplerState(const MTLSamplerStatePtr&, int32_t location);
 
+    /// Bind a texture to the vertex location
+    void setVertexTexture(const MTLTexturePtr&, int32_t location);
+
+    /// Set the sampler for a vertex texture binding
+    void setVertexSamplerState(const MTLSamplerStatePtr&, int32_t location);
+
     /// Set the render pipeline state
     void setRenderPipelineState(const MTLRenderPipelineStatePtr&);
 
@@ -90,6 +96,9 @@ private:
 
     std::array<MTLTexturePtr, maxBinds> fragmentTextureBindings;
     std::array<MTLSamplerStatePtr, maxBinds> fragmentSamplerStates;
+
+    std::array<MTLTexturePtr, maxBinds> vertexTextureBindings;
+    std::array<MTLSamplerStatePtr, maxBinds> vertexSamplerStates;
 
     MTL::CullMode currentCullMode = MTL::CullModeNone;
     MTL::Winding currentWinding = MTL::WindingClockwise;

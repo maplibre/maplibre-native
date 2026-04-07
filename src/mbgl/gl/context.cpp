@@ -563,16 +563,22 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
     return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, {}));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
+                                                std::size_t initialCapacity,
+                                                std::string name,
+                                                bool renderToTerrain) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
+                                        std::size_t initialCapacity,
+                                        std::string name,
+                                        bool renderToTerrain) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
@@ -591,6 +597,14 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     MLN_TRACE_FUNC();
 
     return std::make_shared<RenderTarget>(*this, size, type);
+}
+
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const Color& backgroundColor) {
+    MLN_TRACE_FUNC();
+
+    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {

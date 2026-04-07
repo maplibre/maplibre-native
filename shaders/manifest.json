@@ -222,6 +222,13 @@
         "uses_ubos": true
     },
     {
+        "name": "TerrainShader",
+        "header": "terrain",
+        "glsl_vert": "terrain.vertex.glsl",
+        "glsl_frag": "terrain.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "WideVectorShader",
         "header": "wide_vector",
         "glsl_vert": "_empty.glsl",

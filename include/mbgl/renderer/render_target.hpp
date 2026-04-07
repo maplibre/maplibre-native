@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/size.hpp>
+#include <mbgl/util/color.hpp>
 
 #include <functional>
 #include <map>
@@ -29,6 +30,10 @@ using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 class RenderTarget {
 public:
     RenderTarget(gfx::Context& context, const Size size, const gfx::TextureChannelDataType type);
+    RenderTarget(gfx::Context& context,
+                 const Size size,
+                 const gfx::TextureChannelDataType type,
+                 const Color& backgroundColor);
     ~RenderTarget();
 
     /// Get the render target texture
@@ -83,6 +88,7 @@ protected:
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
+    Color backgroundColor;
 };
 
 } // namespace mbgl

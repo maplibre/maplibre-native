@@ -84,7 +84,8 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
+        if (auto layerGroup_ = context.createLayerGroup(
+                layerIndex, /*initialCapacity=*/1, getID(), true)) { // TODO: make render to terrain optional?
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

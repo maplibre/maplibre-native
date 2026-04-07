@@ -7,6 +7,7 @@
 #include <mbgl/style/source_observer.hpp>
 #include <mbgl/style/layer_observer.hpp>
 #include <mbgl/style/light_observer.hpp>
+#include <mbgl/style/terrain_observer.hpp>
 #include <mbgl/sprite/sprite_loader_observer.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/source.hpp>
@@ -37,6 +38,7 @@ class Style::Impl : public SpriteLoaderObserver,
                     public SourceObserver,
                     public LayerObserver,
                     public LightObserver,
+                    public TerrainObserver,
                     public util::noncopyable {
 public:
     Impl(std::shared_ptr<FileSource>, float pixelRatio, const TaggedScheduler& threadPool_);
@@ -85,6 +87,9 @@ public:
     void setLight(std::unique_ptr<Light>);
     Light* getLight() const;
 
+    void setTerrain(std::unique_ptr<Terrain>);
+    Terrain* getTerrain() const;
+
     std::optional<Immutable<style::Image::Impl>> getImage(const std::string&) const;
     void addImage(std::unique_ptr<style::Image>);
     void removeImage(const std::string&);
@@ -121,6 +126,7 @@ private:
     Collection<Layer> layers;
     TransitionOptions transitionOptions;
     std::unique_ptr<Light> light;
+    std::unique_ptr<Terrain> terrain;
     std::unordered_map<std::string, bool> spritesLoadingStatus;
 
     // Defaults
@@ -143,6 +149,9 @@ private:
 
     // LightObserver implementation.
     void onLightChanged(const Light&) override;
+
+    // TerrainObserver implementation.
+    void onTerrainChanged(const Terrain&) override;
 
     Observer nullObserver;
     Observer* observer = &nullObserver;

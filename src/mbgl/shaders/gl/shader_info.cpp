@@ -534,5 +534,23 @@ const std::vector<TextureInfo> SymbolTextAndIconShaderInfo::textures = {
     TextureInfo{"u_texture_icon", idSymbolImageIconTexture},
 };
 
+// Terrain
+using TerrainShaderInfo = ShaderInfo<BuiltIn::TerrainShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> TerrainShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"TerrainDrawableUBO", idTerrainDrawableUBO},
+    UniformBlockInfo{"TerrainTilePropsUBO", idTerrainTilePropsUBO},
+    UniformBlockInfo{"TerrainEvaluatedPropsUBO", idTerrainEvaluatedPropsUBO},
+};
+const std::vector<AttributeInfo> TerrainShaderInfo::attributes = {
+    AttributeInfo{"a_pos", idTerrainPosVertexAttribute},
+    AttributeInfo{"a_texture_pos", idTerrainTexturePosVertexAttribute},
+};
+const std::vector<TextureInfo> TerrainShaderInfo::textures = {
+    TextureInfo{"u_dem", idTerrainDEMTexture},
+    TextureInfo{"u_map", idTerrainMapTexture},
+};
+
 } // namespace shaders
 } // namespace mbgl

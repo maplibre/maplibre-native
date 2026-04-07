@@ -5,6 +5,7 @@
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
+#include <mbgl/renderer/texture_pool.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/layer.hpp>
@@ -26,6 +27,7 @@ namespace mbgl {
 class ChangeRequest;
 class RendererObserver;
 class RenderSource;
+class RenderTerrain;
 class UpdateParameters;
 class RenderStaticData;
 class RenderedQueryOptions;
@@ -130,12 +132,14 @@ public:
                       gfx::Context&,
                       const TransformState&,
                       const std::shared_ptr<UpdateParameters>&,
-                      const RenderTree&);
+                      const RenderTree&,
+                      const TexturePool& texturePool);
 
     void processChanges();
 
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
+    void addRenderTargets(const TexturePool& texturePool);
 
     template <typename Func /* void(RenderTarget&) */>
     void visitRenderTargets(Func f) {
@@ -157,11 +161,13 @@ public:
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
+    RenderSource* getRenderSource(const std::string& id) const;
+
+    RenderTerrain* getRenderTerrain() const { return renderTerrain.get(); }
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
-
-    RenderSource* getRenderSource(const std::string& id) const;
 
     RenderLayer* getRenderLayer(const std::string& id);
     const RenderLayer* getRenderLayer(const std::string& id) const;
@@ -208,6 +214,7 @@ private:
     std::unordered_map<std::string, std::unique_ptr<RenderSource>> renderSources;
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
+    std::unique_ptr<RenderTerrain> renderTerrain;
 
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;

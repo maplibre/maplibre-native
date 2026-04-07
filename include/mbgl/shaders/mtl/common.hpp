@@ -61,6 +61,21 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
+// Decode elevation from DEM texture (Mapbox Terrain RGB format)
+// Formula: height = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)
+inline float decode_elevation(float4 rgba) {
+    return -10000.0 + ((rgba.r * 255.0 * 256.0 * 256.0 + rgba.g * 255.0 * 256.0 + rgba.b * 255.0) * 0.1);
+}
+
+// Get elevation from DEM texture at a specific UV coordinate
+// Uses bilinear sampling for smooth elevation values
+inline float get_elevation(texture2d<float, access::sample> demTexture,
+                           sampler demSampler,
+                           float2 uv) {
+    float4 demSample = demTexture.sample(demSampler, uv);
+    return decode_elevation(demSample);
+}
+
 template<class ForwardIt, class T>
 ForwardIt upper_bound(ForwardIt first, ForwardIt last, thread const T& value)
 {

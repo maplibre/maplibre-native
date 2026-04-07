@@ -7,7 +7,9 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
@@ -218,6 +220,16 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         renderLight.evaluate(evaluationParameters);
     }
 
+    // Update terrain.
+    if (updateParameters->terrain) {
+        if (!renderTerrain || renderTerrain->getImpl() != *updateParameters->terrain) {
+            renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
+        }
+        renderTerrain->update(*updateParameters);
+    } else if (renderTerrain) {
+        renderTerrain.reset();
+    }
+
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
@@ -413,6 +425,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 updateList[index] = true;
             }
         }
+        // Mark DEM source as needed for terrain rendering
+        if (renderTerrain && renderTerrain->isEnabled() && sourceImpl->id == renderTerrain->getSourceID()) {
+            sourceNeedsRendering = true;
+            Log::Info(Event::Render, "Marking DEM source '" + sourceImpl->id + "' for terrain rendering");
+        }
+
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
@@ -424,6 +442,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             }
         }
         addChanges(changes);
+    }
+
+    // Enable 3D mode if terrain is present
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        renderTreeParameters->has3D = true;
     }
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
@@ -950,7 +973,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
-                                      const RenderTree& renderTree) {
+                                      const RenderTree& renderTree,
+                                      const TexturePool& texturePool) {
     MLN_TRACE_FUNC();
 
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
@@ -979,6 +1003,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 #endif
         renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
+
+    // Update terrain if enabled
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        renderTerrain->update(*this, shaders, context, texturePool, state, updateParameters, renderTree, changes);
+    }
+
     addChanges(changes);
 }
 
@@ -1007,6 +1037,15 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
     } else {
         return false;
     }
+}
+
+void RenderOrchestrator::addRenderTargets(const TexturePool& texturePool) {
+    texturePool.visitRenderTargets([&](const RenderTargetPtr& renderTarget) {
+        auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+        if (it == renderTargets.end()) {
+            renderTargets.emplace_back(renderTarget);
+        }
+    });
 }
 
 void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {

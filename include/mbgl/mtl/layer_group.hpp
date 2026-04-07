@@ -16,7 +16,7 @@ class RenderPass;
  */
 class LayerGroup : public mbgl::LayerGroup {
 public:
-    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
     ~LayerGroup() override {}
 
     void upload(gfx::UploadPass&) override;

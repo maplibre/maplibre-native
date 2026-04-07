@@ -138,10 +138,14 @@ public:
     /// Create a tile layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
                                                    std::size_t initialCapacity,
-                                                   std::string name) = 0;
+                                                   std::string name,
+                                                   bool renderToTerrain) = 0;
 
     /// Create a layer group implementation
-    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) = 0;
+    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex,
+                                           std::size_t initialCapacity,
+                                           std::string name,
+                                           bool renderToTerrain) = 0;
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
@@ -151,6 +155,9 @@ public:
 
     /// Create a render target
     virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
+    virtual RenderTargetPtr createRenderTarget(const Size size,
+                                               const TextureChannelDataType type,
+                                               const Color& backgroundColor) = 0;
 
     /// Resets the context state to defaults
     virtual void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) = 0;

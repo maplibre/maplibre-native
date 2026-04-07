@@ -21,7 +21,7 @@ class RenderPass;
  */
 class TileLayerGroup : public mbgl::TileLayerGroup {
 public:
-    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name, bool renderToTerrain);
     ~TileLayerGroup() override {}
 
     void upload(gfx::UploadPass&) override;

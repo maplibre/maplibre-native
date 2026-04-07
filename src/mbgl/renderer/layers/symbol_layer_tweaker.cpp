@@ -134,7 +134,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             constexpr bool inViewportPixelUnits = false;
             const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                        : evaluated.get<style::IconTranslateAnchor>();
-            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+            matrix = getTileMatrix(
+                tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable, false, false);
         }
 
         // from symbol_program, makeValues

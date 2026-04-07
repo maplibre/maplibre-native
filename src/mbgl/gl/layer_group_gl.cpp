@@ -16,8 +16,11 @@ namespace gl {
 
 using namespace platform;
 
-TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
+TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_,
+                                   std::size_t initialCapacity,
+                                   std::string name_,
+                                   bool renderToTerrain_)
+    : TileLayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
 
 void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
     MLN_TRACE_FUNC();
@@ -139,8 +142,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     }
 }
 
-LayerGroupGL::LayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : LayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
+LayerGroupGL::LayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity, std::string name_, bool renderToTerrain_)
+    : LayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
 
 void LayerGroupGL::upload(gfx::UploadPass& uploadPass) {
     if (!enabled) {

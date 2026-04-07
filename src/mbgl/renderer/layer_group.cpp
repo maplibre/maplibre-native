@@ -26,8 +26,8 @@ void LayerGroupBase::runTweakers(const RenderTree&, PaintParameters& parameters)
     }
 }
 
-LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t /*initialCapacity*/, std::string name_)
-    : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::LayerGroup) {}
+LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t /*initialCapacity*/, std::string name_, bool renderToTerrain_)
+    : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::LayerGroup, renderToTerrain_) {}
 
 LayerGroup::~LayerGroup() = default;
 

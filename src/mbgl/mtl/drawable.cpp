@@ -424,10 +424,29 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
 }
 
 void Drawable::bindTextures(RenderPass& renderPass) const noexcept {
+    const bool isTerrain = (getName() == "terrain-tile");
+
     for (size_t id = 0; id < textures.size(); id++) {
         if (const auto& texture = textures[id]) {
             if (const auto& location = shader->getSamplerLocation(id)) {
+                if (isTerrain) {
+                    Log::Info(Event::Render,
+                              "TERRAIN: Binding texture id=" + std::to_string(id) +
+                                  " to location=" + std::to_string(*location));
+
+                    // Check if texture has a Metal texture
+                    auto& mtlTexture = static_cast<mtl::Texture2D&>(*texture);
+                    if (mtlTexture.getMetalTexture()) {
+                        Log::Info(Event::Render, "TERRAIN: Metal texture is VALID");
+                    } else {
+                        Log::Error(Event::Render, "TERRAIN: Metal texture is NULL!");
+                    }
+                }
                 static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
+            } else {
+                if (isTerrain) {
+                    Log::Warning(Event::Render, "NO sampler location for texture id=" + std::to_string(id));
+                }
             }
         }
     }
@@ -444,10 +463,36 @@ void Drawable::unbindTextures(RenderPass& renderPass) const noexcept {
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {
+    const bool isTerrain = (getName() == "terrain-tile");
+    if (isTerrain) {
+        Log::Info(Event::Render, "Drawable::uploadTextures START");
+    }
+
+    size_t idx = 0;
     for (const auto& texture : textures) {
-        if (texture) {
-            texture->upload();
+        if (isTerrain) {
+            Log::Info(Event::Render, "Loop iteration " + std::to_string(idx));
         }
+
+        if (texture) {
+            if (isTerrain) {
+                Log::Info(Event::Render, "Texture exists at " + std::to_string(idx));
+                Log::Info(Event::Render, "needsUpload=" + std::to_string(texture->needsUpload()));
+            }
+            texture->upload();
+            if (isTerrain) {
+                Log::Info(Event::Render, "Upload done for " + std::to_string(idx));
+            }
+        } else {
+            if (isTerrain) {
+                Log::Info(Event::Render, "Null texture at " + std::to_string(idx));
+            }
+        }
+        idx++;
+    }
+
+    if (isTerrain) {
+        Log::Info(Event::Render, "Drawable::uploadTextures END");
     }
 }
 
@@ -661,7 +706,16 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
 
+    if (getName() == "terrain-tile") {
+        Log::Info(Event::Render,
+                  "Drawable::upload for terrain-tile: texturesNeedUpload=" + std::to_string(texturesNeedUpload) +
+                      ", textureCount=" + std::to_string(textures.size()));
+    }
+
     if (texturesNeedUpload) {
+        if (getName() == "terrain-tile") {
+            Log::Info(Event::Render, "Calling uploadTextures() for terrain-tile");
+        }
         uploadTextures(uploadPass);
     }
 
