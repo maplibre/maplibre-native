@@ -2,6 +2,21 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.25.0
+
+- Expose Offline Region ID property on MLNOfflinePack for Darwin/iOS ([#4161](https://github.com/maplibre/maplibre-native/pull/4161)).
+- fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)).
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)).
+- core: Use interleaved buffer for paint property binders ([#4124](https://github.com/maplibre/maplibre-native/pull/4124)).
+- Make sure MLNScaleBar is exported ([#4198](https://github.com/maplibre/maplibre-native/pull/4198)).
+
+## 6.24.0
+
+- Fix crashing of iOS test apps and add Heatmap ([#4099](https://github.com/maplibre/maplibre-native/pull/4099)).
+- Fix incorrect shader selection for text labels with inline images ([#4082](https://github.com/maplibre/maplibre-native/pull/4082)).
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)).
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+
 ## 6.23.0
 
 - Add basic support for setting camera roll ([#4061](https://github.com/maplibre/maplibre-native/pull/4059)).

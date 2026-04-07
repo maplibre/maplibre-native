@@ -265,14 +265,33 @@ objc_library(
 )
 
 objc_library(
-    name = "iosapp",
+    name = "iosapp_objcpp_srcs",
     srcs = [
         "//platform/darwin:app/CustomStyleLayerExample.h",
-        "//platform/darwin:app/CustomStyleLayerExample.m",
+        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
+        "//platform/ios:ios_app_objcpp_srcs",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/app",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ios-sdk",
+    ],
+)
+
+objc_library(
+    name = "iosapp",
+    srcs = [
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/ios:ios_app_srcs",
     ],
     defines = ["GLES_SILENCE_DEPRECATION"],
@@ -292,6 +311,7 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
+        ":iosapp_objcpp_srcs",
     ] + select({
         "//conditions:default": [
             ":app_custom_drawable_layer_objcpp_srcs",
