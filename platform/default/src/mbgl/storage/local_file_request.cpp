@@ -29,6 +29,7 @@ void requestLocalFile(const std::string& path,
                                                                std::string("Cannot read file ") + path);
         } else {
             response.data = std::make_shared<std::string>(std::move(*data));
+            response.modified = Timestamp{Seconds(buf.st_mtime)};
         }
     }
 
