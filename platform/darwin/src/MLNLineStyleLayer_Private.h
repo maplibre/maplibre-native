@@ -14,4 +14,4 @@ class LineStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::LineLaye
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

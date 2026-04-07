@@ -13,22 +13,22 @@ NS_ASSUME_NONNULL_BEGIN
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNLineCap) {
-    /**
-     A cap with a squared-off end which is drawn to the exact endpoint of the
-     line.
-     */
-    MLNLineCapButt,
-    /**
-     A cap with a rounded end which is drawn beyond the endpoint of the line at
-     a radius of one-half of the line's width and centered on the endpoint of
-     the line.
-     */
-    MLNLineCapRound,
-    /**
-     A cap with a squared-off end which is drawn beyond the endpoint of the line
-     at a distance of one-half of the line's width.
-     */
-    MLNLineCapSquare,
+  /**
+   A cap with a squared-off end which is drawn to the exact endpoint of the
+   line.
+   */
+  MLNLineCapButt,
+  /**
+   A cap with a rounded end which is drawn beyond the endpoint of the line at
+   a radius of one-half of the line's width and centered on the endpoint of
+   the line.
+   */
+  MLNLineCapRound,
+  /**
+   A cap with a squared-off end which is drawn beyond the endpoint of the line
+   at a distance of one-half of the line's width.
+   */
+  MLNLineCapSquare,
 };
 
 /**
@@ -38,22 +38,22 @@ typedef NS_ENUM(NSUInteger, MLNLineCap) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNLineJoin) {
-    /**
-     A join with a squared-off end which is drawn beyond the endpoint of the
-     line at a distance of one-half of the line's width.
-     */
-    MLNLineJoinBevel,
-    /**
-     A join with a rounded end which is drawn beyond the endpoint of the line at
-     a radius of one-half of the line's width and centered on the endpoint of
-     the line.
-     */
-    MLNLineJoinRound,
-    /**
-     A join with a sharp, angled corner which is drawn with the outer sides
-     beyond the endpoint of the path until they meet.
-     */
-    MLNLineJoinMiter,
+  /**
+   A join with a squared-off end which is drawn beyond the endpoint of the
+   line at a distance of one-half of the line's width.
+   */
+  MLNLineJoinBevel,
+  /**
+   A join with a rounded end which is drawn beyond the endpoint of the line at
+   a radius of one-half of the line's width and centered on the endpoint of
+   the line.
+   */
+  MLNLineJoinRound,
+  /**
+   A join with a sharp, angled corner which is drawn with the outer sides
+   beyond the endpoint of the path until they meet.
+   */
+  MLNLineJoinMiter,
 };
 
 /**
@@ -63,20 +63,20 @@ typedef NS_ENUM(NSUInteger, MLNLineJoin) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNLineTranslationAnchor) {
-    /**
-     The line is translated relative to the map.
-     */
-    MLNLineTranslationAnchorMap,
-    /**
-     The line is translated relative to the viewport.
-     */
-    MLNLineTranslationAnchorViewport,
+  /**
+   The line is translated relative to the map.
+   */
+  MLNLineTranslationAnchorMap,
+  /**
+   The line is translated relative to the viewport.
+   */
+  MLNLineTranslationAnchorViewport,
 };
 
 /**
  An ``MLNLineStyleLayer`` is a style layer that renders one or more stroked
  polylines on the map.
- 
+
  Use a line style layer to configure the visual appearance of polyline or
  multipolyline features. These features can come from vector tiles loaded by an
  ``MLNLineStyleLayer`` object, or they can be ``MLNLineStyleLayer``,
@@ -125,12 +125,12 @@ MLN_EXPORT
 
 /**
  The display of line endings.
- 
+
  The default value of this property is an expression that evaluates to `butt`.
  Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNLineCap` values
  * Any of the following constant string values:
    * `butt`: A cap with a squared-off end which is drawn to the exact endpoint
@@ -144,7 +144,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -153,12 +153,12 @@ MLN_EXPORT
 
 /**
  The display of lines when joining.
- 
+
  The default value of this property is an expression that evaluates to `miter`.
  Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNLineJoin` values
  * Any of the following constant string values:
    * `bevel`: A join with a squared-off end which is drawn beyond the endpoint
@@ -178,21 +178,21 @@ MLN_EXPORT
 
 /**
  Used to automatically convert miter joins to bevel joins for sharp angles.
- 
+
  The default value of this property is an expression that evaluates to the float
  `2`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `lineJoin` is set to an
  expression that evaluates to `miter`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -200,21 +200,21 @@ MLN_EXPORT
 
 /**
  Used to automatically convert round joins to miter joins for shallow angles.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1.05`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `lineJoin` is set to an
  expression that evaluates to `round`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -223,9 +223,9 @@ MLN_EXPORT
 /**
  Sorts features in ascending order based on this value. Features with a higher
  sort key will appear above features with a lower sort key.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -239,14 +239,14 @@ MLN_EXPORT
 
 /**
  Blur applied to the line, in points.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -266,16 +266,16 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  The color with which the line will be drawn.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `linePattern` is set to `nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -287,16 +287,16 @@ MLN_EXPORT
 #else
 /**
  The color with which the line will be drawn.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `linePattern` is set to `nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -321,24 +321,24 @@ MLN_EXPORT
  GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to
  the expected scale. Also note that zoom-dependent expressions will be evaluated
  only at integer zoom levels.
- 
+
  This property is measured in line widths.
- 
+
  This property is only applied to the style if `linePattern` is set to `nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-line-dasharray"><code>line-dasharray</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant array values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -348,23 +348,25 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `lineDashPattern` property.
 
- This property corresponds to the `line-dasharray-transition` property in the style JSON file format.
+ This property corresponds to the `line-dasharray-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition lineDashPatternTransition;
 
-@property (nonatomic, null_resettable) NSExpression *lineDasharray __attribute__((unavailable("Use lineDashPattern instead.")));
+@property (nonatomic, null_resettable) NSExpression *lineDasharray
+    __attribute__((unavailable("Use lineDashPattern instead.")));
 
 /**
  Draws a line casing outside of a line's actual path. Value indicates the width
  of the inner gap.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -377,7 +379,8 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `lineGapWidth` property.
 
- This property corresponds to the `line-gap-width-transition` property in the style JSON file format.
+ This property corresponds to the `line-gap-width-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition lineGapWidthTransition;
 
@@ -386,19 +389,19 @@ MLN_EXPORT
  The color gradient with which the line will be drawn. This property only has an
  effect on lines defined by an ``MLNShapeSource`` whose ``MLNShapeSource``
  option is set to `YES`.
- 
+
  This property is only applied to the style if `lineDasharray` is set to `nil`,
  and `linePattern` is set to `nil`, and the data source requirements are met.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$lineProgress` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -408,19 +411,19 @@ MLN_EXPORT
  The color gradient with which the line will be drawn. This property only has an
  effect on lines defined by an ``MLNShapeSource`` whose ``MLNShapeSource``
  option is set to `YES`.
- 
+
  This property is only applied to the style if `lineDasharray` is set to `nil`,
  and `linePattern` is set to `nil`, and the data source requirements are met.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$lineProgress` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -432,14 +435,14 @@ MLN_EXPORT
  the right, relative to the direction of the line, and a negative value to the
  left. For polygon features, a positive value results in an inset, and a
  negative value results in an outset.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -458,12 +461,12 @@ MLN_EXPORT
 
 /**
  The opacity at which the line will be drawn.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values between 0 and 1 inclusive
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -483,9 +486,9 @@ MLN_EXPORT
 /**
  Name of image in style images to use for drawing image lines. For seamless
  patterns, image width must be a factor of two (2, 4, 8, ..., 512).
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant string values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -505,25 +508,25 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  The geometry's offset.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points downward. Set this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-line-translate"><code>line-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -531,25 +534,25 @@ MLN_EXPORT
 #else
 /**
  The geometry's offset.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points upward. Set this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-line-translate"><code>line-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -559,27 +562,29 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `lineTranslation` property.
 
- This property corresponds to the `line-translate-transition` property in the style JSON file format.
+ This property corresponds to the `line-translate-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition lineTranslationTransition;
 
-@property (nonatomic, null_resettable) NSExpression *lineTranslate __attribute__((unavailable("Use lineTranslation instead.")));
+@property (nonatomic, null_resettable) NSExpression *lineTranslate
+    __attribute__((unavailable("Use lineTranslation instead.")));
 
 /**
  Controls the frame of reference for `lineTranslation`.
- 
+
  The default value of this property is an expression that evaluates to `map`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `lineTranslation` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-line-translate-anchor"><code>line-translate-anchor</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNLineTranslationAnchor` values
  * Any of the following constant string values:
    * `map`: The line is translated relative to the map.
@@ -588,25 +593,26 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *lineTranslationAnchor;
 
-@property (nonatomic, null_resettable) NSExpression *lineTranslateAnchor __attribute__((unavailable("Use lineTranslationAnchor instead.")));
+@property (nonatomic, null_resettable) NSExpression *lineTranslateAnchor
+    __attribute__((unavailable("Use lineTranslationAnchor instead.")));
 
 /**
  Stroke thickness.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions

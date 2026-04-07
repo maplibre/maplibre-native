@@ -14,4 +14,4 @@ class BackgroundStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::Ba
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

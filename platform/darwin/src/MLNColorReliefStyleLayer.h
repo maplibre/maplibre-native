@@ -1,8 +1,8 @@
 // This file is generated.
 // Edit platform/darwin/scripts/generate-style-code.js, then run `make darwin-style-code`.
 
-#import "MLNFoundation.h"
 #import "MLNForegroundStyleLayer.h"
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -45,15 +45,15 @@ MLN_EXPORT
 /**
  Defines the color of each point based on its elevation. Should be an expression
  that uses `["elevation"]` as input.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$elevation` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -62,15 +62,15 @@ MLN_EXPORT
 /**
  Defines the color of each point based on its elevation. Should be an expression
  that uses `["elevation"]` as input.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$elevation` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -79,18 +79,18 @@ MLN_EXPORT
 
 /**
  The opacity at which the color-relief will be drawn.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values between 0 and 1 inclusive
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -99,7 +99,8 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `colorReliefOpacity` property.
 
- This property corresponds to the `color-relief-opacity-transition` property in the style JSON file format.
+ This property corresponds to the `color-relief-opacity-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition colorReliefOpacityTransition;
 

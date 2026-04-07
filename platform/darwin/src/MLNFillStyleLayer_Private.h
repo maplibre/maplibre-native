@@ -14,4 +14,4 @@ class FillStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::FillLaye
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

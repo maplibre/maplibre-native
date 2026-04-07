@@ -14,4 +14,4 @@ class HillshadeStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::Hil
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

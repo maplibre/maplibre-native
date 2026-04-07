@@ -13,14 +13,14 @@ NS_ASSUME_NONNULL_BEGIN
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNCirclePitchAlignment) {
-    /**
-     The circle is aligned to the plane of the map.
-     */
-    MLNCirclePitchAlignmentMap,
-    /**
-     The circle is aligned to the plane of the viewport.
-     */
-    MLNCirclePitchAlignmentViewport,
+  /**
+   The circle is aligned to the plane of the map.
+   */
+  MLNCirclePitchAlignmentMap,
+  /**
+   The circle is aligned to the plane of the viewport.
+   */
+  MLNCirclePitchAlignmentViewport,
 };
 
 /**
@@ -30,14 +30,14 @@ typedef NS_ENUM(NSUInteger, MLNCirclePitchAlignment) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNCircleScaleAlignment) {
-    /**
-     Circles are scaled according to their apparent distance to the camera.
-     */
-    MLNCircleScaleAlignmentMap,
-    /**
-     Circles are not scaled.
-     */
-    MLNCircleScaleAlignmentViewport,
+  /**
+   Circles are scaled according to their apparent distance to the camera.
+   */
+  MLNCircleScaleAlignmentMap,
+  /**
+   Circles are not scaled.
+   */
+  MLNCircleScaleAlignmentViewport,
 };
 
 /**
@@ -47,26 +47,26 @@ typedef NS_ENUM(NSUInteger, MLNCircleScaleAlignment) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNCircleTranslationAnchor) {
-    /**
-     The circle is translated relative to the map.
-     */
-    MLNCircleTranslationAnchorMap,
-    /**
-     The circle is translated relative to the viewport.
-     */
-    MLNCircleTranslationAnchorViewport,
+  /**
+   The circle is translated relative to the map.
+   */
+  MLNCircleTranslationAnchorMap,
+  /**
+   The circle is translated relative to the viewport.
+   */
+  MLNCircleTranslationAnchorViewport,
 };
 
 /**
  An ``MLNCircleStyleLayer`` is a style layer that renders one or more filled
  circles on the map.
- 
+
  Use a circle style layer to configure the visual appearance of point or point
  collection features. These features can come from vector tiles loaded by an
  ``MLNCircleStyleLayer`` object, or they can be ``MLNCircleStyleLayer``,
  ``MLNCircleStyleLayer``, ``MLNCircleStyleLayer``, or ``MLNCircleStyleLayer``
  instances in an ``MLNCircleStyleLayer`` or ``MLNCircleStyleLayer`` object.
- 
+
  A circle style layer renders circles whose radii are measured in screen units.
  To display circles on the map whose radii correspond to real-world distances,
  use many-sided regular polygons and configure their appearance using an
@@ -116,9 +116,9 @@ MLN_EXPORT
 /**
  Sorts features in ascending order based on this value. Features with a higher
  sort key will appear above features with a lower sort key.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -133,12 +133,12 @@ MLN_EXPORT
 /**
  Amount to blur the circle. 1 blurs the circle such that only the centerpoint is
  full opacity.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -158,13 +158,13 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  The fill color of the circle.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -176,13 +176,13 @@ MLN_EXPORT
 #else
 /**
  The fill color of the circle.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -202,12 +202,12 @@ MLN_EXPORT
 
 /**
  The opacity at which the circle will be drawn.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values between 0 and 1 inclusive
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -220,18 +220,19 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `circleOpacity` property.
 
- This property corresponds to the `circle-opacity-transition` property in the style JSON file format.
+ This property corresponds to the `circle-opacity-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition circleOpacityTransition;
 
 /**
  Orientation of circle when map is pitched.
- 
+
  The default value of this property is an expression that evaluates to
  `viewport`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNCirclePitchAlignment` values
  * Any of the following constant string values:
    * `map`: The circle is aligned to the plane of the map.
@@ -240,7 +241,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -249,14 +250,14 @@ MLN_EXPORT
 
 /**
  Circle radius.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `5`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -275,16 +276,16 @@ MLN_EXPORT
 
 /**
  Controls the scaling behavior of the circle when the map is pitched.
- 
+
  The default value of this property is an expression that evaluates to `map`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-circle-pitch-scale"><code>circle-pitch-scale</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNCircleScaleAlignment` values
  * Any of the following constant string values:
    * `map`: Circles are scaled according to their apparent distance to the
@@ -294,25 +295,26 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *circleScaleAlignment;
 
-@property (nonatomic, null_resettable) NSExpression *circlePitchScale __attribute__((unavailable("Use circleScaleAlignment instead.")));
+@property (nonatomic, null_resettable) NSExpression *circlePitchScale
+    __attribute__((unavailable("Use circleScaleAlignment instead.")));
 
 #if TARGET_OS_IPHONE
 /**
  The stroke color of the circle.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -324,13 +326,13 @@ MLN_EXPORT
 #else
 /**
  The stroke color of the circle.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -344,18 +346,19 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `circleStrokeColor` property.
 
- This property corresponds to the `circle-stroke-color-transition` property in the style JSON file format.
+ This property corresponds to the `circle-stroke-color-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition circleStrokeColorTransition;
 
 /**
  The opacity of the circle's stroke.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values between 0 and 1 inclusive
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -368,21 +371,22 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `circleStrokeOpacity` property.
 
- This property corresponds to the `circle-stroke-opacity-transition` property in the style JSON file format.
+ This property corresponds to the `circle-stroke-opacity-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition circleStrokeOpacityTransition;
 
 /**
  The width of the circle's stroke. Strokes are placed outside of the
  `circleRadius`.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -395,32 +399,33 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `circleStrokeWidth` property.
 
- This property corresponds to the `circle-stroke-width-transition` property in the style JSON file format.
+ This property corresponds to the `circle-stroke-width-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition circleStrokeWidthTransition;
 
 #if TARGET_OS_IPHONE
 /**
  The geometry's offset.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points downward. Set this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-circle-translate"><code>circle-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -428,25 +433,25 @@ MLN_EXPORT
 #else
 /**
  The geometry's offset.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points upward. Set this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-circle-translate"><code>circle-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -456,27 +461,29 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `circleTranslation` property.
 
- This property corresponds to the `circle-translate-transition` property in the style JSON file format.
+ This property corresponds to the `circle-translate-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition circleTranslationTransition;
 
-@property (nonatomic, null_resettable) NSExpression *circleTranslate __attribute__((unavailable("Use circleTranslation instead.")));
+@property (nonatomic, null_resettable) NSExpression *circleTranslate
+    __attribute__((unavailable("Use circleTranslation instead.")));
 
 /**
  Controls the frame of reference for `circleTranslation`.
- 
+
  The default value of this property is an expression that evaluates to `map`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `circleTranslation` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-circle-translate-anchor"><code>circle-translate-anchor</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNCircleTranslationAnchor` values
  * Any of the following constant string values:
    * `map`: The circle is translated relative to the map.
@@ -485,14 +492,15 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *circleTranslationAnchor;
 
-@property (nonatomic, null_resettable) NSExpression *circleTranslateAnchor __attribute__((unavailable("Use circleTranslationAnchor instead.")));
+@property (nonatomic, null_resettable) NSExpression *circleTranslateAnchor
+    __attribute__((unavailable("Use circleTranslationAnchor instead.")));
 
 @end
 
@@ -536,7 +544,8 @@ MLN_EXPORT
  @param circleTranslationAnchor The value for the new object.
  @return A new value object that contains the enumeration value.
  */
-+ (instancetype)valueWithMLNCircleTranslationAnchor:(MLNCircleTranslationAnchor)circleTranslationAnchor;
++ (instancetype)valueWithMLNCircleTranslationAnchor:
+    (MLNCircleTranslationAnchor)circleTranslationAnchor;
 
 /**
  The ``MLNCircleTranslationAnchor`` enumeration representation of the value.

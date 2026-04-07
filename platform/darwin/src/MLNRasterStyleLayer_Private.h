@@ -14,4 +14,4 @@ class RasterStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::Raster
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

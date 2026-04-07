@@ -13,42 +13,42 @@ NS_ASSUME_NONNULL_BEGIN
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNIconAnchor) {
-    /**
-     The center of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorCenter,
-    /**
-     The left side of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorLeft,
-    /**
-     The right side of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorRight,
-    /**
-     The top of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorTop,
-    /**
-     The bottom of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorBottom,
-    /**
-     The top left corner of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorTopLeft,
-    /**
-     The top right corner of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorTopRight,
-    /**
-     The bottom left corner of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorBottomLeft,
-    /**
-     The bottom right corner of the icon is placed closest to the anchor.
-     */
-    MLNIconAnchorBottomRight,
+  /**
+   The center of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorCenter,
+  /**
+   The left side of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorLeft,
+  /**
+   The right side of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorRight,
+  /**
+   The top of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorTop,
+  /**
+   The bottom of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorBottom,
+  /**
+   The top left corner of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorTopLeft,
+  /**
+   The top right corner of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorTopRight,
+  /**
+   The bottom left corner of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorBottomLeft,
+  /**
+   The bottom right corner of the icon is placed closest to the anchor.
+   */
+  MLNIconAnchorBottomRight,
 };
 
 /**
@@ -58,19 +58,19 @@ typedef NS_ENUM(NSUInteger, MLNIconAnchor) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNIconPitchAlignment) {
-    /**
-     The icon is aligned to the plane of the map.
-     */
-    MLNIconPitchAlignmentMap,
-    /**
-     The icon is aligned to the plane of the viewport.
-     */
-    MLNIconPitchAlignmentViewport,
-    /**
-     Automatically matches the value of
-     ``MLNSymbolStyleLayer/iconRotationAlignment``.
-     */
-    MLNIconPitchAlignmentAuto,
+  /**
+   The icon is aligned to the plane of the map.
+   */
+  MLNIconPitchAlignmentMap,
+  /**
+   The icon is aligned to the plane of the viewport.
+   */
+  MLNIconPitchAlignmentViewport,
+  /**
+   Automatically matches the value of
+   ``MLNSymbolStyleLayer/iconRotationAlignment``.
+   */
+  MLNIconPitchAlignmentAuto,
 };
 
 /**
@@ -81,24 +81,24 @@ typedef NS_ENUM(NSUInteger, MLNIconPitchAlignment) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNIconRotationAlignment) {
-    /**
-     When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, aligns icons
-     east-west. When `symbolPlacement` is set to `MLNSymbolPlacementLine` or
-     `MLNSymbolPlacementLineCenter`, aligns icon x-axes with the line.
-     */
-    MLNIconRotationAlignmentMap,
-    /**
-     Produces icons whose x-axes are aligned with the x-axis of the viewport,
-     regardless of the value of ``MLNSymbolStyleLayer/symbolPlacement``.
-     */
-    MLNIconRotationAlignmentViewport,
-    /**
-     When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, this is
-     equivalent to `MLNIconRotationAlignmentViewport`. When `symbolPlacement` is
-     set to `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`, this is
-     equivalent to `MLNIconRotationAlignmentMap`.
-     */
-    MLNIconRotationAlignmentAuto,
+  /**
+   When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, aligns icons
+   east-west. When `symbolPlacement` is set to `MLNSymbolPlacementLine` or
+   `MLNSymbolPlacementLineCenter`, aligns icon x-axes with the line.
+   */
+  MLNIconRotationAlignmentMap,
+  /**
+   Produces icons whose x-axes are aligned with the x-axis of the viewport,
+   regardless of the value of ``MLNSymbolStyleLayer/symbolPlacement``.
+   */
+  MLNIconRotationAlignmentViewport,
+  /**
+   When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, this is
+   equivalent to `MLNIconRotationAlignmentViewport`. When `symbolPlacement` is
+   set to `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`, this is
+   equivalent to `MLNIconRotationAlignmentMap`.
+   */
+  MLNIconRotationAlignmentAuto,
 };
 
 /**
@@ -110,22 +110,22 @@ typedef NS_ENUM(NSUInteger, MLNIconRotationAlignment) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNIconTextFit) {
-    /**
-     The icon is displayed at its intrinsic aspect ratio.
-     */
-    MLNIconTextFitNone,
-    /**
-     The icon is scaled in the x-dimension to fit the width of the text.
-     */
-    MLNIconTextFitWidth,
-    /**
-     The icon is scaled in the y-dimension to fit the height of the text.
-     */
-    MLNIconTextFitHeight,
-    /**
-     The icon is scaled in both x- and y-dimensions.
-     */
-    MLNIconTextFitBoth,
+  /**
+   The icon is displayed at its intrinsic aspect ratio.
+   */
+  MLNIconTextFitNone,
+  /**
+   The icon is scaled in the x-dimension to fit the width of the text.
+   */
+  MLNIconTextFitWidth,
+  /**
+   The icon is scaled in the y-dimension to fit the height of the text.
+   */
+  MLNIconTextFitHeight,
+  /**
+   The icon is scaled in both x- and y-dimensions.
+   */
+  MLNIconTextFitBoth,
 };
 
 /**
@@ -135,21 +135,21 @@ typedef NS_ENUM(NSUInteger, MLNIconTextFit) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNSymbolPlacement) {
-    /**
-     The label is placed at the point where the geometry is located.
-     */
-    MLNSymbolPlacementPoint,
-    /**
-     The label is placed along the line of the geometry. Can only be used on
-     `LineString` and `Polygon` geometries.
-     */
-    MLNSymbolPlacementLine,
-    /**
-     The label is placed at the center of the line of the geometry. Can only be
-     used on `LineString` and `Polygon` geometries. Note that a single feature
-     in a vector tile may contain multiple line geometries.
-     */
-    MLNSymbolPlacementLineCenter,
+  /**
+   The label is placed at the point where the geometry is located.
+   */
+  MLNSymbolPlacementPoint,
+  /**
+   The label is placed along the line of the geometry. Can only be used on
+   `LineString` and `Polygon` geometries.
+   */
+  MLNSymbolPlacementLine,
+  /**
+   The label is placed at the center of the line of the geometry. Can only be
+   used on `LineString` and `Polygon` geometries. Note that a single feature
+   in a vector tile may contain multiple line geometries.
+   */
+  MLNSymbolPlacementLineCenter,
 };
 
 /**
@@ -162,25 +162,25 @@ typedef NS_ENUM(NSUInteger, MLNSymbolPlacement) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNSymbolZOrder) {
-    /**
-     Sorts symbols by ``MLNSymbolStyleLayer/symbolSortKey`` if set. Otherwise,
-     sorts symbols by their y-position relative to the viewport if
-     `iconAllowOverlap` or `textAllowOverlap` is set to `YES` or
-     `MLNTextAllowOverlapIconIgnorePlacement` or `textIgnorePlacement` is
-     `false`.
-     */
-    MLNSymbolZOrderAuto,
-    /**
-     Specify this z order if symbols’ appearance relies on lower features
-     overlapping higher features. For example, symbols with a pin-like
-     appearance would require this z order.
-     */
-    MLNSymbolZOrderViewportY,
-    /**
-     Specify this z order if the order in which features appear in the source is
-     significant.
-     */
-    MLNSymbolZOrderSource,
+  /**
+   Sorts symbols by ``MLNSymbolStyleLayer/symbolSortKey`` if set. Otherwise,
+   sorts symbols by their y-position relative to the viewport if
+   `iconAllowOverlap` or `textAllowOverlap` is set to `YES` or
+   `MLNTextAllowOverlapIconIgnorePlacement` or `textIgnorePlacement` is
+   `false`.
+   */
+  MLNSymbolZOrderAuto,
+  /**
+   Specify this z order if symbols’ appearance relies on lower features
+   overlapping higher features. For example, symbols with a pin-like
+   appearance would require this z order.
+   */
+  MLNSymbolZOrderViewportY,
+  /**
+   Specify this z order if the order in which features appear in the source is
+   significant.
+   */
+  MLNSymbolZOrderSource,
 };
 
 /**
@@ -190,42 +190,42 @@ typedef NS_ENUM(NSUInteger, MLNSymbolZOrder) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextAnchor) {
-    /**
-     The center of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorCenter,
-    /**
-     The left side of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorLeft,
-    /**
-     The right side of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorRight,
-    /**
-     The top of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorTop,
-    /**
-     The bottom of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorBottom,
-    /**
-     The top left corner of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorTopLeft,
-    /**
-     The top right corner of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorTopRight,
-    /**
-     The bottom left corner of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorBottomLeft,
-    /**
-     The bottom right corner of the text is placed closest to the anchor.
-     */
-    MLNTextAnchorBottomRight,
+  /**
+   The center of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorCenter,
+  /**
+   The left side of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorLeft,
+  /**
+   The right side of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorRight,
+  /**
+   The top of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorTop,
+  /**
+   The bottom of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorBottom,
+  /**
+   The top left corner of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorTopLeft,
+  /**
+   The top right corner of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorTopRight,
+  /**
+   The bottom left corner of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorBottomLeft,
+  /**
+   The bottom right corner of the text is placed closest to the anchor.
+   */
+  MLNTextAnchorBottomRight,
 };
 
 /**
@@ -235,22 +235,22 @@ typedef NS_ENUM(NSUInteger, MLNTextAnchor) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextJustification) {
-    /**
-     The text is aligned towards the anchor position.
-     */
-    MLNTextJustificationAuto,
-    /**
-     The text is aligned to the left.
-     */
-    MLNTextJustificationLeft,
-    /**
-     The text is centered.
-     */
-    MLNTextJustificationCenter,
-    /**
-     The text is aligned to the right.
-     */
-    MLNTextJustificationRight,
+  /**
+   The text is aligned towards the anchor position.
+   */
+  MLNTextJustificationAuto,
+  /**
+   The text is aligned to the left.
+   */
+  MLNTextJustificationLeft,
+  /**
+   The text is centered.
+   */
+  MLNTextJustificationCenter,
+  /**
+   The text is aligned to the right.
+   */
+  MLNTextJustificationRight,
 };
 
 /**
@@ -260,19 +260,19 @@ typedef NS_ENUM(NSUInteger, MLNTextJustification) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextPitchAlignment) {
-    /**
-     The text is aligned to the plane of the map.
-     */
-    MLNTextPitchAlignmentMap,
-    /**
-     The text is aligned to the plane of the viewport.
-     */
-    MLNTextPitchAlignmentViewport,
-    /**
-     Automatically matches the value of
-     ``MLNSymbolStyleLayer/textRotationAlignment``.
-     */
-    MLNTextPitchAlignmentAuto,
+  /**
+   The text is aligned to the plane of the map.
+   */
+  MLNTextPitchAlignmentMap,
+  /**
+   The text is aligned to the plane of the viewport.
+   */
+  MLNTextPitchAlignmentViewport,
+  /**
+   Automatically matches the value of
+   ``MLNSymbolStyleLayer/textRotationAlignment``.
+   */
+  MLNTextPitchAlignmentAuto,
 };
 
 /**
@@ -283,24 +283,24 @@ typedef NS_ENUM(NSUInteger, MLNTextPitchAlignment) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextRotationAlignment) {
-    /**
-     When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, aligns text
-     east-west. When `symbolPlacement` is set to `MLNSymbolPlacementLine` or
-     `MLNSymbolPlacementLineCenter`, aligns text x-axes with the line.
-     */
-    MLNTextRotationAlignmentMap,
-    /**
-     Produces glyphs whose x-axes are aligned with the x-axis of the viewport,
-     regardless of the value of ``MLNSymbolStyleLayer/symbolPlacement``.
-     */
-    MLNTextRotationAlignmentViewport,
-    /**
-     When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, this is
-     equivalent to `MLNTextRotationAlignmentViewport`. When `symbolPlacement` is
-     set to `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`, this is
-     equivalent to `MLNTextRotationAlignmentMap`.
-     */
-    MLNTextRotationAlignmentAuto,
+  /**
+   When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, aligns text
+   east-west. When `symbolPlacement` is set to `MLNSymbolPlacementLine` or
+   `MLNSymbolPlacementLineCenter`, aligns text x-axes with the line.
+   */
+  MLNTextRotationAlignmentMap,
+  /**
+   Produces glyphs whose x-axes are aligned with the x-axis of the viewport,
+   regardless of the value of ``MLNSymbolStyleLayer/symbolPlacement``.
+   */
+  MLNTextRotationAlignmentViewport,
+  /**
+   When `symbolPlacement` is set to `MLNSymbolPlacementPoint`, this is
+   equivalent to `MLNTextRotationAlignmentViewport`. When `symbolPlacement` is
+   set to `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`, this is
+   equivalent to `MLNTextRotationAlignmentMap`.
+   */
+  MLNTextRotationAlignmentAuto,
 };
 
 /**
@@ -310,18 +310,18 @@ typedef NS_ENUM(NSUInteger, MLNTextRotationAlignment) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextTransform) {
-    /**
-     The text is not altered.
-     */
-    MLNTextTransformNone,
-    /**
-     Forces all letters to be displayed in uppercase.
-     */
-    MLNTextTransformUppercase,
-    /**
-     Forces all letters to be displayed in lowercase.
-     */
-    MLNTextTransformLowercase,
+  /**
+   The text is not altered.
+   */
+  MLNTextTransformNone,
+  /**
+   Forces all letters to be displayed in uppercase.
+   */
+  MLNTextTransformUppercase,
+  /**
+   Forces all letters to be displayed in lowercase.
+   */
+  MLNTextTransformLowercase,
 };
 
 /**
@@ -336,16 +336,16 @@ typedef NS_ENUM(NSUInteger, MLNTextTransform) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextWritingMode) {
-    /**
-     If a text's language supports horizontal writing mode, symbols with point
-     placement would be laid out horizontally.
-     */
-    MLNTextWritingModeHorizontal,
-    /**
-     If a text's language supports vertical writing mode, symbols with point
-     placement would be laid out vertically.
-     */
-    MLNTextWritingModeVertical,
+  /**
+   If a text's language supports horizontal writing mode, symbols with point
+   placement would be laid out horizontally.
+   */
+  MLNTextWritingModeHorizontal,
+  /**
+   If a text's language supports vertical writing mode, symbols with point
+   placement would be laid out vertically.
+   */
+  MLNTextWritingModeVertical,
 };
 
 /**
@@ -355,14 +355,14 @@ typedef NS_ENUM(NSUInteger, MLNTextWritingMode) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNIconTranslationAnchor) {
-    /**
-     Icons are translated relative to the map.
-     */
-    MLNIconTranslationAnchorMap,
-    /**
-     Icons are translated relative to the viewport.
-     */
-    MLNIconTranslationAnchorViewport,
+  /**
+   Icons are translated relative to the map.
+   */
+  MLNIconTranslationAnchorMap,
+  /**
+   Icons are translated relative to the viewport.
+   */
+  MLNIconTranslationAnchorViewport,
 };
 
 /**
@@ -372,20 +372,20 @@ typedef NS_ENUM(NSUInteger, MLNIconTranslationAnchor) {
  property.
  */
 typedef NS_ENUM(NSUInteger, MLNTextTranslationAnchor) {
-    /**
-     The text is translated relative to the map.
-     */
-    MLNTextTranslationAnchorMap,
-    /**
-     The text is translated relative to the viewport.
-     */
-    MLNTextTranslationAnchorViewport,
+  /**
+   The text is translated relative to the map.
+   */
+  MLNTextTranslationAnchorMap,
+  /**
+   The text is translated relative to the viewport.
+   */
+  MLNTextTranslationAnchorViewport,
 };
 
 /**
  An ``MLNSymbolStyleLayer`` is a style layer that renders icon and text labels
  at points or along lines on the map.
- 
+
  Use a symbol style layer to configure the visual appearance of feature labels.
  These features can come from vector tiles loaded by an ``MLNSymbolStyleLayer``
  object, or they can be ``MLNSymbolStyleLayer`` or ``MLNSymbolStyleLayer``
@@ -433,45 +433,45 @@ MLN_EXPORT
 /**
  If true, the icon will be visible even if it collides with other previously
  drawn symbols.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `iconOverlap` is set to `nil`. Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-allow-overlap"><code>icon-allow-overlap</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *iconAllowsOverlap;
 
-
-@property (nonatomic, null_resettable) NSExpression *iconAllowOverlap __attribute__((unavailable("Use iconAllowsOverlap instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconAllowOverlap
+    __attribute__((unavailable("Use iconAllowsOverlap instead.")));
 
 /**
  Part of the icon placed closest to the anchor.
- 
+
  The default value of this property is an expression that evaluates to `center`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNIconAnchor` values
  * Any of the following constant string values:
    * `center`: The center of the icon is placed closest to the anchor.
@@ -497,51 +497,51 @@ MLN_EXPORT
 
 /**
  If true, other symbols can be visible even if they collide with the icon.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-ignore-placement"><code>icon-ignore-placement</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *iconIgnoresPlacement;
 
-
-@property (nonatomic, null_resettable) NSExpression *iconIgnorePlacement __attribute__((unavailable("Use iconIgnoresPlacement instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconIgnorePlacement
+    __attribute__((unavailable("Use iconIgnoresPlacement instead.")));
 
 /**
  Name of a style image to use for drawing an image background.
- 
+
  Use the ``MLNStyle/setImage:forName:`` method to associate an image with a name
  that you can set this property to.
- 
+
  Within a constant string value, a feature attribute name enclosed in curly
  braces (e.g., `{token}`) is replaced with the value of the named attribute.
  Tokens inside non-constant expressions are ignored; instead, use `mgl_join:`
  and key path expressions.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-image"><code>icon-image</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant string values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -557,22 +557,22 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *iconImageName;
 
-
-@property (nonatomic, null_resettable) NSExpression *iconImage __attribute__((unavailable("Use iconImageName instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconImage
+    __attribute__((unavailable("Use iconImageName instead.")));
 
 #if TARGET_OS_IPHONE
 /**
  Offset distance of icon from its anchor.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 rightward and 0
  downward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -584,16 +584,16 @@ MLN_EXPORT
 #else
 /**
  Offset distance of icon from its anchor.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 rightward and 0
  upward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -607,21 +607,21 @@ MLN_EXPORT
 /**
  If true, text will display without their corresponding icons when the icon
  collides with other symbols and the text does not.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `text` is non-`nil`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -632,18 +632,18 @@ MLN_EXPORT
 /**
  Size of additional area round the icon bounding box used for detecting symbol
  collisions.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `UIEdgeInsets` struct set to 2 points on all
  sides. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIEdgeInsets` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -656,18 +656,18 @@ MLN_EXPORT
 /**
  Size of additional area round the icon bounding box used for detecting symbol
  collisions.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `NSEdgeInsets` struct set to 2 points on all
  sides. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSEdgeInsets` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -680,15 +680,15 @@ MLN_EXPORT
 
 /**
  Orientation of icon when map is pitched.
- 
+
  The default value of this property is an expression that evaluates to `auto`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNIconPitchAlignment` values
  * Any of the following constant string values:
    * `map`: The icon is aligned to the plane of the map.
@@ -698,7 +698,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -707,21 +707,21 @@ MLN_EXPORT
 
 /**
  Rotates the icon clockwise.
- 
+
  This property is measured in degrees.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-rotate"><code>icon-rotate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -731,21 +731,21 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *iconRotation;
 
-
-@property (nonatomic, null_resettable) NSExpression *iconRotate __attribute__((unavailable("Use iconRotation instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconRotate
+    __attribute__((unavailable("Use iconRotation instead.")));
 
 /**
  In combination with `symbolPlacement`, determines the rotation behavior of
  icons.
- 
+
  The default value of this property is an expression that evaluates to `auto`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNIconRotationAlignment` values
  * Any of the following constant string values:
    * `map`: When `symbol-placement` is set to `point`, aligns icons east-west.
@@ -760,7 +760,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -771,21 +771,21 @@ MLN_EXPORT
  Scales the original size of the icon by the provided factor. The new point size
  of the image will be the original point size multiplied by `iconScale`. 1 is
  the original size; 3 triples the size of the image.
- 
+
  This property is measured in factor of the original icon sizes.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-size"><code>icon-size</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -795,22 +795,22 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *iconScale;
 
-
-@property (nonatomic, null_resettable) NSExpression *iconSize __attribute__((unavailable("Use iconScale instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconSize
+    __attribute__((unavailable("Use iconScale instead.")));
 
 /**
  The directions in which the icon stretches to fit around the text. If the icon
  image is a resizable image, the resizable areas may be stretched, while the cap
  insets are always drawn at the original scale.
- 
+
  The default value of this property is an expression that evaluates to `none`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `text` is non-`nil`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNIconTextFit` values
  * Any of the following constant string values:
    * `none`: The icon is displayed at its intrinsic aspect ratio.
@@ -823,7 +823,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -833,26 +833,26 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  Size of the additional area added to dimensions determined by `iconTextFit`.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing `UIEdgeInsetsZero`. Set this property to `nil` to
  reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `text` is non-`nil`, and `iconTextFit` is set to an expression that evaluates
  to `MLNIconTextFitBoth`, `MLNIconTextFitWidth`, or `MLNIconTextFitHeight`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIEdgeInsets` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -860,26 +860,26 @@ MLN_EXPORT
 #else
 /**
  Size of the additional area added to dimensions determined by `iconTextFit`.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing `NSEdgeInsetsZero`. Set this property to `nil` to
  reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `text` is non-`nil`, and `iconTextFit` is set to an expression that evaluates
  to `MLNIconTextFitBoth`, `MLNIconTextFitWidth`, or `MLNIconTextFitHeight`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSEdgeInsets` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -888,121 +888,121 @@ MLN_EXPORT
 
 /**
  If true, the icon may be flipped to prevent it from being rendered upside-down.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `iconRotationAlignment` is set to an expression that evaluates to `map`, and
  `symbolPlacement` is set to an expression that evaluates to either
  `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`. Otherwise, it is
  ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-keep-upright"><code>icon-keep-upright</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *keepsIconUpright;
 
-
-@property (nonatomic, null_resettable) NSExpression *iconKeepUpright __attribute__((unavailable("Use keepsIconUpright instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconKeepUpright
+    __attribute__((unavailable("Use keepsIconUpright instead.")));
 
 /**
  If true, the text may be flipped vertically to prevent it from being rendered
  upside-down.
- 
+
  The default value of this property is an expression that evaluates to `YES`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `textRotationAlignment` is set to an expression that evaluates to `map`, and
  `symbolPlacement` is set to an expression that evaluates to either
  `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`. Otherwise, it is
  ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-keep-upright"><code>text-keep-upright</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *keepsTextUpright;
 
-
-@property (nonatomic, null_resettable) NSExpression *textKeepUpright __attribute__((unavailable("Use keepsTextUpright instead.")));
+@property (nonatomic, null_resettable) NSExpression *textKeepUpright
+    __attribute__((unavailable("Use keepsTextUpright instead.")));
 
 /**
  Maximum angle change between adjacent characters.
- 
+
  This property is measured in degrees.
- 
+
  The default value of this property is an expression that evaluates to the float
  `45`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `symbolPlacement` is set to an expression that evaluates to either
  `MLNSymbolPlacementLine` or `MLNSymbolPlacementLineCenter`. Otherwise, it is
  ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-max-angle"><code>text-max-angle</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *maximumTextAngle;
 
-
-@property (nonatomic, null_resettable) NSExpression *textMaxAngle __attribute__((unavailable("Use maximumTextAngle instead.")));
+@property (nonatomic, null_resettable) NSExpression *textMaxAngle
+    __attribute__((unavailable("Use maximumTextAngle instead.")));
 
 /**
  The maximum line width for text wrapping.
- 
+
  This property is measured in ems.
- 
+
  The default value of this property is an expression that evaluates to the float
  `10`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-max-width"><code>text-max-width</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1012,12 +1012,12 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *maximumTextWidth;
 
-
-@property (nonatomic, null_resettable) NSExpression *textMaxWidth __attribute__((unavailable("Use maximumTextWidth instead.")));
+@property (nonatomic, null_resettable) NSExpression *textMaxWidth
+    __attribute__((unavailable("Use maximumTextWidth instead.")));
 
 /**
  Whether symbols in this layer avoid colliding with symbols in adjacent tiles.
- 
+
  If this property is set to `true`, symbols in this layer avoid crossing the
  edge of a tile. You should set this property to `true` if the backing vector
  tiles don’t have enough padding to prevent collisions, or if this layer’s
@@ -1026,39 +1026,39 @@ MLN_EXPORT
  layer whose `symbolPlacement` property is set to
  ``MLNSymbolPlacement/MLNSymbolPlacementPoint``. You do not need to enable this
  property to prevent clipped labels at tile boundaries.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-symbol-avoid-edges"><code>symbol-avoid-edges</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *symbolAvoidsEdges;
 
-
-@property (nonatomic, null_resettable) NSExpression *symbolAvoidEdges __attribute__((unavailable("Use symbolAvoidsEdges instead.")));
+@property (nonatomic, null_resettable) NSExpression *symbolAvoidEdges
+    __attribute__((unavailable("Use symbolAvoidsEdges instead.")));
 
 /**
  Label placement relative to its geometry.
- 
+
  The default value of this property is an expression that evaluates to `point`.
  Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNSymbolPlacement` values
  * Any of the following constant string values:
    * `point`: The label is placed at the point where the geometry is located.
@@ -1071,7 +1071,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1080,18 +1080,18 @@ MLN_EXPORT
 
 /**
  Internal use only
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1105,9 +1105,9 @@ MLN_EXPORT
  priority during placement. When `iconAllowsOverlap` or `textAllowsOverlap` is
  set to `YES`, features with a higher sort key will overlap over features with a
  lower sort key.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1119,23 +1119,23 @@ MLN_EXPORT
 
 /**
  Distance between two symbol anchors.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `250`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `symbolPlacement` is set to an
  expression that evaluates to `line`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 1
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -1146,12 +1146,12 @@ MLN_EXPORT
  order that they appear in the data source or by their y-position relative to
  the viewport. To control the order and prioritization of symbols otherwise, use
  `symbolSortKey`.
- 
+
  The default value of this property is an expression that evaluates to `auto`.
  Set this property to `nil` to reset it to the default value.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNSymbolZOrder` values
  * Any of the following constant string values:
    * `auto`: Sorts symbols by `symbol-sort-key` if set. Otherwise, sorts symbols
@@ -1167,7 +1167,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1176,21 +1176,21 @@ MLN_EXPORT
 
 /**
  Value to use for a text label.
- 
+
  Within a constant string value, a feature attribute name enclosed in curly
  braces (e.g., `{token}`) is replaced with the value of the named attribute.
  Tokens inside non-constant expressions are ignored; instead, use `mgl_join:`
  and key path expressions.
- 
+
  The default value of this property is an expression that evaluates to the empty
  string. Set this property to `nil` to reset it to the default value.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-field"><code>text-field</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant string values
  * Formatted expressions.
  * Predefined functions, including mathematical and string operators
@@ -1208,51 +1208,51 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *text;
 
-
-@property (nonatomic, null_resettable) NSExpression *textField __attribute__((unavailable("Use text instead.")));
+@property (nonatomic, null_resettable) NSExpression *textField
+    __attribute__((unavailable("Use text instead.")));
 
 /**
  If true, the text will be visible even if it collides with other previously
  drawn symbols.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-allow-overlap"><code>text-allow-overlap</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *textAllowsOverlap;
 
-
-@property (nonatomic, null_resettable) NSExpression *textAllowOverlap __attribute__((unavailable("Use textAllowsOverlap instead.")));
+@property (nonatomic, null_resettable) NSExpression *textAllowOverlap
+    __attribute__((unavailable("Use textAllowsOverlap instead.")));
 
 /**
  Part of the text placed closest to the anchor.
- 
+
  The default value of this property is an expression that evaluates to `center`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `textVariableAnchor` is set to `nil`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNTextAnchor` values
  * Any of the following constant string values:
    * `center`: The center of the text is placed closest to the anchor.
@@ -1278,27 +1278,27 @@ MLN_EXPORT
 
 /**
  An array of font face names used to display the text.
- 
+
  The first font named in the array is applied to the text. For each character in
  the text, if the first font lacks a glyph for the character, the next font is
  applied as a fallback, and so on.
- 
+
  See the “[Customizing Fonts](doc:Customizing_Fonts)” guide for details on how
  this SDK chooses and renders fonts based on the value of this property.
- 
+
  The default value of this property is an expression that evaluates to the array
  `Open Sans Regular`, `Arial Unicode MS Regular`. Set this property to `nil` to
  reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-font"><code>text-font</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant array values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1308,26 +1308,26 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *textFontNames;
 
-
-@property (nonatomic, null_resettable) NSExpression *textFont __attribute__((unavailable("Use textFontNames instead.")));
+@property (nonatomic, null_resettable) NSExpression *textFont
+    __attribute__((unavailable("Use textFontNames instead.")));
 
 /**
  Font size.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `16`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-size"><code>text-size</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1337,54 +1337,54 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *textFontSize;
 
-
-@property (nonatomic, null_resettable) NSExpression *textSize __attribute__((unavailable("Use textFontSize instead.")));
+@property (nonatomic, null_resettable) NSExpression *textSize
+    __attribute__((unavailable("Use textFontSize instead.")));
 
 /**
  If true, other symbols can be visible even if they collide with the text.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-ignore-placement"><code>text-ignore-placement</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *textIgnoresPlacement;
 
-
-@property (nonatomic, null_resettable) NSExpression *textIgnorePlacement __attribute__((unavailable("Use textIgnoresPlacement instead.")));
+@property (nonatomic, null_resettable) NSExpression *textIgnorePlacement
+    __attribute__((unavailable("Use textIgnoresPlacement instead.")));
 
 /**
  Text justification options.
- 
+
  The default value of this property is an expression that evaluates to `center`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-justify"><code>text-justify</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNTextJustification` values
  * Any of the following constant string values:
    * `auto`: The text is aligned towards the anchor position.
@@ -1399,22 +1399,22 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *textJustification;
 
-
-@property (nonatomic, null_resettable) NSExpression *textJustify __attribute__((unavailable("Use textJustification instead.")));
+@property (nonatomic, null_resettable) NSExpression *textJustify
+    __attribute__((unavailable("Use textJustification instead.")));
 
 /**
  Text tracking amount.
- 
+
  This property is measured in ems.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1426,23 +1426,23 @@ MLN_EXPORT
 
 /**
  Text leading value for multi-line text.
- 
+
  This property is measured in ems.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1.2`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -1451,18 +1451,18 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  Offset distance of text from its anchor.
- 
+
  This property is measured in ems.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 ems rightward and 0
  ems downward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `textRadialOffset` is set to `nil`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1474,18 +1474,18 @@ MLN_EXPORT
 #else
 /**
  Offset distance of text from its anchor.
- 
+
  This property is measured in ems.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 ems rightward and 0
  ems upward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `textRadialOffset` is set to `nil`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1499,21 +1499,21 @@ MLN_EXPORT
 /**
  If true, icons will display without their corresponding text when the text
  collides with other symbols and the icon does not.
- 
+
  The default value of this property is an expression that evaluates to `NO`. Set
  this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `iconImageName` is non-`nil`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant Boolean values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1523,23 +1523,23 @@ MLN_EXPORT
 /**
  Size of the additional area around the text bounding box used for detecting
  symbol collisions.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `2`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -1547,15 +1547,15 @@ MLN_EXPORT
 
 /**
  Orientation of text when map is pitched.
- 
+
  The default value of this property is an expression that evaluates to `auto`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNTextPitchAlignment` values
  * Any of the following constant string values:
    * `map`: The text is aligned to the plane of the map.
@@ -1565,7 +1565,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1576,17 +1576,17 @@ MLN_EXPORT
  Radial offset of text, in the direction of the symbol's anchor. Useful in
  combination with `textVariableAnchor`, which defaults to using the
  two-dimensional `textOffset` if present.
- 
+
  This property is measured in ems.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1598,21 +1598,21 @@ MLN_EXPORT
 
 /**
  Rotates the text clockwise.
- 
+
  This property is measured in degrees.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-rotate"><code>text-rotate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1622,21 +1622,21 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSExpression *textRotation;
 
-
-@property (nonatomic, null_resettable) NSExpression *textRotate __attribute__((unavailable("Use textRotation instead.")));
+@property (nonatomic, null_resettable) NSExpression *textRotate
+    __attribute__((unavailable("Use textRotation instead.")));
 
 /**
  In combination with `symbolPlacement`, determines the rotation behavior of the
  individual glyphs forming the text.
- 
+
  The default value of this property is an expression that evaluates to `auto`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNTextRotationAlignment` values
  * Any of the following constant string values:
    * `map`: When `symbol-placement` is set to `point`, aligns text east-west.
@@ -1651,7 +1651,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1660,15 +1660,15 @@ MLN_EXPORT
 
 /**
  Specifies how to capitalize text.
- 
+
  The default value of this property is an expression that evaluates to `none`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNTextTransform` values
  * Any of the following constant string values:
    * `none`: The text is not altered.
@@ -1688,13 +1688,13 @@ MLN_EXPORT
  the label at each location, in order, before moving onto the next label. Use
  `textJustify: auto` to choose justification based on anchor position. To apply
  an offset, use the `textRadialOffset` or the two-dimensional `textOffset`.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `symbolPlacement` is set to an expression that evaluates to or
  `MLNSymbolPlacementPoint`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant ``MLNTextAnchor`` array values
  * Constant array, in which each element is any of the following constant string
  values:
@@ -1715,7 +1715,7 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
@@ -1728,37 +1728,37 @@ MLN_EXPORT
  provide an array of `textAnchor` locations, each paired with an offset value.
  The renderer will attempt to place the label at each location, in order, before
  moving on to the next location+offset. Use `textJustify: auto` to choose
- justification based on anchor position. 
- 
+ justification based on anchor position.
+
   The length of the array must be even, and must alternate between enum and
  point entries. i.e., each anchor location must be accompanied by a point, and
  that point defines the offset when the corresponding anchor location is used.
  Positive offset values indicate right and down, while negative values indicate
  left and up. Anchor locations may repeat, allowing the renderer to try multiple
- offsets to try and place a label using the same anchor. 
- 
+ offsets to try and place a label using the same anchor.
+
   When present, this property takes precedence over `textAnchor`,
- `textVariableAnchor`, `textOffset`, and `textRadialOffset`. 
- 
-  ```json 
- 
+ `textVariableAnchor`, `textOffset`, and `textRadialOffset`.
+
+  ```json
+
   { "text-variable-anchor-offset": ["top", [0, 4], "left", [3,0], "bottom", [1,
- 1]] } 
- 
-  ``` 
- 
+ 1]] }
+
+  ```
+
   When the renderer chooses the `top` anchor, `[0, 4]` will be used for
- `textOffset`; the text will be shifted down by 4 ems. 
- 
+ `textOffset`; the text will be shifted down by 4 ems.
+
   When the renderer chooses the `left` anchor, `[3, 0]` will be used for
  `textOffset`; the text will be shifted right by 3 ems.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `symbolPlacement` is set to an expression that evaluates to or
  `MLNSymbolPlacementPoint`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant interleaved `MLNTextAnchor` and `CGVector` array values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1773,37 +1773,37 @@ MLN_EXPORT
  provide an array of `textAnchor` locations, each paired with an offset value.
  The renderer will attempt to place the label at each location, in order, before
  moving on to the next location+offset. Use `textJustify: auto` to choose
- justification based on anchor position. 
- 
+ justification based on anchor position.
+
   The length of the array must be even, and must alternate between enum and
  point entries. i.e., each anchor location must be accompanied by a point, and
  that point defines the offset when the corresponding anchor location is used.
  Positive offset values indicate right and down, while negative values indicate
  left and up. Anchor locations may repeat, allowing the renderer to try multiple
- offsets to try and place a label using the same anchor. 
- 
+ offsets to try and place a label using the same anchor.
+
   When present, this property takes precedence over `textAnchor`,
- `textVariableAnchor`, `textOffset`, and `textRadialOffset`. 
- 
-  ```json 
- 
+ `textVariableAnchor`, `textOffset`, and `textRadialOffset`.
+
+  ```json
+
   { "text-variable-anchor-offset": ["top", [0, 4], "left", [3,0], "bottom", [1,
- 1]] } 
- 
-  ``` 
- 
+ 1]] }
+
+  ```
+
   When the renderer chooses the `top` anchor, `[0, 4]` will be used for
- `textOffset`; the text will be shifted down by 4 ems. 
- 
+ `textOffset`; the text will be shifted down by 4 ems.
+
   When the renderer chooses the `left` anchor, `[3, 0]` will be used for
  `textOffset`; the text will be shifted right by 3 ems.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `symbolPlacement` is set to an expression that evaluates to or
  `MLNSymbolPlacementPoint`. Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant interleaved `MLNTextAnchor` and `CGVector` array values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1821,17 +1821,17 @@ MLN_EXPORT
  English point symbol will be rendered horizontally even if array value contains
  single 'vertical' enum value. The order of elements in an array define priority
  order for the placement of an orientation variant.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `symbolPlacement` is set to an expression that evaluates to or
  `MLNSymbolPlacementPoint`. Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#layout-symbol-text-writing-mode"><code>text-writing-mode</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant ``MLNTextWritingMode`` array values
  * Constant array, in which each element is any of the following constant string
  values:
@@ -1843,15 +1843,15 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *textWritingModes;
 
-
-@property (nonatomic, null_resettable) NSExpression *textWritingMode __attribute__((unavailable("Use textWritingModes instead.")));
+@property (nonatomic, null_resettable) NSExpression *textWritingMode
+    __attribute__((unavailable("Use textWritingModes instead.")));
 
 // MARK: - Accessing the Paint Attributes
 
@@ -1859,16 +1859,16 @@ MLN_EXPORT
 /**
  The tint color to apply to the icon. The `iconImageName` property must be set
  to a template image.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1881,16 +1881,16 @@ MLN_EXPORT
 /**
  The tint color to apply to the icon. The `iconImageName` property must be set
  to a template image.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1910,17 +1910,17 @@ MLN_EXPORT
 
 /**
  Fade out the halo towards the outside.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1933,7 +1933,8 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `iconHaloBlur` property.
 
- This property corresponds to the `icon-halo-blur-transition` property in the style JSON file format.
+ This property corresponds to the `icon-halo-blur-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition iconHaloBlurTransition;
 
@@ -1941,16 +1942,16 @@ MLN_EXPORT
 /**
  The color of the icon’s halo. The `iconImageName` property must be set to a
  template image.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.clearColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1963,16 +1964,16 @@ MLN_EXPORT
 /**
  The color of the icon’s halo. The `iconImageName` property must be set to a
  template image.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.clearColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -1986,27 +1987,28 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `iconHaloColor` property.
 
- This property corresponds to the `icon-halo-color-transition` property in the style JSON file format.
+ This property corresponds to the `icon-halo-color-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition iconHaloColorTransition;
 
 /**
- Distance of halo to the icon outline. 
- 
+ Distance of halo to the icon outline.
+
  The unit is in points only for SDF sprites that were created with a blur radius
  of 8, multiplied by the display density. I.e., the radius needs to be 16 for
  `@2x` sprites, etc.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2019,21 +2021,22 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `iconHaloWidth` property.
 
- This property corresponds to the `icon-halo-width-transition` property in the style JSON file format.
+ This property corresponds to the `icon-halo-width-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition iconHaloWidthTransition;
 
 /**
  The opacity at which the icon will be drawn.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values between 0 and 1 inclusive
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2053,28 +2056,28 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  Distance that the icon's anchor is moved from its original placement.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points downward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-icon-translate"><code>icon-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -2082,28 +2085,28 @@ MLN_EXPORT
 #else
 /**
  Distance that the icon's anchor is moved from its original placement.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points upward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`.
  Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-icon-translate"><code>icon-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -2113,27 +2116,29 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `iconTranslation` property.
 
- This property corresponds to the `icon-translate-transition` property in the style JSON file format.
+ This property corresponds to the `icon-translate-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition iconTranslationTransition;
 
-@property (nonatomic, null_resettable) NSExpression *iconTranslate __attribute__((unavailable("Use iconTranslation instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconTranslate
+    __attribute__((unavailable("Use iconTranslation instead.")));
 
 /**
  Controls the frame of reference for `iconTranslation`.
- 
+
  The default value of this property is an expression that evaluates to `map`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `iconImageName` is non-`nil`, and
  `iconTranslation` is non-`nil`. Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-icon-translate-anchor"><code>icon-translate-anchor</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNIconTranslationAnchor` values
  * Any of the following constant string values:
    * `map`: Icons are translated relative to the map.
@@ -2142,28 +2147,29 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *iconTranslationAnchor;
 
-@property (nonatomic, null_resettable) NSExpression *iconTranslateAnchor __attribute__((unavailable("Use iconTranslationAnchor instead.")));
+@property (nonatomic, null_resettable) NSExpression *iconTranslateAnchor
+    __attribute__((unavailable("Use iconTranslationAnchor instead.")));
 
 #if TARGET_OS_IPHONE
 /**
  The color with which the text will be drawn.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2175,16 +2181,16 @@ MLN_EXPORT
 #else
 /**
  The color with which the text will be drawn.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.blackColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2204,17 +2210,17 @@ MLN_EXPORT
 
 /**
  The halo's fadeout distance towards the outside.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2227,23 +2233,24 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `textHaloBlur` property.
 
- This property corresponds to the `text-halo-blur-transition` property in the style JSON file format.
+ This property corresponds to the `text-halo-blur-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition textHaloBlurTransition;
 
 #if TARGET_OS_IPHONE
 /**
  The color of the text's halo, which helps it stand out from backgrounds.
- 
+
  The default value of this property is an expression that evaluates to
  `UIColor.clearColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `UIColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2255,16 +2262,16 @@ MLN_EXPORT
 #else
 /**
  The color of the text's halo, which helps it stand out from backgrounds.
- 
+
  The default value of this property is an expression that evaluates to
  `NSColor.clearColor`. Set this property to `nil` to reset it to the default
  value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `NSColor` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2278,24 +2285,25 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `textHaloColor` property.
 
- This property corresponds to the `text-halo-color-transition` property in the style JSON file format.
+ This property corresponds to the `text-halo-color-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition textHaloColorTransition;
 
 /**
  Distance of halo to the font outline. Max text halo width is 1/4 of the
  font-size.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to the float
  `0`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values no less than 0
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2308,21 +2316,22 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `textHaloWidth` property.
 
- This property corresponds to the `text-halo-width-transition` property in the style JSON file format.
+ This property corresponds to the `text-halo-width-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition textHaloWidthTransition;
 
 /**
  The opacity at which the text will be drawn.
- 
+
  The default value of this property is an expression that evaluates to the float
  `1`. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant numeric values between 0 and 1 inclusive
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
@@ -2342,28 +2351,28 @@ MLN_EXPORT
 #if TARGET_OS_IPHONE
 /**
  Distance that the text's anchor is moved from its original placement.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points downward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-text-translate"><code>text-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -2371,28 +2380,28 @@ MLN_EXPORT
 #else
 /**
  Distance that the text's anchor is moved from its original placement.
- 
+
  This property is measured in points.
- 
+
  The default value of this property is an expression that evaluates to an
  `NSValue` object containing a `CGVector` struct set to 0 points rightward and 0
  points upward. Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`. Otherwise,
  it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-text-translate"><code>text-translate</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `CGVector` values
  * Predefined functions, including mathematical and string operators
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Interpolation and step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation or step functions to
  feature attributes.
  */
@@ -2402,27 +2411,29 @@ MLN_EXPORT
 /**
  The transition affecting any changes to this layer’s `textTranslation` property.
 
- This property corresponds to the `text-translate-transition` property in the style JSON file format.
+ This property corresponds to the `text-translate-transition` property in the style JSON file
+ format.
 */
 @property (nonatomic) MLNTransition textTranslationTransition;
 
-@property (nonatomic, null_resettable) NSExpression *textTranslate __attribute__((unavailable("Use textTranslation instead.")));
+@property (nonatomic, null_resettable) NSExpression *textTranslate
+    __attribute__((unavailable("Use textTranslation instead.")));
 
 /**
  Controls the frame of reference for `textTranslation`.
- 
+
  The default value of this property is an expression that evaluates to `map`.
  Set this property to `nil` to reset it to the default value.
- 
+
  This property is only applied to the style if `text` is non-`nil`, and
  `textTranslation` is non-`nil`. Otherwise, it is ignored.
- 
+
  This attribute corresponds to the <a
  href="https://maplibre.org/maplibre-style-spec/#paint-text-translate-anchor"><code>text-translate-anchor</code></a>
  layout property in the MapLibre Style Spec.
- 
+
  You can set this property to an expression containing any of the following:
- 
+
  * Constant `MLNTextTranslationAnchor` values
  * Any of the following constant string values:
    * `map`: The text is translated relative to the map.
@@ -2431,14 +2442,15 @@ MLN_EXPORT
  * Conditional expressions
  * Variable assignments and references to assigned variables
  * Step functions applied to the `$zoomLevel` variable
- 
+
  This property does not support applying interpolation functions to the
  `$zoomLevel` variable or applying interpolation or step functions to feature
  attributes.
  */
 @property (nonatomic, null_resettable) NSExpression *textTranslationAnchor;
 
-@property (nonatomic, null_resettable) NSExpression *textTranslateAnchor __attribute__((unavailable("Use textTranslationAnchor instead.")));
+@property (nonatomic, null_resettable) NSExpression *textTranslateAnchor
+    __attribute__((unavailable("Use textTranslationAnchor instead.")));
 
 @end
 

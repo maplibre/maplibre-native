@@ -14,4 +14,4 @@ class SymbolStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::Symbol
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

@@ -14,4 +14,4 @@ class HeatmapStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::Heatm
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

@@ -14,4 +14,4 @@ class ColorReliefStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::C
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl

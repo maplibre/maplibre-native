@@ -14,4 +14,4 @@ class CircleStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::Circle
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+} // namespace mbgl
