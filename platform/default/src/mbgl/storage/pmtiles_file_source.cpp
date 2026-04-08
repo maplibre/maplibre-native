@@ -166,7 +166,18 @@ public:
                         response.etag = tileResponse.etag;
 
                         if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
-                            response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                            // Support uncompressed tiles
+                            if (util::is_compressed(*tileResponse.data)) {
+                                try {
+                                    response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                                } catch (const std::exception& e) {
+                                    response.error = std::make_unique<Response::Error>(
+                                        Response::Error::Reason::Other,
+                                        std::string("Error decompressing PMTiles tile: ") + e.what());
+                                }
+                            } else {
+                                response.data = tileResponse.data;
+                            }
                         }
 
                         ref.invoke(&FileSourceRequest::setResponse, response);
