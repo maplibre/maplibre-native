@@ -89,19 +89,15 @@ jobs:
       matrix:
         include:
           - renderer: opengl
-            preset_renderer: opengl
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: vulkan
-            preset_renderer: vulkan
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: wgpu
             preset_renderer: webgpu-wgpu
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: opengl
-            preset_renderer: opengl
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
           - renderer: vulkan
-            preset_renderer: vulkan
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
@@ -117,18 +113,18 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.preset_renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_CREATE_AMALGAMATION=ON
-          cmake --build build-linux-${{ matrix.preset_renderer }} --target mbgl-core
+          cmake --preset linux-${{ matrix.preset_renderer || matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_CREATE_AMALGAMATION=ON
+          cmake --build build-linux-${{ matrix.preset_renderer || matrix.renderer }} --target mbgl-core
 
       - name: Verify Linux WebGPU amalgamation
         if: matrix.renderer == 'wgpu'
         run: |
-          .github/scripts/check-linux-webgpu-amalgam build-linux-${{ matrix.preset_renderer }}/libmbgl-core-amalgam.a
+          .github/scripts/check-linux-webgpu-amalgam build-linux-${{ matrix.preset_renderer || matrix.renderer }}/libmbgl-core-amalgam.a
 
       - name: Rename artifact
         run: |
-          cp build-linux-${{ matrix.preset_renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
-          cp build-linux-${{ matrix.preset_renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          cp build-linux-${{ matrix.preset_renderer || matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          cp build-linux-${{ matrix.preset_renderer || matrix.renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
 
       - name: Upload Linux artifacts
         if: github.event_name == 'pull_request'

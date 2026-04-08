@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
+# Linux-only helper: requires GNU nm long options.
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
   echo "usage: $0 <path-to-libmbgl-core-amalgam.a>" >&2
-  exit 2
+  exit 1
 fi
 
 archive_path="$1"
 
 if [[ ! -f "$archive_path" ]]; then
   echo "archive not found: $archive_path" >&2
-  exit 2
+  exit 1
 fi
 
 unresolved_symbols="$(
