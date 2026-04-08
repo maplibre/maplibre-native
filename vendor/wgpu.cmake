@@ -68,14 +68,18 @@ list(APPEND _wgpu_lib_search_paths
 )
 
 # On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
+macro(mln_wgpu_find_exact_library out_var)
+    foreach(_search_path ${_wgpu_lib_search_paths})
+        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+            set(${out_var} "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+            break()
+        endif()
+    endforeach()
+endmacro()
+
 macro(mln_wgpu_find_library)
     if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        foreach(_search_path ${_wgpu_lib_search_paths})
-            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-                break()
-            endif()
-        endforeach()
+        mln_wgpu_find_exact_library(WGPU_LIBRARY)
     else()
         find_library(WGPU_LIBRARY
             NAMES wgpu_native libwgpu_native
@@ -86,17 +90,8 @@ macro(mln_wgpu_find_library)
     endif()
 endmacro()
 
-macro(mln_wgpu_find_static_library)
-    foreach(_search_path ${_wgpu_lib_search_paths})
-        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-            set(WGPU_STATIC_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native static library")
-            break()
-        endif()
-    endforeach()
-endmacro()
-
 mln_wgpu_find_library()
-mln_wgpu_find_static_library()
+mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY)
 
 if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
     # Use a specific version of WGPU. This is required when to a rust application
@@ -163,7 +158,7 @@ if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
 
     # Try to find the library again
     mln_wgpu_find_library()
-    mln_wgpu_find_static_library()
+    mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY)
 
     if(NOT WGPU_LIBRARY)
         message(FATAL_ERROR "Failed to locate wgpu-native library after building")
@@ -172,10 +167,6 @@ if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
     message(STATUS "Successfully built wgpu-native: ${WGPU_LIBRARY}")
 else()
     message(STATUS "Found wgpu-native library: ${WGPU_LIBRARY}")
-endif()
-
-if(NOT WGPU_STATIC_LIBRARY AND WGPU_LIBRARY MATCHES "\\.(a|lib)$")
-    set(WGPU_STATIC_LIBRARY "${WGPU_LIBRARY}" CACHE FILEPATH "wgpu-native static library" FORCE)
 endif()
 
 if(WGPU_STATIC_LIBRARY)
