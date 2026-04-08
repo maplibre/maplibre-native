@@ -67,19 +67,20 @@ list(APPEND _wgpu_lib_search_paths
     "${_mln_wgpu_source_dir}/build/release"
 )
 
-# On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
-macro(mln_wgpu_find_exact_library out_var)
+# Resolve the exact archive/import library filename emitted by wgpu-native.
+macro(mln_wgpu_find_exact_library out_var out_description)
     foreach(_search_path ${_wgpu_lib_search_paths})
         if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-            set(${out_var} "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+            set(${out_var} "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "${out_description}")
             break()
         endif()
     endforeach()
 endmacro()
 
+# On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
 macro(mln_wgpu_find_library)
     if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        mln_wgpu_find_exact_library(WGPU_LIBRARY)
+        mln_wgpu_find_exact_library(WGPU_LIBRARY "wgpu-native library")
     else()
         find_library(WGPU_LIBRARY
             NAMES wgpu_native libwgpu_native
@@ -91,7 +92,7 @@ macro(mln_wgpu_find_library)
 endmacro()
 
 mln_wgpu_find_library()
-mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY)
+mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
 
 if(NOT WGPU_LIBRARY)
     message(STATUS "Pre-built wgpu-native library not found, attempting to build from source...")
@@ -142,7 +143,7 @@ if(NOT WGPU_LIBRARY)
 
     # Try to find the library again
     mln_wgpu_find_library()
-    mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY)
+    mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
 
     if(NOT WGPU_LIBRARY)
         message(FATAL_ERROR "Failed to locate wgpu-native library after building")
