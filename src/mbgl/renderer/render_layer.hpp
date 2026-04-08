@@ -217,7 +217,8 @@ protected:
     template <typename Func /* bool(gfx::Drawable&) */>
     bool updateTile(RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
         bool anyUpdated = false;
-        if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
+        if (layerGroup && layerGroup->getType() == LayerGroupBase::Type::TileLayerGroup) {
+            const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get());
             bool unUpdatedDrawables = false;
             tileGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
                 if (update(drawable)) {
