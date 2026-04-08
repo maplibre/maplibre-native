@@ -78,10 +78,27 @@ MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE = [
     "src/MLNMapView+Metal.mm",
 ]
 
+MLN_PUBLIC_IOS_APP_HEADERS = [
+    "app/MBXAnnotationView.h",
+    "app/MBXAppDelegate.h",
+    "app/MBXCustomCalloutView.h",
+    "app/MBXCustomLocationViewController.h",
+    "app/MBXEmbeddedMapViewController.h",
+    "app/MBXFrameTimeGraphView.h",
+    "app/MBXOfflinePacksTableViewController.h",
+    "app/MBXOrnamentsViewController.h",
+    "app/MBXSnapshotTestViewController.h",
+    "app/MBXSnapshotsViewController.h",
+    "app/MBXState.h",
+    "app/MBXStateManager.h",
+    "app/MBXUserLocationAnnotationView.h",
+    "app/MBXViewController.h",
+    "app/MLNMapView_Experimental.h",
+]
+
 MLN_PUBLIC_IOS_APP_SOURCE = [
     "app/MBXAnnotationView.m",
     "app/MBXAppDelegate.m",
-    "app/MBXCustomCalloutView.h",
     "app/MBXCustomCalloutView.m",
     "app/MBXCustomLocationViewController.m",
     "app/MBXEmbeddedMapViewController.m",
@@ -92,19 +109,10 @@ MLN_PUBLIC_IOS_APP_SOURCE = [
     "app/MBXState.m",
     "app/MBXStateManager.m",
     "app/MBXUserLocationAnnotationView.m",
-    "app/MBXViewController.mm",
     "app/main.m",
-    "app/MBXAnnotationView.h",
-    "app/MBXAppDelegate.h",
-    "app/MBXCustomLocationViewController.h",
-    "app/MBXEmbeddedMapViewController.h",
-    "app/MBXFrameTimeGraphView.h",
-    "app/MBXOfflinePacksTableViewController.h",
-    "app/MBXOrnamentsViewController.h",
-    "app/MBXSnapshotsViewController.h",
-    "app/MBXState.h",
-    "app/MBXStateManager.h",
-    "app/MBXUserLocationAnnotationView.h",
-    "app/MBXViewController.h",
-    "app/MLNMapView_Experimental.h",
-]
+] + MLN_PUBLIC_IOS_APP_HEADERS
+
+MLN_PUBLIC_IOS_APP_OBJCPP_SOURCE = [
+    "app/MBXSnapshotTestViewController.mm",
+    "app/MBXViewController.mm",
+] + MLN_PUBLIC_IOS_APP_HEADERS
