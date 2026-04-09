@@ -102,7 +102,7 @@ public:
     virtual void uploadSubRegion(const void* pixelData,
                                  const Size& size,
                                  uint16_t xOffset,
-                                 uint16_t yOffset) noexcept = 0;
+                                 uint16_t yOffset) = 0;
 
     /// @brief Upload a subregion of the texture resource
     /// @tparam Image Image object type
