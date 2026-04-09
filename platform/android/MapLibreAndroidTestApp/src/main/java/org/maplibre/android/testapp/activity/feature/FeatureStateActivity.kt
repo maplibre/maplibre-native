@@ -42,6 +42,7 @@ class FeatureStateActivity : AppCompatActivity() {
 
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
+    private lateinit var statesSource: GeoJsonSource
 
     private val mapClickListener = MapLibreMap.OnMapClickListener { point ->
         handleMapClick(point)
@@ -69,7 +70,9 @@ class FeatureStateActivity : AppCompatActivity() {
 
     // # --8<-- [start:addStatesLayer]
     private fun addStatesLayer(style: Style) {
-        style.addSource(GeoJsonSource(STATES_SOURCE_ID, URI(STATES_URL)))
+        val source = GeoJsonSource(STATES_SOURCE_ID, URI(STATES_URL))
+        style.addSource(source)
+        statesSource = source
 
         val selectedFill = Color.parseColor("#d94d41")
         val defaultFill = Color.parseColor("#2f7de1")
@@ -123,7 +126,7 @@ class FeatureStateActivity : AppCompatActivity() {
         val feature = features.firstOrNull() ?: return false
         val featureId = feature.id() ?: return false
 
-        val currentState = maplibreMap.getFeatureState(STATES_SOURCE_ID, null, featureId)
+        val currentState = statesSource.getFeatureState(featureId)
         val isSelected = currentState
             ?.get("selected")
             ?.takeUnless { it.isJsonNull }
@@ -131,7 +134,7 @@ class FeatureStateActivity : AppCompatActivity() {
             ?: false
 
         val nextState = JsonObject().apply { addProperty("selected", !isSelected) }
-        maplibreMap.setFeatureState(STATES_SOURCE_ID, null, featureId, nextState)
+        statesSource.setFeatureState(featureId, nextState)
 
         val stateName = feature.getStringProperty("STATE_NAME") ?: "Unknown"
         Toast.makeText(

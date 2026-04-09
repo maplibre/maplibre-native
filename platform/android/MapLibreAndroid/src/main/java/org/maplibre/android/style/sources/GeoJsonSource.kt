@@ -2,6 +2,7 @@ package org.maplibre.android.style.sources
 
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
+import com.google.gson.JsonObject
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Geometry
@@ -403,6 +404,53 @@ class GeoJsonSource : Source {
             checkThread()
             return nativeGetUrl()
         }
+
+    /**
+     * Sets the state of a feature in this source.
+     *
+     * Feature state can be read in style expressions through `["feature-state", key]`.
+     * The target feature must already have an id in the underlying source data.
+     *
+     * @param featureId the id of the feature whose state to set
+     * @param state     a JSON object with the state key-value pairs to merge
+     */
+    fun setFeatureState(featureId: String, state: JsonObject) {
+        checkThread()
+        nativeSetFeatureState(null, featureId, state)
+    }
+
+    /**
+     * Gets the current state of a feature in this source.
+     *
+     * The target feature must already have an id in the underlying source data.
+     *
+     * @param featureId the id of the feature whose state to get
+     * @return the feature state, or null
+     */
+    fun getFeatureState(featureId: String): JsonObject? {
+        checkThread()
+        return nativeGetFeatureState(null, featureId)
+    }
+
+    /**
+     * Removes state from a feature in this source, or from all features when
+     * [featureId] is null.
+     *
+     * @param featureId the id of the feature, or null to target all features
+     * @param stateKey  the state key to remove, or null to remove all keys
+     */
+    fun removeFeatureState(featureId: String?, stateKey: String?) {
+        checkThread()
+        nativeRemoveFeatureState(null, featureId, stateKey)
+    }
+
+    /**
+     * Removes all feature state entries from this source.
+     */
+    fun resetFeatureStates() {
+        checkThread()
+        nativeRemoveFeatureState(null, null, null)
+    }
 
     /**
      * Queries the source for features.

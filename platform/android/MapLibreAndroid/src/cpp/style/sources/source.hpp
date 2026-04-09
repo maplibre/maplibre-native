@@ -6,6 +6,7 @@
 
 #include "../value.hpp"
 #include "../../android_renderer_frontend.hpp"
+#include "../../gson/json_object.hpp"
 
 #include <jni/jni.hpp>
 
@@ -62,6 +63,20 @@ public:
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
+    void setFeatureState(JNIEnv&,
+                         const jni::String& sourceLayerId,
+                         const jni::String& featureId,
+                         const jni::Object<gson::JsonObject>& state);
+
+    jni::Local<jni::Object<gson::JsonObject>> getFeatureState(JNIEnv&,
+                                                              const jni::String& sourceLayerId,
+                                                              const jni::String& featureId);
+
+    void removeFeatureState(JNIEnv&,
+                            const jni::String& sourceLayerId,
+                            const jni::String& featureId,
+                            const jni::String& stateKey);
+
 protected:
     // Set on newly created sources until added to the map.
     std::unique_ptr<mbgl::style::Source> ownedSource;
@@ -74,6 +89,9 @@ protected:
 
     // RendererFrontend pointer is valid only when added to the map.
     AndroidRendererFrontend* rendererFrontend{nullptr};
+
+    // Map pointer is valid only when added to the map.
+    mbgl::Map* map{nullptr};
 };
 
 } // namespace android

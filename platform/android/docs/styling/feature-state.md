@@ -31,7 +31,7 @@ Tapping a state toggles its `selected` feature-state key and shows a toast:
 
 ## Notes
 
-- Use `MapLibreMap.setFeatureState()` to merge new keys into a feature's state.
-- Use `MapLibreMap.getFeatureState()` to inspect the current state for one feature.
-- Use `MapLibreMap.removeFeatureState()` or `MapLibreMap.resetFeatureStates()` to clear state.
-- For vector tile sources, you must pass `sourceLayerId`.
+- Use `GeoJsonSource.setFeatureState()` or `VectorSource.setFeatureState()` to merge new keys into a feature's state.
+- Use `getFeatureState()` on the source to inspect the current state for one feature.
+- Use `removeFeatureState()` or `resetFeatureStates()` on the source to clear state.
+- For `VectorSource`, all feature-state methods require a `sourceLayerId` parameter.
