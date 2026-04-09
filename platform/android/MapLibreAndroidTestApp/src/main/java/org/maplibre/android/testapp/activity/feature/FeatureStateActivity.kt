@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.activity.feature
 
 import android.graphics.Color
+import android.graphics.PointF
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -21,28 +22,29 @@ import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
-import org.maplibre.geojson.Feature
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.Point
-import org.maplibre.geojson.Polygon
+import java.net.URI
 
 /**
- * Test activity showcasing interactive styling with feature state.
+ * Test activity showcasing interactive styling with feature state,
+ * matching the iOS feature-state example.
+ *
+ * Loads US states from a remote GeoJSON source and uses feature-state
+ * expressions to highlight tapped states.
  */
 class FeatureStateActivity : AppCompatActivity() {
     companion object {
-        private const val SOURCE_ID = "feature-state-source"
-        private const val FILL_LAYER_ID = "feature-state-fill-layer"
-        private const val LINE_LAYER_ID = "feature-state-line-layer"
-        private const val PROPERTY_NAME = "name"
-        private const val STATE_SELECTED = "selected"
+        private const val STATES_SOURCE_ID = "states"
+        private const val FILL_LAYER_ID = "state-fills"
+        private const val LINE_LAYER_ID = "state-borders"
+        private const val STATES_URL =
+            "https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson"
     }
 
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
 
     private val mapClickListener = MapLibreMap.OnMapClickListener { point ->
-        toggleFeatureSelection(point)
+        handleMapClick(point)
     }
 
     // # --8<-- [start:onCreate]
@@ -54,124 +56,92 @@ class FeatureStateActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             maplibreMap = map
-            maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(39.5, -96.5), 2.6))
+            maplibreMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(LatLng(42.619626, -103.523181), 3.0)
+            )
             maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style ->
-                addFeatureStateLayers(style)
+                addStatesLayer(style)
                 maplibreMap.addOnMapClickListener(mapClickListener)
             }
         }
     }
     // # --8<-- [end:onCreate]
 
-    // # --8<-- [start:addFeatureStateLayers]
-    private fun addFeatureStateLayers(style: Style) {
-        style.addSource(GeoJsonSource(SOURCE_ID, createRegions()))
+    // # --8<-- [start:addStatesLayer]
+    private fun addStatesLayer(style: Style) {
+        style.addSource(GeoJsonSource(STATES_SOURCE_ID, URI(STATES_URL)))
 
         val selectedFill = Color.parseColor("#d94d41")
         val defaultFill = Color.parseColor("#2f7de1")
-        val selectedLine = Color.parseColor("#8f241f")
-        val defaultLine = Color.parseColor("#194a80")
+        val selectedBorder = Color.parseColor("#8f241f")
+        val defaultBorder = Color.parseColor("#2f7de1")
 
         style.addLayer(
-            FillLayer(FILL_LAYER_ID, SOURCE_ID).withProperties(
+            FillLayer(FILL_LAYER_ID, STATES_SOURCE_ID).withProperties(
                 fillColor(
                     switchCase(
-                        toBool(featureState(STATE_SELECTED)),
+                        toBool(featureState("selected")),
                         color(selectedFill),
                         color(defaultFill)
                     )
                 ),
                 fillOpacity(
                     switchCase(
-                        toBool(featureState(STATE_SELECTED)),
-                        literal(0.8f),
-                        literal(0.45f)
+                        toBool(featureState("selected")),
+                        literal(0.7f),
+                        literal(0.5f)
                     )
                 )
             )
         )
 
         style.addLayer(
-            LineLayer(LINE_LAYER_ID, SOURCE_ID).withProperties(
+            LineLayer(LINE_LAYER_ID, STATES_SOURCE_ID).withProperties(
                 lineColor(
                     switchCase(
-                        toBool(featureState(STATE_SELECTED)),
-                        color(selectedLine),
-                        color(defaultLine)
+                        toBool(featureState("selected")),
+                        color(selectedBorder),
+                        color(defaultBorder)
                     )
                 ),
                 lineWidth(
                     switchCase(
-                        toBool(featureState(STATE_SELECTED)),
-                        literal(3.0f),
-                        literal(1.25f)
+                        toBool(featureState("selected")),
+                        literal(2.0f),
+                        literal(1.0f)
                     )
                 )
             )
         )
     }
-    // # --8<-- [end:addFeatureStateLayers]
+    // # --8<-- [end:addStatesLayer]
 
-    // # --8<-- [start:toggleFeatureSelection]
-    private fun toggleFeatureSelection(point: LatLng): Boolean {
-        val screenCoordinate = maplibreMap.projection.toScreenLocation(point)
-        val feature = maplibreMap.queryRenderedFeatures(screenCoordinate, FILL_LAYER_ID).firstOrNull() ?: return false
+    // # --8<-- [start:handleMapClick]
+    private fun handleMapClick(point: LatLng): Boolean {
+        val screenPoint: PointF = maplibreMap.projection.toScreenLocation(point)
+        val features = maplibreMap.queryRenderedFeatures(screenPoint, FILL_LAYER_ID)
+        val feature = features.firstOrNull() ?: return false
         val featureId = feature.id() ?: return false
 
-        val currentState = maplibreMap.getFeatureState(SOURCE_ID, null, featureId)
+        val currentState = maplibreMap.getFeatureState(STATES_SOURCE_ID, null, featureId)
         val isSelected = currentState
-            ?.get(STATE_SELECTED)
+            ?.get("selected")
             ?.takeUnless { it.isJsonNull }
             ?.asBoolean
             ?: false
 
-        val nextState = JsonObject().apply { addProperty(STATE_SELECTED, !isSelected) }
-        maplibreMap.setFeatureState(SOURCE_ID, null, featureId, nextState)
+        val nextState = JsonObject().apply { addProperty("selected", !isSelected) }
+        maplibreMap.setFeatureState(STATES_SOURCE_ID, null, featureId, nextState)
 
-        val featureName = feature.properties()
-            ?.get(PROPERTY_NAME)
-            ?.takeUnless { it.isJsonNull }
-            ?.asString
-            ?: "Region"
+        val stateName = feature.getStringProperty("STATE_NAME") ?: "Unknown"
         Toast.makeText(
             this,
-            "$featureName ${if (!isSelected) "selected" else "deselected"}",
+            "$stateName ${if (!isSelected) "selected" else "deselected"}",
             Toast.LENGTH_SHORT
         ).show()
         return true
     }
-    // # --8<-- [end:toggleFeatureSelection]
-
-    // # --8<-- [start:createRegions]
-    private fun createRegions(): FeatureCollection {
-        return FeatureCollection.fromFeatures(
-            arrayOf(
-                createRegion("west", "West", -124.5, 32.5, -109.0, 49.0),
-                createRegion("central", "Central", -109.0, 31.0, -94.0, 49.0),
-                createRegion("east", "East", -94.0, 28.0, -67.0, 47.5)
-            )
-        )
-    }
-    // # --8<-- [end:createRegions]
-
-    private fun createRegion(
-        id: String,
-        name: String,
-        minLongitude: Double,
-        minLatitude: Double,
-        maxLongitude: Double,
-        maxLatitude: Double
-    ): Feature {
-        val ring = listOf(
-            Point.fromLngLat(minLongitude, minLatitude),
-            Point.fromLngLat(maxLongitude, minLatitude),
-            Point.fromLngLat(maxLongitude, maxLatitude),
-            Point.fromLngLat(minLongitude, maxLatitude),
-            Point.fromLngLat(minLongitude, minLatitude)
-        )
-        val properties = JsonObject().apply { addProperty(PROPERTY_NAME, name) }
-        return Feature.fromGeometry(Polygon.fromLngLats(listOf(ring)), properties, id)
-    }
+    // # --8<-- [end:handleMapClick]
 
     override fun onStart() {
         super.onStart()
