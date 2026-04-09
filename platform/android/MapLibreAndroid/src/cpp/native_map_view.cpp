@@ -1023,11 +1023,11 @@ void NativeMapView::setFeatureState(JNIEnv& env,
         return;
     }
 
-    rendererFrontend->setFeatureState(jni::Make<std::string>(env, sourceId),
-                                      sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId))
-                                                    : std::nullopt,
-                                      jni::Make<std::string>(env, featureId),
-                                      gson::JsonObject::convert(env, state));
+    rendererFrontend->setFeatureState(
+        jni::Make<std::string>(env, sourceId),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        jni::Make<std::string>(env, featureId),
+        gson::JsonObject::convert(env, state));
     map->triggerRepaint();
 }
 
@@ -1039,11 +1039,10 @@ jni::Local<jni::Object<gson::JsonObject>> NativeMapView::getFeatureState(JNIEnv&
         return jni::Local<jni::Object<gson::JsonObject>>();
     }
 
-    const auto state =
-        rendererFrontend->getFeatureState(jni::Make<std::string>(env, sourceId),
-                                          sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId))
-                                                        : std::nullopt,
-                                          jni::Make<std::string>(env, featureId));
+    const auto state = rendererFrontend->getFeatureState(
+        jni::Make<std::string>(env, sourceId),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        jni::Make<std::string>(env, featureId));
     if (state.empty()) {
         return jni::Local<jni::Object<gson::JsonObject>>();
     }

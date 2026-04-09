@@ -178,9 +178,8 @@ void AndroidRendererFrontend::setFeatureState(const std::string& sourceID,
 FeatureState AndroidRendererFrontend::getFeatureState(const std::string& sourceID,
                                                       const std::optional<std::string>& sourceLayerID,
                                                       const std::string& featureID) const {
-    auto getFeatureState =
-        static_cast<FeatureState (Renderer::*)(const std::string&, const std::optional<std::string>&, const std::string&)
-                        const>(&Renderer::getFeatureState);
+    auto getFeatureState = static_cast<FeatureState (Renderer::*)(
+        const std::string&, const std::optional<std::string>&, const std::string&) const>(&Renderer::getFeatureState);
     return mapRenderer.actor().ask(getFeatureState, sourceID, sourceLayerID, featureID).get();
 }
 
