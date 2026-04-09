@@ -99,10 +99,7 @@ public:
     /// @param size image dimensions
     /// @param xOffset destination x coordinate
     /// @param yOffset destination y coordinate
-    virtual void uploadSubRegion(const void* pixelData,
-                                 const Size& size,
-                                 uint16_t xOffset,
-                                 uint16_t yOffset) = 0;
+    virtual void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) = 0;
 
     /// @brief Upload a subregion of the texture resource
     /// @tparam Image Image object type
