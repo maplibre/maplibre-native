@@ -115,7 +115,7 @@ public:
                 try {
                     f(*pair.second);
                 } catch (...) {
-                    Log::Warning(Event::Render, "Visit layer error");
+                    observer->onRenderError(std::current_exception());
                 }
             }
         }
@@ -128,7 +128,7 @@ public:
                 try {
                     f(*rit->second);
                 } catch (...) {
-                    Log::Warning(Event::Render, "Visit layer error");
+                    observer->onRenderError(std::current_exception());
                 }
             }
         }

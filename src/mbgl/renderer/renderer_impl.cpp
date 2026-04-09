@@ -81,6 +81,10 @@ void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
     observer->onShaderCompileFailed(shaderID, type, additionalDefines);
 }
 
+void Renderer::Impl::onRenderError(std::exception_ptr error) {
+    observer->onRenderError(error);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
@@ -164,6 +168,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     backend.getDefaultRenderable().wait();
     context.beginFrame();
 
+    auto& device = (static_cast<mtl::RendererBackend&>(backend)).getDevice();
+    MTL::Buffer* OOM[1000];
+    for (int i = 0; i < 1000; i++) {
+        OOM[i] = device->newBuffer(1000000, MTL::ResourceStorageModeShared);
+        if (!OOM[i]) {
+            auto debug = 0;
+        }
+    }
+    
     if (!staticData) {
         staticData = std::make_unique<RenderStaticData>(std::make_unique<gfx::ShaderRegistry>());
 

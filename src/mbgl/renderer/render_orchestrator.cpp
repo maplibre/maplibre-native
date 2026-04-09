@@ -980,7 +980,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         try {
             renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
         } catch (...) {
-            Log::Warning(Event::Render, "Update layers error");
+            observer->onRenderError(std::current_exception());
         }
     }
     addChanges(changes);

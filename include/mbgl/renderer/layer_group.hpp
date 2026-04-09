@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/identity.hpp>
@@ -106,6 +107,9 @@ public:
 
     /// Get the mutable uniform buffer array attached to this layer group
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
+    
+    /// Set observer
+    void setObserver(gfx::ContextObserver* observer_) { observer = observer_ ? observer_ : &gfx::nullObserver; }
 
 protected:
     const Type type;
@@ -113,6 +117,7 @@ protected:
     int32_t layerIndex;
     std::vector<LayerTweakerWeakPtr> layerTweakers;
     std::string name;
+    gfx::ContextObserver* observer;
 };
 
 /**
@@ -132,15 +137,18 @@ public:
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(Func f) {
         assert(drawablesByTile.size() == sortedDrawables.size());
+        unordered_set<gfx::Drawable*> drawablesFailed;
         for (auto* drawable : sortedDrawables) {
             try {
                 f(*drawable);
             } catch (...) {
-                drawable->markedForDeletion = true;
-                Log::Warning(Event::Render, "Visit drawable error");
+                drawablesFailed.insert(drawable);
+                observer->onRenderError(std::current_exception());
             }
         }
-        removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.markedForDeletion; });
+        if (drawablesFailed.size() > 0) {
+            removeDrawablesIf([&](gfx::Drawable& drawable) { return drawablesFailed.contains(&drawable); });
+        }
         return sortedDrawables.size();
     }
 
@@ -166,8 +174,20 @@ public:
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(mbgl::RenderPass pass, const OverscaledTileID& tileID, Func f) {
         assert(drawablesByTile.size() == sortedDrawables.size());
-        const auto range = drawablesByTile.equal_range({pass, tileID});
-        std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
+        unordered_set<gfx::Drawable*> drawablesFailed;
+        auto range = drawablesByTile.equal_range({pass, tileID});
+        std::for_each(range.first, range.second, [&f, &drawablesFailed, this](const auto& pair) {
+            try {
+                f(*pair.second);
+            } catch (...) {
+                drawablesFailed.insert(pair.second.get());
+                observer->onRenderError(std::current_exception());
+            }
+        });
+        if (drawablesFailed.size() > 0) {
+            removeDrawablesIf([&](gfx::Drawable& drawable) { return drawablesFailed.contains(&drawable); });
+            range = drawablesByTile.equal_range({pass, tileID});
+        }
         return std::distance(range.first, range.second);
     }
 
@@ -219,17 +239,20 @@ public:
 
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(Func f) {
+        unordered_set<gfx::Drawable*> drawablesFailed;
         for (auto& item : drawables) {
             if (item) {
                 try {
                     f(*item);
                 } catch (...) {
-                    item->markedForDeletion = true;
-                    Log::Warning(Event::Render, "Visit drawable error");
+                    drawablesFailed.insert(item.get());
+                    observer->onRenderError(std::current_exception());
                 }
             }
         }
-        removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.markedForDeletion; });
+        if (drawablesFailed.size() > 0) {
+            removeDrawablesIf([&](gfx::Drawable& drawable) { return drawablesFailed.contains(&drawable); });
+        }
         return drawables.size();
     }
 
