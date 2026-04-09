@@ -88,7 +88,7 @@ public:
     /// @tparam Image Image object type
     /// @param img Image to transfer
     template <typename Image>
-    void upload(const Image& img) noexcept {
+    void upload(const Image& img) {
         setFormat(Image::channels == 1 ? gfx::TexturePixelType::Alpha : gfx::TexturePixelType::RGBA,
                   gfx::TextureChannelDataType::UnsignedByte);
         upload(img.data ? img.data.get() : nullptr, img.size);
