@@ -223,6 +223,4 @@ void MLNMapViewImpl::onSpriteRequested(const std::optional<mbgl::style::Sprite>&
                       url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
 
-void MLNMapViewImpl::onRenderError(std::exception_ptr error) {
-  [mapView rendererDidError];
-}
+void MLNMapViewImpl::onRenderError(std::exception_ptr error) { [mapView rendererDidError]; }

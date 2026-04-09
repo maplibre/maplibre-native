@@ -176,7 +176,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             auto debug = 0;
         }
     }
-    
+
     if (!staticData) {
         staticData = std::make_unique<RenderStaticData>(std::make_unique<gfx::ShaderRegistry>());
 

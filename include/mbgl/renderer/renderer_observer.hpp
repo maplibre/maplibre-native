@@ -80,7 +80,7 @@ public:
 
     // Tile loading
     virtual void onTileAction(TileOperation, const OverscaledTileID&, const std::string&) {}
-    
+
     /// Render layer or drawable failed
     virtual void onRenderError(std::exception_ptr) {}
 };

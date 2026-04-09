@@ -107,7 +107,7 @@ public:
 
     /// Get the mutable uniform buffer array attached to this layer group
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
-    
+
     /// Set observer
     void setObserver(gfx::ContextObserver* observer_) { observer = observer_ ? observer_ : &gfx::nullObserver; }
 
