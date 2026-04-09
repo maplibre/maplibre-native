@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.UiThread;
 
+import com.google.gson.JsonObject;
 import org.maplibre.android.gestures.AndroidGesturesManager;
 import org.maplibre.android.gestures.MoveGestureDetector;
 import org.maplibre.android.gestures.RotateGestureDetector;
@@ -2283,6 +2284,55 @@ public final class MapLibreMap {
                                              @Nullable Expression filter,
                                              @Nullable String... layerIds) {
     return nativeMapView.queryRenderedFeatures(coordinates, layerIds, filter);
+  }
+
+  /**
+   * Sets the state of a feature identified by source id, optional source layer id and feature id.
+   *
+   * <p>Feature state can be read in style expressions through {@code ["feature-state", key]}.</p>
+   * <p>The target feature must already have an id in the underlying source data. For vector tile
+   * sources, {@code sourceLayerId} is required.</p>
+   */
+  public void setFeatureState(@NonNull String sourceId,
+                              @Nullable String sourceLayerId,
+                              @NonNull String featureId,
+                              @NonNull JsonObject state) {
+    nativeMapView.setFeatureState(sourceId, sourceLayerId, featureId, state);
+  }
+
+  /**
+   * Gets the current state of a feature.
+   *
+   * <p>The target feature must already have an id in the underlying source data. For vector tile
+   * sources, {@code sourceLayerId} is required.</p>
+   */
+  @Nullable
+  public JsonObject getFeatureState(@NonNull String sourceId,
+                                    @Nullable String sourceLayerId,
+                                    @NonNull String featureId) {
+    return nativeMapView.getFeatureState(sourceId, sourceLayerId, featureId);
+  }
+
+  /**
+   * Removes state from a feature, or from all features in a source or source layer when
+   * {@code featureId} is {@code null}.
+   *
+   * <p>For vector tile sources, {@code sourceLayerId} is required.</p>
+   */
+  public void removeFeatureState(@NonNull String sourceId,
+                                 @Nullable String sourceLayerId,
+                                 @Nullable String featureId,
+                                 @Nullable String stateKey) {
+    nativeMapView.removeFeatureState(sourceId, sourceLayerId, featureId, stateKey);
+  }
+
+  /**
+   * Removes all feature state entries from a source or source layer.
+   *
+   * <p>For vector tile sources, {@code sourceLayerId} is required.</p>
+   */
+  public void resetFeatureStates(@NonNull String sourceId, @Nullable String sourceLayerId) {
+    nativeMapView.removeFeatureState(sourceId, sourceLayerId, null, null);
   }
 
   //

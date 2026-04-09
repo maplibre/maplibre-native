@@ -2,6 +2,7 @@ package org.maplibre.android.maps
 
 import android.content.Context
 import android.graphics.PointF
+import com.google.gson.JsonObject
 import org.maplibre.android.MapLibreInjector
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -260,5 +261,39 @@ class MapLibreMapTest : BaseTest() {
         maplibreMap.setZoom(2.0, target, 0)
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
         verify { nativeMapView.setZoom(2.0, target, 0) }
+    }
+
+    @Test
+    fun testSetFeatureState() {
+        val state = JsonObject().apply { addProperty("selected", true) }
+
+        maplibreMap.setFeatureState("source-id", "source-layer-id", "feature-id", state)
+
+        verify { nativeMapView.setFeatureState("source-id", "source-layer-id", "feature-id", state) }
+    }
+
+    @Test
+    fun testGetFeatureState() {
+        val expected = JsonObject().apply { addProperty("selected", true) }
+        every { nativeMapView.getFeatureState("source-id", "source-layer-id", "feature-id") } returns expected
+
+        val actual = maplibreMap.getFeatureState("source-id", "source-layer-id", "feature-id")
+
+        assertEquals(expected, actual)
+        verify { nativeMapView.getFeatureState("source-id", "source-layer-id", "feature-id") }
+    }
+
+    @Test
+    fun testRemoveFeatureState() {
+        maplibreMap.removeFeatureState("source-id", "source-layer-id", "feature-id", "selected")
+
+        verify { nativeMapView.removeFeatureState("source-id", "source-layer-id", "feature-id", "selected") }
+    }
+
+    @Test
+    fun testResetFeatureStates() {
+        maplibreMap.resetFeatureStates("source-id", "source-layer-id")
+
+        verify { nativeMapView.removeFeatureState("source-id", "source-layer-id", null, null) }
     }
 }
