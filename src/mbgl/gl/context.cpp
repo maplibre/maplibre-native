@@ -566,13 +566,17 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+    auto tileLayerGroup= std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+    tileLayerGroup->setObserver(observer);
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+    auto layerGroup= std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+    layerGroup->setObserver(observer);
+    return layerGroup;
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
