@@ -1,5 +1,7 @@
 package org.maplibre.android.testapp.style;
 
+import com.google.gson.JsonObject;
+
 import org.junit.Ignore;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.GeoJsonOptions;
@@ -7,6 +9,7 @@ import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.Point;
 import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.sources.GeoJsonSource;
@@ -109,6 +112,34 @@ public class GeoJsonSourceTests extends EspressoTest {
       assertEquals(1, maplibreMap.queryRenderedFeatures(
               maplibreMap.getProjection().toScreenLocation(
                       new LatLng(55, 20)), "layer").size());
+    });
+  }
+
+  @Test
+  public void testFeatureStateUpdatesStyleOwnedSourceImmediately() {
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      boolean[] styleLoaded = {false};
+      maplibreMap.setStyle(new Style.Builder().fromJson(createFeatureStateStyleJson()), style -> styleLoaded[0] = true);
+
+      while (!styleLoaded[0]) {
+        uiController.loopMainThreadForAtLeast(100);
+      }
+
+      TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
+
+      GeoJsonSource source = maplibreMap.getStyle().getSourceAs("style-source");
+      assertEquals(0, maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size());
+
+      JsonObject state = new JsonObject();
+      state.addProperty("selected", true);
+      source.setFeatureState("feature-1", state);
+
+      TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
+
+      assertEquals(1, maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size());
     });
   }
 
@@ -274,6 +305,42 @@ public class GeoJsonSourceTests extends EspressoTest {
         source.setGeoJson(geoJsonString);
       }
     });
+  }
+
+  private String createFeatureStateStyleJson() {
+    return "{"
+            + "\"version\":8,"
+            + "\"center\":[0,0],"
+            + "\"zoom\":3,"
+            + "\"sources\":{"
+            + "\"style-source\":{"
+            + "\"type\":\"geojson\","
+            + "\"data\":{"
+            + "\"type\":\"FeatureCollection\","
+            + "\"features\":[{"
+            + "\"type\":\"Feature\","
+            + "\"id\":\"feature-1\","
+            + "\"properties\":{},"
+            + "\"geometry\":{\"type\":\"Point\",\"coordinates\":[0,0]}"
+            + "}]"
+            + "}"
+            + "}"
+            + "},"
+            + "\"layers\":["
+            + "{"
+            + "\"id\":\"background\","
+            + "\"type\":\"background\","
+            + "\"paint\":{\"background-color\":\"#ffffff\"}"
+            + "},"
+            + "{"
+            + "\"id\":\"selected-layer\","
+            + "\"type\":\"circle\","
+            + "\"source\":\"style-source\","
+            + "\"filter\":[\"==\",[\"feature-state\",\"selected\"],true],"
+            + "\"paint\":{\"circle-radius\":12,\"circle-color\":\"#ff0000\"}"
+            + "}"
+            + "]"
+            + "}";
   }
 
   public abstract class BaseViewAction implements ViewAction {

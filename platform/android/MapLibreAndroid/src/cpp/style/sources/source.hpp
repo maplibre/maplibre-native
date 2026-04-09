@@ -20,7 +20,10 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&, mbgl::style::Source&);
-    static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend&);
+    static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&,
+                                                        mbgl::style::Source&,
+                                                        AndroidRendererFrontend&,
+                                                        mbgl::Map&);
 
     /*
      * Called when a Java object is created for a core source that belongs to a map.
@@ -76,6 +79,8 @@ public:
                             const jni::String& sourceLayerId,
                             const jni::String& featureId,
                             const jni::String& stateKey);
+
+    void bindToMap(AndroidRendererFrontend&, mbgl::Map&);
 
 protected:
     // Set on newly created sources until added to the map.

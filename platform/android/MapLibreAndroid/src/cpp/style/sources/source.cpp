@@ -52,11 +52,14 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
 
 const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env,
                                                      mbgl::style::Source& coreSource,
-                                                     AndroidRendererFrontend& frontend) {
+                                                     AndroidRendererFrontend& frontend,
+                                                     mbgl::Map& map) {
     if (!coreSource.peer.has_value()) {
         coreSource.peer = createSourcePeer(env, coreSource, &frontend);
     }
-    return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
+    auto* peer = coreSource.peer.get<std::unique_ptr<Source>>().get();
+    peer->bindToMap(frontend, map);
+    return peer->javaPeer;
 }
 
 const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env, mbgl::style::Source& coreSource) {
@@ -172,8 +175,7 @@ void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& ma
     // Add strong reference to java source
     javaPeer = jni::NewGlobal(env, obj);
 
-    rendererFrontend = &frontend;
-    this->map = &map;
+    bindToMap(frontend, map);
 }
 
 bool Source::removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map& map) {
@@ -257,6 +259,11 @@ void Source::removeFeatureState(JNIEnv& env,
     if (map) {
         map->triggerRepaint();
     }
+}
+
+void Source::bindToMap(AndroidRendererFrontend& frontend, mbgl::Map& map) {
+    rendererFrontend = &frontend;
+    this->map = &map;
 }
 
 void Source::releaseJavaPeer() {

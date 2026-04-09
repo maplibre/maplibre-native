@@ -1226,7 +1226,7 @@ jni::Local<jni::Array<jni::Object<Source>>> NativeMapView::getSources(JNIEnv& en
     auto jSources = jni::Array<jni::Object<Source>>::New(env, sources.size());
     int index = 0;
     for (auto source : sources) {
-        jSources.Set(env, index, Source::peerForCoreSource(env, *source, *rendererFrontend));
+        jSources.Set(env, index, Source::peerForCoreSource(env, *source, *rendererFrontend, *map));
         index++;
     }
 
@@ -1242,7 +1242,7 @@ jni::Local<jni::Object<Source>> NativeMapView::getSource(JNIEnv& env, const jni:
     }
 
     // Create and return the source's native peer
-    return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource, *rendererFrontend));
+    return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource, *rendererFrontend, *map));
 }
 
 void NativeMapView::addSource(JNIEnv& env, const jni::Object<Source>& obj, jlong sourcePtr) {
