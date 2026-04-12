@@ -215,7 +215,13 @@ if(NOT EXISTS "${_compat_shim_header}")
 // for both Dawn and wgpu-native backends
 
 // Include the WebGPU-Cpp wrapper
+// TODO: remove this workaround as soon as https://github.com/eliemichel/WebGPU-Cpp/issues/35 is fixed
+#ifndef _NULLABLE
+    #define _NULLABLE WGPU_NULLABLE
+#endif
 #include \"${_webgpu_cpp_header}\"
+
+#undef _NULLABLE
 ")
 
     message(STATUS "Successfully created WebGPU-Cpp compatibility shim")
