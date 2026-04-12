@@ -88,12 +88,12 @@ endmacro()
 
 mln_wgpu_find_library()
 
-if(NOT WGPU_LIBRARY OR MLN_WGPU_VERSION)
+if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
     # Use a specific version of WGPU. This is required when to a rust application
     # which uses wgpu directly instead of wgpu-native
-    if (MLN_WGPU_VERSION)
+    if (MLN_WGPU_NATIVE_VERSION)
         execute_process(
-            COMMAND git checkout ${MLN_WGPU_VERSION}
+            COMMAND git checkout ${MLN_WGPU_NATIVE_VERSION}
             WORKING_DIRECTORY ${_mln_wgpu_source_dir}
             RESULT_VARIABLE _git_checkout_wgpu_result
             OUTPUT_VARIABLE _git_checkout_wgpu_output
@@ -101,7 +101,7 @@ if(NOT WGPU_LIBRARY OR MLN_WGPU_VERSION)
         )
 
         if(NOT _git_checkout_wgpu_result EQUAL 0)
-            message(FATAL_ERROR "Failed to checkout wgpu-native version '${MLN_WGPU_VERSION}': ${_git_checkout_wgpu_error}\n")
+            message(FATAL_ERROR "Failed to checkout wgpu-native version '${MLN_WGPU_NATIVE_VERSION}': ${_git_checkout_wgpu_error}\n")
         endif()
     endif()
 
