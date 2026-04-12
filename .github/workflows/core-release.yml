@@ -112,6 +112,10 @@ jobs:
         with:
           tool: armerge@2
 
+      - name: Install rust target
+        if: $${ matrix.renderer }} == "webgpu-wgpu"
+        run: rustup target add x86_64-unknown-linux-gnu
+
       - name: Build mbgl-core for Linux
         run: |
           cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_CREATE_AMALGAMATION=ON
