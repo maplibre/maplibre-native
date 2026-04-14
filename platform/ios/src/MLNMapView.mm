@@ -1781,6 +1781,9 @@ public:
                        options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
                        context:windowScreenContext];
     }
+
+    // https://github.com/maplibre/maplibre-native/issues/4204
+    [self setNeedsLayout];
   }
 }
 
