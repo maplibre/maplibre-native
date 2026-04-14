@@ -1,4 +1,4 @@
-# Changelog for Mapbox Maps SDK for macOS
+# Changelog for MapLibre Native macOS SDK
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/main/CONTRIBUTING.md) to get started.
 
