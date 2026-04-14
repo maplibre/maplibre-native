@@ -86,12 +86,12 @@ cc_library(
             "src/mbgl/util/timer.cpp",
             "src/mbgl/util/webp_reader.cpp",
         ],
-        "//:macos_libuv_loop": [
+        "//platform/macos:macos_libuv_loop": [
             "src/mbgl/util/async_task.cpp",
             "src/mbgl/util/run_loop.cpp",
             "src/mbgl/util/timer.cpp",
         ],
-        "//:macos_cfrunloop_loop": [],
+        "//platform/macos:macos_cfrunloop_loop": [],
         "//conditions:default": [],
     }),
     hdrs = [
@@ -115,7 +115,7 @@ cc_library(
         "include",
     ],
     linkopts = select({
-        "//:macos_libuv_loop": [
+        "//platform/macos:macos_libuv_loop": [
             "-lsqlite3",
             "-luv",
             "-lz",
@@ -127,7 +127,7 @@ cc_library(
             "-licui18n",
             "-licudata",
         ],
-        "//:macos_cfrunloop_loop": [
+        "//platform/macos:macos_cfrunloop_loop": [
             "-lsqlite3",
             "-lz",
             "-lcurl",
@@ -159,12 +159,12 @@ cc_library(
             "default-collator",
             "//vendor:sqlite",
         ],
-        "//:macos_libuv_loop": [
+        "//platform/macos:macos_libuv_loop": [
             ":default-collator",
             "//platform/darwin:darwin-loop",
             "@libuv",
         ],
-        "//:macos_cfrunloop_loop": [
+        "//platform/macos:macos_cfrunloop_loop": [
             ":default-collator",
             "//platform/darwin:darwin-loop",
         ],

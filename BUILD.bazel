@@ -246,36 +246,6 @@ config_setting(
     },
 )
 
-# Selects the macOS event loop implementation
-# Use --//:macos_loop=cfrunloop for AppKit/SwiftUI apps (xcframework builds)
-# Default is libuv for backwards compatibility with existing targets
-
-string_flag(
-    name = "macos_loop",
-    build_setting_default = "libuv",
-    values = [
-        "cfrunloop",
-        "libuv",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "macos_libuv_loop",
-    constraint_values = ["@platforms//os:osx"],
-    flag_values = {
-        ":macos_loop": "libuv",
-    },
-)
-
-config_setting(
-    name = "macos_cfrunloop_loop",
-    constraint_values = ["@platforms//os:osx"],
-    flag_values = {
-        ":macos_loop": "cfrunloop",
-    },
-)
-
 bool_flag(
     name = "use_rust",
     build_setting_default = False,
