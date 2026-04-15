@@ -57,7 +57,6 @@ mbgl::Value Formatted::toObject() const {
             serializedSection.emplace("scale", NullValue());
         }
         if (section.fontStack) {
-            std::string fontStackString;
             serializedSection.emplace("fontStack", fontStackToString(*section.fontStack));
         } else {
             serializedSection.emplace("fontStack", NullValue());

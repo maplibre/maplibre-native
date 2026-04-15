@@ -6,7 +6,7 @@
 namespace mbgl {
 
 void Log::platformRecord(EventSeverity severity, const std::string &msg) {
-    std::cerr << "[" << Enum<EventSeverity>::toString(severity) << "] " << msg << std::endl;
+    std::cerr << "[" << Enum<EventSeverity>::toString(severity) << "] " << msg << '\n';
 }
 
 } // namespace mbgl

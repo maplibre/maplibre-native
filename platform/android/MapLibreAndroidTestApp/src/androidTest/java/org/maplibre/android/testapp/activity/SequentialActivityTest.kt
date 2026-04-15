@@ -13,7 +13,7 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
 
     companion object {
         // app currently has 100+ activities
-        private const val USE_ALL_ACTIVITIES = true
+        private const val USE_ALL_ACTIVITIES = false
         private const val ACTIVITY_DURATION = 5000L
 
         // ignores for both activity lists
@@ -21,6 +21,9 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
             FeatureOverviewActivity::class.java,
             org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity::class.java,
             org.maplibre.android.testapp.activity.telemetry.PerformanceMeasurementActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.LongRunningActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.UserMapActivity::class.java,
+            org.maplibre.android.testapp.activity.stability.NavigationMapActivity::class.java,
 
             // need style updates
             org.maplibre.android.testapp.activity.turf.MapSnapshotterWithinExpression::class.java,

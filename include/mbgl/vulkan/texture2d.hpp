@@ -41,6 +41,7 @@ enum class Texture2DUsage {
     ShaderInput,
     Attachment,
     Read,
+    Blit,
 };
 
 class Texture2D : public gfx::Texture2D {
@@ -64,6 +65,7 @@ public:
     bool isModifiedAfter(const std::chrono::duration<double>& t) const { return t < lastModified; }
 
     void create() noexcept override;
+    void destroy(bool deferred = true) noexcept;
 
     void upload() noexcept override;
     void upload(const void* pixelData, const Size& size_) noexcept override;
@@ -72,7 +74,8 @@ public:
                          const Size& size,
                          uint16_t xOffset,
                          uint16_t yOffset,
-                         const vk::UniqueCommandBuffer& buffer) noexcept;
+                         const vk::UniqueCommandBuffer& buffer,
+                         bool submit) noexcept;
 
     bool needsUpload() const noexcept override { return !!imageData; };
 
@@ -83,7 +86,7 @@ public:
     const vk::Image& getVulkanImage() const { return imageAllocation->image; }
     const vk::Sampler& getVulkanSampler();
 
-    void copyImage(vk::Image image);
+    void copyImage(vk::Image image, Size imageSize, uint16_t xOffset = 0, uint16_t yOffset = 0);
     std::shared_ptr<PremultipliedImage> readImage();
 
 private:
@@ -94,10 +97,11 @@ private:
     void createTexture();
     void createSampler();
 
-    void destroyTexture();
-    void destroySampler();
+    void destroyTexture(bool deferred = true);
+    void destroySampler(bool deferred = true);
 
-    void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
+    void transitionToTransferWriteLayout(const vk::UniqueCommandBuffer&);
+    void transitionToTransferReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
 
@@ -123,6 +127,8 @@ private:
     vk::Sampler sampler{};
 
     Texture2DUsage textureUsage{Texture2DUsage::ShaderInput};
+
+    friend class DynamicTexture;
 };
 
 } // namespace vulkan

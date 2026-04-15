@@ -1,0 +1,41 @@
+name: setup-android-ci
+description: "Sets up Android CI environment"
+runs:
+  using: "composite"
+  steps:
+    - name: Free Disk Space (Ubuntu)
+      if: startsWith(runner.name, 'GitHub Actions')
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: false
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
+    - name: Validate VERSION
+      run: .github/scripts/validate-version.sh platform/android/VERSION
+      working-directory: .
+      shell: bash
+
+    - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+      shell: bash
+
+    - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        distribution: "temurin"
+        java-version: "17"
+
+    - name: restore-gradle-cache
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      env:
+        cache-name: gradle-v1
+      with:
+        path: ~/.gradle
+        key: ${{ env.cache-name }}-${{ hashFiles('platform/android/buildSrc/src/main/kotlin/maplibre.dependencies.gradle.kts') }}-${{ hashFiles('platform/android/build.gradle.kts') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: |
+          - ${{ env.cache-name }}
+
+    - uses: ./.github/actions/install-sccache

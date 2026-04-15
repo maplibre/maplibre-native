@@ -131,7 +131,7 @@ TEST(getAnchors, OverscaledAnchorsInParent) {
                                             2.0f /*overscaling*/
     );
     for (const auto& anchor : anchors) {
-        EXPECT_TRUE(std::find(childAnchors.begin(), childAnchors.end(), anchor) != childAnchors.end());
+        EXPECT_TRUE(std::ranges::find(childAnchors, anchor) != childAnchors.end());
     }
 }
 

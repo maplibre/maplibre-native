@@ -270,6 +270,8 @@ interface NativeMap {
 
   void enableRenderingStatsView(boolean value);
 
+  void setFrustumOffset(RectF offset);
+
   void setSwapBehaviorFlush(boolean flush);
 
   //

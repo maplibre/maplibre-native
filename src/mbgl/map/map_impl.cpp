@@ -113,28 +113,30 @@ void Map::Impl::onUpdate() {
 
     transform.updateTransitions(timePoint);
 
-    UpdateParameters params = {style->impl->isLoaded(),
-                               mode,
-                               pixelRatio,
-                               debugOptions,
-                               timePoint,
-                               transform.getState(),
-                               style->impl->getGlyphURL(),
-                               style->impl->areSpritesLoaded(),
-                               style->impl->getTransitionOptions(),
-                               style->impl->getLight()->impl,
-                               style->impl->getImageImpls(),
-                               style->impl->getSourceImpls(),
-                               style->impl->getLayerImpls(),
-                               annotationManager.makeWeakPtr(),
-                               fileSource,
-                               prefetchZoomDelta,
-                               bool(stillImageRequest),
-                               crossSourceCollisions,
-                               tileLodMinRadius,
-                               tileLodScale,
-                               tileLodPitchThreshold,
-                               tileLodZoomShift};
+    UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
+                               .mode = mode,
+                               .pixelRatio = pixelRatio,
+                               .debugOptions = debugOptions,
+                               .timePoint = timePoint,
+                               .transformState = transform.getState(),
+                               .glyphURL = style->impl->getGlyphURL(),
+                               .fontFaces = style->impl->getFontFaces(),
+                               .spriteLoaded = style->impl->areSpritesLoaded(),
+                               .transitionOptions = style->impl->getTransitionOptions(),
+                               .light = style->impl->getLight()->impl,
+                               .images = style->impl->getImageImpls(),
+                               .sources = style->impl->getSourceImpls(),
+                               .layers = style->impl->getLayerImpls(),
+                               .annotationManager = annotationManager.makeWeakPtr(),
+                               .fileSource = fileSource,
+                               .prefetchZoomDelta = prefetchZoomDelta,
+                               .stillImageRequest = bool(stillImageRequest),
+                               .crossSourceCollisions = crossSourceCollisions,
+                               .tileLodMinRadius = tileLodMinRadius,
+                               .tileLodScale = tileLodScale,
+                               .tileLodPitchThreshold = tileLodPitchThreshold,
+                               .tileLodZoomShift = tileLodZoomShift,
+                               .tileLodMode = tileLodMode};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -253,8 +255,10 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
     }
 
     if (mode == MapMode::Continuous) {
-        const MapObserver::RenderFrameStatus frameStatus{
-            MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, stats};
+        const MapObserver::RenderFrameStatus frameStatus{.mode = static_cast<MapObserver::RenderMode>(renderMode),
+                                                         .needsRepaint = needsRepaint,
+                                                         .placementChanged = placemenChanged,
+                                                         .renderingStats = stats};
         observer.onDidFinishRenderingFrame(frameStatus);
 
         if (actionJournal) {
@@ -271,7 +275,7 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
             }
         }
     } else if (stillImageRequest && rendererFullyLoaded) {
-        auto request = std::move(stillImageRequest);
+        const auto request = std::move(stillImageRequest);
         request->callback(nullptr);
     }
 }

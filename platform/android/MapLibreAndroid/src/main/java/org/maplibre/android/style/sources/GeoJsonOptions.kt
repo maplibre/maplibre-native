@@ -131,4 +131,15 @@ class GeoJsonOptions : HashMap<String?, Any?>() {
         this["clusterProperties"] = properties
         return this
     }
+
+    /**
+     * Set a flag defining whether or not the fetched tiles for the given source
+     * should be synchronously updated on the render thread
+     *
+     * @param value current setting for synchronous. Defaults to false.
+     */
+    fun withSynchronousUpdate(value: Boolean): GeoJsonOptions {
+        this["synchronousUpdate"] = value
+        return this
+    }
 }

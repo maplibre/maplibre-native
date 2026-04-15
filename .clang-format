@@ -20,4 +20,5 @@ Language: Cpp
 Language: ObjC
 BasedOnStyle: Google
 ObjCSpaceAfterProperty: true
+AccessModifierOffset: -2
 ...

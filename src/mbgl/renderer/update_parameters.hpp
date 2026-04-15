@@ -6,6 +6,7 @@
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/layer.hpp>
+#include <mbgl/text/glyph.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/immutable.hpp>
 
@@ -29,6 +30,7 @@ public:
     const TransformState transformState;
 
     const std::string glyphURL;
+    std::shared_ptr<FontFaces> fontFaces;
     const bool spriteLoaded;
     const style::TransitionOptions transitionOptions;
     const Immutable<style::Light::Impl> light;
@@ -50,6 +52,7 @@ public:
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
+    TileLodMode tileLodMode = TileLodMode::Default;
 };
 
 } // namespace mbgl

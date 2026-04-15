@@ -60,6 +60,8 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
 
+    context.setScissorTest(parameters.scissorRect);
+
     impl->uniformBuffers.bind();
     bindTextures();
 
@@ -74,10 +76,8 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     // Unbind the VAO so that future buffer commands outside Drawable do not change the current VAO state
     context.bindVertexArray = value::BindVertexArray::Default;
 
-#ifndef NDEBUG
     unbindTextures();
     impl->uniformBuffers.unbind();
-#endif
 }
 
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {

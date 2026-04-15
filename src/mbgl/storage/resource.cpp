@@ -9,7 +9,8 @@
 
 namespace mbgl {
 
-static std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
+namespace {
+std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
     std::string quadKey;
     quadKey.reserve(z);
     int32_t mask;
@@ -20,7 +21,7 @@ static std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
     return quadKey;
 }
 
-static mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t z) {
+mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t z) {
     double resolution = (util::M2PI * util::EARTH_RADIUS_M / 256) / std::pow(2, z);
     return {
         x * resolution - util::M2PI * util::EARTH_RADIUS_M / 2,
@@ -28,7 +29,7 @@ static mapbox::geometry::point<double> getMercCoord(int32_t x, int32_t y, int8_t
     };
 }
 
-static std::string getTileBBox(int32_t x, int32_t y, int8_t z) {
+std::string getTileBBox(int32_t x, int32_t y, int8_t z) {
     // Alter the y for the Google/OSM tile scheme.
     y = static_cast<int32_t>(std::pow(2, z)) - y - 1;
 
@@ -38,6 +39,7 @@ static std::string getTileBBox(int32_t x, int32_t y, int8_t z) {
     return (util::toString(min.x) + "," + util::toString(min.y) + "," + util::toString(max.x) + "," +
             util::toString(max.y));
 }
+} // namespace
 
 Resource Resource::style(const std::string& url) {
     return Resource{Resource::Kind::Style, url};
@@ -80,6 +82,10 @@ Resource Resource::glyphs(const std::string& urlTemplate,
                     })};
 }
 
+Resource Resource::fontFace(const std::string& url) {
+    return Resource{Resource::Kind::Glyphs, url};
+}
+
 Resource Resource::tile(const std::string& urlTemplate,
                         float pixelRatio,
                         int32_t x,
@@ -115,7 +121,11 @@ Resource Resource::tile(const std::string& urlTemplate,
                                                 return {};
                                             }
                                         }),
-                    Resource::TileData{urlTemplate, uint8_t(supportsRatio && pixelRatio > 1.0 ? 2 : 1), x, y, z},
+                    Resource::TileData{.urlTemplate = urlTemplate,
+                                       .pixelRatio = uint8_t(supportsRatio && pixelRatio > 1.0 ? 2 : 1),
+                                       .x = x,
+                                       .y = y,
+                                       .z = z},
                     loadingMethod};
 }
 

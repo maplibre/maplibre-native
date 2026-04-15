@@ -10,10 +10,29 @@
  The default value for this option is ``MLNDEMEncoding/MLNDEMEncodingMapbox``.
 
  This option cannot be represented in a TileJSON or style JSON file. It is used
- with the ``MLNRasterDEMSource`` class and is ignored when creating an
+ with the ``MLNRasterDEMSource`` class and is ignored when creating a
  ``MLNRasterTileSource`` or ``MLNRasterTileSource`` object.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEncoding;
+
+/**
+ The encoding formula used to generate the raster tileset
+*/
+
+typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
+
+  /**
+     Raster tiles generated with the [Mapbox encoding
+     formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb)
+  */
+  MLNDEMEncodingMapbox = 0,
+
+  /**
+   Raster tiles generated with the [Mapzen Terrarium encoding
+   formula](https://aws.amazon.com/public-datasets/terrain/).
+  */
+  MLNDEMEncodingTerrarium = 1,
+};
 
 /**
  ``MLNRasterDEMSource`` is a map content source that supplies rasterized
@@ -23,8 +42,9 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEnc
  conforms to the
  <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
  A raster DEM source is added to an ``MLNStyle`` object along with one or more
- ``MLNHillshadeStyleLayer`` objects. Use a hillshade style layer to control the
- appearance of content supplied by the raster DEM source.
+ ``MLNHillshadeStyleLayer`` or ``MLNColorReliefStyleLayer`` objects. Use a hillshade
+ style layer to control the appearance of content supplied by the raster DEM source,
+ or a color relief style layer to render elevation data with a color ramp.
 
  Each
  <a href="https://maplibre.org/maplibre-style-spec/#sources-raster-dem"><code>raster-dem</code></a>

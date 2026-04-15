@@ -79,6 +79,8 @@ bool isCharInComplexShapingScript(char16_t chr);
 
 bool isWhitespace(char16_t chr);
 
+bool isVariationSelector1(char16_t chr);
+
 } // namespace i18n
 } // namespace util
 } // namespace mbgl

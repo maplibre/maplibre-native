@@ -126,7 +126,9 @@ bool CustomGeometrySource::isCancelled(jni::jint z, jni::jint x, jni::jint y) {
     static auto& javaClass = jni::Class<CustomGeometrySource>::Singleton(*_env);
     static auto isCancelled = javaClass.GetMethod<jboolean(jni::jint, jni::jint, jni::jint)>(*_env, "isCancelled");
 
-    assert(javaPeer);
+    if (!javaPeer) {
+        return true;
+    }
 
     auto peer = jni::Cast(*_env, javaClass, javaPeer);
     return peer.Call(*_env, isCancelled, z, x, y);

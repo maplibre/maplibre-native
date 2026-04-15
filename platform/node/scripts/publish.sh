@@ -9,15 +9,15 @@ if [[ "${CIRCLE_TAG}" == "node-v${PACKAGE_JSON_VERSION}" ]] || [[ "${PUBLISH:-}"
     # Changes to the version targets here should happen in tandem with updates to the
     # EXCLUDE_NODE_ABIS property in cmake/node.cmake and the "node" engines property in
     # package.json.
-    for TARGET in 18.0.0 20.0.0 22.0.0; do
+    for TARGET in 20.0.0 22.0.0 24.0.0; do
         rm -rf build/stage
 
         if [[ "${BUILDTYPE}" == "RelWithDebInfo" ]]; then
             ./node_modules/.bin/node-pre-gyp package --target="${TARGET}" $@
-            ./node_modules/.bin/node-pre-gyp-github publish --release
+            ./node_modules/.bin/node-pre-gyp-github publish
         elif [[ "${BUILDTYPE}" == "Debug" ]]; then
             ./node_modules/.bin/node-pre-gyp package --target="${TARGET}" --debug $@
-            ./node_modules/.bin/node-pre-gyp-github publish --release
+            ./node_modules/.bin/node-pre-gyp-github publish
         else
             echo "error: must provide either Debug or RelWithDebInfo for BUILDTYPE"
             exit 1

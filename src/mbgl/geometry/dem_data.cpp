@@ -3,7 +3,7 @@
 
 namespace mbgl {
 
-DEMData::DEMData(const PremultipliedImage& _image, Tileset::DEMEncoding _encoding)
+DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _encoding)
     : dim(_image.size.height),
       // extra two pixels per row for border backfilling on either edge
       stride(dim + 2),
@@ -99,7 +99,7 @@ const std::array<float, 4>& DEMData::getUnpackVector() const {
     // https://aws.amazon.com/public-datasets/terrain/
     static const std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
 
-    return encoding == Tileset::DEMEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
+    return encoding == Tileset::RasterEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
 }
 
 } // namespace mbgl

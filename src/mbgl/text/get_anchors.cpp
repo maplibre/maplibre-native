@@ -20,14 +20,16 @@ float getLineLength(const GeometryCoordinates& line) {
     return lineLength;
 }
 
-static Anchors resample(const GeometryCoordinates& line,
-                        const float offset,
-                        const float spacing,
-                        const float angleWindowSize,
-                        const float maxAngle,
-                        const float labelLength,
-                        const bool continuedLine,
-                        const bool placeAtMiddle) {
+namespace {
+
+Anchors resample(const GeometryCoordinates& line,
+                 const float offset,
+                 const float spacing,
+                 const float angleWindowSize,
+                 const float maxAngle,
+                 const float labelLength,
+                 const bool continuedLine,
+                 const bool placeAtMiddle) {
     const float halfLabelLength = labelLength / 2.0f;
     const float lineLength = getLineLength(line);
 
@@ -81,6 +83,8 @@ static Anchors resample(const GeometryCoordinates& line,
 
     return anchors;
 }
+
+} // unnamed namespace
 
 Anchors getAnchors(const GeometryCoordinates& line,
                    float spacing,

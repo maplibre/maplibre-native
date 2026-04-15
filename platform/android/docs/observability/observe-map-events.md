@@ -19,3 +19,9 @@ In this case we implement them by implementing the interfaces below in the activ
 ```kotlin
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/events/ObserverActivity.kt:ObserverActivity"
 ```
+
+`ObserverActivity.onDidFinishRenderingFrame` uses `RenderStatsTracker` as an example for tracking rendering statistics over time. This offers periodic reports of minimum, maximum, average values and callbacks when predefined thresholds are exceeded.
+
+```kotlin
+--8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/events/ObserverActivity.kt:renderStatsTracker"
+```

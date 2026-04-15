@@ -1,8 +1,8 @@
 self-hosted-runner:
   # Labels of self-hosted runner in array of strings.
   labels:
-    - macos-14  # can be removed once actionlint is updated
-    - ubuntu-24.04  # can be removed once actionlint is updated
+    - windows-11-arm  # can be removed once actionlint is updated
+    - macos-15-intel  # can be removed once actionlint is updated
     - MapLibre_Native_Ubuntu_22_04_ARM_8_core
     - MapLibre_Native_Ubuntu_24_04_x84_16_core
 # Configuration variables in array of strings defined in your repository or

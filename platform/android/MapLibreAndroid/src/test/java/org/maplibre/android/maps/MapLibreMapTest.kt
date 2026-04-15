@@ -15,12 +15,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MapLibreMapTest {
+class MapLibreMapTest : BaseTest() {
 
     private lateinit var maplibreMap: MapLibreMap
 

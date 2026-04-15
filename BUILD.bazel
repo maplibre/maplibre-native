@@ -4,8 +4,6 @@ load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     "//bazel:core.bzl",
-    "MLN_LAYER_PLUGIN_HEADERS",
-    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
     "MLN_DRAWABLES_GL_HEADERS",
@@ -14,14 +12,19 @@ load(
     "MLN_DRAWABLES_MTL_HEADERS",
     "MLN_DRAWABLES_MTL_SOURCE",
     "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_WEBGPU_HEADERS",
+    "MLN_DRAWABLES_WEBGPU_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_LAYER_PLUGIN_HEADERS",
+    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
+    "MLN_SHAPING_HARFBUZZ_SRCS",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
@@ -84,11 +87,16 @@ cc_library(
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
         ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+        ":webgpu_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_WEBGPU_SOURCE,
+        "//conditions:default": [],
+    }) + select({
+        "//:harfbuzz_text_shaping": MLN_SHAPING_HARFBUZZ_SRCS,
         "//conditions:default": [],
     }),
     hdrs = MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+        ":webgpu_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_WEBGPU_HEADERS,
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
@@ -99,8 +107,14 @@ cc_library(
         ":metal_renderer": [
             "MLN_RENDER_BACKEND_METAL=1",
         ],
+        ":webgpu_renderer": [
+            "MLN_RENDER_BACKEND_WEBGPU=1",
+        ],
     }) + select({
         "@platforms//os:ios": ["GLES_SILENCE_DEPRECATION=1"],
+        "//conditions:default": [],
+    }) + select({
+        "//:harfbuzz_text_shaping": ["MLN_TEXT_SHAPING_HARFBUZZ=1"],
         "//conditions:default": [],
     }),
     includes = [
@@ -109,6 +123,12 @@ cc_library(
     ] + select({
         ":metal_renderer": [
             "vendor/metal-cpp",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//:harfbuzz_text_shaping": [
+            "vendor/freetype/include",
+            "vendor/harfbuzz/src",
         ],
         "//conditions:default": [],
     }),
@@ -122,17 +142,22 @@ cc_library(
         "//vendor:boost",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
+        "//vendor:expected-lite",
         "//vendor:maplibre-native-base",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
+        "//vendor:rapidjson",
+        "//vendor:supercluster.hpp",
         "//vendor:unique_resource",
         "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
+        "//vendor/maplibre-tile-spec/cpp:mlt_cpp",
     ] + select({
         "@platforms//os:ios": [
+            "//vendor:ghc_filesystem",
             "//vendor:icu",
         ],
         "@platforms//os:osx": [
@@ -145,6 +170,12 @@ cc_library(
     }) + select({
         ":metal_renderer": [
             "//vendor:metal-cpp",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":harfbuzz_text_shaping": [
+            "//vendor:freetype",
+            "//vendor:harfbuzz",
         ],
         "//conditions:default": [],
     }) + select({
@@ -165,6 +196,7 @@ string_flag(
     values = [
         "drawable",
         "metal",
+        "webgpu",
     ],
 )
 
@@ -179,6 +211,38 @@ config_setting(
     name = "metal_renderer",
     flag_values = {
         ":renderer": "metal",
+    },
+)
+
+config_setting(
+    name = "webgpu_renderer",
+    flag_values = {
+        ":renderer": "webgpu",
+    },
+)
+
+# Selects the shaping implementation to utilize in the core
+
+string_flag(
+    name = "shaping",
+    build_setting_default = "harfbuzz",
+    values = [
+        "legacy",
+        "harfbuzz",
+    ],
+)
+
+config_setting(
+    name = "harfbuzz_text_shaping",
+    flag_values = {
+        ":shaping": "harfbuzz",
+    },
+)
+
+config_setting(
+    name = "legacy_text_shaping",
+    flag_values = {
+        ":shaping": "legacy",
     },
 )
 
@@ -210,7 +274,6 @@ npm_link_all_packages(
 js_binary(
     name = "generate-style-code-script",
     data = [
-        ":node_modules/argparse",
         ":node_modules/csscolorparser",
         ":style-code",
         ":style-spec",
@@ -220,9 +283,6 @@ js_binary(
 
 js_binary(
     name = "generate-shader-code-script",
-    data = [
-        ":node_modules/argparse",
-    ],
     entry_point = "shaders/generate_shader_code.mjs",
 )
 

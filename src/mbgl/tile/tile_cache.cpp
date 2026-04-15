@@ -72,7 +72,7 @@ void TileCache::deferPendingReleases() {
 
     // Block destruction until the cleanup task is complete
     {
-        std::lock_guard counterLock{deferredSignalLock};
+        std::scoped_lock counterLock{deferredSignalLock};
         deferredDeletionsPending++;
     }
 
@@ -88,10 +88,10 @@ void TileCache::deferPendingReleases() {
     // last one and the destruction actually occurs here on this thread.
     std::function<void()> func{[tile_{CaptureWrapper{std::move(wrap)}}, this]() mutable {
         MLN_TRACE_ZONE(deferPendingReleases lambda);
-        MLN_ZONE_VALUE(wrap_.releases.size());
+        MLN_ZONE_VALUE(tile_.items.size());
         tile_.items.clear();
 
-        std::lock_guard<std::mutex> counterLock(deferredSignalLock);
+        std::scoped_lock counterLock(deferredSignalLock);
         deferredDeletionsPending--;
         deferredSignal.notify_all();
     }};

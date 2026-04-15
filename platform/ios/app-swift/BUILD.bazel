@@ -1,40 +1,73 @@
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
-load(
-    "@rules_swift//swift:swift.bzl",
-    "swift_library",
-)
+load("@rules_apple//apple:resources.bzl", "apple_resource_group")
+load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
+load("@rules_swift//swift:swift.bzl", "swift_library")
+load("//platform/ios/bazel:macros.bzl", "env_info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 configure_device_profiles()
 
+apple_resource_group(
+    name = "NavigationRoutes",
+    strip_structured_resources_prefixes = ["Data"],
+    structured_resources = ["Data/Routes"],
+    visibility = ["//visibility:public"],
+)
+
+# add SENTRY_DSN from the environment to the plist
+env_info_plist(
+    name = "info_swift_plist",
+    input = "Info.plist",
+    output = "Info-swift.plist",
+    vars = ["SENTRY_DSN"],
+)
+
 swift_library(
     name = "Sources",
-    srcs = glob(["Sources/*.swift"]),
-    data = glob([
-        "Data/*",
+    srcs = glob(["Sources/**/*.swift"]),
+    data = [":NavigationRoutes"] + glob([
+        "Data/*.geojson",
+        "Data/*.png",
         "Assets.xcassets/*",
     ]),
     module_name = "Sources",
     tags = ["manual"],
     deps = [
         "//platform:ios-sdk",
+        "@swiftpkg_polyline//:Polyline",
+        "@swiftpkg_sentry_cocoa//:Sentry",
     ],
+)
+
+# --embed_label=maplibre_app_1.0_build_$(date +%s)
+apple_bundle_version(
+    name = "maplibre_app_version",
+    build_label_pattern = "maplibre_app_{version}_build_{build}",
+    build_version = "{version}.{build}",
+    capture_groups = {
+        "version": "\\d+\\.\\d+",
+        "build": "\\d+",
+    },
+    fallback_build_label = "maplibre_app_99.99_build_99",
+    short_version_string = "{version}",
 )
 
 ios_application(
     name = "MapLibreApp",
-    bundle_id = "{}.swiftapp".format(BUNDLE_ID_PREFIX),
+    app_icons = glob(["app_icons_ios.xcassets/**"]),
+    bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
     families = [
         "iphone",
         "ipad",
     ],
-    infoplists = [":Info.plist"],
+    infoplists = [":Info-swift.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
     resources = [
         "@pois_nps_mbtiles//file",
     ],
+    version = ":maplibre_app_version",
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],
     deps = [":Sources"],
 )

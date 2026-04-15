@@ -31,6 +31,29 @@ namespace util {
 // cause a link error.
 #undef compress
 
+bool is_compressed(const std::string &v) {
+    if (v.size() > 2) {
+        const auto byte0 = static_cast<uint8_t>(v[0]);
+        const auto byte1 = static_cast<uint8_t>(v[1]);
+        if (byte0 == 0x1f && byte1 == 0x8b) {
+            // gzip (rfc1952)
+            return true;
+        } else if (byte0 == 0x78) {
+            // zlib (rfc1950)
+            switch (byte1) {
+                case 0x01: // 78 01 - No Compression/low
+                case 0x5E: // 78 5E - Fast Compression
+                case 0x9C: // 78 9C - Default Compression
+                case 0xDA: // 78 DA - Best Compression
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+    return false;
+}
+
 std::string compress(const std::string &raw, int windowBits) {
     z_stream deflate_stream;
     memset(&deflate_stream, 0, sizeof(deflate_stream));
@@ -79,14 +102,13 @@ std::string decompress(const std::string &raw, int windowBits) {
     inflate_stream.avail_in = uInt(raw.size());
 
     std::string result;
-    char out[15384];
+    char out[16384];
 
     int code;
     do {
         inflate_stream.next_out = reinterpret_cast<Bytef *>(out);
         inflate_stream.avail_out = sizeof(out);
         code = inflate(&inflate_stream, 0);
-        // result.append(out, sizeof(out) - inflate_stream.avail_out);
         if (result.size() < inflate_stream.total_out) {
             result.append(out, inflate_stream.total_out - result.size());
         }

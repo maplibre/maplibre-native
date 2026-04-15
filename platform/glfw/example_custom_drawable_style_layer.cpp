@@ -11,7 +11,11 @@
 #include <filesystem>
 
 #define TINYOBJLOADER_IMPLEMENTATION
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #include "tiny_obj_loader.h"
+#pragma GCC diagnostic pop
 
 ExampleCustomDrawableStyleLayerHost::ExampleCustomDrawableStyleLayerHost(const std::string& assetsPath_)
     : assetsPath(assetsPath_) {}

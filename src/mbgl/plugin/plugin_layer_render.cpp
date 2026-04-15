@@ -10,11 +10,8 @@
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #endif
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/style/properties.hpp>
-
-#include <iostream>
 
 using namespace mbgl;
 

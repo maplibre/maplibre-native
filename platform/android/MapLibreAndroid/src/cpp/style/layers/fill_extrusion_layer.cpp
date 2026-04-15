@@ -41,122 +41,211 @@ FillExtrusionLayer::~FillExtrusionLayer() = default;
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionOpacity(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionOpacity()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionOpacity()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionOpacity()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionOpacityTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toFillExtrusionLayer(layer).getFillExtrusionOpacityTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void FillExtrusionLayer::setFillExtrusionOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toFillExtrusionLayer(layer).setFillExtrusionOpacityTransition(options);
+    toFillExtrusionLayer(*layer).setFillExtrusionOpacityTransition(options);
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionColor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionColor()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionColor()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionColor()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionColorTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toFillExtrusionLayer(layer).getFillExtrusionColorTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void FillExtrusionLayer::setFillExtrusionColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toFillExtrusionLayer(layer).setFillExtrusionColorTransition(options);
+    toFillExtrusionLayer(*layer).setFillExtrusionColorTransition(options);
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionTranslate(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionTranslate()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionTranslate()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionTranslate()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionTranslateTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toFillExtrusionLayer(layer).getFillExtrusionTranslateTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionTranslateTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void FillExtrusionLayer::setFillExtrusionTranslateTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toFillExtrusionLayer(layer).setFillExtrusionTranslateTransition(options);
+    toFillExtrusionLayer(*layer).setFillExtrusionTranslateTransition(options);
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionTranslateAnchor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionTranslateAnchor()));
+    }
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionTranslateAnchor()));
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionTranslateAnchor()));
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionPattern(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionPattern()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionPattern()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionPattern()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionPatternTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toFillExtrusionLayer(layer).getFillExtrusionPatternTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionPatternTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void FillExtrusionLayer::setFillExtrusionPatternTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toFillExtrusionLayer(layer).setFillExtrusionPatternTransition(options);
+    toFillExtrusionLayer(*layer).setFillExtrusionPatternTransition(options);
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionHeight(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionHeight()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionHeight()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionHeight()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionHeightTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toFillExtrusionLayer(layer).getFillExtrusionHeightTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionHeightTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void FillExtrusionLayer::setFillExtrusionHeightTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toFillExtrusionLayer(layer).setFillExtrusionHeightTransition(options);
+    toFillExtrusionLayer(*layer).setFillExtrusionHeightTransition(options);
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionBase(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionBase()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionBase()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionBase()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionBaseTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toFillExtrusionLayer(layer).getFillExtrusionBaseTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionBaseTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void FillExtrusionLayer::setFillExtrusionBaseTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toFillExtrusionLayer(layer).setFillExtrusionBaseTransition(options);
+    toFillExtrusionLayer(*layer).setFillExtrusionBaseTransition(options);
 }
 
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionVerticalGradient(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionVerticalGradient()));
+    }
     return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(layer).getFillExtrusionVerticalGradient()));
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionVerticalGradient()));
 }
 
 // FillExtrusionJavaLayerPeerFactory

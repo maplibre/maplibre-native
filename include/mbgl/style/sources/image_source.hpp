@@ -11,6 +11,7 @@ class AsyncRequest;
 
 namespace style {
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class ImageSource final : public Source {
 public:
     ImageSource(std::string id, std::array<LatLng, 4>);

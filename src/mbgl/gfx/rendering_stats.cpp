@@ -5,7 +5,6 @@
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 
-#include <algorithm>
 #include <initializer_list>
 #include <sstream>
 #include <iomanip>
@@ -26,7 +25,7 @@ bool RenderingStats::isZero() const {
                                 memIndexBuffers,
                                 memVertexBuffers,
                                 memUniformBuffers};
-    return std::all_of(expectedZeros.begin(), expectedZeros.end(), [](auto x) { return x == 0; });
+    return std::ranges::all_of(expectedZeros, [](auto x) { return x == 0; });
 }
 
 RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {

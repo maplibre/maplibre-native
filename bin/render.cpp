@@ -39,9 +39,11 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<double> zoomValue(centerGroup, "number", "Zoom level", {'z', "zoom"});
     args::ValueFlag<double> lonValue(centerGroup, "degrees", "Longitude", {'x', "lon"});
     args::ValueFlag<double> latValue(centerGroup, "degrees", "Latitude", {'y', "lat"});
-
+    args::ValueFlag<double> altValue(argumentParser, "degrees", "Altitude", {'A', "alt"});
+    args::ValueFlag<double> fovValue(argumentParser, "degrees", "FOV", {'f', "fov"});
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
+    args::ValueFlag<double> rollValue(argumentParser, "degrees", "Roll", {'R', "roll"});
     args::ValueFlag<uint32_t> widthValue(argumentParser, "pixels", "Image width", {'w', "width"});
     args::ValueFlag<uint32_t> heightValue(argumentParser, "pixels", "Image height", {'h', "height"});
 
@@ -65,9 +67,12 @@ int main(int argc, char* argv[]) {
 
     const double lat = latValue ? args::get(latValue) : 0;
     const double lon = lonValue ? args::get(lonValue) : 0;
+    const double alt = altValue ? args::get(altValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
+    const double fov = fovValue ? args::get(fovValue) : mbgl::util::rad2deg(mbgl::util::DEFAULT_FOV);
     const double bearing = bearingValue ? args::get(bearingValue) : 0;
     const double pitch = pitchValue ? args::get(pitchValue) : 0;
+    const double roll = rollValue ? args::get(rollValue) : 0;
     const double pixelRatio = pixelRatioValue ? args::get(pixelRatioValue) : 1;
 
     const uint32_t width = widthValue ? args::get(widthValue) : 512;
@@ -120,7 +125,14 @@ int main(int argc, char* argv[]) {
         LatLngBounds boundingBox = LatLngBounds::hull(LatLng(bounds[0], bounds[1]), LatLng(bounds[2], bounds[3]));
         map.jumpTo(map.cameraForLatLngBounds(boundingBox, EdgeInsets(), bearing, pitch));
     } else {
-        map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
+        map.jumpTo(CameraOptions()
+                       .withCenter(LatLng{lat, lon})
+                       .withCenterAltitude(alt)
+                       .withZoom(zoom)
+                       .withBearing(bearing)
+                       .withPitch(pitch)
+                       .withRoll(roll)
+                       .withFov(fov));
     }
 
     if (debug) {

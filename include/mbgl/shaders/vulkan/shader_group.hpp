@@ -76,7 +76,7 @@ public:
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
             for (const auto& attrib : ShaderClass::attributes) {
-                if (!propertiesAsUniforms.second.count(attrib.id)) {
+                if (!propertiesAsUniforms.second.contains(attrib.id)) {
                     shader->initAttribute(attrib);
                 }
             }

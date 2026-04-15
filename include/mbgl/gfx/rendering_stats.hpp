@@ -15,12 +15,11 @@ class SymbolLayer;
 namespace gfx {
 
 struct RenderingStats {
-    RenderingStats() = default;
     bool isZero() const;
 
-    /// Frame CPU encoding time (milliseconds)
+    /// Frame CPU encoding time (seconds)
     double encodingTime = 0.0;
-    /// Frame CPU rendering time (milliseconds)
+    /// Frame CPU rendering time (seconds)
     double renderingTime = 0.0;
 
     /// Number of frames rendered
@@ -92,7 +91,7 @@ struct RenderingStats {
 
     RenderingStats& operator+=(const RenderingStats&);
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     std::string toString(std::string_view separator) const;
 #endif
 };

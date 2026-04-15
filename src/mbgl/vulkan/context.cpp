@@ -41,7 +41,10 @@ constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
 constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
-static uint32_t glslangRefCount = 0;
+namespace {
+std::mutex glslangMutex;
+uint32_t glslangRefCount = 0;
+} // namespace
 
 class RenderbufferResource : public gfx::RenderbufferResource {
 public:
@@ -52,20 +55,28 @@ Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_),
       globalUniformBuffers(DescriptorSetType::Global, 0, 0, shaders::globalUBOCount) {
-    if (glslangRefCount++ == 0) {
-        glslang::InitializeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (glslangRefCount++ == 0) {
+            glslang::InitializeProcess();
+        }
     }
 
     initFrameResources();
 }
 
 Context::~Context() noexcept {
+    MBGL_VERIFY_THREAD(tid);
+
     backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
     destroyResources();
 
-    if (--glslangRefCount == 0) {
-        glslang::FinalizeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (--glslangRefCount == 0) {
+            glslang::FinalizeProcess();
+        }
     }
 
 #if !defined(NDEBUG)
@@ -134,6 +145,8 @@ void Context::initFrameResources() {
 }
 
 void Context::destroyResources() {
+    MBGL_VERIFY_THREAD(tid);
+
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
     for (auto& frame : frameResources) {
@@ -156,7 +169,9 @@ void Context::destroyResources() {
     clipping.vertexBuffer.reset();
 }
 
-void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
+void Context::enqueueDeletion(DeletionTask&& function) {
+    MBGL_VERIFY_THREAD(tid);
+
     if (frameResources.empty()) {
         function(*this);
         return;
@@ -165,25 +180,20 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    submitOneTimeCommand(backend.getCommandPool(), function);
+}
+
+void Context::submitOneTimeCommand(const vk::UniqueCommandBuffer& commandBuffer) {
     MLN_TRACE_FUNC();
 
-    const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
-    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
-    auto& commandBuffer = commandBuffers.front();
-
-    backend.setDebugName(commandBuffer.get(), "OneTimeSubmitCommandBuffer");
-
-    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
-    function(commandBuffer);
-    commandBuffer->end(dispatcher);
-
     const auto submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
-
     const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()), nullptr, dispatcher);
     backend.getGraphicsQueue().submit(submitInfo, fence.get(), dispatcher);
 
@@ -192,6 +202,22 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     if (waitFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
     }
+}
+
+void Context::submitOneTimeCommand(const vk::UniqueCommandPool& pool,
+                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+
+    const vk::CommandBufferAllocateInfo allocateInfo(pool.get(), vk::CommandBufferLevel::ePrimary, 1);
+    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
+    const auto& commandBuffer = commandBuffers.front();
+
+    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
+    function(commandBuffer);
+    commandBuffer->end(dispatcher);
+
+    submitOneTimeCommand(commandBuffer);
 }
 
 void Context::requestSurfaceUpdate(bool useDelay) {
@@ -209,6 +235,8 @@ void Context::requestSurfaceUpdate(bool useDelay) {
 
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
+
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
     auto& frame = frameResources[frameResourceIndex];
@@ -223,6 +251,7 @@ void Context::waitFrame() const {
 
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
 
     frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
 
@@ -313,6 +342,11 @@ void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
+
     const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end(dispatcher);
@@ -429,6 +463,10 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
@@ -558,6 +596,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
 
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
+    clipping.pipelineInfo.setScissorRect(
+        {0, 0, clipping.pipelineInfo.viewExtent.width, clipping.pipelineInfo.viewExtent.height});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
@@ -568,7 +608,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
     const float rad = renderableResource.getRotation();
-    const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    const mat4 rotationMat = {
+        std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref, dispatcher);
@@ -612,7 +653,7 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
         dummyTexture2D->setSize(size);
 
         submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
-            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer);
+            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer, false);
         });
     }
 
@@ -733,7 +774,9 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 void Context::FrameResources::runDeletionQueue(Context& context) {
     MLN_TRACE_FUNC();
 
-    for (const auto& function : deletionQueue) function(context);
+    for (const auto& function : deletionQueue) {
+        function(context);
+    }
 
     deletionQueue.clear();
 }

@@ -1,5 +1,6 @@
 #include <mbgl/util/action_journal_impl.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/map/map.hpp>
 
@@ -7,6 +8,8 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <algorithm>
+#include <mutex>
 #include <regex>
 
 #ifdef __APPLE__
@@ -137,10 +140,13 @@ public:
 ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     : map(map_),
       options(options_),
-      scheduler(Scheduler::GetSequenced()) {
+      scheduler(Scheduler::GetSequenced()),
+      renderingInfoReportTime(options.renderingStatsReportInterval()) {
     assert(!options.path().empty());
     assert(options.logFileSize() > 0);
     assert(options.logFileCount() > 1);
+
+    previousFrameTime = util::MonotonicTimer::now().count();
 
     options.withPath((mbgl::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
 
@@ -171,7 +177,7 @@ std::vector<std::string> ActionJournal::Impl::getLogFiles() const {
 }
 
 std::vector<std::string> ActionJournal::Impl::getLog() {
-    std::lock_guard lock(fileMutex);
+    std::scoped_lock lock(fileMutex);
     std::vector<std::string> logEvents;
 
     const auto readFile = [&](std::fstream& file) {
@@ -211,7 +217,7 @@ std::vector<std::string> ActionJournal::Impl::getLog() {
 }
 
 void ActionJournal::Impl::clearLog() {
-    std::lock_guard lock(fileMutex);
+    std::scoped_lock lock(fileMutex);
 
     // close current file
     currentFile.close();
@@ -264,6 +270,50 @@ void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::str
                 .addEvent("error", errorStr)
                 .addEvent("code", static_cast<int>(error)));
     });
+}
+
+void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& frame) {
+    // update report time
+    double currentFrameTime = util::MonotonicTimer::now().count();
+    double elapsedTime = currentFrameTime - previousFrameTime;
+    previousFrameTime = currentFrameTime;
+
+    // update rendering stats
+    renderingStats.encodingMin = std::min(renderingStats.encodingMin, frame.renderingStats.encodingTime);
+
+    renderingStats.encodingMax = std::max(renderingStats.encodingMax, frame.renderingStats.encodingTime);
+
+    renderingStats.renderingMin = std::min(renderingStats.renderingMin, frame.renderingStats.renderingTime);
+
+    renderingStats.renderingMax = std::max(renderingStats.renderingMax, frame.renderingStats.renderingTime);
+
+    renderingStats.encodingTotal += frame.renderingStats.encodingTime;
+    renderingStats.renderingTotal += frame.renderingStats.renderingTime;
+    ++renderingStats.frameCount;
+
+    renderingInfoReportTime -= elapsedTime;
+    if (renderingInfoReportTime > 1e-9) {
+        return;
+    }
+
+    renderingInfoReportTime = options.renderingStatsReportInterval();
+
+    // skip if the full interval had an idle map
+    if (renderingStats.frameCount == 0) {
+        return;
+    }
+
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), stats = std::move(renderingStats)]() {
+        log(ActionJournalEvent("renderingStats", env)
+                .addEvent("encodingMin", stats.encodingMin)
+                .addEvent("encodingMax", stats.encodingMax)
+                .addEvent("encodingAvg", stats.encodingTotal / stats.frameCount)
+                .addEvent("renderingMin", stats.renderingMin)
+                .addEvent("renderingMax", stats.renderingMax)
+                .addEvent("renderingAvg", stats.renderingTotal / stats.frameCount));
+    });
+
+    renderingStats = {};
 }
 
 void ActionJournal::Impl::onWillStartRenderingMap() {
@@ -561,7 +611,7 @@ void ActionJournal::Impl::logToFile(const std::string& value) {
         return;
     }
 
-    std::lock_guard lock(fileMutex);
+    std::scoped_lock lock(fileMutex);
 
     if (!prepareFile(value.size() + 1)) {
         return;

@@ -1,0 +1,16 @@
+// swift-tools-version: 5.9
+
+import PackageDescription
+
+// dummy package to fetch dependencies via bazel `rules_swift_package_manager``
+// https://github.com/cgrindel/rules_swift_package_manager?tab=readme-ov-file#4-run-swift-package-update
+
+let package = Package(
+    name: "maplibre-swift",
+    defaultLocalization: "en",
+    platforms: [.iOS(.v12)],
+    dependencies: [
+        .package(url: "https://github.com/aws-geospatial/polyline/", from: "0.3.1"),
+        .package(url: "https://github.com/getsentry/sentry-cocoa", from: "8.54.0"),
+    ]
+)

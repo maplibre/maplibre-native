@@ -4,10 +4,11 @@ import org.maplibre.android.maps.MapLibreMap
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 
-class AnnotationTest {
+class AnnotationTest : BaseTest() {
     @InjectMocks
     private val maplibreMap = Mockito.mock(MapLibreMap::class.java)
     private var annotation: Annotation? = null

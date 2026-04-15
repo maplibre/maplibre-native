@@ -24,7 +24,7 @@ class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
         super.init()
     }
 
-    @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
+    func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }

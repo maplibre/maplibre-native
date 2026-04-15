@@ -60,7 +60,7 @@ android {
 
     defaultConfig {
         compileSdk = 34
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         buildConfigField("String", "GIT_REVISION_SHORT", "\"${getGitRevision()}\"")
         buildConfigField("String", "GIT_REVISION", "\"${getGitRevision(false)}\"")
@@ -76,12 +76,36 @@ android {
     productFlavors {
         create("opengl") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=ON")
+                }
+            }
         }
         create("vulkan") {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
+                    arguments("-DMLN_WITH_VULKAN=ON")
+                }
+            }
+        }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
                 }
             }
         }
@@ -90,6 +114,12 @@ android {
     sourceSets {
         getByName("opengl") {
             java.srcDirs("src/opengl/java/")
+        }
+        listOf("webgpuDawn", "webgpuWgpu").forEach {
+            getByName(it) {
+                java.srcDirs("src/vulkan/java")
+                manifest.srcFile("src/vulkan/AndroidManifest.xml")
+            }
         }
     }
 

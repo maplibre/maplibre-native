@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
   echo "Usage: $0 <tag> [<commit-sha>]"
   echo "  <tag>        Git tag name to create or verify"

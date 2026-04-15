@@ -1,4 +1,4 @@
-import { ArgumentParser } from "argparse";
+import { parseArgs } from "node:util";
 import * as path from "node:path";
 import spec from "./style-spec.mjs";
 import colorParser from "csscolorparser";
@@ -7,14 +7,17 @@ import { camelize, camelizeWithLeadingLowercase, readAndCompile, writeIfModified
 
 // Parse command line
 const args = (() => {
-  const parser = new ArgumentParser({
-      description: "MapLibre Shader Tools"
+  const { values } = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      out: {
+        type: 'string',
+        short: 'o'
+      }
+    },
+    allowPositionals: false
   });
-  parser.add_argument("--out", "--o", {
-      help: "Directory root to write generated code.",
-      required: false
-  });
-  return parser.parse_args();
+  return values;
 })();
 
 function parseCSSColor(/** @type {string} **/ str) {
@@ -50,6 +53,10 @@ function expressionType(property) {
         case 'number':
         case 'enum':
             return 'NumberType';
+        case 'numberArray':
+            return 'Array<NumberType>';
+        case 'colorArray':
+            return 'Array<ColorType>';
         case 'image':
             return 'ImageType';
         case 'string':
@@ -101,6 +108,10 @@ function evaluatedType(property) {
       return 'Rotation';
     }
     return /location$/.test(property.name) ? 'double' : 'float';
+  case 'numberArray':
+    return 'std::vector<float>';
+  case 'colorArray':
+    return 'std::vector<Color>';
   case 'resolvedImage':
       return 'expression::Image';
   case 'formatted':
@@ -207,7 +218,7 @@ function propertyValueType(property) {
  * @returns {string}
  */
 function formatNumber(property, num = 0) {
-  if (evaluatedType(property) === "float") {
+  if (evaluatedType(property) === "float" || property.type === "number") {
     const str = num.toString();
     return str + (str.includes(".") ? "" : ".") + "f";
   }
@@ -234,6 +245,23 @@ function defaultValue(property) {
   switch (property.type) {
   case 'number':
     return formatNumber(property, property.default);
+  case 'numberArray':
+    // Default is a single number, wrap it in a vector
+    return `{${formatNumber({type: 'number'}, property.default)}}`;
+  case 'colorArray':
+    // Default is a single color string, parse it and wrap in a vector
+    const colorArray = parseCSSColor(property.default);
+    const colorStr = colorArray.join(', ');
+    switch (colorStr) {
+      case '0, 0, 0, 0':
+        return '{{}}';
+      case '0, 0, 0, 1':
+        return '{Color::black()}';
+      case '1, 1, 1, 1':
+        return '{Color::white()}';
+      default:
+        return `{{Color{${colorStr}}}}`;
+    }
   case 'formatted':
   case 'string':
   case 'resolvedImage':

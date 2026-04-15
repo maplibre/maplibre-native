@@ -37,8 +37,10 @@ public:
  * performed on the GL Thread.
  *
  * The public methods are safe to call from the main thread, others are not.
+ *
+ * NOTE: Any derived class must invalidate `weakFactory` in the destructor
  */
-class MapRenderer : public Scheduler {
+class MapRenderer final : public Scheduler {
 public:
     static constexpr auto Name() { return "org/maplibre/android/maps/renderer/MapRenderer"; };
 
@@ -94,6 +96,10 @@ protected:
     // Called from the GL Thread //
 
     void scheduleSnapshot(std::unique_ptr<SnapshotCallback>);
+
+    // Allows derived classes to invalidate weak pointers in
+    // their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     struct MailboxData {

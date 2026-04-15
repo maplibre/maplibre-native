@@ -8,37 +8,83 @@
   "configurePresets": [
     {
       "name": "ios",
-      "displayName": "iOS",
+      "hidden": true,
       "generator": "Xcode",
-      "description": "Create Xcode project for iOS",
-      "binaryDir": "${sourceDir}/build-ios",
+      "description": "Base iOS preset",
+      "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
-        "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF"
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "ios-metal",
+      "displayName": "iOS Metal",
+      "inherits": "ios",
+      "binaryDir": "${sourceDir}/build-ios",
+      "cacheVariables": {
+        "MLN_WITH_METAL": "ON"
+      }
+    },
+    {
+      "name": "ios-webgpu-dawn",
+      "displayName": "iOS WebGPU (Dawn)",
+      "inherits": "ios",
+      "binaryDir": "${sourceDir}/build-ios-webgpu-dawn",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_DAWN": "ON"
+      }
+    },
+    {
+      "name": "ios-webgpu-wgpu",
+      "displayName": "iOS WebGPU (wgpu-native)",
+      "inherits": "ios",
+      "binaryDir": "${sourceDir}/build-ios-webgpu-wgpu",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON"
       }
     },
     {
       "name": "macos",
-      "displayName": "macOS",
+      "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-macos",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
-        "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.3",
         "CMAKE_BUILD_TYPE": "Debug",
         "MLN_DARWIN_USE_LIBUV": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
-      "name": "macos-xcode",
+      "name": "macos-metal",
+      "displayName": "macOS Metal",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-metal",
+      "inherits": "macos",
+      "cacheVariables": {
+        "MLN_WITH_METAL": "ON"
+      }
+    },
+    {
+      "name": "macos-metal-xcode",
       "displayName": "macOS (Xcode)",
       "generator": "Xcode",
-      "binaryDir": "${sourceDir}/build-macos-xcode",
-      "inherits": "macos"
+      "binaryDir": "${sourceDir}/build-macos-metal-xcode",
+      "inherits": "macos-metal"
     },
     {
       "name": "macos-vulkan",
@@ -47,9 +93,7 @@
       "binaryDir": "${sourceDir}/build-macos-vulkan",
       "inherits": "macos",
       "cacheVariables": {
-        "MLN_WITH_VULKAN": "ON",
-        "MLN_WITH_METAL": "OFF",
-        "MLN_WITH_OPENGL": "OFF"
+        "MLN_WITH_VULKAN": "ON"
       }
     },
     {
@@ -60,20 +104,40 @@
       "inherits": "macos-vulkan"
     },
     {
-      "name": "macos-node",
-      "inherits": "macos",
+      "name": "macos-metal-node",
+      "inherits": "macos-metal",
       "binaryDir": "${sourceDir}/build",
+      "displayName": "MacOS Node",
+      "description": "MacOS Node build (Metal renderer)",
       "cacheVariables": {
         "MLN_WITH_NODE": "ON",
-        "MLN_WITH_WERROR": "OFF"
+        "MLN_WITH_WERROR": "OFF",
+        "MLN_CREATE_AUTORELEASEPOOL": "ON",
+        "MLN_DARWIN_USE_LIBUV": "OFF"
       }
     },
     {
-      "name": "macos-core",
+      "name": "macos-webgpu-dawn",
+      "displayName": "macOS WebGPU (Dawn)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-webgpu-dawn",
       "inherits": "macos",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_WITH_GLFW": "OFF"
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_DAWN": "ON",
+        "MLN_DARWIN_USE_LIBUV": "ON"
+      }
+    },
+    {
+      "name": "macos-webgpu-wgpu",
+      "displayName": "macOS WebGPU (wgpu-native)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-webgpu-wgpu",
+      "inherits": "macos",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
+        "MLN_DARWIN_USE_LIBUV": "ON"
       }
     },
     {
@@ -93,6 +157,11 @@
         "MLN_WITH_CLANG_TIDY": "OFF",
         "MLN_WITH_WAYLAND": "ON",
         "MLN_WITH_X11": "OFF"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
       }
     },
     {
@@ -102,14 +171,6 @@
       "inherits": "linux",
       "cacheVariables": {
         "MLN_WITH_OPENGL": "ON"
-      }
-    },
-    {
-      "name": "linux-opengl-core",
-      "inherits": "linux-opengl",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "OFF"
       }
     },
     {
@@ -123,11 +184,69 @@
       }
     },
     {
-      "name": "linux-vulkan-core",
-      "inherits": "linux-vulkan",
+      "name": "linux-webgpu-dawn",
+      "binaryDir": "${sourceDir}/build-linux-webgpu-dawn",
+      "inherits": "linux",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "OFF"
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_DAWN": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
+      }
+    },
+    {
+      "name": "linux-webgpu-wgpu",
+      "binaryDir": "${sourceDir}/build-linux-webgpu-wgpu",
+      "inherits": "linux",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
+      }
+    },
+    {
+      "name": "android-webgpu-dawn",
+      "displayName": "Android WebGPU (Dawn)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-android-webgpu-dawn",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+        "CMAKE_ANDROID_NDK": "$env{ANDROID_NDK}",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-26",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_DAWN": "ON"
+      }
+    },
+    {
+      "name": "android-webgpu-wgpu",
+      "displayName": "Android WebGPU (wgpu-native)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-android-webgpu-wgpu",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK}/build/cmake/android.toolchain.cmake",
+        "CMAKE_ANDROID_NDK": "$env{ANDROID_NDK}",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-26",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON"
+      }
+    },
+    {
+      "name": "linux-opengl-node",
+      "inherits": "linux",
+      "binaryDir": "${sourceDir}/build",
+      "displayName": "Linux Node",
+      "description": "Linux Node build (OpenGL renderer)",
+      "cacheVariables": {
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       }
     },
     {
@@ -140,6 +259,11 @@
         "MLN_WITH_EGL": "OFF",
         "MLN_WITH_VULKAN": "OFF",
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
@@ -152,11 +276,15 @@
       }
     },
     {
-      "name": "windows-opengl-core",
-      "inherits": "windows-opengl",
+      "name": "windows-opengl-node",
+      "inherits": "windows",
+      "binaryDir": "${sourceDir}/build",
+      "displayName": "Windows Node",
+      "description": "Windows Node build (OpenGL renderer)",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "ON"
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_OPENGL": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
       }
     },
     {
@@ -170,14 +298,6 @@
       }
     },
     {
-      "name": "windows-egl-core",
-      "inherits": "windows-egl",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "ON"
-      }
-    },
-    {
       "name": "windows-vulkan",
       "binaryDir": "${sourceDir}/build-windows-vulkan",
       "inherits": "windows",
@@ -188,18 +308,63 @@
       }
     },
     {
-      "name": "windows-vulkan-core",
-      "inherits": "windows-vulkan",
+      "name": "windows-arm64",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "ARM64",
+        "strategy": "set"
+      },
+      "environment": {
+        "VSCMD_ARG_TGT_ARCH": "arm64"
+      },
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "ON"
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "MLN_WITH_GLFW": "OFF"
+      }
+    },
+    {
+      "name": "windows-arm64-opengl",
+      "hidden": false,
+      "inherits": "windows-arm64",
+      "displayName": "Windows ARM64 OpenGL",
+      "description": "Windows ARM64 build (OpenGL renderer)",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_GLFW": "ON"
+      }
+    },
+    {
+      "name": "windows-arm64-opengl-node",
+      "binaryDir": "${sourceDir}/build",
+      "inherits": "windows-arm64",
+      "displayName": "Windows ARM64 Node",
+      "description": "Windows ARM64 Node build (OpenGL renderer)",
+      "cacheVariables": {
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_OPENGL": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
+      }
+    },
+    {
+      "name": "windows-arm64-vulkan",
+      "hidden": false,
+      "inherits": "windows-arm64",
+      "displayName": "Windows ARM64 Vulkan",
+      "description": "Windows ARM64 build (Vulkan renderer)",
+      "cacheVariables": {
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_GLFW": "ON"
       }
     }
   ],
   "buildPresets": [
     {
       "name": "macos-core",
-      "configurePreset": "macos-core",
+      "configurePreset": "macos",
       "targets": ["mbgl-core"]
     },
     {

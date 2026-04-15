@@ -12,9 +12,12 @@ import androidx.annotation.Nullable;
 
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.constants.MapLibreConstants;
+import org.maplibre.android.log.Logger;
+import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.util.DefaultStyle;
 import org.maplibre.android.utils.BitmapUtils;
@@ -38,6 +41,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class Style {
 
+  protected static final String TAG = "Style";
   static final String EMPTY_JSON = "{\"version\": 8,\"sources\": {},\"layers\": []}";
 
   private final NativeMap nativeMap;
@@ -735,20 +739,28 @@ public class Style {
     if (!fullyLoaded) {
       fullyLoaded = true;
       for (Source source : builder.sources) {
-        addSource(source);
+        try {
+          addSource(source);
+        } catch (CannotAddSourceException exception) {
+          Logger.e(TAG, "Failed to add source", exception);
+        }
       }
 
-      for (Builder.LayerWrapper layerWrapper : builder.layers) {
-        if (layerWrapper instanceof Builder.LayerAtWrapper) {
-          addLayerAt(layerWrapper.layer, ((Builder.LayerAtWrapper) layerWrapper).index);
-        } else if (layerWrapper instanceof Builder.LayerAboveWrapper) {
-          addLayerAbove(layerWrapper.layer, ((Builder.LayerAboveWrapper) layerWrapper).aboveLayer);
-        } else if (layerWrapper instanceof Builder.LayerBelowWrapper) {
-          addLayerBelow(layerWrapper.layer, ((Builder.LayerBelowWrapper) layerWrapper).belowLayer);
-        } else {
-          // just add layer to map, but below annotations
-          addLayerBelow(layerWrapper.layer, MapLibreConstants.LAYER_ID_ANNOTATIONS);
+      try {
+        for (Builder.LayerWrapper layerWrapper : builder.layers) {
+          if (layerWrapper instanceof Builder.LayerAtWrapper) {
+            addLayerAt(layerWrapper.layer, ((Builder.LayerAtWrapper) layerWrapper).index);
+          } else if (layerWrapper instanceof Builder.LayerAboveWrapper) {
+            addLayerAbove(layerWrapper.layer, ((Builder.LayerAboveWrapper) layerWrapper).aboveLayer);
+          } else if (layerWrapper instanceof Builder.LayerBelowWrapper) {
+            addLayerBelow(layerWrapper.layer, ((Builder.LayerBelowWrapper) layerWrapper).belowLayer);
+          } else {
+            // just add layer to map, but below annotations
+            addLayerBelow(layerWrapper.layer, MapLibreConstants.LAYER_ID_ANNOTATIONS);
+          }
         }
+      } catch (CannotAddLayerException exception) {
+        Logger.e(TAG, "Failed to add layer", exception);
       }
 
       for (Builder.ImageWrapper image : builder.images) {

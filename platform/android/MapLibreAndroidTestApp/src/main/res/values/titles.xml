@@ -4,6 +4,7 @@
     <string name="activity_map_fragment">Map Fragment</string>
     <string name="activity_map_fragment_backstack">Backstack Map Fragment</string>
     <string name="activity_multimap">Multiple Maps on Screen</string>
+    <string name="activity_long_running_maps">Long running Maps</string>
     <string name="activity_add_bulk_markers">Add Markers In Bulk</string>
     <string name="activity_animated_symbollayer">Animated SymbolLayer</string>
     <string name="activity_dynamic_marker">Dynamic Marker</string>
@@ -39,6 +40,7 @@
     <string name="activity_circle_layer">Circle layer</string>
     <string name="activity_collection_style_change">Collection updates on style changes</string>
     <string name="activity_style_file">Local Style file</string>
+    <string name="activity_style_url">Style URL</string>
     <string name="activity_geojson_clustering">GeoJson Clustering</string>
     <string name="activity_geojson_realtime">Add live realtime data</string>
     <string name="activity_print">Print a map</string>
@@ -73,6 +75,7 @@
     <string name="activity_textureview_resize">TextureView resize</string>
     <string name="activity_textureview_animate">TextureView animation</string>
     <string name="activity_textureview_transparent">TextureView transparent background</string>
+    <string name="activity_surfaceview_resize">SurfaceView resize</string>
     <string name="activity_overlay">Map overlay</string>
     <string name="activity_grid_source">Grid Source</string>
     <string name="activity_no_style">No Style URI/JSON</string>

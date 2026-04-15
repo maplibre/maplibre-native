@@ -108,6 +108,10 @@ final class LocationAnimatorCoordinator {
     LatLng previousCameraLatLng = currentCameraPosition.target;
     float previousCameraBearing = normalize((float) currentCameraPosition.bearing);
 
+    if (previousCameraLatLng == null) {
+      previousCameraLatLng = previousLayerLatLng;
+    }
+
     // generate targets for layer
     LatLng[] latLngValues = getLatLngValues(previousLayerLatLng, newLocations);
     Float[] bearingValues = getBearingValues(previousLayerBearing, newLocations);

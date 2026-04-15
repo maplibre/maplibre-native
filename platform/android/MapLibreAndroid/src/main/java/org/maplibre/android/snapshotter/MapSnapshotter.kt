@@ -126,6 +126,10 @@ open class MapSnapshotter(context: Context, options: Options) {
         var region: LatLngBounds? = null
             private set
 
+        // only works when using region to specify the camera
+        var regionPadding: IntArray = intArrayOf(0, 0, 0, 0)
+            private set
+
         /**
          * @return the camera position
          */
@@ -133,6 +137,8 @@ open class MapSnapshotter(context: Context, options: Options) {
             private set
 
         var showLogo = true
+
+        var showAttribution = true
 
         /**
          * @return the font family used for locally generating ideographs,
@@ -203,6 +209,16 @@ open class MapSnapshotter(context: Context, options: Options) {
         }
 
         /**
+         * @param padding of the padding of the region.
+         * This is applied before the region, if region is null, it will not work
+         * @return the mutated [Options]
+         */
+        fun withPadding(left:Int, top:Int, right:Int, bottom:Int): Options {
+            this.regionPadding = intArrayOf(left, top, right, bottom)
+            return this
+        }
+
+        /**
          * @param pixelRatio the pixel ratio to use (default: 1)
          * @return the mutated [Options]
          */
@@ -228,6 +244,15 @@ open class MapSnapshotter(context: Context, options: Options) {
          */
         fun withLogo(showLogo: Boolean): Options {
             this.showLogo = showLogo
+            return this
+        }
+
+        /**
+         * @param showAttribution The flag indicating to show the attribution.
+         * @return the mutated [Options]
+         */
+        fun withAttribution(showAttribution: Boolean): Options {
+            this.showAttribution = showAttribution
             return this
         }
 
@@ -337,7 +362,12 @@ open class MapSnapshotter(context: Context, options: Options) {
             options.region,
             options.cameraPosition,
             options.showLogo,
-            options.localIdeographFontFamily
+            options.showAttribution,
+            options.localIdeographFontFamily,
+            options.regionPadding[0] / options.pixelRatio,
+            options.regionPadding[1] / options.pixelRatio,
+            options.regionPadding[2] / options.pixelRatio,
+            options.regionPadding[3] / options.pixelRatio
         )
     }
 
@@ -381,6 +411,14 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     external fun setRegion(region: LatLngBounds?)
+
+    /**
+     * Updates the snapshotter padding with a new [IntArray]
+     *
+     * @param left, top, right, bottom
+     */
+    @Keep
+    external fun setPadding(left:Int, top:Int, right:Int, bottom:Int)
 
     /**
      * Updates the snapshotter with a new style url
@@ -476,7 +514,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     protected open fun addOverlay(mapSnapshot: MapSnapshot) {
         val snapshot = mapSnapshot.bitmap
-        val canvas = Canvas(snapshot!!)
+        val canvas = Canvas(snapshot)
         val margin = context.resources.displayMetrics.density.toInt() * LOGO_MARGIN_DP
         drawOverlay(mapSnapshot, snapshot, canvas, margin)
     }
@@ -511,6 +549,7 @@ open class MapSnapshotter(context: Context, options: Options) {
 
     private fun drawAttribution(mapSnapshot: MapSnapshot, canvas: Canvas, measure: AttributionMeasure, layout: AttributionLayout?) {
         // draw attribution
+        if (!mapSnapshot.isShowAttribution) return
         val anchorPoint = layout!!.anchorPoint
         if (anchorPoint != null) {
             drawAttribution(canvas, measure, anchorPoint)
@@ -732,7 +771,12 @@ open class MapSnapshotter(context: Context, options: Options) {
         region: LatLngBounds?,
         position: CameraPosition?,
         showLogo: Boolean,
-        localIdeographFontFamily: String?
+        showAttribution: Boolean,
+        localIdeographFontFamily: String?,
+        paddingLeft: Float,
+        paddingTop: Float,
+        paddingRight: Float,
+        paddingBottom: Float
     )
 
     @Keep

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/text/bidi.hpp>
+#include <mbgl/text/harfbuzz.hpp>
 #include <mbgl/style/expression/formatted.hpp>
 #include <mbgl/util/font_stack.hpp>
 
@@ -9,21 +10,48 @@
 namespace mbgl {
 
 struct SectionOptions {
-    SectionOptions(double scale_, FontStack fontStack_, std::optional<Color> textColor_ = std::nullopt)
+    SectionOptions(double scale_,
+                   FontStack fontStack_,
+                   GlyphIDType type_,
+                   uint32_t startIndex_,
+                   std::optional<Color> textColor_ = std::nullopt)
         : scale(scale_),
-          fontStackHash(FontStackHasher()(fontStack_)),
-          fontStack(std::move(fontStack_)),
+          fontStack(fontStack_),
+          fontStackHash(FontStackHasher()(std::move(fontStack_))),
+          type(type_),
+          startIndex(startIndex_),
+          textColor(std::move(textColor_)) {}
+
+    SectionOptions(double scale_,
+                   FontStackHash fontStackHash_,
+                   GlyphIDType type_,
+                   uint32_t startIndex_,
+                   std::optional<Color> textColor_ = std::nullopt)
+        : scale(scale_),
+          fontStackHash(fontStackHash_),
+          type(type_),
+          startIndex(startIndex_),
           textColor(std::move(textColor_)) {}
 
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
+          type(GlyphIDType::FontPBF),
           imageID(std::move(imageID_)) {}
 
     double scale;
-    FontStackHash fontStackHash;
     FontStack fontStack;
-    std::optional<Color> textColor;
+    FontStackHash fontStackHash;
+
+    GlyphIDType type;
+
+    std::shared_ptr<std::vector<HBShapeAdjust>> adjusts;
+
+    int32_t startIndex;
+    bool keySection = true;
+
     std::optional<std::string> imageID;
+
+    std::optional<Color> textColor;
 };
 
 /**
@@ -44,8 +72,9 @@ struct SectionOptions {
 struct TaggedString {
     TaggedString() = default;
 
-    TaggedString(std::u16string text_, SectionOptions options)
-        : styledText(std::move(text_), std::vector<uint8_t>(text_.size(), 0)) {
+    TaggedString(std::u16string text_, SectionOptions options) {
+        auto size = text_.size();
+        styledText = {std::move(text_), std::vector<uint8_t>(size, 0)};
         sections.push_back(std::move(options));
     }
 
@@ -70,6 +99,16 @@ struct TaggedString {
     void addTextSection(const std::u16string& text,
                         double scale,
                         const FontStack& fontStack,
+                        GlyphIDType type,
+                        bool keySection = true,
+                        std::optional<Color> textColor_ = std::nullopt);
+
+    void addTextSection(const std::u16string& text,
+                        double scale,
+                        const FontStack& fontStack,
+                        GlyphIDType type,
+                        std::shared_ptr<std::vector<HBShapeAdjust>>& adjusts,
+                        bool keySection = true,
                         std::optional<Color> textColor_ = std::nullopt);
 
     void addImageSection(const std::string& imageID);
@@ -86,6 +125,12 @@ struct TaggedString {
     void verticalizePunctuation();
     bool allowsVerticalWritingMode();
 
+    bool hbShaped() const { return textHBShaped; }
+
+    void setHBShaped(bool shaped) { textHBShaped = shaped; }
+
+    bool hasNeedHBShapeText() const { return hasNeedShapeTextVal; }
+
 private:
     std::optional<char16_t> getNextImageSectionCharCode();
 
@@ -96,6 +141,8 @@ private:
     // Max number of images within a text is 6400 U+E000–U+F8FF
     // that covers Basic Multilingual Plane Unicode Private Use Area (PUA).
     char16_t imageSectionID = 0u;
+    bool textHBShaped = false;
+    bool hasNeedShapeTextVal = false;
 };
 
 } // namespace mbgl

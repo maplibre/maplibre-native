@@ -1,27 +1,19 @@
 package org.maplibre.android.testapp.activity.events
 
-import android.app.ActivityManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.MapLibre
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.tile.TileOperation
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
-import timber.log.Timber
 import java.util.*
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
-import kotlin.time.TimeSource.Monotonic
 import org.maplibre.android.log.Logger
-import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.maps.MapLibreMap
-
 
 // # --8<-- [start:ObserverActivity]
 /**
@@ -39,6 +31,7 @@ class ObserverActivity : AppCompatActivity(),
     // # --8<-- [end:ObserverActivity]
 
     private lateinit var mapView: MapView
+    private val renderStatsTracker = RenderStatsTracker()
 
     companion object {
         const val TAG = "ObserverActivity"
@@ -61,6 +54,33 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnDidFinishRenderingFrameListener(this)
         // # --8<-- [end:addListeners]
 
+        // # --8<-- [start:renderStatsTracker]
+        renderStatsTracker.setReportFields(listOf(
+            "encodingTime",
+            "renderingTime",
+            "numDrawCalls",
+            "numActiveTextures",
+            "numBuffers",
+            "memTextures",
+            "memBuffers"
+        ))
+
+        renderStatsTracker.setReportListener { _, _, avg ->
+            Logger.i(TAG, "RenderStatsReport - avg - ${avg.nonZeroValuesString()}")
+        }
+
+        renderStatsTracker.setThresholds(hashMapOf(
+            "numDrawCalls" to 1000,
+            "totalBuffers" to 1000L
+        ))
+
+        renderStatsTracker.setThresholdExceededListener { exceededValues, _ ->
+            Logger.i(TAG, "Exceeded render values $exceededValues")
+        }
+
+        renderStatsTracker.startReports(10L)
+        // # --8<-- [end:renderStatsTracker]
+
         mapView.getMapAsync {
             it.setStyle(
                 Style.Builder().fromUri(TestStyles.DEMOTILES)
@@ -78,7 +98,7 @@ class ObserverActivity : AppCompatActivity(),
     }
 
     // # --8<-- [start:printActionJournal]
-    fun printActionJournal(map: MapLibreMap) {
+    private fun printActionJournal(map: MapLibreMap) {
         // configure using `MapLibreMapOptions.actionJournal*` methods
 
         Logger.i(TAG,"ActionJournal files: \n${map.actionJournalLogFiles.joinToString("\n")}")
@@ -136,7 +156,7 @@ class ObserverActivity : AppCompatActivity(),
     }
 
     override fun onDidFinishRenderingFrame(fully: Boolean, stats: RenderingStats) {
-
+        renderStatsTracker.addFrame(stats)
     }
     // # --8<-- [end:mapEvents]
 
@@ -168,6 +188,7 @@ class ObserverActivity : AppCompatActivity(),
     override fun onDestroy() {
         super.onDestroy()
         mapView.onDestroy()
+        renderStatsTracker.stopReports()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

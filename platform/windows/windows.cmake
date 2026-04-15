@@ -187,7 +187,7 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/windows/include
         ${CURL_INCLUDE_DIRS}
-		${DLFCN_INCLUDE_DIRS}
+        ${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
@@ -234,7 +234,7 @@ if(MSVC)
         mbgl-core
         PRIVATE
             ${CURL_LIBRARIES}
-    		dlfcn-win32::dl
+            dlfcn-win32::dl
     )
 elseif(MSYS)
     target_link_libraries(
@@ -252,7 +252,7 @@ target_link_libraries(
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
-        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
+        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite

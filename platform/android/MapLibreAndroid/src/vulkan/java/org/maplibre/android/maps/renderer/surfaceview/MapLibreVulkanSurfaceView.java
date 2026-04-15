@@ -129,9 +129,8 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
           continue;
         }
 
-        MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-
         if (destroySurface) {
+          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
           if (view != null) {
             view.renderer.onSurfaceDestroyed();
             destroySurface = false;
@@ -140,6 +139,7 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
         }
 
         if (initSurface) {
+          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
           if (view != null) {
             view.renderer.onSurfaceCreated(view.getHolder().getSurface());
             initSurface = false;
@@ -147,17 +147,21 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
         }
 
         if (sizeChanged) {
+          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
           if (view != null) {
             view.renderer.onSurfaceChanged(w, h);
             sizeChanged = false;
           }
         }
 
-        if (view != null) {
-          view.renderer.onDrawFrame();
-          if (finishDrawingRunnable != null) {
-            finishDrawingRunnable.run();
-            finishDrawingRunnable = null;
+        {
+          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
+          if (view != null) {
+            view.renderer.onDrawFrame();
+            if (finishDrawingRunnable != null) {
+              finishDrawingRunnable.run();
+              finishDrawingRunnable = null;
+            }
           }
         }
 
@@ -170,6 +174,6 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
 
     private boolean graphicsSurfaceCreated;
 
-    private WeakReference<MapLibreVulkanSurfaceView> mSurfaceViewWeakRef;
+    private final WeakReference<MapLibreVulkanSurfaceView> mSurfaceViewWeakRef;
   }
 }

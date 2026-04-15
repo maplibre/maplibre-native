@@ -35,8 +35,9 @@ gfx::ColorBlendEquationType Enum<gfx::ColorBlendEquationType>::from(const platfo
             return gfx::ColorBlendEquationType::Subtract;
         case GL_FUNC_REVERSE_SUBTRACT:
             return gfx::ColorBlendEquationType::ReverseSubtract;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -85,8 +86,9 @@ gfx::ColorBlendFactorType Enum<gfx::ColorBlendFactorType>::from(const platform::
             return gfx::ColorBlendFactorType::OneMinusConstantAlpha;
         case GL_SRC_ALPHA_SATURATE:
             return gfx::ColorBlendFactorType::SrcAlphaSaturate;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -145,8 +147,9 @@ gfx::DepthFunctionType Enum<gfx::DepthFunctionType>::from(const platform::GLint 
             return gfx::DepthFunctionType::GreaterEqual;
         case GL_ALWAYS:
             return gfx::DepthFunctionType::Always;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -201,8 +204,9 @@ gfx::StencilFunctionType Enum<gfx::StencilFunctionType>::from(const platform::GL
             return gfx::StencilFunctionType::GreaterEqual;
         case GL_ALWAYS:
             return gfx::StencilFunctionType::Always;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -247,8 +251,9 @@ gfx::StencilOpType Enum<gfx::StencilOpType>::from(const platform::GLint value) {
             return gfx::StencilOpType::DecrementWrap;
         case GL_INVERT:
             return gfx::StencilOpType::Invert;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -283,8 +288,9 @@ gfx::CullFaceSideType Enum<gfx::CullFaceSideType>::from(const platform::GLint va
             return gfx::CullFaceSideType::Back;
         case GL_FRONT_AND_BACK:
             return gfx::CullFaceSideType::FrontAndBack;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -307,8 +313,9 @@ gfx::CullFaceWindingType Enum<gfx::CullFaceWindingType>::from(const platform::GL
             return gfx::CullFaceWindingType::Clockwise;
         case GL_CCW:
             return gfx::CullFaceWindingType::CounterClockwise;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -331,8 +338,9 @@ gfx::BufferUsageType Enum<gfx::BufferUsageType>::from(const platform::GLint valu
             return gfx::BufferUsageType::StaticDraw;
         case GL_DYNAMIC_DRAW:
             return gfx::BufferUsageType::DynamicDraw;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -361,8 +369,9 @@ gfx::TexturePixelType Enum<gfx::TexturePixelType>::from(const platform::GLint va
             return gfx::TexturePixelType::Depth;
         case GL_LUMINANCE:
             return gfx::TexturePixelType::Luminance;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -422,8 +431,9 @@ gfx::TextureChannelDataType Enum<gfx::TextureChannelDataType>::from(const platfo
             return gfx::TextureChannelDataType::HalfFloat;
         case GL_FLOAT:
             return gfx::TextureChannelDataType::Float;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>
@@ -448,8 +458,9 @@ gfx::RenderbufferPixelType Enum<gfx::RenderbufferPixelType>::from(const platform
             return gfx::RenderbufferPixelType::Depth;
         case GL_DEPTH24_STENCIL8:
             return gfx::RenderbufferPixelType::DepthStencil;
+        default:
+            return {};
     }
-    return {};
 }
 
 template <>

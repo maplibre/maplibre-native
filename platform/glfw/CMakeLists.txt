@@ -31,15 +31,18 @@ set_property(
     PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
 )
 
+if(APPLE)
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_apple_init.mm
+    )
+endif()
+
 if(MLN_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
     target_sources(
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_gl_backend.cpp
-    )
-    target_compile_definitions(
-        mbgl-glfw
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
     )
 endif()
 
@@ -55,11 +58,6 @@ if(MLN_WITH_VULKAN)
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_vulkan_backend.cpp
     )
-
-    target_compile_definitions(
-        mbgl-glfw
-        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
-    )
 endif()
 
 if(MLN_WITH_METAL)
@@ -71,14 +69,44 @@ if(MLN_WITH_METAL)
         ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.h
         ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.h
     )
-    target_compile_definitions(
-        mbgl-glfw
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
-    )
     target_link_libraries(
         mbgl-glfw
         PRIVATE
         mbgl-vendor-metal-cpp
+    )
+endif()
+
+if(MLN_WITH_WEBGPU)
+    if(APPLE)
+        target_sources(
+            mbgl-glfw
+            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.mm
+        )
+    else()
+        target_sources(
+            mbgl-glfw
+            PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
+        )
+    endif()
+    if(TARGET mbgl-vendor-dawn)
+        target_link_libraries(mbgl-glfw PRIVATE mbgl-vendor-dawn)
+    endif()
+    if(TARGET mbgl-vendor-wgpu)
+        target_link_libraries(mbgl-glfw PRIVATE mbgl-vendor-wgpu)
+    endif()
+endif()
+
+if(DEFINED MLN_WITH_X11 AND MLN_WITH_X11)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_WITH_X11=1
+    )
+endif()
+
+if(DEFINED MLN_WITH_WAYLAND AND MLN_WITH_WAYLAND)
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_WITH_WAYLAND=1
     )
 endif()
 
@@ -89,8 +117,6 @@ target_include_directories(
         # For /platform/default/src/mbgl/map/map_snapshotter.hpp
     PRIVATE ${PROJECT_SOURCE_DIR}/src
 )
-
-include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
 
 # Use target_link_directories when we move away from CMake 3.10.
 target_link_libraries(
@@ -123,8 +149,8 @@ endif()
 target_link_libraries(
     mbgl-glfw
     PRIVATE
-        MapLibreNative::Base::Extras::args
-        MapLibreNative::Base::Extras::rapidjson
+        mbgl-vendor-args
+        mbgl-vendor-rapidjson
         Mapbox::Map
         mbgl-compiler-options
         MapLibreNative::Base::cheap-ruler-cpp

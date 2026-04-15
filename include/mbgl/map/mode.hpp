@@ -35,6 +35,11 @@ enum class ViewportMode : EnumType {
     FlippedY,
 };
 
+enum class TileLodMode : uint8_t {
+    Default, ///< Default TileLOD algorithm
+    Distance ///< Distance-based TileLOD algorithm
+};
+
 enum class MapDebugOptions : EnumType {
     NoDebug = 0,
     TileBorders = 1 << 1,
@@ -47,10 +52,12 @@ enum class MapDebugOptions : EnumType {
 };
 
 constexpr MapDebugOptions operator|(MapDebugOptions lhs, MapDebugOptions rhs) {
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     return MapDebugOptions(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs));
 }
 
 constexpr MapDebugOptions& operator|=(MapDebugOptions& lhs, MapDebugOptions rhs) {
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     return (lhs = MapDebugOptions(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs)));
 }
 
@@ -59,10 +66,12 @@ constexpr bool operator&(MapDebugOptions lhs, MapDebugOptions rhs) {
 }
 
 constexpr MapDebugOptions& operator&=(MapDebugOptions& lhs, MapDebugOptions rhs) {
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     return (lhs = MapDebugOptions(mbgl::underlying_type(lhs) & mbgl::underlying_type(rhs)));
 }
 
 constexpr MapDebugOptions operator~(MapDebugOptions value) {
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     return MapDebugOptions(~mbgl::underlying_type(value));
 }
 

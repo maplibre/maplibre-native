@@ -12,24 +12,19 @@ DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pix
 
     texture = context.createTexture2D();
     texture->setSize(size);
-    texture->setFormat(pixelType, TextureChannelDataType::UnsignedByte);
-    texture->setSamplerConfiguration(
-        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-#if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
-    deferredCreation = true;
-#else
-    texture->create();
-#endif
+    texture->setFormat(pixelType, gfx::TextureChannelDataType::UnsignedByte);
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                      .wrapU = gfx::TextureWrapType::Clamp,
+                                      .wrapV = gfx::TextureWrapType::Clamp});
 }
 
-const Texture2DPtr& DynamicTexture::getTexture() const {
+const gfx::Texture2DPtr& DynamicTexture::getTexture() const {
     assert(texture);
     return texture;
 }
 
 TexturePixelType DynamicTexture::getPixelFormat() const {
-    assert(texture);
-    return texture->getFormat();
+    return getTexture()->getFormat();
 }
 
 bool DynamicTexture::isEmpty() const {
@@ -37,7 +32,7 @@ bool DynamicTexture::isEmpty() const {
 }
 
 std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32_t uniqueId) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     mapbox::Bin* bin = shelfPack.packOne(uniqueId, size.width, size.height);
     if (!bin) {
         return std::nullopt;
@@ -46,22 +41,6 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
         numTextures++;
     }
     return TextureHandle(*bin);
-}
-
-void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHandle) {
-    std::lock_guard<std::mutex> lock(mutex);
-    const auto& rect = texHandle.getRectangle();
-    const auto imageSize = Size(rect.w, rect.h);
-
-#if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
-    auto size = imageSize.area() * texture->getPixelStride();
-    auto imageData = std::make_unique<uint8_t[]>(size);
-    std::copy(pixelData, pixelData + size, imageData.get());
-    imagesToUpload.emplace(texHandle, std::move(imageData));
-#else
-    texture->uploadSubRegion(pixelData, imageSize, rect.x, rect.y);
-#endif
-    texHandle.needsUpload = false;
 }
 
 std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
@@ -74,30 +53,22 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
     return texHandle;
 }
 
-void DynamicTexture::uploadDeferredImages() {
-    std::lock_guard<std::mutex> lock(mutex);
-    if (deferredCreation) {
-        texture->create();
-        deferredCreation = false;
-    }
-    for (const auto& pair : imagesToUpload) {
-        const auto& rect = pair.first.getRectangle();
-        texture->uploadSubRegion(pair.second.get(), Size(rect.w, rect.h), rect.x, rect.y);
-    }
-    imagesToUpload.clear();
+void DynamicTexture::uploadImage(const uint8_t* /*pixelData*/, gfx::TextureHandle& texHandle) {
+    texHandle.needsUpload = false;
 }
 
-void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
-    std::lock_guard<std::mutex> lock(mutex);
+bool DynamicTexture::removeTexture(const TextureHandle& texHandle) {
+    std::scoped_lock lock(mutex);
     auto* bin = shelfPack.getBin(texHandle.getId());
     if (!bin) {
-        return;
+        return false;
     }
     auto refcount = shelfPack.unref(*bin);
     if (refcount == 0) {
         numTextures--;
-        imagesToUpload.erase(texHandle);
+        return true;
     }
+    return false;
 }
 
 } // namespace gfx

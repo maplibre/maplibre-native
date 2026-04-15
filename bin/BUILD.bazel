@@ -9,6 +9,7 @@ cc_binary(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//platform:macos-objcpp",
+        "//vendor:args",
     ],
 )
 
@@ -20,5 +21,6 @@ cc_binary(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//platform:macos-objcpp",
+        "//vendor:args",
     ],
 )

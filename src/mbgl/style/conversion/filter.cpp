@@ -14,7 +14,9 @@ namespace conversion {
 
 using namespace mbgl::style::expression;
 
-static bool isExpression(const Convertible& filter);
+namespace {
+bool isExpression(const Convertible& filter);
+}
 ParseResult convertLegacyFilter(const Convertible& values, Error& error);
 std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values);
 
@@ -34,12 +36,13 @@ std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Er
             assert(error.message.size() > 0);
             return std::nullopt;
         }
-        return Filter(std::optional<std::unique_ptr<Expression>>(std::move(*expression)), serializeLegacyFilter(value));
+        return Filter(std::optional<std::unique_ptr<Expression>>(std::move(expression)), serializeLegacyFilter(value));
     }
 }
 
 // This is a port from
 // https://github.com/mapbox/mapbox-gl-js/blob/master/src/style-spec/feature_filter/index.js
+namespace {
 bool isExpression(const Convertible& filter) {
     if (!isArray(filter) || arrayLength(filter) == 0) {
         return false;
@@ -79,6 +82,7 @@ bool isExpression(const Convertible& filter) {
         return true;
     }
 }
+} // namespace
 
 ParseResult createExpression(const std::string& op,
                              std::optional<std::vector<std::unique_ptr<Expression>>> args,

@@ -10,14 +10,14 @@ struct GLFWwindow;
 @class NSWindow;
 
 class GLFWMetalBackend final : public GLFWBackend {
- public:
+public:
   GLFWMetalBackend(GLFWwindow *window_, const bool capFrameRate);
   ~GLFWMetalBackend() = default;
   mbgl::gfx::RendererBackend &getRendererBackend() override;
   void setSize(mbgl::Size) override;
   mbgl::Size getSize() const override;
 
- private:
+private:
   NSWindow *window;
   MetalBackend rendererBackend;
 };

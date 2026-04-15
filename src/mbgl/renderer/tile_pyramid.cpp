@@ -22,8 +22,10 @@ namespace mbgl {
 
 using namespace style;
 
-static TileObserver nullObserver;
-static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+namespace {
+TileObserver nullObserver;
+const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+} // namespace
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),
@@ -108,12 +110,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
 
-    util::TileCoverParameters tileCoverParameters = {parameters.transformState,
-                                                     parameters.tileLodMinRadius,
-                                                     parameters.tileLodScale,
-                                                     parameters.tileLodPitchThreshold};
+    util::TileCoverParameters tileCoverParameters = {.transformState = parameters.transformState,
+                                                     .tileLodMinRadius = parameters.tileLodMinRadius,
+                                                     .tileLodScale = parameters.tileLodScale,
+                                                     .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
+                                                     .tileLodMode = parameters.tileLodMode};
 
-    if (overscaledZoom >= zoomRange.min) {
+    if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
 
         // Make sure we're not reparsing overzoomed raster tiles.
@@ -133,11 +136,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             }
 
             if (panZoom < idealZoom) {
-                panTiles = util::tileCover(tileCoverParameters, panZoom);
+                panTiles = util::tileCover(tileCoverParameters, panZoom, zoomRange);
             }
         }
 
-        idealTiles = util::tileCover(tileCoverParameters, idealZoom, tileZoom);
+        idealTiles = util::tileCover(tileCoverParameters, idealZoom, zoomRange, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
             mbgl::Log::Warning(mbgl::Event::General,
@@ -156,7 +159,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     auto retainTileFn = [&](Tile& tile, TileNecessity necessity) -> void {
         if (retain.emplace(tile.id).second) {
-            tile.setUpdateParameters({minimumUpdateInterval, isVolatile});
+            tile.setUpdateParameters({.minimumUpdateInterval = minimumUpdateInterval, .isVolatile = isVolatile});
             tile.setNecessity(necessity);
         }
 
@@ -174,8 +177,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // levels. Child tiles are used from the cache, but not created.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
-        tileRange = util::TileRange::fromLatLngBounds(
-            *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));
+        int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
+                              ? zoomRange.max
+                              : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
         if (tileRange && !tileRange->contains(tileID.canonical)) {

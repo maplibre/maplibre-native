@@ -2,6 +2,7 @@
 #include <mbgl/style/conversion/coordinate.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion/geojson_options.hpp>
+#include <mbgl/style/conversion/source_options.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
@@ -15,15 +16,16 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
+namespace {
 // A tile source can either specify a URL to TileJSON, or inline TileJSON.
-static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
+std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
     auto urlVal = objectMember(value, "url");
     if (!urlVal) {
         std::optional<Tileset> tileset = convert<Tileset>(value, error);
         if (!tileset) {
             return std::nullopt;
         }
-        return {*tileset};
+        return {std::move(*tileset)};
     }
 
     std::optional<std::string> url = toString(*urlVal);
@@ -32,12 +34,12 @@ static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Co
         return std::nullopt;
     }
 
-    return {*url};
+    return {std::move(*url)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
-                                                                  const Convertible& value,
-                                                                  Error& error) {
+std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
+                                                           const Convertible& value,
+                                                           Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -57,9 +59,9 @@ static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::str
     return {std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
-                                                                     const Convertible& value,
-                                                                     Error& error) {
+std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
+                                                              const Convertible& value,
+                                                              Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -76,17 +78,24 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
         tileSize = static_cast<uint16_t>(*size);
     }
 
-    return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize)};
+    /*
+     TODO: Refactor TileJSON parsing responsibilities. Currently `Tileset` handles full TileJSON parsing with optional
+           parameters. Since style.json can contain TileJSON parameter overrides or non-TileJSON spec parameters, a
+           separate mechanism is needed. Ideally these two pathways share parsing logic.
+    */
+    auto options = convert<SourceOptions>(value, error);
+
+    return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
-                                                                  const Convertible& value,
-                                                                  Error& error) {
-    std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
+std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
+                                                           const Convertible& value,
+                                                           Error& error) {
+    auto urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
     }
-    auto maxzoomValue = objectMember(value, "maxzoom");
+    const auto maxzoomValue = objectMember(value, "maxzoom");
     std::optional<float> maxzoom;
     if (maxzoomValue) {
         maxzoom = toNumber(*maxzoomValue);
@@ -95,7 +104,7 @@ static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::str
             return std::nullopt;
         }
     }
-    auto minzoomValue = objectMember(value, "minzoom");
+    const auto minzoomValue = objectMember(value, "minzoom");
     std::optional<float> minzoom;
     if (minzoomValue) {
         minzoom = toNumber(*minzoomValue);
@@ -104,12 +113,25 @@ static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::str
             return std::nullopt;
         }
     }
-    return {std::make_unique<VectorSource>(id, std::move(*urlOrTileset), std::move(maxzoom), std::move(minzoom))};
+    const auto encodingValue = objectMember(value, "encoding");
+    auto encoding = Tileset::VectorEncoding::Mapbox;
+    if (encodingValue) {
+        const auto encodingStr = toString(*encodingValue);
+        if (encodingStr && encodingStr == "mvt") {
+            encoding = Tileset::VectorEncoding::Mapbox;
+        } else if (encodingStr && encodingStr == "mlt") {
+            encoding = Tileset::VectorEncoding::MLT;
+        } else {
+            error.message = "invalid encoding";
+            return std::nullopt;
+        }
+    }
+    return {std::make_unique<VectorSource>(id, std::move(*urlOrTileset), maxzoom, minzoom, encoding)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
-                                                                   const Convertible& value,
-                                                                   Error& error) {
+std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
+                                                            const Convertible& value,
+                                                            Error& error) {
     auto dataValue = objectMember(value, "data");
     if (!dataValue) {
         error.message = "GeoJSON source must have a data value";
@@ -139,9 +161,9 @@ static std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::st
     return {std::move(result)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
-                                                                 const Convertible& value,
-                                                                 Error& error) {
+std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
+                                                          const Convertible& value,
+                                                          Error& error) {
     auto urlValue = objectMember(value, "url");
     if (!urlValue) {
         error.message = "Image source must have a url value";
@@ -180,6 +202,7 @@ static std::optional<std::unique_ptr<Source>> convertImageSource(const std::stri
 
     return {std::move(result)};
 }
+} // namespace
 
 std::optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()(const Convertible& value,
                                                                                       Error& error,

@@ -57,7 +57,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 target_link_libraries(
     mbgl-render-test
     PRIVATE
-        MapLibreNative::Base::Extras::args
+        mbgl-vendor-args
         MapLibreNative::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
@@ -65,7 +65,3 @@ target_link_libraries(
 )
 
 set_property(TARGET mbgl-render-test PROPERTY FOLDER MapLibre)
-
-if(MLN_WITH_OPENGL)
-    target_compile_definitions(mbgl-render-test PRIVATE "MLN_RENDER_BACKEND_OPENGL=1")
-endif()

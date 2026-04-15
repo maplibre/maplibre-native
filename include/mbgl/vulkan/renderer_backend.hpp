@@ -19,10 +19,10 @@
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include "vk_mem_alloc.h"
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(__ANDROID__)
 #define ENABLE_VULKAN_VALIDATION
 // #define ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
-//  #define ENABLE_VMA_DEBUG
+// #define ENABLE_VMA_DEBUG
 #endif
 
 namespace mbgl {
@@ -54,13 +54,14 @@ public:
     int32_t getGraphicsQueueIndex() const { return graphicsQueueIndex; }
     int32_t getPresentQueueIndex() const { return presentQueueIndex; }
 
-    template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
+    template <typename T>
+        requires vk::isVulkanHandleType<T>::value
     void setDebugName([[maybe_unused]] const T& object, [[maybe_unused]] const std::string& name) const {
 #ifdef ENABLE_VULKAN_VALIDATION
         if (!debugUtilsEnabled) return;
         const uint64_t handle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(object));
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
-                                               .setObjectType(object.objectType)
+                                               .setObjectType(T::objectType)
                                                .setObjectHandle(handle)
                                                .setPObjectName(name.c_str()),
                                            dispatcher);
@@ -93,7 +94,7 @@ protected:
     virtual void initCommandPool();
     virtual void initFrameCapture();
 
-    virtual void destroyResources();
+    void destroyResources();
 
 protected:
     vk::DynamicLoader dynamicLoader;

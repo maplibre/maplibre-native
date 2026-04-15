@@ -1,5 +1,6 @@
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/utf.hpp>
+#include <mbgl/text/glyph.hpp>
 
 #include <algorithm>
 #include <map>
@@ -42,21 +43,22 @@ DEFINE_IS_IN_UNICODE_BLOCK(ArabicSupplement, 0x0750, 0x077F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Syriac Supplement, 0x0860, 0x086F)
 DEFINE_IS_IN_UNICODE_BLOCK(ArabicExtendedA, 0x08A0, 0x08FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Devanagari, 0x0900, 0x097F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Bengali, 0x0980, 0x09FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Gurmukhi, 0x0A00, 0x0A7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Gujarati, 0x0A80, 0x0AFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Oriya, 0x0B00, 0x0B7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tamil, 0x0B80, 0x0BFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Telugu, 0x0C00, 0x0C7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Kannada, 0x0C80, 0x0CFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Malayalam, 0x0D00, 0x0D7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Sinhala, 0x0D80, 0x0DFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Thai, 0x0E00, 0x0E7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Lao, 0x0E80, 0x0EFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tibetan, 0x0F00, 0x0FFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Bengali, 0x0980, 0x09FF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Gurmukhi, 0x0A00, 0x0A7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Gujarati, 0x0A80, 0x0AFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Oriya, 0x0B00, 0x0B7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Tamil, 0x0B80, 0x0BFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Telugu, 0x0C00, 0x0C7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Kannada, 0x0C80, 0x0CFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Malayalam, 0x0D00, 0x0D7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Sinhala, 0x0D80, 0x0DFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Thai, 0x0E00, 0x0E7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Lao, 0x0E80, 0x0EFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Tibetan, 0x0F00, 0x0FFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Myanmar, 0x1000, 0x109F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Georgian, 0x10A0, 0x10FF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Georgian, 0x10A0, 0x10FF)
 DEFINE_IS_IN_UNICODE_BLOCK(HangulJamo, 0x1100, 0x11FF)
+
 // DEFINE_IS_IN_UNICODE_BLOCK(Ethiopic, 0x1200, 0x137F)
 // DEFINE_IS_IN_UNICODE_BLOCK(EthiopicSupplement, 0x1380, 0x139F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Cherokee, 0x13A0, 0x13FF)
@@ -625,6 +627,11 @@ bool isWhitespace(char16_t chr) {
     return chr == u' ' || chr == u'\t' || chr == u'\n' || chr == u'\v' || chr == u'\f' || chr == u'\r';
 }
 
+bool isVariationSelector1(char16_t chr) {
+    return chr == 0xFE00;
+}
+
 } // namespace i18n
 } // namespace util
+
 } // namespace mbgl

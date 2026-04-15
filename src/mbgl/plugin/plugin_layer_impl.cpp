@@ -46,7 +46,7 @@ void PluginLayerProperty::setCurrentSingleFloatValue(float value) {
 }
 
 PluginLayerProperty* PluginLayerPropertyManager::getProperty(const std::string& propertyName) {
-    if (_properties.count(propertyName) > 0) {
+    if (_properties.contains(propertyName)) {
         return _properties[propertyName];
     }
     return nullptr;

@@ -39,7 +39,9 @@ CircleLayer::CircleLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-CircleLayer::~CircleLayer() = default;
+CircleLayer::~CircleLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const CircleLayer::Impl& CircleLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

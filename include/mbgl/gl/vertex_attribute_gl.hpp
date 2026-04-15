@@ -22,7 +22,7 @@ public:
           glType(other.glType) {}
     VertexAttributeGL(VertexAttributeGL&& other)
         : VertexAttribute(std::move(other)),
-          glType(other.glType) {}
+          glType(other.glType) {} // NOLINT(bugprone-use-after-move)
     ~VertexAttributeGL() override = default;
 
     platform::GLenum getGLType() const { return glType; }

@@ -2,7 +2,11 @@
   "version": 8,
   "metadata": {
     "test": {
-      "height": 256
+      "height": 256,
+      "source-replace": [{
+          "replace": "maplibre",
+          "with": "mlt"
+      }]
     }
   },
   "center": [
@@ -17,6 +21,14 @@
       "tiles": [
         "local://tiles/{z}-{x}-{y}.mvt"
       ]
+    },
+    "mlt": {
+      "type": "vector",
+      "maxzoom": 14,
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.mlt"
+      ],
+      "encoding": "mlt"
     }
   },
   "sprite": "local://sprites/sprite",

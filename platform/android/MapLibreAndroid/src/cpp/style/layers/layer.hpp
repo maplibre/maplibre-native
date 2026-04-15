@@ -78,7 +78,7 @@ protected:
     std::unique_ptr<mbgl::style::Layer> ownedLayer;
 
     // Raw reference to the layer
-    mbgl::style::Layer& layer;
+    mapbox::base::WeakPtr<mbgl::style::Layer> layerPtr;
 };
 
 /**

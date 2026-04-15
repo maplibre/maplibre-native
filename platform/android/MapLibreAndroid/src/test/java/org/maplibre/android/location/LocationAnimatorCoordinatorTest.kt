@@ -18,13 +18,14 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION
 import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
 import org.maplibre.testUtils.Assert as MapLibreAssert
 
 @RunWith(RobolectricTestRunner::class)
-class LocationAnimatorCoordinatorTest {
+class LocationAnimatorCoordinatorTest : BaseTest() {
 
     private lateinit var locationAnimatorCoordinator: LocationAnimatorCoordinator
     private val cameraPosition: CameraPosition = CameraPosition.DEFAULT

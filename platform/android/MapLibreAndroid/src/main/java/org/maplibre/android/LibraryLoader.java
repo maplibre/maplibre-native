@@ -1,6 +1,7 @@
 package org.maplibre.android;
 
 import org.maplibre.android.log.Logger;
+import org.maplibre.android.utils.PlatformUtils;
 
 /**
  * Loads the mapbox-gl shared library
@@ -20,6 +21,7 @@ public abstract class LibraryLoader {
   private static volatile LibraryLoader loader = DEFAULT;
 
   private static boolean loaded;
+  private static boolean handleLoadError = false;
 
   /**
    * Set the library loader that loads the shared library.
@@ -31,9 +33,16 @@ public abstract class LibraryLoader {
   }
 
   /**
+   * Catch UnsatisfiedLinkErrors on load
+   */
+  public static void enableErrorHandling(boolean value) {
+    handleLoadError = value;
+  }
+
+  /**
    * Loads "libmaplibre.so" native shared library.
    * <p>
-   * Catches UnsatisfiedLinkErrors and prints a warning to logcat.
+   * Catches UnsatisfiedLinkErrors (if enabled) and prints a warning to logcat.
    * </p>
    */
   public static synchronized void load() {
@@ -47,6 +56,10 @@ public abstract class LibraryLoader {
       String message = "Failed to load native shared library.";
       Logger.e(TAG, message, error);
       MapStrictMode.strictModeViolation(message, error);
+
+      if (!handleLoadError && !PlatformUtils.isTest()) {
+        throw error;
+      }
     }
   }
 

@@ -6,7 +6,7 @@ cc_library(
     hdrs = glob(["include/mbgl/test/*.hpp"]),
     strip_include_prefix = "include",
     deps = [
-        "//vendor/googletest:gtest",
+        "@googletest//:gtest",
     ],
 )
 
@@ -50,7 +50,11 @@ cc_library(
         [
             "**/*.test.cpp",
         ],
-    ),
+        exclude = ["renderer/wgsl_preprocessor.test.cpp"],
+    ) + select({
+        "//:webgpu_renderer": ["renderer/wgsl_preprocessor.test.cpp"],
+        "//conditions:default": [],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     visibility = [
         "//platform/ios/test/core:__pkg__",
@@ -60,7 +64,7 @@ cc_library(
         "testutils",
         "//:mbgl-core",
         "//platform/default:mbgl-default",
-        "//vendor/googletest:gtest_main",
+        "@googletest//:gtest_main",
     ],
     alwayslink = True,
 )

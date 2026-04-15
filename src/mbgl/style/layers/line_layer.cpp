@@ -39,7 +39,9 @@ LineLayer::LineLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-LineLayer::~LineLayer() = default;
+LineLayer::~LineLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const LineLayer::Impl& LineLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

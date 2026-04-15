@@ -4,11 +4,12 @@ import android.graphics.Bitmap
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
-class IconTest {
+class IconTest : BaseTest() {
     @Mock
     var bitmap: Bitmap? = null
 

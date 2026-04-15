@@ -18,7 +18,7 @@ class ActionJournalEvent;
 class ActionJournal::Impl : public MapObserver {
 public:
     Impl(const Map& map, const ActionJournalOptions& options);
-    ~Impl();
+    ~Impl() override;
 
     const Map& getMap() const { return map; }
     std::string getLogDirectory() const;
@@ -37,6 +37,7 @@ public:
     void onWillStartLoadingMap() override;
     void onDidFinishLoadingMap() override;
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
+    void onDidFinishRenderingFrame(const RenderFrameStatus&) override;
     void onWillStartRenderingMap() override;
     void onDidFinishRenderingMap(RenderMode) override;
     void onDidFinishLoadingStyle() override;
@@ -95,10 +96,27 @@ protected:
 
     const std::shared_ptr<Scheduler> scheduler;
 
+    // log file
     std::mutex fileMutex;
     std::fstream currentFile;
     uint32_t currentFileIndex{0};
     size_t currentFileSize{0};
+
+    // rendering info reporting
+    double previousFrameTime;
+    double renderingInfoReportTime;
+
+    struct {
+        double encodingMin{std::numeric_limits<double>::max()};
+        double encodingMax{-std::numeric_limits<double>::max()};
+        double encodingTotal{0.0};
+
+        double renderingMin{std::numeric_limits<double>::max()};
+        double renderingMax{-std::numeric_limits<double>::max()};
+        double renderingTotal{0.0};
+
+        uint32_t frameCount{0};
+    } renderingStats;
 };
 
 } // namespace util

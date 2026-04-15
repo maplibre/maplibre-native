@@ -4,7 +4,7 @@ load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframe
 load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
-
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
@@ -19,6 +19,7 @@ load(
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
     "MLN_IOS_SDK_HEADERS",
+    "MLN_PUBLIC_IOS_APP_OBJCPP_SOURCE",
     "MLN_PUBLIC_IOS_APP_SOURCE",
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
@@ -65,6 +66,12 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+filegroup(
+    name = "ios_app_objcpp_srcs",
+    srcs = MLN_PUBLIC_IOS_APP_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
 info_plist(
     name = "info_plist",
     out = "Info.plist",
@@ -102,7 +109,9 @@ public_hdrs = [
 
 apple_static_xcframework(
     name = "MapLibre.static",
+    bundle_id = "com.maplibre.mapbox",
     bundle_name = "MapLibre",
+    infoplists = ["info_static_plist"],
     ios = {
         "simulator": [
             "x86_64",
@@ -112,6 +121,7 @@ apple_static_xcframework(
     },
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
+    version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
 )
@@ -213,26 +223,6 @@ ios_application(
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     version = ":maplibre_app_version",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//platform:iosapp",
-    ],
-)
-
-ios_application(
-    name = "AppDynamicLib",
-    bundle_id = "org.maplibre.app",
-    families = [
-        "iphone",
-        "ipad",
-    ],
-    frameworks = [
-        "MapLibre.link",
-    ],
-    infoplists = ["app/Info.plist"],
-    minimum_os_version = "12.0",
-    provisioning_profile = ":xcode_profile",
-    resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
         "//platform:iosapp",

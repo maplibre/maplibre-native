@@ -9,7 +9,6 @@ plugins {
     id("maplibre.gradle-lint")
 }
 
-
 fun obtainTestBuildType(): String {
     return if (project.hasProperty("testBuildType")) {
         project.properties["testBuildType"] as String
@@ -25,12 +24,15 @@ android {
 
     defaultConfig {
         applicationId = "org.maplibre.android.testapp"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 14
-        versionName = "6.0.1"
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
+        versionName = file("../VERSION").readText().trim()
+
+        manifestPlaceholders["SENTRY_DSN"] = ""
+        manifestPlaceholders["SENTRY_ENV"] = ""
     }
 
     nativeBuild(listOf("example-custom-layer"))
@@ -47,13 +49,26 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+
+            packaging {
+                jniLibs {
+                    keepDebugSymbols += "**/*.so"
+                }
+            }
+
+            buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
+
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
             testProguardFiles("test-proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
+
+            buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
     }
 
@@ -64,9 +79,38 @@ android {
     productFlavors {
         create("opengl") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=ON")
+                }
+            }
         }
         create("vulkan") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_VULKAN=ON")
+                }
+            }
+        }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
+                }
+            }
         }
     }
 
@@ -92,6 +136,11 @@ kotlin {
 
 dependencies {
     implementation(project(":MapLibreAndroid"))
+
+    implementation(libs.maplibreNavigation) {
+        exclude(group = "org.maplibre.gl", module = "android-sdk")
+    }
+
     implementation(libs.maplibreJavaTurf)
 
     implementation(libs.supportRecyclerView)
@@ -119,3 +168,5 @@ dependencies {
     androidTestImplementation(libs.androidxTestCoreKtx)
     androidTestImplementation(libs.kotlinxCoroutinesTest)
 }
+
+apply<SentryConditionalPlugin>()

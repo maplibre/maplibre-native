@@ -21,7 +21,7 @@ target_link_libraries(
     mbgl-expression-test
     PRIVATE
         MapLibreNative::Base
-        MapLibreNative::Base::Extras::args
+        mbgl-vendor-args
         mbgl-core
         mbgl-compiler-options
 )

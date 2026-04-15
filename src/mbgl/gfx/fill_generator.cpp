@@ -54,10 +54,10 @@ std::size_t totalVerticesCheck(const GeometryCollection& polygon) {
 
 void addFillIndices(SegmentVector& fillSegments,
                     gfx::IndexVector<gfx::Triangles>& fillIndexes,
-                    std::vector<uint32_t>& indices,
-                    std::size_t startVertices,
-                    std::size_t totalVertices) {
-    std::size_t nIndices = indices.size();
+                    const std::span<const uint32_t>& indices,
+                    const std::size_t startVertices,
+                    const std::size_t totalVertices) {
+    const std::size_t nIndices = indices.size();
     assert(nIndices % 3 == 0);
 
     if (fillSegments.empty() ||
@@ -66,10 +66,13 @@ void addFillIndices(SegmentVector& fillSegments,
     }
 
     auto& triangleSegment = fillSegments.back();
-    assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
+    assert(triangleSegment.vertexLength + totalVertices <= std::numeric_limits<uint16_t>::max());
     const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
     for (std::size_t i = 0; i < nIndices; i += 3) {
+        assert(
+            std::max({triangleIndex + indices[i + 0], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]}) <
+            triangleIndex + totalVertices);
         fillIndexes.emplace_back(
             triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
     }
@@ -78,8 +81,8 @@ void addFillIndices(SegmentVector& fillSegments,
     triangleSegment.indexLength += nIndices;
 }
 
-void addOutlineIndices(std::size_t base,
-                       std::size_t nVertices,
+void addOutlineIndices(const std::size_t base,
+                       const std::size_t nVertices,
                        SegmentVector& lineSegments,
                        gfx::IndexVector<gfx::Lines>& lineIndexes) {
     if (nVertices == 0) return;
@@ -206,21 +209,36 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
     gfx::PolylineGeneratorOptions lineOptions;
     lineOptions.type = FeatureType::Polygon;
 
+    // If we have pre-tessellated geometry, multi-polygons are tessellated
+    // together, so we need to add them to the fill segment all at once.
+    if (!geometry.getTriangles().empty()) {
+        const std::size_t startVertices = fillVertices.elements();
+        std::size_t totalVertices = 0;
+        for (const auto& polygon : geometry) {
+            totalVertices += polygon.size();
+            addRingVertices(fillVertices, polygon);
+        }
+        addFillIndices(fillSegments, fillIndexes, geometry.getTriangles(), startVertices, totalVertices);
+        return;
+    }
+
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
 
-        std::size_t totalVertices = totalVerticesCheck(polygon);
-        std::size_t startVertices = fillVertices.elements();
+        const std::size_t totalVertices = totalVerticesCheck(polygon);
+        const std::size_t startVertices = fillVertices.elements();
 
         for (const auto& ring : polygon) {
-            std::size_t base = fillVertices.elements();
-            std::size_t nVertices = addRingVertices(fillVertices, ring);
+            const std::size_t base = fillVertices.elements();
+            const std::size_t nVertices = addRingVertices(fillVertices, ring);
             addOutlineIndices(base, nVertices, basicLineSegments, basicLineIndexes);
             lineGenerator.generate(ring, lineOptions);
         }
 
+        // tessellate, if no triangles are provided
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
+
         addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
 }

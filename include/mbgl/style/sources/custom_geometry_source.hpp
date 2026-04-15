@@ -20,6 +20,7 @@ using TileFunction = std::function<void(const CanonicalTileID&)>;
 
 class CustomTileLoader;
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class CustomGeometrySource final : public Source {
 public:
     struct TileOptions {

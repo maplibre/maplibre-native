@@ -14,7 +14,8 @@ void VertexArray::bind(Context& context, const gfx::IndexBuffer& indexBuffer, co
     // NOLINTNEXTLINE(bugprone-too-small-loop-variable)
     for (AttributeLocation location = 0; location < bindings.size(); ++location) {
         if (state->bindings.size() <= location) {
-            state->bindings.emplace_back(context, std::move(AttributeLocation(location)));
+            AttributeLocation loc = location;
+            state->bindings.emplace_back(context, std::move(loc));
         }
         state->bindings[location] = bindings[location];
     }

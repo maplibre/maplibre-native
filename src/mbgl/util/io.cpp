@@ -56,7 +56,7 @@ std::optional<std::string> readFile(const std::string &filename,
             size_t size = static_cast<size_t>(dataRange->second - dataRange->first + 1);
             std::string data(size, '\0');
             file.seekg(static_cast<std::streampos>(dataRange->first));
-            file.read(&data[0], static_cast<std::streamsize>(size));
+            file.read(data.data(), static_cast<std::streamsize>(size));
             return data;
         } else {
             std::stringstream data;

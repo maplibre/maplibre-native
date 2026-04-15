@@ -54,9 +54,8 @@ public:
     bool canRequest(const Resource&) const override { return true; }
 
     bool respond(Resource::Kind kind, const Response& response) {
-        auto it = std::find_if(requests.begin(), requests.end(), [&](FakeFileRequest* fakeRequest) {
-            return fakeRequest->resource.kind == kind;
-        });
+        auto it = std::ranges::find_if(
+            requests, [&](FakeFileRequest* fakeRequest) { return fakeRequest->resource.kind == kind; });
 
         const bool requestFound = (it != requests.end());
 

@@ -7,7 +7,7 @@ target_link_libraries(
     mbgl-cache
     PRIVATE
         MapLibreNative::Base
-        MapLibreNative::Base::Extras::args
+        mbgl-vendor-args
         mbgl-compiler-options
         mbgl-core
 )
@@ -19,7 +19,7 @@ add_executable(
 
 target_link_libraries(
     mbgl-offline
-    PRIVATE MapLibreNative::Base::Extras::args mbgl-compiler-options mbgl-core
+    PRIVATE mbgl-vendor-args mbgl-compiler-options mbgl-core
 )
 
 add_executable(
@@ -29,7 +29,7 @@ add_executable(
 
 target_link_libraries(
     mbgl-render
-    PRIVATE MapLibreNative::Base::Extras::args mbgl-compiler-options mbgl-core
+    PRIVATE mbgl-vendor-args mbgl-compiler-options mbgl-core
 )
 
 if(WIN32)
@@ -56,7 +56,3 @@ install(TARGETS mbgl-offline mbgl-render RUNTIME DESTINATION bin)
 # ${PROJECT_SOURCE_DIR} )
 #
 # add_test(NAME mbgl-render-tool-test COMMAND mbgl-render WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} )
-
-if(MLN_WITH_OPENGL)
-    target_compile_definitions(mbgl-render PRIVATE "MLN_RENDER_BACKEND_OPENGL=1")
-endif()

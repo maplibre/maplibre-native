@@ -1,9 +1,12 @@
 #pragma once
 
 #include <mbgl/util/work_task.hpp>
-#include <mbgl/util/run_loop.hpp>
 
+#include <atomic>
 #include <mutex>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 namespace mbgl {
 
@@ -17,8 +20,8 @@ public:
 
     void operator()() override {
         // Lock the mutex while processing so that cancel() will block.
-        std::lock_guard<std::recursive_mutex> lock(mutex);
-        if (!*canceled) {
+        std::scoped_lock lock(mutex);
+        if (!canceled->load(std::memory_order_acquire)) {
             invoke(std::make_index_sequence<std::tuple_size_v<P>>{});
         }
     }
@@ -32,8 +35,8 @@ public:
     /// If the task has completed and the after callback has executed, this will
     /// do nothing.
     void cancel() override {
-        std::lock_guard<std::recursive_mutex> lock(mutex);
-        *canceled = true;
+        std::scoped_lock lock(mutex);
+        canceled->store(true, std::memory_order_release);
     }
 
 private:
@@ -52,7 +55,7 @@ private:
 template <class Fn, class... Args>
 std::shared_ptr<WorkTask> WorkTask::make(Fn&& fn, Args&&... args) {
     auto flag = std::make_shared<std::atomic<bool>>();
-    *flag = false;
+    flag->store(false, std::memory_order_relaxed);
 
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_shared<WorkTaskImpl<std::decay_t<Fn>, decltype(tuple)>>(

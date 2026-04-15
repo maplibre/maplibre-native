@@ -437,12 +437,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = in.fontScale * tileProps.gamma_scale;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
+    const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
+    const float gammaScaled = gamma * in.gamma_scale;
     const half4 color = tileProps.is_halo ? halo_color : fill_color;
-    const float gamma = ((tileProps.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileProps.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * tileProps.gamma_scale;
+    const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
     const float dist = image.sample(image_sampler, float2(in.tex)).a;
-    const float gamma_scaled = gamma * in.gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+
+    float alpha = smoothstep(innerEdge - gammaScaled, innerEdge + gammaScaled, dist);
+    if (tileProps.is_halo) {
+        // When drawing halos, if the fill is translucent we want the inside of the halo to be translucent as well
+        const float haloEdge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+        alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
+    }
 
     return half4(color * (alpha * opacity * in.fade_opacity));
 }
@@ -673,13 +683,23 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
-    const half4 color = tileProps.is_halo ? halo_color : fill_color;
     const float fontGamma = in.fontScale * tileProps.gamma_scale;
-    const float gamma = ((tileProps.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileProps.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
+    const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
+    const float gammaScaled = gamma * in.gamma_scale;
+    const half4 color = tileProps.is_halo ? halo_color : fill_color;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * tileProps.gamma_scale;
+    const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
     const float dist = glyph_image.sample(glyph_sampler, float2(in.tex)).a;
-    const float gamma_scaled = gamma * in.gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+
+    float alpha = smoothstep(innerEdge - gammaScaled, innerEdge + gammaScaled, dist);
+    if (tileProps.is_halo) {
+        // When drawing halos, if the fill is translucent we want the inside of the halo to be translucent as well
+        const float haloEdge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+        alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
+    }
 
     return half4(color * (alpha * opacity * in.fade_opacity));
 }

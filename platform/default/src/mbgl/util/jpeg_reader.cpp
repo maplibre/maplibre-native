@@ -19,12 +19,13 @@ struct jpeg_stream_wrapper {
     std::array<JOCTET, BUF_SIZE> buffer;
 };
 
-static void init_source(j_decompress_ptr cinfo) {
+namespace {
+void init_source(j_decompress_ptr cinfo) {
     auto* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
     wrap->stream->seekg(0, std::ios_base::beg);
 }
 
-static boolean fill_input_buffer(j_decompress_ptr cinfo) {
+boolean fill_input_buffer(j_decompress_ptr cinfo) {
     auto* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
     wrap->stream->read(reinterpret_cast<char*>(wrap->buffer.data()), BUF_SIZE);
     std::streamsize size = wrap->stream->gcount();
@@ -33,7 +34,7 @@ static boolean fill_input_buffer(j_decompress_ptr cinfo) {
     return (size > 0) ? TRUE : FALSE;
 }
 
-static void skip(j_decompress_ptr cinfo, long count) {
+void skip(j_decompress_ptr cinfo, long count) {
     if (count <= 0) return; // A zero or negative skip count should be treated as a no-op.
     auto* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
 
@@ -48,9 +49,9 @@ static void skip(j_decompress_ptr cinfo, long count) {
     }
 }
 
-static void term(j_decompress_ptr) {}
+void term(j_decompress_ptr) {}
 
-static void attach_stream(j_decompress_ptr cinfo, std::istream* in) {
+void attach_stream(j_decompress_ptr cinfo, std::istream* in) {
     if (cinfo->src == nullptr) {
         cinfo->src = static_cast<struct jpeg_source_mgr*>((*cinfo->mem->alloc_small)(
             reinterpret_cast<j_common_ptr>(cinfo), JPOOL_PERMANENT, sizeof(jpeg_stream_wrapper)));
@@ -66,13 +67,14 @@ static void attach_stream(j_decompress_ptr cinfo, std::istream* in) {
     src->stream = in;
 }
 
-static void on_error(j_common_ptr) {}
+void on_error(j_common_ptr) {}
 
-static void on_error_message(j_common_ptr cinfo) {
+void on_error_message(j_common_ptr cinfo) {
     char buffer[JMSG_LENGTH_MAX];
     (*cinfo->err->format_message)(cinfo, buffer);
     throw std::runtime_error(std::string("JPEG Reader: libjpeg could not read image: ") + buffer);
 }
+} // namespace
 
 struct jpeg_info_guard {
     explicit jpeg_info_guard(jpeg_decompress_struct* cinfo)

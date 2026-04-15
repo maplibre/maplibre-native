@@ -8,10 +8,10 @@
 Binaries are available and downloaded during install for the following platforms:
 
 - Operating systems:
-  - Ubuntu 22.04 (amd64/arm64)
-  - macOS 12 (amd64/arm64)
-  - Windows (amd64)
-- Node.js 18, 20, 22
+  - Ubuntu 24.04 (amd64/arm64)
+  - macOS (amd64/arm64)
+  - Windows (amd64/arm64)
+- Node.js 20, 22, 24
 
 Run:
 
@@ -19,13 +19,11 @@ Run:
 npm install @maplibre/maplibre-gl-native
 ```
 
-Further platforms might work [with additional libraries installed](https://github.com/maplibre/maplibre-native/tree/main/platform/linux#prerequisites).
+## License
 
-## Testing
+@maplibre/maplibre-gl-native is available under the BSD 2-Clause License. Refer to the [full list of licenses](https://github.com/maplibre/maplibre-native/blob/main/LICENSES.core.md).
 
-```
-npm test
-```
+MapLibre Native is based in part of the work of the [FreeType](https://freetype.org/) Team.
 
 ## Rendering a map tile
 

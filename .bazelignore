@@ -9,3 +9,9 @@ bazel-testlogs
 .cxx
 build-*
 build
+
+# Ignore vendored Bazel workspaces that conflict with this repo
+vendor/benchmark
+vendor/googletest
+vendor/maplibre-native-base/extras/rapidjson/thirdparty
+vendor/eternal/vendor

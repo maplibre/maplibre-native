@@ -4,11 +4,14 @@
 #include <mbgl/util/feature.hpp>
 
 #include <cstdint>
+#include <memory>
+#include <span>
 #include <string>
 #include <vector>
-#include <memory>
-#include <optional>
 
+namespace mlt {
+class MapLibreTile;
+}
 namespace mbgl {
 
 class CanonicalTileID;
@@ -44,8 +47,17 @@ public:
 
     GeometryCollection clone() const { return GeometryCollection(*this); }
 
+    const auto& getTriangles() const { return triangles; }
+    void setTriangles(std::shared_ptr<const mlt::MapLibreTile> owner, std::span<const std::uint32_t> triangles_) {
+        triangleOwner = std::move(owner);
+        triangles = triangles_;
+    }
+
 private:
     GeometryCollection(const GeometryCollection&) = default;
+
+    std::shared_ptr<const mlt::MapLibreTile> triangleOwner;
+    std::span<const std::uint32_t> triangles = {};
 };
 
 class GeometryTileFeature {

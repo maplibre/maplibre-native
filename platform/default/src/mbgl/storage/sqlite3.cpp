@@ -113,6 +113,7 @@ void logSqlMessage(void*, const int err, const char* msg) {
 }
 #endif
 
+// NOLINTBEGIN(misc-use-anonymous-namespace)
 MBGL_CONSTRUCTOR(initialize) {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
@@ -130,6 +131,7 @@ MBGL_CONSTRUCTOR(initialize) {
     sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
 #endif
 }
+// NOLINTEND(misc-use-anonymous-namespace)
 
 std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
     sqlite3* db = nullptr;
@@ -490,7 +492,8 @@ Transaction::~Transaction() {
         try {
             rollback();
         } catch (...) {
-            // Ignore failed rollbacks in destructor.
+            // Ignore failed rollbacks in destructor, but keep the catch non-empty for analyzers.
+            [[maybe_unused]] auto eptr = std::current_exception();
         }
     }
 }

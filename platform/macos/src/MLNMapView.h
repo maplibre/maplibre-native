@@ -2,6 +2,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "MLNBackendResource.h"
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapOptions.h"
@@ -1335,6 +1336,16 @@ around the returned camera object if it were set as the receiver’s camera.
  Clear stored action journal events.
  */
 - (void)clearActionJournalLog;
+
+#if MLN_RENDER_BACKEND_METAL
+/**
+ Returns the Metal backend resource for use in custom style layers.
+
+ This property provides access to the Metal device, command buffer, and other
+ resources needed for custom Metal rendering in MLNCustomStyleLayer subclasses.
+ */
+- (MLNBackendResource *)backendResource;
+#endif
 
 @end
 

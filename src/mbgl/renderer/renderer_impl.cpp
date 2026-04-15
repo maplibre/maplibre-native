@@ -93,6 +93,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     assert(updateParameters);
 
 #if MLN_RENDER_BACKEND_METAL
+#if MLN_CREATE_AUTORELEASEPOOL
+    NS::SharedPtr pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
+#endif
+
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
 
@@ -101,6 +105,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         if (!commandCaptureScope) {
             if (const auto& cmdQueue = mtlBackend.getCommandQueue()) {
                 if (const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager())) {
+                    // NOLINTNEXTLINE(bugprone-assignment-in-if-condition)
                     if ((commandCaptureScope = NS::TransferPtr(captureManager->newCaptureScope(cmdQueue.get())))) {
                         const auto label = "Renderer::Impl frame=" + util::toString(frameCount);
                         commandCaptureScope->setLabel(NS::String::string(label.c_str(), NS::UTF8StringEncoding));
@@ -180,21 +185,39 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     observer->onWillStartRenderingFrame();
 
-    PaintParameters parameters{context,
-                               pixelRatio,
-                               backend,
-                               renderTreeParameters.light,
-                               renderTreeParameters.mapMode,
-                               renderTreeParameters.debugOptions,
-                               renderTreeParameters.timePoint,
-                               renderTreeParameters.transformParams,
-                               *staticData,
-                               renderTree.getLineAtlas(),
-                               renderTree.getPatternAtlas(),
-                               frameCount,
-                               updateParameters->tileLodMinRadius,
-                               updateParameters->tileLodScale,
-                               updateParameters->tileLodPitchThreshold};
+    const TransformState& state = renderTreeParameters.transformParams.state;
+    const Size& size = staticData->backendSize;
+    const EdgeInsets& frustumOffset = state.getFrustumOffset();
+    const gfx::ScissorRect scissorRect = {
+        .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
+#if MLN_RENDER_BACKEND_OPENGL
+        .y = static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
+#else
+        .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
+#endif
+        .width = size.width - static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
+        .height = size.height - static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
+    };
+
+    PaintParameters parameters{
+        context,
+        pixelRatio,
+        backend,
+        renderTreeParameters.light,
+        renderTreeParameters.mapMode,
+        renderTreeParameters.debugOptions,
+        renderTreeParameters.timePoint,
+        renderTreeParameters.transformParams,
+        *staticData,
+        renderTree.getLineAtlas(),
+        renderTree.getPatternAtlas(),
+        frameCount,
+        updateParameters->tileLodMinRadius,
+        updateParameters->tileLodScale,
+        updateParameters->tileLodPitchThreshold,
+        updateParameters->tileLodMode,
+        scissorRect,
+    };
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -446,7 +469,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        context.renderingStats());
+        context.threadSafeCopyRenderingStats());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;
