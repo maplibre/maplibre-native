@@ -4,8 +4,8 @@
 #import "MLNOfflineStorage_Private.h"
 #import "MLNSettings_Private.h"
 
-#include "locations.hpp"
 #include "BenchmarkAdvancedMetrics.h"
+#include "locations.hpp"
 
 #include <chrono>
 
@@ -184,7 +184,7 @@ enum class State { None, WaitingForAssets, Benchmarking } state = State::None;
 int frames = 0;
 double totalFrameEncodingTime = 0;
 double totalFrameRenderingTime = 0;
-BenchmarkAdvancedMetrics* advancedMetrics = nil;
+BenchmarkAdvancedMetrics *advancedMetrics = nil;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, std::pair<double, double>>> result;
 
@@ -216,10 +216,10 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
 - (void)startBenchmarkIteration {
   if (mbgl::bench::locations.size() > idx) {
     if (advancedMetrics == nil) {
-        advancedMetrics = [[BenchmarkAdvancedMetrics alloc] init];
-        [advancedMetrics start:1];
+      advancedMetrics = [[BenchmarkAdvancedMetrics alloc] init];
+      [advancedMetrics start:1];
     }
-    
+
     const auto &location = mbgl::bench::locations[idx];
 
     mbgl::CameraOptions cameraOptions;
@@ -265,12 +265,15 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
     // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
     // NSLog(@"Total uploads with build: %zu", mbgl::uploadBuildCount);
 
-        [advancedMetrics stop];
+    [advancedMetrics stop];
 
-        NSLog(@"Cpu usage: (min %.2f%%) (max %.2f%%) (avg %.2f%%)", advancedMetrics.min.cpu, advancedMetrics.max.cpu, advancedMetrics.avg.cpu);
-        NSLog(@"Memory usage: (min %llu MB) (max %llu MB) (avg %llu MB)", advancedMetrics.min.memory / 0x100000, advancedMetrics.max.memory / 0x100000, advancedMetrics.avg.memory / 0x100000);
+    NSLog(@"Cpu usage: (min %.2f%%) (max %.2f%%) (avg %.2f%%)", advancedMetrics.min.cpu,
+          advancedMetrics.max.cpu, advancedMetrics.avg.cpu);
+    NSLog(@"Memory usage: (min %llu MB) (max %llu MB) (avg %llu MB)",
+          advancedMetrics.min.memory / 0x100000, advancedMetrics.max.memory / 0x100000,
+          advancedMetrics.avg.memory / 0x100000);
 
-        advancedMetrics = nil;
+    advancedMetrics = nil;
 
 #if !defined(NDEBUG)
     // Clean up and show rendering stats, as in `destroyCoreObjects` from tests.
