@@ -4,6 +4,7 @@
 #include <mbgl/util/immutable.hpp>
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
@@ -24,7 +25,7 @@ class ImageRequestor;
  * @brief tracks requests for icon images from tile workers and sends responses
  * when the requests are fulfilled.
  */
-class ImageManager {
+class ImageManager : public std::enable_shared_from_this<ImageManager> {
 public:
     ImageManager();
     ImageManager(const ImageManager&) = delete;
