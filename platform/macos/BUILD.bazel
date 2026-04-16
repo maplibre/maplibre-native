@@ -1,5 +1,9 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@rules_apple//apple:macos.bzl", "macos_command_line_application")
+load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
@@ -9,10 +13,41 @@ load(
     "bazel/files.bzl",
     "MLN_MACOS_PRIVATE_HEADERS",
     "MLN_MACOS_PUBLIC_HEADERS",
-    "MLN_MACOS_PUBLIC_METAL_HEADERS",
-    "MLN_MACOS_PUBLIC_OBJCPP_METAL_SOURCE",
     "MLN_MACOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_MACOS_PUBLIC_OBJC_SOURCE",
+)
+load("//platform/ios/bazel:macros.bzl", "info_plist")
+
+# Selects the macOS event loop implementation
+# Use --//platform/macos:macos_loop=cfrunloop for AppKit/SwiftUI apps (xcframework builds)
+# Default is libuv for backwards compatibility with existing targets
+
+string_flag(
+    name = "macos_loop",
+    build_setting_default = "libuv",
+    values = [
+        "cfrunloop",
+        "libuv",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "macos_libuv_loop",
+    constraint_values = ["@platforms//os:osx"],
+    flag_values = {
+        ":macos_loop": "libuv",
+    },
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "macos_cfrunloop_loop",
+    constraint_values = ["@platforms//os:osx"],
+    flag_values = {
+        ":macos_loop": "cfrunloop",
+    },
+    visibility = ["//visibility:public"],
 )
 
 filegroup(
@@ -23,13 +58,13 @@ filegroup(
 
 filegroup(
     name = "macos_public_hdrs",
-    srcs = MLN_MACOS_PUBLIC_HEADERS + MLN_MACOS_PUBLIC_METAL_HEADERS,
+    srcs = MLN_MACOS_PUBLIC_HEADERS,
     visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "macos_objcpp_srcs",
-    srcs = MLN_MACOS_PUBLIC_OBJCPP_SOURCE + MLN_MACOS_PUBLIC_OBJCPP_METAL_SOURCE,
+    srcs = MLN_MACOS_PUBLIC_OBJCPP_SOURCE,
     visibility = ["//visibility:public"],
 )
 
@@ -37,6 +72,93 @@ filegroup(
     name = "macos_objc_srcs",
     srcs = MLN_MACOS_PUBLIC_OBJC_SOURCE,
     visibility = ["//visibility:public"],
+)
+
+info_plist(
+    name = "info_plist",
+    out = "Info.plist",
+    base_info_plist = "framework/Info.plist",
+)
+
+info_plist(
+    name = "info_static_plist",
+    out = "Info-static.plist",
+    base_info_plist = "framework/Info-static.plist",
+)
+
+genrule(
+    name = "mln_defines",
+    outs = ["MLNDefines.h"],
+    cmd = select({
+        "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
+        "//conditions:default": "echo '' > $@",
+    }),
+)
+
+public_hdrs = [
+    ":mln_defines",
+    ":macos_public_hdrs",
+    "//platform/darwin:darwin_objc_hdrs",
+    "//platform/darwin:generated_style_public_hdrs",
+]
+
+apple_bundle_version(
+    name = "maplibre_macos_version",
+    build_label_pattern = "maplibre_macos_{version}",
+    build_version = "{version}",
+    capture_groups = {
+        "version": "[0-9]+.[0-9]+.[0-9]+",
+    },
+    fallback_build_label = "maplibre_macos_1.2.3456789",
+    short_version_string = "{version}",
+)
+
+apple_resource_bundle(
+    name = "resources",
+    bundle_id = "com.maplibre.mapbox",
+    bundle_name = "Mapbox",
+    infoplists = ["info_static_plist"],
+    resources = glob([
+        "sdk/*.lproj/**",
+        "sdk/*.pdf",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+apple_static_xcframework(
+    name = "MapLibre.static",
+    bundle_id = "com.maplibre.mapbox",
+    bundle_name = "MapLibre",
+    infoplists = ["info_static_plist"],
+    macos = [
+        "x86_64",
+        "arm64",
+    ],
+    minimum_os_versions = {"macos": "13.0"},
+    public_hdrs = public_hdrs,
+    version = ":maplibre_macos_version",
+    visibility = ["//visibility:public"],
+    deps = ["//platform:macos-sdk"],
+)
+
+apple_xcframework(
+    name = "MapLibre.dynamic",
+    bundle_id = "com.maplibre.mapbox",
+    bundle_name = "MapLibre",
+    data = glob([
+        "sdk/*.lproj/**",
+        "sdk/*.pdf",
+    ]),
+    infoplists = ["info_plist"],
+    macos = [
+        "x86_64",
+        "arm64",
+    ],
+    minimum_os_versions = {"macos": "13.0"},
+    public_hdrs = public_hdrs,
+    version = ":maplibre_macos_version",
+    visibility = ["//visibility:public"],
+    deps = ["//platform:macos-sdk-dynamic"],
 )
 
 macos_command_line_application(
@@ -78,7 +200,6 @@ exports_files(
     MLN_MACOS_PRIVATE_HEADERS +
     MLN_MACOS_PUBLIC_HEADERS +
     MLN_MACOS_PUBLIC_OBJCPP_SOURCE +
-    MLN_MACOS_PUBLIC_OBJCPP_METAL_SOURCE +
     MLN_MACOS_PUBLIC_OBJC_SOURCE,
 )
 
