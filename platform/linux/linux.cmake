@@ -179,7 +179,6 @@ else()
             ${WEBP_INCLUDE_DIRS}
     )
 endif()
-)
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
