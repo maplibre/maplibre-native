@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.6.0"
+androidGradlePlugin = "8.13.2"
 espresso = "3.6.1"
 
 [libraries]

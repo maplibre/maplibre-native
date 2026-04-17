@@ -43,9 +43,9 @@ android {
 
     buildTypes {
         getByName("debug") {
+            manifestPlaceholders += mapOf()
             isJniDebuggable = true
             isDebuggable = true
-            isTestCoverageEnabled = true
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
@@ -57,6 +57,8 @@ android {
             }
 
             buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
             manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
 
