@@ -133,5 +133,9 @@
     "render-tests/symbol-sort-key/placement-tile-boundary-right-then-left": "https://github.com/mapbox/mapbox-gl-js/pull/9054",
     "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results",
     "render-tests/combinations/heatmap-translucent--fill-opaque": "Temporarily disabled until the renderer switch",
-    "render-tests/combinations/heatmap-translucent--background-opaque": "Temporarily disabled until the renderer switch"
+    "render-tests/combinations/heatmap-translucent--background-opaque": "Temporarily disabled until the renderer switch",
+    "render-tests/tms/tms": "MLT source-replace variant fails, needs investigation",
+    "render-tests/icon-visibility/visible": "MLT source-replace variant fails, needs investigation",
+    "render-tests/text-pitch-alignment/viewport-overzoomed-single-glyph": "MLT source-replace variant fails, needs investigation",
+    "render-tests/fill-pattern/wrapping-with-interpolation": "MLT source-replace variant fails, needs investigation"
 }

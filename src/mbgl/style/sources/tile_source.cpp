@@ -44,7 +44,9 @@ uint16_t TileSource::getTileSize() const {
 
 void TileSource::loadDescription(FileSource& fileSource) {
     if (urlOrTileset.is<Tileset>()) {
-        baseImpl = makeMutable<Impl>(impl(), urlOrTileset.get<Tileset>());
+        auto tileset = urlOrTileset.get<Tileset>();
+        this->setTilesetOverrides(tileset);
+        baseImpl = makeMutable<Impl>(impl(), tileset);
         loaded = true;
         observer->onSourceLoaded(*this);
         return;

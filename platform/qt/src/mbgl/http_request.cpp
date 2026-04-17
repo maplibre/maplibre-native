@@ -62,6 +62,11 @@ QNetworkRequest HTTPRequest::networkRequest() const {
         req.setRawHeader("If-Modified-Since", util::rfc1123(*m_resource.priorModified).c_str());
     }
 
+    if (!m_resource.acceptHeader.empty()) {
+        req.setRawHeader("Accept",
+                         QByteArray(m_resource.acceptHeader.data(), static_cast<int>(m_resource.acceptHeader.size())));
+    }
+
     return req;
 }
 

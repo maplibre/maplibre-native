@@ -10,6 +10,7 @@
 #include <mbgl/tile/raster_dem_tile_worker.hpp>
 #include <mbgl/tile/tile_loader_impl.hpp>
 #include <mbgl/tile/tile_observer.hpp>
+#include <mbgl/util/constants.hpp>
 #include <utility>
 
 namespace mbgl {
@@ -20,7 +21,7 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
                              const Tileset& tileset,
                              TileObserver* observer_)
     : Tile(Kind::RasterDEM, id_, std::move(sourceID_), observer_),
-      loader(*this, id_, parameters, tileset),
+      loader(*this, id_, parameters, tileset, util::MIME_TYPE_RASTER),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {
