@@ -67,6 +67,9 @@ void OfflineDatabase::initialize() {
             migrateToVersion6();
             // fall through
         case 6:
+            migrateToVersion7();
+            // fall through
+        case 7:
             // Happy path; we're done
             return;
         default:
@@ -173,7 +176,7 @@ void OfflineDatabase::createSchema() {
     db->exec("PRAGMA synchronous = FULL");
     mapbox::sqlite::Transaction transaction(*db);
     db->exec(offlineDatabaseSchema);
-    db->exec("PRAGMA user_version = 6");
+    db->exec("PRAGMA user_version = 7");
     transaction.commit();
 }
 
@@ -213,6 +216,50 @@ void OfflineDatabase::migrateToVersion6() {
         "0");
     db->exec("PRAGMA user_version = 6");
     transaction.commit();
+}
+
+void OfflineDatabase::migrateToVersion7() {
+    assert(db);
+    checkFlags();
+
+    // SQLite doesn't support modifying UNIQUE constraints in-place,
+    // so we recreate the tiles table with the new encoding column
+    // included in the unique constraint. Foreign keys must be
+    // temporarily disabled to allow dropping the referenced table.
+    db->exec("PRAGMA foreign_keys = OFF");
+    mapbox::sqlite::Transaction transaction(*db);
+    db->exec(
+        "CREATE TABLE tiles_new ("
+        "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+        "  url_template TEXT NOT NULL,"
+        "  pixel_ratio INTEGER NOT NULL,"
+        "  z INTEGER NOT NULL,"
+        "  x INTEGER NOT NULL,"
+        "  y INTEGER NOT NULL,"
+        "  expires INTEGER,"
+        "  modified INTEGER,"
+        "  etag TEXT,"
+        "  data BLOB,"
+        "  compressed INTEGER NOT NULL DEFAULT 0,"
+        "  accessed INTEGER NOT NULL,"
+        "  must_revalidate INTEGER NOT NULL DEFAULT 0,"
+        "  encoding INTEGER NOT NULL DEFAULT 0,"
+        "  UNIQUE (url_template, pixel_ratio, z, x, y, encoding)"
+        ")");
+    db->exec(
+        "INSERT INTO tiles_new (id, url_template, pixel_ratio, z, x, y,"
+        "  expires, modified, etag, data, compressed, accessed,"
+        "  must_revalidate, encoding)"
+        "  SELECT id, url_template, pixel_ratio, z, x, y,"
+        "  expires, modified, etag, data, compressed, accessed,"
+        "  must_revalidate, 0 FROM tiles");
+    db->exec("DROP TABLE tiles");
+    db->exec("ALTER TABLE tiles_new RENAME TO tiles");
+    db->exec("CREATE INDEX tiles_accessed ON tiles (accessed)");
+    db->exec("PRAGMA foreign_key_check");
+    db->exec("PRAGMA user_version = 7");
+    transaction.commit();
+    db->exec("PRAGMA foreign_keys = ON");
 }
 
 void OfflineDatabase::vacuum() {
@@ -512,7 +559,8 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
                 "  AND pixel_ratio  = ?3 "
                 "  AND x            = ?4 "
                 "  AND y            = ?5 "
-                "  AND z            = ?6 ") };
+                "  AND z            = ?6 "
+                "  AND encoding     = ?7 ") };
             // clang-format on
 
             accessedQuery.bind(1, util::now());
@@ -521,6 +569,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
             accessedQuery.bind(4, tile.x);
             accessedQuery.bind(5, tile.y);
             accessedQuery.bind(6, tile.z);
+            accessedQuery.bind(7, static_cast<int>(tile.encoding));
             accessedQuery.run();
         } catch (const mapbox::sqlite::Exception& ex) {
             if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
@@ -542,7 +591,8 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
         "  AND pixel_ratio  = ?2 "
         "  AND x            = ?3 "
         "  AND y            = ?4 "
-        "  AND z            = ?5 ") };
+        "  AND z            = ?5 "
+        "  AND encoding     = ?6 ") };
     // clang-format on
 
     query.bind(1, tile.urlTemplate);
@@ -550,6 +600,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
     query.bind(3, tile.x);
     query.bind(4, tile.y);
     query.bind(5, tile.z);
+    query.bind(6, static_cast<int>(tile.encoding));
 
     if (!query.run()) {
         return std::nullopt;
@@ -586,7 +637,8 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
         "  AND pixel_ratio  = ?2 "
         "  AND x            = ?3 "
         "  AND y            = ?4 "
-        "  AND z            = ?5 ") };
+        "  AND z            = ?5 "
+        "  AND encoding     = ?6 ") };
     // clang-format on
 
     size.bind(1, tile.urlTemplate);
@@ -594,6 +646,7 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
     size.bind(3, tile.x);
     size.bind(4, tile.y);
     size.bind(5, tile.z);
+    size.bind(6, static_cast<int>(tile.encoding));
 
     if (!size.run()) {
         return std::nullopt;
@@ -619,7 +672,8 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
             "  AND pixel_ratio   = ?5 "
             "  AND x             = ?6 "
             "  AND y             = ?7 "
-            "  AND z             = ?8 ") };
+            "  AND z             = ?8 "
+            "  AND encoding      = ?9 ") };
         // clang-format on
 
         notModifiedQuery.bind(1, util::now());
@@ -630,6 +684,7 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
         notModifiedQuery.bind(6, tile.x);
         notModifiedQuery.bind(7, tile.y);
         notModifiedQuery.bind(8, tile.z);
+        notModifiedQuery.bind(9, static_cast<int>(tile.encoding));
         notModifiedQuery.run();
         return false;
     }
@@ -650,7 +705,8 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
         "  AND pixel_ratio   = ?9 "
         "  AND x             = ?10 "
         "  AND y             = ?11 "
-        "  AND z             = ?12 ") };
+        "  AND z             = ?12 "
+        "  AND encoding      = ?13 ") };
     // clang-format on
 
     updateQuery.bind(1, response.modified);
@@ -663,6 +719,7 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
     updateQuery.bind(10, tile.x);
     updateQuery.bind(11, tile.y);
     updateQuery.bind(12, tile.z);
+    updateQuery.bind(13, static_cast<int>(tile.encoding));
 
     if (response.noContent) {
         updateQuery.bind(6, nullptr);
@@ -679,8 +736,8 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
 
     // clang-format off
     mapbox::sqlite::Query insertQuery{ getStatement(
-        "INSERT INTO tiles (url_template, pixel_ratio, x,  y,  z,  modified, must_revalidate, etag, expires, accessed,  data, compressed) "
-        "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,       ?7,              ?8,   ?9,      ?10,       ?11,  ?12)") };
+        "INSERT INTO tiles (url_template, pixel_ratio, x,  y,  z,  modified, must_revalidate, etag, expires, accessed,  data, compressed, encoding) "
+        "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,       ?7,              ?8,   ?9,      ?10,       ?11,  ?12,        ?13)") };
     // clang-format on
 
     insertQuery.bind(1, tile.urlTemplate);
@@ -701,6 +758,7 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
         insertQuery.bindBlob(11, data.data(), data.size(), false);
         insertQuery.bind(12, compressed);
     }
+    insertQuery.bind(13, static_cast<int>(tile.encoding));
 
     insertQuery.run();
 
@@ -892,13 +950,23 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::mergeDatabase(cons
         return unexpected<std::exception_ptr>(std::current_exception());
     }
     try {
-        // Support sideloaded databases at user_version = 6. Future schema
-        // version changes will need to implement migration paths for sideloaded
-        // databases at version 6.
         auto sideUserVersion = static_cast<int>(getPragma<int64_t>("PRAGMA side.user_version"));
         const auto mainUserVersion = getPragma<int64_t>("PRAGMA user_version");
-        if (sideUserVersion < 6 || sideUserVersion != mainUserVersion) {
+        if (sideUserVersion < 6 || sideUserVersion > mainUserVersion) {
             throw std::runtime_error("Merge database has incorrect user_version");
+        }
+
+        // Migrate the sideloaded database to the current schema if needed.
+        // Detach, open as OfflineDatabase to run migrations, close, re-attach.
+        if (sideUserVersion < mainUserVersion) {
+            db->exec("DETACH DATABASE side");
+            statements.clear();
+            {
+                OfflineDatabase sideDB(sideDatabasePath, tileServerOptions);
+            }
+            mapbox::sqlite::Query reattach{getStatement("ATTACH DATABASE ?1 AS side")};
+            reattach.bind(1, sideDatabasePath);
+            reattach.run();
         }
 
         auto currentTileCount = getOfflineMapboxTileCount();
@@ -912,7 +980,8 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::mergeDatabase(cons
                 "st.pixel_ratio = t.pixel_ratio AND "
                 "st.z = t.z AND "
                 "st.x = t.x AND "
-                "st.y = t.y "
+                "st.y = t.y AND "
+                "st.encoding = t.encoding "
             "WHERE t.id IS NULL "
             "AND st.url_template LIKE ?1 || '%'") };
         // clang-format on
@@ -1107,7 +1176,8 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
             "  AND pixel_ratio  = ?3 "
             "  AND x            = ?4 "
             "  AND y            = ?5 "
-            "  AND z            = ?6 ") };
+            "  AND z            = ?6 "
+            "  AND encoding     = ?7 ") };
         // clang-format on
 
         const Resource::TileData& tile = *resource.tileData;
@@ -1117,6 +1187,7 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
         insertQuery.bind(4, tile.x);
         insertQuery.bind(5, tile.y);
         insertQuery.bind(6, tile.z);
+        insertQuery.bind(7, static_cast<int>(tile.encoding));
         insertQuery.run();
 
         bool notOnThisRegion = insertQuery.changes() != 0;
@@ -1132,6 +1203,7 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
             "  AND x            = ?4 "
             "  AND y            = ?5 "
             "  AND z            = ?6 "
+            "  AND encoding     = ?7 "
             "LIMIT 1 ") };
         // clang-format on
 
@@ -1141,6 +1213,7 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
         selectQuery.bind(4, tile.x);
         selectQuery.bind(5, tile.y);
         selectQuery.bind(6, tile.z);
+        selectQuery.bind(7, static_cast<int>(tile.encoding));
 
         bool notOnOtherRegion = !selectQuery.run();
 

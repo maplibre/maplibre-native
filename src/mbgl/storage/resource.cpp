@@ -92,7 +92,9 @@ Resource Resource::tile(const std::string& urlTemplate,
                         int32_t y,
                         int8_t z,
                         Tileset::Scheme scheme,
-                        LoadingMethod loadingMethod) {
+                        LoadingMethod loadingMethod,
+                        std::string_view acceptHeader,
+                        Tileset::VectorEncoding encoding) {
     bool supportsRatio = urlTemplate.find("{ratio}") != std::string::npos;
     if (scheme == Tileset::Scheme::TMS) {
         y = (1 << z) - y - 1;
@@ -125,8 +127,10 @@ Resource Resource::tile(const std::string& urlTemplate,
                                        .pixelRatio = uint8_t(supportsRatio && pixelRatio > 1.0 ? 2 : 1),
                                        .x = x,
                                        .y = y,
-                                       .z = z},
-                    loadingMethod};
+                                       .z = z,
+                                       .encoding = encoding},
+                    loadingMethod,
+                    acceptHeader};
 }
 
 } // namespace mbgl

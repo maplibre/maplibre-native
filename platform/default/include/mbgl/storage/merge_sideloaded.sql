@@ -14,10 +14,11 @@ CREATE TEMPORARY TABLE region_mapping AS
 REPLACE INTO tiles
     SELECT t.id, -- use the old ID in case we run a REPLACE. If it doesn't exist yet, it'll be NULL which will auto-assign a new ID.
         st.url_template, st.pixel_ratio, st.z, st.x, st.y,
-        st.expires, st.modified, st.etag, st.data, st.compressed, st.accessed, st.must_revalidate
+        st.expires, st.modified, st.etag, st.data, st.compressed, st.accessed, st.must_revalidate,
+        st.encoding
     FROM (SELECT DISTINCT sti.* FROM side.region_tiles srt JOIN side.tiles sti ON srt.tile_id = sti.id)   -- ensure that we're only considering region tiles, and not ambient tiles.
     AS st
-    LEFT JOIN tiles t ON st.url_template = t.url_template AND st.pixel_ratio = t.pixel_ratio AND st.z = t.z AND st.x = t.x AND st.y = t.y
+    LEFT JOIN tiles t ON st.url_template = t.url_template AND st.pixel_ratio = t.pixel_ratio AND st.z = t.z AND st.x = t.x AND st.y = t.y AND st.encoding = t.encoding
         WHERE t.id IS NULL -- only consider tiles that don't exist yet in the original database.
         OR st.modified > t.modified; -- ...or tiles that are newer in the side loaded DB.
 
@@ -27,7 +28,7 @@ INSERT OR IGNORE INTO region_tiles
     FROM side.region_tiles srt
     JOIN region_mapping rm ON srt.region_id = rm.side_region_id
     JOIN (SELECT t.id, st.id AS side_tile_id FROM side.tiles st
-            JOIN tiles t ON st.url_template = t.url_template AND st.pixel_ratio = t.pixel_ratio AND st.z = t.z AND st.x = t.x AND st.y = t.y
+            JOIN tiles t ON st.url_template = t.url_template AND st.pixel_ratio = t.pixel_ratio AND st.z = t.z AND st.x = t.x AND st.y = t.y AND st.encoding = t.encoding
     ) AS sti ON srt.tile_id = sti.side_tile_id;
 
 -- copy over resources

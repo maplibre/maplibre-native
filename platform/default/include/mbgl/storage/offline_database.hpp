@@ -112,6 +112,7 @@ private:
     void migrateToVersion5();
     void migrateToVersion3();
     void migrateToVersion6();
+    void migrateToVersion7();
     void cleanup();
     bool disabled();
     void vacuum();
