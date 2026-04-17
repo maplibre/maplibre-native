@@ -92,9 +92,13 @@ jobs:
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: vulkan
             runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: webgpu-wgpu
+            runner: { os: ubuntu-latest, arch: x64 }
           - renderer: opengl
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
           - renderer: vulkan
+            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+          - renderer: webgpu-wgpu
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
@@ -107,6 +111,10 @@ jobs:
       - uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         with:
           tool: armerge@2
+
+      - name: Install rust target
+        if: $${ matrix.renderer }} == "webgpu-wgpu"
+        run: rustup target add x86_64-unknown-linux-gnu
 
       - name: Build mbgl-core for Linux
         run: |
