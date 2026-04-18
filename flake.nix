@@ -24,6 +24,66 @@
           cargoHash = "sha256-oTeV16+aZSbu6D5bmJgiU4DWYuD//5glL2mqRISH7yY=";
         };
 
+        # ── Static library overrides for amalgamation builds ───────────
+        # Nixpkgs doesn't ship .a files by default. Build static variants
+        # with -fPIC for the amalgamation path.
+        staticOverride = pkg: pkg.overrideAttrs (old: {
+          dontDisableStatic = true;
+          configureFlags = (old.configureFlags or []) ++ [ "--enable-static" ];
+          cmakeFlags = (old.cmakeFlags or []) ++ [
+            "-DBUILD_SHARED_LIBS=OFF"
+            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+          ];
+          mesonFlags = (old.mesonFlags or []) ++ [ "-Ddefault_library=both" ];
+        });
+
+        staticLibs = {
+          png = pkgs.libpng.overrideAttrs (old: {
+            dontDisableStatic = true;
+            cmakeFlags = (old.cmakeFlags or []) ++ [
+              "-DPNG_SHARED=OFF"
+              "-DPNG_STATIC=ON"
+              "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+            ];
+          });
+          jpeg = pkgs.libjpeg.overrideAttrs (old: {
+            dontDisableStatic = true;
+            cmakeFlags = (old.cmakeFlags or []) ++ [
+              "-DENABLE_STATIC=ON"
+              "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+            ];
+          });
+          webp = pkgs.libwebp.overrideAttrs (old: {
+            dontDisableStatic = true;
+            cmakeFlags = (old.cmakeFlags or []) ++ [
+              "-DBUILD_SHARED_LIBS=OFF"
+              "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+            ];
+          });
+          uv = pkgs.libuv.overrideAttrs (old: {
+            dontDisableStatic = true;
+            cmakeFlags = (old.cmakeFlags or []) ++ [
+              "-DLIBUV_BUILD_SHARED=OFF"
+              "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+            ];
+          });
+          icu = pkgs.icu.overrideAttrs (old: {
+            dontDisableStatic = true;
+            configureFlags = (old.configureFlags or []) ++ [ "--enable-static" ];
+          });
+          ssl = (pkgs.openssl.override { static = true; });
+          z = pkgs.zlib.static;
+          bz2 = pkgs.bzip2.overrideAttrs (old: {
+            dontDisableStatic = true;
+            # bzip2 in nixpkgs uses libtool; create a static .a from the objects
+            postInstall = (old.postInstall or "") + ''
+              if [ ! -f $out/lib/libbz2.a ]; then
+                ar rcs $out/lib/libbz2.a .libs/*.o
+              fi
+            '';
+          });
+        };
+
         # ── Common build inputs shared across all configurations ────────
         commonNativeBuildInputs = with pkgs; [
           cmake
@@ -43,6 +103,7 @@
           bzip2
           icu
           glfw
+          openssl
         ];
 
         x11Inputs = with pkgs; [
@@ -126,10 +187,11 @@
             '';
           };
 
-          # Minimal shell for amalgamation builds only.
+          # Amalgamation shell: includes static libraries for find_static_library.
           amalgamation = pkgs.mkShell {
             nativeBuildInputs = commonNativeBuildInputs ++ [ armerge ];
-            buildInputs = commonBuildInputs ++ x11Inputs ++ openglInputs;
+            buildInputs = commonBuildInputs ++ x11Inputs ++ openglInputs
+              ++ (builtins.attrValues staticLibs);
 
             shellHook = ''
               echo "amalgamation shell – use -DMLN_CREATE_AMALGAMATION=ON"
