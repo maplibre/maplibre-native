@@ -2,7 +2,7 @@
   description = "MapLibre Native – development shells and build packages for Linux";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -19,9 +19,9 @@
             owner = "tux3";
             repo = "armerge";
             rev = "v${version}";
-            hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";  # TODO: replace after first `nix build`
+            hash = "sha256-0b6hDyH1rq8DuVJY9L3U3Lk3uEKMjPARzp5mCt5hfp8=";
           };
-          cargoHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";  # TODO: replace after first `nix build`
+          cargoHash = "sha256-oTeV16+aZSbu6D5bmJgiU4DWYuD//5glL2mqRISH7yY=";
         };
 
         # ── Common build inputs shared across all configurations ────────
@@ -46,11 +46,11 @@
         ];
 
         x11Inputs = with pkgs; [
-          xorg.libX11
-          xorg.libXinerama
-          xorg.libXcursor
-          xorg.libXi
-          xorg.libxcb
+          libX11
+          libXinerama
+          libXcursor
+          libXi
+          libxcb
         ];
 
         openglInputs = with pkgs; [
