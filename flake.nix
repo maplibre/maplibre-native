@@ -7,7 +7,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
       let
         pkgs = import nixpkgs { inherit system; };
 
@@ -133,18 +133,20 @@
         ];
 
         # ── Helper: invoke cmake + ninja for a given preset ─────────────
-        mkMbglCore = { preset, extraCmakeFlags ? [] }:
+        mkMbglCore = { preset, amalgamation ? false, extraCmakeFlags ? [] }:
           pkgs.stdenv.mkDerivation {
-            pname = "mbgl-core-${preset}";
+            pname = "mbgl-core-${preset}${if amalgamation then "-amalgamation" else ""}";
             version = self.shortRev or self.dirtyShortRev or "dev";
             src = self;
 
-            nativeBuildInputs = commonNativeBuildInputs;
+            nativeBuildInputs = commonNativeBuildInputs
+              ++ (if amalgamation then [ armerge ] else []);
             buildInputs = commonBuildInputs
               ++ x11Inputs
               ++ (if builtins.match ".*vulkan.*" preset != null
                   then vulkanInputs
-                  else openglInputs);
+                  else openglInputs)
+              ++ (if amalgamation then builtins.attrValues staticLibs else []);
 
             cmakeFlags = [
               "-G" "Ninja"
@@ -211,6 +213,7 @@
 
           mbgl-core-opengl-amalgamation = mkMbglCore {
             preset = "linux-opengl";
+            amalgamation = true;
             extraCmakeFlags = [ "-DMLN_CREATE_AMALGAMATION=ON" ];
           };
 
