@@ -58,8 +58,6 @@ public:
     void clear();
 
 private:
-    // Private so instances can only be created via `create()`, guaranteeing
-    // shared_ptr ownership and well-defined `weak_from_this()` behavior.
     ImageManager();
 
     void checkMissingAndNotify(ImageRequestor&, const ImageRequestPair&);
