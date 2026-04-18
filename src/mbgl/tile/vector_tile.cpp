@@ -2,7 +2,6 @@
 
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/tile_loader_impl.hpp>
-#include <mbgl/util/constants.hpp>
 
 #include <utility>
 
@@ -14,15 +13,7 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
                        const Tileset& tileset,
                        TileObserver* observer_)
     : GeometryTile(id_, std::move(sourceID_), parameters_, observer_),
-      loader(std::make_unique<TileLoader<VectorTile>>(
-          *this,
-          id_,
-          parameters_,
-          tileset,
-          tileset.vectorEncoding.value_or(Tileset::VectorEncoding::Mapbox) == Tileset::VectorEncoding::MLT
-              ? util::MIME_TYPE_MLT
-              : util::MIME_TYPE_MVT,
-          tileset.vectorEncoding.value_or(Tileset::VectorEncoding::Mapbox))) {}
+      loader(std::make_unique<TileLoader<VectorTile>>(*this, id_, parameters_, tileset)) {}
 
 VectorTile::~VectorTile() {}
 

@@ -6,7 +6,6 @@
 #include <mbgl/util/tileset.hpp>
 
 #include <string>
-#include <string_view>
 #include <optional>
 
 namespace mbgl {
@@ -45,7 +44,6 @@ public:
         int32_t x;
         int32_t y;
         int8_t z;
-        Tileset::VectorEncoding encoding = Tileset::VectorEncoding::Mapbox;
     };
 
     enum class LoadingMethod : uint8_t {
@@ -61,13 +59,11 @@ public:
     Resource(Kind kind_,
              std::string url_,
              std::optional<TileData> tileData_ = std::nullopt,
-             LoadingMethod loadingMethod_ = LoadingMethod::All,
-             std::string_view acceptHeader_ = {})
+             LoadingMethod loadingMethod_ = LoadingMethod::All)
         : kind(kind_),
           loadingMethod(loadingMethod_),
           url(std::move(url_)),
-          tileData(std::move(tileData_)),
-          acceptHeader(acceptHeader_) {}
+          tileData(std::move(tileData_)) {}
 
     void setPriority(Priority p) { priority = p; }
     void setUsage(Usage u) { usage = u; }
@@ -82,9 +78,7 @@ public:
                          int32_t y,
                          int8_t z,
                          Tileset::Scheme scheme,
-                         LoadingMethod = LoadingMethod::All,
-                         std::string_view acceptHeader = {},
-                         Tileset::VectorEncoding encoding = Tileset::VectorEncoding::Mapbox);
+                         LoadingMethod = LoadingMethod::All);
     static Resource glyphs(const std::string& urlTemplate,
                            const FontStack& fontStack,
                            const std::pair<uint16_t, uint16_t>& glyphRange);
@@ -109,7 +103,6 @@ public:
     std::shared_ptr<const std::string> priorData;
     Duration minimumUpdateInterval{Duration::zero()};
     StoragePolicy storagePolicy{StoragePolicy::Permanent};
-    std::string_view acceptHeader;
 };
 
 inline bool Resource::hasLoadingMethod(Resource::LoadingMethod method) const {

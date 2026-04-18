@@ -84,11 +84,7 @@ CREATE TABLE tiles (
 
   must_revalidate INTEGER NOT NULL DEFAULT 0,      -- When set to true, the tile will not be used unless it gets
                                                    -- first revalidated by the server.
-
-  encoding INTEGER NOT NULL DEFAULT 0,             -- Tile encoding format, matching Tileset::VectorEncoding enum:
-                                                   -- 0 = Mapbox Vector Tiles (MVT), the default
-                                                   -- 1 = MapLibre Tiles (MLT)
-  UNIQUE (url_template, pixel_ratio, z, x, y, encoding)
+  UNIQUE (url_template, pixel_ratio, z, x, y)
 );
 
 --

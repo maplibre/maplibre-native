@@ -50,6 +50,14 @@ static FixtureLog::Message error(ResultCode code, const char* message) {
     return {EventSeverity::Warning, Event::Database, static_cast<int64_t>(code), message};
 }
 
+static int databasePageCount(const std::string& path) {
+    mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
+    mapbox::sqlite::Statement stmt{db, "pragma page_count"};
+    mapbox::sqlite::Query query{stmt};
+    query.run();
+    return query.get<int>(0);
+}
+
 static int databaseUserVersion(const std::string& path) {
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
     mapbox::sqlite::Statement stmt{db, "pragma user_version"};
@@ -228,7 +236,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(SchemaVersion)) {
         OfflineDatabase db(filename, fixture::tileServerOptions);
     }
 
-    EXPECT_EQ(7, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(filename));
 
     OfflineDatabase db(filename, fixture::tileServerOptions);
     // Now try inserting and reading back to make sure we have a valid database.
@@ -1457,7 +1465,8 @@ TEST(OfflineDatabase, MigrateFromV2Schema) {
         }
     }
 
-    EXPECT_EQ(7, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(filename));
+    EXPECT_LT(databasePageCount(filename), databasePageCount("test/fixtures/offline_database/v2.db"));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1478,7 +1487,7 @@ TEST(OfflineDatabase, MigrateFromV3Schema) {
         }
     }
 
-    EXPECT_EQ(7, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(filename));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1500,7 +1509,7 @@ TEST(OfflineDatabase, MigrateFromV4Schema) {
         }
     }
 
-    EXPECT_EQ(7, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(filename));
 
     // Journal mode should be DELETE after migration to v5.
     EXPECT_EQ("delete", databaseJournalMode(filename));
@@ -1527,7 +1536,7 @@ TEST(OfflineDatabase, MigrateFromV5Schema) {
         }
     }
 
-    EXPECT_EQ(7, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(filename));
 
     EXPECT_EQ((std::vector<std::string>{"id",
                                         "url_template",
@@ -1541,8 +1550,7 @@ TEST(OfflineDatabase, MigrateFromV5Schema) {
                                         "data",
                                         "compressed",
                                         "accessed",
-                                        "must_revalidate",
-                                        "encoding"}),
+                                        "must_revalidate"}),
               databaseTableColumns(filename, "tiles"));
     EXPECT_EQ(
         (std::vector<std::string>{
@@ -1585,7 +1593,7 @@ TEST(OfflineDatabase, DowngradeSchema) {
         db.setMaximumAmbientCacheSize(0);
     }
 
-    EXPECT_EQ(7, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(filename));
 
     EXPECT_EQ((std::vector<std::string>{"id",
                                         "url_template",
@@ -1599,8 +1607,7 @@ TEST(OfflineDatabase, DowngradeSchema) {
                                         "data",
                                         "compressed",
                                         "accessed",
-                                        "must_revalidate",
-                                        "encoding"}),
+                                        "must_revalidate"}),
               databaseTableColumns(filename, "tiles"));
     EXPECT_EQ(
         (std::vector<std::string>{
@@ -1642,37 +1649,28 @@ TEST(OfflineDatabase, CorruptDatabaseOnQuery) {
     util::deleteFile(filename);
     util::copyFile(filename, "test/fixtures/offline_database/corrupt-delayed.db");
 
-    // This database is corrupt in a way that may manifest either during the
-    // v7 migration or during the first query, depending on the SQLite version.
-    // Either way, the database should be recreated and work afterward.
+    // This database is corrupt in a way that won't manifest itself until we
+    // start querying it, so just opening it will not cause an error.
     OfflineDatabase db(filename, fixture::tileServerOptions);
 
-    auto corruptOnOpen = log.count(error(ResultCode::Corrupt, "Can't open database: database disk image is malformed"),
-                                   true);
-    if (corruptOnOpen > 0) {
-        // Corruption detected during migration.
-        EXPECT_EQ(
-            1u,
-            log.count(
-                {EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
-        EXPECT_EQ(0u, log.uncheckedCount());
-        EXPECT_EQ(std::nullopt, db.get(fixture::tile));
-        EXPECT_EQ(0u, log.uncheckedCount());
-    } else {
-        // Corruption not yet detected; first query triggers recreation.
-        EXPECT_EQ(std::nullopt, db.get(fixture::tile));
-        EXPECT_EQ(1u,
-                  log.count(error(ResultCode::Corrupt, "Can't read resource: database disk image is malformed"), true));
-        EXPECT_EQ(
-            1u,
-            log.count(
-                {EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
-    }
+    // Just opening this corrupt database should not have produced an error yet,
+    // since PRAGMA user_version still succeeds with this database.
+    EXPECT_EQ(0u, log.uncheckedCount());
+
+    // The first request fails because the database is corrupt and has to be recreated.
+    EXPECT_EQ(std::nullopt, db.get(fixture::tile));
+    EXPECT_EQ(1u, log.count(error(ResultCode::Corrupt, "Can't read resource: database disk image is malformed"), true));
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
+    EXPECT_EQ(0u, log.uncheckedCount());
 
     // Now try inserting and reading back to make sure we have a valid database.
     for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
+        EXPECT_EQ(0u, log.uncheckedCount());
         auto result = db.get(res);
+        EXPECT_EQ(0u, log.uncheckedCount());
         ASSERT_TRUE(result && result->data);
         EXPECT_EQ("first", *result->data);
     }
@@ -1821,11 +1819,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_NoUpdate) {
     auto originalTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
     auto originalStamp = originalTile->first.modified;
 
-    // The sideloaded database is v6; merge should migrate it to current version.
-    EXPECT_EQ(6, databaseUserVersion(filename_sideload));
     auto result = db.mergeDatabase(filename_sideload);
-    EXPECT_EQ(7, databaseUserVersion(filename_sideload));
-
     EXPECT_EQ(1u, result->size());
     EXPECT_EQ(2u, db.listRegions()->size());
 
