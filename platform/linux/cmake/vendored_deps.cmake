@@ -1,8 +1,8 @@
-# Vendored static dependencies for portable Linux shared library builds.
+# Vendored static dependencies for portable Linux amalgamated builds.
 #
-# When MLN_VENDORED_DEPS is ON (used with MLN_CREATE_AMALGAMATION), this file
-# downloads and builds system-level dependencies from source with -fPIC so
-# they can be amalgamated into mbgl-core without runtime dependency on
+# When MLN_CREATE_AMALGAMATION is ON, this file downloads and builds
+# system-level dependencies from source with -fPIC so they can be
+# amalgamated into mbgl-core without runtime dependency on
 # distro-specific library versions.
 #
 # System curl is still linked dynamically (stable ABI, complex dep tree).

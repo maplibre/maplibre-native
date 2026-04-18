@@ -1,12 +1,8 @@
 option(MLN_WITH_X11 "Build with X11 Support" ON)
 option(MLN_WITH_WAYLAND "Build with Wayland Support" OFF)
-option(MLN_VENDORED_DEPS "Build dependencies from source for portable amalgamation (Linux only)" OFF)
 
-if(MLN_VENDORED_DEPS)
-    if(NOT MLN_CREATE_AMALGAMATION)
-        message(FATAL_ERROR "MLN_VENDORED_DEPS requires MLN_CREATE_AMALGAMATION=ON")
-    endif()
-    message(STATUS "Using vendored static dependencies (MLN_VENDORED_DEPS=ON)")
+if(MLN_CREATE_AMALGAMATION)
+    message(STATUS "Amalgamation build: using vendored static dependencies")
     include(${CMAKE_CURRENT_LIST_DIR}/cmake/vendored_deps.cmake)
 
     # Force builtin ICU when vendoring all deps
@@ -20,7 +16,7 @@ if (MLN_WITH_X11)
 endif ()
 find_package(Threads REQUIRED)
 
-if(NOT MLN_VENDORED_DEPS)
+if(NOT MLN_CREATE_AMALGAMATION)
     find_package(JPEG REQUIRED)
     find_package(PNG REQUIRED)
     pkg_search_module(WEBP libwebp REQUIRED)
@@ -162,7 +158,7 @@ target_include_directories(
         ${X11_INCLUDE_DIRS}
 )
 
-if(MLN_VENDORED_DEPS)
+if(MLN_CREATE_AMALGAMATION)
     target_include_directories(
         mbgl-core
         PRIVATE
@@ -197,8 +193,7 @@ if(NOT ${ICUUC_FOUND} OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN
     )
 endif()
 
-if(MLN_VENDORED_DEPS)
-    # Link against vendored static libraries (all built with -fPIC)
+if(MLN_CREATE_AMALGAMATION)
     target_link_libraries(
         mbgl-core
         PRIVATE
@@ -241,79 +236,29 @@ if(MLN_CREATE_AMALGAMATION)
     endif()
     message(STATUS "Found armerge: ${ARMERGE}")
 
-    if(MLN_VENDORED_DEPS)
-        # Vendored path: all deps are built from source with -fPIC
-        add_custom_command(
-            TARGET mbgl-core
-            POST_BUILD
-            # No --keep-symbols: all vendored symbols stay global inside the
-            # amalgamated .a so the linker resolves them internally rather
-            # than falling back to system shared libs.
-            COMMAND ${ARMERGE} --output libmbgl-core-amalgam.a
-                $<TARGET_FILE:mbgl-core>
-                $<TARGET_FILE:mbgl-freetype>
-                $<TARGET_FILE:mbgl-vendor-csscolorparser>
-                $<TARGET_FILE:mbgl-harfbuzz>
-                $<TARGET_FILE:mbgl-vendor-nunicode>
-                $<TARGET_FILE:mbgl-vendor-sqlite>
-                $<TARGET_FILE:mbgl-vendor-parsedate>
-                $<TARGET_FILE:mlt-cpp>
-                $<TARGET_FILE:mbgl-vendor-icu>
-                $<TARGET_FILE:${VENDORED_PNG_TARGET}>
-                $<TARGET_FILE:${VENDORED_ZLIB_TARGET}>
-                $<TARGET_FILE:${VENDORED_JPEG_TARGET}>
-                $<TARGET_FILE:${VENDORED_WEBP_TARGET}>
-                $<TARGET_FILE:${VENDORED_UV_TARGET}>
-                $<TARGET_FILE:${VENDORED_BZ2_TARGET}>
-            # Replace the original mbgl-core.a with the amalgamated archive
-            # so downstream targets link against the full bundle
-            COMMAND ${CMAKE_COMMAND} -E copy libmbgl-core-amalgam.a $<TARGET_FILE:mbgl-core>
-        )
-        # Hide vendored symbols from the final .so to avoid collisions with
-        # other native libraries in the same process
-        target_link_options(mbgl-core PUBLIC -Wl,--exclude-libs,ALL)
-    else()
-        # System path: use system static libraries
-        include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
-        set(STATIC_LIBS "")
-
-        find_static_library(STATIC_LIBS NAMES png)
-        find_static_library(STATIC_LIBS NAMES z)
-        find_static_library(STATIC_LIBS NAMES jpeg)
-        find_static_library(STATIC_LIBS NAMES webp)
-        find_static_library(STATIC_LIBS NAMES uv uv_a)
-        find_static_library(STATIC_LIBS NAMES ssl)
-        find_static_library(STATIC_LIBS NAMES crypto)
-        find_static_library(STATIC_LIBS NAMES bz2 bzip2)
-
-        if(MLN_WITH_VULKAN)
-            find_static_library(STATIC_LIBS NAMES glslang)
-            find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
-            find_static_library(STATIC_LIBS NAMES SPIRV)
-            find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
-            find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
-            find_static_library(STATIC_LIBS NAMES MachineIndependent)
-            find_static_library(STATIC_LIBS NAMES GenericCodeGen)
-        endif()
-
-        add_custom_command(
-            TARGET mbgl-core
-            POST_BUILD
-            COMMAND ${ARMERGE} --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
-                $<TARGET_FILE:mbgl-core>
-                $<TARGET_FILE:mbgl-freetype>
-                $<TARGET_FILE:mbgl-vendor-csscolorparser>
-                $<TARGET_FILE:mbgl-harfbuzz>
-                $<TARGET_FILE:mbgl-vendor-nunicode>
-                $<TARGET_FILE:mbgl-vendor-sqlite>
-                $<TARGET_FILE:mbgl-vendor-parsedate>
-                $<TARGET_FILE:mlt-cpp>
-                ${ICUUC_LIBRARY_DIRS}/libicuuc.a
-                ${ICUUC_LIBRARY_DIRS}/libicudata.a
-                ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
-                ${STATIC_LIBS}
-        )
-    endif()
+    add_custom_command(
+        TARGET mbgl-core
+        POST_BUILD
+        COMMAND ${ARMERGE} --output libmbgl-core-amalgam.a
+            $<TARGET_FILE:mbgl-core>
+            $<TARGET_FILE:mbgl-freetype>
+            $<TARGET_FILE:mbgl-vendor-csscolorparser>
+            $<TARGET_FILE:mbgl-harfbuzz>
+            $<TARGET_FILE:mbgl-vendor-nunicode>
+            $<TARGET_FILE:mbgl-vendor-sqlite>
+            $<TARGET_FILE:mbgl-vendor-parsedate>
+            $<TARGET_FILE:mlt-cpp>
+            $<TARGET_FILE:mbgl-vendor-icu>
+            $<TARGET_FILE:${VENDORED_PNG_TARGET}>
+            $<TARGET_FILE:${VENDORED_ZLIB_TARGET}>
+            $<TARGET_FILE:${VENDORED_JPEG_TARGET}>
+            $<TARGET_FILE:${VENDORED_WEBP_TARGET}>
+            $<TARGET_FILE:${VENDORED_UV_TARGET}>
+            $<TARGET_FILE:${VENDORED_BZ2_TARGET}>
+        COMMAND ${CMAKE_COMMAND} -E copy libmbgl-core-amalgam.a $<TARGET_FILE:mbgl-core>
+    )
+    # Hide vendored symbols from the final .so to avoid collisions
+    target_link_options(mbgl-core PUBLIC -Wl,--exclude-libs,ALL)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
