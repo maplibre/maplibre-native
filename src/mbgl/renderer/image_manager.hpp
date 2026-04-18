@@ -27,7 +27,7 @@ class ImageRequestor;
  */
 class ImageManager : public std::enable_shared_from_this<ImageManager> {
 public:
-    ImageManager();
+    static std::shared_ptr<ImageManager> create() { return std::shared_ptr<ImageManager>(new ImageManager()); }
     ImageManager(const ImageManager&) = delete;
     ImageManager& operator=(const ImageManager&) = delete;
     ~ImageManager();
@@ -58,6 +58,10 @@ public:
     void clear();
 
 private:
+    // Private so instances can only be created via `create()`, guaranteeing
+    // shared_ptr ownership and well-defined `weak_from_this()` behavior.
+    ImageManager();
+
     void checkMissingAndNotify(ImageRequestor&, const ImageRequestPair&);
     void notify(ImageRequestor&, const ImageRequestPair&) const;
 

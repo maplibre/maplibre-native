@@ -16,13 +16,15 @@
 using namespace mbgl;
 
 TEST(ImageManager, Missing) {
-    ImageManager imageManager;
+    auto imageManagerPtr = ImageManager::create();
+    auto& imageManager = *imageManagerPtr;
     EXPECT_FALSE(imageManager.getImage("doesnotexist"));
 }
 
 TEST(ImageManager, Basic) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManagerPtr = ImageManager::create();
+    auto& imageManager = *imageManagerPtr;
 
     auto images = parseSprite("default",
                               util::read_file("test/fixtures/annotations/emerald.png"),
@@ -39,7 +41,8 @@ TEST(ImageManager, Basic) {
 
 TEST(ImageManager, AddRemove) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManagerPtr = ImageManager::create();
+    auto& imageManager = *imageManagerPtr;
 
     imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
     imageManager.addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({16, 16}), 2.0f));
@@ -55,7 +58,8 @@ TEST(ImageManager, AddRemove) {
 
 TEST(ImageManager, Update) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManagerPtr = ImageManager::create();
+    auto& imageManager = *imageManagerPtr;
 
     imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
     EXPECT_EQ(0, imageManager.updatedImageVersions.size());
@@ -67,7 +71,8 @@ TEST(ImageManager, Update) {
 
 TEST(ImageManager, RemoveReleasesBinPackRect) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManagerPtr = ImageManager::create();
+    auto& imageManager = *imageManagerPtr;
 
     imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
     EXPECT_TRUE(imageManager.getImage("big"));
@@ -97,7 +102,7 @@ public:
 
 TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto imageManagerPtr = ImageManager::create();
     auto& imageManager = *imageManagerPtr;
     StubImageRequestor requestor(imageManagerPtr);
     bool notified = false;
@@ -126,7 +131,7 @@ TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
 }
 
 TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
-    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto imageManagerPtr = ImageManager::create();
     auto& imageManager = *imageManagerPtr;
     StubImageRequestor requestor(imageManagerPtr);
     bool notified = false;
@@ -164,7 +169,7 @@ public:
 
 TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto imageManagerPtr = ImageManager::create();
     auto& imageManager = *imageManagerPtr;
     StubImageRequestor requestor(imageManagerPtr);
     StubImageManagerObserver observer;
@@ -220,7 +225,7 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
 
 TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto imageManagerPtr = ImageManager::create();
     auto& imageManager = *imageManagerPtr;
     StubImageRequestor requestor(imageManagerPtr);
     StubImageManagerObserver observer;
@@ -257,7 +262,7 @@ TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
 
 TEST(ImageManager, RemoveUnusedStyleImages) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto imageManagerPtr = ImageManager::create();
     auto& imageManager = *imageManagerPtr;
     StubImageManagerObserver observer;
     imageManager.setObserver(&observer);

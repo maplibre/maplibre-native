@@ -260,14 +260,6 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                 requestor.addPendingRequest(missingImage);
             }
 
-            // Guard against ImageManager destruction between the time this
-            // callback was scheduled (via Scheduler::bindOnce) and the time it
-            // actually runs on the GL render thread. Without this guard the
-            // callback can dereference a destroyed ImageManager and lock a
-            // destroyed recursive_mutex (rwLock). Reproduced on Android 16
-            // (Pixel 7a) with maplibre-native 13.0.2 + maplibre-react-native
-            // 11.0.0-beta.30 when a SurfaceView destroy/recreate races a
-            // pending onStyleImageMissing callback.
             auto removePendingRequests = [weakSelf = weak_from_this(), missingImage] {
                 auto self = weakSelf.lock();
                 if (!self) return;
