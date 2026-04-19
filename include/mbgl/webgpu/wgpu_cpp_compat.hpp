@@ -15,7 +15,14 @@
 #include <webgpu/webgpu_cpp.h>
 #elif MLN_WEBGPU_IMPL_WGPU
 // For wgpu-native backend, use the WebGPU-Cpp wrapper
+// TODO: remove this workaround as soon as https://github.com/eliemichel/WebGPU-Cpp/issues/35 is fixed
+#ifndef _NULLABLE
+#define _NULLABLE WGPU_NULLABLE
+#endif
 #include <webgpu.hpp>
+
+#undef _NULLABLE
+
 #endif
 
 #if defined(__clang__)

@@ -274,9 +274,7 @@ jobs:
         uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
         with:
           toolchain: stable
-
-      - name: Add iOS Rust target
-        run: rustup target add aarch64-apple-ios
+          targets: aarch64-apple-ios
 
       - name: Configure build with CMake
         run: cmake --preset ios-webgpu-wgpu

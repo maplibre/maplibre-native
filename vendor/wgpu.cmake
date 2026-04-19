@@ -88,7 +88,23 @@ endmacro()
 
 mln_wgpu_find_library()
 
-if(NOT WGPU_LIBRARY)
+if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
+    # Use a specific version of WGPU. This is required when to a rust application
+    # which uses wgpu directly instead of wgpu-native
+    if (MLN_WGPU_NATIVE_VERSION)
+        execute_process(
+            COMMAND git checkout ${MLN_WGPU_NATIVE_VERSION}
+            WORKING_DIRECTORY ${_mln_wgpu_source_dir}
+            RESULT_VARIABLE _git_checkout_wgpu_result
+            OUTPUT_VARIABLE _git_checkout_wgpu_output
+            ERROR_VARIABLE _git_checkout_wgpu_error
+        )
+
+        if(NOT _git_checkout_wgpu_result EQUAL 0)
+            message(FATAL_ERROR "Failed to checkout wgpu-native version '${MLN_WGPU_NATIVE_VERSION}': ${_git_checkout_wgpu_error}\n")
+        endif()
+    endif()
+
     message(STATUS "Pre-built wgpu-native library not found, attempting to build from source...")
 
     # Check if cargo is available
@@ -147,9 +163,16 @@ else()
     message(STATUS "Found wgpu-native library: ${WGPU_LIBRARY}")
 endif()
 
+# Create compatibility shims for Dawn header paths if they don't exist
+set(_webgpu-cpp-output_dir "${CMAKE_CURRENT_BINARY_DIR}/webgpu-cpp")
+set(_compat_shim_dir "${_webgpu-cpp-output_dir}/webgpu")
+set(_compat_shim_header "${_compat_shim_dir}/webgpu_cpp.h")
+set(_compat_shim_webgpu_h "${_compat_shim_dir}/webgpu.h")
+set(_compat_shim_wgpu_h "${_compat_shim_dir}/wgpu.h")
+file(MAKE_DIRECTORY "${_compat_shim_dir}")
+
 # Generate WebGPU-Cpp wrapper if needed
-set(_webgpu_cpp_dir "${PROJECT_SOURCE_DIR}/vendor/webgpu-cpp")
-set(_webgpu_cpp_header "${_webgpu_cpp_dir}/webgpu.hpp")
+set(_webgpu_cpp_header "${_webgpu-cpp-output_dir}/webgpu.hpp")
 
 if(NOT EXISTS "${_webgpu_cpp_header}")
     message(STATUS "Generating WebGPU-Cpp wrapper...")
@@ -167,7 +190,8 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
         COMMAND ${PYTHON_EXECUTABLE} generate.py
             --use-init-macros
             --header ${_mln_wgpu_source_dir}/ffi/webgpu-headers/webgpu.h
-        WORKING_DIRECTORY ${_webgpu_cpp_dir}
+            --output ${_webgpu_cpp_header}
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor/webgpu-cpp"
         RESULT_VARIABLE _gen_result
         OUTPUT_VARIABLE _gen_output
         ERROR_VARIABLE _gen_error
@@ -181,15 +205,9 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
     message(STATUS "Successfully generated WebGPU-Cpp wrapper")
 endif()
 
-# Create compatibility shims for Dawn header paths if they don't exist
-set(_compat_shim_dir "${_webgpu_cpp_dir}/wgpu-native/webgpu")
-set(_compat_shim_header "${_compat_shim_dir}/webgpu_cpp.h")
-set(_compat_shim_webgpu_h "${_compat_shim_dir}/webgpu.h")
-
 if(NOT EXISTS "${_compat_shim_header}")
     message(STATUS "Creating WebGPU-Cpp compatibility shim...")
 
-    file(MAKE_DIRECTORY "${_compat_shim_dir}")
     file(WRITE "${_compat_shim_header}"
 "#pragma once
 // Compatibility shim for Dawn header paths
@@ -197,7 +215,13 @@ if(NOT EXISTS "${_compat_shim_header}")
 // for both Dawn and wgpu-native backends
 
 // Include the WebGPU-Cpp wrapper
-#include \"../../webgpu.hpp\"
+// TODO: remove this workaround as soon as https://github.com/eliemichel/WebGPU-Cpp/issues/35 is fixed
+#ifndef _NULLABLE
+    #define _NULLABLE WGPU_NULLABLE
+#endif
+#include \"${_webgpu_cpp_header}\"
+
+#undef _NULLABLE
 ")
 
     message(STATUS "Successfully created WebGPU-Cpp compatibility shim")
@@ -220,7 +244,6 @@ if(NOT EXISTS "${_compat_shim_webgpu_h}")
 endif()
 
 # Also create wgpu.h shim for wgpu-native specific includes
-set(_compat_shim_wgpu_h "${_compat_shim_dir}/wgpu.h")
 if(NOT EXISTS "${_compat_shim_wgpu_h}")
     message(STATUS "Creating wgpu.h compatibility shim...")
 
@@ -245,10 +268,9 @@ target_link_libraries(mbgl-vendor-wgpu INTERFACE ${WGPU_LIBRARY})
 # Add include directories for webgpu.h, wgpu.h, and C++ wrapper
 target_include_directories(mbgl-vendor-wgpu
     SYSTEM INTERFACE
-        ${_webgpu_cpp_dir}                      # For generated webgpu.hpp
-        ${_webgpu_cpp_dir}/wgpu-native          # For webgpu/webgpu_cpp.h compatibility shim
-        ${_mln_wgpu_source_dir}/ffi/webgpu-headers
-        ${_mln_wgpu_source_dir}/ffi
+        ${_webgpu-cpp-output_dir}         # For webgpu.hpp webgpu/webgpu_cpp.h compatibility shim
+        ${_mln_wgpu_source_dir}/ffi/webgpu-headers # webgpu.h
+        ${_mln_wgpu_source_dir}/ffi # wgpu.h
 )
 
 # Platform-specific system libraries that wgpu-native needs
