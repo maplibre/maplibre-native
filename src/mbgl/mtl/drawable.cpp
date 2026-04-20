@@ -602,12 +602,13 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                 attribDesc->setBufferIndex(binding->bufferIndex);
                 attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
                 attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
-                
+
                 const auto& layoutDesc = vertDesc->layouts()->object(binding->bufferIndex);
                 if (!layoutDesc->stride()) {
                     assert(binding->vertexStride > 0);
                     layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-                    layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex : MTL::VertexStepFunctionConstant);
+                    layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
+                                                                              : MTL::VertexStepFunctionConstant);
                     layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
                 } else {
                     assert(layoutDesc->stride() == static_cast<NS::UInteger>(binding->vertexStride));

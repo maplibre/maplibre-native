@@ -20,17 +20,18 @@ public:
         : gfx::VertexAttribute(std::move(other)),
           bufferIndex(other.bufferIndex) {}
     ~VertexAttribute() override = default;
-    
+
     /// @brief Set the bufer index of the vertex attribute
     int getBufferIndex() const { return bufferIndex; }
 
     /// @brief Set the buffer index of the vertex attribute
     void setBufferIndex(int value) { bufferIndex = value; }
-    
+
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
                                                             const gfx::BufferUsageType,
                                                             bool forceUpdate);
+
 protected:
     int bufferIndex = -1;
 };
@@ -49,10 +50,10 @@ public:
     VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
 
     const std::unique_ptr<gfx::VertexAttribute>& set(const size_t id,
-                                                    int index,
-                                                    gfx::AttributeDataType type,
-                                                    int bufferIndex);
-    
+                                                     int index,
+                                                     gfx::AttributeDataType type,
+                                                     int bufferIndex);
+
     /// Indicates whether any values have changed
     bool isModifiedAfter(std::chrono::duration<double> time) const;
 

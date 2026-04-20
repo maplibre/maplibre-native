@@ -123,7 +123,8 @@ public:
 
     friend bool operator==(const AttributeBinding& lhs, const AttributeBinding& rhs) {
         return lhs.attribute == rhs.attribute && lhs.vertexStride == rhs.vertexStride &&
-               lhs.vertexBufferResource == rhs.vertexBufferResource && lhs.vertexOffset == rhs.vertexOffset && lhs.bufferIndex == rhs.bufferIndex;
+               lhs.vertexBufferResource == rhs.vertexBufferResource && lhs.vertexOffset == rhs.vertexOffset &&
+               lhs.bufferIndex == rhs.bufferIndex;
     }
 
     bool operator!=(const AttributeBinding& rhs) const { return !(*this == rhs); }

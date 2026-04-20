@@ -370,7 +370,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         attribDesc->setBufferIndex(ShaderClass::attributes[0].bufferIndex);
         attribDesc->setOffset(0);
         attribDesc->setFormat(MTL::VertexFormatShort2);
-        
+
         const auto& layoutDesc = vertDesc->layouts()->object(ShaderClass::attributes[0].bufferIndex);
         layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
         layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);

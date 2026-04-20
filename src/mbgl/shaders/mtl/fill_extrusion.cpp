@@ -12,7 +12,7 @@ using FillExtrusionShaderSource = ShaderSource<BuiltIn::FillExtrusionShader, gfx
 const std::array<AttributeInfo, 5> FillExtrusionShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short4, fillExtrusionUBOCount + 0, idFillExtrusionNormalEdVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float4, fillExtrusionUBOCount + 1, idFillExtrusionColorVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionBaseVertexAttribute},
@@ -28,12 +28,14 @@ using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatt
 const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short4, fillExtrusionUBOCount + 0, idFillExtrusionNormalEdVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionHeightVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternFromVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternToVertexAttribute},
+    AttributeInfo{
+        4, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternFromVertexAttribute},
+    AttributeInfo{
+        5, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternToVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillExtrusionPatternShaderSource::textures = {
     TextureInfo{0, idFillExtrusionImageTexture},
