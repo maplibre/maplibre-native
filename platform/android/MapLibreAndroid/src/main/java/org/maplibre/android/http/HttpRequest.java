@@ -27,6 +27,24 @@ public interface HttpRequest {
                       String dataRange, String etag, String modified, boolean offlineUsage);
 
   /**
+   * Executes the request with an Accept header.
+   *
+   * @param httpRequest  callback to be invoked when we receive a response
+   * @param nativePtr    the pointer associated to the request
+   * @param resourceUrl  the resource url to download
+   * @param dataRange    http header, used to indicate the part of a resource that the server should return
+   * @param etag         http header, identifier for a specific version of a resource
+   * @param modified     http header, used to determine if a resource hasn't been modified since
+   * @param offlineUsage flag to indicate a resource will be used for offline, appends offline=true as a query parameter
+   * @param acceptHeader the Accept header value to send with the request
+   */
+  default void executeRequest(HttpResponder httpRequest, long nativePtr, String resourceUrl,
+                              String dataRange, String etag, String modified, boolean offlineUsage,
+                              String acceptHeader) {
+    executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage);
+  }
+
+  /**
    * Cancels the request.
    */
   void cancelRequest();

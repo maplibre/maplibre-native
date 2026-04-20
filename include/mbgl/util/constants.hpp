@@ -71,6 +71,10 @@ constexpr uint32_t DEFAULT_MAXIMUM_CONCURRENT_REQUESTS = 20;
 
 constexpr uint8_t TERRAIN_RGB_MAXZOOM = 15;
 
+constexpr const char* MIME_TYPE_MVT = "application/vnd.mapbox-vector-tile";
+constexpr const char* MIME_TYPE_MLT = "application/vnd.maplibre-tile";
+constexpr const char* MIME_TYPE_RASTER = "image/webp, image/jpeg, image/png";
+
 constexpr const char* LAST_RESORT_ALPHABETIC_FONT = "Open Sans Regular";
 constexpr const char* LAST_RESORT_PAN_UNICODE_FONT = "Arial Unicode MS Regular";
 
