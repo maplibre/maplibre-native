@@ -27,6 +27,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install dependencies
+        run: brew install webp libuv
+
       - name: Build XCFramework (Dynamic)
         run: |
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
@@ -70,6 +73,9 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           submodules: recursive
+
+      - name: Install dependencies
+        run: brew install webp libuv
 
       - name: Build XCFramework (Static)
         run: |
