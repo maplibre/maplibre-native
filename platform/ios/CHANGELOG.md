@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.25.1
+
+- iOS: Force `MLNMapView` layout after transitions ([#4225](https://github.com/maplibre/maplibre-native/pull/4225)).
+
 ## 6.25.0
 
 - Expose Offline Region ID property on MLNOfflinePack for Darwin/iOS ([#4161](https://github.com/maplibre/maplibre-native/pull/4161)).
