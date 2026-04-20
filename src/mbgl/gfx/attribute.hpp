@@ -295,6 +295,7 @@ AttributeBinding attributeBinding(const VertexBuffer<detail::VertexType<As...>>&
         Descriptor::data.stride,
         &buffer.getResource(),
         0,
+        0,
     };
 }
 
