@@ -35,5 +35,16 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
     return attrib_.getBuffer();
 }
 
+const std::unique_ptr<gfx::VertexAttribute>& VertexAttributeArray::set(const size_t id,
+                                                                  int index,
+                                                                  gfx::AttributeDataType dataType,
+                                                                  int bufferIndex) {
+    auto& attrib = gfx::VertexAttributeArray::set(id, index, dataType, 1);
+    if (attrib) {
+        static_cast<VertexAttribute*>(attrib.get())->setBufferIndex(bufferIndex);
+    }
+    return attrib;
+}
+
 } // namespace mtl
 } // namespace mbgl

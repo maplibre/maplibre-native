@@ -77,17 +77,17 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(fillExtrusionUBOCount + 0)]];
-    short4 normal_ed [[attribute(fillExtrusionUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short4 normal_ed [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(fillExtrusionUBOCount + 2)]];
+    float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(fillExtrusionUBOCount + 3)]];
+    float base [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(fillExtrusionUBOCount + 4)]];
+    float height [[attribute(4)]];
 #endif
 };
 
@@ -198,20 +198,20 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(fillExtrusionUBOCount + 0)]];
-    short4 normal_ed [[attribute(fillExtrusionUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short4 normal_ed [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(fillExtrusionUBOCount + 2)]];
+    float base [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(fillExtrusionUBOCount + 3)]];
+    float height [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(fillExtrusionUBOCount + 4)]];
+    ushort4 pattern_from [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(fillExtrusionUBOCount + 5)]];
+    ushort4 pattern_to [[attribute(5)]];
 #endif
 };
 

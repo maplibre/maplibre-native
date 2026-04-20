@@ -110,9 +110,9 @@ typedef struct
 struct VertexTriWideVecB
 {
     // x, y offset around the center
-    float3 screenPos [[attribute(wideVectorUBOCount + 0)]];
-    float4 color [[attribute(wideVectorUBOCount + 1)]];
-    int index [[attribute(wideVectorUBOCount + 2)]];
+    float3 screenPos [[attribute(0)]];
+    float4 color [[attribute(1)]];
+    int index [[attribute(2)]];
 };
 
 // Wide vector vertex passed to fragment shader (new version)
@@ -222,7 +222,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
           constant Uniforms &uniforms [[ buffer(idWideVectorUniformsUBO) ]],
           constant UniformWideVec &wideVec [[ buffer(idWideVectorUniformWideVecUBO) ]],
           uint instanceID [[ instance_id ]],
-          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(wideVectorUBOCount + 3) ]])
+          constant VertexTriWideVecInstance *wideVecInsts [[ buffer(wideVectorUBOCount + 1) ]])
 {
     ProjVertexTriWideVecPerf outVert = {
         .position = discardPt,
