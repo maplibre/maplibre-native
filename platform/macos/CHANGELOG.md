@@ -2,6 +2,12 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/main/CONTRIBUTING.md) to get started.
 
+## 6.25.0
+
+- First automated native macOS XCFramework release ([#4088](https://github.com/maplibre/maplibre-native/issues/4088)).
+- Add Bazel `MapLibre.dynamic` and `MapLibre.static` xcframework targets for macOS ([#4113](https://github.com/maplibre/maplibre-native/pull/4113)).
+- Fix Xcode 26 build compatibility ([#4226](https://github.com/maplibre/maplibre-native/pull/4226)).
+
 ## 0.19.1 - September 06, 2021
 
 ### Bug Fixes
