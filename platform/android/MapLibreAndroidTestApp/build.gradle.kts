@@ -144,6 +144,7 @@ dependencies {
     implementation(libs.maplibreJavaTurf)
 
     implementation(libs.supportRecyclerView)
+    implementation(libs.supportPrint)
     implementation(libs.supportDesign)
     implementation(libs.supportConstraintLayout)
     implementation(libs.kotlinxSerializationJson)
