@@ -36,9 +36,11 @@ dependencies {
 
 dokka {
     moduleName.set("MapLibre Native Android")
+    val dokkaVariantName = "openglRelease"
 
     dokkaSourceSets {
         configureEach {
+            suppress.set(name != dokkaVariantName)
             includes.from("Module.md")
 
             sourceLink {
