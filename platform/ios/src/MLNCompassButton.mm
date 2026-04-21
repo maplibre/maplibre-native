@@ -91,8 +91,8 @@
                                                        @"Compass abbreviation for north")
           attributes:@{
             NSFontAttributeName : northFont,
-            NSForegroundColorAttributeName :
-                self.shouldWhiteStyle ? [UIColor blackColor] : [UIColor whiteColor],
+            NSForegroundColorAttributeName : self.shouldWhiteStyle ? [UIColor blackColor]
+                                                                   : [UIColor whiteColor],
           }];
   CGRect stringRect =
       CGRectMake((compassImage.size.width - north.size.width) / 2, compassImage.size.height * 0.435,
