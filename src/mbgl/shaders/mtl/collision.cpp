@@ -13,7 +13,7 @@ const std::array<AttributeInfo, 5> CollisionBoxShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionAnchorPosVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionExtrudeVertexAttribute},
-    
+
     // Dynamic
     AttributeInfo{3, gfx::AttributeDataType::UShort2, collisionUBOCount + 1, idCollisionPlacedVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Float2, collisionUBOCount + 1, idCollisionShiftVertexAttribute},
@@ -29,7 +29,7 @@ const std::array<AttributeInfo, 4> CollisionCircleShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionAnchorPosVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionExtrudeVertexAttribute},
-    
+
     // Dynamic
     AttributeInfo{3, gfx::AttributeDataType::UShort2, collisionUBOCount + 1, idCollisionPlacedVertexAttribute},
 };

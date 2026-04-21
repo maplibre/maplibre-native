@@ -8,7 +8,7 @@ using CircleShaderSource = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Typ
 
 const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, circleUBOCount + 0, idCirclePosVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{1, gfx::AttributeDataType::Float4, circleUBOCount + 1, idCircleColorVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Float2, circleUBOCount + 1, idCircleRadiusVertexAttribute},

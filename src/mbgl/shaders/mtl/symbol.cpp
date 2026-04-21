@@ -13,10 +13,10 @@ const std::array<AttributeInfo, 6> SymbolIconShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPosOffsetVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UShort4, symbolUBOCount + 0, idSymbolDataVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPixelOffsetVertexAttribute},
-    
+
     // Dynamic
     AttributeInfo{3, gfx::AttributeDataType::Float3, symbolUBOCount + 1, idSymbolProjectedPosVertexAttribute},
-    
+
     // Opacity
     AttributeInfo{4, gfx::AttributeDataType::Float, symbolUBOCount + 2, idSymbolFadeOpacityVertexAttribute},
 
@@ -36,10 +36,10 @@ const std::array<AttributeInfo, 10> SymbolSDFShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPosOffsetVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UShort4, symbolUBOCount + 0, idSymbolDataVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPixelOffsetVertexAttribute},
-    
+
     // Dynamic
     AttributeInfo{3, gfx::AttributeDataType::Float3, symbolUBOCount + 1, idSymbolProjectedPosVertexAttribute},
-    
+
     // Opacity
     AttributeInfo{4, gfx::AttributeDataType::Float, symbolUBOCount + 2, idSymbolFadeOpacityVertexAttribute},
 
@@ -62,10 +62,10 @@ using SymbolTextAndIconShaderSource = ShaderSource<BuiltIn::SymbolTextAndIconSha
 const std::array<AttributeInfo, 9> SymbolTextAndIconShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPosOffsetVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UShort4, symbolUBOCount + 0, idSymbolDataVertexAttribute},
-    
+
     // Dynamic
     AttributeInfo{2, gfx::AttributeDataType::Float3, symbolUBOCount + 1, idSymbolProjectedPosVertexAttribute},
-    
+
     // Opacity
     AttributeInfo{3, gfx::AttributeDataType::Float, symbolUBOCount + 2, idSymbolFadeOpacityVertexAttribute},
 

@@ -12,7 +12,7 @@ using LineShaderSource = ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::M
 const std::array<AttributeInfo, 8> LineShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, lineUBOCount + 0, idLinePosNormalVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UByte4, lineUBOCount + 0, idLineDataVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float4, lineUBOCount + 1, idLineColorVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineBlurVertexAttribute},
@@ -31,7 +31,7 @@ using LineGradientShaderSource = ShaderSource<BuiltIn::LineGradientShader, gfx::
 const std::array<AttributeInfo, 7> LineGradientShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, lineUBOCount + 0, idLinePosNormalVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UByte4, lineUBOCount + 0, idLineDataVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineBlurVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineOpacityVertexAttribute},
@@ -51,7 +51,7 @@ using LinePatternShaderSource = ShaderSource<BuiltIn::LinePatternShader, gfx::Ba
 const std::array<AttributeInfo, 9> LinePatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, lineUBOCount + 0, idLinePosNormalVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UByte4, lineUBOCount + 0, idLineDataVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineBlurVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineOpacityVertexAttribute},
@@ -73,7 +73,7 @@ using LineSDFShaderSource = ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::T
 const std::array<AttributeInfo, 9> LineSDFShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, lineUBOCount + 0, idLinePosNormalVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::UByte4, lineUBOCount + 0, idLineDataVertexAttribute},
-    
+
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float4, lineUBOCount + 1, idLineColorVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float2, lineUBOCount + 1, idLineBlurVertexAttribute},
