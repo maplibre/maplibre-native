@@ -18,6 +18,11 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) MLNOrnamentVisibility compassVisibility;
 
+/**
+ Sets whether the compass uses styles that make it easier to read on a dark styled map.
+ */
+@property (nonatomic, assign) BOOL shouldShowDarkStyles;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -64,10 +64,20 @@
   [self updateCompassAnimated:NO];
 }
 
+- (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
+  if (_shouldShowDarkStyles == shouldShowDarkStyles) {
+    return;
+  }
+  _shouldShowDarkStyles = shouldShowDarkStyles;
+  self.image = self.compassImage;
+}
+
 - (UIImage *)compassImage {
-  UIImage *scaleImage = [UIImage mgl_resourceImageNamed:@"Compass"];
-  UIGraphicsBeginImageContextWithOptions(scaleImage.size, NO, UIScreen.mainScreen.scale);
-  [scaleImage drawInRect:{CGPointZero, scaleImage.size}];
+  NSString *imageName = self.shouldShowDarkStyles ? @"Compass-night" : @"Compass";
+  UIImage *compassImage = [UIImage mgl_resourceImageNamed:imageName];
+
+  UIGraphicsBeginImageContextWithOptions(compassImage.size, NO, UIScreen.mainScreen.scale);
+  [compassImage drawInRect:{CGPointZero, compassImage.size}];
 
   UIFont *northFont;
   if (@available(iOS 13.0, *)) {
@@ -81,10 +91,11 @@
                                                        @"Compass abbreviation for north")
           attributes:@{
             NSFontAttributeName : northFont,
-            NSForegroundColorAttributeName : [UIColor whiteColor],
+            NSForegroundColorAttributeName :
+                self.shouldShowDarkStyles ? [UIColor blackColor] : [UIColor whiteColor],
           }];
   CGRect stringRect =
-      CGRectMake((scaleImage.size.width - north.size.width) / 2, scaleImage.size.height * 0.435,
+      CGRectMake((compassImage.size.width - north.size.width) / 2, compassImage.size.height * 0.435,
                  north.size.width, north.size.height);
   [north drawInRect:stringRect];
 

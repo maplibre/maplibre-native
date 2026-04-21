@@ -372,6 +372,11 @@ MLN_EXPORT
 @property (nonatomic, readonly) MLNCompassButton *compassView;
 
 /**
+ Sets whether the compass uses styles that make it easier to read on a dark styled map.
+ */
+@property (nonatomic, assign) BOOL compassViewShouldShowDarkStyles;
+
+/**
  The position of the compass view. The default value is
  ``MLNOrnamentPosition/MLNOrnamentPositionTopRight``.
  */

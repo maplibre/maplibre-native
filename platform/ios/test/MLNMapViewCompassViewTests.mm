@@ -102,6 +102,22 @@
   }
 }
 
+- (void)testDarkStyles {
+  XCTAssertFalse(self.mapView.compassView.shouldShowDarkStyles);
+  XCTAssertFalse(self.mapView.compassViewShouldShowDarkStyles);
+
+  NSData *defaultImageData = UIImagePNGRepresentation(self.mapView.compassView.image);
+  XCTAssertNotNil(defaultImageData);
+
+  self.mapView.compassViewShouldShowDarkStyles = YES;
+  XCTAssertTrue(self.mapView.compassView.shouldShowDarkStyles);
+  XCTAssertTrue(self.mapView.compassViewShouldShowDarkStyles);
+
+  NSData *darkImageData = UIImagePNGRepresentation(self.mapView.compassView.image);
+  XCTAssertNotNil(darkImageData);
+  XCTAssertNotEqualObjects(defaultImageData, darkImageData);
+}
+
 - (CGFloat)degreesFromAffineTransform:(CGAffineTransform)transform {
   CGFloat angle = atan2f(transform.b, transform.a);
   return MLNDegreesFromRadians(angle);
