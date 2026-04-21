@@ -186,26 +186,26 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos_normal [[attribute(lineUBOCount + 0)]];
-    uchar4 data [[attribute(lineUBOCount + 1)]];
+    short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(lineUBOCount + 2)]];
+    float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(lineUBOCount + 3)]];
+    float2 blur [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(lineUBOCount + 4)]];
+    float2 opacity [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(lineUBOCount + 5)]];
+    float2 gapwidth [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(lineUBOCount + 6)]];
+    float2 offset [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(lineUBOCount + 7)]];
+    float2 width [[attribute(7)]];
 #endif
 };
 
@@ -366,22 +366,22 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos_normal [[attribute(lineUBOCount + 0)]];
-    uchar4 data [[attribute(lineUBOCount + 1)]];
+    short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(lineUBOCount + 2)]];
+    float2 blur [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(lineUBOCount + 3)]];
+    float2 opacity [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(lineUBOCount + 4)]];
+    float2 gapwidth [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(lineUBOCount + 5)]];
+    float2 offset [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(lineUBOCount + 6)]];
+    float2 width [[attribute(6)]];
 #endif
 };
 
@@ -533,29 +533,29 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos_normal [[attribute(lineUBOCount + 0)]];
-    uchar4 data [[attribute(lineUBOCount + 1)]];
+    short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(lineUBOCount + 2)]];
+    float2 blur [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(lineUBOCount + 3)]];
+    float2 opacity [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(lineUBOCount + 4)]];
+    float2 gapwidth [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(lineUBOCount + 5)]];
+    float2 offset [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(lineUBOCount + 6)]];
+    float2 width [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(lineUBOCount + 7)]];
+    ushort4 pattern_from [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(lineUBOCount + 8)]];
+    ushort4 pattern_to [[attribute(8)]];
 #endif
 };
 
@@ -770,29 +770,29 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos_normal [[attribute(lineUBOCount + 0)]];
-    uchar4 data [[attribute(lineUBOCount + 1)]];
+    short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(lineUBOCount + 2)]];
+    float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(lineUBOCount + 3)]];
+    float2 blur [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(lineUBOCount + 4)]];
+    float2 opacity [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(lineUBOCount + 5)]];
+    float2 gapwidth [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(lineUBOCount + 6)]];
+    float2 offset [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(lineUBOCount + 7)]];
+    float2 width [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
-    float2 floorwidth [[attribute(lineUBOCount + 8)]];
+    float2 floorwidth [[attribute(8)]];
 #endif
 };
 

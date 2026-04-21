@@ -22,11 +22,6 @@ struct AttributeInfo {
           dataType(dataType_),
           bufferIndex(bufferIndex_),
           id(id_) {}
-    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
-        : index(index_),
-          dataType(dataType_),
-          bufferIndex(index_),
-          id(id_) {}
     std::size_t index;
     gfx::AttributeDataType dataType;
     std::size_t bufferIndex;

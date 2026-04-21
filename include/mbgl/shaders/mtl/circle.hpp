@@ -66,28 +66,28 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(circleUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(circleUBOCount + 1)]];
+    float4 color [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(circleUBOCount + 2)]];
+    float2 radius [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(circleUBOCount + 3)]];
+    float2 blur [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(circleUBOCount + 4)]];
+    float2 opacity [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-    float4 stroke_color [[attribute(circleUBOCount + 5)]];
+    float4 stroke_color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
-    float2 stroke_width [[attribute(circleUBOCount + 6)]];
+    float2 stroke_width [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_opacity)
-    float2 stroke_opacity [[attribute(circleUBOCount + 7)]];
+    float2 stroke_opacity [[attribute(7)]];
 #endif
 };
 

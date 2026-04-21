@@ -56,8 +56,8 @@ struct ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(colorReliefUBOCount + 0)]];
-    short2 texture_pos [[attribute(colorReliefUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short2 texture_pos [[attribute(1)]];
 };
 
 struct FragmentStage {

@@ -154,13 +154,13 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(fillUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(fillUBOCount + 1)]];
+    float4 color [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(fillUBOCount + 2)]];
+    float2 opacity [[attribute(2)]];
 #endif
 };
 
@@ -229,9 +229,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(fillUBOCount + 0)]];
-    float4 outline_color [[attribute(fillUBOCount + 1)]];
-    float2 opacity [[attribute(fillUBOCount + 2)]];
+    short2 position [[attribute(0)]];
+    float4 outline_color [[attribute(1)]];
+    float2 opacity [[attribute(2)]];
 };
 
 struct FragmentStage {
@@ -308,16 +308,16 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(fillUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(fillUBOCount + 1)]];
+    ushort4 pattern_from [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(fillUBOCount + 2)]];
+    ushort4 pattern_to [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(fillUBOCount + 3)]];
+    float2 opacity [[attribute(3)]];
 #endif
 };
 
@@ -451,16 +451,16 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(fillUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(fillUBOCount + 1)]];
+    ushort4 pattern_from [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(fillUBOCount + 2)]];
+    ushort4 pattern_to [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(fillUBOCount + 3)]];
+    float2 opacity [[attribute(3)]];
 #endif
 };
 
@@ -606,8 +606,8 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos_normal [[attribute(fillUBOCount + 0)]];
-    uchar4 data [[attribute(fillUBOCount + 1)]];
+    short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];
 };
 
 struct FragmentStage {

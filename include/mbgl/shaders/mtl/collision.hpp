@@ -45,11 +45,11 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(collisionUBOCount + 0)]];
-    short2 anchor_pos [[attribute(collisionUBOCount + 1)]];
-    short2 extrude [[attribute(collisionUBOCount + 2)]];
-    ushort2 placed [[attribute(collisionUBOCount + 3)]];
-    float2 shift [[attribute(collisionUBOCount + 4)]];
+    short2 pos [[attribute(0)]];
+    short2 anchor_pos [[attribute(1)]];
+    short2 extrude [[attribute(2)]];
+    ushort2 placed [[attribute(3)]];
+    float2 shift [[attribute(4)]];
 };
 
 struct FragmentStage {
@@ -119,10 +119,10 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(collisionUBOCount + 0)]];
-    short2 anchor_pos [[attribute(collisionUBOCount + 1)]];
-    short2 extrude [[attribute(collisionUBOCount + 2)]];
-    ushort2 placed [[attribute(collisionUBOCount + 3)]];
+    short2 pos [[attribute(0)]];
+    short2 anchor_pos [[attribute(1)]];
+    short2 extrude [[attribute(2)]];
+    ushort2 placed [[attribute(3)]];
 };
 
 struct FragmentStage {
