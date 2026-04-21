@@ -20,7 +20,7 @@ timber = "5.0.1"
 okhttp = "4.12.0"
 kotlin = "2.0.20"
 licenses = "0.9.8"
-lint = "32.1.1"
+lint = "31.13.2"
 appcenter = "1.5"
 commonsIO = "2.21.0"
 assertj = "3.27.7"
@@ -28,7 +28,7 @@ gradleNexus = "2.0.0"
 multidex = "2.0.1"
 kotlinxCoroutines = "1.10.2"
 
-androidGradlePlugin = "8.6.0"
+androidGradlePlugin = "8.6.1"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
