@@ -1,4 +1,8 @@
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import com.android.build.gradle.LibraryExtension
 import org.gradle.api.Task
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.get
 import java.util.Locale
 
@@ -10,6 +14,8 @@ plugins {
     id("maplibre.artifact-settings")
 }
 
+val androidExt = extensions.getByType<LibraryExtension>()
+val androidComponents = extensions.getByType<LibraryAndroidComponentsExtension>()
 
 afterEvaluate {
     mavenPublishing {
@@ -32,29 +38,29 @@ gradle.projectsEvaluated {
 }
 
 tasks.register<Javadoc>("androidJavadocs") {
-    source = fileTree(android.sourceSets.getByName("main").java.srcDirs)
-    classpath = files(android.bootClasspath)
+    source = fileTree(androidExt.sourceSets.getByName("main").java.srcDirs)
+    classpath = files(androidExt.bootClasspath)
     isFailOnError = false
 }
 
 tasks.register<Jar>("androidJavadocsJar") {
     archiveClassifier.set("javadoc")
-    from(tasks.named("androidJavadocs", Javadoc::class.java).get().destinationDir)
+    from(tasks.named("androidJavadocs", Javadoc::class.java).map { it.destinationDir!! })
+    dependsOn(tasks.named("androidJavadocs"))
 }
 
 tasks.register<Jar>("androidSourcesJar") {
     archiveClassifier.set("sources")
-    from(android.sourceSets.getByName("main").java.srcDirs)
+    from(androidExt.sourceSets.getByName("main").java.srcDirs)
 }
 
-tasks.withType<Javadoc> {
+tasks.withType<Javadoc>().configureEach {
     options.encoding = "UTF-8"
     (options as StandardJavadocDocletOptions).apply {
         charSet = "UTF-8"
         docEncoding = "UTF-8"
     }
 }
-
 
 artifacts {
     add("archives", tasks.named("androidSourcesJar"))
@@ -110,7 +116,6 @@ fun configureMavenPublication(
     }
 }
 
-
 afterEvaluate {
     configureMavenPublication("vulkan", "defaultrelease", "", "")
     configureMavenPublication("vulkan", "defaultdebug", "-debug", " (Debug)", "Debug")
@@ -123,13 +128,20 @@ afterEvaluate {
     configureMavenPublication("opengl", "opengldebug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
 }
 
+// Wire per-variant compile classpaths into the Javadoc task.
+// Replaces the removed `android.libraryVariants` API with the new AndroidComponents API,
+// looking up the generated JavaCompile task by its conventional name.
+androidComponents.onVariants { variant ->
+    val capitalizedName = variant.name.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+    }
+    val javaCompileTaskName = "compile${capitalizedName}JavaWithJavac"
 
-afterEvaluate {
-    android.libraryVariants.forEach { variant ->
-        tasks.named("androidJavadocs", Javadoc::class.java).configure {
-            doFirst {
-                classpath = classpath.plus(files(variant.javaCompileProvider.get().classpath))
-            }
+    tasks.named("androidJavadocs", Javadoc::class.java).configure {
+        val javaCompile = tasks.named(javaCompileTaskName, JavaCompile::class.java)
+        dependsOn(javaCompile)
+        doFirst {
+            classpath = classpath.plus(files(javaCompile.get().classpath))
         }
     }
 }

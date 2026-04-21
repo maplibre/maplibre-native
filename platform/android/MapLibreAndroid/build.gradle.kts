@@ -1,9 +1,9 @@
 plugins {
+    id("com.android.library")
+    kotlin("android")
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.dokka)
-    id("com.android.library")
     id("com.jaredsburrows.license")
-    kotlin("android")
     id("maplibre.download-vulkan-validation")
     id("maplibre.gradle-checkstyle")
     id("maplibre.gradle-dependencies-graph")
@@ -61,7 +61,6 @@ android {
     defaultConfig {
         compileSdk = 34
         minSdk = 23
-        targetSdk = 33
         buildConfigField("String", "GIT_REVISION_SHORT", "\"${getGitRevision()}\"")
         buildConfigField("String", "GIT_REVISION", "\"${getGitRevision(false)}\"")
         buildConfigField(
@@ -150,12 +149,14 @@ android {
             // http://robolectric.org/migrating/#migrating-to-40
             isIncludeAndroidResources = true
         }
+        targetSdk = 33
     }
 
     buildTypes {
         debug {
-            isTestCoverageEnabled = false
             isJniDebuggable = true
+            enableUnitTestCoverage = false
+            enableAndroidTestCoverage = false
         }
     }
 
@@ -171,6 +172,7 @@ android {
             "WrongThreadInterprocedural"
         )
         warningsAsErrors = false
+        targetSdk = 33
     }
 
     buildFeatures {

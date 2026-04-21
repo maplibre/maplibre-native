@@ -1,9 +1,14 @@
 import com.android.build.gradle.AppExtension
-import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.process.ExecOperations
+import java.io.ByteArrayOutputStream
 
-class SentryConditionalPlugin : Plugin<Project> {
+abstract class SentryConditionalPlugin @Inject constructor(
+    private val execOperations: ExecOperations
+) : Plugin<Project> {
+
     override fun apply(project: Project) {
         val sentryProject = System.getenv("SENTRY_PROJECT")
 
@@ -67,7 +72,7 @@ class SentryConditionalPlugin : Plugin<Project> {
         project.afterEvaluate {
             val commitHash = ByteArrayOutputStream()
 
-            project.exec {
+            execOperations.exec {
                 commandLine("git", "rev-parse", "HEAD")
                 standardOutput = commitHash
                 workingDir = project.rootDir
@@ -75,7 +80,8 @@ class SentryConditionalPlugin : Plugin<Project> {
             }
 
             androidExtension.applicationVariants.forEach { variant ->
-                variant.mergedFlavor.manifestPlaceholders["SENTRY_ENV"] = "${variant.name}-$commitHash"
+                variant.mergedFlavor.manifestPlaceholders["SENTRY_ENV"] =
+                    "${variant.name}-${commitHash.toString().trim()}"
             }
         }
     }
