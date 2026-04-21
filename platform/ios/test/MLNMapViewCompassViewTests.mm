@@ -102,20 +102,20 @@
   }
 }
 
-- (void)testDarkStyles {
-  XCTAssertFalse(self.mapView.compassView.shouldShowDarkStyles);
-  XCTAssertFalse(self.mapView.compassViewShouldShowDarkStyles);
+- (void)testWhiteStyle {
+  XCTAssertFalse(self.mapView.compassView.shouldWhiteStyle);
+  XCTAssertFalse(self.mapView.compassViewShouldWhiteStyle);
 
   NSData *defaultImageData = UIImagePNGRepresentation(self.mapView.compassView.image);
   XCTAssertNotNil(defaultImageData);
 
-  self.mapView.compassViewShouldShowDarkStyles = YES;
-  XCTAssertTrue(self.mapView.compassView.shouldShowDarkStyles);
-  XCTAssertTrue(self.mapView.compassViewShouldShowDarkStyles);
+  self.mapView.compassViewShouldWhiteStyle = YES;
+  XCTAssertTrue(self.mapView.compassView.shouldWhiteStyle);
+  XCTAssertTrue(self.mapView.compassViewShouldWhiteStyle);
 
-  NSData *darkImageData = UIImagePNGRepresentation(self.mapView.compassView.image);
-  XCTAssertNotNil(darkImageData);
-  XCTAssertNotEqualObjects(defaultImageData, darkImageData);
+  NSData *whiteImageData = UIImagePNGRepresentation(self.mapView.compassView.image);
+  XCTAssertNotNil(whiteImageData);
+  XCTAssertNotEqualObjects(defaultImageData, whiteImageData);
 }
 
 - (CGFloat)degreesFromAffineTransform:(CGAffineTransform)transform {

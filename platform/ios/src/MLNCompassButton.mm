@@ -64,16 +64,16 @@
   [self updateCompassAnimated:NO];
 }
 
-- (void)setShouldShowDarkStyles:(BOOL)shouldShowDarkStyles {
-  if (_shouldShowDarkStyles == shouldShowDarkStyles) {
+- (void)setShouldWhiteStyle:(BOOL)shouldWhiteStyle {
+  if (_shouldWhiteStyle == shouldWhiteStyle) {
     return;
   }
-  _shouldShowDarkStyles = shouldShowDarkStyles;
+  _shouldWhiteStyle = shouldWhiteStyle;
   self.image = self.compassImage;
 }
 
 - (UIImage *)compassImage {
-  NSString *imageName = self.shouldShowDarkStyles ? @"Compass-night" : @"Compass";
+  NSString *imageName = self.shouldWhiteStyle ? @"Compass-white" : @"Compass";
   UIImage *compassImage = [UIImage mgl_resourceImageNamed:imageName];
 
   UIGraphicsBeginImageContextWithOptions(compassImage.size, NO, UIScreen.mainScreen.scale);
@@ -92,7 +92,7 @@
           attributes:@{
             NSFontAttributeName : northFont,
             NSForegroundColorAttributeName :
-                self.shouldShowDarkStyles ? [UIColor blackColor] : [UIColor whiteColor],
+                self.shouldWhiteStyle ? [UIColor blackColor] : [UIColor whiteColor],
           }];
   CGRect stringRect =
       CGRectMake((compassImage.size.width - north.size.width) / 2, compassImage.size.height * 0.435,
