@@ -83,7 +83,7 @@ kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-se
 [plugins]
 nexusPublishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }
 kotlinter = { id = "org.jmailen.kotlinter", version = "5.4.2" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android" }
 dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

@@ -1,5 +1,5 @@
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
-import com.android.build.gradle.LibraryExtension
 import org.gradle.api.Task
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
@@ -14,8 +14,15 @@ plugins {
     id("maplibre.artifact-settings")
 }
 
-val androidExt = extensions.getByType<LibraryExtension>()
 val androidComponents = extensions.getByType<LibraryAndroidComponentsExtension>()
+val androidLibrary = extensions.getByType<LibraryExtension>()
+
+androidLibrary.publishing {
+    singleVariant("vulkanRelease")
+    singleVariant("vulkanDebug")
+    singleVariant("openglRelease")
+    singleVariant("openglDebug")
+}
 
 afterEvaluate {
     mavenPublishing {
@@ -38,8 +45,8 @@ gradle.projectsEvaluated {
 }
 
 tasks.register<Javadoc>("androidJavadocs") {
-    source = fileTree(androidExt.sourceSets.getByName("main").java.srcDirs)
-    classpath = files(androidExt.bootClasspath)
+    source = fileTree("src/main/java")
+    classpath = files()
     isFailOnError = false
 }
 
@@ -51,7 +58,7 @@ tasks.register<Jar>("androidJavadocsJar") {
 
 tasks.register<Jar>("androidSourcesJar") {
     archiveClassifier.set("sources")
-    from(androidExt.sourceSets.getByName("main").java.srcDirs)
+    from("src/main/java")
 }
 
 tasks.withType<Javadoc>().configureEach {
@@ -86,7 +93,17 @@ fun configureMavenPublication(
                 artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
                 version = project.version.toString()
 
-                from(components["${renderer}${buildType}"])
+                val componentName = "${renderer}${buildType}"
+                val component = components.findByName(componentName)
+                    ?: components.find { it.name.equals(componentName, ignoreCase = true) }
+                if (component != null) {
+                    from(component)
+                } else {
+                    project.logger.warn(
+                        "Skipping publication '$publicationName' because component '$componentName' was not found. " +
+                            "Available components: ${components.map { it.name }.sorted()}"
+                    )
+                }
 
                 pom {
                     name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")

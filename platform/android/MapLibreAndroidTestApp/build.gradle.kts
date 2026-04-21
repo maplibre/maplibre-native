@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinter)
     id("com.android.application")
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinPluginSerialization)
     id("maplibre.gradle-make")
     id("maplibre.gradle-config")
@@ -48,7 +47,7 @@ android {
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
             packaging {
                 jniLibs {
@@ -65,7 +64,7 @@ android {
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             testProguardFiles("test-proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
 
