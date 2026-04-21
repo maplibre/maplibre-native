@@ -18,17 +18,13 @@ mockk = "1.14.9"
 robolectric = "4.16.1"
 timber = "5.0.1"
 okhttp = "4.12.0"
-kotlin = "2.0.0"
-licenses = "0.9.8"
+kotlin = "2.3.20"
 lint = "32.1.1"
 appcenter = "1.5"
 commonsIO = "2.21.0"
 assertj = "3.27.7"
-gradleNexus = "2.0.0"
 multidex = "2.0.1"
 kotlinxCoroutines = "1.10.2"
-
-androidGradlePlugin = "8.6.1"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -66,25 +62,16 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
 
-kotlinPlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-licensesPlugin = { group = "com.jaredsburrows", name = "gradle-license-plugin", version.ref = "licenses" }
-
 lint = { group = "com.android.tools.lint", name = "lint", version.ref = "lint" }
 lintApi = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
 lintChecks = { group = "com.android.tools.lint", name = "lint-checks", version.ref = "lint" }
 lintTests = { group = "com.android.tools.lint", name = "lint-tests", version.ref = "lint" }
-
-gradleNexus = { group = "io.github.gradle-nexus", name = "publish-plugin", version.ref = "gradleNexus" }
 
 androidxTestExtJUnit = { group = "androidx.test.ext", name = "junit", version = "1.3.0" }
 androidxTestCoreKtx = { group = "androidx.test", name = "core-ktx", version = "1.7.0" }
 kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.11.0" }
 
 [plugins]
-nexusPublishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }
 kotlinter = { id = "org.jmailen.kotlinter", version = "5.4.2" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android" }
 dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
