@@ -15,10 +15,10 @@ class TileSetTest {
     @Test
     fun testSetBoundsWithFourFloats() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-        
+
         // Test setting bounds with four float parameters
         tileSet.setBounds(-180f, -90f, 180f, 90f)
-        
+
         assertNotNull("Bounds should be set", tileSet.bounds)
         assertEquals("Bounds should have 4 elements", 4, tileSet.bounds?.size)
         assertEquals("Left bound should be -180", -180f, tileSet.bounds?.get(0))
@@ -30,10 +30,10 @@ class TileSetTest {
     @Test
     fun testSetBoundsWithVarargFloats() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-        
+
         // Test setting bounds with vararg floats
         tileSet.setBounds(-10f, -20f, 30f, 40f)
-        
+
         assertNotNull("Bounds should be set", tileSet.bounds)
         assertEquals("Bounds should have 4 elements", 4, tileSet.bounds?.size)
         assertEquals("Left bound should be -10", -10f, tileSet.bounds?.get(0))
@@ -45,11 +45,11 @@ class TileSetTest {
     @Test
     fun testSetBoundsWithArray() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-        
+
         // Test setting bounds with array
         val boundsArray = arrayOf(12f, 34f, 56f, 78f)
         tileSet.setBounds(boundsArray)
-        
+
         assertNotNull("Bounds should be set", tileSet.bounds)
         assertEquals("Bounds should have 4 elements", 4, tileSet.bounds?.size)
         assertArrayEquals("Bounds should match input array", boundsArray, tileSet.bounds)
@@ -58,15 +58,15 @@ class TileSetTest {
     @Test
     fun testSetBoundsWithLatLngBounds() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-        
+
         // Test setting bounds with LatLngBounds
         val latLngBounds = LatLngBounds.Builder()
             .include(org.maplibre.android.geometry.LatLng(12.0, 34.0))
             .include(org.maplibre.android.geometry.LatLng(56.0, 78.0))
             .build()
-        
+
         tileSet.setBounds(latLngBounds)
-        
+
         assertNotNull("Bounds should be set", tileSet.bounds)
         assertEquals("Bounds should have 4 elements", 4, tileSet.bounds?.size)
         assertEquals("Left bound should match", latLngBounds.longitudeWest.toFloat(), tileSet.bounds?.get(0))
@@ -78,11 +78,11 @@ class TileSetTest {
     @Test
     fun testSetBoundsNoStackOverflow() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-        
+
         // This test verifies the fix for the infinite recursion bug
         // If the bug still exists, this will cause a StackOverflowError
         tileSet.setBounds(1f, 2f, 3f, 4f)
-        
+
         assertNotNull("Bounds should be set without stack overflow", tileSet.bounds)
         assertEquals("Should have 4 elements", 4, tileSet.bounds?.size)
     }
@@ -90,11 +90,11 @@ class TileSetTest {
     @Test
     fun testMultipleSetBoundsCalls() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-        
+
         // Test multiple calls to setBounds
         tileSet.setBounds(-180f, -90f, 180f, 90f)
         assertNotNull("First bounds should be set", tileSet.bounds)
-        
+
         tileSet.setBounds(-10f, -20f, 30f, 40f)
         assertNotNull("Second bounds should be set", tileSet.bounds)
         assertEquals("Left bound should be updated", -10f, tileSet.bounds?.get(0))
