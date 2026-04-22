@@ -78,9 +78,6 @@ class TileSetTest {
     @Test
     fun testSetBoundsNoStackOverflow() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
-
-        // This test verifies the fix for the infinite recursion bug
-        // If the bug still exists, this will cause a StackOverflowError
         tileSet.setBounds(1f, 2f, 3f, 4f)
 
         assertNotNull("Bounds should be set without stack overflow", tileSet.bounds)
