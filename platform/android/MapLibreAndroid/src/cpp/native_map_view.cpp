@@ -1656,5 +1656,17 @@ void NativeMapView::onSpriteRequested(const std::optional<style::Sprite>& sprite
     }
 }
 
+void NativeMapView::onRenderError(std::exception_ptr) {
+    assert(vm != nullptr);
+
+    android::UniqueEnv _env = android::AttachEnv();
+    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+    static auto onRenderError = javaClass.GetMethod<void()>(*_env, "onRenderError");
+    auto weakReference = javaPeer.get(*_env);
+    if (weakReference) {
+        weakReference.Call(*_env, onRenderError);
+    }
+}
+
 } // namespace android
 } // namespace mbgl
