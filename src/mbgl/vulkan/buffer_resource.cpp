@@ -95,7 +95,7 @@ BufferResource::BufferResource(
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
-        return;
+        throw std::bad_alloc();
     }
 
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);

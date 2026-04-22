@@ -977,7 +977,11 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
             renderLayer.removeAllDrawables();
         }
 #endif
-        renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
+        try {
+            renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
+        } catch (...) {
+            observer->onRenderError(std::current_exception());
+        }
     }
     addChanges(changes);
 }

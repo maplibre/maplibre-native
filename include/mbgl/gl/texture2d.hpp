@@ -37,11 +37,11 @@ public: // gfx::Texture2D
 
     size_t numChannels() const noexcept override;
 
-    void create() noexcept override;
+    void create() override;
 
-    void upload(const void* pixelData, const Size& size_) noexcept override;
+    void upload(const void* pixelData, const Size& size_) override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
-    void upload() noexcept override;
+    void upload() override;
 
     bool needsUpload() const noexcept override { return !!image; };
 
@@ -62,7 +62,7 @@ public:
     void unbind() noexcept;
 
 private:
-    void allocateTexture() noexcept;
+    void allocateTexture();
     void updateTextureData(const void* data = nullptr) noexcept;
 
 private:

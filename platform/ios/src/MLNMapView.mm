@@ -7106,6 +7106,16 @@ static void *windowScreenContext = &windowScreenContext;
   }
 }
 
+- (void)rendererDidError {
+  if (!_mbglMap) {
+    return;
+  }
+
+  if ([self.delegate respondsToSelector:@selector(mapViewRendererDidError:)]) {
+    [self.delegate mapViewRendererDidError:self];
+  }
+}
+
 - (void)updateUserLocationAnnotationView {
   [self updateUserLocationAnnotationViewAnimatedWithDuration:0];
 }
