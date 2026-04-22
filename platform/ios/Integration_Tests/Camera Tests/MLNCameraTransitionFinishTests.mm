@@ -78,6 +78,25 @@
 
   [self waitForExpectations:@[ expectation ] timeout:0.5];
 }
+
+- (void)testFlyToCompletionHandlerWithEdgePaddingAndPeakAltitude {
+  MLNCoordinateBounds bounds = MLNCoordinateBoundsMake(CLLocationCoordinate2DMake(0.0, 0.0),
+                                                       CLLocationCoordinate2DMake(1.0, 1.0));
+  MLNMapCamera *camera = [self.mapView cameraThatFitsCoordinateBounds:bounds];
+
+  XCTestExpectation *expectation =
+      [self expectationWithDescription:@"Completion block should be called"];
+
+  [self.mapView flyToCamera:camera
+                edgePadding:UIEdgeInsetsMake(8.0, 7.0, 6.0, 5.0)
+               withDuration:0.0
+               peakAltitude:1000.0
+          completionHandler:^{
+            [expectation fulfill];
+          }];
+
+  [self waitForExpectations:@[ expectation ] timeout:0.5];
+}
 @end
 
 // MARK: - camera transitions with NaN values
