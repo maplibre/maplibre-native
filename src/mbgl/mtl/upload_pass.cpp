@@ -142,7 +142,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto index = static_cast<std::size_t>(defaultAttr.getIndex());
-        const auto bufferIndex = static_cast<std::size_t>(defaultAttr.getBufferIndex());
+        const auto bufferIndex = static_cast<uint32_t>(defaultAttr.getBufferIndex());
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
