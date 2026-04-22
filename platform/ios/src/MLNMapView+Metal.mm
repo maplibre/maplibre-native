@@ -244,8 +244,7 @@ void MLNMapViewMetalImpl::layoutChanged() {
     resource.mtlView.drawableSize = resource.lastAppliedDrawableSize = target;
   }
 
-  size = {static_cast<uint32_t>(target.width),
-          static_cast<uint32_t>(target.height)};
+  size = {static_cast<uint32_t>(target.width), static_cast<uint32_t>(target.height)};
 }
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {
