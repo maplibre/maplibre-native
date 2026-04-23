@@ -60,7 +60,7 @@ public:
      * not provide line, fill or symbol layers (those, used by the annotations
      * implementation).
      *
-     * Note: in future, annotations implemantation will be moved from the core
+     * Note: in future, annotations implementation will be moved from the core
      * to platform SDK (see
      * https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation)
      * and this flag won't be needed any more.

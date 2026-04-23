@@ -274,7 +274,7 @@ protected:
 
     LayerPlacementData placementData;
 
-    // will need to be overriden to handle their activation.
+    // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;
 
     // An optional tweaker that will update drawables

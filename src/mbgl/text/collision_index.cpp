@@ -55,7 +55,7 @@ float CollisionIndex::approximateTileDistance(const TileDistance& tileDistance,
                                               const float pixelsToTileUnits,
                                               const float cameraToAnchorDistance,
                                               const bool pitchWithMap) {
-    // This is a quick and dirty solution for chosing which collision circles to
+    // This is a quick and dirty solution for choosing which collision circles to
     // use (since collision circles are laid out in tile units). Ideally, I
     // think we should generate collision circles on the fly in viewport
     // coordinates at the time we do collision detection.

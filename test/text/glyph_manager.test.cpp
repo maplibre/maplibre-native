@@ -338,7 +338,7 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
             ASSERT_EQ(testPositions.count(u'々'), 1u);
 
             // Katakana letter te, should be locally rasterized
-            //  instead of using the glyph recieved from the range
+            //  instead of using the glyph received from the range
             //  for the ideagraphic mark
             test.glyphManager.getGlyphs(test.requestor,
                                         GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'テ'}}}, // 0x30c6

@@ -39,7 +39,7 @@ All new code should be written in [Kotlin](https://kotlinlang.org/).
 
 ## Style Checking
 
-To check Kotlin style, we use [ktlint](https://pinterest.github.io/ktlint/). This linter is based on the [official Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html). We intergrate with it using the [kotlinder](https://github.com/jeremymailen/kotlinter-gradle) Gradle plugin.
+To check Kotlin style, we use [ktlint](https://pinterest.github.io/ktlint/). This linter is based on the [official Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html). We integrate with it using the [kotlinder](https://github.com/jeremymailen/kotlinter-gradle) Gradle plugin.
 
 To check the style of all Kotlin source files, use:
 

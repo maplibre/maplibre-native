@@ -1001,7 +1001,7 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
 
     source.setGeoJSONData(nullptr);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
-    EXPECT_FALSE(renderSource.isLoaded()); // Tiles remain in continous mode.
+    EXPECT_FALSE(renderSource.isLoaded()); // Tiles remain in continuous mode.
 
     source.setGeoJSONData(geoJSONData);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());

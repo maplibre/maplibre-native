@@ -8,7 +8,7 @@ namespace gfx {
 /// Graphic primitive type enumeration
 enum class PrimitiveType : uint8_t {
     Point,    ///< point primitive
-    Line,     ///< line primive
+    Line,     ///< line primitive
     Triangle, ///< triangle primitive
 };
 

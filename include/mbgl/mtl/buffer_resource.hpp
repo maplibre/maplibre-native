@@ -68,7 +68,7 @@ public:
                       std::size_t index,
                       std::size_t size) const noexcept;
 
-    /// Update the offset, when this buffer is alread bound to the specified index (unchecked).
+    /// Update the offset, when this buffer is already bound to the specified index (unchecked).
     void updateVertexBindOffset(const MTLRenderCommandEncoderPtr&,
                                 std::size_t offset,
                                 std::size_t index,

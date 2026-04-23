@@ -12,7 +12,7 @@ namespace mbgl {
 namespace plugins {
 
 // This is really hacky, but wanted to do it here to discuss if the
-// const can be removed from teh regular LayerTypeInfo
+// const can be removed from the regular LayerTypeInfo
 struct NonConstLayerTypeInfo {
     const char* type;
     enum class Source {

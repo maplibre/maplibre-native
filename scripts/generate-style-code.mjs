@@ -379,7 +379,7 @@ for (let layer of layers) {
   writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), outLocation);
   writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), outLocation);
 
-  // Remove our fake property for the external interace.
+  // Remove our fake property for the external interface.
   if (layer.type === 'line') {
     layer.paintProperties = layer.paintProperties.filter(property => property.name !== 'line-floor-width');
   }

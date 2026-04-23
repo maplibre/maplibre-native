@@ -6,7 +6,7 @@ using namespace mbgl;
 
 /**
  * An implementation of TileObserver that forwards all methods to
- * dynamically-settable lambas.
+ * dynamically-settable lambdas.
  */
 class StubTileObserver : public TileObserver {
 public:

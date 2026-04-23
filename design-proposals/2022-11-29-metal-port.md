@@ -196,7 +196,7 @@ If you thought real time rendering was mostly about triangles, I have some bad n
 
 The boring way is to allocate Buffers and stick your geometry, indices, textures, uniforms, car keys, manifesto, and texture coordinates in them.  They're just memory.  You ask for how much you want, you get a handle, you copy what you need into place.  You fix whatever buffer overruns you created.
 
-Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  Mostly.  So you build a little buffer management infrastructure and alway use it.
+Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  Mostly.  So you build a little buffer management infrastructure and always use it.
 
 The nice thing about Buffer allocation in Metal is it can be easily done from any thread.  The bad thing is all those little bits of memory are time consuming to track and control, just like in any system.  Thus there is a better way.
 
@@ -329,7 +329,7 @@ Typically bottlenecks are where the main CPU is waiting on something it shouldn'
 
 MapLibre Native makes some use of threads, but not as much as it should.  With OpenGL it's not using shared contexts, though it does a lot of work in the Layers to prep for the GL work that has to be done on the main thread.  So it's not terrible, but it obviously could be better.
 
-Mobile devices, even the really cheap ones, now have a lot of CPU cores and a lot of opportunity for work to be done off the main thread.  Maps have an embarassing amount of high level parallelism.  It's worth periodically analyzing the performance to see what might be updated for data loading.
+Mobile devices, even the really cheap ones, now have a lot of CPU cores and a lot of opportunity for work to be done off the main thread.  Maps have an embarrassing amount of high level parallelism.  It's worth periodically analyzing the performance to see what might be updated for data loading.
 
 The benefits are faster loading, lower latency, better responsiveness to the user.
 

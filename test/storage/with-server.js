@@ -1,4 +1,4 @@
-// This script runs a Node.js server passed to it while running aother program.
+// This script runs a Node.js server passed to it while running another program.
 
 const { spawn } = require('child_process')
 
