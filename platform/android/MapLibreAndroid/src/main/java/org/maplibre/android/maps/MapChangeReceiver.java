@@ -58,6 +58,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnSpriteRequestedListener> onSpriteRequestedList
     = new CopyOnWriteArrayList<>();
+  private final List<MapView.OnRenderErrorListener> onRenderErrorList
+    = new CopyOnWriteArrayList<>();
 
   @Override
   public void onCameraWillChange(boolean animated) {
@@ -424,6 +426,20 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     }
   }
 
+  @Override
+  public void onRenderError() {
+    try {
+      if (!onRenderErrorList.isEmpty()) {
+        for (MapView.OnRenderErrorListener listener : onRenderErrorList) {
+          listener.onRenderError();
+        }
+      }
+    } catch (Throwable err) {
+      Logger.e(TAG, "Exception in onRenderError", err);
+      throw err;
+    }
+  }
+
   void addOnCameraWillChangeListener(MapView.OnCameraWillChangeListener listener) {
     onCameraWillChangeListenerList.add(listener);
   }
@@ -592,6 +608,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteRequestedList.add(callback);
   }
 
+  public void addOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
+    onRenderErrorList.add(callback);
+  }
+
   public void removeOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     onPreCompileShaderList.remove(callback);
   }
@@ -632,6 +652,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteRequestedList.remove(callback);
   }
 
+  public void removeOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
+    onRenderErrorList.remove(callback);
+  }
+
   void clear() {
     onCameraWillChangeListenerList.clear();
     onCameraIsChangingListenerList.clear();
@@ -658,5 +682,6 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteLoadedList.clear();
     onSpriteErrorList.clear();
     onSpriteRequestedList.clear();
+    onRenderErrorList.clear();
   }
 }
