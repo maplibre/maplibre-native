@@ -561,11 +561,8 @@ void GeometryTileWorker::finalizeLayout() {
             // renderData directly. Copy the map cheaply — buckets are shared_ptr.
             auto partialRenderData = renderData;
             parent.invoke(&GeometryTile::onLayout,
-                          std::make_shared<GeometryTile::LayoutResult>(std::move(partialRenderData),
-                                                                       nullptr,
-                                                                       gfx::GlyphAtlas{},
-                                                                       gfx::ImageAtlas{},
-                                                                       nullptr),
+                          std::make_shared<GeometryTile::LayoutResult>(
+                              std::move(partialRenderData), nullptr, gfx::GlyphAtlas{}, gfx::ImageAtlas{}, nullptr),
                           correlationID,
                           /*isPartialResult=*/true);
         }
