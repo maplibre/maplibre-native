@@ -69,6 +69,12 @@ public:
     void setRasterSaturationTransition(const TransitionOptions&);
     TransitionOptions getRasterSaturationTransition() const;
 
+    static PropertyValue<ResamplingType> getDefaultRasterStandardResampling();
+    const PropertyValue<ResamplingType>& getRasterStandardResampling() const;
+    void setRasterStandardResampling(const PropertyValue<ResamplingType>&);
+    void setRasterStandardResamplingTransition(const TransitionOptions&);
+    TransitionOptions getRasterStandardResamplingTransition() const;
+
     // Private implementation
 
     class Impl;

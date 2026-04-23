@@ -291,6 +291,18 @@ public class HillshadeLayer extends Layer {
     return (PropertyValue<String>) new PropertyValue("hillshade-method", nativeGetHillshadeMethod());
   }
 
+  /**
+   * Get the Resampling property
+   *
+   * @return property wrapper value around String
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<String> getResampling() {
+    checkThread();
+    return (PropertyValue<String>) new PropertyValue("resampling", nativeGetResampling());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetHillshadeIlluminationDirection();
@@ -350,6 +362,10 @@ public class HillshadeLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetHillshadeMethod();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetResampling();
 
   @Override
   @Keep
