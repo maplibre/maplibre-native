@@ -120,7 +120,8 @@ public class GeoJsonSourceTests extends EspressoTest {
     validateTestSetup();
     MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       boolean[] styleLoaded = {false};
-      maplibreMap.setStyle(new Style.Builder().fromJson(createFeatureStateStyleJson()), style -> styleLoaded[0] = true);
+      String styleJson = ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_state_style);
+      maplibreMap.setStyle(new Style.Builder().fromJson(styleJson), style -> styleLoaded[0] = true);
 
       while (!styleLoaded[0]) {
         uiController.loopMainThreadForAtLeast(100);
@@ -129,18 +130,60 @@ public class GeoJsonSourceTests extends EspressoTest {
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
       GeoJsonSource source = maplibreMap.getStyle().getSourceAs("style-source");
-      assertEquals(0, maplibreMap.queryRenderedFeatures(
-              maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size());
+      assertEquals(0, queryFeatureCount(maplibreMap));
 
       JsonObject state = new JsonObject();
       state.addProperty("selected", true);
       source.setFeatureState("feature-1", state);
 
+      // The feature-state update is applied on a subsequent render pass, so
+      // poll until the filter re-evaluates rather than relying on a single
+      // didBecomeIdle callback (which can be missed if the repaint completes
+      // before the listener is attached).
+      assertEquals(1, pollFeatureCount(uiController, maplibreMap, 1));
+    });
+  }
+
+  @Test
+  public void testFeatureStateKeyRemovalAcrossSource() {
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      boolean[] styleLoaded = {false};
+      String styleJson = ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_state_style);
+      maplibreMap.setStyle(new Style.Builder().fromJson(styleJson), style -> styleLoaded[0] = true);
+
+      while (!styleLoaded[0]) {
+        uiController.loopMainThreadForAtLeast(100);
+      }
+
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertEquals(1, maplibreMap.queryRenderedFeatures(
-              maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size());
+      GeoJsonSource source = maplibreMap.getStyle().getSourceAs("style-source");
+      JsonObject state = new JsonObject();
+      state.addProperty("selected", true);
+      source.setFeatureState("feature-1", state);
+      assertEquals(1, pollFeatureCount(uiController, maplibreMap, 1));
+
+      source.removeFeatureState(null, "selected");
+      assertEquals(0, pollFeatureCount(uiController, maplibreMap, 0));
     });
+  }
+
+  private int queryFeatureCount(org.maplibre.android.maps.MapLibreMap maplibreMap) {
+    return maplibreMap.queryRenderedFeatures(
+            maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size();
+  }
+
+  private int pollFeatureCount(androidx.test.espresso.UiController uiController,
+                               org.maplibre.android.maps.MapLibreMap maplibreMap,
+                               int expected) {
+    long deadline = System.nanoTime() / 1_000_000L + 5_000L;
+    int count = queryFeatureCount(maplibreMap);
+    while (count != expected && System.nanoTime() / 1_000_000L < deadline) {
+      uiController.loopMainThreadForAtLeast(100);
+      count = queryFeatureCount(maplibreMap);
+    }
+    return count;
   }
 
   @Test
@@ -305,42 +348,6 @@ public class GeoJsonSourceTests extends EspressoTest {
         source.setGeoJson(geoJsonString);
       }
     });
-  }
-
-  private String createFeatureStateStyleJson() {
-    return "{"
-            + "\"version\":8,"
-            + "\"center\":[0,0],"
-            + "\"zoom\":3,"
-            + "\"sources\":{"
-            + "\"style-source\":{"
-            + "\"type\":\"geojson\","
-            + "\"data\":{"
-            + "\"type\":\"FeatureCollection\","
-            + "\"features\":[{"
-            + "\"type\":\"Feature\","
-            + "\"id\":\"feature-1\","
-            + "\"properties\":{},"
-            + "\"geometry\":{\"type\":\"Point\",\"coordinates\":[0,0]}"
-            + "}]"
-            + "}"
-            + "}"
-            + "},"
-            + "\"layers\":["
-            + "{"
-            + "\"id\":\"background\","
-            + "\"type\":\"background\","
-            + "\"paint\":{\"background-color\":\"#ffffff\"}"
-            + "},"
-            + "{"
-            + "\"id\":\"selected-layer\","
-            + "\"type\":\"circle\","
-            + "\"source\":\"style-source\","
-            + "\"filter\":[\"==\",[\"feature-state\",\"selected\"],true],"
-            + "\"paint\":{\"circle-radius\":12,\"circle-color\":\"#ff0000\"}"
-            + "}"
-            + "]"
-            + "}";
   }
 
   public abstract class BaseViewAction implements ViewAction {
