@@ -200,9 +200,9 @@ public abstract class Source {
   protected native Long nativeGetMinimumTileUpdateInterval();
 
   @Keep
-  protected native void nativeSetFeatureState(@Nullable String sourceLayerId,
-                                              @NonNull String featureId,
-                                              @NonNull JsonObject state);
+  protected native boolean nativeSetFeatureState(@Nullable String sourceLayerId,
+                                                 @NonNull String featureId,
+                                                 @NonNull JsonObject state);
 
   @Nullable
   @Keep
@@ -210,9 +210,9 @@ public abstract class Source {
                                                     @NonNull String featureId);
 
   @Keep
-  protected native void nativeRemoveFeatureState(@Nullable String sourceLayerId,
-                                                 @Nullable String featureId,
-                                                 @Nullable String stateKey);
+  protected native boolean nativeRemoveFeatureState(@Nullable String sourceLayerId,
+                                                    @Nullable String featureId,
+                                                    @Nullable String stateKey);
 
   public void setDetached() {
     detached = true;

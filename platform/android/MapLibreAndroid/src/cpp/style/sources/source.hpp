@@ -66,19 +66,19 @@ public:
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
-    void setFeatureState(JNIEnv&,
-                         const jni::String& sourceLayerId,
-                         const jni::String& featureId,
-                         const jni::Object<gson::JsonObject>& state);
+    jni::jboolean setFeatureState(JNIEnv&,
+                                  const jni::String& sourceLayerId,
+                                  const jni::String& featureId,
+                                  const jni::Object<gson::JsonObject>& state);
 
     jni::Local<jni::Object<gson::JsonObject>> getFeatureState(JNIEnv&,
                                                               const jni::String& sourceLayerId,
                                                               const jni::String& featureId);
 
-    void removeFeatureState(JNIEnv&,
-                            const jni::String& sourceLayerId,
-                            const jni::String& featureId,
-                            const jni::String& stateKey);
+    jni::jboolean removeFeatureState(JNIEnv&,
+                                     const jni::String& sourceLayerId,
+                                     const jni::String& featureId,
+                                     const jni::String& stateKey);
 
     void bindToMap(AndroidRendererFrontend&, mbgl::Map&);
 

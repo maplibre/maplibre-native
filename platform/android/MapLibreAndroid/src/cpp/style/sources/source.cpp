@@ -207,12 +207,12 @@ jni::Local<jni::Long> Source::getMinimumTileUpdateInterval(JNIEnv& env) {
     return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
 }
 
-void Source::setFeatureState(JNIEnv& env,
-                             const jni::String& sourceLayerId,
-                             const jni::String& featureId,
-                             const jni::Object<gson::JsonObject>& state) {
+jni::jboolean Source::setFeatureState(JNIEnv& env,
+                                      const jni::String& sourceLayerId,
+                                      const jni::String& featureId,
+                                      const jni::Object<gson::JsonObject>& state) {
     if (!rendererFrontend || !featureId || !state) {
-        return;
+        return jni::jni_false;
     }
 
     rendererFrontend->setFeatureState(
@@ -223,6 +223,7 @@ void Source::setFeatureState(JNIEnv& env,
     if (map) {
         map->triggerRepaint();
     }
+    return jni::jni_true;
 }
 
 jni::Local<jni::Object<gson::JsonObject>> Source::getFeatureState(JNIEnv& env,
@@ -243,12 +244,12 @@ jni::Local<jni::Object<gson::JsonObject>> Source::getFeatureState(JNIEnv& env,
     return gson::JsonObject::New(env, state);
 }
 
-void Source::removeFeatureState(JNIEnv& env,
-                                const jni::String& sourceLayerId,
-                                const jni::String& featureId,
-                                const jni::String& stateKey) {
+jni::jboolean Source::removeFeatureState(JNIEnv& env,
+                                         const jni::String& sourceLayerId,
+                                         const jni::String& featureId,
+                                         const jni::String& stateKey) {
     if (!rendererFrontend) {
-        return;
+        return jni::jni_false;
     }
 
     rendererFrontend->removeFeatureState(
@@ -259,6 +260,7 @@ void Source::removeFeatureState(JNIEnv& env,
     if (map) {
         map->triggerRepaint();
     }
+    return jni::jni_true;
 }
 
 void Source::bindToMap(AndroidRendererFrontend& frontend, mbgl::Map& map) {

@@ -112,10 +112,11 @@ class VectorSource : Source {
      * @param sourceLayerId the source layer id
      * @param featureId     the id of the feature whose state to set
      * @param state         a JSON object with the state key-value pairs to merge
+     * @return true if the source is attached to a map and the update was dispatched
      */
-    fun setFeatureState(sourceLayerId: String, featureId: String, state: JsonObject) {
+    fun setFeatureState(sourceLayerId: String, featureId: String, state: JsonObject): Boolean {
         checkThread()
-        nativeSetFeatureState(sourceLayerId, featureId, state)
+        return nativeSetFeatureState(sourceLayerId, featureId, state)
     }
 
     /**
@@ -139,20 +140,34 @@ class VectorSource : Source {
      * @param sourceLayerId the source layer id
      * @param featureId     the id of the feature, or null to target all features
      * @param stateKey      the state key to remove, or null to remove all keys
+     * @return true if the source is attached to a map and the update was dispatched
      */
-    fun removeFeatureState(sourceLayerId: String, featureId: String?, stateKey: String?) {
+    fun removeFeatureState(sourceLayerId: String, featureId: String?, stateKey: String?): Boolean {
         checkThread()
-        nativeRemoveFeatureState(sourceLayerId, featureId, stateKey)
+        return nativeRemoveFeatureState(sourceLayerId, featureId, stateKey)
+    }
+
+    /**
+     * Removes all state from a single feature in this source.
+     *
+     * @param sourceLayerId the source layer id
+     * @param featureId     the id of the feature
+     * @return true if the source is attached to a map and the update was dispatched
+     */
+    fun removeFeatureState(sourceLayerId: String, featureId: String): Boolean {
+        checkThread()
+        return nativeRemoveFeatureState(sourceLayerId, featureId, null)
     }
 
     /**
      * Removes all feature state entries from the given source layer.
      *
      * @param sourceLayerId the source layer id
+     * @return true if the source is attached to a map and the update was dispatched
      */
-    fun resetFeatureStates(sourceLayerId: String) {
+    fun resetFeatureStates(sourceLayerId: String): Boolean {
         checkThread()
-        nativeRemoveFeatureState(sourceLayerId, null, null)
+        return nativeRemoveFeatureState(sourceLayerId, null, null)
     }
 
     /**
