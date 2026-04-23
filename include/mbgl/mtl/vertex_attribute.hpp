@@ -21,7 +21,7 @@ public:
           bufferIndex(other.bufferIndex) {}
     ~VertexAttribute() override = default;
 
-    /// @brief Set the bufer index of the vertex attribute
+    /// @brief Get the bufer index of the vertex attribute
     int getBufferIndex() const { return bufferIndex; }
 
     /// @brief Set the buffer index of the vertex attribute
@@ -33,7 +33,7 @@ public:
                                                             bool forceUpdate);
 
 protected:
-    int bufferIndex = -1;
+    int bufferIndex = 0;
 };
 
 /// Stores a collection of vertex attributes by name
