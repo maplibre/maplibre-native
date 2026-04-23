@@ -2,7 +2,7 @@
 
 {{ activity_source_note("FeatureStateActivity.kt") }}
 
-This example shows how to use [`feature-state`](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) for interactive styling on Android, matching the iOS feature-state example.
+This example shows how to use [`feature-state`](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) for interactive styling on Android.
 
 Feature state lets you attach runtime JSON values to individual features, then read those values back inside style expressions. This is useful for interaction-driven UI such as selection, highlighting, or temporary analysis state.
 

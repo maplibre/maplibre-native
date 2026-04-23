@@ -25,8 +25,7 @@ import org.maplibre.android.testapp.styles.TestStyles
 import java.net.URI
 
 /**
- * Test activity showcasing interactive styling with feature state,
- * matching the iOS feature-state example.
+ * Test activity showcasing interactive styling with feature state.
  *
  * Loads US states from a remote GeoJSON source and uses feature-state
  * expressions to highlight tapped states.
