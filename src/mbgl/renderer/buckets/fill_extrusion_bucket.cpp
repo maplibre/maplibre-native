@@ -95,51 +95,28 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             std::size_t nVertices = ring.size();
 
             if (nVertices == 0) continue;
-
+            
             std::size_t edgeDistance = 0;
 
             for (std::size_t i = 0; i < nVertices; i++) {
                 const auto& p1 = ring[i];
 
-                vertices.emplace_back(
-                    FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
+                vertices.emplace_back(layoutVertex(p1, edgeDistance, i == nVertices - 1));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
-
-                if (i != 0) {
-                    const auto& p2 = ring[i - 1];
+                
+                if (i < nVertices - 1) {
+                    const auto& p2 = ring[i + 1];
 
                     const auto d1 = convertPoint<double>(p1);
                     const auto d2 = convertPoint<double>(p2);
-
-                    const Point<double> perp = util::unit(util::perp(d1 - d2));
-                    const size_t dist = util::dist<int16_t>(d1, d2);
-                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
+                    
+                    const size_t dist = util::dist<uint16_t>(d1, d2);
+                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
                         edgeDistance = 0;
                     }
-
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
-
+                    
                     edgeDistance += dist;
-
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
-
-                    // ┌──────┐
-                    // │ 0  1 │ Counter-Clockwise winding order.
-                    // │      │ Triangle 1: 0 => 2 => 1
-                    // │ 2  3 │ Triangle 2: 1 => 2 => 3
-                    // └──────┘
-                    triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
-                    triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
-                    triangleIndex += 4;
-                    triangleSegment.vertexLength += 4;
-                    triangleSegment.indexLength += 6;
                 }
             }
         }

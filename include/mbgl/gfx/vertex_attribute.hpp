@@ -301,8 +301,8 @@ public:
     /// Sum of element strides, and the total size of a vertex in the buffer
     std::size_t getTotalSize() const;
 
-    /// Get the largest count value of the attribute elements
-    std::size_t getMaxCount() const;
+    /// Get the smallest count value of the attribute elements
+    std::size_t getMinCount() const;
 
     /// Get a attribute element.
     /// Returns a pointer to the element on success, or null if the attribute doesn't exists.

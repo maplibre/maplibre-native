@@ -422,7 +422,8 @@ enum {
 
 enum {
     idFillExtrusionPosVertexAttribute,
-    idFillExtrusionNormalEdVertexAttribute,
+    idFillExtrusionOutlinePosAttribute,
+    idFillExtrusionEdDiscardAttribute,
 
     // Data driven
     idFillExtrusionBaseVertexAttribute,
