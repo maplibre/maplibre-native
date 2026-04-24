@@ -95,12 +95,12 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             std::size_t nVertices = ring.size();
 
             if (nVertices == 0) continue;
-            
+
             std::size_t edgeDistance = 0;
 
             for (std::size_t i = 0; i < nVertices; i++) {
                 const auto& p1 = ring[i];
-                
+
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
                 vertices.emplace_back(layoutVertex(p1, edgeDistance, i == nVertices - 1));
                 flatIndices.emplace_back(triangleIndex);
@@ -111,12 +111,12 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
                     const auto d1 = convertPoint<double>(p1);
                     const auto d2 = convertPoint<double>(p2);
-                    
+
                     const size_t dist = util::dist<uint16_t>(d1, d2);
                     if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
                         edgeDistance = 0;
                     }
-                    
+
                     edgeDistance += dist;
                 }
 #else
@@ -124,7 +124,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
-                
+
                 if (i != 0) {
                     const auto& p2 = ring[i - 1];
 

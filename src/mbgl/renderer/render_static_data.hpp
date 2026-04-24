@@ -34,7 +34,7 @@ public:
     static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
     static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices();
     static gfx::IndexVector<gfx::Triangles> fillExtrusionTriangleIndices();
-    
+
     static SegmentVector tileTriangleSegments();
     static SegmentVector tileBorderSegments();
     static SegmentVector rasterSegments();

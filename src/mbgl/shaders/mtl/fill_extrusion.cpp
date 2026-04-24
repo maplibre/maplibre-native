@@ -22,7 +22,8 @@ const std::array<TextureInfo, 0> FillExtrusionShaderSource::textures = {};
 //
 // Fill extrusion instanced
 
-using FillExtrusionInstancedShaderSource = ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::Metal>;
+using FillExtrusionInstancedShaderSource =
+    ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionPosVertexAttribute},
@@ -30,7 +31,7 @@ const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attribute
 const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 1, idFillExtrusionOutlinePosAttribute},
     AttributeInfo{2, gfx::AttributeDataType::UShort2, fillExtrusionUBOCount + 1, idFillExtrusionEdDiscardAttribute},
-    
+
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float4, fillExtrusionUBOCount + 2, idFillExtrusionColorVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
@@ -61,7 +62,8 @@ const std::array<TextureInfo, 1> FillExtrusionPatternShaderSource::textures = {
 //
 // Fill extrusion pattern instanced
 
-using FillExtrusionPatternInstancedShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::Type::Metal>;
+using FillExtrusionPatternInstancedShaderSource =
+    ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 1> FillExtrusionPatternInstancedShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionPosVertexAttribute},
@@ -69,7 +71,7 @@ const std::array<AttributeInfo, 1> FillExtrusionPatternInstancedShaderSource::at
 const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 1, idFillExtrusionOutlinePosAttribute},
     AttributeInfo{2, gfx::AttributeDataType::UShort2, fillExtrusionUBOCount + 1, idFillExtrusionEdDiscardAttribute},
-    
+
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionHeightVertexAttribute},

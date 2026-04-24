@@ -48,14 +48,15 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
-    
+
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     static FillExtrusionLayoutVertex layoutVertex(Point<int16_t> p, uint16_t edgeDistance, bool isDiscarded) {
         return FillExtrusionLayoutVertex{{p.x, p.y},
-                                         {// The edgeDistance attribute is used for wrapping fill_extrusion patterns
-                                          edgeDistance,
-                                          // When used as instance vector this specify if an instance is discarded
-                                          static_cast<uint16_t>(isDiscarded)}};
+                                         { // The edgeDistance attribute is used for wrapping fill_extrusion patterns
+                                             edgeDistance,
+                                             // When used as instance vector this specify if an instance is discarded
+                                             static_cast<uint16_t>(isDiscarded)
+                                         }};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(
@@ -73,7 +74,7 @@ public:
                                            static_cast<int16_t>(e)}}};
     }
 #endif
-    
+
     static std::array<float, 3> lightColor(const EvaluatedLight&);
     static std::array<float, 3> lightPosition(const EvaluatedLight&, const TransformState&);
     static float lightIntensity(const EvaluatedLight&);

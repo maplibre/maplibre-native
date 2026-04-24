@@ -549,9 +549,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setDirty(false);
     }
 
-    const bool buildVertexAttribs = !impl->vertexDesc || !vertexAttributes || !attributeUpdateTime || vertexAttributes->isModifiedAfter(*attributeUpdateTime);
-    const bool buildInstanceAttribs = instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime));
-    
+    const bool buildVertexAttribs = !impl->vertexDesc || !vertexAttributes || !attributeUpdateTime ||
+                                    vertexAttributes->isModifiedAfter(*attributeUpdateTime);
+    const bool buildInstanceAttribs = instanceAttributes && (!attributeUpdateTime ||
+                                                             instanceAttributes->isModifiedAfter(*attributeUpdateTime));
+
     if (buildVertexAttribs || buildInstanceAttribs) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
@@ -588,11 +590,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                   usage,
                                                                   attributeUpdateTime,
                                                                   instanceBuffers);
-            
+
             // clear dirty flag
             instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
         }
-        
+
         if (impl->attributeBindings != attributeBindings_ || impl->instanceBindings != instanceBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
             impl->instanceBindings = std::move(instanceBindings_);
@@ -603,7 +605,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
             // Create a layout descriptor for each attribute
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
 
-            const auto applyBindings = [&](const gfx::AttributeBindingArray& attributeBindings, MTL::VertexStepFunction stepFunction) {
+            const auto applyBindings = [&](const gfx::AttributeBindingArray& attributeBindings,
+                                           MTL::VertexStepFunction stepFunction) {
                 NS::UInteger index = 0;
                 for (auto& binding : attributeBindings) {
                     if (!binding) {
@@ -611,43 +614,44 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                         index += 1;
                         continue;
                     }
-                    
+
                     if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
                         if (const auto& buf = context.getEmptyVertexBuffer()) {
                             impl->noBindingBuffer = buf.get();
                         }
                     }
-                    
+
                     const auto& attribDesc = vertDesc->attributes()->object(index);
                     attribDesc->setBufferIndex(binding->bufferIndex);
                     attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
                     attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
-                    
+
                     const auto& layoutDesc = vertDesc->layouts()->object(binding->bufferIndex);
                     if (!layoutDesc->stride()) {
                         assert(binding->vertexStride > 0);
                         layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-                        layoutDesc->setStepFunction(binding->vertexBufferResource ? stepFunction : MTL::VertexStepFunctionConstant);
+                        layoutDesc->setStepFunction(binding->vertexBufferResource ? stepFunction
+                                                                                  : MTL::VertexStepFunctionConstant);
                         layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
                     } else {
                         assert(layoutDesc->stride() == static_cast<NS::UInteger>(binding->vertexStride));
                         assert(layoutDesc->stepRate() == (binding->vertexBufferResource ? 1 : 0));
                     }
-                    
+
                     mbgl::util::hash_combine(hash,
                                              mbgl::util::hash(index,
                                                               binding->attribute.offset,
                                                               binding->attribute.dataType,
                                                               binding->vertexStride,
                                                               static_cast<bool>(binding->vertexBufferResource)));
-                    
+
                     index += 1;
                 }
             };
 
             applyBindings(impl->attributeBindings, MTL::VertexStepFunctionPerVertex);
             applyBindings(impl->instanceBindings, MTL::VertexStepFunctionPerInstance);
-            
+
             impl->vertexDesc = std::move(vertDesc);
             impl->vertexDescHash = hash;
             impl->pipelineState.reset();
