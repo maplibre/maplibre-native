@@ -39,8 +39,10 @@ private:
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
 
     gfx::ShaderGroupPtr fillExtrusionGroup;
-    gfx::ShaderGroupPtr fillExtrusionInstancedGroup;
     gfx::ShaderGroupPtr fillExtrusionPatternGroup;
+    
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+    gfx::ShaderGroupPtr fillExtrusionInstancedGroup;
     gfx::ShaderGroupPtr fillExtrusionPatternInstancedGroup;
     
     using FillExtrusionVertexVector = gfx::VertexVector<FillExtrusionStaticVertex>;
@@ -49,6 +51,7 @@ private:
     std::shared_ptr<FillExtrusionVertexVector> staticDataVertices;
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
     std::shared_ptr<SegmentVector> staticDataSegments;
+#endif
 };
 
 } // namespace mbgl

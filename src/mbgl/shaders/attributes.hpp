@@ -16,12 +16,17 @@ MBGL_DEFINE_ATTRIBUTE(int16_t, 4, pixeloffset);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, label_pos);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, anchor_pos);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, texture_pos);
-MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, ed_discard);
 MBGL_DEFINE_ATTRIBUTE(float, 1, fade_opacity);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, placed);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 3, size);
 MBGL_DEFINE_ATTRIBUTE(float, 1, offset);
 MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
+
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, ed_discard);
+#else
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, normal_ed);
+#endif
 
 template <typename T, std::size_t N>
 struct data {
