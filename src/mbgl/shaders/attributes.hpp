@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/attribute.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 
 namespace mbgl {
 namespace attributes {
