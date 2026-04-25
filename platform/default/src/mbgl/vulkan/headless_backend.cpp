@@ -82,7 +82,7 @@ PremultipliedImage HeadlessBackend::readStillImage() {
     auto& contextImpl = static_cast<Context&>(*context);
     auto& resourceImpl = static_cast<HeadlessRenderableResource&>(*resource);
 
-    if (!texture) {
+    if (!texture || texture->getSize() != size) {
         texture = std::make_unique<Texture2D>(contextImpl);
         texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
         texture->setUsage(Texture2DUsage::Read);
