@@ -654,9 +654,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
-    const float2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
-        ? float2(vertx.pos) // extrusion top
-        : float2(edgedistance, z * drawable.height_factor); // extrusion side
+    const float2 pos = float2(edgedistance, z * drawable.height_factor); // extrusion side
 
     float4 lighting = float4(0.0, 0.0, 0.0, 1.0);
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);

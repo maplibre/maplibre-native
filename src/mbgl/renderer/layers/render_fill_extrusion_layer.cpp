@@ -337,7 +337,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 }
 #endif
             }
-            return;
         }
 
         if (const auto& attr = vertexAttrs->set(idFillExtrusionPosVertexAttribute)) {
