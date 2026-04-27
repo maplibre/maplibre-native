@@ -1395,6 +1395,13 @@ final class NativeMapView implements NativeMap {
     }
   }
 
+  @Keep
+  private void onRenderError() {
+    if (stateCallback != null) {
+      stateCallback.onRenderError();
+    }
+  }
+
   //
   // JNI methods
   //
@@ -1890,5 +1897,7 @@ final class NativeMapView implements NativeMap {
     void onSpriteError(String id, String url);
 
     void onSpriteRequested(String id, String url);
+
+    void onRenderError();
   }
 }

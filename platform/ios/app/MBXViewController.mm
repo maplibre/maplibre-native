@@ -8,6 +8,7 @@
 #import "MBXEmbeddedMapViewController.h"
 #import "MBXOfflinePacksTableViewController.h"
 #import "MBXOrnamentsViewController.h"
+#import "MBXSnapshotTestViewController.h"
 #import "MBXState.h"
 #import "MBXStateManager.h"
 #import "MBXUserLocationAnnotationView.h"
@@ -24,9 +25,13 @@
 #import "MLNMapView_Experimental.h"
 
 // Plug In Examples
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
 #import "MLNPluginStyleLayer.h"
 #import "PluginLayerExample.h"
+#endif
+#if MLN_RENDER_BACKEND_METAL
 #import "PluginLayerExampleMetalRendering.h"
+#endif
 #import "PluginProtocolExample.h"
 #import "StyleFilterExample.h"
 
@@ -131,6 +136,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
   MBXSettingsMiscellaneousOrnamentsPlacement,
   MBXSettingsMiscellaneousLatLngBoundsWithPadding,
   MBXSettingsMiscellaneousCycleTileLOD,
+  MBXSettingsMiscellaneousLiveSnapshot,
   MBXSettingsMiscellaneousPrintLogFile,
   MBXSettingsMiscellaneousDeleteLogFile
 };
@@ -275,8 +281,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 // This will add the plug-in layers.  This is a demo of how
 // extensible layers for the style can be added to the map view
 - (void)addPluginLayers {
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
   [self.mapView addPluginLayerType:[PluginLayerExample class]];
+#endif
+#if MLN_RENDER_BACKEND_METAL
   [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
+#endif
   [self.mapView addPluginProtocolHandler:[PluginProtocolExample class]];
   [self.mapView addStyleFilter:[[StyleFilterExample alloc] init]];
 }
@@ -535,7 +545,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [NSString
             stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
         @"View Route Simulation", @"Ornaments Placement", @"Lat Long bounds with padding",
-        [NSString stringWithFormat:@"Cycle tile LOD mode: %@", [self getTileLodModeName]]
+        [NSString stringWithFormat:@"Cycle tile LOD mode: %@", [self getTileLodModeName]],
+        @"Live Snapshot"
       ]];
 
       break;
@@ -884,6 +895,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneousCycleTileLOD:
           [self cycleTileLodMode];
           break;
+        case MBXSettingsMiscellaneousLiveSnapshot: {
+          MBXSnapshotTestViewController *vc = [[MBXSnapshotTestViewController alloc] init];
+          vc.sourceMapView = self.mapView;
+          [self.navigationController pushViewController:vc animated:YES];
+          break;
+        }
         default:
           NSAssert(NO, @"All miscellaneous setting rows should be implemented");
           break;
@@ -994,7 +1011,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 };
 
 - (void)addTestShapes:(NSUInteger)featuresCount {
-  for (int featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
+  for (NSUInteger featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
     double deltaLongitude = featureIndex * 0.01;
     double deltaLatitude = -featureIndex * 0.01;
 
@@ -1885,6 +1902,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (void)addCustomDrawableLayer {
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
   // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
   ExampleCustomDrawableStyleLayer *layer =
       [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
@@ -1892,6 +1910,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   if (layer) {
     [self.mapView.style addLayer:layer];
   }
+#endif
 }
 
 - (void)removeSource:(NSString *)ident {
@@ -1947,10 +1966,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (void)styleAddCustomTriangleLayer {
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
   if (CustomStyleLayerExample *layer =
           [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"]) {
     [self.mapView.style addLayer:layer];
   }
+#endif
 }
 
 - (void)stylePolygonWithDDS {
@@ -2527,6 +2548,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   self.styleURLs = [NSMutableArray array];
 
   /// Style that does not require an `apiKey` nor any further configuration
+  [self.styleNames addObject:@"OpenFreeMap Liberty"];
+  [self.styleURLs addObject:[NSURL URLWithString:@"https://tiles.openfreemap.org/styles/liberty"]];
+
   [self.styleNames addObject:@"MapLibre Basic"];
   [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 

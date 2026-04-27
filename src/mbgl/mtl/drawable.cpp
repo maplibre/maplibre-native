@@ -396,7 +396,7 @@ void Drawable::setVertexAttrId(const size_t id) {
     impl->vertexAttrId = id;
 }
 
-void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
+void Drawable::bindAttributes(RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
@@ -409,7 +409,7 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
     }
 }
 
-void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
+void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->instanceBindings) {
         if (binding.has_value()) {
@@ -422,7 +422,7 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
     }
 }
 
-void Drawable::bindTextures(RenderPass& renderPass) const noexcept {
+void Drawable::bindTextures(RenderPass& renderPass) const {
     for (size_t id = 0; id < textures.size(); id++) {
         if (const auto& texture = textures[id]) {
             if (const auto& location = shader->getSamplerLocation(id)) {
@@ -442,7 +442,7 @@ void Drawable::unbindTextures(RenderPass& renderPass) const noexcept {
     }
 }
 
-void Drawable::uploadTextures(UploadPass&) const noexcept {
+void Drawable::uploadTextures(UploadPass&) const {
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();

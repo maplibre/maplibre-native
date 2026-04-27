@@ -1065,7 +1065,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
-   * Set a callback that's invoked after a sprite fails to laod.
+   * Set a callback that's invoked after a sprite fails to load.
    *
    * @param listener The callback that's invoked after a sprite fails to load
    */
@@ -1074,7 +1074,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
-   * Removes a callback that's invoked after a sprite fails to laod.
+   * Removes a callback that's invoked after a sprite fails to load.
    *
    * @param listener The callback that's invoked after a sprite fails to load
    */
@@ -1098,6 +1098,28 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    */
   public void removeOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
     mapChangeReceiver.removeOnSpriteRequestedListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after an error occurs
+   * while trying to render a layer or drawable.
+   *
+   * @param listener The callback that's invoked after an error occurs
+   * while trying to render a layer or drawable.
+   */
+  public void addOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
+    mapChangeReceiver.addOnRenderErrorListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after an error occurs
+   * while trying to render a layer or drawable.
+   *
+   * @param listener The callback that's invoked after an error occurs
+   * while trying to render a layer or drawable.
+   */
+  public void removeOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
+    mapChangeReceiver.removeOnRenderErrorListener(callback);
   }
 
   /**
@@ -1512,6 +1534,20 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * @param url of the sprite.
      */
     void onSpriteRequested(@NonNull String id, @NonNull String url);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after an error occurs
+   * while trying to render a layer or drawable.
+   * <p>
+   * {@link MapView#addOnRenderErrorListener(OnRenderErrorListener)}
+   * </p>
+   */
+  public interface OnRenderErrorListener {
+    /**
+     * Called when an error occurs while trying to render a layer or drawable.
+     */
+    void onRenderError();
   }
 
   /**

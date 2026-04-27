@@ -5,15 +5,24 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #import "MLNMapView+Metal.h"
-#else  // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_WEBGPU
+#import "MLNMapView+WebGPU.h"
+#elif MLN_RENDER_BACKEND_OPENGL
 #import "MLNMapView+OpenGL.h"
+#else
+#error "No render backend defined"
 #endif
 
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
 #if MLN_RENDER_BACKEND_METAL
   return std::make_unique<MLNMapViewMetalImpl>(nativeView);
-#else  // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_WEBGPU
+  return std::make_unique<MLNMapViewWebGPUImpl>(nativeView);
+#elif MLN_RENDER_BACKEND_OPENGL
   return std::make_unique<MLNMapViewOpenGLImpl>(nativeView);
+#else
+#error "No render backend defined"
+  return nullptr;
 #endif
 }
 
@@ -213,3 +222,5 @@ void MLNMapViewImpl::onSpriteRequested(const std::optional<mbgl::style::Sprite>&
   [mapView spriteWillLoad:[NSString stringWithUTF8String:spriteID.value().id.c_str()]
                       url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
+
+void MLNMapViewImpl::onRenderError(std::exception_ptr error) { [mapView rendererDidError]; }

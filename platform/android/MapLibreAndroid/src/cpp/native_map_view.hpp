@@ -351,6 +351,9 @@ public:
     void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
     void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
+    // Renderer
+    void onRenderError(std::exception_ptr) override;
+
 private:
     std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 

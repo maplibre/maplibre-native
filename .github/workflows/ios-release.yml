@@ -51,7 +51,7 @@ jobs:
         working-directory: .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: xcframework
           path: |
@@ -94,7 +94,7 @@ jobs:
   #       working-directory: .
 
   #     - name: Upload artifact
-  #       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+  #       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
   #       with:
   #         name: xcframework-static
   #         path: |
@@ -119,9 +119,9 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
 
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v4
         with:
           node-version-file: ".nvmrc"
 
@@ -166,7 +166,7 @@ jobs:
 
       - name: Release (GitHub)
         id: github_release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           name: ios-v${{ env.version }}
           working_directory: .
@@ -181,7 +181,7 @@ jobs:
 
       # needed to trigger workflow for Swift Package Index release
       # - name: Generate token
-      #   uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      #   uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
       #   id: generate_token
       #   with:
       #     app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
@@ -212,7 +212,7 @@ jobs:
       #    GH_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
 
       # - name: Publish release (remove draft)
-      #   uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+      #   uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
       #   with:
       #     tag_name: ios-v${{ env.version }}
       #     name: ios-v${{ env.version }}

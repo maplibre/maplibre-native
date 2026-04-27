@@ -33,6 +33,7 @@ public:
     void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
     void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
     void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
+    void onRenderError(std::exception_ptr) override;
 
 private:
     friend class Renderer;

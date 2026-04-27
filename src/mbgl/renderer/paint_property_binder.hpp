@@ -26,6 +26,41 @@ struct FeatureVertexRange {
 
 using FeatureVertexRangeMap = std::map<std::string, std::vector<FeatureVertexRange>>;
 
+struct InterleavedVertexBuffer {
+    std::size_t stride = 0;
+    std::size_t vertexCount = 0;
+
+    gfx::VertexVectorPtr<uint8_t> sharedVertexVector = std::make_shared<gfx::VertexVector<uint8_t>>();
+
+    template <typename T>
+    void set(std::size_t index, std::size_t offset, const T& value) {
+        assert(stride * index + offset + sizeof(T) <= sharedVertexVector->bytes());
+        const void* data = reinterpret_cast<const void*>(sharedVertexVector->data() + stride * index + offset);
+        memcpy(const_cast<void*>(data), &value, sizeof(value));
+    }
+
+    template <typename T>
+    const T& get(std::size_t index, std::size_t offset) {
+        assert(stride * index + offset + sizeof(T) <= sharedVertexVector->bytes());
+        return *reinterpret_cast<const T*>(sharedVertexVector->data() + stride * index + offset);
+    }
+
+    template <typename T>
+    size_t extendVertexFormat() {
+        constexpr auto alignment = alignof(T);
+
+        size_t offset = stride & (alignment - 1);
+        if (offset != 0) {
+            offset = alignment - offset;
+        }
+
+        size_t vertexOffset = stride + offset;
+        stride += sizeof(T) + offset;
+
+        return vertexOffset;
+    }
+};
+
 /*
    ZoomInterpolatedAttribute<Attr> is a 'compound' attribute, representing two
    values of the the base attribute Attr.  These two values are provided to the
@@ -126,18 +161,30 @@ public:
     virtual std::tuple<ExpandToType<As, UniformValueType>...> uniformValue(
         const PossiblyEvaluatedType& currentValue) const = 0;
 
-    virtual std::size_t getVertexCount() const = 0;
-
     /// Indicates that the vertex data is duplicated for interpolation
     virtual bool isInterpolated() const { return false; }
 
     virtual std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t index) const = 0;
 
-    virtual gfx::VertexVectorBasePtr getSharedVertexVector() const = 0;
+    virtual std::size_t getVertexCount() const {
+        return interleavedVertexBuffer ? interleavedVertexBuffer->vertexCount : 0;
+    }
+    virtual void setInterleavedBuffer(InterleavedVertexBuffer&) {}
+
+    template <typename VertexFormat>
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) {
+        interleavedVertexBuffer = &buffer;
+
+        if (vertexOffset == 0) {
+            vertexOffset = interleavedVertexBuffer->extendVertexFormat<VertexFormat>();
+        }
+    }
 
     static std::unique_ptr<PaintPropertyBinder> create(const PossiblyEvaluatedType& value, float zoom, T defaultValue);
 
     PaintPropertyStatistics<T> statistics;
+    InterleavedVertexBuffer* interleavedVertexBuffer = nullptr;
+    std::size_t vertexOffset = 0;
 };
 
 namespace detail {
@@ -172,13 +219,9 @@ public:
     using BaseAttributeType = A;
     using BaseVertex = gfx::VertexType<BaseAttributeType>;
 
-    std::size_t getVertexCount() const override { return 0; }
-
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t) const override {
         return {ZoomInterpolatedVertexType<A>{0}};
     }
-
-    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return detail::noVector; }
 
 private:
     T constant;
@@ -220,13 +263,9 @@ public:
         return constantPatternPositions;
     }
 
-    std::size_t getVertexCount() const override { return 0; }
-
     std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t) const override {
         return {ZoomInterpolatedVertexType<As>{0}...};
     }
-
-    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return detail::noVector; }
 
 private:
     Faded<T> constant;
@@ -242,7 +281,7 @@ public:
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
-    ~SourceFunctionPaintPropertyBinder() override { sharedVertexVector->release(); }
+    ~SourceFunctionPaintPropertyBinder() override {}
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -260,9 +299,11 @@ public:
             defaultValue);
         this->statistics.add(evaluated);
         auto value = attributeValue(evaluated);
-        auto elements = vertexVector.elements();
+
+        const std::size_t elements = this->getVertexCount();
+
         for (std::size_t i = elements; i < length; ++i) {
-            vertexVector.emplace_back(BaseVertex{value});
+            this->interleavedVertexBuffer->set(i, this->vertexOffset, BaseVertex{value});
         }
         std::optional<std::string> idStr = featureIDtoString(feature.getID());
         if (idStr) {
@@ -299,10 +340,8 @@ public:
 
         const auto value = BaseVertex{attributeValue(evaluated)};
         for (std::size_t i = start; i < end; ++i) {
-            vertexVector.at(i) = value;
+            this->interleavedVertexBuffer->set(i, this->vertexOffset, value);
         }
-
-        vertexVector.updateModified();
     }
 
     std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
@@ -316,22 +355,19 @@ public:
         }
     }
 
-    std::size_t getVertexCount() const override { return vertexVector.elements(); }
-
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
-        const BaseVertex& value = vertexVector.at(index);
+        const BaseVertex& value = this->interleavedVertexBuffer->template get<BaseVertex>(index, this->vertexOffset);
         return {ZoomInterpolatedVertexType<A>{concatenate(value.a1, value.a1)}};
     }
 
-    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedVertexVector; }
+    using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->template setInterleavedBuffer<BaseVertex>(buffer);
+    }
 
 private:
     style::PropertyExpression<T> expression;
     T defaultValue;
-
-    gfx::VertexVectorPtr<BaseVertex> sharedVertexVector = std::make_shared<gfx::VertexVector<BaseVertex>>();
-    gfx::VertexVector<BaseVertex>& vertexVector = *sharedVertexVector;
-
     FeatureVertexRangeMap featureMap;
 };
 
@@ -347,7 +383,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeFunctionPaintPropertyBinder() override { sharedVertexVector->release(); }
+    ~CompositeFunctionPaintPropertyBinder() override {}
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -374,12 +410,10 @@ public:
         this->statistics.add(range.max);
         const AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min),
                                                                     attributeValue(range.max));
-        const auto elements = vertexVector.elements();
-        if (vertexVector.empty()) {
-            vertexVector.reserve(length);
-        }
+        const std::size_t elements = this->getVertexCount();
+
         for (std::size_t i = elements; i < length; ++i) {
-            vertexVector.emplace_back(Vertex{value});
+            this->interleavedVertexBuffer->set(i, this->vertexOffset, Vertex{value});
         }
         if (auto idStr = featureIDtoString(feature.getID())) {
             featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
@@ -420,10 +454,8 @@ public:
             zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max))};
 
         for (std::size_t i = start; i < end; ++i) {
-            vertexVector.at(i) = value;
+            this->interleavedVertexBuffer->set(i, this->vertexOffset, value);
         }
-
-        vertexVector.updateModified();
     }
 
     std::tuple<float> interpolationFactor(float currentZoom) const override {
@@ -442,24 +474,21 @@ public:
         }
     }
 
-    std::size_t getVertexCount() const override { return vertexVector.elements(); }
-
     bool isInterpolated() const override { return true; }
 
-    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedVertexVector; }
+    using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->template setInterleavedBuffer<Vertex>(buffer);
+    }
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
-        return {vertexVector.at(index)};
+        return {this->interleavedVertexBuffer->template get<Vertex>(index, this->vertexOffset)};
     }
 
 private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
-
-    gfx::VertexVectorPtr<Vertex> sharedVertexVector = std::make_shared<gfx::VertexVector<Vertex>>();
-    gfx::VertexVector<Vertex>& vertexVector = *sharedVertexVector;
-
     FeatureVertexRangeMap featureMap;
 };
 
@@ -477,7 +506,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeCrossFadedPaintPropertyBinder() override { sharedPatternToVertexVector->release(); }
+    ~CompositeCrossFadedPaintPropertyBinder() override {}
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -500,7 +529,8 @@ public:
             // try to draw the layer because we don't know at draw time if all
             // features were evaluated to valid pattern dependencies.
             for (std::size_t i = zoomInVertexVector.elements(); i < length; ++i) {
-                patternToVertexVector.emplace_back(Vertex{std::array<uint16_t, 4>{{0, 0, 0, 0}}});
+                const auto value = Vertex{std::array<uint16_t, 4>{{0, 0, 0, 0}}};
+                this->interleavedVertexBuffer->set(i, this->vertexOffset, value);
                 zoomInVertexVector.emplace_back(Vertex2{std::array<uint16_t, 4>{{0, 0, 0, 0}}});
                 zoomOutVertexVector.emplace_back(Vertex2{std::array<uint16_t, 4>{{0, 0, 0, 0}}});
             }
@@ -517,9 +547,11 @@ public:
             const ImagePosition imageMax = max->second;
 
             for (std::size_t i = zoomInVertexVector.elements(); i < length; ++i) {
-                patternToVertexVector.emplace_back(Vertex{imageMid.tlbr()});
                 zoomInVertexVector.emplace_back(Vertex2{imageMin.tlbr()});
                 zoomOutVertexVector.emplace_back(Vertex2{imageMax.tlbr()});
+
+                const auto& value = Vertex{imageMid.tlbr()};
+                this->interleavedVertexBuffer->set(i, this->vertexOffset, value);
             }
         }
     }
@@ -534,26 +566,25 @@ public:
         return {};
     }
 
-    std::size_t getVertexCount() const override { return patternToVertexVector.elements(); }
-
     std::tuple<ZoomInterpolatedVertexType<A1>, ZoomInterpolatedVertexType<A2>> getVertexValue(
         std::size_t index) const override {
-        const Vertex& patternValue = patternToVertexVector.at(index);
+        const Vertex& patternValue = this->interleavedVertexBuffer->template get<Vertex>(index, this->vertexOffset);
         const Vertex2& zoomValue = crossfade.fromScale == 2 ? zoomInVertexVector.at(index)
                                                             : zoomOutVertexVector.at(index);
         return {ZoomInterpolatedVertexType<A1>{concatenate(patternValue.a1, patternValue.a1)},
                 ZoomInterpolatedVertexType<A2>{concatenate(zoomValue.a1, zoomValue.a1)}};
     }
 
-    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedPatternToVertexVector; }
+    using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::
+        setInterleavedBuffer;
+    void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
+        this->template setInterleavedBuffer<Vertex>(buffer);
+    }
 
 private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
-
-    gfx::VertexVectorPtr<Vertex> sharedPatternToVertexVector = std::make_shared<gfx::VertexVector<Vertex>>();
-    gfx::VertexVector<Vertex>& patternToVertexVector = *sharedPatternToVertexVector;
 
     gfx::VertexVector<Vertex2> zoomInVertexVector;
     gfx::VertexVector<Vertex2> zoomOutVertexVector;
@@ -655,10 +686,25 @@ public:
     PaintPropertyBinders(const EvaluatedProperties& properties, float z)
         : binders(Binder<Ps>::create(properties.template get<Ps>(), z, Ps::defaultValue())...) {
         (void)z; // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56958
+
+        (([&] {
+             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+         }()),
+         ...);
     }
 
-    PaintPropertyBinders(PaintPropertyBinders&&) noexcept = default;
+    PaintPropertyBinders(PaintPropertyBinders&& other) noexcept {
+        binders = std::move(other.binders);
+        interleavedVertexBuffer = std::move(other.interleavedVertexBuffer);
+
+        (([&] {
+             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+         }()),
+         ...);
+    }
+
     PaintPropertyBinders(const PaintPropertyBinders&) = delete;
+    ~PaintPropertyBinders() = default;
 
     void populateVertexVectors(const GeometryTileFeature& feature,
                                std::size_t length,
@@ -667,21 +713,29 @@ public:
                                const std::optional<PatternDependency>& patternDependencies,
                                const CanonicalTileID& canonical,
                                const style::expression::Value& formattedSection = {}) {
+        interleavedVertexBuffer.sharedVertexVector->extend(
+            (length - interleavedVertexBuffer.vertexCount) * interleavedVertexBuffer.stride, {});
+
         util::ignore({(binders.template get<Ps>()->populateVertexVector(
                            feature, length, index, patternPositions, patternDependencies, canonical, formattedSection),
                        0)...});
+
+        interleavedVertexBuffer.vertexCount += length - interleavedVertexBuffer.vertexCount;
+        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }
 
     void updateVertexVectors(const FeatureStates& states,
                              const GeometryTileLayer& layer,
                              const ImagePositions& imagePositions) {
         util::ignore({(binders.template get<Ps>()->updateVertexVectors(states, layer, imagePositions), 0)...});
+        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
                               const std::optional<ImagePosition>& posB,
                               const CrossfadeParameters& crossfade) {
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
+        interleavedVertexBuffer.sharedVertexVector->updateModified(true);
     }
 
     template <class P>
@@ -720,6 +774,8 @@ public:
     const auto& statistics() const {
         return binders.template get<P>()->statistics;
     }
+
+    InterleavedVertexBuffer interleavedVertexBuffer;
 
 private:
     Binders binders;

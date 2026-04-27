@@ -75,6 +75,7 @@ public:
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
     void onGlyphsRequested(const FontStack&, const GlyphRange&) final;
     void onTileAction(TileOperation op, const OverscaledTileID&, const std::string&) final;
+    void onRenderError(std::exception_ptr) final;
 
     // Map
     void jumpTo(const CameraOptions&);

@@ -171,7 +171,6 @@ lowp float halo_blur = u_halo_blur;
         size *= perspective_ratio;
     }
 
-
     float fontScale = size / 24.0;
 
     highp float symbol_rotation = 0.0;

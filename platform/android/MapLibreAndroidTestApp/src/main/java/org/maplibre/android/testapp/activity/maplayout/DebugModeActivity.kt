@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.activity.maplayout
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -34,6 +35,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private var fpsView: TextView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+
         setContentView(R.layout.activity_debug_mode)
         setupToolbar()
         setupMapView(savedInstanceState)

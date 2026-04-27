@@ -1,23 +1,40 @@
 package org.maplibre
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.getByType
 import java.io.File
 
+private fun configureCcacheArguments(arguments: MutableList<String>) {
+    val cacheToolPath = findCacheToolPath()
+    if (cacheToolPath != null) {
+        arguments.add("-DCMAKE_CXX_COMPILER_LAUNCHER=$cacheToolPath")
+        println("ccache enabled at: $cacheToolPath")
+    } else {
+        println("ccache not found on the system, continuing without it.")
+    }
+}
+
 fun configureCcache(project: Project) {
-    project.extensions.getByType<BaseExtension>().run {
-        defaultConfig {
+    val appExtension = project.extensions.findByType(ApplicationExtension::class.java)
+    if (appExtension != null) {
+        appExtension.defaultConfig {
             externalNativeBuild {
                 cmake {
-                    val cacheToolPath = findCacheToolPath()
-                    if (cacheToolPath != null) {
-                        arguments.add("-DCMAKE_CXX_COMPILER_LAUNCHER=$cacheToolPath")
-                        println("ccache enabled at: $cacheToolPath")
-                    } else {
-                        println("ccache not found on the system, continuing without it.")
-                    }
+                    configureCcacheArguments(arguments)
+                }
+            }
+        }
+        return
+    }
+
+    val libraryExtension = project.extensions.findByType(LibraryExtension::class.java)
+    if (libraryExtension != null) {
+        libraryExtension.defaultConfig {
+            externalNativeBuild {
+                cmake {
+                    configureCcacheArguments(arguments)
                 }
             }
         }

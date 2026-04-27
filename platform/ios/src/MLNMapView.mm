@@ -8,7 +8,9 @@
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/math/wrap.hpp>
+#if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/mtl_fwd.hpp>
+#endif
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/plugin/plugin_file_source.hpp>
@@ -1815,6 +1817,9 @@ public:
                        options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
                        context:windowScreenContext];
     }
+
+    // https://github.com/maplibre/maplibre-native/issues/4204
+    [self setNeedsLayout];
   }
 }
 
@@ -6410,7 +6415,7 @@ static void *windowScreenContext = &windowScreenContext;
       completionHandler:^{
         MLNMapView *strongSelf = weakSelf;
         if (strongSelf.userTrackingState == MLNUserTrackingStateBegan ||
-            strongSelf.userTrackingState == MLNDistanceThresholdForCameraPause) {
+            strongSelf.userTrackingState == MLNUserTrackingStateBeginSignificantTransition) {
           strongSelf.userTrackingState = MLNUserTrackingStateChanged;
         }
         if (completion) {
@@ -7148,6 +7153,16 @@ static void *windowScreenContext = &windowScreenContext;
   }
 }
 
+- (void)rendererDidError {
+  if (!_mbglMap) {
+    return;
+  }
+
+  if ([self.delegate respondsToSelector:@selector(mapViewRendererDidError:)]) {
+    [self.delegate mapViewRendererDidError:self];
+  }
+}
+
 - (void)updateUserLocationAnnotationView {
   [self updateUserLocationAnnotationViewAnimatedWithDuration:0];
 }
@@ -7704,10 +7719,13 @@ static void *windowScreenContext = &windowScreenContext;
 
     // Set the render function
     auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters &paintParameters) {
+#if MLN_RENDER_BACKEND_METAL
       mbgl::mtl::RenderPass &renderPass =
           static_cast<mbgl::mtl::RenderPass &>(*paintParameters.renderPass);
-      id<MTLRenderCommandEncoder> encoder =
-          (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
+      id encoder = (__bridge id)renderPass.getMetalEncoder().get();
+#else
+      id encoder = nil;
+#endif
 
       weakPlugInLayer.textureBindingCallback =
           ^(std::shared_ptr<mbgl::gfx::Texture2D> texture2D, int32_t location) {

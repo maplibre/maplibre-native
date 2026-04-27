@@ -244,6 +244,50 @@ objc_library(
     ],
 )
 
+# sdk for the macOS static target which includes the resources.
+objc_library(
+    name = "macos-sdk",
+    hdrs = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:generated_style_public_hdrs",
+        "//platform/macos:macos_public_hdrs",
+    ],
+    data = ["//platform/macos:resources"],
+    module_name = "MapLibre",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "Security",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":macos-objc",
+        ":macos-objcpp",
+    ],
+)
+
+# sdk for the macOS dynamic target. Lacking the resources bundle since for dynamic
+# they are in the main package.
+objc_library(
+    name = "macos-sdk-dynamic",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "Security",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":macos-objc",
+        ":macos-objcpp",
+    ],
+)
+
 objc_library(
     name = "app_custom_drawable_layer_objcpp_srcs",
     srcs = [
@@ -267,18 +311,37 @@ objc_library(
 )
 
 objc_library(
-    name = "iosapp",
+    name = "iosapp_objcpp_srcs",
     srcs = [
         "//platform/darwin:app/CustomStyleLayerExample.h",
-        "//platform/darwin:app/CustomStyleLayerExample.m",
+        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
+        "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
+        "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
         "//platform/darwin:app/PluginProtocolExample.h",
         "//platform/darwin:app/PluginProtocolExample.mm",
         "//platform/darwin:app/StyleFilterExample.h",
         "//platform/darwin:app/StyleFilterExample.mm",
-        "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
-        "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
+        "//platform/ios:ios_app_objcpp_srcs",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/app",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ios-sdk",
+    ],
+)
+
+objc_library(
+    name = "iosapp",
+    srcs = [
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/ios:ios_app_srcs",
     ],
     defines = ["GLES_SILENCE_DEPRECATION"],
@@ -298,6 +361,7 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
+        ":iosapp_objcpp_srcs",
     ] + select({
         "//conditions:default": [
             ":app_custom_drawable_layer_objcpp_srcs",
