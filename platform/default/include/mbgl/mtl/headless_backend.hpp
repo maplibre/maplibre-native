@@ -25,6 +25,7 @@ public:
 private:
     void activate() override;
     void deactivate() override;
+    void ensureResource();
 
 private:
     bool active = false;

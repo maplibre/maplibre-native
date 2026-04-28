@@ -77,10 +77,14 @@ void HeadlessBackend::deactivate() {
 }
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
+    ensureResource();
+    return *this;
+}
+
+void HeadlessBackend::ensureResource() {
     if (!resource) {
         resource = std::make_unique<HeadlessRenderableResource>(*this, static_cast<mtl::Context&>(getContext()), size);
     }
-    return *this;
 }
 
 void HeadlessBackend::updateAssumedState() {
@@ -92,7 +96,7 @@ PremultipliedImage HeadlessBackend::readStillImage() {
 }
 
 MTL::Texture* HeadlessBackend::getMetalTexture() {
-    getDefaultRenderable();
+    ensureResource();
     return getResource<HeadlessRenderableResource>().getMetalTexture();
 }
 
