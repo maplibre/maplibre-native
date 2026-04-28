@@ -167,6 +167,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             /* vertexStride = */ vertexStride,
             /* vertexBufferResource = */ nullptr, // buffer details established later
             /* vertexOffset = */ 0,
+            /*.bufferIndex = */ 0,
         };
     }
 
@@ -187,6 +188,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
                 /*.vertexBufferResource = */ buffer.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
+                /*.bufferIndex = */ 0,
             };
             return;
         }
@@ -230,6 +232,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             /* vertexStride = */ static_cast<uint32_t>(stride),
             /* vertexBufferResource = */ nullptr, // buffer details established later
             /* vertexOffset = */ 0,
+            /*.bufferIndex = */ 0,
         };
 
         pad(allData, align, padding);

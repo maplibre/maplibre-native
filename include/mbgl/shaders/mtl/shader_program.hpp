@@ -12,28 +12,22 @@
 
 namespace mbgl {
 namespace shaders {
-struct UniformBlockInfo {
-    constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
-        : index(id_),
-          vertex(vertex_),
-          fragment(fragment_),
-          size(size_),
-          id(id_) {}
-    std::size_t index;
-    bool vertex;
-    bool fragment;
-    std::size_t size;
-    std::size_t id;
-};
+
 struct AttributeInfo {
-    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+    constexpr AttributeInfo(std::size_t index_,
+                            gfx::AttributeDataType dataType_,
+                            std::size_t bufferIndex_,
+                            std::size_t id_)
         : index(index_),
           dataType(dataType_),
+          bufferIndex(bufferIndex_),
           id(id_) {}
     std::size_t index;
     gfx::AttributeDataType dataType;
+    std::size_t bufferIndex;
     std::size_t id;
 };
+
 struct TextureInfo {
     constexpr TextureInfo(std::size_t index_, std::size_t id_)
         : index(index_),
@@ -41,6 +35,7 @@ struct TextureInfo {
     std::size_t index;
     std::size_t id;
 };
+
 } // namespace shaders
 namespace mtl {
 class RenderableResource;

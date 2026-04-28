@@ -53,13 +53,13 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(heatmapUBOCount + 0)]];
+    short2 pos [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_weight)
-    float2 weight [[attribute(heatmapUBOCount + 1)]];
+    float2 weight [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(heatmapUBOCount + 2)]];
+    float2 radius [[attribute(2)]];
 #endif
 };
 

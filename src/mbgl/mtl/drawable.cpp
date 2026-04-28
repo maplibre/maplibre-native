@@ -398,28 +398,24 @@ void Drawable::setVertexAttrId(const size_t id) {
 }
 
 void Drawable::bindAttributes(RenderPass& renderPass) const {
-    NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
                                                                                    : nullptr);
         if (buffer && buffer->get()) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
-            renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
+            renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
         }
-        attributeIndex += 1;
     }
 }
 
 void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
-    NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->instanceBindings) {
         if (binding.has_value()) {
             const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding->vertexBufferResource);
             if (buffer && buffer->get()) {
-                renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
+                renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
             }
         }
-        attributeIndex += 1;
     }
 }
 
@@ -602,20 +598,22 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                     }
                 }
 
-                auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-                attribDesc->setBufferIndex(index);
+                const auto& attribDesc = vertDesc->attributes()->object(index);
+                attribDesc->setBufferIndex(binding->bufferIndex);
                 attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
                 attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
-                assert(binding->vertexStride > 0);
 
-                auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
-                layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-                layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
-                                                                          : MTL::VertexStepFunctionConstant);
-                layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
-
-                vertDesc->attributes()->setObject(attribDesc.get(), index);
-                vertDesc->layouts()->setObject(layoutDesc.get(), index);
+                const auto& layoutDesc = vertDesc->layouts()->object(binding->bufferIndex);
+                if (!layoutDesc->stride()) {
+                    assert(binding->vertexStride > 0);
+                    layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
+                    layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
+                                                                              : MTL::VertexStepFunctionConstant);
+                    layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
+                } else {
+                    assert(layoutDesc->stride() == static_cast<NS::UInteger>(binding->vertexStride));
+                    assert(layoutDesc->stepRate() == (binding->vertexBufferResource ? 1 : 0));
+                }
 
                 mbgl::util::hash_combine(hash,
                                          mbgl::util::hash(index,

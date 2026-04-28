@@ -17,13 +17,23 @@ public:
         : gfx::VertexAttribute(index_, dataType_, count_) {}
     VertexAttribute(const VertexAttribute& other) = delete;
     VertexAttribute(VertexAttribute&& other)
-        : gfx::VertexAttribute(std::move(other)) {}
+        : gfx::VertexAttribute(std::move(other)),
+          bufferIndex(other.bufferIndex) {}
     ~VertexAttribute() override = default;
+
+    /// @brief Get the bufer index of the vertex attribute
+    int getBufferIndex() const { return bufferIndex; }
+
+    /// @brief Set the buffer index of the vertex attribute
+    void setBufferIndex(int value) { bufferIndex = value; }
 
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
                                                             const gfx::BufferUsageType,
                                                             bool forceUpdate);
+
+protected:
+    int bufferIndex = 0;
 };
 
 /// Stores a collection of vertex attributes by name
@@ -38,6 +48,11 @@ public:
         return *this;
     }
     VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
+
+    const std::unique_ptr<gfx::VertexAttribute>& set(const size_t id,
+                                                     int index,
+                                                     gfx::AttributeDataType type,
+                                                     int bufferIndex);
 
     /// Indicates whether any values have changed
     bool isModifiedAfter(std::chrono::duration<double> time) const;

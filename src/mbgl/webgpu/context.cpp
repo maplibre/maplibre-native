@@ -460,7 +460,8 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(gfx::Context&,
                 result[index] = {/*.attribute = */ {attr.getDataType(), /*offset=*/0},
                                  /*.vertexStride = */ static_cast<uint32_t>(attr.getStride()),
                                  /*.vertexBufferResource = */ bufferResource.get(),
-                                 /*.vertexOffset = */ 0};
+                                 /*.vertexOffset = */ 0,
+                                 /*.bufferIndex = */ 0};
             }
         }
     });

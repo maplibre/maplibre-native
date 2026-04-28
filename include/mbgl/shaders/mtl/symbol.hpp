@@ -89,14 +89,14 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(symbolUBOCount + 0)]];
-    float4 data [[attribute(symbolUBOCount + 1)]];
-    float4 pixeloffset [[attribute(symbolUBOCount + 2)]];
-    float3 projected_pos [[attribute(symbolUBOCount + 3)]];
-    float fade_opacity [[attribute(symbolUBOCount + 4)]];
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float4 pixeloffset [[attribute(2)]];
+    float3 projected_pos [[attribute(3)]];
+    float fade_opacity [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(symbolUBOCount + 5)]];
+    float opacity [[attribute(5)]];
 #endif
 };
 
@@ -245,26 +245,26 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(symbolUBOCount + 0)]];
-    float4 data [[attribute(symbolUBOCount + 1)]];
-    float4 pixeloffset [[attribute(symbolUBOCount + 2)]];
-    float3 projected_pos [[attribute(symbolUBOCount + 3)]];
-    float fade_opacity [[attribute(symbolUBOCount + 4)]];
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float4 pixeloffset [[attribute(2)]];
+    float3 projected_pos [[attribute(3)]];
+    float fade_opacity [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(symbolUBOCount + 5)]];
+    float4 fill_color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(symbolUBOCount + 6)]];
+    float4 halo_color [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(symbolUBOCount + 7)]];
+    float opacity [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(symbolUBOCount + 8)]];
+    float halo_width [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(symbolUBOCount + 9)]];
+    float halo_blur [[attribute(9)]];
 #endif
 };
 
@@ -481,25 +481,25 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 #define ICON 0.0
 
 struct VertexStage {
-    float4 pos_offset [[attribute(symbolUBOCount + 0)]];
-    float4 data [[attribute(symbolUBOCount + 1)]];
-    float3 projected_pos [[attribute(symbolUBOCount + 2)]];
-    float fade_opacity [[attribute(symbolUBOCount + 3)]];
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float3 projected_pos [[attribute(2)]];
+    float fade_opacity [[attribute(3)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(symbolUBOCount + 4)]];
+    float4 fill_color [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(symbolUBOCount + 5)]];
+    float4 halo_color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(symbolUBOCount + 6)]];
+    float opacity [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(symbolUBOCount + 7)]];
+    float halo_width [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(symbolUBOCount + 8)]];
+    float halo_blur [[attribute(8)]];
 #endif
 };
 

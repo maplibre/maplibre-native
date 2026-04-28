@@ -46,8 +46,8 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal> 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(hillshadePrepareUBOCount + 0)]];
-    short2 texture_pos [[attribute(hillshadePrepareUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short2 texture_pos [[attribute(1)]];
 };
 
 struct FragmentStage {
