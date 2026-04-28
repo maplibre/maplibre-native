@@ -2,7 +2,7 @@
 //
 // Foundation/NSNotification.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,3 +107,4 @@ _NS_INLINE void NS::NotificationCenter::removeObserver(Object* pObserver)
 {
     return NS::Object::sendMessage<void>(this, _NS_PRIVATE_SEL(removeObserver_), pObserver);
 }
+

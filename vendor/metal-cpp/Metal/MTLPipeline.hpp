@@ -2,7 +2,7 @@
 //
 // Metal/MTLPipeline.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,60 +20,59 @@
 
 #pragma once
 
+#include "../Foundation/Foundation.hpp"
 #include "MTLDefines.hpp"
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
 
-#include <Foundation/Foundation.hpp>
-
-#include "MTLPipeline.hpp"
-
 namespace MTL
 {
+class PipelineBufferDescriptor;
+class PipelineBufferDescriptorArray;
 _MTL_ENUM(NS::UInteger, Mutability) {
     MutabilityDefault = 0,
     MutabilityMutable = 1,
     MutabilityImmutable = 2,
 };
 
+_MTL_ENUM(NS::Integer, ShaderValidation) {
+    ShaderValidationDefault = 0,
+    ShaderValidationEnabled = 1,
+    ShaderValidationDisabled = 2,
+};
+
 class PipelineBufferDescriptor : public NS::Copying<PipelineBufferDescriptor>
 {
 public:
-    static class PipelineBufferDescriptor* alloc();
+    static PipelineBufferDescriptor* alloc();
 
-    class PipelineBufferDescriptor*        init();
+    PipelineBufferDescriptor*        init();
 
-    MTL::Mutability                        mutability() const;
-    void                                   setMutability(MTL::Mutability mutability);
+    Mutability                       mutability() const;
+    void                             setMutability(MTL::Mutability mutability);
 };
-
 class PipelineBufferDescriptorArray : public NS::Referencing<PipelineBufferDescriptorArray>
 {
 public:
-    static class PipelineBufferDescriptorArray* alloc();
+    static PipelineBufferDescriptorArray* alloc();
 
-    class PipelineBufferDescriptorArray*        init();
+    PipelineBufferDescriptorArray*        init();
 
-    class PipelineBufferDescriptor*             object(NS::UInteger bufferIndex);
-
-    void                                        setObject(const class PipelineBufferDescriptor* buffer, NS::UInteger bufferIndex);
+    PipelineBufferDescriptor*             object(NS::UInteger bufferIndex);
+    void                                  setObject(const MTL::PipelineBufferDescriptor* buffer, NS::UInteger bufferIndex);
 };
 
 }
-
-// static method: alloc
 _MTL_INLINE MTL::PipelineBufferDescriptor* MTL::PipelineBufferDescriptor::alloc()
 {
     return NS::Object::alloc<MTL::PipelineBufferDescriptor>(_MTL_PRIVATE_CLS(MTLPipelineBufferDescriptor));
 }
 
-// method: init
 _MTL_INLINE MTL::PipelineBufferDescriptor* MTL::PipelineBufferDescriptor::init()
 {
     return NS::Object::init<MTL::PipelineBufferDescriptor>();
 }
 
-// property: mutability
 _MTL_INLINE MTL::Mutability MTL::PipelineBufferDescriptor::mutability() const
 {
     return Object::sendMessage<MTL::Mutability>(this, _MTL_PRIVATE_SEL(mutability));
@@ -84,25 +83,21 @@ _MTL_INLINE void MTL::PipelineBufferDescriptor::setMutability(MTL::Mutability mu
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setMutability_), mutability);
 }
 
-// static method: alloc
 _MTL_INLINE MTL::PipelineBufferDescriptorArray* MTL::PipelineBufferDescriptorArray::alloc()
 {
     return NS::Object::alloc<MTL::PipelineBufferDescriptorArray>(_MTL_PRIVATE_CLS(MTLPipelineBufferDescriptorArray));
 }
 
-// method: init
 _MTL_INLINE MTL::PipelineBufferDescriptorArray* MTL::PipelineBufferDescriptorArray::init()
 {
     return NS::Object::init<MTL::PipelineBufferDescriptorArray>();
 }
 
-// method: objectAtIndexedSubscript:
 _MTL_INLINE MTL::PipelineBufferDescriptor* MTL::PipelineBufferDescriptorArray::object(NS::UInteger bufferIndex)
 {
     return Object::sendMessage<MTL::PipelineBufferDescriptor*>(this, _MTL_PRIVATE_SEL(objectAtIndexedSubscript_), bufferIndex);
 }
 
-// method: setObject:atIndexedSubscript:
 _MTL_INLINE void MTL::PipelineBufferDescriptorArray::setObject(const MTL::PipelineBufferDescriptor* buffer, NS::UInteger bufferIndex)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(setObject_atIndexedSubscript_), buffer, bufferIndex);
