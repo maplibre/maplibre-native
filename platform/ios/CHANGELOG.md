@@ -2,6 +2,14 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.26.0
+
+Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
+
+- core: Handle allocation failure ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
+- Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
+- Fix: unconditionally rewriting contentScaleFactor/drawableSize every layout pass caused a feedback loop under iOS 26 Smart Display Zoom ([#4251](https://github.com/maplibre/maplibre-native/pull/4251)). This resolves CarPlay users were experiencing.
+
 ## 6.25.1
 
 - iOS: Force `MLNMapView` layout after transitions ([#4225](https://github.com/maplibre/maplibre-native/pull/4225)).
