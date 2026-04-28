@@ -209,6 +209,39 @@ protected:
     void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
 
     /// Update the drawables for a tile.
+    /// @param tileGroup The tile layer group to consider
+    /// @param renderPass The pass to consider
+    /// @param tileID The tile to consider
+    /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
+    ///                       was updated or false if it was skipped because it's for a previous style.
+    /// @return true if drawables were updated
+    template <typename Func /* bool(gfx::Drawable&) */>
+    bool updateTile(TileLayerGroup* tileGroup, RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
+        if (!tileGroup) {
+            return false;
+        }
+
+        bool anyUpdated = false;
+        bool unUpdatedDrawables = false;
+        tileGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            if (update(drawable)) {
+                anyUpdated = true;
+            } else {
+                unUpdatedDrawables = true;
+            }
+        });
+
+        // If any are updated, the caller shouldn't add new ones.
+        // If none are updated and some were skipped, remove those.
+        // This is to handle the case that the style layer changes but the bucket is not re-created.
+        if (!anyUpdated && unUpdatedDrawables) {
+            removeTile(renderPass, tileID);
+        }
+
+        return anyUpdated;
+    }
+
+    /// Update the drawables for a tile.
     /// @param renderPass The pass to consider
     /// @param tileID The tile to consider
     /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
@@ -216,25 +249,13 @@ protected:
     /// @return true if drawables were updated
     template <typename Func /* bool(gfx::Drawable&) */>
     bool updateTile(RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
-        bool anyUpdated = false;
-        if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
-            bool unUpdatedDrawables = false;
-            tileGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                if (update(drawable)) {
-                    anyUpdated = true;
-                } else {
-                    unUpdatedDrawables = true;
-                }
-            });
-
-            // If any are updated, the caller shouldn't add new ones.
-            // If none are updated and some were skipped, remove those.
-            // This is to handle the case that the style layer changes but the bucket is not re-created.
-            if (!anyUpdated && unUpdatedDrawables) {
-                removeTile(renderPass, tileID);
-            }
+        if (!layerGroup) {
+            return false;
         }
-        return anyUpdated;
+
+        assert(layerGroup->getType() == LayerGroupBase::Type::TileLayerGroup);
+        const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+        return updateTile(tileGroup, renderPass, tileID, update);
     }
 
     /// Remove all drawables for the tile from the layer group
