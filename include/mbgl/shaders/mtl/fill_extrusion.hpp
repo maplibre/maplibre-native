@@ -255,9 +255,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 p1 = float2(outline[instanceID + 1].pos);
     float2 p2 = float2(outline[instanceID + 0].pos);
     float2 perp = p1 - p2;
-    float magnitute = sqrt(perp.x * perp.x + perp.y * perp.y);
-    if (magnitute > 0) {
-        perp = perp / magnitute;
+    float magnitude = sqrt(perp.x * perp.x + perp.y * perp.y);
+    if (magnitude > 0) {
+        perp = perp / magnitude;
     }
 
     const float3 normal = float3(-perp.y, perp.x, 0.0);
@@ -603,9 +603,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 p1 = float2(outline[instanceID + 1].pos);
     float2 p2 = float2(outline[instanceID + 0].pos);
     float2 perp = p1 - p2;
-    float magnitute = sqrt(perp.x * perp.x + perp.y * perp.y);
-    if (magnitute > 0) {
-        perp = perp / magnitute;
+    float magnitude = sqrt(perp.x * perp.x + perp.y * perp.y);
+    if (magnitude > 0) {
+        perp = perp / magnitude;
     }
 
     const float3 normal = float3(-perp.y, perp.x, 0.0);

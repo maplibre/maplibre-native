@@ -253,29 +253,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             }
             return true;
         };
-#if MLN_RENDER_BACKEND_WEBGPU
-        bool anyUpdated = false;
-        bool skippedDrawables = false;
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            if (updateExisting(drawable)) {
-                anyUpdated = true;
-            } else {
-                skippedDrawables = true;
-            }
-        });
 
-        if (!anyUpdated && skippedDrawables) {
-            removeTile(renderPass, tileID);
-        }
-
-        if (anyUpdated) {
+        if (updateTile(tileLayerGroup, renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
-#else
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
-#endif
 
         if (!propertiesAsUniforms) {
             propertiesAsUniforms.emplace();
