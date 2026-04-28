@@ -9,6 +9,7 @@ load(
     "top_level_target",
     "xcodeproj",
 )
+load("//platform/ios/bazel:macros.bzl", "info_plist")
 load(
     "bazel/files.bzl",
     "MLN_MACOS_PRIVATE_HEADERS",
@@ -16,7 +17,6 @@ load(
     "MLN_MACOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_MACOS_PUBLIC_OBJC_SOURCE",
 )
-load("//platform/ios/bazel:macros.bzl", "info_plist")
 
 # Selects the macOS event loop implementation
 # Use --//platform/macos:macos_loop=cfrunloop for AppKit/SwiftUI apps (xcframework builds)

@@ -213,21 +213,6 @@ jobs:
         run: |
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
 
-      # Trigger release on main if VERSION file changed
-
-      - name: VERSION file changed
-        if: github.ref == 'refs/heads/main'
-        id: version-file-ios-changed
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
-        with:
-          files: platform/ios/VERSION
-
-      - name: Run release
-        if: github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run ios-release.yml --ref ${{ github.ref }}
-
   ios-build-cmake:
     needs: pre_job
     runs-on: macos-14
@@ -298,3 +283,22 @@ jobs:
       - name: Mark result as failed
         if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success'
         run: exit 1
+
+      # Trigger release on main if VERSION file changed
+
+      - name: VERSION file changed
+        if: github.ref == 'refs/heads/main'
+        id: version-file-ios-changed
+        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        with:
+          files: platform/ios/VERSION
+
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - name: Run release
+        if: github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ios-release.yml --ref ${{ github.ref }}
