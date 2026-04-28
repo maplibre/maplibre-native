@@ -321,15 +321,14 @@
 - (void)testSymbolLayerIconImageNameWithMultiCaseImageExpression {
   MLNPointFeature *feature = [[MLNPointFeature alloc] init];
   MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"sourceID"
-                                                               shape:feature
-                                                             options:nil];
+                                                                shape:feature
+                                                              options:nil];
   MLNSymbolStyleLayer *layer = [[MLNSymbolStyleLayer alloc] initWithIdentifier:@"layerID"
                                                                         source:source];
   // Reproduces https://github.com/maplibre/maplibre-native/issues/3477.
   NSArray *jsonExpression = @[
     @"case", @[ @"==", @[ @"get", @"icon" ], @"1" ], @[ @"image", @"icon1" ],
-    @[ @"==", @[ @"get", @"icon" ], @"2" ], @[ @"image", @"icon2" ],
-    @[ @"image", @"icon3" ]
+    @[ @"==", @[ @"get", @"icon" ], @"2" ], @[ @"image", @"icon2" ], @[ @"image", @"icon3" ]
   ];
   NSExpression *expression = [NSExpression expressionWithMLNJSONObject:jsonExpression];
 
