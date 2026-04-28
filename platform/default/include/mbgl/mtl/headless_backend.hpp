@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/headless_backend.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <memory>
 #include <functional>
@@ -17,6 +18,7 @@ public:
     void updateAssumedState() override;
     gfx::Renderable& getDefaultRenderable() override;
     PremultipliedImage readStillImage() override;
+    MTL::Texture* getMetalTexture();
     RendererBackend* getRendererBackend() override;
     SwapBehaviour getSwapBehaviour();
 
