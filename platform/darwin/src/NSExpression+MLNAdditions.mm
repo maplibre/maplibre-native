@@ -1559,7 +1559,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
     firstCondition = self.operand;
   }
 
-  if ([firstCondition respondsToSelector:@selector(constantValue)] &&
+  if (firstCondition.expressionType == NSConstantValueExpressionType &&
       [firstCondition.constantValue isKindOfClass:[NSComparisonPredicate class]]) {
     NSPredicate *predicate = (NSPredicate *)firstCondition.constantValue;
     condition = predicate.mgl_jsonExpressionObject;
@@ -1572,7 +1572,7 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       isAftermarketFunction ? self.arguments : self.arguments[minimumIndex].constantValue;
 
   for (NSUInteger index = minimumIndex; index < arguments.count; index++) {
-    if ([arguments[index] respondsToSelector:@selector(constantValue)] &&
+    if (arguments[index].expressionType == NSConstantValueExpressionType &&
         [arguments[index].constantValue isKindOfClass:[NSComparisonPredicate class]]) {
       NSPredicate *predicate = (NSPredicate *)arguments[index].constantValue;
       [expressionObject addObject:predicate.mgl_jsonExpressionObject];
