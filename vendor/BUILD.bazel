@@ -722,6 +722,13 @@ cc_library(
         # "HB_NO_WIN1256",
         "HB_TINY",
     ],
+    # Keep bundled HarfBuzz symbols private so they do not interpose symbols from
+    # app dependencies. See https://github.com/maplibre/maplibre-native/issues/3777.
+    copts = select({
+        "@platforms//os:ios": ["-fvisibility=hidden"],
+        "@platforms//os:macos": ["-fvisibility=hidden"],
+        "//conditions:default": [],
+    }),
     includes = [
         "freetype/include",
         "harfbuzz/src",
