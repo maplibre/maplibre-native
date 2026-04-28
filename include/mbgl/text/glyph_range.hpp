@@ -12,9 +12,9 @@ enum GlyphIDType : uint16_t {
     FontPBF = 0x00,
 };
 
-GlyphIDType genNewGlyphIDType(const std::string &url,
-                              const FontStack &fontStack,
-                              const std::vector<std::pair<uint32_t, uint32_t>> &pairs);
+GlyphIDType genNewGlyphIDType(const std::string& url,
+                              const FontStack& fontStack,
+                              const std::vector<std::pair<uint32_t, uint32_t>>& pairs);
 
 class GlyphRange {
 public:
@@ -25,8 +25,8 @@ public:
 
     GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_ = FontPBF);
 
-    bool operator==(const GlyphRange &other) const;
-    bool operator<(const GlyphRange &other) const;
+    bool operator==(const GlyphRange& other) const;
+    bool operator<(const GlyphRange& other) const;
 };
 
 constexpr uint32_t GLYPHS_PER_GLYPH_RANGE = 256;
@@ -40,7 +40,7 @@ namespace std {
 
 template <>
 struct hash<mbgl::GlyphRange> {
-    std::size_t operator()(const mbgl::GlyphRange &range) const { return mbgl::util::hash(range.first, range.second); }
+    std::size_t operator()(const mbgl::GlyphRange& range) const { return mbgl::util::hash(range.first, range.second); }
 };
 
 } // namespace std

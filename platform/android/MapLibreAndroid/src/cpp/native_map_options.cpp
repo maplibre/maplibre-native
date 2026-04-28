@@ -3,17 +3,17 @@
 namespace mbgl {
 namespace android {
 
-void NativeMapOptions::registerNative(jni::JNIEnv &env) {
+void NativeMapOptions::registerNative(jni::JNIEnv& env) {
     jni::Class<NativeMapOptions>::Singleton(env);
 }
 
-NativeMapOptions::NativeMapOptions(jni::JNIEnv &_env, const jni::Object<NativeMapOptions> &_obj) {}
+NativeMapOptions::NativeMapOptions(jni::JNIEnv& _env, const jni::Object<NativeMapOptions>& _obj) {}
 
 NativeMapOptions::~NativeMapOptions() {}
 
-util::ActionJournalOptions NativeMapOptions::getActionJournalOptions(jni::JNIEnv &env,
-                                                                     const jni::Object<NativeMapOptions> &obj) {
-    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+util::ActionJournalOptions NativeMapOptions::getActionJournalOptions(jni::JNIEnv& env,
+                                                                     const jni::Object<NativeMapOptions>& obj) {
+    auto& javaClass = jni::Class<NativeMapOptions>::Singleton(env);
 
     auto enabledField = javaClass.GetField<jni::jboolean>(env, "actionJournalEnabled");
     auto pathField = javaClass.GetField<jni::String>(env, "actionJournalPath");
@@ -29,14 +29,14 @@ util::ActionJournalOptions NativeMapOptions::getActionJournalOptions(jni::JNIEnv
         .withRenderingStatsReportInterval(obj.Get(env, renderingReportIntervalField));
 }
 
-float NativeMapOptions::pixelRatio(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
-    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+float NativeMapOptions::pixelRatio(jni::JNIEnv& env, const jni::Object<NativeMapOptions>& obj) {
+    auto& javaClass = jni::Class<NativeMapOptions>::Singleton(env);
     auto pixelRatioField = javaClass.GetField<float>(env, "pixelRatio");
     return obj.Get(env, pixelRatioField);
 }
 
-bool NativeMapOptions::crossSourceCollisions(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
-    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+bool NativeMapOptions::crossSourceCollisions(jni::JNIEnv& env, const jni::Object<NativeMapOptions>& obj) {
+    auto& javaClass = jni::Class<NativeMapOptions>::Singleton(env);
     auto crossSourceCollisionsField = javaClass.GetField<jni::jboolean>(env, "crossSourceCollisions");
     return obj.Get(env, crossSourceCollisionsField);
 }

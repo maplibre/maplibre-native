@@ -10,8 +10,8 @@
 struct FT_FaceRec_;
 struct FT_LibraryRec_;
 
-using FT_Face = FT_FaceRec_ *;
-using FT_Library = FT_LibraryRec_ *;
+using FT_Face = FT_FaceRec_*;
+using FT_Library = FT_LibraryRec_*;
 
 namespace mbgl {
 
@@ -26,15 +26,15 @@ private:
 };
 
 // call back format: width, height, left, top, advance, bitmap data
-using GlyphCallBack = std::function<void(uint32_t, uint32_t, int, int, uint32_t, unsigned char *)>;
+using GlyphCallBack = std::function<void(uint32_t, uint32_t, int, int, uint32_t, unsigned char*)>;
 
 class FreeTypeFace {
 public:
-    explicit FreeTypeFace(const std::string &fontFileName, const FreeTypeLibrary &lib);
-    explicit FreeTypeFace(const char *fontData, size_t fontDataSize, const FreeTypeLibrary &lib);
+    explicit FreeTypeFace(const std::string& fontFileName, const FreeTypeLibrary& lib);
+    explicit FreeTypeFace(const char* fontData, size_t fontDataSize, const FreeTypeLibrary& lib);
     ~FreeTypeFace();
 
-    Glyph rasterizeGlyph(const GlyphID &glyph);
+    Glyph rasterizeGlyph(const GlyphID& glyph);
 
     bool isValid() const { return valid; }
 

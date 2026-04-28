@@ -23,7 +23,7 @@ struct NavigationMapView: UIViewRepresentable {
 }
 
 struct LongRunningMapView: View {
-    // view lifetime (seconds)
+    /// view lifetime (seconds)
     let DURATION = 72.0 * 60.0 * 60.0
 
     @Environment(\.dismiss) var dismiss

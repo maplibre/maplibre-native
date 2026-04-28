@@ -3,7 +3,7 @@ import MapLibre
 class UserMap: MLNMapView, MLNMapViewDelegate {
     private var continuation: CheckedContinuation<Void, Never>?
 
-    // config
+    /// config
     private var RANDOM = RandomNumberGeneratorWithSeed(seed: 42)
 
     private let STYLES = [
@@ -61,11 +61,21 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
         return values[low].0
     }
 
-    func randomSlowDuration() -> TimeInterval { random(in: 3000 ... 5000) / 1000.0 }
-    func randomFastDuration() -> TimeInterval { random(in: 500 ... 1000) / 1000.0 }
+    func randomSlowDuration() -> TimeInterval {
+        random(in: 3000 ... 5000) / 1000.0
+    }
 
-    func randomPlacePoints() -> Int { random(in: 10 ... 20) }
-    func randomPlaceActions() -> Int { random(in: 10 ... 20) }
+    func randomFastDuration() -> TimeInterval {
+        random(in: 500 ... 1000) / 1000.0
+    }
+
+    func randomPlacePoints() -> Int {
+        random(in: 10 ... 20)
+    }
+
+    func randomPlaceActions() -> Int {
+        random(in: 10 ... 20)
+    }
 
     func randomLatLng() -> CLLocationCoordinate2D {
         let bounds = visibleCoordinateBounds
@@ -75,17 +85,29 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
         )
     }
 
-    func randomZoom() -> Double { random(in: 14.0 ... 20.0) }
+    func randomZoom() -> Double {
+        random(in: 14.0 ... 20.0)
+    }
 
     func randomAltitude() -> Double {
         MLNAltitudeForZoomLevel(randomZoom(), camera.pitch, camera.centerCoordinate.latitude, frame.size)
     }
 
-    func randomTilt() -> Double { random(in: 0.0 ... 60.0) }
-    func randomBearing() -> Double { random(in: 0.0 ... 360.0) }
+    func randomTilt() -> Double {
+        random(in: 0.0 ... 60.0)
+    }
 
-    func randomAnnotationRemove() -> Int { random(in: 4 ... 8) }
-    func randomAnnotationAdd() -> Int { random(in: 2 ... 4) }
+    func randomBearing() -> Double {
+        random(in: 0.0 ... 360.0)
+    }
+
+    func randomAnnotationRemove() -> Int {
+        random(in: 4 ... 8)
+    }
+
+    func randomAnnotationAdd() -> Int {
+        random(in: 2 ... 4)
+    }
 
     func randomPolyPoints() -> [CLLocationCoordinate2D] {
         let bounds = visibleCoordinateBounds
@@ -104,7 +126,9 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
         }
     }
 
-    func randomLineWidth() -> Double { random(in: 1.0 ... 4.0) }
+    func randomLineWidth() -> Double {
+        random(in: 1.0 ... 4.0)
+    }
 
     func randomColor() -> UIColor {
         UIColor(
