@@ -85,12 +85,17 @@ jobs:
   build-linux:
     needs: [create-release]
     runs-on: ${{ matrix.runner.os }}
+    env:
+      PRESET_RENDERER: ${{ matrix.preset_renderer || matrix.renderer }}
     strategy:
       matrix:
         include:
           - renderer: opengl
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: vulkan
+            runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: wgpu
+            preset_renderer: webgpu-wgpu
             runner: { os: ubuntu-latest, arch: x64 }
           - renderer: opengl
             runner: { os: ubuntu-24.04-arm, arch: arm64 }
@@ -110,13 +115,18 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_CREATE_AMALGAMATION=ON
-          cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core
+          cmake --preset "linux-${PRESET_RENDERER}" -DCMAKE_CXX_COMPILER_LAUNCHER="" -DMLN_CREATE_AMALGAMATION=ON
+          cmake --build "build-linux-${PRESET_RENDERER}" --target mbgl-core
+
+      - name: Verify Linux WebGPU amalgamation
+        if: matrix.renderer == 'wgpu'
+        run: |
+          .github/scripts/check-linux-webgpu-amalgam "build-linux-${PRESET_RENDERER}/libmbgl-core-amalgam.a"
 
       - name: Rename artifact
         run: |
-          cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
-          cp build-linux-${{ matrix.renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          cp "build-linux-${PRESET_RENDERER}/libmbgl-core.a" "libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a"
+          cp "build-linux-${PRESET_RENDERER}/libmbgl-core-amalgam.a" "libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a"
 
       - name: Upload Linux artifacts
         if: github.event_name == 'pull_request'

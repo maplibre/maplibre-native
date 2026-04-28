@@ -67,15 +67,20 @@ list(APPEND _wgpu_lib_search_paths
     "${_mln_wgpu_source_dir}/build/release"
 )
 
+# Resolve the exact archive/import library filename emitted by wgpu-native.
+macro(mln_wgpu_find_exact_library out_var out_description)
+    foreach(_search_path ${_wgpu_lib_search_paths})
+        if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+            set(${out_var} "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "${out_description}")
+            break()
+        endif()
+    endforeach()
+endmacro()
+
 # On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
 macro(mln_wgpu_find_library)
     if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        foreach(_search_path ${_wgpu_lib_search_paths})
-            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
-                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
-                break()
-            endif()
-        endforeach()
+        mln_wgpu_find_exact_library(WGPU_LIBRARY "wgpu-native library")
     else()
         find_library(WGPU_LIBRARY
             NAMES wgpu_native libwgpu_native
@@ -87,6 +92,7 @@ macro(mln_wgpu_find_library)
 endmacro()
 
 mln_wgpu_find_library()
+mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
 
 if(NOT WGPU_LIBRARY)
     message(STATUS "Pre-built wgpu-native library not found, attempting to build from source...")
@@ -137,6 +143,7 @@ if(NOT WGPU_LIBRARY)
 
     # Try to find the library again
     mln_wgpu_find_library()
+    mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
 
     if(NOT WGPU_LIBRARY)
         message(FATAL_ERROR "Failed to locate wgpu-native library after building")
@@ -145,6 +152,14 @@ if(NOT WGPU_LIBRARY)
     message(STATUS "Successfully built wgpu-native: ${WGPU_LIBRARY}")
 else()
     message(STATUS "Found wgpu-native library: ${WGPU_LIBRARY}")
+endif()
+
+if(WGPU_STATIC_LIBRARY)
+    message(STATUS "Found wgpu-native static library: ${WGPU_STATIC_LIBRARY}")
+elseif(MLN_CREATE_AMALGAMATION)
+    message(FATAL_ERROR
+        "MLN_CREATE_AMALGAMATION=ON requires a static wgpu-native library, "
+        "but none was found in: ${_wgpu_lib_search_paths}")
 endif()
 
 # Generate WebGPU-Cpp wrapper if needed
