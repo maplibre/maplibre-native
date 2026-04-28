@@ -39,11 +39,11 @@ public:
 
     size_t numChannels() const noexcept override;
 
-    void create() noexcept override;
+    void create() override;
 
-    void upload(const void* pixelData, const Size& size_) noexcept override;
+    void upload(const void* pixelData, const Size& size_) override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
-    void upload() noexcept override;
+    void upload() override;
 
     bool needsUpload() const noexcept override { return !!image; };
 
@@ -51,12 +51,12 @@ public:
 
     MTL::Texture* getMetalTexture() const noexcept;
 
-    void updateSamplerConfiguration() noexcept;
+    void updateSamplerConfiguration();
 
     /// @brief Bind this texture to the specified location
     /// @param renderPass Render pass on which the texture will be assign
     /// @param location Location index of texture sampler in a shader
-    void bind(RenderPass& renderPass, int32_t location) noexcept;
+    void bind(RenderPass& renderPass, int32_t location);
 
     /// @brief Unbind the texture, if it was bound
     /// @param renderPass Render pass from which the texture will be removed
@@ -65,7 +65,7 @@ public:
 
 private:
     MTL::PixelFormat getMetalPixelFormat() const noexcept;
-    void createMetalTexture() noexcept;
+    void createMetalTexture();
     void destroyMetalTexture() noexcept;
 
     Context& context;

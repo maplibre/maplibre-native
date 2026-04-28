@@ -106,6 +106,11 @@ public:
   id<MTLCommandQueue> commandQueue;
   bool presentsWithTransaction = false;
 
+  // Cached last-applied values comparing against MTKView's reflected state round-trips
+  // through UIKit and can defeat the no-op guard under non-integer scale factors.
+  CGFloat lastAppliedScaleFactor = 0;
+  CGSize lastAppliedDrawableSize = CGSizeZero;
+
   // We count how often the context was activated/deactivated so that we can truly deactivate it
   // after the activation count drops to 0.
   NSUInteger activationCount = 0;
@@ -161,6 +166,9 @@ void MLNMapViewMetalImpl::createView() {
   resource.mtlView.delegate = resource.delegate;
   resource.mtlView.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  // We own drawable sizing in layoutChanged(); disable MTKView's automatic recompute so
+  // setting contentScaleFactor cannot race with explicit drawableSize assignment.
+  resource.mtlView.autoResizeDrawable = NO;
   resource.mtlView.contentScaleFactor = scaleFactor;
   resource.mtlView.contentMode = UIViewContentModeCenter;
   resource.mtlView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -215,17 +223,28 @@ UIImage* MLNMapViewMetalImpl::snapshot() {
 }
 
 void MLNMapViewMetalImpl::layoutChanged() {
-  const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
-  const auto screenSize = mapView.bounds.size;
-
+  // Fix: unconditionally rewriting contentScaleFactor/drawableSize every
+  // layout pass caused a feedback loop under iOS 26 Smart Display Zoom (non-integer scale).
+  // Also skip pre-layout/detached passes — MLNEffectiveScaleFactorForView falls back to
+  // mainScreen without a window, wrong for CarPlay.
   auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+  const auto viewSize = mapView.bounds.size;
+  if (!resource.mtlView || viewSize.width <= 0 || viewSize.height <= 0 || !mapView.window) {
+    return;
+  }
 
-  resource.mtlView.contentScaleFactor = scaleFactor;
-  resource.mtlView.drawableSize =
-      CGSizeMake(screenSize.width * scaleFactor, screenSize.height * scaleFactor);
+  const auto scaleFactor = MLNEffectiveScaleFactorForView(mapView);
+  const CGSize target = CGSizeMake(std::round(viewSize.width * scaleFactor),
+                                   std::round(viewSize.height * scaleFactor));
 
-  size = {static_cast<uint32_t>(resource.mtlView.drawableSize.width),
-          static_cast<uint32_t>(resource.mtlView.drawableSize.height)};
+  if (scaleFactor != resource.lastAppliedScaleFactor) {
+    resource.mtlView.contentScaleFactor = resource.lastAppliedScaleFactor = scaleFactor;
+  }
+  if (!CGSizeEqualToSize(target, resource.lastAppliedDrawableSize)) {
+    resource.mtlView.drawableSize = resource.lastAppliedDrawableSize = target;
+  }
+
+  size = {static_cast<uint32_t>(target.width), static_cast<uint32_t>(target.height)};
 }
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {
