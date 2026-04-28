@@ -9,6 +9,7 @@ Note: this release has some changes to how icon offsets behave on pitched maps. 
 - core: Handle allocation failure ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
 - Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
 - Fix: unconditionally rewriting contentScaleFactor/drawableSize every layout pass caused a feedback loop under iOS 26 Smart Display Zoom ([#4251](https://github.com/maplibre/maplibre-native/pull/4251)). This resolves CarPlay users were experiencing.
+- iOS: Fix case image expression crash ([#4269]((https://github.com/maplibre/maplibre-native/pull/4269))).
 
 ## 6.25.1
 
