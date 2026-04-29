@@ -115,10 +115,11 @@ std::size_t VertexAttributeArray::getTotalSize() const {
     });
 }
 
-std::size_t VertexAttributeArray::getMaxCount() const {
-    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& attr) {
-        return std::max(acc, (attr ? attr->getCount() : 0));
-    });
+std::size_t VertexAttributeArray::getMinCount() const {
+    return std::accumulate(
+        attrs.begin(), attrs.end(), std::numeric_limits<std::size_t>::max(), [](const auto acc, const auto& attr) {
+            return std::min(acc, (attr ? attr->getCount() : std::numeric_limits<std::size_t>::max()));
+        });
 }
 
 void VertexAttributeArray::clear() {
