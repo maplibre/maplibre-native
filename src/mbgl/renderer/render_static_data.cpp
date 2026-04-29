@@ -5,53 +5,85 @@
 
 namespace mbgl {
 
-gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> RenderStaticData::tileVertices() {
-    gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> result;
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, 0}}}));
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, 0}}}));
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, util::EXTENT}}}));
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, util::EXTENT}}}));
-    return result;
-}
-
-gfx::IndexVector<gfx::Triangles> RenderStaticData::quadTriangleIndices() {
-    gfx::IndexVector<gfx::Triangles> result;
-    result.emplace_back(0, 1, 2);
-    result.emplace_back(1, 2, 3);
-    return result;
-}
-
-gfx::IndexVector<gfx::LineStrip> RenderStaticData::tileLineStripIndices() {
-    gfx::IndexVector<gfx::LineStrip> result;
-    result.emplace_back(0);
-    result.emplace_back(1);
-    result.emplace_back(3);
-    result.emplace_back(2);
-    result.emplace_back(0);
-    return result;
-}
-
-gfx::VertexVector<RasterLayoutVertex> RenderStaticData::rasterVertices() {
-    gfx::VertexVector<RasterLayoutVertex> result;
-    result.emplace_back(RasterBucket::layoutVertex({0, 0}, {0, 0}));
-    result.emplace_back(RasterBucket::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
-    result.emplace_back(RasterBucket::layoutVertex({0, util::EXTENT}, {0, util::EXTENT}));
-    result.emplace_back(RasterBucket::layoutVertex({util::EXTENT, util::EXTENT}, {util::EXTENT, util::EXTENT}));
-    return result;
-}
-
-gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVertices() {
-    gfx::VertexVector<HeatmapTextureLayoutVertex> result;
-    result.emplace_back(HeatmapBucket::textureVertex({0, 0}));
-    result.emplace_back(HeatmapBucket::textureVertex({1, 0}));
-    result.emplace_back(HeatmapBucket::textureVertex({0, 1}));
-    result.emplace_back(HeatmapBucket::textureVertex({1, 1}));
-    return result;
-}
-
 RenderStaticData::RenderStaticData(std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
     : shaders(std::move(shaders_)),
       clippingMaskSegments(tileTriangleSegments()) {}
+
+void RenderStaticData::upload(gfx::UploadPass& uploadPass) {
+    if (!uploaded) {
+        // these are still used by stencil buffer rendering
+        tileVertexBuffer = uploadPass.createVertexBuffer(
+            tileVertices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/false);
+        quadTriangleIndexBuffer = uploadPass.createIndexBuffer(
+            quadTriangleIndices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/false);
+        uploaded = true;
+    }
+}
+
+gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> RenderStaticData::tileVertices() {
+    gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> vertices;
+    vertices.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, 0}}}));
+    vertices.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, 0}}}));
+    vertices.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, util::EXTENT}}}));
+    vertices.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, util::EXTENT}}}));
+    return vertices;
+}
+
+gfx::VertexVector<RasterLayoutVertex> RenderStaticData::rasterVertices() {
+    gfx::VertexVector<RasterLayoutVertex> vertices;
+    vertices.emplace_back(RasterBucket::layoutVertex({0, 0}, {0, 0}));
+    vertices.emplace_back(RasterBucket::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
+    vertices.emplace_back(RasterBucket::layoutVertex({0, util::EXTENT}, {0, util::EXTENT}));
+    vertices.emplace_back(RasterBucket::layoutVertex({util::EXTENT, util::EXTENT}, {util::EXTENT, util::EXTENT}));
+    return vertices;
+}
+
+gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVertices() {
+    gfx::VertexVector<HeatmapTextureLayoutVertex> vertices;
+    vertices.emplace_back(HeatmapBucket::textureVertex({0, 0}));
+    vertices.emplace_back(HeatmapBucket::textureVertex({1, 0}));
+    vertices.emplace_back(HeatmapBucket::textureVertex({0, 1}));
+    vertices.emplace_back(HeatmapBucket::textureVertex({1, 1}));
+    return vertices;
+}
+
+gfx::VertexVector<FillExtrusionStaticVertex> RenderStaticData::fillExtrusionVertices() {
+    gfx::VertexVector<HeatmapTextureLayoutVertex> vertices;
+    vertices.emplace_back(FillExtrusionStaticVertex{1, 0});
+    vertices.emplace_back(FillExtrusionStaticVertex{1, 1});
+    vertices.emplace_back(FillExtrusionStaticVertex{0, 0});
+    vertices.emplace_back(FillExtrusionStaticVertex{0, 1});
+    return vertices;
+}
+
+gfx::IndexVector<gfx::Triangles> RenderStaticData::quadTriangleIndices() {
+    gfx::IndexVector<gfx::Triangles> indices;
+    indices.emplace_back(0, 1, 2);
+    indices.emplace_back(1, 2, 3);
+    return indices;
+}
+
+gfx::IndexVector<gfx::LineStrip> RenderStaticData::tileLineStripIndices() {
+    gfx::IndexVector<gfx::LineStrip> indices;
+    indices.emplace_back(0);
+    indices.emplace_back(1);
+    indices.emplace_back(3);
+    indices.emplace_back(2);
+    indices.emplace_back(0);
+    return indices;
+}
+
+gfx::IndexVector<gfx::Triangles> RenderStaticData::fillExtrusionTriangleIndices() {
+    gfx::IndexVector<gfx::Triangles> indices;
+    // ┌──────┐
+    // │ 0  1 │ Counter-Clockwise winding order.
+    // │      │ Triangle 1: 0 => 2 => 1
+    // │ 2  3 │ Triangle 2: 1 => 2 => 3
+    // └──────┘
+    indices.emplace_back(0, 2, 1);
+    indices.emplace_back(1, 2, 3);
+    return indices;
+}
 
 SegmentVector RenderStaticData::tileTriangleSegments() {
     SegmentVector segments;
@@ -77,15 +109,10 @@ SegmentVector RenderStaticData::heatmapTextureSegments() {
     return segments;
 }
 
-void RenderStaticData::upload(gfx::UploadPass& uploadPass) {
-    if (!uploaded) {
-        // these are still used by stencil buffer rendering
-        tileVertexBuffer = uploadPass.createVertexBuffer(
-            tileVertices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/false);
-        quadTriangleIndexBuffer = uploadPass.createIndexBuffer(
-            quadTriangleIndices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/false);
-        uploaded = true;
-    }
+SegmentVector RenderStaticData::fillExtrusionSegments() {
+    SegmentVector segments;
+    segments.emplace_back(0, 0, 4, 6);
+    return segments;
 }
 
 } // namespace mbgl

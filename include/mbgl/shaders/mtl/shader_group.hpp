@@ -77,11 +77,13 @@ public:
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
             for (const auto& attrib : ShaderClass::attributes) {
                 if (!propertiesAsUniforms.second.count(attrib.id)) {
-                    shader->initAttribute(attrib);
+                    shader->initVertexAttribute(attrib);
                 }
             }
             for (const auto& attrib : ShaderClass::instanceAttributes) {
-                shader->initInstanceAttribute(attrib);
+                if (!propertiesAsUniforms.second.count(attrib.id)) {
+                    shader->initInstanceAttribute(attrib);
+                }
             }
             for (const auto& texture : ShaderClass::textures) {
                 shader->initTexture(texture);
