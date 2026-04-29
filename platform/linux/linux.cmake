@@ -1,20 +1,34 @@
 option(MLN_WITH_X11 "Build with X11 Support" ON)
 option(MLN_WITH_WAYLAND "Build with Wayland Support" OFF)
 
+if(MLN_CREATE_AMALGAMATION)
+    message(STATUS "Amalgamation build: using vendored static dependencies")
+    include(${CMAKE_CURRENT_LIST_DIR}/cmake/vendored_deps.cmake)
+
+    # Force builtin ICU when vendoring all deps
+    set(MLN_USE_BUILTIN_ICU TRUE)
+endif()
+
 find_package(CURL REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
 if (MLN_WITH_X11)
     find_package(X11 REQUIRED)
 endif ()
 find_package(Threads REQUIRED)
 
-pkg_search_module(WEBP libwebp REQUIRED)
-pkg_search_module(LIBUV libuv REQUIRED)
-pkg_search_module(ICUUC icu-uc)
-pkg_search_module(ICUI18N icu-i18n)
-find_program(ARMERGE NAMES armerge)
+if(NOT MLN_CREATE_AMALGAMATION)
+    find_package(JPEG REQUIRED)
+    find_package(PNG REQUIRED)
+    pkg_search_module(WEBP libwebp REQUIRED)
+    pkg_search_module(LIBUV libuv REQUIRED)
+    pkg_search_module(ICUUC icu-uc)
+    pkg_search_module(ICUI18N icu-i18n)
+endif()
+
+find_program(ARMERGE NAMES armerge
+    HINTS "$ENV{HOME}/.cargo/bin"
+    DOC "Path to armerge tool for static library amalgamation"
+)
 
 if(MLN_WITH_WAYLAND AND NOT MLN_WITH_VULKAN)
     # See https://github.com/maplibre/maplibre-native/pull/2022
@@ -141,11 +155,26 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/platform/default/include
     PRIVATE
         ${CURL_INCLUDE_DIRS}
-        ${JPEG_INCLUDE_DIRS}
-        ${LIBUV_INCLUDE_DIRS}
         ${X11_INCLUDE_DIRS}
-        ${WEBP_INCLUDE_DIRS}
 )
+
+if(MLN_CREATE_AMALGAMATION)
+    target_include_directories(
+        mbgl-core
+        PRIVATE
+            ${VENDORED_JPEG_INCLUDE_DIR}
+            ${VENDORED_UV_INCLUDE_DIR}
+            ${VENDORED_WEBP_INCLUDE_DIR}
+    )
+else()
+    target_include_directories(
+        mbgl-core
+        PRIVATE
+            ${JPEG_INCLUDE_DIRS}
+            ${LIBUV_INCLUDE_DIRS}
+            ${WEBP_INCLUDE_DIRS}
+    )
+endif()
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
@@ -164,54 +193,53 @@ if(NOT ${ICUUC_FOUND} OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN
     )
 endif()
 
-target_link_libraries(
-    mbgl-core
-    PRIVATE
-        ${CURL_LIBRARIES}
-        ${JPEG_LIBRARIES}
-        ${LIBUV_LIBRARIES}
-        ${X11_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${WEBP_LIBRARIES}
-        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUUC_LIBRARIES}>
-        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUI18N_LIBRARIES}>
-        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
-        PNG::PNG
-        mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
-)
+if(MLN_CREATE_AMALGAMATION)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            ${CURL_LIBRARIES}
+            ${VENDORED_JPEG_TARGET}
+            ${VENDORED_UV_TARGET}
+            ${X11_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT}
+            ${VENDORED_WEBP_TARGET}
+            mbgl-vendor-icu
+            ${VENDORED_PNG_TARGET}
+            ${VENDORED_ZLIB_TARGET}
+            ${VENDORED_BZ2_TARGET}
+            mbgl-vendor-nunicode
+            mbgl-vendor-sqlite
+    )
+else()
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            ${CURL_LIBRARIES}
+            ${JPEG_LIBRARIES}
+            ${LIBUV_LIBRARIES}
+            ${X11_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT}
+            ${WEBP_LIBRARIES}
+            $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUUC_LIBRARIES}>
+            $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUI18N_LIBRARIES}>
+            $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
+            PNG::PNG
+            mbgl-vendor-nunicode
+            mbgl-vendor-sqlite
+    )
+endif()
 
 if(MLN_CREATE_AMALGAMATION)
-    if ("${ARMERGE}" STREQUAL "MLN_CREATE_AMALGAMATION")
-        message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
+    if ("${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+        message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON.\n"
+            "Install with: cargo install armerge")
     endif()
     message(STATUS "Found armerge: ${ARMERGE}")
-    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
-    set(STATIC_LIBS "")
-
-    find_static_library(STATIC_LIBS NAMES png)
-    find_static_library(STATIC_LIBS NAMES z)
-    find_static_library(STATIC_LIBS NAMES jpeg)
-    find_static_library(STATIC_LIBS NAMES webp)
-    find_static_library(STATIC_LIBS NAMES uv uv_a)
-    find_static_library(STATIC_LIBS NAMES ssl)
-    find_static_library(STATIC_LIBS NAMES crypto)
-    find_static_library(STATIC_LIBS NAMES bz2 bzip2)
-
-    if(MLN_WITH_VULKAN)
-        find_static_library(STATIC_LIBS NAMES glslang)
-        find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
-        find_static_library(STATIC_LIBS NAMES SPIRV)
-        find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
-        find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
-        find_static_library(STATIC_LIBS NAMES MachineIndependent)
-        find_static_library(STATIC_LIBS NAMES GenericCodeGen)
-    endif()
 
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND ${ARMERGE} --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
@@ -220,12 +248,17 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-sqlite>
             $<TARGET_FILE:mbgl-vendor-parsedate>
             $<TARGET_FILE:mlt-cpp>
-            ${ICUUC_LIBRARY_DIRS}/libicuuc.a
-            ${ICUUC_LIBRARY_DIRS}/libicudata.a
-            ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
-            ${STATIC_LIBS}
+            $<TARGET_FILE:mbgl-vendor-icu>
+            $<TARGET_FILE:${VENDORED_PNG_TARGET}>
+            $<TARGET_FILE:${VENDORED_ZLIB_TARGET}>
+            $<TARGET_FILE:${VENDORED_JPEG_TARGET}>
+            $<TARGET_FILE:${VENDORED_WEBP_TARGET}>
+            $<TARGET_FILE:${VENDORED_UV_TARGET}>
+            $<TARGET_FILE:${VENDORED_BZ2_TARGET}>
+        COMMAND ${CMAKE_COMMAND} -E copy libmbgl-core-amalgam.a $<TARGET_FILE:mbgl-core>
     )
-
+    # Hide vendored symbols from the final .so to avoid collisions
+    target_link_options(mbgl-core PUBLIC -Wl,--exclude-libs,ALL)
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
