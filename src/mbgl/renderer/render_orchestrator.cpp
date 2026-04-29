@@ -117,7 +117,7 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
                                        const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
-      imageManager(std::make_unique<ImageManager>()),
+      imageManager(ImageManager::create()),
       lineAtlas(std::make_unique<LineAtlas>()),
       patternAtlas(std::make_unique<PatternAtlas>()),
       imageImpls(makeMutable<std::vector<Immutable<style::Image::Impl>>>()),

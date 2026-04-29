@@ -23,7 +23,7 @@ public:
     util::RunLoop loop;
     AnnotationManager annotationManager{style};
 
-    const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    const std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     const std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
