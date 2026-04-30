@@ -40,6 +40,7 @@
 #include "conversion/collection.hpp"
 #include "style/conversion/filter.hpp"
 #include "geojson/feature.hpp"
+#include "gson/json_object.hpp"
 #include "rendering_stats.hpp"
 
 #include "android_renderer_frontend.hpp"
@@ -1013,6 +1014,59 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> NativeMapView::queryRender
     return Feature::convert(env, rendererFrontend->queryRenderedFeatures(box, {layers, toFilter(env, jfilter)}));
 }
 
+void NativeMapView::setFeatureState(JNIEnv& env,
+                                    const jni::String& sourceId,
+                                    const jni::String& sourceLayerId,
+                                    const jni::String& featureId,
+                                    const jni::Object<gson::JsonObject>& state) {
+    if (!sourceId || !featureId || !state) {
+        return;
+    }
+
+    rendererFrontend->setFeatureState(
+        jni::Make<std::string>(env, sourceId),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        jni::Make<std::string>(env, featureId),
+        gson::JsonObject::convert(env, state));
+    map->triggerRepaint();
+}
+
+jni::Local<jni::Object<gson::JsonObject>> NativeMapView::getFeatureState(JNIEnv& env,
+                                                                         const jni::String& sourceId,
+                                                                         const jni::String& sourceLayerId,
+                                                                         const jni::String& featureId) {
+    if (!sourceId || !featureId) {
+        return jni::Local<jni::Object<gson::JsonObject>>();
+    }
+
+    const auto state = rendererFrontend->getFeatureState(
+        jni::Make<std::string>(env, sourceId),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        jni::Make<std::string>(env, featureId));
+    if (state.empty()) {
+        return jni::Local<jni::Object<gson::JsonObject>>();
+    }
+
+    return gson::JsonObject::New(env, state);
+}
+
+void NativeMapView::removeFeatureState(JNIEnv& env,
+                                       const jni::String& sourceId,
+                                       const jni::String& sourceLayerId,
+                                       const jni::String& featureId,
+                                       const jni::String& stateKey) {
+    if (!sourceId) {
+        return;
+    }
+
+    rendererFrontend->removeFeatureState(
+        jni::Make<std::string>(env, sourceId),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        featureId ? std::optional<std::string>(jni::Make<std::string>(env, featureId)) : std::nullopt,
+        stateKey ? std::optional<std::string>(jni::Make<std::string>(env, stateKey)) : std::nullopt);
+    map->triggerRepaint();
+}
+
 jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
     mbgl::style::Light* light = map->getStyle().getLight();
     if (light) {
@@ -1172,7 +1226,7 @@ jni::Local<jni::Array<jni::Object<Source>>> NativeMapView::getSources(JNIEnv& en
     auto jSources = jni::Array<jni::Object<Source>>::New(env, sources.size());
     int index = 0;
     for (auto source : sources) {
-        jSources.Set(env, index, Source::peerForCoreSource(env, *source, *rendererFrontend));
+        jSources.Set(env, index, Source::peerForCoreSource(env, *source, *rendererFrontend, *map));
         index++;
     }
 
@@ -1188,7 +1242,7 @@ jni::Local<jni::Object<Source>> NativeMapView::getSource(JNIEnv& env, const jni:
     }
 
     // Create and return the source's native peer
-    return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource, *rendererFrontend));
+    return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource, *rendererFrontend, *map));
 }
 
 void NativeMapView::addSource(JNIEnv& env, const jni::Object<Source>& obj, jlong sourcePtr) {
@@ -1417,6 +1471,9 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::queryShapeAnnotations, "nativeQueryShapeAnnotations"),
         METHOD(&NativeMapView::queryRenderedFeaturesForPoint, "nativeQueryRenderedFeaturesForPoint"),
         METHOD(&NativeMapView::queryRenderedFeaturesForBox, "nativeQueryRenderedFeaturesForBox"),
+        METHOD(&NativeMapView::setFeatureState, "nativeSetFeatureState"),
+        METHOD(&NativeMapView::getFeatureState, "nativeGetFeatureState"),
+        METHOD(&NativeMapView::removeFeatureState, "nativeRemoveFeatureState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),

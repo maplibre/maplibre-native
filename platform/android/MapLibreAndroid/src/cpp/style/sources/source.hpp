@@ -6,6 +6,7 @@
 
 #include "../value.hpp"
 #include "../../android_renderer_frontend.hpp"
+#include "../../gson/json_object.hpp"
 
 #include <jni/jni.hpp>
 
@@ -19,7 +20,10 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&, mbgl::style::Source&);
-    static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend&);
+    static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&,
+                                                        mbgl::style::Source&,
+                                                        AndroidRendererFrontend&,
+                                                        mbgl::Map&);
 
     /*
      * Called when a Java object is created for a core source that belongs to a map.
@@ -62,6 +66,22 @@ public:
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
+    void setFeatureState(JNIEnv&,
+                         const jni::String& sourceLayerId,
+                         const jni::String& featureId,
+                         const jni::Object<gson::JsonObject>& state);
+
+    jni::Local<jni::Object<gson::JsonObject>> getFeatureState(JNIEnv&,
+                                                              const jni::String& sourceLayerId,
+                                                              const jni::String& featureId);
+
+    void removeFeatureState(JNIEnv&,
+                            const jni::String& sourceLayerId,
+                            const jni::String& featureId,
+                            const jni::String& stateKey);
+
+    void bindToMap(AndroidRendererFrontend&, mbgl::Map&);
+
 protected:
     // Set on newly created sources until added to the map.
     std::unique_ptr<mbgl::style::Source> ownedSource;
@@ -74,6 +94,9 @@ protected:
 
     // RendererFrontend pointer is valid only when added to the map.
     AndroidRendererFrontend* rendererFrontend{nullptr};
+
+    // Map pointer is valid only when added to the map.
+    mbgl::Map* map{nullptr};
 };
 
 } // namespace android

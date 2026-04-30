@@ -52,11 +52,14 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
 
 const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env,
                                                      mbgl::style::Source& coreSource,
-                                                     AndroidRendererFrontend& frontend) {
+                                                     AndroidRendererFrontend& frontend,
+                                                     mbgl::Map& map) {
     if (!coreSource.peer.has_value()) {
         coreSource.peer = createSourcePeer(env, coreSource, &frontend);
     }
-    return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
+    auto* peer = coreSource.peer.get<std::unique_ptr<Source>>().get();
+    peer->bindToMap(frontend, map);
+    return peer->javaPeer;
 }
 
 const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env, mbgl::style::Source& coreSource) {
@@ -172,7 +175,7 @@ void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& ma
     // Add strong reference to java source
     javaPeer = jni::NewGlobal(env, obj);
 
-    rendererFrontend = &frontend;
+    bindToMap(frontend, map);
 }
 
 bool Source::removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map& map) {
@@ -204,6 +207,65 @@ jni::Local<jni::Long> Source::getMinimumTileUpdateInterval(JNIEnv& env) {
     return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
 }
 
+void Source::setFeatureState(JNIEnv& env,
+                             const jni::String& sourceLayerId,
+                             const jni::String& featureId,
+                             const jni::Object<gson::JsonObject>& state) {
+    if (!rendererFrontend || !featureId || !state) {
+        return;
+    }
+
+    rendererFrontend->setFeatureState(
+        source.getID(),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        jni::Make<std::string>(env, featureId),
+        gson::JsonObject::convert(env, state));
+    if (map) {
+        map->triggerRepaint();
+    }
+}
+
+jni::Local<jni::Object<gson::JsonObject>> Source::getFeatureState(JNIEnv& env,
+                                                                  const jni::String& sourceLayerId,
+                                                                  const jni::String& featureId) {
+    if (!rendererFrontend || !featureId) {
+        return jni::Local<jni::Object<gson::JsonObject>>();
+    }
+
+    const auto state = rendererFrontend->getFeatureState(
+        source.getID(),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        jni::Make<std::string>(env, featureId));
+    if (state.empty()) {
+        return jni::Local<jni::Object<gson::JsonObject>>();
+    }
+
+    return gson::JsonObject::New(env, state);
+}
+
+void Source::removeFeatureState(JNIEnv& env,
+                                const jni::String& sourceLayerId,
+                                const jni::String& featureId,
+                                const jni::String& stateKey) {
+    if (!rendererFrontend) {
+        return;
+    }
+
+    rendererFrontend->removeFeatureState(
+        source.getID(),
+        sourceLayerId ? std::optional<std::string>(jni::Make<std::string>(env, sourceLayerId)) : std::nullopt,
+        featureId ? std::optional<std::string>(jni::Make<std::string>(env, featureId)) : std::nullopt,
+        stateKey ? std::optional<std::string>(jni::Make<std::string>(env, stateKey)) : std::nullopt);
+    if (map) {
+        map->triggerRepaint();
+    }
+}
+
+void Source::bindToMap(AndroidRendererFrontend& frontend, mbgl::Map& map) {
+    rendererFrontend = &frontend;
+    this->map = &map;
+}
+
 void Source::releaseJavaPeer() {
     // We can't release the peer if the source was not removed from the map
     if (!ownedSource) {
@@ -220,6 +282,7 @@ void Source::releaseJavaPeer() {
     javaPeer.reset();
 
     rendererFrontend = nullptr;
+    map = nullptr;
 }
 
 void Source::registerNative(jni::JNIEnv& env) {
@@ -242,7 +305,10 @@ void Source::registerNative(jni::JNIEnv& env) {
         METHOD(&Source::isVolatile, "nativeIsVolatile"),
         METHOD(&Source::setVolatile, "nativeSetVolatile"),
         METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
-        METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
+        METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"),
+        METHOD(&Source::setFeatureState, "nativeSetFeatureState"),
+        METHOD(&Source::getFeatureState, "nativeGetFeatureState"),
+        METHOD(&Source::removeFeatureState, "nativeRemoveFeatureState"));
 
     // Register subclasses
     GeoJSONSource::registerNative(env);

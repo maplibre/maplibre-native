@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.annotation.Keep
 import androidx.annotation.Size
 import androidx.annotation.UiThread
+import com.google.gson.JsonObject
 import org.maplibre.geojson.Feature
 import org.maplibre.android.style.expressions.Expression
 import java.net.URL
@@ -100,6 +101,58 @@ class VectorSource : Source {
      */
     constructor(id: String?, tileSet: TileSet) : super() {
         initialize(id, tileSet.toValueObject())
+    }
+
+    /**
+     * Sets the state of a feature in this source.
+     *
+     * Feature state can be read in style expressions through `["feature-state", key]`.
+     * The target feature must already have an id in the underlying source data.
+     *
+     * @param sourceLayerId the source layer id
+     * @param featureId     the id of the feature whose state to set
+     * @param state         a JSON object with the state key-value pairs to merge
+     */
+    fun setFeatureState(sourceLayerId: String, featureId: String, state: JsonObject) {
+        checkThread()
+        nativeSetFeatureState(sourceLayerId, featureId, state)
+    }
+
+    /**
+     * Gets the current state of a feature in this source.
+     *
+     * The target feature must already have an id in the underlying source data.
+     *
+     * @param sourceLayerId the source layer id
+     * @param featureId     the id of the feature whose state to get
+     * @return the feature state, or null
+     */
+    fun getFeatureState(sourceLayerId: String, featureId: String): JsonObject? {
+        checkThread()
+        return nativeGetFeatureState(sourceLayerId, featureId)
+    }
+
+    /**
+     * Removes state from a feature in this source, or from all features in a source layer
+     * when [featureId] is null.
+     *
+     * @param sourceLayerId the source layer id
+     * @param featureId     the id of the feature, or null to target all features
+     * @param stateKey      the state key to remove, or null to remove all keys
+     */
+    fun removeFeatureState(sourceLayerId: String, featureId: String?, stateKey: String?) {
+        checkThread()
+        nativeRemoveFeatureState(sourceLayerId, featureId, stateKey)
+    }
+
+    /**
+     * Removes all feature state entries from the given source layer.
+     *
+     * @param sourceLayerId the source layer id
+     */
+    fun resetFeatureStates(sourceLayerId: String) {
+        checkThread()
+        nativeRemoveFeatureState(sourceLayerId, null, null)
     }
 
     /**

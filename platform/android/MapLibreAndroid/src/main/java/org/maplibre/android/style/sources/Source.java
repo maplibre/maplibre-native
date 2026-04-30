@@ -4,6 +4,7 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.JsonObject;
 import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.utils.ThreadUtils;
 
@@ -197,6 +198,21 @@ public abstract class Source {
   @NonNull
   @Keep
   protected native Long nativeGetMinimumTileUpdateInterval();
+
+  @Keep
+  protected native void nativeSetFeatureState(@Nullable String sourceLayerId,
+                                              @NonNull String featureId,
+                                              @NonNull JsonObject state);
+
+  @Nullable
+  @Keep
+  protected native JsonObject nativeGetFeatureState(@Nullable String sourceLayerId,
+                                                    @NonNull String featureId);
+
+  @Keep
+  protected native void nativeRemoveFeatureState(@Nullable String sourceLayerId,
+                                                 @Nullable String featureId,
+                                                 @Nullable String stateKey);
 
   public void setDetached() {
     detached = true;

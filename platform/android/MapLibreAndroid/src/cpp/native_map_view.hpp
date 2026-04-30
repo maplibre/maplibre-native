@@ -15,6 +15,7 @@
 #include "graphics/rectf.hpp"
 #include "geojson/feature.hpp"
 #include "geojson/geometry.hpp"
+#include "gson/json_object.hpp"
 #include "geometry/lat_lng.hpp"
 #include "geometry/projected_meters.hpp"
 #include "style/layers/layer_manager.hpp"
@@ -257,6 +258,23 @@ public:
         jni::jfloat,
         const jni::Array<jni::String>&,
         const jni::Array<jni::Object<>>& jfilter);
+
+    void setFeatureState(JNIEnv&,
+                         const jni::String& sourceId,
+                         const jni::String& sourceLayerId,
+                         const jni::String& featureId,
+                         const jni::Object<gson::JsonObject>& state);
+
+    jni::Local<jni::Object<gson::JsonObject>> getFeatureState(JNIEnv&,
+                                                              const jni::String& sourceId,
+                                                              const jni::String& sourceLayerId,
+                                                              const jni::String& featureId);
+
+    void removeFeatureState(JNIEnv&,
+                            const jni::String& sourceId,
+                            const jni::String& sourceLayerId,
+                            const jni::String& featureId,
+                            const jni::String& stateKey);
 
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
 
