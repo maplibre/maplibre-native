@@ -379,9 +379,7 @@ jobs:
         uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
         with:
           toolchain: stable
-
-      - name: Add Android Rust target
-        run: rustup target add ${{ env.RUST_TARGET }}
+          targets: ${{ env.RUST_TARGET }}
 
       - name: Configure cargo for Android NDK linker
         run: |
