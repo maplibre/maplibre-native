@@ -6,12 +6,12 @@ import androidx.test.rule.ActivityTestRule
 import org.maplibre.android.AppCenter
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
-import org.junit.Assert.*
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +19,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicBoolean
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class RemoveUnusedImagesTest : AppCenter() {
@@ -44,7 +45,10 @@ class RemoveUnusedImagesTest : AppCenter() {
 
     @Test
     fun testRemoveUnusedImagesUserProvidedListener() {
-        var callbackLatch = CountDownLatch(2)
+        val canRemoveCallbackLatch = CountDownLatch(1)
+        val imageStillPresentLatch = CountDownLatch(1)
+        val cameraMoveRequested = AtomicBoolean(false)
+
         rule.runOnUiThread {
             mapView.addOnStyleImageMissingListener {
                 maplibreMap.style!!.addImage(it, Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888))
@@ -52,25 +56,42 @@ class RemoveUnusedImagesTest : AppCenter() {
 
             // Remove layer and source, so that rendered tiles are no longer used, therefore, map must
             // notify client about unused images.
-            mapView.addOnDidBecomeIdleListener {
-                maplibreMap.style!!.removeLayer("icon")
-                maplibreMap.style!!.removeSource("geojson")
-            }
+            mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
+                override fun onDidBecomeIdle() {
+                    mapView.removeOnDidBecomeIdleListener(this)
+                    maplibreMap.style!!.removeLayer("icon")
+                    maplibreMap.style!!.removeSource("geojson")
+                }
+            })
 
             mapView.addOnCanRemoveUnusedStyleImageListener {
-                callbackLatch.countDown()
-                maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
-                mapView.addOnDidFinishRenderingFrameListener{ _, _ ->
-                    assertNotNull(maplibreMap.style!!.getImage("small"))
-                    assertNotNull(maplibreMap.style!!.getImage("large"))
-                    latch.countDown()
+                canRemoveCallbackLatch.countDown()
+                if (cameraMoveRequested.compareAndSet(false, true)) {
+                    maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
+                    mapView.addOnDidFinishRenderingFrameListener(object : MapView.OnDidFinishRenderingFrameListener {
+                        override fun onDidFinishRenderingFrame(
+                            fully: Boolean,
+                            frameEncodingTime: Double,
+                            frameRenderingTime: Double
+                        ) {
+                            mapView.removeOnDidFinishRenderingFrameListener(this)
+                            assertNotNull(maplibreMap.style!!.getImage("small"))
+                            assertNotNull(maplibreMap.style!!.getImage("large"))
+                            imageStillPresentLatch.countDown()
+                        }
+                    })
                 }
-                return@addOnCanRemoveUnusedStyleImageListener false
+                false
             }
         }
 
-        if (!latch.await(5, TimeUnit.SECONDS) && !callbackLatch.await(5, TimeUnit.SECONDS)) {
-            throw TimeoutException()
+        val hasCanRemoveCallback = canRemoveCallbackLatch.await(15, TimeUnit.SECONDS)
+        val imagesStayedPresent = imageStillPresentLatch.await(15, TimeUnit.SECONDS)
+
+        if (!hasCanRemoveCallback || !imagesStayedPresent) {
+            throw TimeoutException(
+                "hasCanRemoveCallback=$hasCanRemoveCallback, imagesStayedPresent=$imagesStayedPresent"
+            )
         }
     }
 

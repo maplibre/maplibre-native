@@ -88,7 +88,7 @@ namespace mbgl {
     return @(self.rawLayer->getSourceID().c_str());
 }
 
-<% if (type !== 'raster' && type !== 'hillshade') { -%>
+<% if (type !== 'raster' && type !== 'hillshade' && type !== 'color-relief') { -%>
 - (NSString *)sourceLayerIdentifier
 {
     MLNAssertStyleLayerIsValid();

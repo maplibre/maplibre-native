@@ -9,7 +9,7 @@
 typedef struct _CGLContextObject* CGLContextObj;
 
 class MLNMapViewImpl : public mbgl::MapObserver {
- public:
+public:
   static std::unique_ptr<MLNMapViewImpl> Create(MLNMapView*);
 
   MLNMapViewImpl(MLNMapView*);
@@ -61,7 +61,7 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
   void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
- protected:
+protected:
   /// Cocoa map view that this adapter bridges to.
   __weak MLNMapView* mapView = nullptr;
 };

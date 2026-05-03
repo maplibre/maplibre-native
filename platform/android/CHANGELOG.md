@@ -1,5 +1,62 @@
 # Changelog MapLibre Native for Android
 
+## 13.1.0
+
+Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
+
+### ✨ Features and improvements
+
+- Update Boost to 1.90 ([#4210](https://github.com/maplibre/maplibre-native/pull/4210)).
+- android: update AGP and Gradle dependencies ([#4245](https://github.com/maplibre/maplibre-native/pull/4245)).
+- Handle allocation failure [Core feature] ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
+-  (android): apply size optimization flags to RelWithDebInfo build config ([#4247](https://github.com/maplibre/maplibre-native/pull/4247)).
+- Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
+- Add attribute buffer index to support multiple attributes interleaved in single buffer bind [Core optimization] ([#4241](https://github.com/maplibre/maplibre-native/pull/4241)).
+
+### 🐞 Bug fixes
+
+- Fix infinite recursion causing Stack Overflow in TileSet.kt setBounds() ([#4252](https://github.com/maplibre/maplibre-native/pull/4252)).
+- core: Fix crash in RenderLayer::updateTile when layerGroup is not a TileLayerGroup ([#4217](https://github.com/maplibre/maplibre-native/pull/4217)).
+
+## 13.0.2
+
+### ✨ Features and improvements
+
+- core: Skip empty dynamic texture submissions ([#4177](https://github.com/maplibre/maplibre-native/pull/4177)).
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)).
+- core: Use interleaved buffer for paint property binders ([#4124](https://github.com/maplibre/maplibre-native/pull/4124)).
+
+### 🐞 Bug fixes
+
+- core: Fix vulkan surface rotation ([#4182](https://github.com/maplibre/maplibre-native/pull/4182)).
+- core: Fix crash during exception stack unwind ([#4188](https://github.com/maplibre/maplibre-native/pull/4188)).
+
+## 13.0.1
+
+### 🐞 Bug fixes
+
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+- core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166))
+
+## 13.0.0
+
+### ✨ Features and improvements
+
+- 💥 **Breaking:** Use Vulkan as rendering backend for the `org.maplibre.gl:android-sdk` package. You can still use OpenGL ES with the `org.maplibre.gl:android-sdk-opengl` package.
+
+- core, android: add support for camera roll ([#3011](https://github.com/maplibre/maplibre-native/pull/3011)).
+- Add multithreaded upload to dynamic texture on Vulkan [Core feature] ([#4028](https://github.com/maplibre/maplibre-native/pull/4028)).
+- core: Avoid unnecessary raster buffer updates ([#4085](https://github.com/maplibre/maplibre-native/pull/4085)).
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965))
+
+### 🐞 Bug fixes
+
+- Fix laggy map when using synchronous GeoJSON source [#4092](https://github.com/maplibre/maplibre-native/pull/4092).
+  This replaces the synchronous methods on `GeoJsonSource` introduced in [#3560](https://github.com/maplibre/maplibre-native/pull/3560). To migrate, pass `GeoJsonOptions` with `options.withSynchronousUpdate(true)` when constructing a `GeoJsonSource`.
+- Do not capture this in Android GeoJSONSource ([#3976](https://github.com/maplibre/maplibre-native/pull/3976)).
+- Fix Vulkan headless backend resize ([#4030](https://github.com/maplibre/maplibre-native/pull/4030)).
+- Disable scissor test when clearing on OpenGL ([#4029](https://github.com/maplibre/maplibre-native/pull/4029)).
+
 ## 12.3.1
 
 - Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).

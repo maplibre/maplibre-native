@@ -196,11 +196,8 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-#if MLN_RENDER_BACKEND_OPENGL
-    // GL requires the context managed by the java surface for cleanup
-    // Vulkan resources can be released on any thread (finalizer in this case)
     backend.reset();
-#endif
+    window.reset();
     swapBehaviorFlush = false;
 }
 
@@ -316,7 +313,6 @@ void MapRenderer::onRendererReset(JNIEnv&) {
 // needs to be called on GL thread
 void MapRenderer::onSurfaceDestroyed(JNIEnv&) {
     resetRenderer();
-    window.reset();
 }
 
 void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {

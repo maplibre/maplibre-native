@@ -47,6 +47,7 @@ public:
     BufferResource& operator=(BufferResource&&) noexcept;
 
     BufferResource clone() const;
+    void destroy(bool deferred = true);
 
     void update(const void* data, std::size_t size, std::size_t offset) noexcept;
 

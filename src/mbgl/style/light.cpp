@@ -19,7 +19,7 @@ namespace style {
 
 namespace {
 LightObserver nullObserver;
-}
+} // namespace
 
 Light::Light(Immutable<Light::Impl> impl_)
     : impl(std::move(impl_)),

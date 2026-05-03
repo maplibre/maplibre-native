@@ -67,4 +67,9 @@ extern const std::string panGestureOp;
 extern const std::string gfxProbeOp;
 extern const std::string gfxProbeStartOp;
 extern const std::string gfxProbeEndOp;
+extern const std::string setTileLodMinRadiusOp;
+extern const std::string setTileLodScaleOp;
+extern const std::string setTileLodPitchThresholdOp;
+extern const std::string setTileLodZoomShiftOp;
+extern const std::string setTileLodModeOp;
 } // namespace TestOperationNames

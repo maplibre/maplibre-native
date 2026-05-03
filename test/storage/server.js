@@ -36,7 +36,7 @@ app.get('/test', function (req, res) {
     res.send(content);
 });
 
-app.get('/stale/*', function() {
+app.get('/stale/*path', function() {
     // Never respond.
 });
 
@@ -169,18 +169,28 @@ app.get('/delayed', function(req, res) {
 });
 
 
-app.get('/load/:number(\\d+)', function(req, res) {
-    res.send('Request ' + req.params.number);
+app.get('/load/:number', function(req, res) {
+    const number = parseInt(req.params.number, 10);
+    if (isNaN(number)) {
+        res.status(400).send('Bad Request');
+        return;
+    }
+    res.send('Request ' + number);
 });
 
-app.get('/online/:style(*)', function(req, res) {
-    const file = path.join(import.meta.dirname, "../fixtures/map/online", req.params.style);
+app.get('/online/*style', function(req, res) {
+    const stylePath = [].concat(req.params.style).join('/');
+    const file = path.join(import.meta.dirname, "../fixtures/map/online", stylePath);
     res.sendFile(file); // Set disposition and send it.
     // res.status(200).send();
     // res.send('Request ' + req.params.style);
 });
 
-var server = app.listen(3000, function () {
+var server = app.listen(3000, function (error) {
+    if (error) {
+        process.stderr.write('Failed to start server: ' + error.message + '\n');
+        process.exit(1);
+    }
     // Tell parent that we're now listening.
     process.stdout.write("OK");
 });

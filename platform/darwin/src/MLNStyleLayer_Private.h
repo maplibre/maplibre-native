@@ -87,7 +87,7 @@ struct LayerWrapper {
 namespace mbgl {
 
 class LayerPeerFactory {
- public:
+public:
   virtual ~LayerPeerFactory() = default;
   /**
    Get the corresponding core layer factory.

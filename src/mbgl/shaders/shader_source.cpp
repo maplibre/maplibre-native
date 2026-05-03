@@ -6,7 +6,6 @@ namespace mbgl {
 
 using namespace shaders;
 
-// NOLINTNEXTLINE(modernize-use-ranges)
 MBGL_DEFINE_ENUM(BuiltIn,
                  {{BuiltIn::None, "None"},
                   {BuiltIn::Prelude, "Prelude"},
@@ -29,6 +28,7 @@ MBGL_DEFINE_ENUM(BuiltIn,
                   {BuiltIn::HeatmapShader, "HeatmapShader"},
                   {BuiltIn::HeatmapTextureShader, "HeatmapTextureShader"},
                   {BuiltIn::HillshadePrepareShader, "HillshadePrepareShader"},
+                  {BuiltIn::ColorReliefShader, "ColorReliefShader"},
                   {BuiltIn::HillshadeShader, "HillshadeShader"},
                   {BuiltIn::LineShader, "LineShader"},
                   {BuiltIn::LineGradientShader, "LineGradientShader"},

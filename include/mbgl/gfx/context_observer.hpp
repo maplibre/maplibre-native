@@ -13,6 +13,7 @@ public:
     virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
     virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
     virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
+    virtual void onRenderError(std::exception_ptr) {}
 };
 
 } // namespace gfx

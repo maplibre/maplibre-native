@@ -42,8 +42,9 @@ typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
  conforms to the
  <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
  A raster DEM source is added to an ``MLNStyle`` object along with one or more
- ``MLNHillshadeStyleLayer`` objects. Use a hillshade style layer to control the
- appearance of content supplied by the raster DEM source.
+ ``MLNHillshadeStyleLayer`` or ``MLNColorReliefStyleLayer`` objects. Use a hillshade
+ style layer to control the appearance of content supplied by the raster DEM source,
+ or a color relief style layer to render elevation data with a color ramp.
 
  Each
  <a href="https://maplibre.org/maplibre-style-spec/#sources-raster-dem"><code>raster-dem</code></a>

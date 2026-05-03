@@ -95,7 +95,7 @@ BufferResource::BufferResource(
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
-        return;
+        throw std::bad_alloc();
     }
 
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
@@ -128,6 +128,10 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
 }
 
 BufferResource::~BufferResource() noexcept {
+    destroy(true);
+}
+
+void BufferResource::destroy(bool deferred) {
     if (isValid()) {
         context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
             stats.numBuffers--;
@@ -140,9 +144,15 @@ BufferResource::~BufferResource() noexcept {
         });
     }
 
-    if (!bufferAllocation) return;
+    if (!bufferAllocation) {
+        return;
+    }
 
-    context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
+    if (deferred) {
+        context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
+    } else {
+        bufferAllocation.reset();
+    }
 }
 
 BufferResource BufferResource::clone() const {

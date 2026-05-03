@@ -25,13 +25,18 @@ endif()
 
 # Platform-specific library names and paths
 if(APPLE)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        set(_wgpu_lib_arch "aarch64-apple-darwin")
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        include("${CMAKE_CURRENT_LIST_DIR}/wgpu.ios.cmake")
     else()
-        set(_wgpu_lib_arch "x86_64-apple-darwin")
+        if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+            set(_wgpu_lib_arch "aarch64-apple-darwin")
+        else()
+            set(_wgpu_lib_arch "x86_64-apple-darwin")
+        endif()
     endif()
     set(_wgpu_lib_name "libwgpu_native.a")
-    set(_wgpu_lib_suffix ".dylib")
+elseif(ANDROID)
+    include("${CMAKE_CURRENT_LIST_DIR}/wgpu.android.cmake")
 elseif(WIN32)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_wgpu_lib_arch "x86_64-pc-windows-msvc")
@@ -39,7 +44,6 @@ elseif(WIN32)
         set(_wgpu_lib_arch "i686-pc-windows-msvc")
     endif()
     set(_wgpu_lib_name "wgpu_native.lib")
-    set(_wgpu_lib_suffix ".dll")
 else() # Linux
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
         set(_wgpu_lib_arch "aarch64-unknown-linux-gnu")
@@ -47,25 +51,60 @@ else() # Linux
         set(_wgpu_lib_arch "x86_64-unknown-linux-gnu")
     endif()
     set(_wgpu_lib_name "libwgpu_native.a")
-    set(_wgpu_lib_suffix ".so")
 endif()
 
 # Look for prebuilt wgpu-native library
+# Search platform-specific path first to prefer cross-compiled libraries
 set(_wgpu_lib_search_paths
-    "${_mln_wgpu_source_dir}/target/release"
     "${_mln_wgpu_source_dir}/target/${_wgpu_lib_arch}/release"
+)
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    mln_wgpu_ios_append_search_paths(_wgpu_lib_search_paths)
+endif()
+list(APPEND _wgpu_lib_search_paths
+    "${_mln_wgpu_source_dir}/target/release"
     "${_mln_wgpu_source_dir}/lib"
     "${_mln_wgpu_source_dir}/build/release"
 )
 
-find_library(WGPU_LIBRARY
-    NAMES wgpu_native libwgpu_native
-    PATHS ${_wgpu_lib_search_paths}
-    NO_DEFAULT_PATH
-)
+# On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
+macro(mln_wgpu_find_library)
+    if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        foreach(_search_path ${_wgpu_lib_search_paths})
+            if(EXISTS "${_search_path}/${_wgpu_lib_name}")
+                set(WGPU_LIBRARY "${_search_path}/${_wgpu_lib_name}" CACHE FILEPATH "wgpu-native library")
+                break()
+            endif()
+        endforeach()
+    else()
+        find_library(WGPU_LIBRARY
+            NAMES wgpu_native libwgpu_native
+            PATHS ${_wgpu_lib_search_paths}
+            NO_DEFAULT_PATH
+            NO_CMAKE_FIND_ROOT_PATH
+        )
+    endif()
+endmacro()
 
-# If not found, try to build it using cargo
-if(NOT WGPU_LIBRARY)
+mln_wgpu_find_library()
+
+if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
+    # Use a specific version of WGPU. This is required when to a rust application
+    # which uses wgpu directly instead of wgpu-native
+    if (MLN_WGPU_NATIVE_VERSION)
+        execute_process(
+            COMMAND git checkout ${MLN_WGPU_NATIVE_VERSION}
+            WORKING_DIRECTORY ${_mln_wgpu_source_dir}
+            RESULT_VARIABLE _git_checkout_wgpu_result
+            OUTPUT_VARIABLE _git_checkout_wgpu_output
+            ERROR_VARIABLE _git_checkout_wgpu_error
+        )
+
+        if(NOT _git_checkout_wgpu_result EQUAL 0)
+            message(FATAL_ERROR "Failed to checkout wgpu-native version '${MLN_WGPU_NATIVE_VERSION}': ${_git_checkout_wgpu_error}\n")
+        endif()
+    endif()
+
     message(STATUS "Pre-built wgpu-native library not found, attempting to build from source...")
 
     # Check if cargo is available
@@ -83,8 +122,22 @@ if(NOT WGPU_LIBRARY)
     # Build wgpu-native using cargo
     message(STATUS "Building wgpu-native with cargo (this may take a few minutes)...")
 
+    # For cross-compilation targets (iOS, Android), pass --target and platform-specific features
+    set(_cargo_extra_args "")
+    if(_wgpu_lib_arch AND NOT _wgpu_lib_arch MATCHES "apple-darwin$")
+        list(APPEND _cargo_extra_args --target ${_wgpu_lib_arch})
+    endif()
+    if(_wgpu_cargo_features)
+        list(APPEND _cargo_extra_args ${_wgpu_cargo_features})
+    endif()
+
+    set(_cargo_env_prefix "")
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        mln_wgpu_ios_setup_cargo_env(_cargo_env_prefix)
+    endif()
+
     execute_process(
-        COMMAND ${CARGO_EXECUTABLE} build --release
+        COMMAND ${_cargo_env_prefix} ${CARGO_EXECUTABLE} build --release ${_cargo_extra_args}
         WORKING_DIRECTORY ${_mln_wgpu_source_dir}
         RESULT_VARIABLE _cargo_result
         OUTPUT_VARIABLE _cargo_output
@@ -99,11 +152,7 @@ if(NOT WGPU_LIBRARY)
     endif()
 
     # Try to find the library again
-    find_library(WGPU_LIBRARY
-        NAMES wgpu_native libwgpu_native
-        PATHS ${_wgpu_lib_search_paths}
-        NO_DEFAULT_PATH
-    )
+    mln_wgpu_find_library()
 
     if(NOT WGPU_LIBRARY)
         message(FATAL_ERROR "Failed to locate wgpu-native library after building")
@@ -114,9 +163,16 @@ else()
     message(STATUS "Found wgpu-native library: ${WGPU_LIBRARY}")
 endif()
 
+# Create compatibility shims for Dawn header paths if they don't exist
+set(_webgpu-cpp-output_dir "${CMAKE_CURRENT_BINARY_DIR}/webgpu-cpp")
+set(_compat_shim_dir "${_webgpu-cpp-output_dir}/webgpu")
+set(_compat_shim_header "${_compat_shim_dir}/webgpu_cpp.h")
+set(_compat_shim_webgpu_h "${_compat_shim_dir}/webgpu.h")
+set(_compat_shim_wgpu_h "${_compat_shim_dir}/wgpu.h")
+file(MAKE_DIRECTORY "${_compat_shim_dir}")
+
 # Generate WebGPU-Cpp wrapper if needed
-set(_webgpu_cpp_dir "${PROJECT_SOURCE_DIR}/vendor/webgpu-cpp")
-set(_webgpu_cpp_header "${_webgpu_cpp_dir}/webgpu.hpp")
+set(_webgpu_cpp_header "${_webgpu-cpp-output_dir}/webgpu.hpp")
 
 if(NOT EXISTS "${_webgpu_cpp_header}")
     message(STATUS "Generating WebGPU-Cpp wrapper...")
@@ -134,7 +190,8 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
         COMMAND ${PYTHON_EXECUTABLE} generate.py
             --use-init-macros
             --header ${_mln_wgpu_source_dir}/ffi/webgpu-headers/webgpu.h
-        WORKING_DIRECTORY ${_webgpu_cpp_dir}
+            --output ${_webgpu_cpp_header}
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor/webgpu-cpp"
         RESULT_VARIABLE _gen_result
         OUTPUT_VARIABLE _gen_output
         ERROR_VARIABLE _gen_error
@@ -148,15 +205,9 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
     message(STATUS "Successfully generated WebGPU-Cpp wrapper")
 endif()
 
-# Create compatibility shims for Dawn header paths if they don't exist
-set(_compat_shim_dir "${_webgpu_cpp_dir}/wgpu-native/webgpu")
-set(_compat_shim_header "${_compat_shim_dir}/webgpu_cpp.h")
-set(_compat_shim_webgpu_h "${_compat_shim_dir}/webgpu.h")
-
 if(NOT EXISTS "${_compat_shim_header}")
     message(STATUS "Creating WebGPU-Cpp compatibility shim...")
 
-    file(MAKE_DIRECTORY "${_compat_shim_dir}")
     file(WRITE "${_compat_shim_header}"
 "#pragma once
 // Compatibility shim for Dawn header paths
@@ -164,7 +215,13 @@ if(NOT EXISTS "${_compat_shim_header}")
 // for both Dawn and wgpu-native backends
 
 // Include the WebGPU-Cpp wrapper
-#include \"../../webgpu.hpp\"
+// TODO: remove this workaround as soon as https://github.com/eliemichel/WebGPU-Cpp/issues/35 is fixed
+#ifndef _NULLABLE
+    #define _NULLABLE WGPU_NULLABLE
+#endif
+#include \"${_webgpu_cpp_header}\"
+
+#undef _NULLABLE
 ")
 
     message(STATUS "Successfully created WebGPU-Cpp compatibility shim")
@@ -187,7 +244,6 @@ if(NOT EXISTS "${_compat_shim_webgpu_h}")
 endif()
 
 # Also create wgpu.h shim for wgpu-native specific includes
-set(_compat_shim_wgpu_h "${_compat_shim_dir}/wgpu.h")
 if(NOT EXISTS "${_compat_shim_wgpu_h}")
     message(STATUS "Creating wgpu.h compatibility shim...")
 
@@ -212,10 +268,9 @@ target_link_libraries(mbgl-vendor-wgpu INTERFACE ${WGPU_LIBRARY})
 # Add include directories for webgpu.h, wgpu.h, and C++ wrapper
 target_include_directories(mbgl-vendor-wgpu
     SYSTEM INTERFACE
-        ${_webgpu_cpp_dir}                      # For generated webgpu.hpp
-        ${_webgpu_cpp_dir}/wgpu-native          # For webgpu/webgpu_cpp.h compatibility shim
-        ${_mln_wgpu_source_dir}/ffi/webgpu-headers
-        ${_mln_wgpu_source_dir}/ffi
+        ${_webgpu-cpp-output_dir}         # For webgpu.hpp webgpu/webgpu_cpp.h compatibility shim
+        ${_mln_wgpu_source_dir}/ffi/webgpu-headers # webgpu.h
+        ${_mln_wgpu_source_dir}/ffi # wgpu.h
 )
 
 # Platform-specific system libraries that wgpu-native needs
@@ -235,6 +290,8 @@ elseif(WIN32)
         bcrypt
         ntdll
     )
+elseif(ANDROID)
+    mln_wgpu_android_link_library(mbgl-vendor-wgpu)
 else() # Linux
     # wgpu-native on Linux might need these depending on the build configuration
     find_package(Threads REQUIRED)

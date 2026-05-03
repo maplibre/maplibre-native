@@ -103,3 +103,43 @@ TEST(PMTilesFileSource, NonExistentTile) {
 
     loop.run();
 }
+
+// A tile whose bytes start with gzip magic but are otherwise corrupt must yield an error
+// response — the decompression failure must not propagate as an exception.
+TEST(PMTilesFileSource, CorruptGzipTile) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        Resource::tile(toAbsoluteURL("corrupt-gzip-tile.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
+            EXPECT_NE(res.error->message.find("Error decompressing PMTiles tile:"), std::string::npos);
+            loop.stop();
+        });
+
+    loop.run();
+}
+
+// An archive whose header flags tile_compression=GZIP but whose individual tiles are stored
+// without compression must be served without error (uncompressed bytes passed through as-is).
+TEST(PMTilesFileSource, UncompressedTile) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        Resource::tile(toAbsoluteURL("uncompressed-tiles.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res) {
+            req.reset();
+            EXPECT_EQ(nullptr, res.error);
+            ASSERT_TRUE(res.data.get());
+            ASSERT_EQ(res.noContent, false);
+            loop.stop();
+        });
+
+    loop.run();
+}

@@ -386,7 +386,7 @@ public class CircleLayerTest extends BaseLayerTest {
     // Set and Get
     Float[] propertyValue = new Float[] {0f, 0f};
     layer.setProperties(circleTranslate(propertyValue));
-    assertEquals(layer.getCircleTranslate().getValue(), propertyValue);
+    assertArrayEquals(layer.getCircleTranslate().getValue(), propertyValue);
   }
 
   @Test

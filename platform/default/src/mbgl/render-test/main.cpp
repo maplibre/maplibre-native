@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 #ifdef IS_IOS
     try {
 #endif
-        return mbgl::runRenderTests(argc, argv, []() {});
+        return mbgl::runRenderTests(argc, argv, [](mbgl::TestStatus) {});
 #ifdef IS_IOS
     } catch (std::exception const& e) {
         std::cerr << "Caught an exception while running tests\n" << e.what() << '\n';

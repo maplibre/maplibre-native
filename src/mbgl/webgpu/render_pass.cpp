@@ -110,6 +110,11 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         colorAttachment.clearValue = value;
     } else {
         colorAttachment.loadOp = WGPULoadOp_Load;
+#if MLN_WEBGPU_IMPL_WGPU
+        // wgpu-native requires clearValue to be set even when using LoadOp_Load
+        const WGPUColor defaultClearValue{0.0, 0.0, 0.0, 0.0};
+        colorAttachment.clearValue = defaultClearValue;
+#endif
     }
 
     WGPURenderPassDepthStencilAttachment depthAttachment = {};

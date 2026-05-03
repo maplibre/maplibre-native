@@ -588,6 +588,14 @@ double Map::getTileLodZoomShift() const {
     return impl->tileLodZoomShift;
 }
 
+void Map::setTileLodMode(TileLodMode mode) {
+    impl->tileLodMode = mode;
+}
+
+TileLodMode Map::getTileLodMode() const {
+    return impl->tileLodMode;
+}
+
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
 }

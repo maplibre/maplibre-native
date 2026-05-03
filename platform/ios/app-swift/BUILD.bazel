@@ -1,6 +1,7 @@
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
 load("@rules_apple//apple:resources.bzl", "apple_resource_group")
+load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@rules_swift//swift:swift.bzl", "swift_library")
 load("//platform/ios/bazel:macros.bzl", "env_info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
@@ -39,6 +40,19 @@ swift_library(
     ],
 )
 
+# --embed_label=maplibre_app_1.0_build_$(date +%s)
+apple_bundle_version(
+    name = "maplibre_app_version",
+    build_label_pattern = "maplibre_app_{version}_build_{build}",
+    build_version = "{version}.{build}",
+    capture_groups = {
+        "version": "\\d+\\.\\d+",
+        "build": "\\d+",
+    },
+    fallback_build_label = "maplibre_app_99.99_build_99",
+    short_version_string = "{version}",
+)
+
 ios_application(
     name = "MapLibreApp",
     app_icons = glob(["app_icons_ios.xcassets/**"]),
@@ -53,6 +67,7 @@ ios_application(
     resources = [
         "@pois_nps_mbtiles//file",
     ],
+    version = ":maplibre_app_version",
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],
     deps = [":Sources"],
 )

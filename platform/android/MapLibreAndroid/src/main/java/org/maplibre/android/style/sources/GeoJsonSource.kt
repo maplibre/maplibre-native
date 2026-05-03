@@ -240,11 +240,7 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (nativeIsUpdateSynchronous()) {
-            nativeSetFeatureSync(feature)
-        } else {
-            nativeSetFeature(feature)
-        }
+        nativeSetFeature(feature)
     }
 
     /**
@@ -260,11 +256,7 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (nativeIsUpdateSynchronous()) {
-            nativeSetGeometrySync(geometry)
-        } else {
-            nativeSetGeometry(geometry)
-        }
+        nativeSetGeometry(geometry)
     }
 
     /**
@@ -285,11 +277,7 @@ class GeoJsonSource : Source {
             val featuresCopy: List<Feature> = ArrayList(features)
             featureCollection = FeatureCollection.fromFeatures(featuresCopy)
         }
-        if (nativeIsUpdateSynchronous()) {
-            nativeSetFeatureCollectionSync(featureCollection)
-        } else {
-            nativeSetFeatureCollection(featureCollection)
-        }
+        nativeSetFeatureCollection(featureCollection)
     }
 
     /**
@@ -304,77 +292,7 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (nativeIsUpdateSynchronous()) {
-            nativeSetGeoJsonStringSync(json)
-        } else {
-            nativeSetGeoJsonString(json)
-        }
-    }
-
-    /**
-     * Updates the GeoJson with a single feature. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param feature the GeoJSON [Feature] to set
-     */
-    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
-    fun setGeoJsonSync(feature: Feature?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetFeatureSync(feature)
-    }
-
-    /**
-     * Updates the GeoJson with a single geometry. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param geometry the GeoJSON [Geometry] to set
-     */
-    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
-    fun setGeoJsonSync(geometry: Geometry?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetGeometrySync(geometry)
-    }
-
-    /**
-     * Updates the GeoJson. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param featureCollection the GeoJSON FeatureCollection
-     */
-    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
-    fun setGeoJsonSync(featureCollection: FeatureCollection?) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        if (featureCollection != null && featureCollection.features() != null) {
-            val features = featureCollection.features()
-            val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollectionSync(FeatureCollection.fromFeatures(featuresCopy))
-        } else {
-            nativeSetFeatureCollectionSync(featureCollection)
-        }
-    }
-
-    /**
-     * Updates the GeoJson. The update is performed synchronously,
-     * so the data will be immediately visible and available to query when this method returns.
-     *
-     * @param json the raw GeoJson FeatureCollection string
-     */
-    @Deprecated("use {@link GeoJsonOptions#withSynchronousUpdate(Boolean)} to enable synchronous updates on construction")
-    fun setGeoJsonSync(json: String) {
-        if (detached) {
-            return
-        }
-        checkThread()
-        nativeSetGeoJsonStringSync(json)
+        nativeSetGeoJsonString(json)
     }
 
     /**
@@ -567,18 +485,6 @@ class GeoJsonSource : Source {
 
     @Keep
     private external fun nativeSetGeometry(geometry: Geometry?)
-
-    @Keep
-    private external fun nativeSetGeoJsonStringSync(geoJson: String)
-
-    @Keep
-    private external fun nativeSetFeatureCollectionSync(geoJson: FeatureCollection?)
-
-    @Keep
-    private external fun nativeSetFeatureSync(feature: Feature?)
-
-    @Keep
-    private external fun nativeSetGeometrySync(geometry: Geometry?)
 
     @Keep
     private external fun querySourceFeatures(filter: Array<Any>?): Array<Feature>

@@ -1,12 +1,13 @@
 #import <Foundation/Foundation.h>
 
+#import <mbgl/util/feature.hpp>
 #import <mbgl/util/geometry.hpp>
 
 /**
  Recursively transforms a C++ type into the corresponding Foundation type.
  */
 class ValueEvaluator {
- public:
+public:
   id operator()(const mbgl::NullValue &) const { return [NSNull null]; }
 
   id operator()(const bool &value) const { return value ? @YES : @NO; }

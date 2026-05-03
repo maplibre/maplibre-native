@@ -18,7 +18,7 @@ import java.net.URL
  */
 
 // Define the validation layer version, with a default value.
-var vvlVersion = "1.4.313.0"
+var vvlVersion = "1.4.341.0"
 if (extra.has("vvl_version")) {
     vvlVersion = extra["vvl_version"] as String
 }

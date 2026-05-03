@@ -233,9 +233,7 @@ See [`/platform`](/platform) and navigate to the platform you are interested in 
 
 Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/
 
-### Bounties 💰
-
-Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
+### Become a Sponsor 💰
 
 We thank everyone who supported us financially in the past and special thanks to the people and organizations who support us with recurring donations!
 
@@ -260,6 +258,8 @@ Silver:
 <a href="https://www.maptiler.com/"><img src="https://maplibre.org/img/maptiler-logo.svg" alt="Logo maptiler" width="25%"/></a>
 
 <a href="https://aws.amazon.com/location"><img src="https://maplibre.org/img/aws-logo.svg" alt="Logo AWS" width="25%"/></a>
+
+<a href="https://www.caltopo.com/"><img src="https://maplibre.org/img/caltopo-logo.svg" alt="Caltopo AWS" width="25%"/></a>
 
 Backers and Supporters:
 

@@ -23,7 +23,11 @@ class ViewPagerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityViewpagerBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.viewPager.adapter = MapFragmentAdapter(this, supportFragmentManager)
+        val adapter = MapFragmentAdapter(this, supportFragmentManager)
+        binding.viewPager.adapter = adapter
+        // Ensure all pages are instantiated so their titles are available to UI tests immediately
+        // This keeps all 5 fragments in memory so PagerTabStrip shows all titles
+        binding.viewPager.offscreenPageLimit = adapter.count
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -48,7 +52,7 @@ class ViewPagerActivity : AppCompatActivity() {
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val options = MapLibreMapOptions.createFromAttributes(context)
-            options.textureMode(true)
+            options.textureMode(false)
             options.camera(
                 CameraPosition.Builder()
                     .zoom(3.0)

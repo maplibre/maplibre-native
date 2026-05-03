@@ -31,6 +31,13 @@ set_property(
     PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
 )
 
+if(APPLE)
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_apple_init.mm
+    )
+endif()
+
 if(MLN_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
     target_sources(
@@ -110,8 +117,6 @@ target_include_directories(
         # For /platform/default/src/mbgl/map/map_snapshotter.hpp
     PRIVATE ${PROJECT_SOURCE_DIR}/src
 )
-
-include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
 
 # Use target_link_directories when we move away from CMake 3.10.
 target_link_libraries(

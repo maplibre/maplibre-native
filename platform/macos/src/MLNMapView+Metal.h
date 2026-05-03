@@ -10,34 +10,34 @@
 class MLNMapViewMetalImpl final : public MLNMapViewImpl,
                                   public mbgl::mtl::RendererBackend,
                                   public mbgl::gfx::Renderable {
- public:
+public:
   MLNMapViewMetalImpl(MLNMapView*);
   ~MLNMapViewMetalImpl() override;
 
- public:
+public:
   void restoreFramebufferBinding();
 
   // Implementation of mbgl::gfx::RendererBackend
- public:
+public:
   mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
- private:
+private:
   void activate() override;
   void deactivate() override;
   // End implementation of mbgl::gfx::RendererBackend
 
   // Implementation of mbgl::gl::RendererBackend
- public:
+public:
   void updateAssumedState() override;
   // End implementation of mbgl::gl::Rendererbackend
 
   // Implementation of MLNMapViewImpl
- public:
+public:
   mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
   mbgl::PremultipliedImage readStillImage() override;
   MLNBackendResource* getObject() override;
 
- private:
+private:
   bool presentsWithTransaction = false;
 };

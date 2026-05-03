@@ -3,6 +3,7 @@
 #include <mbgl/programs/circle_program.hpp>
 #include <mbgl/programs/heatmap_program.hpp>
 #include <mbgl/programs/hillshade_program.hpp>
+#include <mbgl/programs/color_relief_program.hpp>
 #include <mbgl/programs/fill_extrusion_program.hpp>
 #include <mbgl/programs/fill_program.hpp>
 #include <mbgl/programs/line_program.hpp>
@@ -50,6 +51,7 @@ void Programs::registerWith(gfx::ShaderRegistry& registry) {
                   HeatmapTextureProgram,
                   HillshadeProgram,
                   HillshadePrepareProgram,
+                  ColorReliefProgram,
                   FillProgram,
                   FillPatternProgram,
                   FillOutlineProgram,

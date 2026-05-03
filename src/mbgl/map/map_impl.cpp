@@ -135,7 +135,8 @@ void Map::Impl::onUpdate() {
                                .tileLodMinRadius = tileLodMinRadius,
                                .tileLodScale = tileLodScale,
                                .tileLodPitchThreshold = tileLodPitchThreshold,
-                               .tileLodZoomShift = tileLodZoomShift};
+                               .tileLodZoomShift = tileLodZoomShift,
+                               .tileLodMode = tileLodMode};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -425,6 +426,10 @@ void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const
     if (actionJournal) {
         actionJournal->impl->onTileAction(op, id, sourceID);
     }
+}
+
+void Map::Impl::onRenderError(std::exception_ptr error) {
+    observer.onRenderError(error);
 }
 
 } // namespace mbgl

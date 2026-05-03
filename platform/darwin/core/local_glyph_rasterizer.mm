@@ -1,15 +1,15 @@
 #include <mbgl/text/local_glyph_rasterizer.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
-#include <mbgl/util/constants.hpp>
 
 #include <mbgl/interface/native_apple_interface.h>
 
 #include <unordered_map>
 
-#import <Foundation/Foundation.h>
 #import <CoreText/CoreText.h>
+#import <Foundation/Foundation.h>
 #import <ImageIO/ImageIO.h>
 
 #import "CFHandle.hpp"
@@ -63,114 +63,117 @@ using CTLineRefHandle = CFHandle<CTLineRef, CFTypeRef, CFRelease>;
 */
 class LocalGlyphRasterizer::Impl {
 public:
-    /**
-     Creates a new rasterizer with the given font names as a fallback.
+  /**
+   Creates a new rasterizer with the given font names as a fallback.
 
-     The fallback font names can also be specified in the style as a font stack
-     or in the `MLNIdeographicFontFamilyName` key of
-     `NSUserDefaults.standardUserDefaults`. The font stack takes precedence,
-     followed by the `MLNIdeographicFontFamilyName` user default, then finally
-     the `fallbackFontNames_` parameter as a last resort.
+   The fallback font names can also be specified in the style as a font stack
+   or in the `MLNIdeographicFontFamilyName` key of
+   `NSUserDefaults.standardUserDefaults`. The font stack takes precedence,
+   followed by the `MLNIdeographicFontFamilyName` user default, then finally
+   the `fallbackFontNames_` parameter as a last resort.
 
-     @param fallbackFontNames_ A list of font names, one per line. Each font
-        name can be the PostScript name or display name of a specific font face
-        or a font family name. Set this parameter to `nullptr` to disable local
-        glyph rasterization globally. The system font is a good default value to
-        pass into this constructor.
-     */
-    Impl(const std::optional<std::string> fallbackFontNames_)
-    {
-        fallbackFontNames = [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"MLNIdeographicFontFamilyName"];
-        if (fallbackFontNames_) {
-            fallbackFontNames = [fallbackFontNames ?: @[] arrayByAddingObjectsFromArray:[@(fallbackFontNames_->c_str()) componentsSeparatedByString:@"\n"]];
-        }
+   @param fallbackFontNames_ A list of font names, one per line. Each font
+      name can be the PostScript name or display name of a specific font face
+      or a font family name. Set this parameter to `nullptr` to disable local
+      glyph rasterization globally. The system font is a good default value to
+      pass into this constructor.
+   */
+  Impl(const std::optional<std::string> fallbackFontNames_) {
+    fallbackFontNames =
+        [[NSUserDefaults standardUserDefaults] stringArrayForKey:@"MLNIdeographicFontFamilyName"];
+    if (fallbackFontNames_) {
+      fallbackFontNames = [fallbackFontNames ?: @[]
+          arrayByAddingObjectsFromArray:[@(fallbackFontNames_->c_str())
+                                            componentsSeparatedByString:@"\n"]];
+    }
+  }
+
+  /**
+   Returns whether local glyph rasterization is enabled globally.
+
+   The developer can disable local glyph rasterization by specifying no
+   fallback font names.
+   */
+  bool isEnabled() { return fallbackFontNames; }
+
+  /**
+   Creates a font descriptor representing the given font stack and any global
+   fallback fonts.
+
+   @param fontStack The font stack that takes precedence.
+   @returns A font descriptor representing the first font in the font stack
+      with a cascade list representing the rest of the fonts in the font stack
+      and any fallback fonts. The font descriptor is not cached.
+
+   @post The caller is responsible for releasing the font descriptor.
+   */
+  CTFontDescriptorRef createFontDescriptor(const FontStack &fontStack) {
+    NSMutableArray *fontNames =
+        [NSMutableArray arrayWithCapacity:fontStack.size() + fallbackFontNames.count];
+    for (auto &fontName : fontStack) {
+      // Per the MapLibre Style Spec, the text-font property comes
+      // with these last resort fonts by default, but they shouldn’t take
+      // precedence over any application or system fallback font that may
+      // be more appropriate to the current device.
+      if (fontName != util::LAST_RESORT_ALPHABETIC_FONT &&
+          fontName != util::LAST_RESORT_PAN_UNICODE_FONT) {
+        [fontNames addObject:@(fontName.c_str())];
+      }
+    }
+    [fontNames addObjectsFromArray:fallbackFontNames];
+
+    if (!fontNames.count) {
+      NSDictionary *fontAttributes = @{
+        (NSString *)kCTFontSizeAttribute : @(util::ONE_EM),
+      };
+      return CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes);
     }
 
-    /**
-     Returns whether local glyph rasterization is enabled globally.
+    // Apply the first font name to the returned font descriptor; apply the
+    // rest of the font names to the cascade list.
+    CFStringRef mainFontName = (__bridge CFStringRef)fontNames.firstObject;
+    CFMutableArrayRefHandle fallbackDescriptors(
+        CFArrayCreateMutable(kCFAllocatorDefault, fontNames.count, &kCFTypeArrayCallBacks));
+    for (NSString *name in [fontNames subarrayWithRange:NSMakeRange(1, fontNames.count - 1)]) {
+      NSDictionary *fontAttributes = @{
+        (NSString *)kCTFontSizeAttribute : @(util::ONE_EM),
+        // This attribute is technically supposed to be a font’s
+        // PostScript name, but Core Text will fall back to matching
+        // font display names and font family names.
+        (NSString *)kCTFontNameAttribute : name,
+      };
 
-     The developer can disable local glyph rasterization by specifying no
-     fallback font names.
-     */
-    bool isEnabled() { return fallbackFontNames; }
-
-    /**
-     Creates a font descriptor representing the given font stack and any global
-     fallback fonts.
-
-     @param fontStack The font stack that takes precedence.
-     @returns A font descriptor representing the first font in the font stack
-        with a cascade list representing the rest of the fonts in the font stack
-        and any fallback fonts. The font descriptor is not cached.
-
-     @post The caller is responsible for releasing the font descriptor.
-     */
-    CTFontDescriptorRef createFontDescriptor(const FontStack& fontStack) {
-        NSMutableArray *fontNames = [NSMutableArray arrayWithCapacity:fontStack.size() + fallbackFontNames.count];
-        for (auto& fontName : fontStack) {
-            // Per the MapLibre Style Spec, the text-font property comes
-            // with these last resort fonts by default, but they shouldn’t take
-            // precedence over any application or system fallback font that may
-            // be more appropriate to the current device.
-            if (fontName != util::LAST_RESORT_ALPHABETIC_FONT && fontName != util::LAST_RESORT_PAN_UNICODE_FONT) {
-                [fontNames addObject:@(fontName.c_str())];
-            }
-        }
-        [fontNames addObjectsFromArray:fallbackFontNames];
-
-        if (!fontNames.count) {
-            NSDictionary *fontAttributes = @{
-                (NSString *)kCTFontSizeAttribute: @(util::ONE_EM),
-            };
-            return CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes);
-        }
-
-        // Apply the first font name to the returned font descriptor; apply the
-        // rest of the font names to the cascade list.
-        CFStringRef mainFontName = (__bridge CFStringRef)fontNames.firstObject;
-        CFMutableArrayRefHandle fallbackDescriptors(CFArrayCreateMutable(kCFAllocatorDefault, fontNames.count, &kCFTypeArrayCallBacks));
-        for (NSString *name in [fontNames subarrayWithRange:NSMakeRange(1, fontNames.count - 1)]) {
-            NSDictionary *fontAttributes = @{
-                (NSString *)kCTFontSizeAttribute: @(util::ONE_EM),
-                // This attribute is technically supposed to be a font’s
-                // PostScript name, but Core Text will fall back to matching
-                // font display names and font family names.
-                (NSString *)kCTFontNameAttribute: name,
-            };
-
-            CTFontDescriptorRefHandle descriptor(CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes));
-            CFArrayAppendValue(*fallbackDescriptors, *descriptor);
-        }
-
-        CFStringRef keys[] = {
-            kCTFontSizeAttribute,
-            kCTFontNameAttribute,
-            kCTFontCascadeListAttribute,
-        };
-        CFTypeRef values[] = {
-            (__bridge CFNumberRef)@(util::ONE_EM),
-            mainFontName,
-            *fallbackDescriptors,
-        };
-
-        CFDictionaryRefHandle attributes(
-            CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
-                (const void**)&values, sizeof(keys) / sizeof(keys[0]),
-                &kCFTypeDictionaryKeyCallBacks,
-                &kCFTypeDictionaryValueCallBacks));
-        return CTFontDescriptorCreateWithAttributes(*attributes);
+      CTFontDescriptorRefHandle descriptor(
+          CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes));
+      CFArrayAppendValue(*fallbackDescriptors, *descriptor);
     }
+
+    CFStringRef keys[] = {
+        kCTFontSizeAttribute,
+        kCTFontNameAttribute,
+        kCTFontCascadeListAttribute,
+    };
+    CFTypeRef values[] = {
+      (__bridge CFNumberRef) @(util::ONE_EM),
+      mainFontName,
+      *fallbackDescriptors,
+    };
+
+    CFDictionaryRefHandle attributes(
+        CFDictionaryCreate(kCFAllocatorDefault, (const void **)&keys, (const void **)&values,
+                           sizeof(keys) / sizeof(keys[0]), &kCFTypeDictionaryKeyCallBacks,
+                           &kCFTypeDictionaryValueCallBacks));
+    return CTFontDescriptorCreateWithAttributes(*attributes);
+  }
 
 private:
-    NSArray<NSString *> *fallbackFontNames;
+  NSArray<NSString *> *fallbackFontNames;
 };
 
-LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fontFamily)
-    : impl(std::make_unique<Impl>(fontFamily))
-{}
+LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string> &fontFamily)
+    : impl(std::make_unique<Impl>(fontFamily)) {}
 
-LocalGlyphRasterizer::~LocalGlyphRasterizer()
-{}
+LocalGlyphRasterizer::~LocalGlyphRasterizer() {}
 
 /**
  Returns whether the rasterizer can rasterize a glyph for the given codepoint.
@@ -178,11 +181,11 @@ LocalGlyphRasterizer::~LocalGlyphRasterizer()
  @param glyphID A font-agnostic Unicode codepoint, not a glyph index.
  @returns Whether a glyph for the codepoint can be rasterized.
  */
-bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) {
+bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack &, GlyphID glyphID) {
 #if MBGL_DARWIN_NO_REMOTE_FONTS
-    return impl->isEnabled();
+  return impl->isEnabled();
 #else
-    return util::i18n::allowsFixedWidthGlyphGeneration(glyphID) && impl->isEnabled();
+  return util::i18n::allowsFixedWidthGlyphGeneration(glyphID) && impl->isEnabled();
 #endif
 }
 
@@ -197,91 +200,90 @@ bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) 
  @param isBold use kCTFontBoldTrait if it is true.
  @returns An image containing the glyph.
  */
-PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics, BOOL isBold) {
-    CFStringRefHandle string(CFStringCreateWithCharacters(NULL, reinterpret_cast<UniChar*>(&glyphID), 1));
-    if (!string) {
-        throw std::runtime_error("Unable to create string from codepoint");
-    }
+PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics &metrics,
+                                   BOOL isBold) {
+  CFStringRefHandle string(
+      CFStringCreateWithCharacters(NULL, reinterpret_cast<UniChar *>(&glyphID), 1));
+  if (!string) {
+    throw std::runtime_error("Unable to create string from codepoint");
+  }
 
-    // Create a bold variant of the font
-    CTFontRefHandle boldFont(CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait));
-    if (!boldFont) {
-        CFStringRefHandle familyNameHandle(CTFontCopyFamilyName(font));
-        NSString* familyName = (__bridge NSString *)(*familyNameHandle);
-        std::string stdFamilyName(familyName.UTF8String);
-        Log::Error(Event::General, "Unable to create bold font for " + stdFamilyName);
-    }
+  // Create a bold variant of the font
+  CTFontRefHandle boldFont(
+      CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait));
+  if (!boldFont) {
+    CFStringRefHandle familyNameHandle(CTFontCopyFamilyName(font));
+    NSString *familyName = (__bridge NSString *)(*familyNameHandle);
+    std::string stdFamilyName(familyName.UTF8String);
+    Log::Error(Event::General, "Unable to create bold font for " + stdFamilyName);
+  }
 
-    CTFontRef drawFont = isBold && boldFont ? *boldFont : font;
+  CTFontRef drawFont = isBold && boldFont ? *boldFont : font;
 
-    CFStringRef keys[] = { kCTFontAttributeName };
-    CFTypeRef values[] = { drawFont };
+  CFStringRef keys[] = {kCTFontAttributeName};
+  CFTypeRef values[] = {drawFont};
 
-    CFDictionaryRefHandle attributes(
-        CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
-            (const void**)&values, sizeof(keys) / sizeof(keys[0]),
-            &kCFTypeDictionaryKeyCallBacks,
-            &kCFTypeDictionaryValueCallBacks));
-    if (!attributes) {
-        throw std::runtime_error("Unable to create attributed string attributes dictionary");
-    }
+  CFDictionaryRefHandle attributes(
+      CFDictionaryCreate(kCFAllocatorDefault, (const void **)&keys, (const void **)&values,
+                         sizeof(keys) / sizeof(keys[0]), &kCFTypeDictionaryKeyCallBacks,
+                         &kCFTypeDictionaryValueCallBacks));
+  if (!attributes) {
+    throw std::runtime_error("Unable to create attributed string attributes dictionary");
+  }
 
-    CFAttributedStringRefHandle attrString(CFAttributedStringCreate(kCFAllocatorDefault, *string, *attributes));
-    if (!attrString) {
-        throw std::runtime_error("Unable to create attributed string");
-    }
-    CTLineRefHandle line(CTLineCreateWithAttributedString(*attrString));
-    if (!line) {
-        throw std::runtime_error("Unable to create line from attributed string");
-    }
+  CFAttributedStringRefHandle attrString(
+      CFAttributedStringCreate(kCFAllocatorDefault, *string, *attributes));
+  if (!attrString) {
+    throw std::runtime_error("Unable to create attributed string");
+  }
+  CTLineRefHandle line(CTLineCreateWithAttributedString(*attrString));
+  if (!line) {
+    throw std::runtime_error("Unable to create line from attributed string");
+  }
 
-    Size size(35, 35);
-    metrics.width = size.width;
-    metrics.height = size.height;
+  Size size(35, 35);
+  metrics.width = size.width;
+  metrics.height = size.height;
 
-    PremultipliedImage rgbaBitmap(size);
+  PremultipliedImage rgbaBitmap(size);
 
-    CGColorSpaceHandle colorSpace(CGColorSpaceCreateDeviceRGB());
-    if (!colorSpace) {
-        throw std::runtime_error("CGColorSpaceCreateDeviceRGB failed");
-    }
+  CGColorSpaceHandle colorSpace(CGColorSpaceCreateDeviceRGB());
+  if (!colorSpace) {
+    throw std::runtime_error("CGColorSpaceCreateDeviceRGB failed");
+  }
 
-    constexpr const size_t bitsPerComponent = 8;
-    constexpr const size_t bytesPerPixel = 4;
-    const size_t bytesPerRow = bytesPerPixel * size.width;
-    const auto bitmapInfo = static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast);
+  constexpr const size_t bitsPerComponent = 8;
+  constexpr const size_t bytesPerPixel = 4;
+  const size_t bytesPerRow = bytesPerPixel * size.width;
+  const auto bitmapInfo = static_cast<uint32_t>(kCGBitmapByteOrderDefault) |
+                          static_cast<uint32_t>(kCGImageAlphaPremultipliedLast);
 
-    CGContextHandle context(CGBitmapContextCreate(
-        rgbaBitmap.data.get(),
-        size.width,
-        size.height,
-        bitsPerComponent,
-        bytesPerRow,
-        *colorSpace,
-        bitmapInfo));
-    if (!context) {
-        throw std::runtime_error("CGBitmapContextCreate failed");
-    }
+  CGContextHandle context(CGBitmapContextCreate(rgbaBitmap.data.get(), size.width, size.height,
+                                                bitsPerComponent, bytesPerRow, *colorSpace,
+                                                bitmapInfo));
+  if (!context) {
+    throw std::runtime_error("CGBitmapContextCreate failed");
+  }
 
-    CFArrayRef glyphRuns = CTLineGetGlyphRuns(*line);
-    CTRunRef glyphRun = (CTRunRef)CFArrayGetValueAtIndex(glyphRuns, 0);
-    CFRange wholeRunRange = CFRangeMake(0, CTRunGetGlyphCount(glyphRun));
-    std::vector<CGSize> advances(wholeRunRange.length);
-    CTRunGetAdvances(glyphRun, wholeRunRange, advances.data());
-    metrics.advance = std::round(advances[0].width);
+  CFArrayRef glyphRuns = CTLineGetGlyphRuns(*line);
+  CTRunRef glyphRun = (CTRunRef)CFArrayGetValueAtIndex(glyphRuns, 0);
+  CFRange wholeRunRange = CFRangeMake(0, CTRunGetGlyphCount(glyphRun));
+  std::vector<CGSize> advances(wholeRunRange.length);
+  CTRunGetAdvances(glyphRun, wholeRunRange, advances.data());
+  metrics.advance = std::round(advances[0].width);
 
-    // Mimic glyph PBF metrics.
-    metrics.left = Glyph::borderSize;
-    metrics.top = -Glyph::borderSize;
+  // Mimic glyph PBF metrics.
+  metrics.left = Glyph::borderSize;
+  metrics.top = -Glyph::borderSize;
 
-    // Move the text upward to avoid clipping off descenders.
-    CGFloat descent;
-    CTRunGetTypographicBounds(glyphRun, wholeRunRange, NULL, &descent, NULL);
-    CGContextSetTextPosition(*context, 0.0, descent);
+  // Move the text upward to avoid clipping off descenders.
+  CGFloat descent;
+  CTRunGetTypographicBounds(glyphRun, wholeRunRange, NULL, &descent, NULL);
+  CGContextSetTextPosition(*context, 0.0, descent);
 
-    CTLineDraw(*line, *context);
+  CTLineDraw(*line, *context);
 
-    return rgbaBitmap;
+  return rgbaBitmap;
 }
 
 /**
@@ -294,34 +296,36 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
  @returns A glyph representation of the given codepoint with its bitmap data and
     metrics set.
  */
-Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID glyphID) {
-    Glyph manufacturedGlyph;
-    CTFontDescriptorRefHandle descriptor(impl->createFontDescriptor(fontStack));
-    CTFontRefHandle font(CTFontCreateWithFontDescriptor(*descriptor, 0.0, NULL));
-    if (!font) {
-        return manufacturedGlyph;
-    }
-
-    manufacturedGlyph.id = glyphID;
-    BOOL isBold = NO;
-    // Only check the first font name to detect if the user prefers using bold
-    if (!fontStack.empty()) {
-        std::string lowercaseFont = platform::lowercase(fontStack.front());
-        if (lowercaseFont.find("bold") != std::string::npos && lowercaseFont.find("semibold") == std::string::npos) {
-            isBold = YES;
-        }
-    }
-
-    PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics, isBold);
-
-    Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
-    // Copy alpha values from RGBA bitmap into the AlphaImage output
-    manufacturedGlyph.bitmap = AlphaImage(size);
-    for (uint32_t i = 0; i < size.width * size.height; i++) {
-        manufacturedGlyph.bitmap.data[i] = rgbaBitmap.data[4 * i + 3];
-    }
-
+Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack &fontStack, GlyphID glyphID) {
+  Glyph manufacturedGlyph;
+  CTFontDescriptorRefHandle descriptor(impl->createFontDescriptor(fontStack));
+  CTFontRefHandle font(CTFontCreateWithFontDescriptor(*descriptor, 0.0, NULL));
+  if (!font) {
     return manufacturedGlyph;
+  }
+
+  manufacturedGlyph.id = glyphID;
+  BOOL isBold = NO;
+  // Only check the first font name to detect if the user prefers using bold
+  if (!fontStack.empty()) {
+    std::string lowercaseFont = platform::lowercase(fontStack.front());
+    if (lowercaseFont.find("bold") != std::string::npos &&
+        lowercaseFont.find("semibold") == std::string::npos) {
+      isBold = YES;
+    }
+  }
+
+  PremultipliedImage rgbaBitmap =
+      drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics, isBold);
+
+  Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
+  // Copy alpha values from RGBA bitmap into the AlphaImage output
+  manufacturedGlyph.bitmap = AlphaImage(size);
+  for (uint32_t i = 0; i < size.width * size.height; i++) {
+    manufacturedGlyph.bitmap.data[i] = rgbaBitmap.data[4 * i + 3];
+  }
+
+  return manufacturedGlyph;
 }
 
-} // namespace mbgl
+}  // namespace mbgl
