@@ -8,8 +8,8 @@ namespace shaders {
 using ColorReliefShaderSource = ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 2> ColorReliefShaderSource::attributes = {
-    AttributeInfo{colorReliefUBOCount + 0, gfx::AttributeDataType::Short2, idColorReliefPosVertexAttribute},
-    AttributeInfo{colorReliefUBOCount + 1, gfx::AttributeDataType::Short2, idColorReliefTexturePosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, colorReliefUBOCount + 0, idColorReliefPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, colorReliefUBOCount + 0, idColorReliefTexturePosVertexAttribute},
 };
 const std::array<TextureInfo, 3> ColorReliefShaderSource::textures = {
     TextureInfo{0, idColorReliefImageTexture},

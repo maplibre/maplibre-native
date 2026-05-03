@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinter)
     id("com.android.application")
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinPluginSerialization)
     id("maplibre.gradle-make")
     id("maplibre.gradle-config")
@@ -43,12 +42,12 @@ android {
 
     buildTypes {
         getByName("debug") {
+            manifestPlaceholders += mapOf()
             isJniDebuggable = true
             isDebuggable = true
-            isTestCoverageEnabled = true
             isMinifyEnabled = false
             isShrinkResources = false
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
             packaging {
                 jniLibs {
@@ -57,13 +56,15 @@ android {
             }
 
             buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
             manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
 
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             testProguardFiles("test-proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
 
@@ -144,6 +145,7 @@ dependencies {
     implementation(libs.maplibreJavaTurf)
 
     implementation(libs.supportRecyclerView)
+    implementation(libs.supportPrint)
     implementation(libs.supportDesign)
     implementation(libs.supportConstraintLayout)
     implementation(libs.kotlinxSerializationJson)

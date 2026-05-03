@@ -358,7 +358,7 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::buildVulkanInputBindings() noexcept {
+void Drawable::buildVulkanInputBindings() {
     MLN_TRACE_FUNC();
 
     impl->vulkanVertexBuffers.clear();
@@ -412,7 +412,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
     impl->pipelineInfo.updateVertexInputHash();
 }
 
-bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindAttributes(CommandEncoder& encoder) const {
     MLN_TRACE_FUNC();
 
     if (impl->vulkanVertexBuffers.empty()) return false;
@@ -433,7 +433,7 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
     return true;
 }
 
-bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindDescriptors(CommandEncoder& encoder) const {
     MLN_TRACE_FUNC();
 
     if (!shader) return false;
@@ -464,7 +464,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     return true;
 }
 
-void Drawable::uploadTextures(UploadPass&) const noexcept {
+void Drawable::uploadTextures(UploadPass&) const {
     MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {
