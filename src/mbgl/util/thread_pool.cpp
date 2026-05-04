@@ -13,7 +13,7 @@ ThreadedSchedulerBase::~ThreadedSchedulerBase() = default;
 
 void ThreadedSchedulerBase::terminate() {
     {
-        std::lock_guard<std::mutex> lock(workerMutex);
+        std::scoped_lock lock(workerMutex);
         terminated = true;
     }
 
@@ -51,7 +51,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
             std::vector<std::shared_ptr<Queue>> pending;
             {
                 // 1. Gather buckets for us to visit this iteration
-                std::lock_guard<std::mutex> lock(taggedQueueLock);
+                std::scoped_lock lock(taggedQueueLock);
                 for (const auto& [tag, queue] : taggedQueue) {
                     pending.push_back(queue);
                 }
@@ -61,7 +61,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
             for (auto& q : pending) {
                 std::function<void()> tasklet;
                 {
-                    std::lock_guard<std::mutex> lock(q->lock);
+                    std::scoped_lock lock(q->lock);
                     if (q->queue.size()) {
                         q->runningCount++;
                         tasklet = std::move(q->queue.front());
@@ -78,13 +78,13 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                     tasklet = {}; // destroy the function and release its captures before unblocking `waitForEmpty`
 
                     if (!--q->runningCount) {
-                        std::lock_guard<std::mutex> lock(q->lock);
+                        std::scoped_lock lock(q->lock);
                         if (q->queue.empty()) {
                             q->cv.notify_all();
                         }
                     }
                 } catch (...) {
-                    std::lock_guard<std::mutex> lock(q->lock);
+                    std::scoped_lock lock(q->lock);
                     if (handler) {
                         handler(std::current_exception());
                     }
@@ -117,7 +117,7 @@ void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::functi
     std::shared_ptr<Queue> q;
     {
         MLN_TRACE_ZONE(queue);
-        std::lock_guard<std::mutex> lock(taggedQueueLock);
+        std::scoped_lock lock(taggedQueueLock);
 
         // find or insert
         auto result = taggedQueue.insert(std::make_pair(tag, std::shared_ptr<Queue>{}));
@@ -132,13 +132,13 @@ void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::functi
 
     {
         MLN_TRACE_ZONE(push);
-        std::lock_guard<std::mutex> lock(q->lock);
+        std::scoped_lock lock(q->lock);
         q->queue.push(std::move(fn));
         taskCount++;
     }
 
     // Take the worker lock before notifying to prevent threads from waiting while we try to wake them
-    std::lock_guard<std::mutex> workerLock(workerMutex);
+    std::scoped_lock workerLock(workerMutex);
     cvAvailable.notify_one();
 }
 
@@ -150,7 +150,7 @@ void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
 
         std::shared_ptr<Queue> q;
         {
-            std::lock_guard<std::mutex> lock(taggedQueueLock);
+            std::scoped_lock lock(taggedQueueLock);
             auto it = taggedQueue.find(tagToFind);
             if (it == taggedQueue.end()) {
                 return;
@@ -165,7 +165,7 @@ void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
 
         // After waiting for the queue to empty, go ahead and erase it from the map.
         {
-            std::lock_guard<std::mutex> lock(taggedQueueLock);
+            std::scoped_lock lock(taggedQueueLock);
             taggedQueue.erase(tagToFind);
         }
     }

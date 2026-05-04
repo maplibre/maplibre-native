@@ -325,6 +325,8 @@ public:
     jni::jboolean isRenderingStatsViewEnabled(JNIEnv&);
     void enableRenderingStatsView(JNIEnv&, jni::jboolean);
 
+    void setFrustumOffset(JNIEnv&, const jni::Object<RectF>&);
+
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
     void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
@@ -344,6 +346,9 @@ public:
     void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
     void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
+    // Renderer
+    void onRenderError(std::exception_ptr) override;
+
 private:
     std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 
@@ -361,6 +366,8 @@ private:
     // Minimum texture size according to OpenGL ES 2.0 specification.
     int width = 64;
     int height = 64;
+
+    static constexpr auto annotationRequestTimeout = std::chrono::milliseconds(200);
 
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;

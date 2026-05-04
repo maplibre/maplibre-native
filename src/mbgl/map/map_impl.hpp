@@ -74,6 +74,7 @@ public:
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
     void onGlyphsRequested(const FontStack&, const GlyphRange&) final;
     void onTileAction(TileOperation op, const OverscaledTileID&, const std::string&) final;
+    void onRenderError(std::exception_ptr) final;
 
     // Map
     void jumpTo(const CameraOptions&);
@@ -111,6 +112,7 @@ public:
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
+    TileLodMode tileLodMode = TileLodMode::Default;
 };
 
 // Forward declaration of this method is required for the MapProjection class

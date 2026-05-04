@@ -95,7 +95,7 @@ void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag
     while (true) {
         std::size_t remaining;
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            std::scoped_lock lock(mutex);
             remaining = defaultQueue.size() + highPriorityQueue.size();
         }
 

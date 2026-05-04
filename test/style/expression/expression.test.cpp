@@ -88,7 +88,7 @@ static std::vector<std::string> populateNames() {
     for (const auto& file_entry : std::filesystem::directory_iterator(style_directory)) {
         auto file_entry_path = file_entry.path().string();
         if (!file_entry.path().empty() && file_entry_path.length() >= ending.length() &&
-            file_entry_path.compare(file_entry_path.length() - ending.length(), ending.length(), ending) == 0) {
+            file_entry_path.ends_with(ending)) {
 #if ANDROID
             if (file_entry_path.find("number-format") != std::string::npos) {
                 continue;

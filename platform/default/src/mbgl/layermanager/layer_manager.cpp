@@ -2,6 +2,7 @@
 
 #include <mbgl/layermanager/background_layer_factory.hpp>
 #include <mbgl/layermanager/circle_layer_factory.hpp>
+#include <mbgl/layermanager/color_relief_layer_factory.hpp>
 #include <mbgl/layermanager/custom_layer_factory.hpp>
 #include <mbgl/layermanager/fill_extrusion_layer_factory.hpp>
 #include <mbgl/layermanager/fill_layer_factory.hpp>
@@ -68,6 +69,9 @@ LayerManagerDefault::LayerManagerDefault() {
 #endif
 #if !defined(MBGL_LAYER_HILLSHADE_DISABLE_ALL)
     addLayerType(std::make_unique<HillshadeLayerFactory>());
+#endif
+#if !defined(MBGL_LAYER_COLOR_RELIEF_DISABLE_ALL)
+    addLayerType(std::make_unique<ColorReliefLayerFactory>());
 #endif
 #if !defined(MBGL_LAYER_FILL_EXTRUSION_DISABLE_ALL)
     addLayerType(std::make_unique<FillExtrusionLayerFactory>());

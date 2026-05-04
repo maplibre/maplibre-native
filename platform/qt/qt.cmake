@@ -128,8 +128,11 @@ target_sources(
 
 target_compile_definitions(
     mbgl-core
-    PRIVATE QT_IMAGE_DECODERS
-    PUBLIC __QT__
+    PRIVATE
+        QT_IMAGE_DECODERS
+        $<$<PLATFORM_ID:Windows>:NOMINMAX>
+    PUBLIC
+        __QT__
 )
 
 target_include_directories(
@@ -150,7 +153,7 @@ target_link_libraries(
         $<BUILD_INTERFACE:mbgl-vendor-parsedate>
         $<BUILD_INTERFACE:mbgl-vendor-nunicode>
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
-        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:maplibre-native-base-extras-filesystem>>
+        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:mbgl-vendor-filesystem>>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
@@ -176,9 +179,9 @@ if(MLN_QT_HAS_PARENT)
         mbgl-vendor-parsedate
         mbgl-vendor-nunicode
         mbgl-vendor-csscolorparser
-        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:maplibre-native-base-extras-filesystem>>
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
-        $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:$<BUILD_INTERFACE:mbgl-vendor-icu>>
+        $<$<PLATFORM_ID:iOS>:mbgl-vendor-filesystem>
+        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>
+        $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:mbgl-vendor-icu>
         PARENT_SCOPE
     )
 endif()
@@ -212,12 +215,14 @@ if(NOT MLN_QT_LIBRARY_ONLY)
     if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE -Wl,-force_load mbgl-test
+            PRIVATE
+                -Wl,-force_load mbgl-test
         )
     else()
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
+            PRIVATE
+                $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
         )
     endif()
 

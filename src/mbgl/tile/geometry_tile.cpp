@@ -193,8 +193,9 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       ImageRequestor(parameters.imageManager),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(parameters.threadPool, // Scheduler reference for the Actor retainer
-             ActorRef<GeometryTile>(*this, mailbox),
+      worker(parameters.isUpdateSynchronous,
+             parameters.threadPool, // Scheduler reference for the Actor retainer
+             OptionalActorRef<GeometryTile>(parameters.isUpdateSynchronous, *this, mailbox),
              parameters.threadPool,
              id_,
              sourceID,
@@ -399,9 +400,9 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, [[maybe_unused]] HBShape
 
                     auto fontStackHash = FontStackHasher()(fontStack);
                     bool needShape = true;
-                    if (glyphMap.find(fontStackHash) != glyphMap.end()) {
+                    if (glyphMap.contains(fontStackHash)) {
                         auto& glyphs = glyphMap[fontStackHash];
-                        if (glyphs.find(glyphID) != glyphs.end()) needShape = false;
+                        if (glyphs.contains(glyphID)) needShape = false;
                     }
                     if (needShape) {
                         auto glyph = glyphManager->getGlyph(fontStack, glyphID);

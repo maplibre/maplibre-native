@@ -24,7 +24,7 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {
-    encoding = tileset.encoding;
+    encoding = tileset.rasterEncoding.value_or(Tileset::RasterEncoding::Mapbox);
     if (id.canonical.y == 0) {
         // this tile doesn't have upper neighboring tiles so marked those as backfilled
         neighboringTiles = neighboringTiles | DEMTileNeighbors::NoUpper;

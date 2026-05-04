@@ -47,6 +47,7 @@ layout (std140) uniform SymbolDrawableUBO {
     bool u_pitch_with_map;
     bool u_is_size_zoom_constant;
     bool u_is_size_feature_constant;
+    bool u_is_offset;
 
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
@@ -167,7 +168,9 @@ lowp float halo_blur = u_halo_blur;
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!u_is_offset) {
+        size *= perspective_ratio;
+    }
 
     float fontScale = u_is_text_prop ? size / 24.0 : size;
 
@@ -279,16 +282,22 @@ lowp float halo_blur = u_halo_blur;
 
     lowp vec4 color = fill_color;
     highp float gamma = EDGE_GAMMA / (fontScale * u_gamma_scale);
-    lowp float buff = (256.0 - 64.0) / 256.0;
+    lowp float inner_edge = (256.0 - 64.0) / 256.0;
     if (u_is_halo) {
         color = halo_color;
         gamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / (fontScale * u_gamma_scale);
-        buff = (6.0 - halo_width / fontScale) / SDF_PX;
+        inner_edge = inner_edge + gamma * gamma_scale;
     }
 
     lowp float dist = texture(u_texture, tex).a;
     highp float gamma_scaled = gamma * gamma_scale;
-    highp float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    highp float alpha = smoothstep(inner_edge - gamma_scaled, inner_edge + gamma_scaled, dist);
+    if (u_is_halo) {
+        // When drawing halos, we want the inside of the halo to be transparent as well
+        // in case the text fill is transparent.
+        lowp float halo_edge = (6.0 - halo_width / fontScale) / SDF_PX;
+        alpha = min(smoothstep(halo_edge - gamma_scaled, halo_edge + gamma_scaled, dist), 1.0 - alpha);
+    }
 
     fragColor = color * (alpha * opacity * fade_opacity);
 

@@ -160,7 +160,7 @@ TEST(Shaping, applyTextFit) {
         // This set of tests against applyTextFit starts with a 100x20 image with a 5,5,95,15 content box
         // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
         const auto horizontalRectangle = Rect<uint16_t>(0, 0, 100, 20);
-        const style::ImageContent horizontalContent = {5, 5, 95, 15};
+        const style::ImageContent horizontalContent = {.left = 5, .top = 5, .right = 95, .bottom = 15};
 
         {
             // applyTextFit: not specified
@@ -208,7 +208,7 @@ TEST(Shaping, applyTextFit) {
         // This set of tests against applyTextFit starts with a 20x100 image with a 5,5,15,95 content box
         // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
         const auto verticalRectangle = Rect<uint16_t>(0, 0, 20, 100);
-        const style::ImageContent verticalContent = {5, 5, 15, 95};
+        const style::ImageContent verticalContent = {.left = 5, .top = 5, .right = 15, .bottom = 95};
 
         {
             // applyTextFit: stretchOnly, proportional

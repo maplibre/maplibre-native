@@ -15,7 +15,7 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
 constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
 
@@ -27,7 +27,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     const auto& state = parameters.state;
     auto& context = parameters.context;
 
-#if defined(DEBUG)
+#ifdef DEBUG
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif

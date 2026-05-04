@@ -105,6 +105,11 @@ public:
         const auto format_ptr = values.find("format");
         const std::string format = (format_ptr == values.end()) ? "png" : format_ptr->second;
 
+        // Translate MIME type field to source encoding.
+        if (format == "mlt" || format == "application/vnd.maplibre-vector-tile") {
+            doc.AddMember("encoding", "mlt", allocator);
+        }
+
         if (format != "pbf" && !values.contains("scale")) {
             values["scale"] = "1";
         }
@@ -218,22 +223,22 @@ public:
     }
 
     void setResourceOptions(ResourceOptions options) {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         resourceOptions = options;
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return resourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         clientOptions = options;
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return clientOptions.clone();
     }
 

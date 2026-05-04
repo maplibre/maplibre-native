@@ -2,6 +2,7 @@
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/conversion/rotation.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+#include <mbgl/style/conversion.hpp>
 
 namespace mbgl {
 namespace style {
@@ -166,6 +167,12 @@ mbgl::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::
 }
 
 template std::optional<PropertyValue<Rotation>> Converter<PropertyValue<Rotation>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+
+// Hillshade array and enum types
+template std::optional<PropertyValue<std::vector<Color>>> Converter<PropertyValue<std::vector<Color>>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+template std::optional<PropertyValue<HillshadeMethodType>> Converter<PropertyValue<HillshadeMethodType>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 
 } // namespace conversion

@@ -7,12 +7,11 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/util.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <cassert>
 #include <future>
 #include <memory>
-#include <mutex>
-#include <queue>
 #include <string>
 #include <thread>
 #include <utility>
@@ -51,6 +50,8 @@ public:
                               runningPromise = std::move(running_),
                               prioritySetter = std::move(prioritySetter_)]() mutable {
             platform::setCurrentThreadName(name);
+            instrumentation::setThreadName(name);
+
             if (prioritySetter) prioritySetter();
             platform::attachThread();
 

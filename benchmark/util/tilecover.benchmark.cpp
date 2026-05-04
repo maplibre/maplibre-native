@@ -25,8 +25,9 @@ static void TileCoverPitchedViewport(benchmark::State& state) {
     transform.jumpTo(CameraOptions().withCenter(LatLng{0.1, -0.1}).withZoom(8.0).withBearing(5.0).withPitch(40.0));
 
     std::size_t length = 0;
+    const Range<uint8_t> zoomRange(0, 14);
     while (state.KeepRunning()) {
-        auto tiles = util::tileCover({transform.getState()}, 8);
+        auto tiles = util::tileCover({transform.getState()}, 8, zoomRange);
         length += tiles.size();
     }
     benchmark::DoNotOptimize(length);

@@ -58,7 +58,7 @@ public:
     FakeGeoJSONData(TileFeatures features_)
         : features(std::move(features_)) {}
 
-    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn) final {
+    void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>& fn, bool) final {
         assert(fn);
         fn(features);
     }
@@ -74,6 +74,25 @@ private:
 };
 
 } // namespace
+
+TEST(GeoJSONTile, SynchronousUpdate) {
+    GeoJSONTileTest test;
+
+    CircleLayer layer("circle", "source");
+
+    mapbox::feature::feature_collection<int16_t> features;
+    features.push_back(mapbox::feature::feature<int16_t>{mapbox::geometry::point<int16_t>(0, 0)});
+    auto data = std::make_shared<FakeGeoJSONData>(std::move(features));
+    TileParameters tileParameters = test.tileParameters;
+    tileParameters.isUpdateSynchronous = true;
+    GeoJSONTile tile(OverscaledTileID(0, 0, 0), "source", tileParameters, data);
+    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+    tile.setLayers(layers);
+    ASSERT_TRUE(tile.isComplete());
+    ASSERT_TRUE(tile.isRenderable());
+}
 
 TEST(GeoJSONTile, Issue7648) {
     GeoJSONTileTest test;
@@ -101,7 +120,7 @@ TEST(GeoJSONTile, Issue7648) {
         test.loop.runOnce();
     }
 
-    tile.updateData(data);
+    tile.updateData(data, false, test.tileParameters.isUpdateSynchronous);
     while (!tile.isComplete()) {
         test.loop.runOnce();
     }

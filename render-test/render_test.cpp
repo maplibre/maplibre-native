@@ -131,10 +131,61 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
                           updateResults,
                           std::move(testFilter)};
 }
+
+void runWithAlternateSources(TestRunner& runner, TestMetadata& metadata, bool& errored, bool& passed) {
+    constexpr auto replacementsKey = "source-replace";
+    constexpr auto targetKey = "replace";
+    constexpr auto sourceKey = "with";
+    constexpr auto sourcesKey = "sources";
+
+    if (!metadata.document.HasMember("metadata") || !metadata.document["metadata"].HasMember("test")) {
+        return;
+    }
+
+    auto& testElement = metadata.document["metadata"]["test"];
+    if (!testElement.HasMember(replacementsKey) || !testElement[replacementsKey].IsArray()) {
+        return;
+    }
+
+    const auto& replacesElement = testElement[replacementsKey];
+    if (!replacesElement.IsArray() || replacesElement.Empty()) {
+        return;
+    }
+
+    auto& sources = metadata.document[sourcesKey];
+
+    // Each item in the source replacements array...
+    for (auto i = replacesElement.Begin(); i != replacesElement.End(); ++i) {
+        const auto& entry = *i;
+        if (entry.IsObject() && entry.HasMember(targetKey) && entry.HasMember(sourceKey) &&
+            entry[targetKey].IsString() && entry[sourceKey].IsString()) {
+            const auto* targetName = entry[targetKey].GetString();
+            const auto* sourceName = entry[sourceKey].GetString();
+            if (sources.HasMember(targetName) && sources[targetName].IsObject() && sources.HasMember(sourceName) &&
+                sources[sourceName].IsObject()) {
+                // Swap the named sources
+                sources[targetName].Swap(sources[sourceName]);
+
+                // run the test again with the new source
+                runner.run(metadata);
+
+                // Restore the original source
+                sources[targetName].Swap(sources[sourceName]);
+
+                // stop if the test fails
+                errored = metadata.metricsErrored || metadata.renderErrored || metadata.labelCutOffFound;
+                passed = !errored && !metadata.metricsFailed && !metadata.renderFailed;
+                if (!passed) {
+                    break;
+                }
+            }
+        }
+    }
+}
 } // namespace
 namespace mbgl {
 
-int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
+int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testStatus) {
     int returnCode = 0;
     bool recycleMap;
     bool shuffle;
@@ -175,6 +226,8 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     metadatas.reserve(testPaths.size());
 
     TestStatistics stats;
+    const uint32_t totalTests = static_cast<uint32_t>(testPaths.size());
+    uint32_t completedTests = 0;
 
     for (auto& testPath : testPaths) {
         TestMetadata metadata = parseTestMetadata(testPath);
@@ -200,7 +253,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         if (it != ignores.end()) {
             metadata.ignoredTest = shouldIgnore = true;
             ignoreReason = it->second;
-            if (ignoreReason.rfind("skip", 0) == 0) {
+            if (ignoreReason.starts_with("skip")) {
                 printf(ANSI_COLOR_GRAY "* skipped %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
                 mbgl::Log::Info(mbgl::Event::General, "* skipped " + id + "(" + ignoreReason + ")");
                 continue;
@@ -216,6 +269,10 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
 
         bool errored = metadata.metricsErrored || metadata.renderErrored || metadata.labelCutOffFound;
         bool passed = !errored && !metadata.metricsFailed && !metadata.renderFailed;
+
+        if (passed) {
+            runWithAlternateSources(runner, metadata, errored, passed);
+        }
 
         if (shouldIgnore) {
             if (passed) {
@@ -269,7 +326,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
 
         metadatas.push_back(std::move(metadata));
         if (testStatus) {
-            testStatus();
+            testStatus({.completed = ++completedTests, .total = totalTests});
         }
     }
 

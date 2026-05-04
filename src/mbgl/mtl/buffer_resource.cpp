@@ -42,6 +42,10 @@ BufferResource::BufferResource(Context& context_,
         auto& device = context.getBackend().getDevice();
         buffer = NS::TransferPtr((data && size) ? device->newBuffer(data, size, usage)
                                                 : device->newBuffer(size, usage));
+
+        if (!buffer) {
+            throw std::bad_alloc();
+        }
     }
 
     if (isValid()) {
@@ -91,7 +95,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     return *this;
 }
 
-void BufferResource::update(const void* newData, std::size_t updateSize, std::size_t offset) noexcept {
+void BufferResource::update(const void* newData, std::size_t updateSize, std::size_t offset) {
     assert(size >= 0 && updateSize + offset <= size);
     updateSize = std::min(updateSize, size - offset);
     if (updateSize <= 0) {
@@ -135,6 +139,9 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
 
         if (newBufferSource) {
             auto newBuffer = NS::TransferPtr(device->newBuffer(newBufferSource, size, usage));
+            if (!newBuffer) {
+                throw std::bad_alloc();
+            }
             assert(newBuffer);
             if (newBuffer) {
                 buffer = std::move(newBuffer);
@@ -144,7 +151,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
                 stats.bufferUpdateBytes += updateSize;
             }
         }
-    } else {
+    } else if (raw.size() > 0) {
         std::memcpy(raw.data() + offset, newData, updateSize);
         stats.bufferUpdateBytes += updateSize;
     }
@@ -165,9 +172,11 @@ void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
     assert(offset + size_ <= size);
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+        usingVertexBuffer = true;
     } else if (!raw.empty()) {
         size_ = size_ ? std::min(size_, size - offset) : size - offset;
         encoder->setVertexBytes(raw.data() + offset, size_, index);
+        usingVertexBuffer = false;
     }
 }
 
@@ -192,7 +201,7 @@ void BufferResource::updateVertexBindOffset(const MTLRenderCommandEncoderPtr& en
     // The documentation for `setVertexBufferOffset` indicates that it should work for buffers
     // assigned using `setVertexBytes` but, in practice, it produces a validation failure:
     // `Set Vertex Buffer Offset Validation index(1) must have an existing buffer.`
-    if (buffer.get()) {
+    if (buffer.get() && usingVertexBuffer) {
         encoder->setVertexBufferOffset(offset, index);
     } else {
         bindVertex(encoder, offset, index, size_);

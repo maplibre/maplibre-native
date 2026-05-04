@@ -145,7 +145,10 @@ add_test(
 
 find_program(ARMERGE NAMES armerge)
 
-if(NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+if(MLN_CREATE_AMALGAMATION)
+    if ("${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+        message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
+    endif()
     message(STATUS "Found armerge: ${ARMERGE}")
     include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
     set(STATIC_LIBS "")
@@ -160,9 +163,9 @@ if(NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
         POST_BUILD
         COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
-            $<TARGET_FILE:freetype>
+            $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
-            $<TARGET_FILE:harfbuzz>
+            $<TARGET_FILE:mbgl-harfbuzz>
             $<TARGET_FILE:mbgl-vendor-parsedate>
             ${STATIC_LIBS}
     )

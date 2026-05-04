@@ -334,7 +334,15 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
         wantRenderNotification = true;
         requestRender = true;
         renderComplete = false;
-        finishDrawingRunnable = finishDrawing;
+        final Runnable oldCallback = finishDrawingRunnable;
+        finishDrawingRunnable = () -> {
+          if (oldCallback != null) {
+            oldCallback.run();
+          }
+          if (finishDrawing != null) {
+            finishDrawing.run();
+          }
+        };
 
         renderThreadManager.notifyAll();
       }
@@ -490,7 +498,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected ArrayList<Runnable> eventQueue = new ArrayList<>();
     protected boolean sizeChanged = true;
     protected Runnable finishDrawingRunnable = null;
-    protected RenderThreadManager renderThreadManager = null;
+    protected final RenderThreadManager renderThreadManager;
     // End of member variables protected by the sRenderThreadManager monitor.
 
   }

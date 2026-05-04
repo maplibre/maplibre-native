@@ -37,7 +37,7 @@ FileSourceManager::~FileSourceManager() = default;
 std::shared_ptr<FileSource> FileSourceManager::getFileSource(FileSourceType type,
                                                              const ResourceOptions& resourceOptions,
                                                              const ClientOptions& clientOptions) noexcept {
-    std::lock_guard<std::recursive_mutex> lock(impl->mutex);
+    std::scoped_lock lock(impl->mutex);
 
     // Remove released file sources.
     for (auto it = impl->fileSources.begin(); it != impl->fileSources.end();) {
@@ -71,12 +71,12 @@ std::shared_ptr<FileSource> FileSourceManager::getFileSource(FileSourceType type
 
 void FileSourceManager::registerFileSourceFactory(FileSourceType type, FileSourceFactory&& factory) noexcept {
     assert(factory);
-    std::lock_guard<std::recursive_mutex> lock(impl->mutex);
+    std::scoped_lock lock(impl->mutex);
     impl->fileSourceFactories[type] = std::move(factory);
 }
 
 FileSourceManager::FileSourceFactory FileSourceManager::unRegisterFileSourceFactory(FileSourceType type) noexcept {
-    std::lock_guard<std::recursive_mutex> lock(impl->mutex);
+    std::scoped_lock lock(impl->mutex);
     auto it = impl->fileSourceFactories.find(type);
     FileSourceFactory factory;
     if (it != impl->fileSourceFactories.end()) {

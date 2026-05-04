@@ -30,7 +30,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif

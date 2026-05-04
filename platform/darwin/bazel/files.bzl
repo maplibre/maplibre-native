@@ -2,6 +2,7 @@ MLN_GENERATED_DARWIN_STYLE_SOURCE = [
     "src/MLNLight.mm",
     "src/MLNBackgroundStyleLayer.mm",
     "src/MLNCircleStyleLayer.mm",
+    "src/MLNColorReliefStyleLayer.mm",
     "src/MLNFillExtrusionStyleLayer.mm",
     "src/MLNFillStyleLayer.mm",
     "src/MLNHeatmapStyleLayer.mm",
@@ -13,6 +14,7 @@ MLN_GENERATED_DARWIN_STYLE_SOURCE = [
 
 MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
     "src/MLNBackgroundStyleLayer.h",
+    "src/MLNColorReliefStyleLayer.h",
     "src/MLNFillExtrusionStyleLayer.h",
     "src/MLNHeatmapStyleLayer.h",
     "src/MLNLight.h",
@@ -27,6 +29,7 @@ MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
 MLN_GENERATED_DARWIN_STYLE_HEADERS = [
     "src/MLNRasterStyleLayer_Private.h",
     "src/MLNBackgroundStyleLayer_Private.h",
+    "src/MLNColorReliefStyleLayer_Private.h",
     "src/MLNFillExtrusionStyleLayer_Private.h",
     "src/MLNHeatmapStyleLayer_Private.h",
     "src/MLNLineStyleLayer_Private.h",
@@ -38,6 +41,7 @@ MLN_GENERATED_DARWIN_STYLE_HEADERS = [
 
 MLN_GENERATED_DARWIN_TEST_CODE = [
     "test/MLNBackgroundStyleLayerTests.mm",
+    "test/MLNColorReliefStyleLayerTests.mm",
     "test/MLNFillExtrusionStyleLayerTests.mm",
     "test/MLNHeatmapStyleLayerTests.mm",
     "test/MLNLightTest.mm",
@@ -63,6 +67,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNCustomStyleLayer.h",
     "src/MLNCustomDrawableStyleLayer.h",
     "src/MLNDefaultStyle.h",
+    "src/MLNDisplayUtils.h",
     "src/MLNDistanceFormatter.h",
     "src/MLNFeature.h",
     "src/MLNForegroundStyleLayer.h",
@@ -108,6 +113,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSValue+MLNAdditions.h",
     "src/MLNPluginLayer.h",
     "src/MLNPluginStyleLayer.h",
+    "src/MLNNetworkResponse.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -175,6 +181,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNComputedShapeSource.mm",
     "src/MLNCustomStyleLayer.mm",
     "src/MLNDefaultStyle.mm",
+    "src/MLNDisplayUtils.mm",
     "src/MLNFeature.mm",
     "src/MLNForegroundStyleLayer.mm",
     "src/MLNFoundation.mm",
@@ -222,6 +229,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSValue+MLNStyleAttributeAdditions.mm",
     "src/MLNPluginLayer.mm",
     "src/MLNPluginStyleLayer.mm",
+    "src/MLNNetworkResponse.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",

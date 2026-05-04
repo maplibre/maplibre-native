@@ -37,7 +37,9 @@ public:
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
+    TileLodMode tileLodMode = TileLodMode::Default;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+    bool isUpdateSynchronous = false;
 };
 
 } // namespace mbgl

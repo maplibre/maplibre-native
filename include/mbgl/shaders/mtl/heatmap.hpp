@@ -53,13 +53,13 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(heatmapUBOCount + 0)]];
+    short2 pos [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_weight)
-    float2 weight [[attribute(heatmapUBOCount + 1)]];
+    float2 weight [[attribute(1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(heatmapUBOCount + 2)]];
+    float2 radius [[attribute(2)]];
 #endif
 };
 
@@ -109,7 +109,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // weight * u_intensity * GAUSS_COEF * exp(-0.5 * 3.0^2 * S^2) == ZERO
     // Which solves to:
     // S = sqrt(-2.0 * log(ZERO / (weight * u_intensity * GAUSS_COEF))) / 3.0
-    const float S = sqrt(-2.0 * log(ZERO / weight / props.intensity / GAUSS_COEF)) / 3.0;
+    const float S = sqrt(-2.0 * log(ZERO / (max(weight, ZERO) * max(props.intensity, ZERO) * GAUSS_COEF))) / 3.0;
 
     // Pass the varying in units of radius
     const float2 extrude = S * unscaled_extrude;

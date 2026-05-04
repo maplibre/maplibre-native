@@ -35,7 +35,7 @@ std::optional<ImagePosition> PatternAtlas::getPattern(const std::string& id) con
 }
 
 std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& image) {
-    if (patterns.find(image.id) != patterns.end()) {
+    if (patterns.contains(image.id)) {
         return std::nullopt;
     }
     const uint16_t width = image.image.size.width + padding * 2;

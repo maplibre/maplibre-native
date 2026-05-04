@@ -86,7 +86,12 @@ TEST(StyleImage, InvalidStretchY) {
 TEST(StyleImage, InvalidContent) {
     // bottom right out of bounds
     try {
-        style::Image("test", PremultipliedImage({16, 16}), 1, {}, {}, style::ImageContent{0, 0, 24, 28});
+        style::Image("test",
+                     PremultipliedImage({16, 16}),
+                     1,
+                     {},
+                     {},
+                     style::ImageContent{.left = 0, .top = 0, .right = 24, .bottom = 28});
         FAIL() << "Expected exception";
     } catch (util::StyleImageException& ex) {
         EXPECT_STREQ("content area is invalid", ex.what());
@@ -94,7 +99,12 @@ TEST(StyleImage, InvalidContent) {
 
     // bottom right < top left
     try {
-        style::Image("test", PremultipliedImage({16, 16}), 1, {}, {}, style::ImageContent{14, 14, 12, 10});
+        style::Image("test",
+                     PremultipliedImage({16, 16}),
+                     1,
+                     {},
+                     {},
+                     style::ImageContent{.left = 14, .top = 14, .right = 12, .bottom = 10});
         FAIL() << "Expected exception";
     } catch (util::StyleImageException& ex) {
         EXPECT_STREQ("content area is invalid", ex.what());
@@ -102,7 +112,12 @@ TEST(StyleImage, InvalidContent) {
 
     // top left out of bounds
     try {
-        style::Image("test", PremultipliedImage({16, 16}), 1, {}, {}, style::ImageContent{-2, -8, 12, 10});
+        style::Image("test",
+                     PremultipliedImage({16, 16}),
+                     1,
+                     {},
+                     {},
+                     style::ImageContent{.left = -2, .top = -8, .right = 12, .bottom = 10});
         FAIL() << "Expected exception";
     } catch (util::StyleImageException& ex) {
         EXPECT_STREQ("content area is invalid", ex.what());
@@ -115,7 +130,7 @@ TEST(StyleImage, StretchContent) {
                        1,
                        {{2.0f, 14.0f}},
                        {{0.0f, 4.0f}, {12.0f, 16.0f}},
-                       style::ImageContent{2, 2, 14, 14});
+                       style::ImageContent{.left = 2, .top = 2, .right = 14, .bottom = 14});
     EXPECT_EQ(16u, image.getImage().size.width);
     EXPECT_EQ(16u, image.getImage().size.height);
     EXPECT_EQ(1.0, image.getPixelRatio());

@@ -41,8 +41,14 @@ UniformBufferGL::UniformBufferGL(Context& context_, const void* data_, std::size
     context.renderingStats().numBuffers++;
     context.renderingStats().memBuffers += size;
 
+#ifdef __EMSCRIPTEN__
+    constexpr bool forceDisableManagedAllocation{true};
+#else
+    constexpr bool forceDisableManagedAllocation{false};
+#endif
+
     MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, size_);
-    if (size_ > managedBuffer.allocator.pageSize()) {
+    if (forceDisableManagedAllocation || size_ > managedBuffer.allocator.pageSize()) {
         // Buffer is very large, won't fit in the provided allocator
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));

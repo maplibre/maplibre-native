@@ -5,13 +5,14 @@ import org.assertj.core.api.Assertions.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.maplibre.android.location.engine.AndroidLocationEngineImpl.AndroidLocationEngineCallbackTransport
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
-class LocationEngineProxyTest {
+class LocationEngineProxyTest : BaseTest() {
     @Mock
     private val callback: LocationEngineCallback<LocationEngineResult>? = null
 

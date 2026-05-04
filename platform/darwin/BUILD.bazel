@@ -330,7 +330,6 @@ js_binary(
     data = [
         "scripts/style-spec-cocoa-conventions-v8.json",
         "scripts/style-spec-overrides-v8.json",
-        "//:node_modules/argparse",
         "//:node_modules/csscolorparser",
         "//:node_modules/lodash",
         "//:style-code",

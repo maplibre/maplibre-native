@@ -66,7 +66,7 @@ TEST(OrderIndependentHash, Permutations) {
                     } else {
                         EXPECT_EQ(initialValue, curValue);
                     }
-                } while (std::next_permutation(values.begin(), values.end()));
+                } while (std::next_permutation(values.begin(), values.end())); // NOLINT(modernize-use-ranges)
             }
         }
     }
@@ -112,7 +112,7 @@ void checkShaderHashes() {
                     // All subset hashes must be unique
                     EXPECT_TRUE(subsetHashes.insert(hash).second);
                 }
-            } while (std::next_permutation(subset.begin(), subset.end()));
+            } while (std::next_permutation(subset.begin(), subset.end())); // NOLINT(modernize-use-ranges)
         }
     });
     EXPECT_EQ(static_cast<size_t>(std::pow(2, attributes.size())), 1 + subsetHashes.size());

@@ -10,7 +10,7 @@
  dependent way.
  */
 class MLNRenderFrontend : public mbgl::RendererFrontend {
- public:
+public:
   MLNRenderFrontend(std::unique_ptr<mbgl::Renderer> renderer_, MLNMapView* nativeView_,
                     mbgl::gfx::RendererBackend& mbglBackend_, bool async = false)
       : renderer(std::move(renderer_)), nativeView(nativeView_), mbglBackend(mbglBackend_) {
@@ -73,7 +73,7 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     renderer->reduceMemoryUse();
   }
 
- private:
+private:
   std::unique_ptr<mbgl::Renderer> renderer;
   __weak MLNMapView* nativeView = nullptr;
   mbgl::gfx::RendererBackend& mbglBackend;

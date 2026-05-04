@@ -13,6 +13,7 @@ RenderPass::RenderPass(gl::CommandEncoder& commandEncoder_,
       debugGroup(commandEncoder.createDebugGroup(name)) {
     descriptor.renderable.getResource<gl::RenderableResource>().bind();
     const auto clearDebugGroup(commandEncoder.createDebugGroup("clear"));
+    commandEncoder.context.setScissorTest({.x = 0, .y = 0, .width = 0, .height = 0});
     commandEncoder.context.clear(descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil);
 }
 

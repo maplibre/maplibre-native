@@ -17,7 +17,7 @@ auto fakeImage = [](Size s) {
 
 TEST(DEMData, ConstructorMapbox) {
     PremultipliedImage image = fakeImage({16, 16});
-    DEMData demdata(image, Tileset::DEMEncoding::Mapbox);
+    DEMData demdata(image, Tileset::RasterEncoding::Mapbox);
 
     EXPECT_EQ(demdata.dim, 16);
     EXPECT_EQ(demdata.stride, 18);
@@ -26,7 +26,7 @@ TEST(DEMData, ConstructorMapbox) {
 
 TEST(DEMData, ConstructorTerrarium) {
     PremultipliedImage image = fakeImage({16, 16});
-    DEMData demdata(image, Tileset::DEMEncoding::Terrarium);
+    DEMData demdata(image, Tileset::RasterEncoding::Terrarium);
 
     EXPECT_EQ(demdata.dim, 16);
     EXPECT_EQ(demdata.stride, 18);
@@ -35,7 +35,7 @@ TEST(DEMData, ConstructorTerrarium) {
 
 TEST(DEMData, InitialBackfill) {
     PremultipliedImage image1 = fakeImage({4, 4});
-    DEMData dem1(image1, Tileset::DEMEncoding::Mapbox);
+    DEMData dem1(image1, Tileset::RasterEncoding::Mapbox);
 
     bool nonempty = true;
     // checking that a 1 px border around the fake image has been populated
@@ -89,10 +89,10 @@ TEST(DEMData, InitialBackfill) {
 
 TEST(DEMData, BackfillNeighbor) {
     PremultipliedImage image1 = fakeImage({4, 4});
-    DEMData dem0(image1, Tileset::DEMEncoding::Mapbox);
+    DEMData dem0(image1, Tileset::RasterEncoding::Mapbox);
 
     PremultipliedImage image2 = fakeImage({4, 4});
-    DEMData dem1(image2, Tileset::DEMEncoding::Mapbox);
+    DEMData dem1(image2, Tileset::RasterEncoding::Mapbox);
 
     dem0.backfillBorder(dem1, -1, 0);
     for (int y = 0; y < 4; y++) {

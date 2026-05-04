@@ -52,6 +52,7 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
+    bool is_offset;
 
     float size_t;
     float size;
@@ -106,7 +107,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -256,6 +259,7 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
+    bool is_offset;
 
     float size_t;
     float size;
@@ -335,7 +339,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -485,12 +491,22 @@ void main() {
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = frag_font_scale * tileProps.gamma_scale;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
+    const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
+    const float gammaScaled = gamma * frag_gamma_scale;
     const vec4 color = tileProps.is_halo ? halo_color : fill_color;
-    const float gamma = ((tileProps.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileProps.is_halo ? (6.0 - halo_width / frag_font_scale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * frag_gamma_scale;
+    const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
     const float dist = texture(image0_sampler, frag_tex).a;
-    const float gamma_scaled = gamma * frag_gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    float alpha = smoothstep(innerEdge - gammaScaled, innerEdge + gammaScaled, dist);
+    if (tileProps.is_halo) {
+        // When drawing halos, if the fill is translucent we want
+        // the inside of the halo to be translucent as well
+        const float haloEdge = (6.0 - halo_width / frag_font_scale) / SDF_PX;
+        alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
+    }
 
     out_color = color * (alpha * opacity * frag_fade_opacity);
 }
@@ -553,6 +569,7 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
+    bool is_offset;
 
     float size_t;
     float size;
@@ -634,7 +651,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = size / 24.0;
 
@@ -795,12 +814,22 @@ void main() {
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = frag_font_scale * tileProps.gamma_scale;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
+    const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
+    const float gammaScaled = gamma * frag_gamma_scale;
     const vec4 color = tileProps.is_halo ? halo_color : fill_color;
-    const float gamma = ((tileProps.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileProps.is_halo ? (6.0 - halo_width / frag_font_scale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * frag_gamma_scale;
+    const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
     const float dist = texture(glyph_image, frag_tex).a;
-    const float gamma_scaled = gamma * frag_gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+    float alpha = smoothstep(innerEdge - gammaScaled, innerEdge + gammaScaled, dist);
+    if (tileProps.is_halo) {
+        // When drawing halos, if the fill is translucent we want
+        // the inside of the halo to be translucent as well
+        const float haloEdge = (6.0 - halo_width / frag_font_scale) / SDF_PX;
+        alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
+    }
 
     out_color = color * (alpha * opacity * frag_fade_opacity);
 }

@@ -1,7 +1,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/string.hpp>
-
 #include <csscolorparser/csscolorparser.hpp>
+#include <vector>
 
 namespace mbgl {
 
@@ -23,6 +23,19 @@ std::string Color::stringify() const {
            util::toString(array[3]) + ")";
 }
 
+mbgl::Value Color::serialize() const {
+    // Emit as an rgba expression array for expression serialization to avoid
+    // "Bare objects invalid" parse errors in expression roundtrips.
+    const auto array = toArray();
+    return std::vector<mbgl::Value>{
+        std::string("rgba"),
+        array[0],
+        array[1],
+        array[2],
+        array[3],
+    };
+}
+
 std::array<double, 4> Color::toArray() const {
     if (a == 0) {
         return {{0, 0, 0, 0}};
@@ -37,21 +50,11 @@ std::array<double, 4> Color::toArray() const {
 }
 
 mbgl::Value Color::toObject() const {
+    // Return object format for evaluation output
     return mapbox::base::ValueObject{{"r", static_cast<double>(r)},
                                      {"g", static_cast<double>(g)},
                                      {"b", static_cast<double>(b)},
                                      {"a", static_cast<double>(a)}};
-}
-
-mbgl::Value Color::serialize() const {
-    std::array<double, 4> array = toArray();
-    return std::vector<mbgl::Value>{
-        std::string("rgba"),
-        array[0],
-        array[1],
-        array[2],
-        array[3],
-    };
 }
 
 } // namespace mbgl

@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-csscolorparser)
     return()
 endif()
 
-if(MLN_WITH_QT OR MLN_CORE_INCLUDE_DEPS)
+if(MLN_WITH_QT)
     add_library(mbgl-vendor-csscolorparser OBJECT)
 else()
     add_library(mbgl-vendor-csscolorparser STATIC)

@@ -45,7 +45,7 @@ protected:
     /// It sets the internal assumed state to the supplied values.
     void assumeFramebufferBinding(FramebufferID fbo);
     void assumeViewport(int32_t x, int32_t y, const Size&);
-    void assumeScissorTest(bool);
+    void assumeScissorTest(int32_t, int32_t, uint32_t, uint32_t);
 
     /// Returns true when assumed framebuffer binding hasn't changed from the implicit binding.
     bool implicitFramebufferBound();
@@ -55,7 +55,7 @@ public:
     /// match the supplied values.
     void setFramebufferBinding(FramebufferID fbo);
     void setViewport(int32_t x, int32_t y, const Size&);
-    void setScissorTest(bool);
+    void setScissorTest(int32_t, int32_t, uint32_t, uint32_t);
 };
 
 } // namespace gl

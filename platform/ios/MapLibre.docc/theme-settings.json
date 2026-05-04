@@ -1,7 +1,6 @@
 {
   "theme": {
     "color": {
-      "documentation-intro-fill": "#111725",
       "documentation-intro-accent": "#1058c0",
       "link": {
         "light": "#1058c0",

@@ -497,6 +497,44 @@ class MapLibreMapTest : EspressoTest() {
         }
     }
 
+    @Test
+    fun testSetFrustumOffset() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            // RectF(left, top, right, bottom) - frustum offset represents insets in pixels
+            val offset = android.graphics.RectF(20f, 50f, 30f, 40f)
+            maplibreMap.setFrustumOffset(offset)
+            // Verify that setFrustumOffset was called without throwing an exception
+            // Since there's no getter, we can only verify it doesn't crash
+        }
+    }
+
+    @Test
+    fun testSetFrustumOffsetZero() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            val zeroOffset = android.graphics.RectF(0f, 0f, 0f, 0f)
+            maplibreMap.setFrustumOffset(zeroOffset)
+            // Verify that setFrustumOffset with zero values works
+        }
+    }
+
+    @Test
+    fun testSetFrustumOffsetMultipleChanges() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            val firstOffset = android.graphics.RectF(10f, 20f, 30f, 40f)
+            maplibreMap.setFrustumOffset(firstOffset)
+
+            val secondOffset = android.graphics.RectF(100f, 200f, 300f, 400f)
+            maplibreMap.setFrustumOffset(secondOffset)
+
+            val zeroOffset = android.graphics.RectF(0f, 0f, 0f, 0f)
+            maplibreMap.setFrustumOffset(zeroOffset)
+            // Verify that multiple changes to frustum offset work correctly
+        }
+    }
+
     @Deprecated("remove this class when removing deprecated annotations")
     inner class MapLibreMapAction internal constructor(private val invokeViewAction: InvokeViewAction) : ViewAction {
         override fun getConstraints(): Matcher<View> {

@@ -11,6 +11,8 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 
 Renderer::Renderer(gfx::RendererBackend& backend, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
@@ -91,7 +93,7 @@ AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) c
     }
     AnnotationIDs ids;
     ids.reserve(set.size());
-    std::move(set.begin(), set.end(), std::back_inserter(ids));
+    std::ranges::move(set, std::back_inserter(ids));
     return ids;
 }
 

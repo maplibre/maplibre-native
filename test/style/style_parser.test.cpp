@@ -94,8 +94,7 @@ static void populateNames(std::vector<std::string>& names) {
     std::string style_directory = "test/fixtures/style_parser";
 
     auto testName = [&](const std::string& name) {
-        if (name.length() >= ending.length() &&
-            name.compare(name.length() - ending.length(), ending.length(), ending) == 0) {
+        if (name.length() >= ending.length() && name.ends_with(ending)) {
             names.push_back(name.substr(0, name.length() - ending.length()));
         }
     };

@@ -1,0 +1,15 @@
+{
+  "base_test_path": "integration",
+  "cache_path": "cache-style.db",
+  "expectation_paths": [
+      "expectations/platform-macos"
+  ],
+  "ignore_paths": [
+      "ignores/platform-all.json",
+      "ignores/platform-macos-webgpu.json"
+  ],
+  "metric_path": "macos-webgpu-dawn",
+  "probes": [
+      "probeNetwork"
+  ]
+}

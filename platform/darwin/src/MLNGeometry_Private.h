@@ -151,3 +151,5 @@ CLLocationDirection MLNDirectionBetweenCoordinates(CLLocationCoordinate2D firstC
 CGPoint MLNPointRounded(CGPoint point);
 
 MLNMatrix4 MLNMatrix4Make(std::array<double, 16> mat);
+
+FOUNDATION_EXTERN BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy);

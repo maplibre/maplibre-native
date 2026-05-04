@@ -7,15 +7,15 @@ namespace shaders {
 using WideVectorShaderSource = ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 3> WideVectorShaderSource::attributes = {
-    AttributeInfo{wideVectorUBOCount + 0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
-    AttributeInfo{wideVectorUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
-    AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex},
+    AttributeInfo{0, gfx::AttributeDataType::Float3, wideVectorUBOCount + 0, idWideVectorScreenPos},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, wideVectorUBOCount + 0, idWideVectorColor},
+    AttributeInfo{2, gfx::AttributeDataType::Int, wideVectorUBOCount + 0, idWideVectorIndex},
 };
 const std::array<AttributeInfo, 4> WideVectorShaderSource::instanceAttributes = {
-    AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
-    AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
-    AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
-    AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstanceNext},
+    AttributeInfo{3, gfx::AttributeDataType::Float3, wideVectorUBOCount + 1, idWideVectorInstanceCenter},
+    AttributeInfo{4, gfx::AttributeDataType::Float4, wideVectorUBOCount + 1, idWideVectorInstanceColor},
+    AttributeInfo{5, gfx::AttributeDataType::Int, wideVectorUBOCount + 1, idWideVectorInstancePrevious},
+    AttributeInfo{6, gfx::AttributeDataType::Int, wideVectorUBOCount + 1, idWideVectorInstanceNext},
 };
 const std::array<TextureInfo, 0> WideVectorShaderSource::textures = {};
 

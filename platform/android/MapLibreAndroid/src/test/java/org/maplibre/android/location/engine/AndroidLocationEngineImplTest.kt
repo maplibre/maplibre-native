@@ -13,6 +13,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(MockitoJUnitRunner::class)
-class AndroidLocationEngineImplTest {
+class AndroidLocationEngineImplTest : BaseTest() {
     @Mock
     private val locationManagerMock: LocationManager? = null
     private var engine: LocationEngine? = null

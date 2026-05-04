@@ -253,7 +253,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             }
             return true;
         };
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+
+        if (updateTile(tileLayerGroup, renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 

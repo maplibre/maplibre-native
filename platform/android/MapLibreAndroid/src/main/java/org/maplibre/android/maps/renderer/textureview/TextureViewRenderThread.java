@@ -85,7 +85,7 @@ abstract class TextureViewRenderThread extends Thread implements TextureView.Sur
       this.requestRender = false;
       lock.notifyAll();
 
-      while (this.hasNativeSurface) {
+      while (this.hasNativeSurface && !this.exited) {
         try {
           lock.wait();
         } catch (InterruptedException ex) {

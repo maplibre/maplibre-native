@@ -91,7 +91,7 @@ public:
     void runOnRenderThread(const util::SimpleIdentity tag, std::function<void()>&& fn) override {
         std::shared_ptr<RenderQueue> queue;
         {
-            std::lock_guard<std::mutex> lock(taggedRenderQueueLock);
+            std::scoped_lock lock(taggedRenderQueueLock);
             auto it = taggedRenderQueue.find(tag);
             if (it != taggedRenderQueue.end()) {
                 queue = it->second;
@@ -101,14 +101,14 @@ public:
             }
         }
 
-        std::lock_guard<std::mutex> lock(queue->mutex);
+        std::scoped_lock lock(queue->mutex);
         queue->queue.push(std::move(fn));
     }
 
     void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
         MLN_TRACE_FUNC();
         std::shared_ptr<RenderQueue> queue;
-        std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
+        std::unique_lock lock(taggedRenderQueueLock);
 
         {
             auto it = taggedRenderQueue.find(tag);
@@ -125,7 +125,7 @@ public:
             return;
         }
 
-        std::lock_guard<std::mutex> taskLock(queue->mutex);
+        std::scoped_lock taskLock(queue->mutex);
         while (queue->queue.size()) {
             auto fn = std::move(queue->queue.front());
             queue->queue.pop();

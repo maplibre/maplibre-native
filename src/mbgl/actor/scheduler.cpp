@@ -37,7 +37,7 @@ std::shared_ptr<Scheduler> Scheduler::GetBackground() {
     static std::weak_ptr<Scheduler> weak;
     static std::mutex mtx;
 
-    std::lock_guard<std::mutex> lock(mtx);
+    std::scoped_lock lock(mtx);
     std::shared_ptr<Scheduler> scheduler = weak.lock();
 
     if (!scheduler) {
@@ -54,7 +54,7 @@ std::shared_ptr<Scheduler> Scheduler::GetSequenced() {
     static std::mutex mtx;
     static std::size_t lastUsedIndex = 0u;
 
-    std::lock_guard lock(mtx);
+    std::scoped_lock lock(mtx);
 
     lastUsedIndex = (lastUsedIndex + 1) % kSchedulersCount;
 

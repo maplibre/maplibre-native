@@ -7,10 +7,12 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
+
+# For node versions, see: https://raw.githubusercontent.com/nodejs/node/main/doc/abi_version_registry.json
 add_node_module(
     mbgl-node
     INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
-    NAN_VERSION 2.23.0
+    NAN_VERSION 2.25.0
     EXCLUDE_NODE_ABIS
         46
         47

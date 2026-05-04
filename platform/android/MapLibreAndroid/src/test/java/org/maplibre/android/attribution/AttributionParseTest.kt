@@ -3,11 +3,12 @@ package org.maplibre.android.attribution
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
-class AttributionParseTest {
+class AttributionParseTest : BaseTest() {
     @Test
     @Throws(Exception::class)
     fun testParseAttributionStringSatellite() {

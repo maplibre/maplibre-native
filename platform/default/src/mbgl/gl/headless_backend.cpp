@@ -24,7 +24,7 @@ public:
 
     void bind() override {
         context.bindFramebuffer = framebuffer.framebuffer;
-        context.scissorTest = false;
+        context.scissorTest = {0, 0, 0, 0};
         context.viewport = {0, 0, framebuffer.size};
     }
 

@@ -52,6 +52,8 @@ size_t Texture2D::getPixelStride() const noexcept {
             return 1 * numChannels();
         case gfx::TextureChannelDataType::HalfFloat:
             return 2 * numChannels();
+        case gfx::TextureChannelDataType::Float:
+            return 4 * numChannels();
         default:
             return 0;
     }
@@ -68,7 +70,7 @@ size_t Texture2D::numChannels() const noexcept {
     }
 }
 
-void Texture2D::allocateTexture() noexcept {
+void Texture2D::allocateTexture() {
     MLN_TRACE_FUNC();
 
     // Create a new texture object
@@ -86,7 +88,7 @@ void Texture2D::updateTextureData(const void* data) noexcept {
     updateSamplerConfiguration();
 }
 
-void Texture2D::create() noexcept {
+void Texture2D::create() {
     allocateTexture();
     if (storageDirty) {
         updateTextureData();
@@ -154,7 +156,7 @@ void Texture2D::unbind() noexcept {
     }
 }
 
-void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
+void Texture2D::upload(const void* pixelData, const Size& size_) {
     if (!texture || storageDirty || size_ == Size{0, 0} || size_ != size) {
         size = size_;
 
@@ -192,7 +194,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     context.renderingStats().textureUpdateBytes += static_cast<size_t>(getPixelStride() * size_.width * size_.height);
 }
 
-void Texture2D::upload() noexcept {
+void Texture2D::upload() {
     if (image && image->valid()) {
         setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
         upload(image->data.get(), image->size);

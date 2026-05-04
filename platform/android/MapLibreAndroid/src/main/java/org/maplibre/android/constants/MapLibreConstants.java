@@ -169,6 +169,11 @@ public class MapLibreConstants {
   public static final double MINIMUM_DIRECTION = 0;
 
   /**
+   * The current default vertical field of view (matches mbgl::util::DEFAULT_FOV)
+   */
+  public static final double DEFAULT_FOV = 36.86989764584402;
+
+  /**
    * The currently used minimum scale factor to clamp to when a quick zoom gesture occurs
    *
    * @deprecated unused

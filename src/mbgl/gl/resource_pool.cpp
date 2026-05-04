@@ -44,6 +44,8 @@ size_t Texture2DDesc::channelCount() const {
 
 size_t Texture2DDesc::channelStorageSize() const {
     switch (channelType) {
+        case gfx::TextureChannelDataType::Float:
+            return 4;
         case gfx::TextureChannelDataType::HalfFloat:
             return 2;
         case gfx::TextureChannelDataType::UnsignedByte:
@@ -152,6 +154,9 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
                                   Enum<gfx::TexturePixelType>::to(desc.pixelFormat),
                                   Enum<gfx::TextureChannelDataType>::to(desc.channelType),
                                   nullptr));
+    if (glGetError()) {
+        throw std::bad_alloc();
+    }
 
     // Update stats
     context->renderingStats().numCreatedTextures++;

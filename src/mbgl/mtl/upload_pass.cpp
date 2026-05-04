@@ -142,6 +142,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto index = static_cast<std::size_t>(defaultAttr.getIndex());
+        const auto bufferIndex = static_cast<uint32_t>(defaultAttr.getBufferIndex());
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
@@ -150,10 +151,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // up a valid binding or the validation will complain when the shader code references the
             // attribute at compile time, regardless of whether it's ever used at runtime.
             bindings[index] = {
-                /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
-                /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
-                /*.vertexBufferResource = */ nullptr,
-                /*.vertexOffset = */ 0,
+                .attribute = {.dataType = defaultAttr.getDataType(), /*offset=*/.offset = 0},
+                .vertexStride = static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
+                .vertexBufferResource = nullptr,
+                .vertexOffset = 0,
+                .bufferIndex = bufferIndex,
             };
             return;
         }
@@ -168,6 +170,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
                 /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
+                /*.bufferIndex = */ bufferIndex,
             };
             return;
         }
@@ -182,6 +185,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
                 /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ 0,
+                /*.bufferIndex = */ bufferIndex,
             };
             return;
         }

@@ -121,7 +121,11 @@ Resource Resource::tile(const std::string& urlTemplate,
                                                 return {};
                                             }
                                         }),
-                    Resource::TileData{urlTemplate, uint8_t(supportsRatio && pixelRatio > 1.0 ? 2 : 1), x, y, z},
+                    Resource::TileData{.urlTemplate = urlTemplate,
+                                       .pixelRatio = uint8_t(supportsRatio && pixelRatio > 1.0 ? 2 : 1),
+                                       .x = x,
+                                       .y = y,
+                                       .z = z},
                     loadingMethod};
 }
 

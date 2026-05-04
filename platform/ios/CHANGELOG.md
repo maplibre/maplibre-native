@@ -2,6 +2,92 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.26.0
+
+Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
+
+- core: Handle allocation failure ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
+- Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
+- Fix: unconditionally rewriting contentScaleFactor/drawableSize every layout pass caused a feedback loop under iOS 26 Smart Display Zoom ([#4251](https://github.com/maplibre/maplibre-native/pull/4251)). This resolves CarPlay users were experiencing.
+- iOS: Fix case image expression crash ([#4269]((https://github.com/maplibre/maplibre-native/pull/4269))).
+
+## 6.25.1
+
+- iOS: Force `MLNMapView` layout after transitions ([#4225](https://github.com/maplibre/maplibre-native/pull/4225)).
+
+## 6.25.0
+
+- Expose Offline Region ID property on MLNOfflinePack for Darwin/iOS ([#4161](https://github.com/maplibre/maplibre-native/pull/4161)).
+- fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)).
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)).
+- core: Use interleaved buffer for paint property binders ([#4124](https://github.com/maplibre/maplibre-native/pull/4124)).
+- Make sure MLNScaleBar is exported ([#4198](https://github.com/maplibre/maplibre-native/pull/4198)).
+
+## 6.24.0
+
+- Fix crashing of iOS test apps and add Heatmap ([#4099](https://github.com/maplibre/maplibre-native/pull/4099)).
+- Fix incorrect shader selection for text labels with inline images ([#4082](https://github.com/maplibre/maplibre-native/pull/4082)).
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)).
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+
+## 6.23.0
+
+- Add basic support for setting camera roll ([#4061](https://github.com/maplibre/maplibre-native/pull/4059)).
+- Make rendering stats thread safe ([#4059](https://github.com/maplibre/maplibre-native/pull/4059)).
+
+## 6.22.2
+
+- Metal backend resource for MacOS fixes ([#4020](https://github.com/maplibre/maplibre-native/pull/4020)).
+- Port several iOS fixes from GrabMaps ([#4023](https://github.com/maplibre/maplibre-native/pull/4023)).
+- Metal: only update offset if we call setVertexBuffer previously ([#4049](https://github.com/maplibre/maplibre-native/pull/4049)).
+
+## 6.22.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
+## 6.22.0
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+- Fix pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
+
+## 6.21.2
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
+## 6.21.1
+
+- Include static XCFramework in GitHub release.
+
+## 6.21.0
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+- Support hiding attribution on iOS ([#3952](https://github.com/maplibre/maplibre-native/pull/3952)).
+- Support extra annotations for snapshotter for iOS ([#3963](https://github.com/maplibre/maplibre-native/pull/3963)).
+
+## 6.20.1
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+
+## 6.20.0
+
+- Add configurable threshold for rotate gesture snapping to north ([#3914](https://github.com/maplibre/maplibre-native/pull/3914)).
+- Add support for parsing MLT-format vector tile sources ([#3246](https://github.com/maplibre/maplibre-native/pull/3246)).
+- Adds some network delegate methods ([#3917](https://github.com/maplibre/maplibre-native/pull/3917)).
+- Add accessibility annotation check ([#3926](https://github.com/maplibre/maplibre-native/pull/3926)).
+
+## 6.19.3
+
+- fix number-format/currency expression test for darwin ([#3900](https://github.com/maplibre/maplibre-native/pull/3900)).
+- Updates drawable size of metal view after it is attached to display hierarchy. ([#3903](https://github.com/maplibre/maplibre-native/pull/3903)).
+
+## 6.19.2
+
+- [metal] OffscreenTextureResource: fix compilation warnings ([#3727](https://github.com/maplibre/maplibre-native/pull/3727)).
+- Apply symbol shader changes from JS  for Metal, Vulkan, and OpenGL ([#3873](https://github.com/maplibre/maplibre-native/pull/3873)).
+- Fixes wrong map view dimension on CarPlay. ([#3890](https://github.com/maplibre/maplibre-native/pull/3890)).
+
 ## 6.19.1
 
 - Tweak layer depth distribution ([#3738](https://github.com/maplibre/maplibre-native/pull/3738)).

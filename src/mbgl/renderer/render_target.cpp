@@ -71,6 +71,10 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
                                                                   .clearDepth = {},
                                                                   .clearStencil = {}});
 
+    const gfx::ScissorRect prevScissorRect = parameters.scissorRect;
+    const auto& size = getTexture()->getSize();
+    parameters.scissorRect = {.x = 0, .y = 0, .width = size.width, .height = size.height};
+
     // Run layer tweakers to update any dynamic elements
     parameters.currentLayer = 0;
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
@@ -104,6 +108,8 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
 
     parameters.renderPass.reset();
     parameters.encoder->present(*offscreenTexture);
+
+    parameters.scissorRect = prevScissorRect;
 }
 
 } // namespace mbgl

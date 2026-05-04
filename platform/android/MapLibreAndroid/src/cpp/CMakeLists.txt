@@ -147,6 +147,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/layers/background_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.hpp
+            ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.cpp
+            ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.cpp
@@ -213,6 +215,22 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.hpp
     )
+endif()
+
+if(MLN_WITH_WEBGPU)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_webgpu_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_webgpu_renderer_backend.hpp
+    )
+    target_compile_definitions(maplibre PRIVATE MLN_RENDER_BACKEND_WEBGPU=1)
+    if(MLN_WEBGPU_IMPL_DAWN AND TARGET mbgl-vendor-dawn)
+        target_compile_definitions(maplibre PRIVATE MLN_WEBGPU_IMPL_DAWN=1)
+        target_link_libraries(maplibre PRIVATE mbgl-vendor-dawn)
+    elseif(MLN_WEBGPU_IMPL_WGPU AND TARGET mbgl-vendor-wgpu)
+        target_compile_definitions(maplibre PRIVATE MLN_WEBGPU_IMPL_WGPU=1)
+        target_link_libraries(maplibre PRIVATE mbgl-vendor-wgpu)
+    endif()
 endif()
 
 target_include_directories(

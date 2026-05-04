@@ -23,10 +23,15 @@ class LayerSourceProvider {
 
   @NonNull
   GeoJsonSource generateSource(Feature locationFeature) {
+    return generateSource(locationFeature, false);
+  }
+
+  @NonNull
+  GeoJsonSource generateSource(Feature locationFeature, Boolean synchronousUpdate) {
     return new GeoJsonSource(
       LocationComponentConstants.LOCATION_SOURCE,
       locationFeature,
-      new GeoJsonOptions().withMaxZoom(16)
+      new GeoJsonOptions().withMaxZoom(16).withSynchronousUpdate(synchronousUpdate)
     );
   }
 

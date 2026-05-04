@@ -39,10 +39,15 @@ Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, con
 
 Style::Impl::~Impl() = default;
 
+void Style::Impl::cancelPendingRequest() noexcept {
+    styleRequest.reset();
+}
+
 void Style::Impl::loadJSON(const std::string& json_) {
     lastError = nullptr;
     observer->onStyleLoading();
 
+    cancelPendingRequest();
     url.clear();
     parse(json_);
 }
@@ -110,9 +115,11 @@ void Style::Impl::parse(const std::string& json_) {
 
     name = parser.name;
     defaultCamera.center = parser.latLng;
+    defaultCamera.centerAltitude = parser.centerAltitude;
     defaultCamera.zoom = parser.zoom;
     defaultCamera.bearing = parser.bearing;
     defaultCamera.pitch = parser.pitch;
+    defaultCamera.roll = parser.roll;
 
     setLight(std::make_unique<Light>(parser.light));
 

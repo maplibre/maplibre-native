@@ -14,10 +14,7 @@ Texture2D::Texture2D(Context& context_)
     : context(context_) {}
 
 Texture2D::~Texture2D() {
-    if (metalTexture) {
-        context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures -= getDataSize();
-    }
+    destroyMetalTexture();
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
@@ -36,6 +33,9 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
     }
+
+    destroyMetalTexture();
+
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     textureDirty = true;
@@ -46,6 +46,9 @@ gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
+
+    destroyMetalTexture();
+
     size = size_;
     textureDirty = true;
     return *this;
@@ -57,17 +60,17 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
 }
 
 size_t Texture2D::getDataSize() const noexcept {
-    return size.width * size.height * getPixelStride();
+    return size.width * size.height * getPixelStride(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
 }
 
 size_t Texture2D::getPixelStride() const noexcept {
     switch (channelType) {
         case gfx::TextureChannelDataType::UnsignedByte:
-            return 1 * numChannels();
+            return 1 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         case gfx::TextureChannelDataType::HalfFloat:
-            return 2 * numChannels();
+            return 2 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
         case gfx::TextureChannelDataType::Float:
-            return 4 * numChannels();
+            return 4 * numChannels(); // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     }
 }
 
@@ -142,11 +145,12 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
     }
 }
 
-void Texture2D::createMetalTexture() noexcept {
+void Texture2D::createMetalTexture() {
     if (size == Size{0, 0}) {
         return;
     }
-    metalTexture.reset();
+
+    destroyMetalTexture();
 
     const auto format = getMetalPixelFormat();
     if (format == MTL::PixelFormat::PixelFormatInvalid) {
@@ -176,23 +180,40 @@ void Texture2D::createMetalTexture() noexcept {
         }
 #endif
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
+        if (!metalTexture) {
+            throw std::bad_alloc();
+        }
     }
 
     if (metalTexture) {
         textureDirty = false;
-        context.renderingStats().numCreatedTextures++;
-        context.renderingStats().numActiveTextures++;
-        context.renderingStats().memTextures += getDataSize();
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numCreatedTextures++;
+            stats.numActiveTextures++;
+            stats.memTextures += getDataSize();
+        });
     }
 }
 
-void Texture2D::create() noexcept {
+void Texture2D::create() {
     if (textureDirty) {
         createMetalTexture();
     }
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
+}
+
+void Texture2D::destroyMetalTexture() noexcept {
+    if (!metalTexture) {
+        return;
+    }
+
+    metalTexture.reset();
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numActiveTextures--;
+        stats.memTextures -= getDataSize();
+    });
 }
 
 gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
@@ -206,7 +227,7 @@ MTL::Texture* Texture2D::getMetalTexture() const noexcept {
     return metalTexture.get();
 }
 
-void Texture2D::updateSamplerConfiguration() noexcept {
+void Texture2D::updateSamplerConfiguration() {
     auto samplerDescriptor = NS::TransferPtr(MTL::SamplerDescriptor::alloc()->init());
     samplerDescriptor->setMinFilter(samplerState.filter == gfx::TextureFilterType::Nearest
                                         ? MTL::SamplerMinMagFilterNearest
@@ -221,11 +242,14 @@ void Texture2D::updateSamplerConfiguration() noexcept {
                                            ? MTL::SamplerAddressModeClampToEdge
                                            : MTL::SamplerAddressModeRepeat);
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
+    if (!metalSamplerState) {
+        throw std::bad_alloc();
+    }
 
     samplerStateDirty = false;
 }
 
-void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
+void Texture2D::bind(RenderPass& renderPass, int32_t location) {
     assert(!textureDirty);
 
     // Update the sampler state if it was changed after resource creation
@@ -236,14 +260,14 @@ void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
     renderPass.setFragmentTexture(metalTexture, location);
     renderPass.setFragmentSamplerState(metalSamplerState, location);
 
-    context.renderingStats().numTextureBindings++;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings++; });
 }
 
 void Texture2D::unbind(RenderPass&, int32_t /*location*/) noexcept {
-    context.renderingStats().numTextureBindings--;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings--; });
 }
 
-void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
+void Texture2D::upload(const void* pixelData, const Size& size_) {
     setSize(size_);
     if (textureDirty) {
         createMetalTexture();
@@ -263,11 +287,13 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     const MTL::Region region = MTL::Region::Make2D(xOffset, yOffset, size_.width, size_.height);
     const NS::UInteger bytesPerRow = size_.width * getPixelStride();
     metalTexture->replaceRegion(region, 0, pixelData, bytesPerRow);
-    context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += bytesPerRow * size_.height;
+    context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+        stats.numTextureUpdates++;
+        stats.textureUpdateBytes += bytesPerRow * size_.height;
+    });
 }
 
-void Texture2D::upload() noexcept {
+void Texture2D::upload() {
     if (image && image->valid()) {
         setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
         upload(image->data.get(), image->size);

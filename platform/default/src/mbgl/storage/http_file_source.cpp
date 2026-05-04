@@ -245,22 +245,22 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
 }
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
-    std::lock_guard lock(resourceOptionsMutex);
+    std::scoped_lock lock(resourceOptionsMutex);
     resourceOptions = options;
 }
 
 ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
-    std::lock_guard lock(resourceOptionsMutex);
+    std::scoped_lock lock(resourceOptionsMutex);
     return resourceOptions.clone();
 }
 
 void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
-    std::lock_guard lock(clientOptionsMutex);
+    std::scoped_lock lock(clientOptionsMutex);
     clientOptions = options;
 }
 
 ClientOptions HTTPFileSource::Impl::getClientOptions() {
-    std::lock_guard lock(clientOptionsMutex);
+    std::scoped_lock lock(clientOptionsMutex);
     return clientOptions.clone();
 }
 

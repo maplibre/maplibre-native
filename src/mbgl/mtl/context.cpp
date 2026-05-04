@@ -3,6 +3,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/drawable_builder.hpp>
+#include <mbgl/mtl/dynamic_texture.hpp>
 #include <mbgl/mtl/layer_group.hpp>
 #include <mbgl/mtl/offscreen_texture.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
@@ -139,7 +140,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
-    NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
+    NS::String* nsSource = NS::String::string(
+        source.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
 
     const auto& device = backend.getDevice();
     auto library = NS::TransferPtr(device->newLibrary(nsSource, options.get(), &error));
@@ -152,7 +154,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         return nullptr;
     }
 
-    const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
+    const auto nsVertName = NS::String::string(
+        vertexName.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
@@ -164,7 +167,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // fragment function is optional
     MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
-        const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
+        const auto nsFragName = NS::String::string(
+            fragmentName.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
@@ -215,15 +219,23 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    tileLayerGroup->setObserver(observer);
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+    layerGroup->setObserver(observer);
+    return layerGroup;
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
+}
+
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
@@ -286,15 +298,15 @@ const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
 
 namespace {
 const auto clipMaskStencilMode = gfx::StencilMode{
-    /*.test=*/gfx::StencilMode::Always(),
-    /*.ref=*/0,
-    /*.mask=*/0b11111111,
-    /*.fail=*/gfx::StencilOpType::Keep,
-    /*.depthFail=*/gfx::StencilOpType::Keep,
-    /*.pass=*/gfx::StencilOpType::Replace,
+    .test = gfx::StencilMode::Always(),
+    .ref = 0,
+    .mask = 0b11111111,
+    .fail = gfx::StencilOpType::Keep,
+    .depthFail = gfx::StencilOpType::Keep,
+    .pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/gfx::DepthFunctionType::Always,
-                                              /*.mask=*/gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Always,
+                                              .mask = gfx::DepthMaskType::ReadOnly};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -354,20 +366,19 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     if (!clipMaskPipelineState) {
         // A vertex descriptor tells Metal what's in the vertex buffer
         auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
-        auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-        auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
-        if (!vertDesc || !attribDesc || !layoutDesc) {
+        if (!vertDesc) {
             return false;
         }
 
-        attribDesc->setBufferIndex(ShaderClass::attributes[0].index);
+        const auto& attribDesc = vertDesc->attributes()->object(ShaderClass::attributes[0].index);
+        attribDesc->setBufferIndex(ShaderClass::attributes[0].bufferIndex);
         attribDesc->setOffset(0);
         attribDesc->setFormat(MTL::VertexFormatShort2);
+
+        const auto& layoutDesc = vertDesc->layouts()->object(ShaderClass::attributes[0].bufferIndex);
         layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
         layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
         layoutDesc->setStepRate(1);
-        vertDesc->attributes()->setObject(attribDesc.get(), ShaderClass::attributes[0].index);
-        vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
@@ -410,7 +421,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     mtlRenderPass.setCullMode(MTL::CullModeNone);
 
-    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
+    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].bufferIndex);
 
     // Instancing is disabled for now because the `[[stencil]]` attribute in the fragment shader output
     // that we need to apply a different stencil value for each tile causes a problem on some older (A8-A11)
