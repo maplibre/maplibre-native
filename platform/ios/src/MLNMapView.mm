@@ -1,6 +1,6 @@
 #import "MLNMapView+Impl.h"
-#import "MLNStyleValue_Private.h"
 #import "MLNMapView_Private.h"
+#import "MLNStyleValue_Private.h"
 
 #include <mbgl/annotation/annotation.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
@@ -6693,115 +6693,117 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: Managing Feature State
 
-- (void)setFeatureState:(id<MLNFeature>)feature sourceID:(NSString *)sourceID state:(NSDictionary<NSString *, id> *)state {
-    MLNAssertIsMainThread();
+- (void)setFeatureState:(id<MLNFeature>)feature
+               sourceID:(NSString *)sourceID
+                  state:(NSDictionary<NSString *, id> *)state {
+  MLNAssertIsMainThread();
 
-    if (!feature || !sourceID || !state) {
-        return;
-    }
+  if (!feature || !sourceID || !state) {
+    return;
+  }
 
-    NSString *featureID = [NSString stringWithFormat:@"%@", feature.identifier];
-    [self setFeatureStateForSource:sourceID sourceLayer:nil featureID:featureID state:state];
+  NSString *featureID = [NSString stringWithFormat:@"%@", feature.identifier];
+  [self setFeatureStateForSource:sourceID sourceLayer:nil featureID:featureID state:state];
 }
 
 - (void)setFeatureStateForSource:(NSString *)sourceID
-                    sourceLayer:(nullable NSString *)sourceLayerID
-                      featureID:(NSString *)featureID
+                     sourceLayer:(nullable NSString *)sourceLayerID
+                       featureID:(NSString *)featureID
                            state:(NSDictionary<NSString *, id> *)state {
-    MLNAssertIsMainThread();
+  MLNAssertIsMainThread();
 
-    if (!sourceID || !featureID || !state) {
-        return;
-    }
+  if (!sourceID || !featureID || !state) {
+    return;
+  }
 
-    mbgl::FeatureState mbglState;
-    for (NSString *key in state) {
-        id value = state[key];
-        NSExpression *expression = [NSExpression expressionForConstantValue:value];
-        mbglState[key.UTF8String] = expression.mgl_constantMBGLValue;
-    }
+  mbgl::FeatureState mbglState;
+  for (NSString *key in state) {
+    id value = state[key];
+    NSExpression *expression = [NSExpression expressionForConstantValue:value];
+    mbglState[key.UTF8String] = expression.mgl_constantMBGLValue;
+  }
 
-    _rendererFrontend->getRenderer()->setFeatureState(
-        sourceID.UTF8String,
-        sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
-        featureID.UTF8String,
-        mbglState
-    );
+  _rendererFrontend->getRenderer()->setFeatureState(
+      sourceID.UTF8String,
+      sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
+      featureID.UTF8String, mbglState);
 
-    [self setNeedsRerender];
+  [self setNeedsRerender];
 }
 
-- (nullable NSDictionary<NSString *, id> *)getFeatureState:(id<MLNFeature>)feature sourceID:(NSString *)sourceID {
-    MLNAssertIsMainThread();
+- (nullable NSDictionary<NSString *, id> *)getFeatureState:(id<MLNFeature>)feature
+                                                  sourceID:(NSString *)sourceID {
+  MLNAssertIsMainThread();
 
-    if (!feature || !sourceID) {
-        return nil;
-    }
+  if (!feature || !sourceID) {
+    return nil;
+  }
 
-    NSString *featureID = [NSString stringWithFormat:@"%@", feature.identifier];
-    return [self getFeatureStateForSource:sourceID sourceLayer:nil featureID:featureID];
+  NSString *featureID = [NSString stringWithFormat:@"%@", feature.identifier];
+  return [self getFeatureStateForSource:sourceID sourceLayer:nil featureID:featureID];
 }
 
 - (nullable NSDictionary<NSString *, id> *)getFeatureStateForSource:(NSString *)sourceID
-                                                       sourceLayer:(nullable NSString *)sourceLayerID
-                                                         featureID:(NSString *)featureID {
-    MLNAssertIsMainThread();
+                                                        sourceLayer:
+                                                            (nullable NSString *)sourceLayerID
+                                                          featureID:(NSString *)featureID {
+  MLNAssertIsMainThread();
 
-    if (!sourceID || !featureID) {
-        return nil;
-    }
+  if (!sourceID || !featureID) {
+    return nil;
+  }
 
-    mbgl::FeatureState mbglState;
-    _rendererFrontend->getRenderer()->getFeatureState(
-        mbglState,
-        sourceID.UTF8String,
-        sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
-        featureID.UTF8String
-    );
+  mbgl::FeatureState mbglState;
+  _rendererFrontend->getRenderer()->getFeatureState(
+      mbglState, sourceID.UTF8String,
+      sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
+      featureID.UTF8String);
 
-    if (mbglState.empty()) {
-        return nil;
-    }
+  if (mbglState.empty()) {
+    return nil;
+  }
 
-    NSMutableDictionary<NSString *, id> *state = [NSMutableDictionary dictionaryWithCapacity:mbglState.size()];
-    for (const auto &pair : mbglState) {
-        NSString *key = [NSString stringWithUTF8String:pair.first.c_str()];
-        id value = MLNJSONObjectFromMBGLValue(pair.second);
-        state[key] = value;
-    }
+  NSMutableDictionary<NSString *, id> *state =
+      [NSMutableDictionary dictionaryWithCapacity:mbglState.size()];
+  for (const auto &pair : mbglState) {
+    NSString *key = [NSString stringWithUTF8String:pair.first.c_str()];
+    id value = MLNJSONObjectFromMBGLValue(pair.second);
+    state[key] = value;
+  }
 
-    return [state copy];
+  return [state copy];
 }
 
-- (void)removeFeatureState:(id<MLNFeature>)feature sourceID:(NSString *)sourceID stateKey:(nullable NSString *)stateKey {
-    MLNAssertIsMainThread();
+- (void)removeFeatureState:(id<MLNFeature>)feature
+                  sourceID:(NSString *)sourceID
+                  stateKey:(nullable NSString *)stateKey {
+  MLNAssertIsMainThread();
 
-    if (!feature || !sourceID) {
-        return;
-    }
+  if (!feature || !sourceID) {
+    return;
+  }
 
-    NSString *featureID = [NSString stringWithFormat:@"%@", feature.identifier];
-    [self removeFeatureStateForSource:sourceID sourceLayer:nil featureID:featureID stateKey:stateKey];
+  NSString *featureID = [NSString stringWithFormat:@"%@", feature.identifier];
+  [self removeFeatureStateForSource:sourceID sourceLayer:nil featureID:featureID stateKey:stateKey];
 }
 
 - (void)removeFeatureStateForSource:(NSString *)sourceID
                         sourceLayer:(nullable NSString *)sourceLayerID
                           featureID:(nullable NSString *)featureID
                            stateKey:(nullable NSString *)stateKey {
-    MLNAssertIsMainThread();
+  MLNAssertIsMainThread();
 
-    if (!sourceID) {
-        return;
-    }
+  if (!sourceID) {
+    return;
+  }
 
-    _rendererFrontend->getRenderer()->removeFeatureState(
-        sourceID.UTF8String,
-        sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
-        featureID ? std::optional<std::string>(featureID.UTF8String) : std::nullopt,
-        stateKey ? std::optional<std::string>(stateKey.UTF8String) : std::nullopt
-    );
+  _rendererFrontend->getRenderer()->removeFeatureState(
+      sourceID.UTF8String,
+      sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
+      featureID ? std::optional<std::string>(featureID.UTF8String) : std::nullopt,
+      stateKey ? std::optional<std::string>(stateKey.UTF8String) : std::nullopt);
 
-    [self setNeedsRerender];
+  [self setNeedsRerender];
 }
 
 // MARK: - Utility -
