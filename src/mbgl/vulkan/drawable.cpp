@@ -204,7 +204,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
-        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
+        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMinCount(),
                                                                    /*vertexType*/ gfx::AttributeDataType::Byte,
                                                                    /*vertexAttributeIndex=*/-1,
                                                                    /*vertexData=*/{},
@@ -290,7 +290,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
-    const auto instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+    const auto instances = instanceAttributes ? instanceAttributes->getMinCount() : 1;
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();

@@ -65,7 +65,7 @@ public:
 
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
 
-    void initAttribute(const shaders::AttributeInfo&);
+    void initVertexAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
     void initTexture(const shaders::TextureInfo&);
 
