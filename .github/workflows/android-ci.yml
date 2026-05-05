@@ -380,9 +380,6 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Add Android Rust target
-        run: rustup target add ${{ env.RUST_TARGET }}
-
       - name: Configure cargo for Android NDK linker
         run: |
           LATEST_NDK=$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
@@ -396,6 +393,11 @@ jobs:
       - name: Pre-build wgpu-native for Android
         working-directory: vendor/wgpu-native
         run: |
+          # vendor/wgpu-native pins its own rust toolchain; install targets for that active toolchain
+          ACTIVE_TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}')
+          rustup target add ${{ env.RUST_TARGET }} --toolchain "$ACTIVE_TOOLCHAIN"
+          rustup target list --toolchain "$ACTIVE_TOOLCHAIN" --installed | grep -x '${{ env.RUST_TARGET }}'
+
           LATEST_NDK=$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
           NDK_PREBUILT="$LATEST_NDK/toolchains/llvm/prebuilt/linux-x86_64"
           RESOURCE_DIR=$("$NDK_PREBUILT/bin/clang" --print-resource-dir)

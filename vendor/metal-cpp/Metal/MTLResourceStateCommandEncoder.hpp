@@ -2,7 +2,7 @@
 //
 // Metal/MTLResourceStateCommandEncoder.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2025 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,20 @@
 
 #pragma once
 
+#include "../Foundation/Foundation.hpp"
+#include "MTLCommandEncoder.hpp"
 #include "MTLDefines.hpp"
 #include "MTLHeaderBridge.hpp"
 #include "MTLPrivate.hpp"
-
-#include <Foundation/Foundation.hpp>
-
-#include "MTLCommandEncoder.hpp"
 #include "MTLTypes.hpp"
+#include <cstdint>
 
 namespace MTL
 {
+class Buffer;
+class Fence;
+struct Region;
+class Texture;
 _MTL_ENUM(NS::UInteger, SparseTextureMappingMode) {
     SparseTextureMappingModeMap = 0,
     SparseTextureMappingModeUnmap = 1,
@@ -51,53 +54,45 @@ struct MapIndirectArguments
 class ResourceStateCommandEncoder : public NS::Referencing<ResourceStateCommandEncoder, CommandEncoder>
 {
 public:
-    void updateTextureMappings(const class Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region* regions, const NS::UInteger* mipLevels, const NS::UInteger* slices, NS::UInteger numRegions);
+    void moveTextureMappingsFromTexture(const MTL::Texture* sourceTexture, NS::UInteger sourceSlice, NS::UInteger sourceLevel, MTL::Origin sourceOrigin, MTL::Size sourceSize, const MTL::Texture* destinationTexture, NS::UInteger destinationSlice, NS::UInteger destinationLevel, MTL::Origin destinationOrigin);
 
-    void updateTextureMapping(const class Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region region, const NS::UInteger mipLevel, const NS::UInteger slice);
+    void updateFence(const MTL::Fence* fence);
 
-    void updateTextureMapping(const class Texture* texture, const MTL::SparseTextureMappingMode mode, const class Buffer* indirectBuffer, NS::UInteger indirectBufferOffset);
+    void updateTextureMapping(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region region, const NS::UInteger mipLevel, const NS::UInteger slice);
+    void updateTextureMapping(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Buffer* indirectBuffer, NS::UInteger indirectBufferOffset);
+    void updateTextureMappings(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region* regions, const NS::UInteger* mipLevels, const NS::UInteger* slices, NS::UInteger numRegions);
 
-    void updateFence(const class Fence* fence);
-
-    void waitForFence(const class Fence* fence);
-
-    void moveTextureMappingsFromTexture(const class Texture* sourceTexture, NS::UInteger sourceSlice, NS::UInteger sourceLevel, MTL::Origin sourceOrigin, MTL::Size sourceSize, const class Texture* destinationTexture, NS::UInteger destinationSlice, NS::UInteger destinationLevel, MTL::Origin destinationOrigin);
+    void waitForFence(const MTL::Fence* fence);
 };
 
 }
 
-// method: updateTextureMappings:mode:regions:mipLevels:slices:numRegions:
-_MTL_INLINE void MTL::ResourceStateCommandEncoder::updateTextureMappings(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region* regions, const NS::UInteger* mipLevels, const NS::UInteger* slices, NS::UInteger numRegions)
+_MTL_INLINE void MTL::ResourceStateCommandEncoder::moveTextureMappingsFromTexture(const MTL::Texture* sourceTexture, NS::UInteger sourceSlice, NS::UInteger sourceLevel, MTL::Origin sourceOrigin, MTL::Size sourceSize, const MTL::Texture* destinationTexture, NS::UInteger destinationSlice, NS::UInteger destinationLevel, MTL::Origin destinationOrigin)
 {
-    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateTextureMappings_mode_regions_mipLevels_slices_numRegions_), texture, mode, regions, mipLevels, slices, numRegions);
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(moveTextureMappingsFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin_), sourceTexture, sourceSlice, sourceLevel, sourceOrigin, sourceSize, destinationTexture, destinationSlice, destinationLevel, destinationOrigin);
 }
 
-// method: updateTextureMapping:mode:region:mipLevel:slice:
-_MTL_INLINE void MTL::ResourceStateCommandEncoder::updateTextureMapping(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region region, const NS::UInteger mipLevel, const NS::UInteger slice)
-{
-    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateTextureMapping_mode_region_mipLevel_slice_), texture, mode, region, mipLevel, slice);
-}
-
-// method: updateTextureMapping:mode:indirectBuffer:indirectBufferOffset:
-_MTL_INLINE void MTL::ResourceStateCommandEncoder::updateTextureMapping(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Buffer* indirectBuffer, NS::UInteger indirectBufferOffset)
-{
-    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateTextureMapping_mode_indirectBuffer_indirectBufferOffset_), texture, mode, indirectBuffer, indirectBufferOffset);
-}
-
-// method: updateFence:
 _MTL_INLINE void MTL::ResourceStateCommandEncoder::updateFence(const MTL::Fence* fence)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateFence_), fence);
 }
 
-// method: waitForFence:
+_MTL_INLINE void MTL::ResourceStateCommandEncoder::updateTextureMapping(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region region, const NS::UInteger mipLevel, const NS::UInteger slice)
+{
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateTextureMapping_mode_region_mipLevel_slice_), texture, mode, region, mipLevel, slice);
+}
+
+_MTL_INLINE void MTL::ResourceStateCommandEncoder::updateTextureMapping(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Buffer* indirectBuffer, NS::UInteger indirectBufferOffset)
+{
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateTextureMapping_mode_indirectBuffer_indirectBufferOffset_), texture, mode, indirectBuffer, indirectBufferOffset);
+}
+
+_MTL_INLINE void MTL::ResourceStateCommandEncoder::updateTextureMappings(const MTL::Texture* texture, const MTL::SparseTextureMappingMode mode, const MTL::Region* regions, const NS::UInteger* mipLevels, const NS::UInteger* slices, NS::UInteger numRegions)
+{
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(updateTextureMappings_mode_regions_mipLevels_slices_numRegions_), texture, mode, regions, mipLevels, slices, numRegions);
+}
+
 _MTL_INLINE void MTL::ResourceStateCommandEncoder::waitForFence(const MTL::Fence* fence)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(waitForFence_), fence);
-}
-
-// method: moveTextureMappingsFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
-_MTL_INLINE void MTL::ResourceStateCommandEncoder::moveTextureMappingsFromTexture(const MTL::Texture* sourceTexture, NS::UInteger sourceSlice, NS::UInteger sourceLevel, MTL::Origin sourceOrigin, MTL::Size sourceSize, const MTL::Texture* destinationTexture, NS::UInteger destinationSlice, NS::UInteger destinationLevel, MTL::Origin destinationOrigin)
-{
-    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(moveTextureMappingsFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin_), sourceTexture, sourceSlice, sourceLevel, sourceOrigin, sourceSize, destinationTexture, destinationSlice, destinationLevel, destinationOrigin);
 }
