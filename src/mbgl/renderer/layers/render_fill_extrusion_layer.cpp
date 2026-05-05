@@ -466,6 +466,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             instancedBuilder.flush(context);
 
+            const auto instancedSSBO = context.createUniformBuffer(
+                bucket.sharedVertices->getRawData(),
+                bucket.sharedVertices->getRawCount() * bucket.sharedVertices->getRawSize(),
+                true,
+                true);
+            auto& uniforms = layerGroup->mutableUniformBuffers();
+            uniforms.set(idFillExtrusionInstancedDrawableUBO, instancedSSBO);
+
             for (auto& drawable : instancedBuilder.clearDrawables()) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<std::size_t>(hasPattern));

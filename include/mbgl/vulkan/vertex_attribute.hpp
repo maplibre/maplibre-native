@@ -25,6 +25,8 @@ public:
                                                             UploadPass&,
                                                             const gfx::BufferUsageType,
                                                             bool forceUpdate);
+
+    bool ssbo = false;
 };
 
 /// Stores a collection of vertex attributes by name

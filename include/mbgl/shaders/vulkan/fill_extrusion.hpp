@@ -18,7 +18,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -26,18 +26,17 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
-layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_color)
-layout(location = 2) in vec4 in_color;
+layout(location = 1) in vec4 in_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 3) in vec2 in_base;
+layout(location = 2) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 4) in vec2 in_height;
+layout(location = 3) in vec2 in_height;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -100,8 +99,8 @@ void main() {
     vec4 color = unpack_mix_color(in_color, drawable.color_t);
 #endif
 
-    const vec3 normal = in_normal_ed.xyz;
-    const float t = mod(normal.x, 2.0);
+    const vec3 normal = vec3(0.0, 0.0, 1.0);
+    const float t = 1.0;
     const float z = t != 0.0 ? height : base;
 
     gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
@@ -121,7 +120,174 @@ void main() {
     color += vec4(0.03, 0.03, 0.03, 1.0);
 
     // Calculate cos(theta), where theta is the angle between surface normal and diffuse light ray
-    const float directionalFraction = clamp(dot(normal / 16384.0, props.light_position_base.xyz), 0.0, 1.0);
+    const float directionalFraction = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
+
+    // Adjust directional so that the range of values for highlight/shading is
+    // narrower with lower light intensity and with lighter/brighter surface colors
+    const float minDirectional = 1.0 - props.light_intensity;
+    const float maxDirectional = max(1.0 - luminance + props.light_intensity, 1.0);
+    float directional = mix(minDirectional, maxDirectional, directionalFraction);
+
+    // Add gradient along z axis of side surfaces
+    if (normal.y != 0.0) {
+        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
+        // vertical gradient, and otherwise calculates the gradient based on base + height
+        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
+        //       the square root when height is a uniform.
+        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
+        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+    }
+
+    // Assign final color based on surface + ambient light color, diffuse light directional,
+    // and light color with lower bounds adjusted to hue of light so that shading is tinted
+    // with the complementary (opposite) color to the light color
+    const vec3 light_color = props.light_color_pad.rgb;
+    const vec3 minLight = mix(vec3(0.0), vec3(0.3), 1.0 - light_color.rgb);
+    vcolor += vec4(clamp(color.rgb * directional * light_color.rgb, minLight, vec3(1.0)), 0.0);
+
+    frag_color = vcolor * props.opacity;
+}
+)";
+    static constexpr auto fragment = R"(
+
+layout(location = 0) in vec4 frag_color;
+layout(location = 0) out vec4 out_color;
+
+void main() {
+    out_color = frag_color;
+}
+)";
+};
+
+template <>
+struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::Vulkan> {
+    static constexpr const char* name = "FillExtrusionInstancedShader";
+
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 5> instanceAttributes;
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto prelude = fillExtrusionShaderPrelude;
+
+    static constexpr auto vertex = R"(
+
+layout(location = 0) in ivec2 in_position;
+
+#if !defined(HAS_UNIFORM_u_color)
+layout(location = 3) in vec4 in_color;
+#endif
+
+#if !defined(HAS_UNIFORM_u_base)
+layout(location = 4) in vec2 in_base;
+#endif
+
+#if !defined(HAS_UNIFORM_u_height)
+layout(location = 5) in vec2 in_height;
+#endif
+
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillExtrusionDrawableUBO {
+    mat4 matrix;
+    vec2 pixel_coord_upper;
+    vec2 pixel_coord_lower;
+    float height_factor;
+    float tile_ratio;
+    // Interpolations
+    float base_t;
+    float height_t;
+    float color_t;
+    float pattern_from_t;
+    float pattern_to_t;
+    float pad1;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
+    FillExtrusionDrawableUBO drawable_ubo[];
+} drawableVector;
+
+layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
+    vec4 color;
+    vec4 light_color_pad;
+    vec4 light_position_base;
+    float height;
+    float light_intensity;
+    float vertical_gradient;
+    float opacity;
+    float fade;
+    float from_scale;
+    float to_scale;
+    float pad2;
+} props;
+
+struct OutlineInstance {
+    ivec2 pos;
+    uvec2 ed_discard;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO + 1) readonly buffer FillExtrusionInstanceVector {
+    OutlineInstance instance[];
+} instanceVector;
+
+layout(location = 0) out mediump vec4 frag_color;
+
+void main() {
+
+    if (instanceVector.instance[gl_InstanceIndex].ed_discard.y > 0.0) {
+        gl_Position = vec4(0.0);
+        frag_color = vec4(0.0);
+        return;
+    }
+
+    const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+
+#if defined(HAS_UNIFORM_u_base)
+    const float base = props.light_position_base.w;
+#else
+    const float base = max(unpack_mix_float(in_base, drawable.base_t), 0.0);
+#endif
+
+#if defined(HAS_UNIFORM_u_height)
+    const float height = props.height;
+#else
+    const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
+#endif
+
+#if defined(HAS_UNIFORM_u_color)
+    vec4 color = props.color;
+#else
+    vec4 color = unpack_mix_color(in_color, drawable.color_t);
+#endif
+
+    const vec2 p1 = instanceVector.instance[gl_InstanceIndex].pos;
+    const vec2 p2 = instanceVector.instance[gl_InstanceIndex].pos;
+    const vec2 perp = normalize(p1 - p2);
+
+    const vec3 normal = vec3(-perp.y, perp.x, 1.0);
+    const float t = 1.0;
+    const float z = t != 0.0 ? height : base;
+
+    gl_Position = drawable.matrix * vec4(instanceVector.instance[gl_InstanceIndex + in_position.x].pos, z, 1.0);
+    applySurfaceTransform();
+
+#if defined(OVERDRAW_INSPECTOR)
+    frag_color = vec4(1.0);
+    return;
+#endif
+
+    // Relative luminance (how dark/bright is the surface color?)
+    const float luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+
+    vec4 vcolor = vec4(0.0, 0.0, 0.0, 1.0);
+
+    // Add slight ambient lighting so no extrusions are totally black
+    color += vec4(0.03, 0.03, 0.03, 1.0);
+
+    // Calculate cos(theta), where theta is the angle between surface normal and diffuse light ray
+    const float directionalFraction = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
 
     // Adjust directional so that the range of values for highlight/shading is
     // narrower with lower light intensity and with lighter/brighter surface colors
@@ -166,7 +332,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -421,6 +587,19 @@ void main() {
     out_color = mix(color1, color2, props.fade) * frag_lighting;
 }
 )";
+};
+
+template <>
+struct ShaderSource<BuiltIn::FillExtrusionPatternInstancedShader, gfx::Backend::Type::Vulkan> {
+    static constexpr const char* name = "FillExtrusionPatternInstancedShader";
+
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 6> instanceAttributes;
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto prelude = fillExtrusionShaderPrelude;
+    static constexpr auto vertex = R"()";
+    static constexpr auto fragment = R"()";
 };
 
 } // namespace shaders

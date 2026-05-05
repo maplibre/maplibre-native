@@ -30,8 +30,8 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
                                                                                   const std::size_t size,
                                                                                   const gfx::BufferUsageType,
                                                                                   bool persistent) {
-    return std::make_unique<VertexBufferResource>(
-        commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, persistent));
+    return std::make_unique<VertexBufferResource>(commandEncoder.context.createBuffer(
+        data, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, persistent));
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {

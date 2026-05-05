@@ -53,6 +53,7 @@ enum {
 
 enum {
     idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillExtrusionInstancedDrawableUBO,
     idFillExtrusionTilePropsUBO = drawableReservedUBOCount,
     fillExtrusionDrawableUBOCount
 };

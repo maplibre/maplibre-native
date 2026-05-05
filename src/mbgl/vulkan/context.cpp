@@ -665,19 +665,19 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
-                                              size_t startId,
+                                              [[maybe_unused]] size_t startId,
                                               size_t storageCount,
                                               size_t uniformCount,
                                               const std::string& name) {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
     for (size_t i = 0; i < storageCount + uniformCount; ++i) {
         auto stageFlags = vk::ShaderStageFlags();
-        if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
-            stageFlags |= vk::ShaderStageFlagBits::eVertex;
-        }
-        if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
-            stageFlags |= vk::ShaderStageFlagBits::eFragment;
-        }
+        // if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
+        stageFlags |= vk::ShaderStageFlagBits::eVertex;
+        //}
+        // if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
+        stageFlags |= vk::ShaderStageFlagBits::eFragment;
+        //}
 
         const auto descriptorType = i < storageCount ? vk::DescriptorType::eStorageBuffer
                                                      : vk::DescriptorType::eUniformBuffer;

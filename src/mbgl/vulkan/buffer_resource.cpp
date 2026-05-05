@@ -57,7 +57,8 @@ BufferResource::BufferResource(
     std::size_t totalSize = size;
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT || usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) {
+    if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT ||
+        (usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT && (usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0)) {
         const auto& backend = context.getBackend();
         const auto& deviceProps = backend.getDeviceProperties();
 

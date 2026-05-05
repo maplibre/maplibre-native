@@ -25,13 +25,18 @@ struct UniformBlockInfo {
     std::size_t id;
 };
 struct AttributeInfo {
-    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+    constexpr AttributeInfo(std::size_t index_,
+                            gfx::AttributeDataType dataType_,
+                            std::size_t id_,
+                            bool uniform_ = false)
         : index(index_),
           dataType(dataType_),
-          id(id_) {}
+          id(id_),
+          uniform(uniform_) {}
     std::size_t index;
     gfx::AttributeDataType dataType;
     std::size_t id;
+    bool uniform;
 };
 struct TextureInfo {
     constexpr TextureInfo(std::size_t index_, std::size_t id_)
@@ -72,7 +77,7 @@ public:
 
     bool hasTextures() const;
 
-    void initAttribute(const shaders::AttributeInfo&);
+    void initVertexAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
     void initTexture(const shaders::TextureInfo&);
 

@@ -244,12 +244,11 @@ bool ShaderProgram::hasTextures() const {
         textureBindings.begin(), textureBindings.end(), [](const auto& texture) { return texture.has_value(); });
 }
 
-void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
+void ShaderProgram::initVertexAttribute(const shaders::AttributeInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
     vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
 #endif
     vertexAttributes.set(info.id, index, info.dataType, 1);
 }
@@ -260,7 +259,7 @@ void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
 #if !defined(NDEBUG)
     // Indexes must not be reused by regular attributes or uniform blocks
     // More than one instance attribute can have the same index, if they share the block
-    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
 #endif
     instanceAttributes.set(info.id, index, info.dataType, 1);
 }
