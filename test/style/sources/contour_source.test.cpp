@@ -240,3 +240,102 @@ TEST(ContourSourceParse, ZeroMajorMultiplierRejected) {
     EXPECT_FALSE(src);
     EXPECT_NE(error.message.find("majorMultiplier"), std::string::npos);
 }
+
+// --- Idempotence ---------------------------------------------------------
+//
+// MapLibre source classes don't expose a built-in JSON serialiser, so a
+// literal "parse → serialise → parse" round-trip isn't a thing the existing
+// API supports. Equivalent: parse JSON A → ContourSource X → reconstruct an
+// equivalent JSON B from X's getters → parse JSON B → ContourSource Y →
+// assert every getter matches. Proves the parser captures every field
+// faithfully — anything that doesn't round-trip would surface here.
+
+namespace {
+
+std::string formatIntervalStops(const std::vector<double>& stops) {
+    std::string out = "[";
+    for (std::size_t i = 0; i < stops.size(); i++) {
+        if (i) out += ", ";
+        out += std::to_string(stops[i]);
+    }
+    out += "]";
+    return out;
+}
+
+std::string reconstruct(const ContourSource& src) {
+    std::string out = "{\"type\": \"contour\"";
+    out += ", \"source\": \"" + src.getDEMSourceID() + "\"";
+    out += ", \"intervals\": " + formatIntervalStops(src.getIntervals().stops);
+    using algorithm::contour::ContourUnit;
+    switch (src.getUnit().unit) {
+    case ContourUnit::Meters:
+        out += ", \"unit\": \"meters\"";
+        break;
+    case ContourUnit::Feet:
+        out += ", \"unit\": \"feet\"";
+        break;
+    case ContourUnit::Custom:
+        out += ", \"unit\": " + std::to_string(src.getUnit().customMultiplier);
+        break;
+    }
+    out += ", \"majorMultiplier\": " + std::to_string(src.getMajorMultiplier());
+    out += ", \"overzoom\": " + std::to_string(static_cast<unsigned>(src.getOverzoom()));
+    out += "}";
+    return out;
+}
+
+} // namespace
+
+TEST(ContourSourceParse, RoundTripsThroughGetters) {
+    const std::string original = R"JSON({
+        "type": "contour",
+        "source": "dem",
+        "intervals": [200, 12, 100, 14, 50, 15, 20],
+        "unit": "feet",
+        "majorMultiplier": 5,
+        "overzoom": 2
+    })JSON";
+
+    Error error1;
+    auto first = parseContour(original, error1);
+    ASSERT_TRUE(first) << error1.message;
+
+    const std::string reconstructed = reconstruct(*first);
+
+    Error error2;
+    auto second = parseContour(reconstructed, error2);
+    ASSERT_TRUE(second) << error2.message << " (reconstructed JSON: " << reconstructed << ")";
+
+    EXPECT_EQ(first->getDEMSourceID(), second->getDEMSourceID());
+    EXPECT_EQ(first->getIntervals().stops, second->getIntervals().stops);
+    EXPECT_EQ(first->getUnit().unit, second->getUnit().unit);
+    EXPECT_DOUBLE_EQ(first->getUnit().customMultiplier, second->getUnit().customMultiplier);
+    EXPECT_EQ(first->getMajorMultiplier(), second->getMajorMultiplier());
+    EXPECT_EQ(first->getOverzoom(), second->getOverzoom());
+}
+
+TEST(ContourSourceParse, RoundTripsCustomUnit) {
+    const std::string original = R"JSON({
+        "type": "contour",
+        "source": "dem",
+        "intervals": [50],
+        "unit": 0.5,
+        "majorMultiplier": 4,
+        "overzoom": 0
+    })JSON";
+
+    Error error1;
+    auto first = parseContour(original, error1);
+    ASSERT_TRUE(first) << error1.message;
+
+    const std::string reconstructed = reconstruct(*first);
+
+    Error error2;
+    auto second = parseContour(reconstructed, error2);
+    ASSERT_TRUE(second) << error2.message << " (reconstructed JSON: " << reconstructed << ")";
+
+    EXPECT_EQ(first->getUnit().unit, algorithm::contour::ContourUnit::Custom);
+    EXPECT_EQ(second->getUnit().unit, algorithm::contour::ContourUnit::Custom);
+    EXPECT_DOUBLE_EQ(first->getUnit().customMultiplier, 0.5);
+    EXPECT_DOUBLE_EQ(second->getUnit().customMultiplier, 0.5);
+}
