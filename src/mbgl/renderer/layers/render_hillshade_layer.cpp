@@ -141,6 +141,14 @@ void RenderHillshadeLayer::addRenderTarget(const RenderTargetPtr& renderTarget, 
     activatedRenderTargets.emplace_back(renderTarget);
 }
 
+void RenderHillshadeLayer::removeRenderTarget(const RenderTargetPtr& renderTarget, UniqueChangeRequestVec& changes) {
+    activateRenderTarget(renderTarget, false, changes);
+    auto it = std::find(activatedRenderTargets.begin(), activatedRenderTargets.end(), renderTarget);
+    if (it != activatedRenderTargets.end()) {
+        activatedRenderTargets.erase(it);
+    }
+}
+
 void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) {
     for (const auto& renderTarget : activatedRenderTargets) {
         activateRenderTarget(renderTarget, false, changes);
@@ -250,7 +258,17 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         if (!bucket.renderTargetPrepared) {
-            // Set up tile render target
+            // Drop the previous render target before allocating a new one.
+            // Without this, every re-prepare (e.g. after a neighbour tile
+            // arrives and triggers backfillBorder, which flips
+            // renderTargetPrepared to false) leaks the prior render target
+            // into activatedRenderTargets and the orchestrator's
+            // renderTargets vector — neither is cleaned up until the layer
+            // becomes unrenderable.
+            if (bucket.renderTarget) {
+                removeRenderTarget(bucket.renderTarget, changes);
+            }
+            // Set up tile render target.
             const uint16_t tilesize = bucket.getDEMData().dim;
             auto renderTarget = context.createRenderTarget({tilesize, tilesize},
                                                            gfx::TextureChannelDataType::UnsignedByte);
