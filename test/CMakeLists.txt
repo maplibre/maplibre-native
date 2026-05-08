@@ -2,6 +2,8 @@ add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
     ${PROJECT_SOURCE_DIR}/test/actor/actor_ref.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/algorithm/contour/isolines.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/algorithm/contour/units.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_renderables.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_tile_masks.test.cpp
     ${PROJECT_SOURCE_DIR}/test/api/annotations.test.cpp

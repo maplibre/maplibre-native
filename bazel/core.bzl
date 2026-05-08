@@ -121,6 +121,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/actor/scheduler.cpp",
     "src/mbgl/algorithm/contour/isolines.cpp",
     "src/mbgl/algorithm/contour/isolines.hpp",
+    "src/mbgl/algorithm/contour/units.cpp",
+    "src/mbgl/algorithm/contour/units.hpp",
     "src/mbgl/algorithm/update_renderables.hpp",
     "src/mbgl/algorithm/update_tile_masks.hpp",
     "src/mbgl/annotation/annotation_manager.cpp",
