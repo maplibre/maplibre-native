@@ -1,4 +1,5 @@
 #include <mbgl/renderer/sources/render_contour_source.hpp>
+#include <mbgl/algorithm/contour/intervals.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/contour_tile.hpp>
@@ -67,7 +68,10 @@ void RenderContourSource::update(Immutable<style::Source::Impl> baseImpl_,
                            // had no pyramid tile to target).
                            if (upstream != nullptr) {
                                if (const RasterDEMTile* dem = upstream->getRenderableTile(tileID)) {
-                                   tile->populateFromDEM(*dem);
+                                   const auto& opts = impl().getOptions();
+                                   const double interval = algorithm::contour::intervalForZoom(
+                                       opts.intervals, static_cast<double>(tileID.canonical.z));
+                                   tile->populateFromDEM(*dem, interval, opts.unit, opts.majorMultiplier);
                                }
                            }
                            return tile;
@@ -119,15 +123,14 @@ void RenderContourSource::rebindUpstream(const TileParameters& parameters) {
 void RenderContourSource::onUpstreamTileLoaded(const RasterDEMTile& demTile) {
     Tile* match = tilePyramid.getTile(demTile.id);
     if (match == nullptr) {
-        // No contour tile at this coord yet — the pyramid doesn't have a
-        // matching visible tile. The next pyramid update will create one,
-        // and we'll need a re-fire of populateFromDEM at that point. For the
-        // spike that's tolerable; Task 4 will add a small "pending coords"
-        // cache so newly-created tiles get populated synchronously from any
-        // already-loaded DEM data.
+        // No contour tile at this coord yet — the createTile callback will
+        // catch it on the next pyramid update via getRenderableTile, so
+        // missing the listener fire is harmless.
         return;
     }
-    static_cast<ContourTile&>(*match).populateFromDEM(demTile);
+    const auto& opts = impl().getOptions();
+    const double interval = algorithm::contour::intervalForZoom(opts.intervals, static_cast<double>(demTile.id.canonical.z));
+    static_cast<ContourTile&>(*match).populateFromDEM(demTile, interval, opts.unit, opts.majorMultiplier);
 }
 
 } // namespace mbgl

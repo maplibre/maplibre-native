@@ -1,8 +1,11 @@
 #pragma once
 
+#include <mbgl/algorithm/contour/units.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 
 #include <mapbox/std/weak.hpp>
+
+#include <cstdint>
 
 namespace mbgl {
 
@@ -29,10 +32,15 @@ public:
     ContourTile(const OverscaledTileID&, std::string sourceID, const TileParameters&, TileObserver* = nullptr);
 
     // Populate the tile from an upstream DEM tile that just finished parsing.
-    // The contour source's tile-load listener calls this on each
-    // RenderContourSource pyramid tile that matches an arriving DEM tile.
-    // Until the background work completes, the tile is non-renderable.
-    void populateFromDEM(const RasterDEMTile& demTile);
+    // `intervalDisplayUnits` is the contour spacing in the source's display
+    // unit (e.g. 100 feet, 50 metres) — the schedule is resolved to a single
+    // value per the tile's zoom by the caller. `unit` controls the
+    // metres↔display conversion. `majorMultiplier` tags every Nth contour
+    // level as major:true on the emitted feature.
+    void populateFromDEM(const RasterDEMTile& demTile,
+                         double intervalDisplayUnits,
+                         const algorithm::contour::UnitConfig& unit,
+                         std::uint32_t majorMultiplier);
 
 private:
     mapbox::base::WeakPtrFactory<ContourTile> weakFactory{this};
