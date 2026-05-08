@@ -456,6 +456,8 @@ list(APPEND INCLUDE_FILES
 list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/mailbox.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/scheduler.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/height_tile.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/height_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/intervals.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/intervals.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/isolines.cpp
