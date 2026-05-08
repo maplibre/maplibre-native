@@ -39,6 +39,10 @@ enum class DEMTileNeighbors : uint8_t {
     NoUpper = 0b00011100,
     // 0b11100000
     NoLower = 0b11100000,
+    // 0b11111100 — single-tile worlds (zoom 0) where neither upper nor
+    // lower neighbours exist; explicit so the bitwise OR doesn't produce
+    // an unnamed enum value the static analyzer flags as out-of-range.
+    NoUpperAndLower = 0b11111100,
     // 0b11111111
     Complete = 0b11111111
 };

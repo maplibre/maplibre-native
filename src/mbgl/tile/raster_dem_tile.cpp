@@ -79,6 +79,33 @@ void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
 
 void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint64_t resultCorrelationID) {
     if (!obsolete) {
+        // The new bucket carries a freshly-parsed DEMData whose 1px border is
+        // seeded with edge-clamped pixels — no neighbour data has been backfilled
+        // into it yet. Reset neighboringTiles so that
+        // RenderRasterDEMSource::onTileChanged re-runs the backfill loop for
+        // every side. Otherwise sides whose bit is still set from the previous
+        // bucket are skipped (the iteration short-circuits on already-set
+        // masks), and the prepare pass renders with edge-clamped pixels at
+        // those edges, producing visible seams between tiles.
+        //
+        // NoUpper / NoLower bits (set in the ctor for tiles at the world's top
+        // and bottom rows, where there are no neighbours) must be preserved.
+        // The combined NoUpperAndLower case (zoom 0, single-tile world) is a
+        // named enum value rather than a chained OR so the static analyzer
+        // doesn't flag the bitwise combination as an out-of-range cast.
+        const bool atTop = (id.canonical.y == 0);
+        const bool atBottom = (id.canonical.y + 1 == std::pow(2, id.canonical.z));
+        DEMTileNeighbors initialMask;
+        if (atTop && atBottom) {
+            initialMask = DEMTileNeighbors::NoUpperAndLower;
+        } else if (atTop) {
+            initialMask = DEMTileNeighbors::NoUpper;
+        } else if (atBottom) {
+            initialMask = DEMTileNeighbors::NoLower;
+        } else {
+            initialMask = DEMTileNeighbors::Empty;
+        }
+        neighboringTiles = initialMask;
         bucket = std::move(result);
         loaded = true;
         if (resultCorrelationID == correlationID) {
