@@ -5,6 +5,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/height_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/intervals.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/isolines.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/algorithm/contour/smoothing.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/units.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_renderables.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_tile_masks.test.cpp

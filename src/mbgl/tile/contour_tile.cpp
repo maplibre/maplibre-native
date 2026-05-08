@@ -2,6 +2,7 @@
 
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/algorithm/contour/isolines.hpp>
+#include <mbgl/algorithm/contour/smoothing.hpp>
 #include <mbgl/algorithm/contour/units.hpp>
 #include <mbgl/geometry/dem_data.hpp>
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
@@ -63,20 +64,50 @@ std::int64_t contourIndex(std::int64_t elev, algorithm::contour::ContourUnit uni
     return 1;
 }
 
+// Half-pixel-in-tile-local-units, used as the Douglas-Peucker simplification
+// tolerance. With `util::EXTENT = 8192` across a 512-px MapLibre vector
+// tile, one device pixel is 16 tile-local units; half a pixel is 8.
+// Sub-pixel wiggle gets dropped before Chaikin's corner-cutting so the
+// smoothing pass doesn't waste iterations on noise.
+constexpr double kSimplifyEpsilon = 8.0;
+
+// Two iterations of Chaikin gives a noticeable smoothing of the
+// marching-squares staircase without ballooning the vertex count
+// (each iteration roughly doubles vertices). Empirically a good
+// quality / size balance.
+constexpr int kChaikinIterations = 2;
+
 // Convert raw marching-squares output (interleaved int32 tile-local coords
-// with elevation in metres) to vector-tile features.
+// with elevation in metres) to vector-tile features. Each line goes through Douglas-Peucker
+// simplification then Chaikin smoothing before being rounded to int16 MVT
+// coordinates.
 mapbox::feature::feature_collection<std::int16_t> toFeatures(
     const std::vector<algorithm::contour::ContourLineString>& lines,
     const algorithm::contour::UnitConfig& unit) {
     mapbox::feature::feature_collection<std::int16_t> features;
     features.reserve(lines.size());
+
+    std::vector<algorithm::contour::Point2D> work;
     for (const auto& line : lines) {
         if (line.points.size() < 4) continue;
-        mapbox::geometry::line_string<std::int16_t> ls;
-        ls.reserve(line.points.size() / 2);
+
+        work.clear();
+        work.reserve(line.points.size() / 2);
         for (std::size_t i = 0; i + 1 < line.points.size(); i += 2) {
-            ls.push_back({static_cast<std::int16_t>(line.points[i]),
-                          static_cast<std::int16_t>(line.points[i + 1])});
+            work.push_back({static_cast<double>(line.points[i]), static_cast<double>(line.points[i + 1])});
+        }
+
+        // Smooth: Douglas-Peucker simplification, then Chaikin corner-cutting.
+        const auto simplified = algorithm::contour::douglasPeucker(work, kSimplifyEpsilon);
+        if (simplified.size() < 2) continue;
+        const auto smoothed = algorithm::contour::chaikin(simplified, kChaikinIterations);
+        if (smoothed.size() < 2) continue;
+
+        mapbox::geometry::line_string<std::int16_t> ls;
+        ls.reserve(smoothed.size());
+        for (const auto& p : smoothed) {
+            ls.push_back({static_cast<std::int16_t>(std::lround(p[0])),
+                          static_cast<std::int16_t>(std::lround(p[1]))});
         }
 
         // Round elevation to integer display units before emission.

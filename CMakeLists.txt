@@ -464,6 +464,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/intervals.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/isolines.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/isolines.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/smoothing.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/smoothing.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/units.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/units.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/update_renderables.hpp
