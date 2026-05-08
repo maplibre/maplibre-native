@@ -139,16 +139,20 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
     if (bucket == nullptr) return;
     const DEMData& dem = bucket->getDEMData();
 
-    // Snapshot the inner dim×dim heights on the render thread. The DEMData
-    // image is shared with backfillBorder which mutates the 1-pixel border
-    // when neighbour tiles arrive — we'd race if we sampled from the
-    // background. Snapshotting up front (~0.5 MB worst case for our
-    // pipeline's tileSize=512) is simpler and safer than coordinating reads.
+    // Snapshot the (dim+2)×(dim+2) buffered DEMData view on the render thread.
+    // The image carries a 1-pixel skirt that gets backfilled from neighbour
+    // tiles via DEMData::backfillBorder once they parse — sampling that
+    // border on the contour side gives shared edge values across adjacent
+    // contour tiles, which closes the visible seams that show up when each
+    // tile only sees its own dim×dim interior. We snapshot here (render
+    // thread) because backfillBorder mutates the same image asynchronously
+    // when more neighbours arrive.
     const int dim = dem.dim;
+    const int width = dim + 2;
     auto heights = std::make_shared<std::vector<std::int16_t>>();
-    heights->reserve(static_cast<std::size_t>(dim) * dim);
-    for (int y = 0; y < dim; y++) {
-        for (int x = 0; x < dim; x++) {
+    heights->reserve(static_cast<std::size_t>(width) * width);
+    for (int y = -1; y <= dim; y++) {
+        for (int x = -1; x <= dim; x++) {
             heights->push_back(static_cast<std::int16_t>(dem.get(x, y)));
         }
     }
@@ -162,13 +166,33 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
 
     Scheduler::GetBackground()->scheduleAndReplyValue(
         util::SimpleIdentity::Empty,
-        [heights, dim, intervalMeters, unit]() {
+        [heights, width, intervalMeters, unit]() {
             algorithm::contour::ContourThresholds thresholds;
             thresholds.interval = intervalMeters;
+            // Output coordinates map (border + interior + border) → tile-local
+            // [-extent/(width-1), extent + extent/(width-1)]. We translate by
+            // +extent/(width-1) per axis below so the interior dim×dim cells
+            // land back at [0, extent], with the border bleeding into a small
+            // negative / over-extent skirt that rendering naturally clips.
             thresholds.extent = util::EXTENT;
             thresholds.buffer = 0;
-            const auto lines = algorithm::contour::generateContours(*heights, dim, dim, thresholds);
-            return toFeatures(lines, unit);
+            const auto lines = algorithm::contour::generateContours(*heights, width, width, thresholds);
+            // Translate output: shift by one cell so the interior maps to
+            // [0, extent].
+            const double cellPx = static_cast<double>(util::EXTENT) / static_cast<double>(width - 1);
+            std::vector<algorithm::contour::ContourLineString> shifted;
+            shifted.reserve(lines.size());
+            for (const auto& line : lines) {
+                algorithm::contour::ContourLineString s;
+                s.elevation = line.elevation;
+                s.points.reserve(line.points.size());
+                for (std::size_t i = 0; i + 1 < line.points.size(); i += 2) {
+                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i] - cellPx)));
+                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i + 1] - cellPx)));
+                }
+                shifted.push_back(std::move(s));
+            }
+            return toFeatures(shifted, unit);
         },
         [self = weakFactory.makeWeakPtr(), this](mapbox::feature::feature_collection<std::int16_t> features) {
             if (auto guard = self.lock(); self) {
