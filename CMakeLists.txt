@@ -456,6 +456,8 @@ list(APPEND INCLUDE_FILES
 list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/mailbox.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/actor/scheduler.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/isolines.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/contour/isolines.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/update_renderables.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/algorithm/update_tile_masks.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/annotation/annotation_manager.cpp
