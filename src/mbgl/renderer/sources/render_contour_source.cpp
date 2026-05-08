@@ -71,7 +71,7 @@ void RenderContourSource::update(Immutable<style::Source::Impl> baseImpl_,
                                    const auto& opts = impl().getOptions();
                                    const double interval = algorithm::contour::intervalForZoom(
                                        opts.intervals, static_cast<double>(tileID.canonical.z));
-                                   tile->populateFromDEM(*dem, interval, opts.unit, opts.majorMultiplier);
+                                   tile->populateFromDEM(*dem, interval, opts.unit);
                                }
                            }
                            return tile;
@@ -130,7 +130,7 @@ void RenderContourSource::onUpstreamTileLoaded(const RasterDEMTile& demTile) {
     }
     const auto& opts = impl().getOptions();
     const double interval = algorithm::contour::intervalForZoom(opts.intervals, static_cast<double>(demTile.id.canonical.z));
-    static_cast<ContourTile&>(*match).populateFromDEM(demTile, interval, opts.unit, opts.majorMultiplier);
+    static_cast<ContourTile&>(*match).populateFromDEM(demTile, interval, opts.unit);
 }
 
 } // namespace mbgl

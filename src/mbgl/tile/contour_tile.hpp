@@ -35,12 +35,11 @@ public:
     // `intervalDisplayUnits` is the contour spacing in the source's display
     // unit (e.g. 100 feet, 50 metres) — the schedule is resolved to a single
     // value per the tile's zoom by the caller. `unit` controls the
-    // metres↔display conversion. `majorMultiplier` tags every Nth contour
-    // level as major:true on the emitted feature.
+    // metres↔display conversion and the `index` ladder used to tag
+    // features (minor / intermediate / major / super-major).
     void populateFromDEM(const RasterDEMTile& demTile,
                          double intervalDisplayUnits,
-                         const algorithm::contour::UnitConfig& unit,
-                         std::uint32_t majorMultiplier);
+                         const algorithm::contour::UnitConfig& unit);
 
 private:
     mapbox::base::WeakPtrFactory<ContourTile> weakFactory{this};
