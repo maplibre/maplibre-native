@@ -2,8 +2,11 @@
 
 #include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/sources/tile_source_impl.hpp>
+#include <mbgl/util/listener_set.hpp>
 
 namespace mbgl {
+
+class RasterDEMTile;
 
 class RenderRasterDEMSource final : public RenderTileSetSource {
 public:
@@ -18,6 +21,16 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
 
+    // Tile-load listener API. Cross-source consumers (e.g. ContourSource)
+    // register a listener and are notified every time a DEM tile finishes
+    // parsing with `DEMData` ready. `addTileLoadListener` also replays the
+    // currently-renderable tiles synchronously so a late-registering
+    // consumer doesn't miss tiles already loaded before it appeared.
+    using TileLoadListener = std::function<void(const RasterDEMTile&)>;
+    using ListenerHandle = ListenerSet<const RasterDEMTile&>::Handle;
+    [[nodiscard]] ListenerHandle addTileLoadListener(TileLoadListener);
+    void removeTileLoadListener(ListenerHandle);
+
 private:
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,
@@ -30,6 +43,8 @@ private:
     const style::TileSource::Impl& impl() const;
 
     void onTileChanged(Tile&) override;
+
+    ListenerSet<const RasterDEMTile&> tileLoadListeners;
 };
 
 } // namespace mbgl

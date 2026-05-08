@@ -838,6 +838,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/indexed_tuple.hpp",
     "include/mbgl/util/instrumentation.hpp",
     "include/mbgl/util/interpolate.hpp",
+    "include/mbgl/util/listener_set.hpp",
     "include/mbgl/util/logging.hpp",
     "include/mbgl/util/lru_cache.hpp",
     "include/mbgl/util/monotonic_timer.hpp",

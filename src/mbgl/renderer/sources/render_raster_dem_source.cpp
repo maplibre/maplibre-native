@@ -106,6 +106,29 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile) {
         }
     }
     RenderTileSource::onTileChanged(tile);
+
+    // Fan out to cross-source consumers (contour source, etc.) after the
+    // parent class has updated render state. Only fire for renderable tiles
+    // — listeners care about parsed DEMData, not bare load events.
+    if (tile.isRenderable()) {
+        tileLoadListeners.notify(demtile);
+    }
+}
+
+RenderRasterDEMSource::ListenerHandle RenderRasterDEMSource::addTileLoadListener(TileLoadListener listener) {
+    // Replay currently-renderable tiles to *this* listener only so a
+    // late-registering consumer sees DEM data that arrived before it
+    // existed, without re-notifying listeners that already saw those tiles.
+    for (const auto& [_, tilePtr] : tilePyramid.getTiles()) {
+        if (tilePtr && tilePtr->isRenderable()) {
+            listener(static_cast<const RasterDEMTile&>(*tilePtr));
+        }
+    }
+    return tileLoadListeners.add(std::move(listener));
+}
+
+void RenderRasterDEMSource::removeTileLoadListener(ListenerHandle handle) {
+    tileLoadListeners.remove(handle);
 }
 
 std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::queryRenderedFeatures(
