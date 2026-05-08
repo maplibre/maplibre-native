@@ -3,12 +3,14 @@
 #include <mbgl/annotation/render_annotation_source.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
+#include <mbgl/renderer/sources/render_contour_source.hpp>
 #include <mbgl/renderer/sources/render_geojson_source.hpp>
 #include <mbgl/renderer/sources/render_raster_source.hpp>
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
 #include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
+#include <mbgl/style/sources/contour_source_impl.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/constants.hpp>
@@ -53,11 +55,8 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
             return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl),
                                                                 std::move(threadPool_));
         case SourceType::Contour:
-            // RenderContourSource not implemented yet; until it lands the
-            // source object is constructible from style JSON
-            // but produces no rendered output.
-            assert(false);
-            return nullptr;
+            return std::make_unique<RenderContourSource>(staticImmutableCast<style::ContourSource::Impl>(impl),
+                                                         std::move(threadPool_));
     }
 
     // Not reachable, but placate GCC.

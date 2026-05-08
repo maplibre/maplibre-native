@@ -131,6 +131,13 @@ void RenderRasterDEMSource::removeTileLoadListener(ListenerHandle handle) {
     tileLoadListeners.remove(handle);
 }
 
+const RasterDEMTile* RenderRasterDEMSource::getRenderableTile(const OverscaledTileID& id) const {
+    auto it = tilePyramid.getTiles().find(id);
+    if (it == tilePyramid.getTiles().end()) return nullptr;
+    if (!it->second || !it->second->isRenderable()) return nullptr;
+    return static_cast<const RasterDEMTile*>(it->second.get());
+}
+
 std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::queryRenderedFeatures(
     const ScreenLineString&,
     const TransformState&,

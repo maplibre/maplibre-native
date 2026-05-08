@@ -31,6 +31,13 @@ public:
     [[nodiscard]] ListenerHandle addTileLoadListener(TileLoadListener);
     void removeTileLoadListener(ListenerHandle);
 
+    // Sync lookup: returns the renderable DEM tile at the given coord, or
+    // nullptr if absent / not yet parsed. Used by cross-source consumers
+    // (contour source) to populate newly-created derived tiles from
+    // already-loaded DEM data, closing the race between consumer-pyramid
+    // updates and upstream tile arrivals.
+    const RasterDEMTile* getRenderableTile(const OverscaledTileID&) const;
+
 private:
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,
