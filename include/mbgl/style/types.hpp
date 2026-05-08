@@ -15,7 +15,8 @@ enum class SourceType : uint8_t {
     Video,
     Annotations,
     Image,
-    CustomVector
+    CustomVector,
+    Contour
 };
 
 enum class VisibilityType : bool {

@@ -52,6 +52,12 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
         case SourceType::CustomVector:
             return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl),
                                                                 std::move(threadPool_));
+        case SourceType::Contour:
+            // RenderContourSource not implemented yet; until it lands the
+            // source object is constructible from style JSON
+            // but produces no rendered output.
+            assert(false);
+            return nullptr;
     }
 
     // Not reachable, but placate GCC.

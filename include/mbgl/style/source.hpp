@@ -21,6 +21,7 @@ class VectorSource;
 class RasterSource;
 class RasterDEMSource;
 class GeoJSONSource;
+class ContourSource;
 class SourceObserver;
 struct LayerTypeInfo;
 

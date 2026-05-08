@@ -219,6 +219,9 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
             case SourceType::Video:
             case SourceType::Annotations:
             case SourceType::CustomVector:
+            case SourceType::Contour:
+                // Contour features are derived in-process from an upstream
+                // raster-dem source; nothing extra to download for offline.
                 break;
         }
     }
@@ -333,6 +336,8 @@ void OfflineDownload::activateDownload() {
                 case SourceType::Video:
                 case SourceType::Annotations:
                 case SourceType::CustomVector:
+                case SourceType::Contour:
+                    // Derived in-process from an upstream raster-dem source.
                     break;
             }
         }
