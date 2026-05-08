@@ -5,12 +5,15 @@
 #include <mbgl/style/conversion/source_options.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+#include <mbgl/style/sources/contour_source.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/sources/raster_source.hpp>
 #include <mbgl/style/sources/raster_dem_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/util/geo.hpp>
+
+#include <cmath>
 
 namespace mbgl {
 namespace style {
@@ -161,6 +164,104 @@ std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& i
     return {std::move(result)};
 }
 
+std::optional<std::unique_ptr<Source>> convertContourSource(const std::string& id,
+                                                            const Convertible& value,
+                                                            Error& error) {
+    ContourSourceOptions options;
+
+    // Required: source — ID of the upstream raster-dem source.
+    auto sourceVal = objectMember(value, "source");
+    if (!sourceVal) {
+        error.message = "contour source must reference a `source`";
+        return std::nullopt;
+    }
+    auto sourceStr = toString(*sourceVal);
+    if (!sourceStr) {
+        error.message = "contour `source` must be a string";
+        return std::nullopt;
+    }
+    options.sourceID = std::move(*sourceStr);
+
+    // Required: intervals — odd-length number array of step-by-zoom outputs
+    // and stops, with strictly-positive outputs.
+    auto intervalsVal = objectMember(value, "intervals");
+    if (!intervalsVal) {
+        error.message = "contour source must specify `intervals`";
+        return std::nullopt;
+    }
+    if (!isArray(*intervalsVal) || arrayLength(*intervalsVal) == 0) {
+        error.message = "contour `intervals` must be a non-empty array";
+        return std::nullopt;
+    }
+    const std::size_t n = arrayLength(*intervalsVal);
+    if ((n % 2) == 0) {
+        error.message = "contour `intervals` must have an odd number of entries (output, stop, output, stop, ..., output)";
+        return std::nullopt;
+    }
+    options.intervals.stops.reserve(n);
+    for (std::size_t i = 0; i < n; i++) {
+        auto entry = toDouble(arrayMember(*intervalsVal, i));
+        if (!entry) {
+            error.message = "contour `intervals` entries must be numbers";
+            return std::nullopt;
+        }
+        options.intervals.stops.push_back(*entry);
+    }
+    if (!algorithm::contour::isValid(options.intervals)) {
+        error.message = "contour `intervals` outputs must be > 0 and stops strictly increasing";
+        return std::nullopt;
+    }
+
+    // Optional: unit — "meters" (default), "feet", or a positive number used
+    // as a metres-to-display multiplier.
+    if (auto unitVal = objectMember(value, "unit")) {
+        if (auto unitStr = toString(*unitVal)) {
+            if (*unitStr == "meters") {
+                options.unit.unit = algorithm::contour::ContourUnit::Meters;
+            } else if (*unitStr == "feet") {
+                options.unit.unit = algorithm::contour::ContourUnit::Feet;
+            } else {
+                error.message = "contour `unit` must be \"meters\", \"feet\", or a positive number";
+                return std::nullopt;
+            }
+        } else if (auto unitNum = toDouble(*unitVal)) {
+            if (*unitNum <= 0.0) {
+                error.message = "contour `unit` numeric multiplier must be > 0";
+                return std::nullopt;
+            }
+            options.unit.unit = algorithm::contour::ContourUnit::Custom;
+            options.unit.customMultiplier = *unitNum;
+        } else {
+            error.message = "contour `unit` must be \"meters\", \"feet\", or a positive number";
+            return std::nullopt;
+        }
+    }
+
+    // Optional: majorMultiplier — every Nth contour level is tagged
+    // major:true. Must be a positive integer.
+    if (auto majorVal = objectMember(value, "majorMultiplier")) {
+        auto majorNum = toDouble(*majorVal);
+        if (!majorNum || *majorNum <= 0.0 || *majorNum != std::floor(*majorNum)) {
+            error.message = "contour `majorMultiplier` must be a positive integer";
+            return std::nullopt;
+        }
+        options.majorMultiplier = static_cast<std::uint32_t>(*majorNum);
+    }
+
+    // Optional: overzoom — non-negative integer count of bilinear-upsample
+    // levels above the upstream DEM source.
+    if (auto overzoomVal = objectMember(value, "overzoom")) {
+        auto overzoomNum = toDouble(*overzoomVal);
+        if (!overzoomNum || *overzoomNum < 0.0 || *overzoomNum != std::floor(*overzoomNum)) {
+            error.message = "contour `overzoom` must be a non-negative integer";
+            return std::nullopt;
+        }
+        options.overzoom = static_cast<std::uint8_t>(*overzoomNum);
+    }
+
+    return {std::make_unique<ContourSource>(id, std::move(options))};
+}
+
 std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
                                                           const Convertible& value,
                                                           Error& error) {
@@ -234,6 +335,8 @@ std::optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::opera
         return convertGeoJSONSource(id, value, error);
     } else if (tname == "image") {
         return convertImageSource(id, value, error);
+    } else if (tname == "contour") {
+        return convertContourSource(id, value, error);
     } else {
         error.message = "invalid source type";
         return std::nullopt;
