@@ -100,6 +100,17 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile) {
                     const DEMTileNeighbors& borderMask = opposites[mask];
                     if ((borderTile.neighboringTiles & borderMask) != borderMask) {
                         borderTile.backfillBorder(demtile, borderMask);
+                        // The neighbour's DEMData border just changed — notify
+                        // cross-source consumers so anything derived from it
+                        // (e.g. contour-line tiles) regenerates with the
+                        // updated edge values. Without this re-fire, contour
+                        // tiles for already-loaded neighbours stay computed
+                        // off the *old* near-pixel border and end up with a
+                        // visible misalignment along the shared edge once
+                        // both neighbours are loaded.
+                        if (borderTile.isRenderable()) {
+                            tileLoadListeners.notify(borderTile);
+                        }
                     }
                 }
             }
