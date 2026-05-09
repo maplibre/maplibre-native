@@ -18,6 +18,7 @@
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace mbgl {
@@ -77,10 +78,139 @@ constexpr double kSimplifyEpsilon = 8.0;
 // quality / size balance.
 constexpr int kChaikinIterations = 2;
 
+// Sutherland-Hodgman-style polyline clip against an axis-aligned rect
+// `[0, EXTENT] × [0, EXTENT]` in tile-local coords. Returns a list of
+// sub-polylines covering only the interior portion of the input. Each
+// sub-polyline starts and ends either at an interior vertex or at a
+// segment-rect intersection point, so adjacent tiles' clipped lines
+// share the boundary intersection exactly (both sides compute it from
+// the same two MS vertices in the overlap region).
+//
+// Why this matters: Chaikin's corner-cutting preserves the first and
+// last input vertex. If we trim each line so its endpoints land exactly
+// on the tile boundary, the smoothed line in tile A and the smoothed
+// line in tile B both terminate at the same boundary crossing point,
+// so the rendered contours meet without a visible gap. Without trimming,
+// each tile's smoothing window reached different vertices on the far
+// side of the seam, producing slightly different smoothed curves and
+// leaving misaligned ends.
+std::vector<std::vector<algorithm::contour::Point2D>> clipPolylineToTile(
+    const std::vector<algorithm::contour::Point2D>& line) {
+    std::vector<std::vector<algorithm::contour::Point2D>> result;
+    if (line.size() < 2) return result;
+
+    constexpr double minX = 0.0;
+    constexpr double minY = 0.0;
+    constexpr double maxX = static_cast<double>(util::EXTENT);
+    constexpr double maxY = static_cast<double>(util::EXTENT);
+    constexpr double eps = 1e-9;
+
+    auto isInside = [](const algorithm::contour::Point2D& p) {
+        return p[0] >= minX - eps && p[0] <= maxX + eps && p[1] >= minY - eps && p[1] <= maxY + eps;
+    };
+
+    // Liang-Barsky line-rect intersection — return the parameter `t` (in
+    // [0, 1]) at which segment a→b enters/exits the rect, or `nan` if
+    // there's no intersection.
+    auto intersectSegment = [&](const algorithm::contour::Point2D& a,
+                                const algorithm::contour::Point2D& b,
+                                bool wantEntry) -> std::optional<algorithm::contour::Point2D> {
+        const double dx = b[0] - a[0];
+        const double dy = b[1] - a[1];
+        double tEnter = 0.0;
+        double tExit = 1.0;
+        const double p[4] = {-dx, dx, -dy, dy};
+        const double q[4] = {a[0] - minX, maxX - a[0], a[1] - minY, maxY - a[1]};
+        for (int i = 0; i < 4; i++) {
+            if (p[i] == 0.0) {
+                if (q[i] < 0.0) return std::nullopt;
+            } else {
+                const double t = q[i] / p[i];
+                if (p[i] < 0.0) {
+                    if (t > tExit) return std::nullopt;
+                    if (t > tEnter) tEnter = t;
+                } else {
+                    if (t < tEnter) return std::nullopt;
+                    if (t < tExit) tExit = t;
+                }
+            }
+        }
+        const double t = wantEntry ? tEnter : tExit;
+        return algorithm::contour::Point2D{a[0] + t * dx, a[1] + t * dy};
+    };
+
+    std::vector<algorithm::contour::Point2D> current;
+    current.reserve(line.size());
+    bool prevInside = isInside(line[0]);
+    if (prevInside) current.push_back(line[0]);
+
+    for (std::size_t i = 1; i < line.size(); i++) {
+        const auto& a = line[i - 1];
+        const auto& b = line[i];
+        const bool curInside = isInside(b);
+        if (prevInside && curInside) {
+            current.push_back(b);
+        } else if (prevInside && !curInside) {
+            if (auto exit = intersectSegment(a, b, false); exit) {
+                current.push_back(*exit);
+            }
+            if (current.size() >= 2) result.push_back(std::move(current));
+            current.clear();
+        } else if (!prevInside && curInside) {
+            if (auto entry = intersectSegment(a, b, true); entry) {
+                current.push_back(*entry);
+            }
+            current.push_back(b);
+        } else {
+            // Both endpoints outside — segment may still cross the rect.
+            // Test for an in-and-out crossing and emit it as a 2-vertex
+            // sub-polyline.
+            const double dx = b[0] - a[0];
+            const double dy = b[1] - a[1];
+            double tEnter = 0.0;
+            double tExit = 1.0;
+            const double p[4] = {-dx, dx, -dy, dy};
+            const double q[4] = {a[0] - minX, maxX - a[0], a[1] - minY, maxY - a[1]};
+            bool ok = true;
+            for (int j = 0; j < 4 && ok; j++) {
+                if (p[j] == 0.0) {
+                    if (q[j] < 0.0) ok = false;
+                } else {
+                    const double t = q[j] / p[j];
+                    if (p[j] < 0.0) {
+                        if (t > tExit) ok = false;
+                        else if (t > tEnter) tEnter = t;
+                    } else {
+                        if (t < tEnter) ok = false;
+                        else if (t < tExit) tExit = t;
+                    }
+                }
+            }
+            if (ok && tEnter < tExit) {
+                std::vector<algorithm::contour::Point2D> crossing;
+                crossing.push_back({a[0] + tEnter * dx, a[1] + tEnter * dy});
+                crossing.push_back({a[0] + tExit * dx, a[1] + tExit * dy});
+                result.push_back(std::move(crossing));
+            }
+        }
+        prevInside = curInside;
+    }
+    if (current.size() >= 2) result.push_back(std::move(current));
+    return result;
+}
+
 // Convert raw marching-squares output (interleaved int32 tile-local coords
-// with elevation in metres) to vector-tile features. Each line goes through Douglas-Peucker
-// simplification then Chaikin smoothing before being rounded to int16 MVT
-// coordinates.
+// with elevation in metres) to vector-tile features.
+//
+// Pipeline per line:
+//   1. Clip to the [0, EXTENT] tile bbox so endpoints land on the
+//      boundary at the shared crossing point.
+//   2. Douglas-Peucker simplification (drops sub-pixel wiggle so
+//      Chaikin doesn't waste iterations on noise).
+//   3. Chaikin corner-cutting (endpoints preserved by the algorithm,
+//      and now also clamped to the tile boundary so adjacent tiles'
+//      smoothed lines meet exactly).
+//   4. Round to int16 MVT coords and emit.
 mapbox::feature::feature_collection<std::int16_t> toFeatures(
     const std::vector<algorithm::contour::ContourLineString>& lines,
     const algorithm::contour::UnitConfig& unit) {
@@ -97,29 +227,31 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
             work.push_back({static_cast<double>(line.points[i]), static_cast<double>(line.points[i + 1])});
         }
 
-        // Smooth: Douglas-Peucker simplification, then Chaikin corner-cutting.
-        const auto simplified = algorithm::contour::douglasPeucker(work, kSimplifyEpsilon);
-        if (simplified.size() < 2) continue;
-        const auto smoothed = algorithm::contour::chaikin(simplified, kChaikinIterations);
-        if (smoothed.size() < 2) continue;
+        for (auto& clipped : clipPolylineToTile(work)) {
+            if (clipped.size() < 2) continue;
+            const auto simplified = algorithm::contour::douglasPeucker(clipped, kSimplifyEpsilon);
+            if (simplified.size() < 2) continue;
+            const auto smoothed = algorithm::contour::chaikin(simplified, kChaikinIterations);
+            if (smoothed.size() < 2) continue;
 
-        mapbox::geometry::line_string<std::int16_t> ls;
-        ls.reserve(smoothed.size());
-        for (const auto& p : smoothed) {
-            ls.push_back({static_cast<std::int16_t>(std::lround(p[0])),
-                          static_cast<std::int16_t>(std::lround(p[1]))});
+            mapbox::geometry::line_string<std::int16_t> ls;
+            ls.reserve(smoothed.size());
+            for (const auto& p : smoothed) {
+                ls.push_back({static_cast<std::int16_t>(std::lround(p[0])),
+                              static_cast<std::int16_t>(std::lround(p[1]))});
+            }
+
+            // Round elevation to integer display units before emission.
+            const double elevDisplay = algorithm::contour::metersToUnit(line.elevation, unit);
+            const std::int64_t elev = static_cast<std::int64_t>(std::llround(elevDisplay));
+
+            mapbox::feature::feature<std::int16_t> f;
+            f.geometry = std::move(ls);
+            f.properties["ele"] = elev;
+            f.properties["elevation"] = elev;
+            f.properties["index"] = contourIndex(elev, unit.unit);
+            features.push_back(std::move(f));
         }
-
-        // Round elevation to integer display units before emission.
-        const double elevDisplay = algorithm::contour::metersToUnit(line.elevation, unit);
-        const std::int64_t elev = static_cast<std::int64_t>(std::llround(elevDisplay));
-
-        mapbox::feature::feature<std::int16_t> f;
-        f.geometry = std::move(ls);
-        f.properties["ele"] = elev;
-        f.properties["elevation"] = elev;
-        f.properties["index"] = contourIndex(elev, unit.unit);
-        features.push_back(std::move(f));
     }
     return features;
 }
@@ -139,24 +271,32 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
     if (bucket == nullptr) return;
     const DEMData& dem = bucket->getDEMData();
 
-    // Snapshot the (dim+2)×(dim+2) buffered DEMData view on the render
-    // thread. Under the DEM source's pixel-CENTER convention (verified
-    // empirically: rightmost column of tile L and leftmost column of
-    // tile R differ by ~one elevation cell, not zero), each tile covers
-    // an exclusive pixel range. Sample 0 of tile L sits at world
-    // west_L + 0.5·cellWidth; sample dim-1 at east_L - 0.5·cellWidth.
-    // The (dim+2) border, after backfillBorder runs, holds the
-    // neighbour's actual sample at the cell beyond — so the boundary
-    // cell straddles the tile edge with real data on both sides.
+    // Snapshot the buffered DEMData view on the render thread. The DEM
+    // source uses a pixel-CENTER convention (verified empirically:
+    // rightmost column of tile L and leftmost column of tile R differ
+    // by ~one elevation cell, not zero), so each tile covers an
+    // exclusive pixel range — sample 0 of tile L sits at world
+    // west_L + 0.5·cellWidth, sample dim-1 at east_L - 0.5·cellWidth.
+    //
+    // We sample the entire (dim + 2·border) buffered view rather than
+    // just the 1-pixel inner ring. With border = 2 the marching-squares
+    // skirt extends two cells past the tile edge on every side, which
+    // gives the downstream Douglas-Peucker / Chaikin smoothing more
+    // context near the boundary so adjacent tiles' smoothed contours
+    // share a tangent direction at the seam, not just an endpoint.
+    // Adjacent tiles' overlapping output regions are clipped during
+    // rendering, so the extra width costs only a small per-tile
+    // generation step.
     //
     // Snapshot here on the render thread because backfillBorder mutates
     // the same image asynchronously when more neighbours arrive.
     const int dim = dem.dim;
-    const int width = dim + 2;
+    const int border = DEMData::border;
+    const int width = dim + 2 * border;
     auto heights = std::make_shared<std::vector<std::int16_t>>();
     heights->reserve(static_cast<std::size_t>(width) * width);
-    for (int y = -1; y <= dim; y++) {
-        for (int x = -1; x <= dim; x++) {
+    for (int y = -border; y < dim + border; y++) {
+        for (int x = -border; x < dim + border; x++) {
             heights->push_back(static_cast<std::int16_t>(dem.get(x, y)));
         }
     }
@@ -173,34 +313,38 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
         [heights, width, dim, intervalMeters, unit]() {
             algorithm::contour::ContourThresholds thresholds;
             thresholds.interval = intervalMeters;
-            // Pixel-center coordinate mapping for a (dim+2) input. We want:
-            //   alg index 0 (border, world west_L − 0.5cw) → tile-local −0.5cw_local
-            //   alg index 1 (sample 0, world west_L + 0.5cw) → 0.5cw_local
-            //   alg index dim (sample dim-1, east_L − 0.5cw) → EXTENT − 0.5cw_local
-            //   alg index dim+1 (border, east_L + 0.5cw) → EXTENT + 0.5cw_local
+            // Pixel-center coordinate mapping. We want:
+            //   alg index `border`     (sample 0, world west_L + 0.5cw) → tile-local +0.5cw
+            //   alg index `border+dim-1` (sample dim-1, east_L − 0.5cw) → EXTENT − 0.5cw
+            //   alg indices [0, border-1] and [border+dim, width-1]    → outside the tile,
+            //                                                            in the neighbour's interior
             //
             // The algorithm internally uses
-            //   multiplier = thresholds.extent / (width - 1) = thresholds.extent / (dim+1)
-            // and produces output at multiplier·index. We want
+            //   multiplier = thresholds.extent / (width - 1)
+            // and emits output at multiplier·index. We want
             //   multiplier = EXTENT / dim
-            // (so cw_local = EXTENT/dim and the half-cell shift below lines
-            // up the boundary cell correctly). That gives
-            //   thresholds.extent = EXTENT × (dim+1) / dim.
+            // so each cell spans one tile-local cell width, no matter how
+            // wide the buffered view is. That gives
+            //   thresholds.extent = EXTENT × (width - 1) / dim
             //
-            // Boundary cell L heights[dim..dim+1] and R heights[0..1] then
-            // both straddle world east_L = west_R using identical neighbour
-            // data, so adjacent tiles' contour features meet exactly.
+            // The boundary cell on each tile (heights[border-1..border]
+            // on the west, heights[width-2..width-1] on the east, after
+            // backfillBorder) straddles the tile edge using identical
+            // neighbour data, so adjacent tiles' contour features meet
+            // exactly at the seam.
             thresholds.extent = static_cast<int>(std::lround(static_cast<double>(util::EXTENT) *
-                                                             static_cast<double>(dim + 1) /
+                                                             static_cast<double>(width - 1) /
                                                              static_cast<double>(dim)));
             thresholds.buffer = 0;
             const auto lines = algorithm::contour::generateContours(*heights, width, width, thresholds);
 
-            // Half-cell shift so alg index 1 lands at +0.5cw (sample 0's
-            // pixel-center position), with alg index 0 at -0.5cw (one cell
-            // left of west_L) and alg index dim+1 at EXTENT + 0.5cw (one
-            // cell right of east_L).
+            // Shift so alg index `border` lands at +0.5cw (sample 0's
+            // pixel-center position). At border = 1 this is −0.5cw.
+            // At border = 2 it is −1.5cw — alg index 0 (outer west
+            // border) sits one cell further west than the inner border
+            // cell did before.
             const double halfCellPx = 0.5 * static_cast<double>(util::EXTENT) / static_cast<double>(dim);
+            const double shift = halfCellPx * static_cast<double>(2 * DEMData::border - 1);
             std::vector<algorithm::contour::ContourLineString> shifted;
             shifted.reserve(lines.size());
             for (const auto& line : lines) {
@@ -208,8 +352,8 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
                 s.elevation = line.elevation;
                 s.points.reserve(line.points.size());
                 for (std::size_t i = 0; i + 1 < line.points.size(); i += 2) {
-                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i] - halfCellPx)));
-                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i + 1] - halfCellPx)));
+                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i] - shift)));
+                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i + 1] - shift)));
                 }
                 shifted.push_back(std::move(s));
             }
