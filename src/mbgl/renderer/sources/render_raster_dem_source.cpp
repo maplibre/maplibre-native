@@ -146,6 +146,13 @@ const RasterDEMTile* RenderRasterDEMSource::getRenderableTile(const OverscaledTi
     return static_cast<const RasterDEMTile*>(it->second.get());
 }
 
+std::optional<Range<std::uint8_t>> RenderRasterDEMSource::getZoomRange() const {
+    if (const auto& tileset = impl().tileset) {
+        return tileset->zoomRange;
+    }
+    return std::nullopt;
+}
+
 std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::queryRenderedFeatures(
     const ScreenLineString&,
     const TransformState&,

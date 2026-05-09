@@ -40,18 +40,23 @@ void RenderContourSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     rebindUpstream(parameters);
 
-    // For the spike, drive contour-tile coords from the *upstream DEM
-    // source's* visible tile coords rather than computing our own viewport
-    // tile range. This matches the user's stated requirement: "DEM tiles get
-    // requested at the correct zoom level (driven by their resolution); we
-    // can always display vector tiles at a higher / lower zoom level." The
-    // contour pyramid grows lock-step with the DEM pyramid.
+    // Mirror the upstream DEM source's zoom range so contour tiles share
+    // the DEM's canonical zoom (e.g. canonical.z = DEM maxzoom = 12 for a
+    // Terrarium source). At display zoom > maxzoom the renderer overscales
+    // both pyramids in lock-step — same canonical tile, same line geometry
+    // reused for the bigger screen area. Diverging the two pyramids' zoom
+    // ranges leaves the contour pyramid asking for tiles at coords that
+    // have no upstream DEM, with no matching listener fire — empty tiles.
     //
-    // We use a wide zoom range and let the DEM-tile-load listener call
-    // populateFromDEM on the corresponding pyramid entry. Tiles created here
-    // before their DEM counterpart loads remain in pending state (no
-    // bucket); they become renderable only when the listener fires.
-    constexpr Range<std::uint8_t> contourZoomRange{0, 22};
+    // Default to (0..12) when the upstream's zoom range isn't available
+    // yet (style still loading) so the very first frame doesn't go
+    // through a wide-range path that has nothing to populate from.
+    Range<std::uint8_t> contourZoomRange{0, 12};
+    if (upstream != nullptr) {
+        if (auto upstreamRange = upstream->getZoomRange()) {
+            contourZoomRange = *upstreamRange;
+        }
+    }
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,

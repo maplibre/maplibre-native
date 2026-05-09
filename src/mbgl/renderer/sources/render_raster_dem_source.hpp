@@ -38,6 +38,14 @@ public:
     // updates and upstream tile arrivals.
     const RasterDEMTile* getRenderableTile(const OverscaledTileID&) const;
 
+    // Zoom range of the upstream DEM tileset, or `std::nullopt` if the
+    // tileset hasn't been parsed yet. Cross-source consumers (contour
+    // source) use this to mirror the DEM source's tile-pyramid coords
+    // exactly — same canonical zoom for every tile, same overzoom
+    // behaviour at high display zooms — so derived-tile lookup by
+    // `OverscaledTileID` always finds its DEM counterpart.
+    std::optional<Range<std::uint8_t>> getZoomRange() const;
+
 private:
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,
