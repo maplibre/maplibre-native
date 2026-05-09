@@ -139,14 +139,18 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
     if (bucket == nullptr) return;
     const DEMData& dem = bucket->getDEMData();
 
-    // Snapshot the (dim+2)×(dim+2) buffered DEMData view on the render thread.
-    // The image carries a 1-pixel skirt that gets backfilled from neighbour
-    // tiles via DEMData::backfillBorder once they parse — sampling that
-    // border on the contour side gives shared edge values across adjacent
-    // contour tiles, which closes the visible seams that show up when each
-    // tile only sees its own dim×dim interior. We snapshot here (render
-    // thread) because backfillBorder mutates the same image asynchronously
-    // when more neighbours arrive.
+    // Snapshot the (dim+2)×(dim+2) buffered DEMData view on the render
+    // thread. Under the DEM source's pixel-CENTER convention (verified
+    // empirically: rightmost column of tile L and leftmost column of
+    // tile R differ by ~one elevation cell, not zero), each tile covers
+    // an exclusive pixel range. Sample 0 of tile L sits at world
+    // west_L + 0.5·cellWidth; sample dim-1 at east_L - 0.5·cellWidth.
+    // The (dim+2) border, after backfillBorder runs, holds the
+    // neighbour's actual sample at the cell beyond — so the boundary
+    // cell straddles the tile edge with real data on both sides.
+    //
+    // Snapshot here on the render thread because backfillBorder mutates
+    // the same image asynchronously when more neighbours arrive.
     const int dim = dem.dim;
     const int width = dim + 2;
     auto heights = std::make_shared<std::vector<std::int16_t>>();
@@ -169,26 +173,34 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
         [heights, width, dim, intervalMeters, unit]() {
             algorithm::contour::ContourThresholds thresholds;
             thresholds.interval = intervalMeters;
-            // The (dim+2) input has algorithm indices 0..dim+1; the interior
-            // of the tile (DEM samples 0..dim-1, algorithm indices 1..dim)
-            // must map to tile-local coords [0, EXTENT]. The algorithm uses
-            // multiplier = thresholds.extent / (width-1) per cell, so we
-            // pick thresholds.extent such that multiplier = EXTENT/(dim-1).
-            // That gives:
-            //   algo index 0 (border)         → -multiplier
-            //   algo index 1 (sample 0)       → 0           ← left tile edge
-            //   algo index dim (sample dim-1) → EXTENT      ← right tile edge
-            //   algo index dim+1 (border)     → EXTENT+multiplier
+            // Pixel-center coordinate mapping for a (dim+2) input. We want:
+            //   alg index 0 (border, world west_L − 0.5cw) → tile-local −0.5cw_local
+            //   alg index 1 (sample 0, world west_L + 0.5cw) → 0.5cw_local
+            //   alg index dim (sample dim-1, east_L − 0.5cw) → EXTENT − 0.5cw_local
+            //   alg index dim+1 (border, east_L + 0.5cw) → EXTENT + 0.5cw_local
+            //
+            // The algorithm internally uses
+            //   multiplier = thresholds.extent / (width - 1) = thresholds.extent / (dim+1)
+            // and produces output at multiplier·index. We want
+            //   multiplier = EXTENT / dim
+            // (so cw_local = EXTENT/dim and the half-cell shift below lines
+            // up the boundary cell correctly). That gives
+            //   thresholds.extent = EXTENT × (dim+1) / dim.
+            //
+            // Boundary cell L heights[dim..dim+1] and R heights[0..1] then
+            // both straddle world east_L = west_R using identical neighbour
+            // data, so adjacent tiles' contour features meet exactly.
             thresholds.extent = static_cast<int>(std::lround(static_cast<double>(util::EXTENT) *
-                                                             static_cast<double>(width - 1) /
-                                                             static_cast<double>(dim - 1)));
+                                                             static_cast<double>(dim + 1) /
+                                                             static_cast<double>(dim)));
             thresholds.buffer = 0;
             const auto lines = algorithm::contour::generateContours(*heights, width, width, thresholds);
 
-            // Shift output so the interior lands at [0, EXTENT]. Use the
-            // algorithm's actual multiplier (computed from the int-rounded
-            // thresholds.extent) so the shift matches its output exactly.
-            const double cellPx = static_cast<double>(thresholds.extent) / static_cast<double>(width - 1);
+            // Half-cell shift so alg index 1 lands at +0.5cw (sample 0's
+            // pixel-center position), with alg index 0 at -0.5cw (one cell
+            // left of west_L) and alg index dim+1 at EXTENT + 0.5cw (one
+            // cell right of east_L).
+            const double halfCellPx = 0.5 * static_cast<double>(util::EXTENT) / static_cast<double>(dim);
             std::vector<algorithm::contour::ContourLineString> shifted;
             shifted.reserve(lines.size());
             for (const auto& line : lines) {
@@ -196,8 +208,8 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
                 s.elevation = line.elevation;
                 s.points.reserve(line.points.size());
                 for (std::size_t i = 0; i + 1 < line.points.size(); i += 2) {
-                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i] - cellPx)));
-                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i + 1] - cellPx)));
+                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i] - halfCellPx)));
+                    s.points.push_back(static_cast<std::int32_t>(std::lround(line.points[i + 1] - halfCellPx)));
                 }
                 shifted.push_back(std::move(s));
             }
