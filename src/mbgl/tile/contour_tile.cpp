@@ -166,20 +166,29 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
 
     Scheduler::GetBackground()->scheduleAndReplyValue(
         util::SimpleIdentity::Empty,
-        [heights, width, intervalMeters, unit]() {
+        [heights, width, dim, intervalMeters, unit]() {
             algorithm::contour::ContourThresholds thresholds;
             thresholds.interval = intervalMeters;
-            // Output coordinates map (border + interior + border) → tile-local
-            // [-extent/(width-1), extent + extent/(width-1)]. We translate by
-            // +extent/(width-1) per axis below so the interior dim×dim cells
-            // land back at [0, extent], with the border bleeding into a small
-            // negative / over-extent skirt that rendering naturally clips.
-            thresholds.extent = util::EXTENT;
+            // The (dim+2) input has algorithm indices 0..dim+1; the interior
+            // of the tile (DEM samples 0..dim-1, algorithm indices 1..dim)
+            // must map to tile-local coords [0, EXTENT]. The algorithm uses
+            // multiplier = thresholds.extent / (width-1) per cell, so we
+            // pick thresholds.extent such that multiplier = EXTENT/(dim-1).
+            // That gives:
+            //   algo index 0 (border)         → -multiplier
+            //   algo index 1 (sample 0)       → 0           ← left tile edge
+            //   algo index dim (sample dim-1) → EXTENT      ← right tile edge
+            //   algo index dim+1 (border)     → EXTENT+multiplier
+            thresholds.extent = static_cast<int>(std::lround(static_cast<double>(util::EXTENT) *
+                                                             static_cast<double>(width - 1) /
+                                                             static_cast<double>(dim - 1)));
             thresholds.buffer = 0;
             const auto lines = algorithm::contour::generateContours(*heights, width, width, thresholds);
-            // Translate output: shift by one cell so the interior maps to
-            // [0, extent].
-            const double cellPx = static_cast<double>(util::EXTENT) / static_cast<double>(width - 1);
+
+            // Shift output so the interior lands at [0, EXTENT]. Use the
+            // algorithm's actual multiplier (computed from the int-rounded
+            // thresholds.extent) so the shift matches its output exactly.
+            const double cellPx = static_cast<double>(thresholds.extent) / static_cast<double>(width - 1);
             std::vector<algorithm::contour::ContourLineString> shifted;
             shifted.reserve(lines.size());
             for (const auto& line : lines) {
