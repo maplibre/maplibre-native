@@ -34,18 +34,15 @@ public:
 
     // Populate the tile from an upstream DEM tile that just finished parsing.
     // `intervalDisplayUnits` is the contour spacing in the source's display
-    // unit (e.g. 100 feet, 50 metres) — the schedule is resolved to a single
-    // value per the tile's zoom by the caller. `scheduleIntervals` is the
-    // sorted-descending list of distinct interval values from the source's
-    // intervals schedule (display units), used to tag each generated line
-    // with a `natural_interval` property = the largest schedule value that
-    // divides its elevation. Style filters can target individual schedule
-    // bands without needing to bake elevation modulo arithmetic into the
-    // style. `unit` controls the metres↔display conversion and the `index`
-    // ladder used to tag features.
+    // unit (e.g. 100 feet, 50 metres) — the source's `intervals` schedule is
+    // resolved to a single value per the tile's zoom by the caller.
+    // `majorMultiplier` is the source's `majorMultiplier` schedule resolved
+    // to a single positive integer per the tile's zoom by the caller; lines
+    // at elevations divisible by `intervalDisplayUnits × majorMultiplier`
+    // get `major: true`. `unit` controls the metres↔display conversion.
     void populateFromDEM(const RasterDEMTile& demTile,
                          double intervalDisplayUnits,
-                         const std::vector<double>& scheduleIntervals,
+                         std::int64_t majorMultiplier,
                          const algorithm::contour::UnitConfig& unit);
 
 private:

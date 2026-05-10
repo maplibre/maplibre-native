@@ -59,7 +59,7 @@ A new source type `contour` with this shape:
       "source": "dem",
       "intervals": [200, 9, 100, 10, 50, 11, 20, 12, 10],
       "unit": "meters",
-      "majorMultiplier": 5,
+      "majorMultiplier": [5, 14, 4, 15, 5],
       "overzoom": 0
     }
   }
@@ -72,7 +72,7 @@ A new source type `contour` with this shape:
 | `source` | string | yes | ID of the upstream `raster-dem` source whose tile pyramid drives generation. |
 | `intervals` | step-by-zoom number array | yes | Per-zoom contour interval in display units. Odd-length: `[output0, stop1, output1, stop2, …, outputN]`. |
 | `unit` | string \| number | no, default `"meters"` | `"meters"`, `"feet"`, or a positive number used as a metres→display multiplier. |
-| `majorMultiplier` | positive integer | no, default 5 | Tags every Nth contour level as `major: true` on emitted features. |
+| `majorMultiplier` | step-by-zoom positive-integer array | no, default `[5]` | Same odd-length step-by-zoom shape as `intervals`. Tags every Nth contour level as `major: true` at each zoom band. |
 | `overzoom` | non-negative integer | no, default 0 | Levels of bilinear upsample to apply over the upstream DEM before running marching-squares (closes tile-edge seams when the contour source is rendered above the DEM's `maxzoom`). |
 
 The source emits standard vector-tile features that the existing
@@ -231,17 +231,6 @@ parent and does border-stitching); adding a fan-out side-channel on
 the source rather than the pyramid keeps the change local to the one
 type that has cross-source consumers, with no churn in `Tile`,
 `TilePyramid`, or any other observer site.
-
-### Per-zoom `majorMultiplier` schedule
-
-Allow `majorMultiplier` itself to vary per zoom (matching the
-divisibility-by-elevation rule used by some existing pipelines).
-
-Rejected for the initial proposal but worth revisiting. The fixed-
-multiplier model is the simplest expression of the spec and matches
-the implicit shape from #583. Authors who want absolute-divisibility
-ladders today can express that on the consumer side via a `["%",
-["get", "ele"], 100]` filter expression.
 
 ## Testing
 

@@ -25,46 +25,6 @@ namespace mbgl {
 
 namespace {
 
-// Mapbox-Terrain-v2-compatible `index` bucket, emitted as a per-feature
-// property so styles can filter minor / intermediate / major / super-major
-// lines without expressing the divisibility ladder in `["%", ["get", "ele"], …]`
-// expressions. Highest applicable bucket wins:
-//
-//   metres elevation:
-//     multiple of 500 → 10  (super-major; label candidate)
-//     multiple of 100 → 5   (major)
-//     multiple of 50  → 2   (intermediate)
-//     otherwise       → 1   (minor)
-//
-//   feet elevation:
-//     multiple of 1000 → 10
-//     multiple of 500  → 5
-//     multiple of 100  → 2
-//     otherwise        → 1
-//
-// `elev = 0` is divisible by everything and returns the highest bucket — sea
-// level renders as super-major. Custom unit has no natural divisibility
-// ladder, so always returns 1 (minor). The thresholds are conventions, not
-// part of the style spec; consumers wanting different cutoffs should
-// compute their own bucket via expression filters.
-std::int64_t contourIndex(std::int64_t elev, algorithm::contour::ContourUnit unit) {
-    switch (unit) {
-    case algorithm::contour::ContourUnit::Meters:
-        if (elev % 500 == 0) return 10;
-        if (elev % 100 == 0) return 5;
-        if (elev % 50 == 0) return 2;
-        return 1;
-    case algorithm::contour::ContourUnit::Feet:
-        if (elev % 1000 == 0) return 10;
-        if (elev % 500 == 0) return 5;
-        if (elev % 100 == 0) return 2;
-        return 1;
-    case algorithm::contour::ContourUnit::Custom:
-        return 1;
-    }
-    return 1;
-}
-
 // Half-pixel-in-tile-local-units, used as the Douglas-Peucker simplification
 // tolerance. With `util::EXTENT = 8192` across a 512-px MapLibre vector
 // tile, one device pixel is 16 tile-local units; half a pixel is 8.
@@ -199,47 +159,16 @@ std::vector<std::vector<algorithm::contour::Point2D>> clipPolylineToTile(
     return result;
 }
 
-// Compute the `natural_interval` for a line at elevation `elev` (display
-// units): the largest entry in the source's distinct interval list that
-// divides `elev`. `scheduleIntervals` must be sorted descending and contain
-// only positive values.
-//
-// Lets style filters target a specific schedule band without modulo
-// arithmetic — `["==", ["get", "natural_interval"], 200]` matches every
-// line whose elevation is a multiple of the largest schedule interval
-// (e.g. 200 m for a metres schedule of `[200, …, 100, …, 50, …, 20, …, 10]`).
-// Whichever canonical zoom's tile is currently rendered, the same set of
-// lines satisfies the filter, so a single style layer can fade them in
-// across one display-zoom range without losing them at canonical-zoom
-// transitions.
-std::int64_t naturalInterval(std::int64_t elev,
-                             const std::vector<double>& scheduleIntervals) {
-    for (double v : scheduleIntervals) {
-        const auto candidate = static_cast<std::int64_t>(std::llround(v));
-        if (candidate <= 0) continue;
-        if (elev % candidate == 0) return candidate;
-    }
-    return 0;
-}
-
 // Convert raw marching-squares output (interleaved int32 tile-local coords
 // with elevation in metres) to vector-tile features.
 //
-// Per-feature properties:
-//   ele              — elevation in display units (rounded int). Canonical
-//                      style-spec property.
-//   index            — Mapbox-Terrain-v2-compatible divisibility bucket
-//                      (1 / 2 / 5 / 10) per `contourIndex` above. Engine-
-//                      specific extra.
-//   interval         — the contour spacing this tile was generated at, in
-//                      display units. Reflects which canonical-zoom band
-//                      the line came from; useful for diagnostics.
-//   natural_interval — largest schedule interval that divides this line's
-//                      elevation. Stable across canonical-zoom transitions
-//                      (a line at ele=200 always has natural_interval=200
-//                      whether it appears in the canonical-z=9 tile or the
-//                      canonical-z=12 tile), so style layers can be
-//                      filtered per band and faded smoothly.
+// Per-feature properties (per the maplibre-style-spec contour-source
+// proposal, #583):
+//   ele      — elevation in display units (rounded int).
+//   interval — the contour spacing this tile was generated at, in display
+//              units.
+//   major    — true iff the line's elevation is a multiple of
+//              `interval × majorMultiplier` resolved at this tile's zoom.
 //
 // Pipeline per line:
 //   1. Clip to the [0, EXTENT] tile bbox so endpoints land on the
@@ -254,9 +183,14 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
     const std::vector<algorithm::contour::ContourLineString>& lines,
     const algorithm::contour::UnitConfig& unit,
     double intervalDisplayUnits,
-    const std::vector<double>& scheduleIntervals) {
+    std::int64_t majorMultiplier) {
     mapbox::feature::feature_collection<std::int16_t> features;
     features.reserve(lines.size());
+
+    const std::int64_t intervalRound =
+        static_cast<std::int64_t>(std::llround(intervalDisplayUnits));
+    const std::int64_t majorMod =
+        (majorMultiplier > 0 && intervalRound > 0) ? intervalRound * majorMultiplier : 0;
 
     std::vector<algorithm::contour::Point2D> work;
     for (const auto& line : lines) {
@@ -289,9 +223,8 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
             mapbox::feature::feature<std::int16_t> f;
             f.geometry = std::move(ls);
             f.properties["ele"] = elev;
-            f.properties["index"] = contourIndex(elev, unit.unit);
-            f.properties["interval"] = static_cast<std::int64_t>(std::llround(intervalDisplayUnits));
-            f.properties["natural_interval"] = naturalInterval(elev, scheduleIntervals);
+            f.properties["interval"] = intervalRound;
+            f.properties["major"] = (majorMod > 0) && (elev % majorMod == 0);
             features.push_back(std::move(f));
         }
     }
@@ -308,7 +241,7 @@ ContourTile::ContourTile(const OverscaledTileID& id_,
 
 void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
                                   double intervalDisplayUnits,
-                                  const std::vector<double>& scheduleIntervals,
+                                  std::int64_t majorMultiplier,
                                   const algorithm::contour::UnitConfig& unit) {
     HillshadeBucket* bucket = demTile.getBucket();
     if (bucket == nullptr) return;
@@ -353,7 +286,7 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
 
     Scheduler::GetBackground()->scheduleAndReplyValue(
         util::SimpleIdentity::Empty,
-        [heights, width, dim, intervalMeters, intervalDisplayUnits, scheduleIntervals, unit]() {
+        [heights, width, dim, intervalMeters, intervalDisplayUnits, majorMultiplier, unit]() {
             algorithm::contour::ContourThresholds thresholds;
             thresholds.interval = intervalMeters;
             // Pixel-center coordinate mapping. We want:
@@ -399,7 +332,7 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
                 }
                 shifted.push_back(std::move(s));
             }
-            return toFeatures(shifted, unit, intervalDisplayUnits, scheduleIntervals);
+            return toFeatures(shifted, unit, intervalDisplayUnits, majorMultiplier);
         },
         [self = weakFactory.makeWeakPtr(), this](mapbox::feature::feature_collection<std::int16_t> features) {
             if (auto guard = self.lock(); self) {

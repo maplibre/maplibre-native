@@ -7,8 +7,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
 
-#include <algorithm>
-#include <vector>
+#include <cmath>
 
 namespace mbgl {
 
@@ -16,22 +15,13 @@ using namespace style;
 
 namespace {
 
-// Extract the distinct interval values from an `IntervalSchedule.stops`
-// array (odd-length: outputs interleaved with stops at even / odd
-// indices), sorted descending so callers can find the largest divisor
-// of an elevation by linear scan. Used to tag each contour line with a
-// `natural_interval` property.
-std::vector<double> distinctIntervalsDesc(const std::vector<double>& stops) {
-    std::vector<double> values;
-    for (std::size_t i = 0; i < stops.size(); i += 2) {
-        const double v = stops[i];
-        if (v <= 0) continue;
-        if (std::find(values.begin(), values.end(), v) == values.end()) {
-            values.push_back(v);
-        }
-    }
-    std::sort(values.begin(), values.end(), std::greater<>());
-    return values;
+// Resolve the source's `majorMultiplier` schedule at a tile's canonical
+// zoom to a single positive integer. Returns 0 when the schedule is
+// empty or invalid (callers treat 0 as "never major").
+std::int64_t resolveMajorMultiplier(const algorithm::contour::IntervalSchedule& schedule, double zoom) {
+    const double v = algorithm::contour::intervalForZoom(schedule, zoom);
+    if (v <= 0.0) return 0;
+    return static_cast<std::int64_t>(std::llround(v));
 }
 
 } // namespace
@@ -99,10 +89,10 @@ void RenderContourSource::update(Immutable<style::Source::Impl> baseImpl_,
                            if (upstream != nullptr) {
                                if (const RasterDEMTile* dem = upstream->getRenderableTile(tileID)) {
                                    const auto& opts = impl().getOptions();
-                                   const double interval = algorithm::contour::intervalForZoom(
-                                       opts.intervals, static_cast<double>(tileID.canonical.z));
-                                   const auto schedule = distinctIntervalsDesc(opts.intervals.stops);
-                                   tile->populateFromDEM(*dem, interval, schedule, opts.unit);
+                                   const double zoom = static_cast<double>(tileID.canonical.z);
+                                   const double interval = algorithm::contour::intervalForZoom(opts.intervals, zoom);
+                                   const std::int64_t major = resolveMajorMultiplier(opts.majorMultiplier, zoom);
+                                   tile->populateFromDEM(*dem, interval, major, opts.unit);
                                }
                            }
                            return tile;
@@ -160,9 +150,10 @@ void RenderContourSource::onUpstreamTileLoaded(const RasterDEMTile& demTile) {
         return;
     }
     const auto& opts = impl().getOptions();
-    const double interval = algorithm::contour::intervalForZoom(opts.intervals, static_cast<double>(demTile.id.canonical.z));
-    const auto schedule = distinctIntervalsDesc(opts.intervals.stops);
-    static_cast<ContourTile&>(*match).populateFromDEM(demTile, interval, schedule, opts.unit);
+    const double zoom = static_cast<double>(demTile.id.canonical.z);
+    const double interval = algorithm::contour::intervalForZoom(opts.intervals, zoom);
+    const std::int64_t major = resolveMajorMultiplier(opts.majorMultiplier, zoom);
+    static_cast<ContourTile&>(*match).populateFromDEM(demTile, interval, major, opts.unit);
 }
 
 } // namespace mbgl

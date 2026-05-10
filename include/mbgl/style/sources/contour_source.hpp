@@ -18,7 +18,7 @@ namespace style {
 //     "source": "dem",
 //     "intervals": [200, 12, 100, 14, 50, 15, 20],
 //     "unit": "feet",
-//     "majorMultiplier": 5,
+//     "majorMultiplier": [5, 14, 4, 15, 5],
 //     "overzoom": 1
 //   }
 struct ContourSourceOptions {
@@ -29,9 +29,14 @@ struct ContourSourceOptions {
     // Display unit for emitted `ele` / `interval` feature attributes. Defaults
     // to metres; the underlying DEM is always interpreted as metres.
     algorithm::contour::UnitConfig unit;
-    // Every Nth contour level is tagged `major: true` on emitted features.
-    // Defaults to 5 (i.e. major lines every 5 × interval).
-    std::uint32_t majorMultiplier = 5;
+    // Per-zoom step-by-zoom schedule of "every Nth contour line is tagged
+    // `major: true`" multipliers. Same shape as `intervals` (odd-length
+    // step-by-zoom array). The per-tile multiplier resolves to a single
+    // positive integer; a line at elevation `e` with tile-zoom interval `i`
+    // and resolved multiplier `m` emits `major: true` iff `e % (i*m) == 0`.
+    // Default: a single-output schedule of `{5}` (every 5th line is major
+    // at every zoom).
+    algorithm::contour::IntervalSchedule majorMultiplier{{5.0}};
     // Number of zoom levels to overzoom from the upstream DEM source. 0 means
     // sample the DEM at the contour-tile zoom directly.
     std::uint8_t overzoom = 0;
@@ -49,7 +54,7 @@ public:
     const std::string& getDEMSourceID() const;
     const algorithm::contour::IntervalSchedule& getIntervals() const;
     const algorithm::contour::UnitConfig& getUnit() const;
-    std::uint32_t getMajorMultiplier() const;
+    const algorithm::contour::IntervalSchedule& getMajorMultiplier() const;
     std::uint8_t getOverzoom() const;
 
     class Impl;

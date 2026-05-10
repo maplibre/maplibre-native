@@ -237,15 +237,42 @@ std::optional<std::unique_ptr<Source>> convertContourSource(const std::string& i
         }
     }
 
-    // Optional: majorMultiplier — every Nth contour level is tagged
-    // major:true. Must be a positive integer.
+    // Optional: majorMultiplier — step-by-zoom array of positive integers
+    // (same odd-length shape as `intervals`). A line at tile-zoom interval
+    // `i` and resolved multiplier `m` emits `major: true` iff `e % (i*m)
+    // == 0`. Defaults to a single-output schedule of `{5}` if absent.
     if (auto majorVal = objectMember(value, "majorMultiplier")) {
-        auto majorNum = toDouble(*majorVal);
-        if (!majorNum || *majorNum <= 0.0 || *majorNum != std::floor(*majorNum)) {
-            error.message = "contour `majorMultiplier` must be a positive integer";
+        if (!isArray(*majorVal) || arrayLength(*majorVal) == 0) {
+            error.message = "contour `majorMultiplier` must be a non-empty array";
             return std::nullopt;
         }
-        options.majorMultiplier = static_cast<std::uint32_t>(*majorNum);
+        const std::size_t mn = arrayLength(*majorVal);
+        if ((mn % 2) == 0) {
+            error.message = "contour `majorMultiplier` must have an odd number of entries (output, stop, output, stop, ..., output)";
+            return std::nullopt;
+        }
+        algorithm::contour::IntervalSchedule majorSchedule;
+        majorSchedule.stops.reserve(mn);
+        for (std::size_t i = 0; i < mn; i++) {
+            auto entry = toDouble(arrayMember(*majorVal, i));
+            if (!entry) {
+                error.message = "contour `majorMultiplier` entries must be numbers";
+                return std::nullopt;
+            }
+            // Output positions (even indices) must be positive integers.
+            if ((i % 2) == 0) {
+                if (*entry <= 0.0 || *entry != std::floor(*entry)) {
+                    error.message = "contour `majorMultiplier` outputs must be positive integers";
+                    return std::nullopt;
+                }
+            }
+            majorSchedule.stops.push_back(*entry);
+        }
+        if (!algorithm::contour::isValid(majorSchedule)) {
+            error.message = "contour `majorMultiplier` outputs must be > 0 and stops strictly increasing";
+            return std::nullopt;
+        }
+        options.majorMultiplier = std::move(majorSchedule);
     }
 
     // Optional: overzoom — non-negative integer count of bilinear-upsample

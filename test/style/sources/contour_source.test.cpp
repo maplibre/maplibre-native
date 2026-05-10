@@ -21,7 +21,7 @@ ContourSourceOptions fullConfig() {
     opts.intervals.stops = {200.0, 12.0, 100.0, 14.0, 50.0, 15.0, 20.0};
     opts.unit.unit = algorithm::contour::ContourUnit::Feet;
     opts.unit.customMultiplier = 1.0;
-    opts.majorMultiplier = 5;
+    opts.majorMultiplier.stops = {5.0, 14.0, 4.0, 15.0, 5.0};
     opts.overzoom = 1;
     return opts;
 }
@@ -41,18 +41,19 @@ TEST(ContourSource, GettersReturnConfiguredValues) {
     EXPECT_EQ(source.getDEMSourceID(), "dem");
     EXPECT_EQ(source.getIntervals().stops, cfg.intervals.stops);
     EXPECT_EQ(source.getUnit().unit, algorithm::contour::ContourUnit::Feet);
-    EXPECT_EQ(source.getMajorMultiplier(), 5);
+    EXPECT_EQ(source.getMajorMultiplier().stops, cfg.majorMultiplier.stops);
     EXPECT_EQ(source.getOverzoom(), 1);
 }
 
 TEST(ContourSource, DefaultOptionsReflectSpecDefaults) {
-    // Spec defaults: unit "meters", majorMultiplier 5, overzoom 0.
+    // Spec defaults: unit "meters", majorMultiplier {5} (every 5th line at
+    // every zoom), overzoom 0.
     ContourSourceOptions opts;
     opts.sourceID = "dem";
     opts.intervals.stops = {100.0};
     ContourSource source("contours", opts);
     EXPECT_EQ(source.getUnit().unit, algorithm::contour::ContourUnit::Meters);
-    EXPECT_EQ(source.getMajorMultiplier(), 5);
+    EXPECT_EQ(source.getMajorMultiplier().stops, std::vector<double>{5.0});
     EXPECT_EQ(source.getOverzoom(), 0);
 }
 
@@ -108,7 +109,7 @@ TEST(ContourSourceParse, FullySpecifiedBlockParses) {
         "source": "dem",
         "intervals": [200, 12, 100, 14, 50, 15, 20],
         "unit": "feet",
-        "majorMultiplier": 5,
+        "majorMultiplier": [5, 14, 4, 15, 5],
         "overzoom": 1
     })JSON",
                             error);
@@ -117,7 +118,7 @@ TEST(ContourSourceParse, FullySpecifiedBlockParses) {
     EXPECT_EQ(src->getDEMSourceID(), "dem");
     EXPECT_EQ(src->getIntervals().stops, (std::vector<double>{200, 12, 100, 14, 50, 15, 20}));
     EXPECT_EQ(src->getUnit().unit, algorithm::contour::ContourUnit::Feet);
-    EXPECT_EQ(src->getMajorMultiplier(), 5u);
+    EXPECT_EQ(src->getMajorMultiplier().stops, (std::vector<double>{5, 14, 4, 15, 5}));
     EXPECT_EQ(src->getOverzoom(), 1u);
 }
 
@@ -132,7 +133,8 @@ TEST(ContourSourceParse, MinimalBlockUsesDefaults) {
     ASSERT_TRUE(src) << error.message;
     EXPECT_EQ(src->getDEMSourceID(), "dem");
     EXPECT_EQ(src->getUnit().unit, algorithm::contour::ContourUnit::Meters);
-    EXPECT_EQ(src->getMajorMultiplier(), 5u);
+    // Default majorMultiplier: single-output schedule of {5}.
+    EXPECT_EQ(src->getMajorMultiplier().stops, std::vector<double>{5.0});
     EXPECT_EQ(src->getOverzoom(), 0u);
 }
 
@@ -241,10 +243,42 @@ TEST(ContourSourceParse, OverzoomAboveFourRejected) {
     EXPECT_NE(error.message.find("overzoom"), std::string::npos);
 }
 
-TEST(ContourSourceParse, ZeroMajorMultiplierRejected) {
+TEST(ContourSourceParse, ScalarMajorMultiplierRejected) {
+    // Spec defines `majorMultiplier` as a step-by-zoom array; reject scalar
+    // forms with a clear error pointing at the array shape.
     Error error;
     auto src = parseContour(R"JSON({
-        "type": "contour", "source": "dem", "intervals": [100], "majorMultiplier": 0
+        "type": "contour", "source": "dem", "intervals": [100], "majorMultiplier": 5
+    })JSON",
+                            error);
+    EXPECT_FALSE(src);
+    EXPECT_NE(error.message.find("majorMultiplier"), std::string::npos);
+}
+
+TEST(ContourSourceParse, EvenLengthMajorMultiplierRejected) {
+    Error error;
+    auto src = parseContour(R"JSON({
+        "type": "contour", "source": "dem", "intervals": [100], "majorMultiplier": [5, 14]
+    })JSON",
+                            error);
+    EXPECT_FALSE(src);
+    EXPECT_NE(error.message.find("majorMultiplier"), std::string::npos);
+}
+
+TEST(ContourSourceParse, NonPositiveMajorMultiplierRejected) {
+    Error error;
+    auto src = parseContour(R"JSON({
+        "type": "contour", "source": "dem", "intervals": [100], "majorMultiplier": [0]
+    })JSON",
+                            error);
+    EXPECT_FALSE(src);
+    EXPECT_NE(error.message.find("majorMultiplier"), std::string::npos);
+}
+
+TEST(ContourSourceParse, NonIntegerMajorMultiplierRejected) {
+    Error error;
+    auto src = parseContour(R"JSON({
+        "type": "contour", "source": "dem", "intervals": [100], "majorMultiplier": [4.5]
     })JSON",
                             error);
     EXPECT_FALSE(src);
@@ -288,7 +322,7 @@ std::string reconstruct(const ContourSource& src) {
         out += ", \"unit\": " + std::to_string(src.getUnit().customMultiplier);
         break;
     }
-    out += ", \"majorMultiplier\": " + std::to_string(src.getMajorMultiplier());
+    out += ", \"majorMultiplier\": " + formatIntervalStops(src.getMajorMultiplier().stops);
     out += ", \"overzoom\": " + std::to_string(static_cast<unsigned>(src.getOverzoom()));
     out += "}";
     return out;
@@ -302,7 +336,7 @@ TEST(ContourSourceParse, RoundTripsThroughGetters) {
         "source": "dem",
         "intervals": [200, 12, 100, 14, 50, 15, 20],
         "unit": "feet",
-        "majorMultiplier": 5,
+        "majorMultiplier": [5, 14, 4, 15, 5],
         "overzoom": 2
     })JSON";
 
@@ -320,7 +354,7 @@ TEST(ContourSourceParse, RoundTripsThroughGetters) {
     EXPECT_EQ(first->getIntervals().stops, second->getIntervals().stops);
     EXPECT_EQ(first->getUnit().unit, second->getUnit().unit);
     EXPECT_DOUBLE_EQ(first->getUnit().customMultiplier, second->getUnit().customMultiplier);
-    EXPECT_EQ(first->getMajorMultiplier(), second->getMajorMultiplier());
+    EXPECT_EQ(first->getMajorMultiplier().stops, second->getMajorMultiplier().stops);
     EXPECT_EQ(first->getOverzoom(), second->getOverzoom());
 }
 
@@ -330,7 +364,7 @@ TEST(ContourSourceParse, RoundTripsCustomUnit) {
         "source": "dem",
         "intervals": [50],
         "unit": 0.5,
-        "majorMultiplier": 4,
+        "majorMultiplier": [4],
         "overzoom": 0
     })JSON";
 

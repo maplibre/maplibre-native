@@ -27,7 +27,7 @@ const algorithm::contour::UnitConfig& ContourSource::getUnit() const {
     return impl().getOptions().unit;
 }
 
-std::uint32_t ContourSource::getMajorMultiplier() const {
+const algorithm::contour::IntervalSchedule& ContourSource::getMajorMultiplier() const {
     return impl().getOptions().majorMultiplier;
 }
 
