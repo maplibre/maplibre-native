@@ -312,15 +312,15 @@ std::string reconstruct(const ContourSource& src) {
     out += ", \"intervals\": " + formatIntervalStops(src.getIntervals().stops);
     using algorithm::contour::ContourUnit;
     switch (src.getUnit().unit) {
-    case ContourUnit::Meters:
-        out += ", \"unit\": \"meters\"";
-        break;
-    case ContourUnit::Feet:
-        out += ", \"unit\": \"feet\"";
-        break;
-    case ContourUnit::Custom:
-        out += ", \"unit\": " + std::to_string(src.getUnit().customMultiplier);
-        break;
+        case ContourUnit::Meters:
+            out += ", \"unit\": \"meters\"";
+            break;
+        case ContourUnit::Feet:
+            out += ", \"unit\": \"feet\"";
+            break;
+        case ContourUnit::Custom:
+            out += ", \"unit\": " + std::to_string(src.getUnit().customMultiplier);
+            break;
     }
     out += ", \"majorMultiplier\": " + formatIntervalStops(src.getMajorMultiplier().stops);
     out += ", \"overzoom\": " + std::to_string(static_cast<unsigned>(src.getOverzoom()));

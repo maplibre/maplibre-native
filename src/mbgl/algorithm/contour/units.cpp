@@ -11,24 +11,24 @@ constexpr double kMetersPerFoot = 0.3048;
 
 double metersToUnit(double meters, const UnitConfig& cfg) {
     switch (cfg.unit) {
-    case ContourUnit::Meters:
-        return meters;
-    case ContourUnit::Feet:
-        return meters / kMetersPerFoot;
-    case ContourUnit::Custom:
-        return meters * cfg.customMultiplier;
+        case ContourUnit::Meters:
+            return meters;
+        case ContourUnit::Feet:
+            return meters / kMetersPerFoot;
+        case ContourUnit::Custom:
+            return meters * cfg.customMultiplier;
     }
     return meters;
 }
 
 double unitToMeters(double value, const UnitConfig& cfg) {
     switch (cfg.unit) {
-    case ContourUnit::Meters:
-        return value;
-    case ContourUnit::Feet:
-        return value * kMetersPerFoot;
-    case ContourUnit::Custom:
-        return value / cfg.customMultiplier;
+        case ContourUnit::Meters:
+            return value;
+        case ContourUnit::Feet:
+            return value * kMetersPerFoot;
+        case ContourUnit::Custom:
+            return value / cfg.customMultiplier;
     }
     return value;
 }

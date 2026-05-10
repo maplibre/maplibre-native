@@ -26,7 +26,8 @@ std::int64_t resolveMajorMultiplier(const algorithm::contour::IntervalSchedule& 
 
 } // namespace
 
-RenderContourSource::RenderContourSource(Immutable<style::ContourSource::Impl> impl_, const TaggedScheduler& threadPool_)
+RenderContourSource::RenderContourSource(Immutable<style::ContourSource::Impl> impl_,
+                                         const TaggedScheduler& threadPool_)
     : RenderTileSource(std::move(impl_), threadPool_) {}
 
 RenderContourSource::~RenderContourSource() {

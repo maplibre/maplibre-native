@@ -42,9 +42,7 @@ public:
         return h;
     }
 
-    void remove(Handle handle) {
-        listeners.erase(handle);
-    }
+    void remove(Handle handle) { listeners.erase(handle); }
 
     template <class... CallArgs>
     void notify(CallArgs&&... args) const {

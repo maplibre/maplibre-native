@@ -195,7 +195,8 @@ std::optional<std::unique_ptr<Source>> convertContourSource(const std::string& i
     }
     const std::size_t n = arrayLength(*intervalsVal);
     if ((n % 2) == 0) {
-        error.message = "contour `intervals` must have an odd number of entries (output, stop, output, stop, ..., output)";
+        error.message =
+            "contour `intervals` must have an odd number of entries (output, stop, output, stop, ..., output)";
         return std::nullopt;
     }
     options.intervals.stops.reserve(n);
@@ -248,7 +249,9 @@ std::optional<std::unique_ptr<Source>> convertContourSource(const std::string& i
         }
         const std::size_t mn = arrayLength(*majorVal);
         if ((mn % 2) == 0) {
-            error.message = "contour `majorMultiplier` must have an odd number of entries (output, stop, output, stop, ..., output)";
+            error.message =
+                "contour `majorMultiplier` must have an odd number of entries (output, stop, output, stop, ..., "
+                "output)";
             return std::nullopt;
         }
         algorithm::contour::IntervalSchedule majorSchedule;
@@ -281,8 +284,7 @@ std::optional<std::unique_ptr<Source>> convertContourSource(const std::string& i
     // visual quality stops improving.
     if (auto overzoomVal = objectMember(value, "overzoom")) {
         auto overzoomNum = toDouble(*overzoomVal);
-        if (!overzoomNum || *overzoomNum < 0.0 || *overzoomNum > 4.0 ||
-            *overzoomNum != std::floor(*overzoomNum)) {
+        if (!overzoomNum || *overzoomNum < 0.0 || *overzoomNum > 4.0 || *overzoomNum != std::floor(*overzoomNum)) {
             error.message = "contour `overzoom` must be an integer in [0, 4]";
             return std::nullopt;
         }

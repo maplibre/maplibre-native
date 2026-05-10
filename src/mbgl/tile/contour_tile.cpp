@@ -138,11 +138,15 @@ std::vector<std::vector<algorithm::contour::Point2D>> clipPolylineToTile(
                 } else {
                     const double t = q[j] / p[j];
                     if (p[j] < 0.0) {
-                        if (t > tExit) ok = false;
-                        else if (t > tEnter) tEnter = t;
+                        if (t > tExit)
+                            ok = false;
+                        else if (t > tEnter)
+                            tEnter = t;
                     } else {
-                        if (t < tEnter) ok = false;
-                        else if (t < tExit) tExit = t;
+                        if (t < tEnter)
+                            ok = false;
+                        else if (t < tExit)
+                            tExit = t;
                     }
                 }
             }
@@ -187,10 +191,8 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
     mapbox::feature::feature_collection<std::int16_t> features;
     features.reserve(lines.size());
 
-    const std::int64_t intervalRound =
-        static_cast<std::int64_t>(std::llround(intervalDisplayUnits));
-    const std::int64_t majorMod =
-        (majorMultiplier > 0 && intervalRound > 0) ? intervalRound * majorMultiplier : 0;
+    const std::int64_t intervalRound = static_cast<std::int64_t>(std::llround(intervalDisplayUnits));
+    const std::int64_t majorMod = (majorMultiplier > 0 && intervalRound > 0) ? intervalRound * majorMultiplier : 0;
 
     std::vector<algorithm::contour::Point2D> work;
     for (const auto& line : lines) {
@@ -212,8 +214,8 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
             mapbox::geometry::line_string<std::int16_t> ls;
             ls.reserve(smoothed.size());
             for (const auto& p : smoothed) {
-                ls.push_back({static_cast<std::int16_t>(std::lround(p[0])),
-                              static_cast<std::int16_t>(std::lround(p[1]))});
+                ls.push_back(
+                    {static_cast<std::int16_t>(std::lround(p[0])), static_cast<std::int16_t>(std::lround(p[1]))});
             }
 
             // Round elevation to integer display units before emission.
@@ -308,9 +310,8 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
             // backfillBorder) straddles the tile edge using identical
             // neighbour data, so adjacent tiles' contour features meet
             // exactly at the seam.
-            thresholds.extent = static_cast<int>(std::lround(static_cast<double>(util::EXTENT) *
-                                                             static_cast<double>(width - 1) /
-                                                             static_cast<double>(dim)));
+            thresholds.extent = static_cast<int>(std::lround(
+                static_cast<double>(util::EXTENT) * static_cast<double>(width - 1) / static_cast<double>(dim)));
             const auto lines = algorithm::contour::generateContours(*heights, width, width, thresholds);
 
             // Shift so alg index `border` lands at +0.5cw (sample 0's

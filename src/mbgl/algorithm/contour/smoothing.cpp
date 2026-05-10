@@ -29,11 +29,7 @@ double perpDist(const Point2D& p, const Point2D& a, const Point2D& b) {
 // the first and last index always present in the caller). Recursion depth
 // is bounded by the polyline length, which for DEM-derived contour tiles
 // is small enough not to need an explicit work-stack.
-void rdp(std::span<const Point2D> pts,
-         double epsilon,
-         std::size_t lo,
-         std::size_t hi,
-         std::vector<std::size_t>& keep) {
+void rdp(std::span<const Point2D> pts, double epsilon, std::size_t lo, std::size_t hi, std::vector<std::size_t>& keep) {
     if (hi <= lo + 1) return;
     double dmax = 0.0;
     std::size_t index = lo;

@@ -58,8 +58,16 @@ inline double ratio(double a, double threshold, double b) {
     return (threshold - a) / (b - a);
 }
 
-inline void edgePosition(const Edge edge, int c, int r, double tl, double tr, double bl, double br,
-                         double threshold, double& outX, double& outY) {
+inline void edgePosition(const Edge edge,
+                         int c,
+                         int r,
+                         double tl,
+                         double tr,
+                         double bl,
+                         double br,
+                         double threshold,
+                         double& outX,
+                         double& outY) {
     if (edge.u == 0) {
         outX = static_cast<double>(c - 1);
         outY = static_cast<double>(r) - ratio(bl, threshold, tl);
@@ -179,7 +187,8 @@ std::vector<ContourLineString> generateContours(std::span<const std::int16_t> he
             const double endLevel = std::floor(maxV / interval) * interval;
 
             for (double level = startLevel; level <= endLevel + 0.5 * interval; level += interval) {
-                const int idx = (tl > level ? 8 : 0) | (tr > level ? 4 : 0) | (br > level ? 2 : 0) | (bl > level ? 1 : 0);
+                const int idx = (tl > level ? 8 : 0) | (tr > level ? 4 : 0) | (br > level ? 2 : 0) |
+                                (bl > level ? 1 : 0);
                 const int nSegments = SEGMENT_COUNT[idx];
                 if (nSegments == 0) continue;
 
