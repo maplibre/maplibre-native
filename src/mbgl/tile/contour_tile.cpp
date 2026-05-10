@@ -228,9 +228,6 @@ std::int64_t naturalInterval(std::int64_t elev,
 // Per-feature properties:
 //   ele              — elevation in display units (rounded int). Canonical
 //                      style-spec property.
-//   elevation        — duplicate of `ele` under the legacy property name
-//                      used by some existing line/symbol styles. Engine-
-//                      specific extra; consumers should prefer `ele`.
 //   index            — Mapbox-Terrain-v2-compatible divisibility bucket
 //                      (1 / 2 / 5 / 10) per `contourIndex` above. Engine-
 //                      specific extra.
@@ -292,7 +289,6 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
             mapbox::feature::feature<std::int16_t> f;
             f.geometry = std::move(ls);
             f.properties["ele"] = elev;
-            f.properties["elevation"] = elev;
             f.properties["index"] = contourIndex(elev, unit.unit);
             f.properties["interval"] = static_cast<std::int64_t>(std::llround(intervalDisplayUnits));
             f.properties["natural_interval"] = naturalInterval(elev, scheduleIntervals);
@@ -382,7 +378,6 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
             thresholds.extent = static_cast<int>(std::lround(static_cast<double>(util::EXTENT) *
                                                              static_cast<double>(width - 1) /
                                                              static_cast<double>(dim)));
-            thresholds.buffer = 0;
             const auto lines = algorithm::contour::generateContours(*heights, width, width, thresholds);
 
             // Shift so alg index `border` lands at +0.5cw (sample 0's

@@ -14,6 +14,13 @@ namespace mbgl {
 // events to multiple cross-source consumers without coupling them to each
 // other.
 //
+// Reentrancy: `notify()` snapshots the listener map before iterating so a
+// listener may call `add()` or `remove()` on the same set without
+// invalidating the in-flight iteration. A listener registered during the
+// notification will NOT see the current event (it's added after the
+// snapshot); a listener removed during notification WILL still fire once
+// for the current event.
+//
 // Pure C++; no MapLibre deps. Move-only because handles are stable for the
 // lifetime of a given ListenerSet and copying would invite confusion about
 // which copy a handle refers to.
@@ -41,7 +48,10 @@ public:
 
     template <class... CallArgs>
     void notify(CallArgs&&... args) const {
-        for (const auto& [_, listener] : listeners) {
+        // Snapshot listeners before iterating so a listener may safely
+        // mutate this set during the call. See the reentrancy note above.
+        const auto snapshot = listeners;
+        for (const auto& [_, listener] : snapshot) {
             listener(args...);
         }
     }

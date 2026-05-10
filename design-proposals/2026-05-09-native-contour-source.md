@@ -254,7 +254,6 @@ ladders today can express that on the consumer side via a `["%",
   step-expression boundary semantics.
 - `algorithm/contour/units.test.cpp` — meters / feet / custom
   multiplier round-trips.
-- `algorithm/contour/height_tile.test.cpp` — bounds-check sampling.
 - `algorithm/contour/smoothing.test.cpp` — Douglas-Peucker invariants
   (endpoint preservation, collinear drop, threshold strictness),
   Chaikin endpoint pinning + monotonicity preservation.

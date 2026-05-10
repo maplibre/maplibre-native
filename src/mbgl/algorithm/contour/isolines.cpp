@@ -145,7 +145,6 @@ std::vector<ContourLineString> generateContours(std::span<const std::int16_t> he
 
     const double interval = thresholds.interval;
     const double multiplier = static_cast<double>(thresholds.extent) / static_cast<double>(width - 1);
-    const int buffer = thresholds.buffer;
 
     // Per-threshold polyline accumulators. We key by level rounded to the
     // nearest interval-step, expressed as a signed integer multiple, to avoid
@@ -159,13 +158,13 @@ std::vector<ContourLineString> generateContours(std::span<const std::int16_t> he
         return static_cast<double>(heights[y * width + x]);
     };
 
-    const int cMin = 1 - buffer;
-    const int cMax = width + buffer;
-    const int rMin = 1 - buffer;
-    const int rMax = height + buffer;
-
-    for (int r = rMin; r < rMax; r++) {
-        for (int c = cMin; c < cMax; c++) {
+    // Iterate cells in [1, width) × [1, height): each cell at (c, r)
+    // samples corners at (c-1, r-1), (c, r-1), (c-1, r), (c, r), so this
+    // covers all (width-1) × (height-1) cells exactly once. Skirts beyond
+    // the grid edge are the caller's responsibility (e.g. by passing a
+    // border-padded height grid).
+    for (int r = 1; r < height; r++) {
+        for (int c = 1; c < width; c++) {
             const double tl = sample(c - 1, r - 1);
             const double tr = sample(c, r - 1);
             const double bl = sample(c - 1, r);

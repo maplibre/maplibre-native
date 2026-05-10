@@ -25,7 +25,7 @@ namespace {
 // is laid out as { 0, 0, 0,  0, 0, 0,  0, 0, 0 }.
 
 constexpr ContourThresholds withInterval(double interval) {
-    return ContourThresholds{interval, /*extent=*/4096, /*buffer=*/0};
+    return ContourThresholds{interval, /*extent=*/4096};
 }
 
 } // namespace
@@ -182,32 +182,19 @@ TEST(Contour, MultipleThresholdsEmittedInSingleCellPass) {
     EXPECT_EQ(found250, 1);
 }
 
-TEST(Contour, BufferZeroEmitsLinesEntirelyWithinTile) {
+TEST(Contour, OutputCoordsLandWithinExtent) {
     // 3×2 grid, contour at level 100 cuts horizontally through the middle.
-    // With buffer=0 the algorithm only iterates cells whose corners are all
-    // inside the grid, so output coords stay within [0, extent].
+    // The cell loop iterates [1, width) × [1, height) so output coords
+    // always stay within [0, extent].
     const std::vector<std::int16_t> heights{50,  50,  50,
                                             150, 150, 150};
-    const auto thresholds = ContourThresholds{/*interval=*/100.0, /*extent=*/4096, /*buffer=*/0};
+    const auto thresholds = ContourThresholds{/*interval=*/100.0, /*extent=*/4096};
     const auto lines = generateContours(heights, 3, 2, thresholds);
     ASSERT_FALSE(lines.empty());
     for (auto v : lines[0].points) {
         EXPECT_GE(v, 0);
         EXPECT_LE(v, 4096);
     }
-}
-
-TEST(Contour, BufferOnePushesLinesPastTileEdge) {
-    // Same grid, buffer=1 — the loop iterates one cell past each edge,
-    // sampling out-of-bounds positions which return NaN. Those cells skip
-    // entirely (NaN check), so for a tile with no neighbour data the buffer
-    // doesn't change output. Verify output is still valid (not regressed by
-    // the buffer-iteration code).
-    const std::vector<std::int16_t> heights{50,  50,  50,
-                                            150, 150, 150};
-    const auto thresholds = ContourThresholds{/*interval=*/100.0, /*extent=*/4096, /*buffer=*/1};
-    const auto lines = generateContours(heights, 3, 2, thresholds);
-    EXPECT_FALSE(lines.empty());
 }
 
 // Saddle cases (5 and 10) are the only marching-squares cases that emit two

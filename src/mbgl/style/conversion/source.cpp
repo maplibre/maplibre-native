@@ -249,11 +249,14 @@ std::optional<std::unique_ptr<Source>> convertContourSource(const std::string& i
     }
 
     // Optional: overzoom — non-negative integer count of bilinear-upsample
-    // levels above the upstream DEM source.
+    // levels above the upstream DEM source. Capped at 4 — beyond that
+    // the bilinear upsample produces 16+× the source data per tile and
+    // visual quality stops improving.
     if (auto overzoomVal = objectMember(value, "overzoom")) {
         auto overzoomNum = toDouble(*overzoomVal);
-        if (!overzoomNum || *overzoomNum < 0.0 || *overzoomNum != std::floor(*overzoomNum)) {
-            error.message = "contour `overzoom` must be a non-negative integer";
+        if (!overzoomNum || *overzoomNum < 0.0 || *overzoomNum > 4.0 ||
+            *overzoomNum != std::floor(*overzoomNum)) {
+            error.message = "contour `overzoom` must be an integer in [0, 4]";
             return std::nullopt;
         }
         options.overzoom = static_cast<std::uint8_t>(*overzoomNum);

@@ -28,10 +28,6 @@ struct ContourThresholds {
     double interval = 0.0;
     // Tile-local coordinate scale (MVT default = 4096).
     int extent = 4096;
-    // Pixels of skirt to extend output past the tile edge on every side.
-    // Useful for clipping at the consumer; matches `maplibre-contour`'s
-    // `buffer` parameter.
-    int buffer = 1;
 };
 
 struct ContourLineString {

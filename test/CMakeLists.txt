@@ -2,7 +2,6 @@ add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
     ${PROJECT_SOURCE_DIR}/test/actor/actor_ref.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/algorithm/contour/height_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/intervals.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/isolines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/contour/smoothing.test.cpp

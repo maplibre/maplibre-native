@@ -119,8 +119,6 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
 MLN_CORE_SOURCE = [
     "src/mbgl/actor/mailbox.cpp",
     "src/mbgl/actor/scheduler.cpp",
-    "src/mbgl/algorithm/contour/height_tile.cpp",
-    "src/mbgl/algorithm/contour/height_tile.hpp",
     "src/mbgl/algorithm/contour/intervals.cpp",
     "src/mbgl/algorithm/contour/intervals.hpp",
     "src/mbgl/algorithm/contour/isolines.cpp",

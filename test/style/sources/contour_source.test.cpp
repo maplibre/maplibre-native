@@ -231,6 +231,16 @@ TEST(ContourSourceParse, NegativeOverzoomRejected) {
     EXPECT_NE(error.message.find("overzoom"), std::string::npos);
 }
 
+TEST(ContourSourceParse, OverzoomAboveFourRejected) {
+    Error error;
+    auto src = parseContour(R"JSON({
+        "type": "contour", "source": "dem", "intervals": [100], "overzoom": 5
+    })JSON",
+                            error);
+    EXPECT_FALSE(src);
+    EXPECT_NE(error.message.find("overzoom"), std::string::npos);
+}
+
 TEST(ContourSourceParse, ZeroMajorMultiplierRejected) {
     Error error;
     auto src = parseContour(R"JSON({
