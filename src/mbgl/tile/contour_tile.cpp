@@ -199,8 +199,50 @@ std::vector<std::vector<algorithm::contour::Point2D>> clipPolylineToTile(
     return result;
 }
 
+// Compute the `natural_interval` for a line at elevation `elev` (display
+// units): the largest entry in the source's distinct interval list that
+// divides `elev`. `scheduleIntervals` must be sorted descending and contain
+// only positive values.
+//
+// Lets style filters target a specific schedule band without modulo
+// arithmetic — `["==", ["get", "natural_interval"], 200]` matches every
+// line whose elevation is a multiple of the largest schedule interval
+// (e.g. 200 m for a metres schedule of `[200, …, 100, …, 50, …, 20, …, 10]`).
+// Whichever canonical zoom's tile is currently rendered, the same set of
+// lines satisfies the filter, so a single style layer can fade them in
+// across one display-zoom range without losing them at canonical-zoom
+// transitions.
+std::int64_t naturalInterval(std::int64_t elev,
+                             const std::vector<double>& scheduleIntervals) {
+    for (double v : scheduleIntervals) {
+        const auto candidate = static_cast<std::int64_t>(std::llround(v));
+        if (candidate <= 0) continue;
+        if (elev % candidate == 0) return candidate;
+    }
+    return 0;
+}
+
 // Convert raw marching-squares output (interleaved int32 tile-local coords
 // with elevation in metres) to vector-tile features.
+//
+// Per-feature properties:
+//   ele              — elevation in display units (rounded int). Canonical
+//                      style-spec property.
+//   elevation        — duplicate of `ele` under the legacy property name
+//                      used by some existing line/symbol styles. Engine-
+//                      specific extra; consumers should prefer `ele`.
+//   index            — Mapbox-Terrain-v2-compatible divisibility bucket
+//                      (1 / 2 / 5 / 10) per `contourIndex` above. Engine-
+//                      specific extra.
+//   interval         — the contour spacing this tile was generated at, in
+//                      display units. Reflects which canonical-zoom band
+//                      the line came from; useful for diagnostics.
+//   natural_interval — largest schedule interval that divides this line's
+//                      elevation. Stable across canonical-zoom transitions
+//                      (a line at ele=200 always has natural_interval=200
+//                      whether it appears in the canonical-z=9 tile or the
+//                      canonical-z=12 tile), so style layers can be
+//                      filtered per band and faded smoothly.
 //
 // Pipeline per line:
 //   1. Clip to the [0, EXTENT] tile bbox so endpoints land on the
@@ -213,7 +255,9 @@ std::vector<std::vector<algorithm::contour::Point2D>> clipPolylineToTile(
 //   4. Round to int16 MVT coords and emit.
 mapbox::feature::feature_collection<std::int16_t> toFeatures(
     const std::vector<algorithm::contour::ContourLineString>& lines,
-    const algorithm::contour::UnitConfig& unit) {
+    const algorithm::contour::UnitConfig& unit,
+    double intervalDisplayUnits,
+    const std::vector<double>& scheduleIntervals) {
     mapbox::feature::feature_collection<std::int16_t> features;
     features.reserve(lines.size());
 
@@ -250,6 +294,8 @@ mapbox::feature::feature_collection<std::int16_t> toFeatures(
             f.properties["ele"] = elev;
             f.properties["elevation"] = elev;
             f.properties["index"] = contourIndex(elev, unit.unit);
+            f.properties["interval"] = static_cast<std::int64_t>(std::llround(intervalDisplayUnits));
+            f.properties["natural_interval"] = naturalInterval(elev, scheduleIntervals);
             features.push_back(std::move(f));
         }
     }
@@ -266,6 +312,7 @@ ContourTile::ContourTile(const OverscaledTileID& id_,
 
 void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
                                   double intervalDisplayUnits,
+                                  const std::vector<double>& scheduleIntervals,
                                   const algorithm::contour::UnitConfig& unit) {
     HillshadeBucket* bucket = demTile.getBucket();
     if (bucket == nullptr) return;
@@ -310,7 +357,7 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
 
     Scheduler::GetBackground()->scheduleAndReplyValue(
         util::SimpleIdentity::Empty,
-        [heights, width, dim, intervalMeters, unit]() {
+        [heights, width, dim, intervalMeters, intervalDisplayUnits, scheduleIntervals, unit]() {
             algorithm::contour::ContourThresholds thresholds;
             thresholds.interval = intervalMeters;
             // Pixel-center coordinate mapping. We want:
@@ -357,7 +404,7 @@ void ContourTile::populateFromDEM(const RasterDEMTile& demTile,
                 }
                 shifted.push_back(std::move(s));
             }
-            return toFeatures(shifted, unit);
+            return toFeatures(shifted, unit, intervalDisplayUnits, scheduleIntervals);
         },
         [self = weakFactory.makeWeakPtr(), this](mapbox::feature::feature_collection<std::int16_t> features) {
             if (auto guard = self.lock(); self) {
