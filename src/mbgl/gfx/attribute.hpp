@@ -119,10 +119,12 @@ public:
     uint32_t vertexStride;
     const VertexBufferResource* vertexBufferResource;
     uint32_t vertexOffset;
+    uint32_t bufferIndex;
 
     friend bool operator==(const AttributeBinding& lhs, const AttributeBinding& rhs) {
         return lhs.attribute == rhs.attribute && lhs.vertexStride == rhs.vertexStride &&
-               lhs.vertexBufferResource == rhs.vertexBufferResource && lhs.vertexOffset == rhs.vertexOffset;
+               lhs.vertexBufferResource == rhs.vertexBufferResource && lhs.vertexOffset == rhs.vertexOffset &&
+               lhs.bufferIndex == rhs.bufferIndex;
     }
 
     bool operator!=(const AttributeBinding& rhs) const { return !(*this == rhs); }
@@ -292,6 +294,7 @@ AttributeBinding attributeBinding(const VertexBuffer<detail::VertexType<As...>>&
         Descriptor::data.attributes[I],
         Descriptor::data.stride,
         &buffer.getResource(),
+        0,
         0,
     };
 }

@@ -2,6 +2,7 @@
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/offscreen_texture.hpp>
 #include <mbgl/mtl/context.hpp>
+#include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 
 #include <Metal/Metal.hpp>
@@ -28,6 +29,10 @@ public:
     void swap() override { offscreenTexture->getResource<RenderableResource>().swap(); }
 
     PremultipliedImage readStillImage() { return offscreenTexture->readStillImage(); }
+
+    MTL::Texture* getMetalTexture() {
+        return static_cast<Texture2D*>(offscreenTexture->getTexture().get())->getMetalTexture();
+    }
 
     const RendererBackend& getBackend() const override { return context.getBackend(); }
 
@@ -72,10 +77,14 @@ void HeadlessBackend::deactivate() {
 }
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
+    ensureResource();
+    return *this;
+}
+
+void HeadlessBackend::ensureResource() {
     if (!resource) {
         resource = std::make_unique<HeadlessRenderableResource>(*this, static_cast<mtl::Context&>(getContext()), size);
     }
-    return *this;
 }
 
 void HeadlessBackend::updateAssumedState() {
@@ -84,6 +93,11 @@ void HeadlessBackend::updateAssumedState() {
 
 PremultipliedImage HeadlessBackend::readStillImage() {
     return getResource<HeadlessRenderableResource>().readStillImage();
+}
+
+MTL::Texture* HeadlessBackend::getMetalTexture() {
+    ensureResource();
+    return getResource<HeadlessRenderableResource>().getMetalTexture();
 }
 
 RendererBackend* HeadlessBackend::getRendererBackend() {

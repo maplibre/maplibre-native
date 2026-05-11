@@ -46,8 +46,8 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float2 a_pos [[attribute(customSymbolUBOCount + 0)]];
-    float2 a_tex [[attribute(customSymbolUBOCount + 1)]];
+    float2 a_pos [[attribute(0)]];
+    float2 a_tex [[attribute(1)]];
 };
 
 struct FragmentStage {

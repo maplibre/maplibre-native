@@ -204,7 +204,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
-        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
+        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMinCount(),
                                                                    /*vertexType*/ gfx::AttributeDataType::Byte,
                                                                    /*vertexAttributeIndex=*/-1,
                                                                    /*vertexData=*/{},
@@ -290,7 +290,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
-    const auto instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+    const auto instances = instanceAttributes ? instanceAttributes->getMinCount() : 1;
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();
@@ -358,7 +358,7 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::buildVulkanInputBindings() noexcept {
+void Drawable::buildVulkanInputBindings() {
     MLN_TRACE_FUNC();
 
     impl->vulkanVertexBuffers.clear();
@@ -412,7 +412,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
     impl->pipelineInfo.updateVertexInputHash();
 }
 
-bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindAttributes(CommandEncoder& encoder) const {
     MLN_TRACE_FUNC();
 
     if (impl->vulkanVertexBuffers.empty()) return false;
@@ -433,7 +433,7 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
     return true;
 }
 
-bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindDescriptors(CommandEncoder& encoder) const {
     MLN_TRACE_FUNC();
 
     if (!shader) return false;
@@ -464,7 +464,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     return true;
 }
 
-void Drawable::uploadTextures(UploadPass&) const noexcept {
+void Drawable::uploadTextures(UploadPass&) const {
     MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {

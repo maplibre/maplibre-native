@@ -1,5 +1,23 @@
 # Changelog MapLibre Native for Android
 
+## 13.1.0
+
+Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
+
+### ✨ Features and improvements
+
+- Update Boost to 1.90 ([#4210](https://github.com/maplibre/maplibre-native/pull/4210)).
+- android: update AGP and Gradle dependencies ([#4245](https://github.com/maplibre/maplibre-native/pull/4245)).
+- Handle allocation failure [Core feature] ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
+-  (android): apply size optimization flags to RelWithDebInfo build config ([#4247](https://github.com/maplibre/maplibre-native/pull/4247)).
+- Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
+- Add attribute buffer index to support multiple attributes interleaved in single buffer bind [Core optimization] ([#4241](https://github.com/maplibre/maplibre-native/pull/4241)).
+
+### 🐞 Bug fixes
+
+- Fix infinite recursion causing Stack Overflow in TileSet.kt setBounds() ([#4252](https://github.com/maplibre/maplibre-native/pull/4252)).
+- core: Fix crash in RenderLayer::updateTile when layerGroup is not a TileLayerGroup ([#4217](https://github.com/maplibre/maplibre-native/pull/4217)).
+
 ## 13.0.2
 
 ### ✨ Features and improvements

@@ -503,6 +503,17 @@ Called when an error occurs while loading a sprite.
 */
 - (void)mapView:(MLNMapView *)mapView spriteDidError:(NSString *)id url:(NSString *)url;
 
+// MARK: - Renderer
+
+/**
+Called when an error occurs while trying to render a layer or drawable.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapViewRendererDidError:(MLNMapView *)mapView;
+
 // MARK: Tracking User Location
 
 /**

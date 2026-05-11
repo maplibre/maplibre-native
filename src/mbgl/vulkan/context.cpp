@@ -441,11 +441,15 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    tileLayerGroup->setObserver(observer);
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+    layerGroup->setObserver(observer);
+    return layerGroup;
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
