@@ -21,6 +21,7 @@ option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires amerge)" OFF)
+option(MLN_ANDROID_MULTI_BACKEND "Android only: build both OpenGL and Vulkan versions" OFF)
 
 include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
@@ -34,6 +35,85 @@ if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_N
 endif()
 
 project("MapLibre Native" LANGUAGES CXX C)
+
+if(MLN_WITH_MULTI_BACKEND)
+    if(NOT ANDROID)
+        message(FATAL_ERROR
+            "MLN_WITH_MULTI_BACKEND is only supported on Android. "
+            "On desktop, build mbgl-glfw with a single -DMLN_WITH_OPENGL=ON or -DMLN_WITH_VULKAN=ON.")
+    endif()
+
+    # Android: invoke the Android NDK CMakeLists twice via ExternalProject_Add
+    # (once per backend) and surface the results to AGP as two distinct
+    # add_library(SHARED) targets so both .so files end up in the AAR.
+    # Reached via add_subdirectory(...) from the Android src/cpp CMakeLists.
+    include(ExternalProject)
+
+    set(_multi_android_source_dir ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp)
+
+    set(_multi_forward_args
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+        -DANDROID_ABI=${ANDROID_ABI}
+        -DANDROID_PLATFORM=${ANDROID_PLATFORM}
+        -DANDROID_NDK=${ANDROID_NDK}
+        -DANDROID_TOOLCHAIN=${ANDROID_TOOLCHAIN}
+        -DANDROID_STL=${ANDROID_STL}
+        -DANDROID_CPP_FEATURES=${ANDROID_CPP_FEATURES}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DMLN_ANDROID_MULTI_BACKEND=OFF)
+
+    set(_multi_opengl_dir ${CMAKE_BINARY_DIR}/multi-opengl)
+    set(_multi_vulkan_dir ${CMAKE_BINARY_DIR}/multi-vulkan)
+
+    ExternalProject_Add(maplibre-opengl-build
+        SOURCE_DIR ${_multi_android_source_dir}
+        BINARY_DIR ${_multi_opengl_dir}
+        CMAKE_ARGS
+            ${_multi_forward_args}
+            -DMLN_WITH_OPENGL=ON
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${_multi_opengl_dir}/lib
+        BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target maplibre
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS 1)
+
+    ExternalProject_Add(maplibre-vulkan-build
+        SOURCE_DIR ${_multi_android_source_dir}
+        BINARY_DIR ${_multi_vulkan_dir}
+        CMAKE_ARGS
+            ${_multi_forward_args}
+            -DMLN_WITH_VULKAN=ON
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${_multi_vulkan_dir}/lib
+        BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target maplibre
+        INSTALL_COMMAND ""
+        BUILD_ALWAYS 1)
+
+    set(_multi_stub ${CMAKE_BINARY_DIR}/maplibre_multi_stub.cpp)
+    file(WRITE ${_multi_stub}
+         "extern \"C\" void maplibre_multi_backend_stub() {}\n")
+
+    add_library(maplibre-opengl SHARED ${_multi_stub})
+    # Produce libmaplibre.so (not libmaplibre-opengl.so) so the OpenGL output
+    # matches the single-backend OpenGL AAR's library name.
+    set_target_properties(maplibre-opengl PROPERTIES OUTPUT_NAME maplibre)
+    add_dependencies(maplibre-opengl maplibre-opengl-build)
+    add_custom_command(TARGET maplibre-opengl POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${_multi_opengl_dir}/lib/libmaplibre.so
+            $<TARGET_FILE:maplibre-opengl>
+        VERBATIM)
+
+    add_library(maplibre-vulkan SHARED ${_multi_stub})
+    add_dependencies(maplibre-vulkan maplibre-vulkan-build)
+    add_custom_command(TARGET maplibre-vulkan POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${_multi_vulkan_dir}/lib/libmaplibre.so
+            $<TARGET_FILE:maplibre-vulkan>
+        VERBATIM)
+
+    install(TARGETS maplibre-opengl maplibre-vulkan LIBRARY DESTINATION lib)
+
+    return()
+endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)

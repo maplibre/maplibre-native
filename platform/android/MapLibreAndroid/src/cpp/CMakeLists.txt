@@ -2,8 +2,18 @@ cmake_minimum_required(VERSION 3.10)
 
 project(MapLibreAndroid)
 
+# Always invoke the top-level CMakeLists. When MLN_ANDROID_MULTI_BACKEND=ON
+# (set by the Gradle multiBackend flavor via -D), the top-level handles the
+# dual-backend ExternalProject_Add setup, declares maplibre-opengl (output
+# libmaplibre.so) and maplibre-vulkan (output libmaplibre-vulkan.so) SHARED
+# targets, and returns from its scope. The matching `if` below then skips
+# this file's normal single-backend maplibre target.
 add_subdirectory(../../../../../
                  ../../../../../${ANDROID_ABI})
+
+if(MLN_ANDROID_MULTI_BACKEND)
+    return()
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
