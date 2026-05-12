@@ -499,9 +499,9 @@ bool OfflineDatabase::putResource(const Resource& resource,
     if (updateQuery.changes() != 0) {
         if (resource.dataRange) {
             // TODO: Remove after PR review
-            Log::Info(Event::Database,
-                      "[ambient cache] refresh: " + cacheKey(resource) + " (" + std::to_string(data.size()) +
-                          " bytes)");
+            Log::Info(
+                Event::Database,
+                "[ambient cache] refresh: " + cacheKey(resource) + " (" + std::to_string(data.size()) + " bytes)");
         }
         return false;
     }
@@ -533,8 +533,7 @@ bool OfflineDatabase::putResource(const Resource& resource,
     if (resource.dataRange) {
         // TODO: Remove after PR review
         Log::Info(Event::Database,
-                  "[ambient cache] insert: " + cacheKey(resource) + " (" + std::to_string(data.size()) +
-                      " bytes)");
+                  "[ambient cache] insert: " + cacheKey(resource) + " (" + std::to_string(data.size()) + " bytes)");
     }
 
     return true;
