@@ -6,6 +6,7 @@
 #include <mbgl/tile/raster_dem_tile.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <cmath>
 
@@ -68,17 +69,26 @@ void RenderContourSource::update(Immutable<style::Source::Impl> baseImpl_,
     // yet (style still loading) so the very first frame doesn't go
     // through a wide-range path that has nothing to populate from.
     Range<std::uint8_t> contourZoomRange{0, 12};
+    uint16_t contourTileSize = util::tileSize_I;
     if (upstream != nullptr) {
         if (auto upstreamRange = upstream->getZoomRange()) {
             contourZoomRange = *upstreamRange;
         }
+        // Mirror the upstream DEM source's tileSize. tilePyramid's
+        // OverscaledTileID coordinates are derived from (display zoom,
+        // tileSize), so a contour pyramid with tileSize=512 and a DEM
+        // pyramid with tileSize=256 produce different overscaledZ for
+        // the same canonical tile — the tile-load listener fires with
+        // the DEM's coords and tilePyramid::getTile(...) on the contour
+        // side returns no match.
+        contourTileSize = upstream->getTileSize();
     }
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,
                        parameters,
                        *baseImpl,
-                       util::tileSize_I,
+                       contourTileSize,
                        contourZoomRange,
                        std::optional<LatLngBounds>{},
                        [&](const OverscaledTileID& tileID, TileObserver* observer_) {

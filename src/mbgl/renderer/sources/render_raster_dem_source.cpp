@@ -153,6 +153,10 @@ std::optional<Range<std::uint8_t>> RenderRasterDEMSource::getZoomRange() const {
     return std::nullopt;
 }
 
+uint16_t RenderRasterDEMSource::getTileSize() const {
+    return impl().getTileSize();
+}
+
 std::unordered_map<std::string, std::vector<Feature>> RenderRasterDEMSource::queryRenderedFeatures(
     const ScreenLineString&,
     const TransformState&,

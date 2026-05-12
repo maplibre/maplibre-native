@@ -46,6 +46,13 @@ public:
     // `OverscaledTileID` always finds its DEM counterpart.
     std::optional<Range<std::uint8_t>> getZoomRange() const;
 
+    // Tile size (px) of the upstream DEM tileset. Cross-source
+    // consumers (contour source) use this so their tilePyramid produces
+    // the same OverscaledTileID coordinates as the DEM's pyramid;
+    // different tileSize values produce different overscaledZ at the
+    // same display zoom, which breaks the contour-to-DEM listener match.
+    uint16_t getTileSize() const;
+
 private:
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,
