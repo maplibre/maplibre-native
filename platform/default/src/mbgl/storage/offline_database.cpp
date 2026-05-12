@@ -13,6 +13,19 @@
 
 namespace mbgl {
 
+namespace {
+// PMTiles and other range-aware sources issue multiple sub-requests against
+// the same URL with different byte ranges. The `resources` table has a UNIQUE
+// constraint on `url`, so we encode the range into the cache key so each range
+// gets its own row instead of overwriting the previous one.
+std::string cacheKey(const Resource& resource) {
+    if (!resource.dataRange) return resource.url;
+    const auto sep = resource.url.find('?') == std::string::npos ? '?' : '&';
+    return resource.url + sep + "_mlnRange=" + std::to_string(resource.dataRange->first) + "-" +
+           std::to_string(resource.dataRange->second);
+}
+} // namespace
+
 OfflineDatabase::OfflineDatabase(std::string path_, const TileServerOptions& options)
     : path(std::move(path_)),
       tileServerOptions(options) {
@@ -354,7 +367,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
         try {
             mapbox::sqlite::Query accessedQuery{getStatement("UPDATE resources SET accessed = ?1 WHERE url = ?2")};
             accessedQuery.bind(1, util::now());
-            accessedQuery.bind(2, resource.url);
+            accessedQuery.bind(2, cacheKey(resource));
             accessedQuery.run();
         } catch (const mapbox::sqlite::Exception& ex) {
             if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
@@ -375,9 +388,13 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
         "WHERE url = ?") };
     // clang-format on
 
-    query.bind(1, resource.url);
+    query.bind(1, cacheKey(resource));
 
     if (!query.run()) {
+        if (resource.dataRange) {
+            // TODO: Remove after PR review
+            Log::Info(Event::Database, "[ambient cache] miss: " + cacheKey(resource));
+        }
         return std::nullopt;
     }
 
@@ -400,12 +417,18 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
         size = data->length();
     }
 
+    if (resource.dataRange) {
+        // TODO: Remove after PR review
+        Log::Info(Event::Database,
+                  "[ambient cache] hit: " + cacheKey(resource) + " (" + std::to_string(size) + " bytes)");
+    }
+
     return std::make_pair(response, size);
 }
 
 std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
     mapbox::sqlite::Query query{getStatement("SELECT length(data) FROM resources WHERE url = ?")};
-    query.bind(1, resource.url);
+    query.bind(1, cacheKey(resource));
     if (!query.run()) {
         return std::nullopt;
     }
@@ -432,8 +455,12 @@ bool OfflineDatabase::putResource(const Resource& resource,
         notModifiedQuery.bind(1, util::now());
         notModifiedQuery.bind(2, response.expires);
         notModifiedQuery.bind(3, response.mustRevalidate);
-        notModifiedQuery.bind(4, resource.url);
+        notModifiedQuery.bind(4, cacheKey(resource));
         notModifiedQuery.run();
+        if (resource.dataRange) {
+            // TODO: Remove after PR review
+            Log::Info(Event::Database, "[ambient cache] revalidated (304): " + cacheKey(resource));
+        }
         return false;
     }
 
@@ -458,7 +485,7 @@ bool OfflineDatabase::putResource(const Resource& resource,
     updateQuery.bind(4, response.mustRevalidate);
     updateQuery.bind(5, response.modified);
     updateQuery.bind(6, util::now());
-    updateQuery.bind(9, resource.url);
+    updateQuery.bind(9, cacheKey(resource));
 
     if (response.noContent) {
         updateQuery.bind(7, nullptr);
@@ -470,6 +497,12 @@ bool OfflineDatabase::putResource(const Resource& resource,
 
     updateQuery.run();
     if (updateQuery.changes() != 0) {
+        if (resource.dataRange) {
+            // TODO: Remove after PR review
+            Log::Info(Event::Database,
+                      "[ambient cache] refresh: " + cacheKey(resource) + " (" + std::to_string(data.size()) +
+                          " bytes)");
+        }
         return false;
     }
 
@@ -479,7 +512,7 @@ bool OfflineDatabase::putResource(const Resource& resource,
         "VALUES                (?1,  ?2,   ?3,   ?4,      ?5,              ?6,       ?7,       ?8,   ?9) ") };
     // clang-format on
 
-    insertQuery.bind(1, resource.url);
+    insertQuery.bind(1, cacheKey(resource));
     insertQuery.bind(2, int(resource.kind));
     insertQuery.bind(3, response.etag);
     insertQuery.bind(4, response.expires);
@@ -496,6 +529,13 @@ bool OfflineDatabase::putResource(const Resource& resource,
     }
 
     insertQuery.run();
+
+    if (resource.dataRange) {
+        // TODO: Remove after PR review
+        Log::Info(Event::Database,
+                  "[ambient cache] insert: " + cacheKey(resource) + " (" + std::to_string(data.size()) +
+                      " bytes)");
+    }
 
     return true;
 }
@@ -1155,7 +1195,7 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
         // clang-format on
 
         insertQuery.bind(1, regionID);
-        insertQuery.bind(2, resource.url);
+        insertQuery.bind(2, cacheKey(resource));
         insertQuery.run();
 
         if (insertQuery.changes() == 0) {
@@ -1172,7 +1212,7 @@ bool OfflineDatabase::markUsed(int64_t regionID, const Resource& resource) {
         // clang-format on
 
         selectQuery.bind(1, regionID);
-        selectQuery.bind(2, resource.url);
+        selectQuery.bind(2, cacheKey(resource));
         return !selectQuery.run();
     }
 }

@@ -396,6 +396,70 @@ TEST(OfflineDatabase, PutTile) {
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
+// Resources that differ only by their byte range — e.g. PMTiles header vs. directory vs.
+// tile sub-requests against the same .pmtiles URL — must each occupy their own cache row
+// instead of overwriting one another. See https://github.com/maplibre/maplibre-native/issues/3690.
+TEST(OfflineDatabase, PutGetResourceWithDataRange) {
+    FixtureLog log;
+    OfflineDatabase db(":memory:", fixture::tileServerOptions);
+
+    Resource r1{Resource::Kind::Source, "https://example.com/x.pmtiles"};
+    r1.dataRange = std::make_pair<uint64_t, uint64_t>(0, 126);
+    Resource r2{Resource::Kind::Source, "https://example.com/x.pmtiles"};
+    r2.dataRange = std::make_pair<uint64_t, uint64_t>(200, 399);
+
+    Response resp1;
+    resp1.data = std::make_shared<std::string>("HEADER");
+    Response resp2;
+    resp2.data = std::make_shared<std::string>("DIR");
+
+    db.put(r1, resp1);
+    db.put(r2, resp2);
+
+    auto g1 = db.get(r1);
+    auto g2 = db.get(r2);
+    ASSERT_TRUE(g1);
+    ASSERT_TRUE(g2);
+    EXPECT_EQ("HEADER", *g1->data);
+    EXPECT_EQ("DIR", *g2->data);
+
+    // A query-string URL should still produce a distinct key per range.
+    Resource r3{Resource::Kind::Source, "https://example.com/y.pmtiles?token=abc"};
+    r3.dataRange = std::make_pair<uint64_t, uint64_t>(0, 126);
+    Response resp3;
+    resp3.data = std::make_shared<std::string>("Q_HEADER");
+    db.put(r3, resp3);
+    auto g3 = db.get(r3);
+    ASSERT_TRUE(g3);
+    EXPECT_EQ("Q_HEADER", *g3->data);
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+// A resource with no `dataRange` must still be stored and looked up under its bare URL,
+// so existing (non-PMTiles) sources keep round-tripping through the cache unchanged.
+TEST(OfflineDatabase, PutGetResourceWithoutDataRange) {
+    FixtureLog log;
+    OfflineDatabase db(":memory:", fixture::tileServerOptions);
+
+    Resource resource{Resource::Style, "https://example.com/style.json"};
+    Response response;
+    response.data = std::make_shared<std::string>("style-body");
+    db.put(resource, response);
+
+    auto got = db.get(resource);
+    ASSERT_TRUE(got);
+    EXPECT_EQ("style-body", *got->data);
+
+    // A ranged lookup against the same URL must miss — the bare entry and the ranged entry
+    // live under different keys.
+    Resource ranged{Resource::Style, "https://example.com/style.json"};
+    ranged.dataRange = std::make_pair<uint64_t, uint64_t>(0, 9);
+    EXPECT_FALSE(db.get(ranged));
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
 TEST(OfflineDatabase, PutResourceNoContent) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);

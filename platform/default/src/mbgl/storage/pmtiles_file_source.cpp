@@ -143,11 +143,11 @@ public:
                     }
 
                     Resource tileResource(Resource::Kind::Source, url);
-                    tileResource.loadingMethod = Resource::LoadingMethod::Network;
+                    // loadingMethod is overridden inside cacheFirstThenNetwork (Cache, then Network).
                     tileResource.dataRange = std::make_pair(tileAddress.first,
                                                             tileAddress.first + tileAddress.second - 1);
 
-                    tasks[req] = getFileSource()->request(tileResource, [=](const Response& tileResponse) {
+                    cacheFirstThenNetwork(req, tileResource, [=](const Response& tileResponse) {
                         Response response;
                         response.noContent = true;
 
@@ -155,6 +155,14 @@ public:
                             response.error = std::make_unique<Response::Error>(
                                 tileResponse.error->reason,
                                 std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
+                            ref.invoke(&FileSourceRequest::setResponse, response);
+                            return;
+                        }
+
+                        // A `notModified` revalidation response carries no body — the cached data
+                        // lives elsewhere. Tolerate it by leaving `noContent=true` and returning
+                        // a non-error response so the lambda doesn't deref a null `data` below.
+                        if (!tileResponse.data) {
                             ref.invoke(&FileSourceRequest::setResponse, response);
                             return;
                         }
@@ -229,13 +237,59 @@ private:
         return fileSource;
     }
 
+    // Issue a sub-request that prefers cache and skips conditional revalidation on hit.
+    // Used for PMTiles byte-range sub-requests (metadata, directories, tiles) after
+    // `getHeader()` has validated the archive once per session. Skipping revalidation
+    // is safe because PMTiles archives are content-addressable per upload: if the
+    // header is unchanged, every other byte range still corresponds to the same bytes.
+    //
+    // On cache hit, the cached response is forwarded immediately — no network call.
+    // On cache miss, a NetworkOnly sub-request is fired (no priorEtag/priorData, so
+    // the server returns a full body, not a 304). The response is cached as usual
+    // via `databaseFileSource->forward()` inside MainResourceLoader.
+    //
+    // Caller must ensure `header_cache.contains(resource.url)` before calling this.
+    // In current code structure that's always true because every call site is inside
+    // a `getHeader()` success callback.
+    void cacheFirstThenNetwork(AsyncRequest* req,
+                               Resource resource,
+                               std::function<void(const Response&)> userCallback) {
+        Resource cacheResource = resource;
+        cacheResource.loadingMethod = Resource::LoadingMethod::CacheOnly;
+
+        tasks[req] = getFileSource()->request(cacheResource, [=, this](const Response& cacheResponse) {
+            if (cacheResponse.data && !cacheResponse.error) {
+                userCallback(cacheResponse);
+                return;
+            }
+
+            // Cache miss — fetch fresh, no revalidation.
+            Resource networkResource = resource;
+            networkResource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
+
+            // Keep the (now-finished) cache AsyncRequest alive until the network
+            // call completes, matching the pattern in MainResourceLoader.
+            auto cacheReqKeepAlive = std::shared_ptr<AsyncRequest>(std::move(tasks[req]));
+            tasks[req] = getFileSource()->request(
+                networkResource,
+                [userCallback, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
+                    userCallback(netResponse);
+                });
+        });
+    }
+
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (header_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         Resource resource(Resource::Kind::Source, url);
-        resource.loadingMethod = Resource::LoadingMethod::Network;
+        // The header sub-request is the once-per-session validation point: if the
+        // SQLite cache has it, we still revalidate (via LoadingMethod::All -> 304
+        // path) so future-session archive replacements are noticed. All other
+        // sub-requests skip revalidation via `cacheFirstThenNetwork` below.
+        resource.loadingMethod = Resource::LoadingMethod::All;
 
         resource.dataRange = std::make_pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
                                                                 pmtilesHeaderOffset + pmtilesHeaderLength - 1);
@@ -257,6 +311,14 @@ private:
 
                     callback(std::make_unique<Response::Error>(response.error->reason, message));
 
+                    return;
+                }
+
+                if (!response.data) {
+                    // 304/no-data revalidation came back with the body absent. Report as error so
+                    // the caller doesn't proceed assuming a parseable header is present.
+                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "PMTiles header response has no data"));
                     return;
                 }
 
@@ -283,6 +345,7 @@ private:
     void getMetadata(std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (metadata_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         getHeader(
@@ -397,16 +460,30 @@ private:
 
                 if (header.json_metadata_bytes > 0) {
                     Resource resource(Resource::Kind::Source, url);
-                    resource.loadingMethod = Resource::LoadingMethod::Network;
+                    // loadingMethod is overridden inside cacheFirstThenNetwork.
                     resource.dataRange = std::make_pair(header.json_metadata_offset,
                                                         header.json_metadata_offset + header.json_metadata_bytes - 1);
 
-                    tasks[req] = getFileSource()->request(resource, [=](const Response& responseMetadata) {
+                    cacheFirstThenNetwork(req, resource, [=](const Response& responseMetadata) {
                         if (responseMetadata.error) {
                             callback(std::make_unique<Response::Error>(
                                 responseMetadata.error->reason,
                                 std::string("Error fetching PMTiles metadata: ") + responseMetadata.error->message));
 
+                            return;
+                        }
+
+                        if (!responseMetadata.data) {
+                            std::string detail = "PMTiles metadata response has no data (noContent=";
+                            detail += responseMetadata.noContent ? "true" : "false";
+                            detail += ", notModified=";
+                            detail += responseMetadata.notModified ? "true" : "false";
+                            detail += ", range=";
+                            detail += std::to_string(header.json_metadata_offset) + "-" +
+                                      std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1);
+                            detail += ")";
+                            callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                                       std::move(detail)));
                             return;
                         }
 
@@ -480,15 +557,21 @@ private:
             pmtiles::headerv3 header = header_cache.at(url);
 
             Resource resource(Resource::Kind::Source, url);
-            resource.loadingMethod = Resource::LoadingMethod::Network;
+            // loadingMethod is overridden inside cacheFirstThenNetwork.
             resource.dataRange = std::make_pair(directoryOffset, directoryOffset + directoryLength - 1);
 
-            tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
+            cacheFirstThenNetwork(req, resource, [=, this](const Response& response) {
                 if (response.error) {
                     callback(std::make_unique<Response::Error>(
                         response.error->reason,
                         std::string("Error fetching PMTiles directory: ") + response.error->message));
 
+                    return;
+                }
+
+                if (!response.data) {
+                    callback(std::make_unique<Response::Error>(
+                        Response::Error::Reason::Other, "PMTiles directory response has no data"));
                     return;
                 }
 
