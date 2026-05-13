@@ -1,0 +1,51 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "width": 256,
+      "description": "Native contour source with `unit: \"feet\"`. The underlying DEM is always metres; setting unit converts the emitted `ele` values and applies the interval in feet. intervals=500ft \u2192 roughly the same spatial density as 152m. Verifies that the unit config affects which contour levels are emitted."
+    }
+  },
+  "center": [
+    -113.26903,
+    35.9654
+  ],
+  "zoom": 12,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "contours": {
+      "type": "contour",
+      "source": "dem",
+      "intervals": [
+        500
+      ],
+      "unit": "feet"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "contour-lines",
+      "type": "line",
+      "source": "contours",
+      "paint": {
+        "line-color": "#5b3a8a",
+        "line-width": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "width": 256,
+      "description": "Native contour source at the corner where four z=12 DEM tiles meet. Each contour tile is generated independently from its own DEM (with neighbour edges backfilled into DEMData::border). The four-tile corner falls at the centre of the viewport: any failure in the algorithm's edge handling (smoothing, clipping, endpoint clamping) would show as a gap or step where contour lines cross the centre cross. line-width=2 so single-pixel endpoint mismatches are visible."
+    }
+  },
+  "center": [
+    -113.291016,
+    35.960223
+  ],
+  "zoom": 12,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "contours": {
+      "type": "contour",
+      "source": "dem",
+      "intervals": [
+        100
+      ],
+      "unit": "meters"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "contour-lines",
+      "type": "line",
+      "source": "contours",
+      "paint": {
+        "line-color": "#7c4a14",
+        "line-width": 2
+      }
+    }
+  ]
+}

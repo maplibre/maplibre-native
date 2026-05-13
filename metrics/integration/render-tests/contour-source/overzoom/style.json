@@ -1,0 +1,52 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "width": 256,
+      "description": "Native contour source with `overzoom: 1`: the upstream raster-dem caps at maxzoom=12, the contour source is sampled at z=13. The 2-pixel DEM border + bbox clipping (commit 19e6ede) ensures contour lines are continuous across tile boundaries at overzoom. Centred on the corner where four z=12 DEM tiles meet so any seam discontinuity would be visible as a cross through the viewport centre."
+    }
+  },
+  "center": [
+    -113.291016,
+    35.960223
+  ],
+  "zoom": 13,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "contours": {
+      "type": "contour",
+      "source": "dem",
+      "intervals": [
+        50
+      ],
+      "unit": "meters",
+      "overzoom": 1
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "contour-lines",
+      "type": "line",
+      "source": "contours",
+      "paint": {
+        "line-color": "#7c4a14",
+        "line-width": 1
+      }
+    }
+  ]
+}

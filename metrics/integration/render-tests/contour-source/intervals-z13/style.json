@@ -1,0 +1,56 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 256,
+      "width": 256,
+      "description": "Native contour source with step-by-zoom intervals `[200, 12, 100, 13, 50]`. At zoom 13 the schedule resolves to 50m, producing the densest contour set. Rendered with overzoom: 1 since the DEM caps at maxzoom 12; without overzoom the contour source would also have to upsample but the algorithm still produces output."
+    }
+  },
+  "center": [
+    -113.26903,
+    35.9654
+  ],
+  "zoom": 13,
+  "sources": {
+    "dem": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "contours": {
+      "type": "contour",
+      "source": "dem",
+      "intervals": [
+        200,
+        12,
+        100,
+        13,
+        50
+      ],
+      "unit": "meters",
+      "overzoom": 1
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "contour-lines",
+      "type": "line",
+      "source": "contours",
+      "paint": {
+        "line-color": "#7c4a14",
+        "line-width": 1
+      }
+    }
+  ]
+}
