@@ -3,9 +3,9 @@ layout (location = 1) in vec2 a_texture_pos;
 
 layout (std140) uniform HillshadeDrawableUBO {
     highp mat4 u_matrix;
+    highp vec2 u_dimension;
+    highp vec2 pad_drawable0;
 };
-
-uniform sampler2D u_image;
 
 out vec2 v_pos;
 
@@ -16,8 +16,10 @@ void main() {
     // are all backfilled from the matching neighbour. Inset v_pos so
     // the displayed tile [world 0, dim] maps to the inner dim+1
     // texels (indices 1 to dim+1), with the outer ring providing
-    // shared-data bilinear partners at the boundary.
-    float texW = float(textureSize(u_image, 0).x);
+    // shared-data bilinear partners at the boundary. u_dimension is
+    // populated from the C++ side because Metal can't sample the
+    // texture in the vertex stage.
+    float texW = u_dimension.x;
     float scale = (texW - 3.0) / texW;
     float offset = 1.0 / texW;
     v_pos = (a_texture_pos / 8192.0) * scale + offset;

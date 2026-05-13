@@ -17,9 +17,12 @@ enum class HillshadeMethod : int32_t {
 
 struct alignas(16) HillshadeDrawableUBO {
     /*  0 */ std::array<float, 4 * 4> matrix;
-    /* 64 */
+    /* 64 */ std::array<float, 2> dimension; // prepare-pass render-target size (dim+3, dim+3)
+    /* 72 */ float pad0;
+    /* 76 */ float pad1;
+    /* 80 */
 };
-static_assert(sizeof(HillshadeDrawableUBO) == 4 * 16);
+static_assert(sizeof(HillshadeDrawableUBO) == 80);
 
 struct alignas(16) HillshadeTilePropsUBO {
     /*  0 */ std::array<float, 2> latrange;

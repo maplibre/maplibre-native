@@ -32,6 +32,8 @@ struct GlobalIndexUBO {
 
 struct HillshadeDrawableUBO {
     matrix: mat4x4<f32>,
+    dimension: vec2<f32>,
+    pad0: vec2<f32>,
 };
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -45,7 +47,12 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var tex = vec2<f32>(f32(in.texcoord.x), f32(in.texcoord.y)) / 8192.0;
     tex.y = 1.0 - tex.y;
-    out.tex_coord = tex;
+    // Inset to the inner dim+1 texels of the (dim+3) prepare output.
+    // See shaders/hillshade.vertex.glsl for the rationale.
+    let texW = drawable.dimension.x;
+    let scale = (texW - 3.0) / texW;
+    let offset = 1.0 / texW;
+    out.tex_coord = tex * scale + offset;
     return out;
 }
 )";

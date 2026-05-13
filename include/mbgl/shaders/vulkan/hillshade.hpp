@@ -34,6 +34,8 @@ layout(push_constant) uniform Constants {
 
 struct HillshadeDrawableUBO {
     mat4 matrix;
+    vec2 dimension;
+    vec2 pad0;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idHillshadeDrawableUBO) readonly buffer HillshadeDrawableUBOVector {
@@ -48,8 +50,14 @@ void main() {
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     applySurfaceTransform();
 
-    frag_position = vec2(in_texture_position) / 8192.0;
-    frag_position.y = 1.0 - frag_position.y;
+    vec2 pos = vec2(in_texture_position) / 8192.0;
+    pos.y = 1.0 - pos.y;
+    // Inset to the inner dim+1 texels of the (dim+3) prepare output.
+    // See shaders/hillshade.vertex.glsl for the rationale.
+    float texW = drawable.dimension.x;
+    float scale = (texW - 3.0) / texW;
+    float offset = 1.0 / texW;
+    frag_position = pos * scale + offset;
 }
 )";
 

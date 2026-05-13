@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
@@ -175,12 +176,27 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
 
+        // The hillshade vertex shader samples the prepare-pass output (sized
+        // (dim+3)²) and needs the texture dimensions to inset its sampler
+        // into the inner texels. We stash stride (= dim+6) on the drawable
+        // via HillshadePrepareDrawableData; the render-target width is
+        // stride - 3 = dim + 3.
+        const float texW = drawable.getData()
+                               ? static_cast<float>(
+                                     static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData())
+                                         .stride -
+                                     3)
+                               : 0.0f;
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
         const HillshadeDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix)
+            /* .matrix    = */ util::cast<float>(matrix),
+            /* .dimension = */ {texW, texW},
+            /* .pad0      = */ 0.0f,
+            /* .pad1      = */ 0.0f,
         };
 
 #if MLN_UBO_CONSOLIDATION

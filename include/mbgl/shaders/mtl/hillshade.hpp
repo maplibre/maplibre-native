@@ -18,9 +18,12 @@ enum {
 
 struct alignas(16) HillshadeDrawableUBO {
     /*  0 */ float4x4 matrix;
-    /* 64 */
+    /* 64 */ float2 dimension; // prepare-pass render-target size (dim+3, dim+3)
+    /* 72 */ float pad0;
+    /* 76 */ float pad1;
+    /* 80 */
 };
-static_assert(sizeof(HillshadeDrawableUBO) == 4 * 16, "wrong size");
+static_assert(sizeof(HillshadeDrawableUBO) == 80, "wrong size");
 
 struct alignas(16) HillshadeTilePropsUBO {
     /*  0 */ float2 latrange;
@@ -89,8 +92,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // restore Y-flip to match prepare pass and historical behavior.
     pos.y = 1.0 - pos.y;
     // Inset to the inner dim+1 texels of the (dim+3) prepare output.
-    // See shaders/hillshade.vertex.glsl for the rationale.
-    float texW = float(image.get_width());
+    // See shaders/hillshade.vertex.glsl for the rationale. MSL textures
+    // can't be sampled in the vertex stage (only fragment binds image),
+    // so the C++ side passes the prepare-output width via drawable.dimension.
+    float texW = drawable.dimension.x;
     float scale = (texW - 3.0) / texW;
     float offset = 1.0 / texW;
     pos = pos * scale + offset;

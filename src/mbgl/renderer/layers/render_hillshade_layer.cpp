@@ -405,6 +405,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : hillshadeBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
+            // Stash the prepare-pass render target size so the tweaker can
+            // populate HillshadeDrawableUBO::dimension. The vertex shader
+            // needs it to inset the sampler into the inner texels of the
+            // (dim+3)² target (see shaders/hillshade.vertex.glsl). We pass
+            // it via HillshadePrepareDrawableData since the only field we
+            // actually need is stride; encoding/maxzoom are ignored here.
+            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(
+                bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom));
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
