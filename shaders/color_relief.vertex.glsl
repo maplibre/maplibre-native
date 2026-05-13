@@ -16,9 +16,13 @@ out vec2 v_pos;
 void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 
-    highp vec2 epsilon = 1.0 / u_dimension;
-    float scale = (u_dimension.x - 2.0) / u_dimension.x;
-    v_pos = (a_texture_pos / 8192.0) * scale + epsilon;
+    // With a 3-pixel DEM border (stride = dim+6), the displayed tile area
+    // maps to interior cells at buffer indices 3..dim+2. Sample at the
+    // border/interior boundary on each side so the bilinear blend pulls
+    // in shared neighbour data at the edge — matches the seam-aware
+    // sampling used by the hillshade-color shader.
+    float scale = (u_dimension.x - 6.0) / u_dimension.x;
+    v_pos = (a_texture_pos / 8192.0) * scale + 3.0 / u_dimension.x;
 
     // Handle poles
     if (a_pos.y < -32767.5) v_pos.y = 0.0;

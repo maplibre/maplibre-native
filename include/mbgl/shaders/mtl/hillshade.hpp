@@ -88,6 +88,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Metal's texture coordinate origin differs from some renderers;
     // restore Y-flip to match prepare pass and historical behavior.
     pos.y = 1.0 - pos.y;
+    // Inset to the inner dim+1 texels of the (dim+3) prepare output.
+    // See shaders/hillshade.vertex.glsl for the rationale.
+    float texW = float(image.get_width());
+    float scale = (texW - 3.0) / texW;
+    float offset = 1.0 / texW;
+    pos = pos * scale + offset;
 
     return {
         .position    = position,

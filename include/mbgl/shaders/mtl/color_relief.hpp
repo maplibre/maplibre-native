@@ -76,9 +76,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
     // Calculate texture coordinate
-    float2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    float2 pos = (float2(vertx.pos) / 8192.0) * scale + epsilon;
+    // With a 3-pixel DEM border (stride = dim+6), see
+    // shaders/color_relief.vertex.glsl for the offset rationale.
+    float scale = (tileProps.dimension.x - 6.0) / tileProps.dimension.x;
+    float2 pos = (float2(vertx.pos) / 8192.0) * scale + 3.0 / tileProps.dimension.x;
 
     // Handle poles (use vertx.pos, not texture_pos, to match GLSL a_pos)
     if (float(vertx.pos.y) < -32767.5) pos.y = 0.0;

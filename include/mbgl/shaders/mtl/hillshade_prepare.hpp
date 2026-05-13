@@ -61,9 +61,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
-    float2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
-    float2 pos = (float2(vertx.texture_pos) / 8192.0) * scale + epsilon;
+    // See shaders/hillshade_prepare.vertex.glsl for the derivation. With a
+    // 3-pixel DEM border (stride = dim+6) and a (dim+3)² render target,
+    // output pixel i (i ∈ [0, dim+2]) lands on buffer texel i+2. The two
+    // extra texels per side hold slope values whose Sobel inputs are all
+    // backfilled from the matching neighbour, so adjacent tiles' bilinear
+    // sampling near the boundary stays in shared-data territory.
+    float scale = (tileProps.dimension.x - 3.0) / tileProps.dimension.x;
+    float2 pos = (float2(vertx.texture_pos) / 8192.0) * scale + 2.0 / tileProps.dimension;
 
     return {
         .position    = position,
@@ -87,7 +92,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
     float2 epsilon = 1.0 / tileProps.dimension;
-    float tileSize = tileProps.dimension.x - 2.0;
+    // dimension is the DEM buffer stride (interior + 2 * 3-pixel border),
+    // so the actual interior tile size is stride - 6.
+    float tileSize = tileProps.dimension.x - 6.0;
 
     // queried pixels (using Sobel operator kernel):
     // +-----------+
