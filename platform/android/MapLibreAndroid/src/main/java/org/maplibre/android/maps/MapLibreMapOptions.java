@@ -837,8 +837,11 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
-   * Move the native renderer backend deletion from the render thread to the garbage collector,
-   * defaults to false.
+   * By default, backend cleanup executes on the render thread
+   * (with the main thread waiting for the task to finish).
+   * Enabling this defers cleanup work to the garbage collector/finalzer thread. This can reduce
+   * shutdown stalls on the main thread, but introduces a non-deterministic cleanup timing and
+   * might expose possible OpenGL driver issues.
    *
    * @param asyncRendererCleanup true to enable, false to disable
    * @return This
