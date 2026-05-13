@@ -74,6 +74,8 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
         return;
     }
 
+    mapRenderer.SetAsyncRendererCleanup(NativeMapOptions::asyncRendererCleanup(_env, jNativeMapOptions));
+
     // Create a renderer frontend
     rendererFrontend = AndroidRendererFrontend::create(_env, jMapRenderer);
 

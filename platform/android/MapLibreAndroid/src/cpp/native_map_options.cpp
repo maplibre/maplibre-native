@@ -41,5 +41,11 @@ bool NativeMapOptions::crossSourceCollisions(jni::JNIEnv &env, const jni::Object
     return obj.Get(env, crossSourceCollisionsField);
 }
 
+bool NativeMapOptions::asyncRendererCleanup(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
+    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+    auto asyncRendererCleanupField = javaClass.GetField<jni::jboolean>(env, "asyncRendererCleanup");
+    return obj.Get(env, asyncRendererCleanupField);
+}
+
 } // namespace android
 } // namespace mbgl
