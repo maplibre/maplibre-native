@@ -88,9 +88,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
     float2 pos = float2(vertx.texture_pos) / 8192.0;
-    // Metal's texture coordinate origin differs from some renderers;
-    // restore Y-flip to match prepare pass and historical behavior.
-    pos.y = 1.0 - pos.y;
     // Inset to the inner dim+1 texels of the (dim+3) prepare output.
     // See shaders/hillshade.vertex.glsl for the rationale. MSL textures
     // can't be sampled in the vertex stage (only fragment binds image),
@@ -99,6 +96,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float scale = (texW - 3.0) / texW;
     float offset = 1.0 / texW;
     pos = pos * scale + offset;
+    // Metal's texture coordinate origin differs from some renderers;
+    // restore Y-flip to match prepare pass and historical behavior.
+    pos.y = 1.0 - pos.y;
 
     return {
         .position    = position,
