@@ -46,13 +46,18 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
 
     var tex = vec2<f32>(f32(in.texcoord.x), f32(in.texcoord.y)) / 8192.0;
-    tex.y = 1.0 - tex.y;
     // Inset to the inner dim+1 texels of the (dim+3) prepare output.
-    // See shaders/hillshade.vertex.glsl for the rationale.
+    // See shaders/hillshade.vertex.glsl for the rationale. Apply the inset
+    // BEFORE the Y-flip — same order as the Metal shader. With flip-first
+    // the offset/scale lands on the mirrored side of the texture, so the
+    // bilinear partner at the south tile boundary picks the wrong row of
+    // the prepare output and leaves a residual horizontal seam.
     let texW = drawable.dimension.x;
     let scale = (texW - 3.0) / texW;
     let offset = 1.0 / texW;
-    out.tex_coord = tex * scale + offset;
+    tex = tex * scale + offset;
+    tex.y = 1.0 - tex.y;
+    out.tex_coord = tex;
     return out;
 }
 )";
