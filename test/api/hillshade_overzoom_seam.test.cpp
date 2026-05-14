@@ -134,18 +134,26 @@ public:
         // we parse z/x/y back out and dispatch to the matching
         // metrics/integration/tiles fixture.
         fileSource->tileResponse = [](const Resource& res) -> std::optional<Response> {
+            // Every tile request gets a synchronous response. For URLs we
+            // don't recognise or zoom levels we don't have fixtures for,
+            // we return a `noContent`-flagged empty Response rather than
+            // `std::nullopt` — the latter leaves the request pending in
+            // StubFileSource's async path, which under bazel coverage's
+            // slower task scheduling can occasionally surface as a hang
+            // in `render()` waiting for a parent tile that never resolves.
+            Response empty;
+            empty.noContent = true;
             static const std::regex urlRe{R"(/(\d+)/(\d+)/(\d+)\.terrain\.png$)"};
             std::smatch m;
-            if (!std::regex_search(res.url, m, urlRe)) return std::nullopt;
+            if (!std::regex_search(res.url, m, urlRe)) return empty;
             const uint32_t z = static_cast<uint32_t>(std::stoul(m[1].str()));
             const uint32_t x = static_cast<uint32_t>(std::stoul(m[2].str()));
             const uint32_t y = static_cast<uint32_t>(std::stoul(m[3].str()));
             // We only ship the four z=12 corner tiles as fixtures.
-            // Anything else returns a 404 — the renderer copes by
-            // overzooming from the available parents (here, z=12 is
-            // the source maxzoom, so overzoom upward is what we want;
-            // there is no z<12 data to read).
-            if (z != 12) return std::nullopt;
+            // Anything else: empty Response (the renderer falls back to
+            // its overzoom path from the available parents — here z=12
+            // is the source maxzoom, so overzoom upward is what we want).
+            if (z != 12) return empty;
             Response r;
             try {
                 r.data = std::make_shared<std::string>(readTerrainTile(x, y));
