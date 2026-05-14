@@ -15,7 +15,10 @@ on:
 
 jobs:
   gh-pages-docc-build:
-    if: ${{ github.ref_name == 'main' }}
+    # Publishes to S3 / GH Pages with credentials only configured on the
+    # upstream repository. On forks the AWS-OIDC step would fail at "Could
+    # not load credentials from any providers".
+    if: ${{ github.ref_name == 'main' && github.repository == 'maplibre/maplibre-native' }}
     name: Build DocC Docs
     runs-on: macos-latest
     steps:
