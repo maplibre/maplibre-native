@@ -3,6 +3,10 @@
 #include <mbgl/style/conversion/rotation.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/conversion.hpp>
+#include <mbgl/util/color.hpp>
+
+#include <type_traits>
+#include <vector>
 
 namespace mbgl {
 namespace style {
@@ -22,11 +26,32 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
     std::optional<PropertyExpression<T>> expression;
 
     if (isExpression(value)) {
-        ParsingContext ctx(valueTypeToExpressionType<T>());
-        ParseResult parsed = ctx.parseLayerPropertyExpression(value);
-        if (!parsed) {
-            error.message = ctx.getCombinedErrors();
-            return std::nullopt;
+        ParseResult parsed;
+        if constexpr (std::is_same_v<T, std::vector<Color>>) {
+            // `colorArray` paint properties (hillshade-shadow-color and
+            // hillshade-highlight-color, promoted from `color` to `colorArray` in
+            // PR #3965 to support multidirectional hillshade) accept a single color
+            // value as their spec-default shape (defaults are "#000000" / "#FFFFFF").
+            // Try parsing as a single Color first; ValueConverter<std::vector<Color>>
+            // already wraps a single Color into a one-element vector at evaluation
+            // time. Fall back to array<color> for explicit multidirectional users.
+            ParsingContext colorCtx(type::Color);
+            parsed = colorCtx.parseLayerPropertyExpression(value);
+            if (!parsed) {
+                ParsingContext arrayCtx{type::Array(type::Color)};
+                parsed = arrayCtx.parseLayerPropertyExpression(value);
+                if (!parsed) {
+                    error.message = arrayCtx.getCombinedErrors();
+                    return std::nullopt;
+                }
+            }
+        } else {
+            ParsingContext ctx(valueTypeToExpressionType<T>());
+            parsed = ctx.parseLayerPropertyExpression(value);
+            if (!parsed) {
+                error.message = ctx.getCombinedErrors();
+                return std::nullopt;
+            }
         }
         expression = PropertyExpression<T>(std::move(*parsed));
     } else if (isObject(value)) {
