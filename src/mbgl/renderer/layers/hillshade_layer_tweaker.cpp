@@ -183,8 +183,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         // stride - 3 = dim + 3.
         const float texW = drawable.getData()
                                ? static_cast<float>(
-                                     static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData())
-                                         .stride -
+                                     static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData()).stride -
                                      3)
                                : 0.0f;
 
