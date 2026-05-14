@@ -54,8 +54,11 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
 
     let a_pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
-    let scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    // DEM border is 3 (stride = dim + 6); inset to skip the 3-pixel border
+    // ring on each side so the displayed tile area maps to interior texels.
+    // Matches the GL / Metal color_relief vertex shader.
+    let epsilon = vec2<f32>(3.0, 3.0) / tileProps.dimension;
+    let scale = (tileProps.dimension.x - 6.0) / tileProps.dimension.x;
     out.frag_position = (a_pos / 8192.0) * scale + epsilon;
 
     // Handle poles
