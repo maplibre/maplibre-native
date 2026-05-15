@@ -409,8 +409,7 @@ TEST(OfflineDatabase, CacheKey) {
 
     Resource rangedWithQuery{Resource::Kind::Source, "https://example.com/x.pmtiles?token=abc"};
     rangedWithQuery.dataRange = std::make_pair<uint64_t, uint64_t>(200, 399);
-    EXPECT_EQ("https://example.com/x.pmtiles?token=abc&_mlnRange=200-399",
-              OfflineDatabase::cacheKey(rangedWithQuery));
+    EXPECT_EQ("https://example.com/x.pmtiles?token=abc&_mlnRange=200-399", OfflineDatabase::cacheKey(rangedWithQuery));
 }
 
 TEST(OfflineDatabase, PutResourceNoContent) {

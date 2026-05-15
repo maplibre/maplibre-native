@@ -160,8 +160,7 @@ public:
 
                         if (!tileResponse.data) {
                             response.error = std::make_unique<Response::Error>(
-                                Response::Error::Reason::Other,
-                                "Error fetching PMTiles tile: response has no data");
+                                Response::Error::Reason::Other, "Error fetching PMTiles tile: response has no data");
                             ref.invoke(&FileSourceRequest::setResponse, response);
                             return;
                         }
@@ -255,8 +254,7 @@ private:
 
             auto cacheReqKeepAlive = std::shared_ptr<AsyncRequest>(std::move(tasks[req]));
             tasks[req] = getFileSource()->request(
-                networkResource,
-                [userCallback, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
+                networkResource, [userCallback, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
                     userCallback(netResponse);
                 });
         });
@@ -459,8 +457,8 @@ private:
                             detail += std::to_string(header.json_metadata_offset) + "-" +
                                       std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1);
                             detail += ")";
-                            callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                                       std::move(detail)));
+                            callback(
+                                std::make_unique<Response::Error>(Response::Error::Reason::Other, std::move(detail)));
                             return;
                         }
 
@@ -546,8 +544,8 @@ private:
                 }
 
                 if (!response.data) {
-                    callback(std::make_unique<Response::Error>(
-                        Response::Error::Reason::Other, "PMTiles directory response has no data"));
+                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "PMTiles directory response has no data"));
                     return;
                 }
 
