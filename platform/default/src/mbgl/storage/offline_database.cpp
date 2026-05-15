@@ -13,18 +13,16 @@
 
 namespace mbgl {
 
-namespace {
-// PMTiles and other range-aware sources issue multiple sub-requests against
-// the same URL with different byte ranges. The `resources` table has a UNIQUE
-// constraint on `url`, so we encode the range into the cache key so each range
-// gets its own row instead of overwriting the previous one.
-std::string cacheKey(const Resource& resource) {
+// Single-point transformer for offline storage keys. For sources where the URL is
+// not enough to guarantee uniqueness (eg. PMTiles where all requests resolve to
+// the same URL), this function creates a synthetic key based on the requested
+// data range. Can be expanded in the future to accommodate other formats.
+std::string OfflineDatabase::cacheKey(const Resource& resource) {
     if (!resource.dataRange) return resource.url;
     const auto sep = resource.url.find('?') == std::string::npos ? '?' : '&';
     return resource.url + sep + "_mlnRange=" + std::to_string(resource.dataRange->first) + "-" +
            std::to_string(resource.dataRange->second);
 }
-} // namespace
 
 OfflineDatabase::OfflineDatabase(std::string path_, const TileServerOptions& options)
     : path(std::move(path_)),
@@ -391,10 +389,6 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     query.bind(1, cacheKey(resource));
 
     if (!query.run()) {
-        if (resource.dataRange) {
-            // TODO: Remove after PR review
-            Log::Info(Event::Database, "[ambient cache] miss: " + cacheKey(resource));
-        }
         return std::nullopt;
     }
 
@@ -415,12 +409,6 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     } else {
         response.data = std::make_shared<std::string>(*data);
         size = data->length();
-    }
-
-    if (resource.dataRange) {
-        // TODO: Remove after PR review
-        Log::Info(Event::Database,
-                  "[ambient cache] hit: " + cacheKey(resource) + " (" + std::to_string(size) + " bytes)");
     }
 
     return std::make_pair(response, size);
@@ -457,10 +445,6 @@ bool OfflineDatabase::putResource(const Resource& resource,
         notModifiedQuery.bind(3, response.mustRevalidate);
         notModifiedQuery.bind(4, cacheKey(resource));
         notModifiedQuery.run();
-        if (resource.dataRange) {
-            // TODO: Remove after PR review
-            Log::Info(Event::Database, "[ambient cache] revalidated (304): " + cacheKey(resource));
-        }
         return false;
     }
 
@@ -497,12 +481,6 @@ bool OfflineDatabase::putResource(const Resource& resource,
 
     updateQuery.run();
     if (updateQuery.changes() != 0) {
-        if (resource.dataRange) {
-            // TODO: Remove after PR review
-            Log::Info(
-                Event::Database,
-                "[ambient cache] refresh: " + cacheKey(resource) + " (" + std::to_string(data.size()) + " bytes)");
-        }
         return false;
     }
 
@@ -529,12 +507,6 @@ bool OfflineDatabase::putResource(const Resource& resource,
     }
 
     insertQuery.run();
-
-    if (resource.dataRange) {
-        // TODO: Remove after PR review
-        Log::Info(Event::Database,
-                  "[ambient cache] insert: " + cacheKey(resource) + " (" + std::to_string(data.size()) + " bytes)");
-    }
 
     return true;
 }

@@ -97,6 +97,9 @@ public:
 
     void reopenDatabaseReadOnly(bool readOnly);
 
+    // Builds the offline-cache key for a resource. Exposed for testing.
+    static std::string cacheKey(const Resource&);
+
 private:
     class DatabaseSizeChangeStats;
 
