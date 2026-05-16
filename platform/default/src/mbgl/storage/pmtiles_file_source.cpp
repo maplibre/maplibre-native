@@ -95,7 +95,7 @@ public:
                 return;
             }
 
-            pmtiles::headerv3 header = header_cache.at(url);
+            pmtiles::headerv3 header = header_cache.at(url).header;
 
             if (resource.tileData->z < header.min_zoom || resource.tileData->z > header.max_zoom) {
                 Response response;
@@ -220,11 +220,26 @@ private:
     ClientOptions clientOptions;
 
     std::shared_ptr<FileSource> fileSource;
-    std::map<std::string, pmtiles::headerv3> header_cache;
+
+    struct CachedHeader {
+        pmtiles::headerv3 header;
+        std::optional<std::string> etag;
+    };
+    std::map<std::string, CachedHeader> header_cache;
     std::map<std::string, std::string> metadata_cache;
     std::map<std::string, std::map<std::string, std::vector<pmtiles::entryv3>>> directory_cache;
     std::map<std::string, std::vector<std::string>> directory_cache_control;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
+
+    // Clears all in-memory caches for a URL. Called when ETag-mismatch detection in
+    // `cacheFirstThenNetwork` notices the upstream archive has been replaced. The next
+    // request triggers a fresh `getHeader()` which repopulates with the new archive.
+    void invalidateArchive(const std::string& url) {
+        header_cache.erase(url);
+        directory_cache.erase(url);
+        directory_cache_control.erase(url);
+        metadata_cache.erase(url);
+    }
 
     std::shared_ptr<FileSource> getFileSource() {
         if (!fileSource) {
@@ -256,7 +271,24 @@ private:
 
             auto cacheReqKeepAlive = std::shared_ptr<AsyncRequest>(std::move(tasks[req]));
             tasks[req] = getFileSource()->request(
-                networkResource, [userCallback, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
+                networkResource,
+                [=, this, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
+                    // Upstream archive-replacement detection: if the server's ETag on this
+                    // sub-request differs from the ETag we observed when the archive header
+                    // was parsed, the archive has been replaced. Invalidate the in-memory
+                    // caches and surface an error so the renderer's retry path triggers a
+                    // fresh getHeader().
+                    auto it = header_cache.find(resource.url);
+                    if (it != header_cache.end() && it->second.etag && netResponse.etag &&
+                        *it->second.etag != *netResponse.etag) {
+                        invalidateArchive(resource.url);
+                        Response err;
+                        err.error = std::make_unique<Response::Error>(
+                            Response::Error::Reason::Other,
+                            "PMTiles archive replaced upstream; retry needed");
+                        userCallback(err);
+                        return;
+                    }
                     userCallback(netResponse);
                 });
         });
@@ -310,7 +342,7 @@ private:
                         throw std::runtime_error("Compression method not supported");
                     }
 
-                    header_cache.insert_or_assign(url, header);
+                    header_cache.insert_or_assign(url, CachedHeader{header, response.etag});
 
                     callback(std::unique_ptr<Response::Error>());
                 } catch (const std::exception& e) {
@@ -335,7 +367,7 @@ private:
                     return;
                 }
 
-                pmtiles::headerv3 header = header_cache.at(url);
+                pmtiles::headerv3 header = header_cache.at(url).header;
 
                 auto parse_callback = [=, this](const std::string& data) {
                     Document doc;
@@ -531,7 +563,7 @@ private:
                 return;
             }
 
-            pmtiles::headerv3 header = header_cache.at(url);
+            pmtiles::headerv3 header = header_cache.at(url).header;
 
             Resource resource(Resource::Kind::Source, url);
             resource.dataRange = std::make_pair(directoryOffset, directoryOffset + directoryLength - 1);
@@ -597,7 +629,18 @@ private:
                     return;
                 }
 
-                pmtiles::headerv3 header = header_cache.at(url);
+                // A concurrent request may have detected upstream archive replacement and
+                // cleared `header_cache` since this request started. Bail with a retry-needed
+                // error rather than dereferencing a missing entry.
+                auto headerIt = header_cache.find(url);
+                if (headerIt == header_cache.end()) {
+                    callback(std::make_pair(0, 0),
+                             std::make_unique<Response::Error>(
+                                 Response::Error::Reason::Other,
+                                 "PMTiles header cache invalidated mid-request; retry needed"));
+                    return;
+                }
+                pmtiles::headerv3 header = headerIt->second.header;
                 std::vector<pmtiles::entryv3> directory = directory_cache.at(url).at(
                     url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength));
 
