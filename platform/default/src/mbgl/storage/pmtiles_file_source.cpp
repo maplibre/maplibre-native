@@ -235,8 +235,10 @@ private:
         return fileSource;
     }
 
-    // Cache-first byte-range fetch that skips conditional revalidation on hit, since
-    // PMTiles archives are immutable per upload (validated once by `getHeader()`)
+    // Cache-first-then-network helper to handle fetches. `LoadingMethod::All` fires
+    // cache revalidation requests when tiles are served from the SQLite cache,
+    // which are wasteful in the context of PMTiles sources. This helper emulates
+    // the behavior of `LoadingMethod::All`, but without cache revalidation requests.
     void cacheFirstThenNetwork(AsyncRequest* req,
                                Resource resource,
                                std::function<void(const Response&)> userCallback) {
