@@ -271,8 +271,7 @@ private:
 
             auto cacheReqKeepAlive = std::shared_ptr<AsyncRequest>(std::move(tasks[req]));
             tasks[req] = getFileSource()->request(
-                networkResource,
-                [=, this, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
+                networkResource, [=, this, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
                     // Upstream archive-replacement detection: if the server's ETag on this
                     // sub-request differs from the ETag we observed when the archive header
                     // was parsed, the archive has been replaced. Invalidate the in-memory
@@ -284,8 +283,7 @@ private:
                         invalidateArchive(resource.url);
                         Response err;
                         err.error = std::make_unique<Response::Error>(
-                            Response::Error::Reason::Other,
-                            "PMTiles archive replaced upstream; retry needed");
+                            Response::Error::Reason::Other, "PMTiles archive replaced upstream; retry needed");
                         userCallback(err);
                         return;
                     }
