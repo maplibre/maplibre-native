@@ -310,7 +310,7 @@ private:
                         throw std::runtime_error("Compression method not supported");
                     }
 
-                    header_cache.emplace(url, header);
+                    header_cache.insert_or_assign(url, header);
 
                     callback(std::unique_ptr<Response::Error>());
                 } catch (const std::exception& e) {
@@ -431,7 +431,7 @@ private:
                     doc["maxzoom"] = maxzoom;
 
                     std::string metadata = serialize(doc);
-                    metadata_cache.emplace(url, metadata);
+                    metadata_cache.insert_or_assign(url, metadata);
 
                     callback(std::unique_ptr<Response::Error>());
                 };
