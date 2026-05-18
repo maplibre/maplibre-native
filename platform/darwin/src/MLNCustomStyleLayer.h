@@ -58,7 +58,7 @@ MLN_EXPORT
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE && !TARGET_OS_MACCATALYST
 /// The OpenGL ES rendering context used for drawing this layer.
 ///
 /// This property is only valid when using the OpenGL-based rendering backend.

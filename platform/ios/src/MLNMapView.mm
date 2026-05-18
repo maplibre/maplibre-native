@@ -2036,9 +2036,11 @@ public:
 
 // MARK: - GL / display link wake/sleep
 
+#if !TARGET_OS_MACCATALYST
 - (EAGLContext *)context {
   return _mbglView->getEAGLContext();
 }
+#endif
 
 - (BOOL)supportsBackgroundRendering {
   // Note: The following comment may be out of date with Metal enabled builds where
