@@ -143,7 +143,7 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/app")
 
 set(DEVELOPMENT_TEAM_ID "" CACHE STRING "Apple Development Team ID")
 
-if(NOT DEVELOPMENT_TEAM_ID)
+if(NOT DEVELOPMENT_TEAM_ID AND NOT MLN_MAC_CATALYST)
     message(STATUS "No Apple Developer Team ID set (-DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID). Configuring build without signing.")
     set(CMAKE_OSX_SYSROOT iphonesimulator)
     set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO")
