@@ -27,18 +27,13 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
 
     if (isExpression(value)) {
         ParseResult parsed;
-        if constexpr (std::is_same_v<T, std::vector<Color>>) {
-            // `colorArray` paint properties (hillshade-shadow-color and
-            // hillshade-highlight-color, promoted from `color` to `colorArray` in
-            // PR #3965 to support multidirectional hillshade) accept a single color
-            // value as their spec-default shape (defaults are "#000000" / "#FFFFFF").
-            // Try parsing as a single Color first; ValueConverter<std::vector<Color>>
-            // already wraps a single Color into a one-element vector at evaluation
-            // time. Fall back to array<color> for explicit multidirectional users.
-            ParsingContext colorCtx(type::Color);
-            parsed = colorCtx.parseLayerPropertyExpression(value);
+        if constexpr (std::is_same_v<T, std::vector<Color>> || std::is_same_v<T, std::vector<float>>) {
+            using Element = typename T::value_type;
+            const auto scalarType = valueTypeToExpressionType<Element>();
+            ParsingContext scalarCtx(scalarType);
+            parsed = scalarCtx.parseLayerPropertyExpression(value);
             if (!parsed) {
-                ParsingContext arrayCtx{type::Array(type::Color)};
+                ParsingContext arrayCtx{type::Array(scalarType)};
                 parsed = arrayCtx.parseLayerPropertyExpression(value);
                 if (!parsed) {
                     error.message = arrayCtx.getCombinedErrors();
