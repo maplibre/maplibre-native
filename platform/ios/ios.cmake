@@ -43,13 +43,17 @@ if(NOT ACTOOL_EXECUTABLE)
     message(FATAL_ERROR "Could not find actool. Ensure Xcode is installed.")
 endif()
 
+if(MLN_MAC_CATALYST OR CMAKE_OSX_SYSROOT MATCHES "MacOSX|macosx")
+    set(_MLN_ACTOOL_PLATFORM_ARGS --platform macosx --target-device mac-catalyst --minimum-deployment-target 14.0)
+else()
+    set(_MLN_ACTOOL_PLATFORM_ARGS --platform iphoneos --minimum-deployment-target 12.0)
+endif()
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Mapbox.bundle/Assets.car
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/Mapbox.bundle
     COMMAND ${ACTOOL_EXECUTABLE}
             --compile ${FRAMEWORK_BUNDLE_DIR}
-            --platform iphoneos
-            --minimum-deployment-target 12.0
+            ${_MLN_ACTOOL_PLATFORM_ARGS}
             ${CMAKE_CURRENT_LIST_DIR}/resources/Images.xcassets
     COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_LIST_DIR}/framework/Info-static.plist
