@@ -67,7 +67,7 @@ MLN_EXPORT
 ///
 /// - Warning: Deprecated and will be removed in a future release.
 @property (nonatomic, readonly) EAGLContext *context;
-#else
+#elif !TARGET_OS_IPHONE
 /// The macOS CGL rendering context used for drawing this layer.
 ///
 /// This property is only valid when using the OpenGL-based rendering backend.
