@@ -638,6 +638,7 @@ void RendererBackend::destroyResources() {
     commandPool.reset();
 
     vmaDestroyAllocator(allocator);
+    allocator = nullptr;
 
     usingSharedContext ? void(device.release()) : device.reset();
 
