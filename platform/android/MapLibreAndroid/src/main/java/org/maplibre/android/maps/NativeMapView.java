@@ -1000,7 +1000,17 @@ final class NativeMapView implements NativeMap {
     if (checkState("removeLayer")) {
       return false;
     }
-    return nativeRemoveLayer(layer.getNativePtr());
+    if (layer.isDetached()) {
+      Logger.w(TAG, "Ignoring removeLayer() call on detached layer reference.");
+      return false;
+    }
+
+    final long nativePtr = layer.getNativePtr();
+    if (nativePtr == 0L) {
+      Logger.w(TAG, "Ignoring removeLayer() call on released layer pointer.");
+      return false;
+    }
+    return nativeRemoveLayer(nativePtr);
   }
 
   @Override
