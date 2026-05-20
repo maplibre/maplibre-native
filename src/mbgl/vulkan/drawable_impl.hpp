@@ -25,7 +25,7 @@ class Drawable::Impl final {
 public:
     Impl()
         : uniformBuffers(
-              DescriptorSetType::DrawableUniform, shaders::globalUBOCount, 0, shaders::maxUBOCountPerDrawable) {}
+              DescriptorSetType::DrawableUniform, shaders::drawableSSBOStartId, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable) {}
 
     ~Impl() = default;
 

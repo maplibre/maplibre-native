@@ -101,7 +101,7 @@ void Context::initFrameResources() {
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, 0, shaders::maxUBOCountPerDrawable, 0));
+        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
@@ -127,18 +127,18 @@ void Context::initFrameResources() {
     }
 
     // force placeholder texture upload before any descriptor sets
-    (void)getDummyTexture();
+    static_cast<void>(getDummyTexture());
 
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, 0, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
+                                    shaders::layerSSBOStartId,
                                     shaders::maxSSBOCountPerLayer,
                                     shaders::maxUBOCountPerLayer,
                                     "LayerUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
-                                    0,
+                                    shaders::drawableSSBOStartId,
+                                    shaders::maxSSBOCountPerDrawable,
                                     shaders::maxUBOCountPerDrawable,
                                     "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
@@ -672,12 +672,13 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
     for (size_t i = 0; i < storageCount + uniformCount; ++i) {
         auto stageFlags = vk::ShaderStageFlags();
-        // if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
-        stageFlags |= vk::ShaderStageFlagBits::eVertex;
-        //}
-        // if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
-        stageFlags |= vk::ShaderStageFlagBits::eFragment;
-        //}
+        if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eVertex;
+        }
+
+        if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eFragment;
+        }
 
         const auto descriptorType = i < storageCount ? vk::DescriptorType::eStorageBuffer
                                                      : vk::DescriptorType::eUniformBuffer;
