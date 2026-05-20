@@ -196,7 +196,11 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-    backend.reset();
+
+    if (!asyncRendererCleanup) {
+        backend.reset();
+    }
+
     window.reset();
     swapBehaviorFlush = false;
 }

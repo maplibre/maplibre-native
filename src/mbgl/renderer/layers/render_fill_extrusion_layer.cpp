@@ -484,18 +484,16 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             std::vector<InstanceData> instanceSSBOData;
             for (const auto& vertex : bucket.vertices.vector()) {
-                instanceSSBOData.push_back({
-                    .posX = vertex.a1[0], 
-                    .posY = vertex.a1[1], 
-                    .ed_discardX = vertex.a2[0], 
-                    .ed_discardY = vertex.a2[1]
-                });
+                instanceSSBOData.push_back({.posX = vertex.a1[0],
+                                            .posY = vertex.a1[1],
+                                            .ed_discardX = vertex.a2[0],
+                                            .ed_discardY = vertex.a2[1]});
             }
 
             const auto instancedSSBO = context.createUniformBuffer(
                 instanceSSBOData.data(), instanceSSBOData.size() * sizeof(InstanceData), true, true);
-            //auto& uniforms = layerGroup->mutableUniformBuffers();
-            //uniforms.set(idFillExtrusionInstancedDrawableUBO, instancedSSBO);
+            // auto& uniforms = layerGroup->mutableUniformBuffers();
+            // uniforms.set(idFillExtrusionInstancedDrawableUBO, instancedSSBO);
 #endif
 
             for (auto& drawable : instancedBuilder.clearDrawables()) {
