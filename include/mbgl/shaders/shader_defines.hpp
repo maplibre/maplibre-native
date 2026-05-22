@@ -87,64 +87,59 @@ static constexpr uint32_t layerUBOStartId = std::max({static_cast<uint32_t>(draw
                                                       static_cast<uint32_t>(symbolLayerSSBOCount)});
 
 #if MLN_RENDER_BACKEND_VULKAN
-#define getEnumStartValue(packed, unpacked) unpacked
+#define getEnumValue(packed, unpacked) unpacked
 #else
-#define getEnumStartValue(packed, unpacked) packed
+#define getEnumValue(packed, unpacked) packed
 #endif
 
 enum {
-    idBackgroundPropsUBO = getEnumStartValue(backgroundLayerSSBOCount, layerUBOStartId),
+    idBackgroundPropsUBO = getEnumValue(backgroundLayerSSBOCount, layerUBOStartId),
     backgroundLayerUBOCount
 };
 
 enum {
-    idCircleEvaluatedPropsUBO = getEnumStartValue(circleLayerSSBOCount, layerUBOStartId),
+    idCircleEvaluatedPropsUBO = getEnumValue(circleLayerSSBOCount, layerUBOStartId),
     circleLayerUBOCount
 };
 
 enum {
-    idColorReliefEvaluatedPropsUBO = getEnumStartValue(colorReliefLayerSSBOCount, layerUBOStartId),
+    idColorReliefEvaluatedPropsUBO = getEnumValue(colorReliefLayerSSBOCount, layerUBOStartId),
     colorReliefLayerUBOCount
 };
 
 enum {
-    idFillEvaluatedPropsUBO = getEnumStartValue(fillLayerSSBOCount, layerUBOStartId),
+    idFillEvaluatedPropsUBO = getEnumValue(fillLayerSSBOCount, layerUBOStartId),
     fillLayerUBOCount
 };
 
 enum {
-    idFillExtrusionPropsUBO = getEnumStartValue(fillExtrusionLayerSSBOCount, layerUBOStartId),
+    idFillExtrusionPropsUBO = getEnumValue(fillExtrusionLayerSSBOCount, layerUBOStartId),
     fillExtrusionLayerUBOCount
 };
 
 enum {
-    idHeatmapEvaluatedPropsUBO = getEnumStartValue(heatmapLayerSSBOCount, layerUBOStartId),
+    idHeatmapEvaluatedPropsUBO = getEnumValue(heatmapLayerSSBOCount, layerUBOStartId),
     heatmapLayerUBOCount
 };
 
 enum {
-    idHeatmapTexturePropsUBO = getEnumStartValue(globalUBOCount, layerUBOStartId),
-    heatmapTextureLayerUBOCount
-};
-
-enum {
-    idHillshadeEvaluatedPropsUBO = getEnumStartValue(hillshadeLayerSSBOCount, layerUBOStartId),
+    idHillshadeEvaluatedPropsUBO = getEnumValue(hillshadeLayerSSBOCount, layerUBOStartId),
     hillshadeLayerUBOCount
 };
 
 enum {
-    idLineEvaluatedPropsUBO = getEnumStartValue(lineLayerSSBOCount, layerUBOStartId),
+    idLineEvaluatedPropsUBO = getEnumValue(lineLayerSSBOCount, layerUBOStartId),
     idLineExpressionUBO,
     lineLayerUBOCount
 };
 
 enum {
-    idRasterEvaluatedPropsUBO = getEnumStartValue(rasterLayerSSBOCount, layerUBOStartId),
+    idRasterEvaluatedPropsUBO = getEnumValue(rasterLayerSSBOCount, layerUBOStartId),
     rasterLayerUBOCount
 };
 
 enum {
-    idSymbolEvaluatedPropsUBO = getEnumStartValue(symbolLayerSSBOCount, layerUBOStartId),
+    idSymbolEvaluatedPropsUBO = getEnumValue(symbolLayerSSBOCount, layerUBOStartId),
     symbolLayerUBOCount
 };
 
@@ -156,14 +151,13 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(fillLayerUBOCount),
                                                           static_cast<uint32_t>(fillExtrusionLayerUBOCount),
                                                           static_cast<uint32_t>(heatmapLayerUBOCount),
-                                                          static_cast<uint32_t>(heatmapTextureLayerUBOCount),
                                                           static_cast<uint32_t>(hillshadeLayerUBOCount),
                                                           static_cast<uint32_t>(lineLayerUBOCount),
                                                           static_cast<uint32_t>(rasterLayerUBOCount),
                                                           static_cast<uint32_t>(symbolLayerUBOCount)});
 
 enum {
-    idFillExtrusionInstanced = getEnumStartValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
+    idFillExtrusionInstanced = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
     fillExtrusionDrawableSSBOCount
 };
 
@@ -173,96 +167,97 @@ static constexpr uint32_t drawableUBOStartId = std::max(
     {static_cast<uint32_t>(drawableSSBOStartId), static_cast<uint32_t>(fillExtrusionDrawableSSBOCount)});
 
 enum {
-    backgroundUBOCount = getEnumStartValue(backgroundLayerUBOCount, drawableUBOStartId)
+    backgroundUBOCount = getEnumValue(backgroundLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    circleUBOCount = getEnumStartValue(circleLayerUBOCount, drawableUBOStartId)
+    circleUBOCount = getEnumValue(circleLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    idCollisionDrawableUBO = getEnumStartValue(globalUBOCount, drawableUBOStartId), // UBO
-    idCollisionTilePropsUBO,
+    idCollisionDrawableUBO = getEnumValue(globalUBOCount, drawableUBOStartId), // UBO
+    idCollisionTilePropsUBO = getEnumValue(drawableReservedUBOCount, idCollisionDrawableUBO + 1),
     collisionUBOCount
 };
 
 enum {
-    idClippingMaskUBO = getEnumStartValue(colorReliefLayerUBOCount, drawableUBOStartId),
-    clippingMaskUBOCount
+    idClippingMaskUBO = getEnumValue(globalUBOCount, drawableUBOStartId),
+    clippingMaskUBOCount = getEnumValue(drawableReservedUBOCount, idClippingMaskUBO + 1)
 };
 
 enum {
-    colorReliefUBOCount = getEnumStartValue(globalUBOCount, drawableUBOStartId)
+    colorReliefUBOCount = getEnumValue(colorReliefLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    idCustomGeometryDrawableUBO = getEnumStartValue(globalUBOCount, drawableUBOStartId), // UBO
+    idCustomGeometryDrawableUBO = getEnumValue(drawableReservedUBOCount, drawableUBOStartId), // UBO
     customGeometryUBOCount
 };
 
 enum {
-    idCustomSymbolDrawableUBO = getEnumStartValue(globalUBOCount, drawableUBOStartId), // UBO
-    customSymbolUBOCount
+    idCustomSymbolDrawableUBO = getEnumValue(globalUBOCount, drawableUBOStartId), // UBO
+    customSymbolUBOCount = getEnumValue(drawableReservedUBOCount, idCustomSymbolDrawableUBO + 1)
 };
 
 enum {
-    idDebugUBO = getEnumStartValue(globalUBOCount, drawableUBOStartId), // UBO
+    idDebugUBO = getEnumValue(drawableReservedUBOCount, drawableUBOStartId), // UBO
     debugUBOCount
 };
 
 enum {
-    fillUBOCount = getEnumStartValue(fillLayerUBOCount, drawableUBOStartId)
+    fillUBOCount = getEnumValue(fillLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    fillExtrusionUBOCount = getEnumStartValue(fillExtrusionLayerUBOCount, drawableUBOStartId)
+    fillExtrusionUBOCount = getEnumValue(fillExtrusionLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    heatmapTextureUBOCount = getEnumStartValue(heatmapTextureLayerUBOCount, drawableUBOStartId)
+    idHeatmapTexturePropsUBO = getEnumValue(drawableReservedUBOCount, drawableUBOStartId),
+    heatmapTextureUBOCount
 };
 
 enum {
-    heatmapUBOCount = getEnumStartValue(heatmapLayerUBOCount, drawableUBOStartId)
+    heatmapUBOCount = getEnumValue(heatmapLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    idHillshadePrepareDrawableUBO = getEnumStartValue(heatmapLayerUBOCount, drawableUBOStartId), // UBO
-    idHillshadePrepareTilePropsUBO,                                                              // UBO
+    idHillshadePrepareDrawableUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId),          // UBO
+    idHillshadePrepareTilePropsUBO = getEnumValue(drawableReservedUBOCount, idHillshadePrepareDrawableUBO + 1), // UBO
     hillshadePrepareUBOCount
 };
 
 enum {
-    hillshadeUBOCount = getEnumStartValue(hillshadeLayerUBOCount, drawableUBOStartId)
+    hillshadeUBOCount = getEnumValue(hillshadeLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    lineUBOCount = getEnumStartValue(lineLayerUBOCount, drawableUBOStartId)
+    lineUBOCount = getEnumValue(lineLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    idLocationIndicatorDrawableUBO = getEnumStartValue(globalUBOCount, drawableUBOStartId), // UBO
+    idLocationIndicatorDrawableUBO = getEnumValue(drawableReservedUBOCount, drawableUBOStartId), // UBO
     locationIndicatorUBOCount
 };
 
 enum {
-    rasterUBOCount = getEnumStartValue(rasterLayerUBOCount, drawableUBOStartId)
+    rasterUBOCount = getEnumValue(rasterLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    symbolUBOCount = getEnumStartValue(symbolLayerUBOCount, drawableUBOStartId)
+    symbolUBOCount = getEnumValue(symbolLayerUBOCount, drawableUBOStartId)
 };
 
 enum {
-    idWideVectorUniformsUBO = getEnumStartValue(globalUBOCount, drawableUBOStartId), // UBO
-    idWideVectorUniformWideVecUBO,                                                   // UBO
+    idWideVectorUniformsUBO = getEnumValue(globalUBOCount, drawableUBOStartId),                          // UBO
+    idWideVectorUniformWideVecUBO = getEnumValue(drawableReservedUBOCount, idWideVectorUniformsUBO + 1), // UBO
     wideVectorUBOCount
 };
 
-#undef getEnumStartValue
+#undef getEnumValue
 
-static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>(backgroundUBOCount),
-                                                           static_cast<uint32_t>(circleUBOCount),
+static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>(backgroundUBOCount), // x
+                                                           static_cast<uint32_t>(circleUBOCount),     // x
                                                            static_cast<uint32_t>(clippingMaskUBOCount),
                                                            static_cast<uint32_t>(collisionUBOCount),
                                                            static_cast<uint32_t>(colorReliefUBOCount),
