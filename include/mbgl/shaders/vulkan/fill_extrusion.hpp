@@ -245,8 +245,8 @@ layout(location = 0) out mediump vec4 frag_color;
 
 void main() {
 
-    const vec2 instancePos = unpackSignedShort(instanceVector.instance[gl_InstanceIndex].pos);
-    const vec2 instanceEd = unpackUnsignedShort(instanceVector.instance[gl_InstanceIndex].ed_discard);
+    const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
+    const vec2 instanceEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].ed_discard);
 
     if (instanceEd.y > 0.0) {
         gl_Position = vec4(0.0);
@@ -274,15 +274,15 @@ void main() {
     vec4 color = unpack_mix_color(in_color, drawable.color_t);
 #endif
 
-    const vec2 p1 = unpackSignedShort(instanceVector.instance[gl_InstanceIndex + 1].pos);
-    const vec2 p2 = unpackSignedShort(instanceVector.instance[gl_InstanceIndex + 0].pos);
+    const vec2 p1 = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
+    const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
     const vec2 perp = normalize(p1 - p2);
 
     const vec3 normal = vec3(-perp.y, -perp.x, 1.0);
     const float t = float(in_position.y);
     const float z = t != 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(unpackSignedShort(instanceVector.instance[gl_InstanceIndex + in_position.x].pos), z, 1.0);
+    gl_Position = drawable.matrix * vec4(unpack_int(instanceVector.instance[gl_InstanceIndex + in_position.x].pos), z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -705,8 +705,8 @@ layout(location = 4) out mediump vec4 frag_pattern_to;
 #endif
 
 void main() {
-    const vec2 instancePos = unpackSignedShort(instanceVector.instance[gl_InstanceIndex].pos);
-    const vec2 instanceEd = unpackUnsignedShort(instanceVector.instance[gl_InstanceIndex].ed_discard);
+    const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
+    const vec2 instanceEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].ed_discard);
 
     if (instanceEd.y > 0.0) {
         gl_Position = vec4(0.0);
@@ -727,16 +727,16 @@ void main() {
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
 
-    const vec2 p1 = unpackSignedShort(instanceVector.instance[gl_InstanceIndex + 1].pos);
-    const vec2 p2 = unpackSignedShort(instanceVector.instance[gl_InstanceIndex + 0].pos);
+    const vec2 p1 = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
+    const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
     const vec2 perp = normalize(p1 - p2);
 
     const vec3 normal = vec3(-perp.y, -perp.x, 1.0);
-    const float edgedistance = unpackSignedShort(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
+    const float edgedistance = unpack_int(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
     const float t = float(in_position.y);
     const float z = t != 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(unpackSignedShort(instanceVector.instance[gl_InstanceIndex + in_position.x].pos), z, 1.0);
+    gl_Position = drawable.matrix * vec4(unpack_int(instanceVector.instance[gl_InstanceIndex + in_position.x].pos), z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)

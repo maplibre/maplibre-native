@@ -25,18 +25,13 @@ struct UniformBlockInfo {
     std::size_t id;
 };
 struct AttributeInfo {
-    constexpr AttributeInfo(std::size_t index_,
-                            gfx::AttributeDataType dataType_,
-                            std::size_t id_,
-                            bool uniform_ = false)
+    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
         : index(index_),
           dataType(dataType_),
-          id(id_),
-          uniform(uniform_) {}
+          id(id_) {}
     std::size_t index;
     gfx::AttributeDataType dataType;
     std::size_t id;
-    bool uniform;
 };
 struct TextureInfo {
     constexpr TextureInfo(std::size_t index_, std::size_t id_)

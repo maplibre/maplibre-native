@@ -493,8 +493,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             const auto instancedSSBO = context.createUniformBuffer(
                 instanceSSBOData.data(), instanceSSBOData.size() * sizeof(InstanceData), true, true);
-            // auto& uniforms = layerGroup->mutableUniformBuffers();
-            // uniforms.set(idFillExtrusionInstancedDrawableUBO, instancedSSBO);
 #endif
 #endif
 

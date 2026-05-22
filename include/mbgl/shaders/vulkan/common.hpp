@@ -71,25 +71,25 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
 }
 
 #ifdef USE_PACK
-vec2 unpackSignedShort(int value) {
+vec2 unpack_int(int value) {
     const int low  = (value << 16) >> 16;
     const int high = value >> 16;
-    
+
     return vec2(low, high);
 }
 
-vec2 unpackUnsignedShort(uint value) {
+vec2 unpack_uint(uint value) {
     const uint low  = value & 0xFFFF;
     const uint high = (value >> 16) & 0xFFFF;
 
     return vec2(low, high);
 }
 #else
-vec2 unpackSignedShort(ivec2 value) {
+vec2 unpack_int(ivec2 value) {
     return vec2(float(value.x), float(value.y));
 }
 
-vec2 unpackUnsignedShort(ivec2 value) {
+vec2 unpack_uint(ivec2 value) {
     return vec2(float(value.x), float(value.y));
 }
 #endif

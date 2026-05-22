@@ -28,8 +28,8 @@ const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attribute
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
 };
 const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceAttributes = {
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, true},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute, true},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
@@ -64,8 +64,8 @@ const std::array<AttributeInfo, 1> FillExtrusionPatternInstancedShaderSource::at
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
 };
 const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::instanceAttributes = {
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, true},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute, true},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},

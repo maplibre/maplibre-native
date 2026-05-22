@@ -157,7 +157,9 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(symbolLayerUBOCount)});
 
 enum {
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionInstanced = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
+#endif
     fillExtrusionDrawableSSBOCount
 };
 
@@ -175,13 +177,13 @@ enum {
 };
 
 enum {
-    idCollisionDrawableUBO = getEnumValue(globalUBOCount, drawableUBOStartId), // UBO
+    idCollisionDrawableUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId), // UBO
     idCollisionTilePropsUBO = getEnumValue(drawableReservedUBOCount, idCollisionDrawableUBO + 1),
     collisionUBOCount
 };
 
 enum {
-    idClippingMaskUBO = getEnumValue(globalUBOCount, drawableUBOStartId),
+    idClippingMaskUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId),
     clippingMaskUBOCount = getEnumValue(drawableReservedUBOCount, idClippingMaskUBO + 1)
 };
 
@@ -195,7 +197,7 @@ enum {
 };
 
 enum {
-    idCustomSymbolDrawableUBO = getEnumValue(globalUBOCount, drawableUBOStartId), // UBO
+    idCustomSymbolDrawableUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId), // UBO
     customSymbolUBOCount = getEnumValue(drawableReservedUBOCount, idCustomSymbolDrawableUBO + 1)
 };
 
@@ -249,15 +251,15 @@ enum {
 };
 
 enum {
-    idWideVectorUniformsUBO = getEnumValue(globalUBOCount, drawableUBOStartId),                          // UBO
+    idWideVectorUniformsUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId),         // UBO
     idWideVectorUniformWideVecUBO = getEnumValue(drawableReservedUBOCount, idWideVectorUniformsUBO + 1), // UBO
     wideVectorUBOCount
 };
 
 #undef getEnumValue
 
-static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>(backgroundUBOCount), // x
-                                                           static_cast<uint32_t>(circleUBOCount),     // x
+static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>(backgroundUBOCount),
+                                                           static_cast<uint32_t>(circleUBOCount),
                                                            static_cast<uint32_t>(clippingMaskUBOCount),
                                                            static_cast<uint32_t>(collisionUBOCount),
                                                            static_cast<uint32_t>(colorReliefUBOCount),
