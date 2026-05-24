@@ -6,6 +6,7 @@
 
 #include <mbgl/interface/native_apple_interface.h>
 
+#include <cmath>
 #include <unordered_map>
 
 #import <CoreText/CoreText.h>
@@ -18,6 +19,14 @@
 #define MBGL_DARWIN_NO_REMOTE_FONTS 0
 
 namespace mbgl {
+
+// 2x bitmap with 1x logical metrics.
+constexpr uint32_t kLocalGlyphTextureScale = 2;
+constexpr CGFloat kLocalGlyphFontSize = util::ONE_EM * kLocalGlyphTextureScale;
+constexpr uint32_t kLocalGlyphLogicalSize = 30;
+constexpr uint32_t kLocalGlyphBitmapSize = kLocalGlyphLogicalSize * kLocalGlyphTextureScale;
+constexpr CGFloat kLocalGlyphRasterBuffer = Glyph::borderSize * kLocalGlyphTextureScale;
+constexpr CGFloat kLocalGlyphTopAdjustment = 26.0;
 
 using CGColorSpaceHandle = CFHandle<CGColorSpaceRef, CGColorSpaceRef, CGColorSpaceRelease>;
 using CGContextHandle = CFHandle<CGContextRef, CGContextRef, CGContextRelease>;
@@ -35,7 +44,7 @@ using CTLineRefHandle = CFHandle<CTLineRef, CFTypeRef, CFRelease>;
  typesetting text using glyph sheets downloaded from a server.
 
  This implementation is similar to the local glyph rasterization in GL JS:
-  - Only CJK glyphs are drawn locally, because it’s much more noticeable when a
+  - Only CJK-related BMP ranges are drawn locally, because it’s much more noticeable when a
     non-CJK font mismatches the style than when a CJK font mismatches the style.
     (Unlike GL JS, this implementation does respect the font’s metrics, so it
     does work with variable-width fonts.)
@@ -44,8 +53,6 @@ using CTLineRefHandle = CFHandle<CTLineRef, CFTypeRef, CFRelease>;
 
  This is a first step toward fully local font rendering:
  <https://github.com/mapbox/mapbox-gl-native/issues/7862>. Further improvements:
-  - Make sure the font size is 24 points (`util::ONE_EM`) at all times, not the
-    system default of 12 points, to avoid blobbiness after rasterization.
   - Sniff an appropriate font weight and style from the font stack’s font names,
     as GL JS and the Android map SDK do.
   - Enable local glyph rasterization for all writing systems, not just CJK. This
@@ -124,7 +131,7 @@ public:
 
     if (!fontNames.count) {
       NSDictionary *fontAttributes = @{
-        (NSString *)kCTFontSizeAttribute : @(util::ONE_EM),
+        (NSString *)kCTFontSizeAttribute : @(kLocalGlyphFontSize),
       };
       return CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes);
     }
@@ -136,7 +143,7 @@ public:
         CFArrayCreateMutable(kCFAllocatorDefault, fontNames.count, &kCFTypeArrayCallBacks));
     for (NSString *name in [fontNames subarrayWithRange:NSMakeRange(1, fontNames.count - 1)]) {
       NSDictionary *fontAttributes = @{
-        (NSString *)kCTFontSizeAttribute : @(util::ONE_EM),
+        (NSString *)kCTFontSizeAttribute : @(kLocalGlyphFontSize),
         // This attribute is technically supposed to be a font’s
         // PostScript name, but Core Text will fall back to matching
         // font display names and font family names.
@@ -154,7 +161,7 @@ public:
         kCTFontCascadeListAttribute,
     };
     CFTypeRef values[] = {
-      (__bridge CFNumberRef) @(util::ONE_EM),
+      (__bridge CFNumberRef) @(kLocalGlyphFontSize),
       mainFontName,
       *fallbackDescriptors,
     };
@@ -241,9 +248,11 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     throw std::runtime_error("Unable to create line from attributed string");
   }
 
-  Size size(35, 35);
-  metrics.width = size.width;
-  metrics.height = size.height;
+  // Bitmap is allocated at 2x texture resolution; metrics report 1x logical size.
+  Size size(kLocalGlyphBitmapSize, kLocalGlyphBitmapSize);
+  metrics.width = kLocalGlyphLogicalSize;
+  metrics.height = kLocalGlyphLogicalSize;
+  metrics.isDoubleResolution = true;
 
   PremultipliedImage rgbaBitmap(size);
 
@@ -270,16 +279,21 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
   CFRange wholeRunRange = CFRangeMake(0, CTRunGetGlyphCount(glyphRun));
   std::vector<CGSize> advances(wholeRunRange.length);
   CTRunGetAdvances(glyphRun, wholeRunRange, advances.data());
-  metrics.advance = std::round(advances[0].width);
+  // CTRunGetAdvances returns advances measured at the rasterization (2x) font
+  // size; report the logical 1x value using the historical integer metric.
+  metrics.advance = std::round(advances[0].width / static_cast<CGFloat>(kLocalGlyphTextureScale));
 
-  // Mimic glyph PBF metrics.
-  metrics.left = Glyph::borderSize;
-  metrics.top = -Glyph::borderSize;
+  const CGRect glyphBounds = CTRunGetImageBounds(glyphRun, *context, wholeRunRange);
+  const CGFloat glyphTop = CGRectGetMaxY(glyphBounds);
 
-  // Move the text upward to avoid clipping off descenders.
-  CGFloat descent;
-  CTRunGetTypographicBounds(glyphRun, wholeRunRange, NULL, &descent, NULL);
-  CGContextSetTextPosition(*context, 0.0, descent);
+  // GL JS/TinySDF records glyphTop per character and applies a calibrated
+  // topAdjustment. Keep the same model here so fallback fonts do not inherit a
+  // platform-wide fixed top value.
+  metrics.left = Glyph::borderSize + 0.5f;
+  metrics.top = glyphTop / kLocalGlyphTextureScale - kLocalGlyphTopAdjustment;
+
+  const CGFloat textBaselineY = size.height - kLocalGlyphRasterBuffer - glyphTop;
+  CGContextSetTextPosition(*context, 0.0, textBaselineY);
 
   CTLineDraw(*line, *context);
 
@@ -318,8 +332,9 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack &fontStack, GlyphID g
   PremultipliedImage rgbaBitmap =
       drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics, isBold);
 
-  Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
+  const Size size = rgbaBitmap.size;
   // Copy alpha values from RGBA bitmap into the AlphaImage output
+  // The bitmap may be larger than the logical metrics (2x texture resolution).
   manufacturedGlyph.bitmap = AlphaImage(size);
   for (uint32_t i = 0; i < size.width * size.height; i++) {
     manufacturedGlyph.bitmap.data[i] = rgbaBitmap.data[4 * i + 3];
