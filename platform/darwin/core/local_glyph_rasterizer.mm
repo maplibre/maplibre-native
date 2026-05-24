@@ -284,7 +284,13 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
   metrics.advance = std::round(advances[0].width / static_cast<CGFloat>(kLocalGlyphTextureScale));
 
   const CGRect glyphBounds = CTRunGetImageBounds(glyphRun, *context, wholeRunRange);
-  const CGFloat glyphTop = CGRectGetMaxY(glyphBounds);
+  CGFloat glyphTop = 0.0;
+  if (!CGRectIsNull(glyphBounds)) {
+    const CGFloat maxY = CGRectGetMaxY(glyphBounds);
+    if (std::isfinite(maxY)) {
+      glyphTop = maxY;
+    }
+  }
 
   // GL JS/TinySDF records glyphTop per character and applies a calibrated
   // topAdjustment. Keep the same model here so fallback fonts do not inherit a
