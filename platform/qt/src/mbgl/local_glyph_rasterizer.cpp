@@ -90,9 +90,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     // using the unpadded width so AlphaImage's tight layout matches.
     auto img = std::make_unique<uint8_t[]>(static_cast<size_t>(size.width) * size.height);
     for (uint32_t y = 0; y < size.height; ++y) {
-        std::memcpy(img.get() + static_cast<size_t>(y) * size.width,
-                    image.constScanLine(y),
-                    size.width);
+        std::memcpy(img.get() + static_cast<size_t>(y) * size.width, image.constScanLine(y), size.width);
     }
 
     glyph.bitmap = AlphaImage{size, std::move(img)};

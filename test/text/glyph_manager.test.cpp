@@ -121,7 +121,9 @@ public:
 
 class KatakanaOnlyLocalGlyphRasterizer : public StubLocalGlyphRasterizer {
 public:
-    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override { return static_cast<char16_t>(glyphID) == u'テ'; }
+    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override {
+        return static_cast<char16_t>(glyphID) == u'テ';
+    }
 };
 
 class StubGlyphManagerObserver : public GlyphManagerObserver {
@@ -155,7 +157,8 @@ public:
     StubGlyphRequestor requestor;
     GlyphManager glyphManager;
 
-    GlyphManagerTest(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer = std::make_unique<StubLocalGlyphRasterizer>())
+    GlyphManagerTest(
+        std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer = std::make_unique<StubLocalGlyphRasterizer>())
         : glyphManager(std::move(localGlyphRasterizer)) {}
 
     void run(const std::string& url, GlyphDependencies dependencies) {

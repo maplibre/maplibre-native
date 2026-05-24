@@ -93,9 +93,7 @@ public:
         return androidLocalGlyphRasterizer.drawGlyphBitmap(*fontFamily, bold, glyphID);
     }
 
-    float getLastGlyphTop() {
-        return androidLocalGlyphRasterizer.getLastGlyphTop();
-    }
+    float getLastGlyphTop() { return androidLocalGlyphRasterizer.getLastGlyphTop(); }
 
 private:
     std::optional<std::string> fontFamily;
