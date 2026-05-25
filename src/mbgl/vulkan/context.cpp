@@ -68,8 +68,6 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     MBGL_VERIFY_THREAD(tid);
 
-    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
-
     destroyResources();
 
     {
