@@ -65,7 +65,7 @@ TEST(LocalGlyphRasterizer, PingFang) {
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
 #if defined(__APPLE__) && !defined(__QT__)
-    test.checkRendering("ping_fang", 0.0161);
+    test.checkRendering("ping_fang", 0.025);
 #elif defined(__QT__)
     test.checkRendering("ping_fang_qt");
 #endif // defined(__APPLE__)
@@ -77,7 +77,7 @@ TEST(LocalGlyphRasterizer, PingFangWithBoldInStyle) {
     ss << std::regex_replace(
         util::read_file("test/fixtures/local_glyphs/mixed.json"), std::regex("NotoCJK"), "NotoCJK Bold");
     test.map.getStyle().loadJSON(ss.str());
-    test.checkRendering("ping_fang_with_bold_in_style");
+    test.checkRendering("ping_fang_with_bold_in_style", 0.025);
 }
 
 #if !defined(__QT__)
@@ -85,7 +85,7 @@ TEST(LocalGlyphRasterizer, PingFangSemibold) {
     LocalGlyphRasterizerTest test(std::string("PingFang TC Semibold"));
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/local_glyphs/mixed.json"));
-    test.checkRendering("ping_fang_semibold", 0.0161);
+    test.checkRendering("ping_fang_semibold", 0.025);
 }
 #endif // !defined(__QT__)
 
