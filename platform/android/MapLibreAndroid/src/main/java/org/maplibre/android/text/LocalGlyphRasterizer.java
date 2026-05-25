@@ -24,7 +24,7 @@ public class LocalGlyphRasterizer {
   private static final int BITMAP_SIZE = 60;
   private static final int TEXT_SIZE = 48;
   private static final int RASTER_BUFFER = 3 * TEXTURE_SCALE;
-  private static final float TOP_ADJUSTMENT = 26.0f;
+  private static final float TOP_ADJUSTMENT = 26.5f;
   private static final float BASELINE_X = 10;
 
   private final Bitmap bitmap;

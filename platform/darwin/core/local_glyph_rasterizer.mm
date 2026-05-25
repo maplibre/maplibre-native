@@ -26,7 +26,7 @@ constexpr CGFloat kLocalGlyphFontSize = util::ONE_EM * kLocalGlyphTextureScale;
 constexpr uint32_t kLocalGlyphLogicalSize = 30;
 constexpr uint32_t kLocalGlyphBitmapSize = kLocalGlyphLogicalSize * kLocalGlyphTextureScale;
 constexpr CGFloat kLocalGlyphRasterBuffer = Glyph::borderSize * kLocalGlyphTextureScale;
-constexpr CGFloat kLocalGlyphTopAdjustment = 26.0;
+constexpr CGFloat kLocalGlyphTopAdjustment = 26.5;
 
 using CGColorSpaceHandle = CFHandle<CGColorSpaceRef, CGColorSpaceRef, CGColorSpaceRelease>;
 using CGContextHandle = CFHandle<CGContextRef, CGContextRef, CGContextRelease>;

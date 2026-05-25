@@ -14,7 +14,7 @@ constexpr int kLocalGlyphTextureScale = 2;
 constexpr uint32_t kLocalGlyphLogicalSize = 30;
 constexpr uint32_t kLocalGlyphBitmapSize = kLocalGlyphLogicalSize * kLocalGlyphTextureScale;
 constexpr int kLocalGlyphRasterBuffer = Glyph::borderSize * kLocalGlyphTextureScale;
-constexpr double kLocalGlyphTopAdjustment = 26.0;
+constexpr double kLocalGlyphTopAdjustment = 26.5;
 
 class LocalGlyphRasterizer::Impl {
 public:
