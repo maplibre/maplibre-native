@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/vulkan/buffer_resource.hpp>
+#include <mbgl/vulkan/vertex_buffer_resource.hpp>
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/convert.hpp>
@@ -12,9 +13,17 @@
 namespace mbgl {
 namespace vulkan {
 
+size_t VertexAttribute::getBufferUsage() const {
+    if (ubo == -1) {
+        return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    }
+
+    return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+}
+
 const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
                                                                   UploadPass& uploadPass,
-                                                                  const gfx::BufferUsageType usage,
+                                                                  size_t usage,
                                                                   bool forceUpdate) {
     if (!attrib_.getBuffer()) {
         auto& attrib = static_cast<VertexAttribute&>(attrib_);
@@ -22,8 +31,8 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
             return uploadPass.getBuffer(attrib.sharedRawData, usage, forceUpdate);
         } else {
             if (!attrib.rawData.empty()) {
-                auto buffer = uploadPass.createVertexBufferResource(
-                    attrib.rawData.data(), attrib.rawData.size(), usage, false);
+                auto buffer = std::make_unique<VertexBufferResource>(uploadPass.createBufferResource(
+                    attrib.rawData.data(), attrib.rawData.size(), usage, false));
                 attrib.setBuffer(std::move(buffer));
                 attrib.setRawData({});
                 attrib_.setDirty(false);

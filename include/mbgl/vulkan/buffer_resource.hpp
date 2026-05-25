@@ -47,6 +47,7 @@ public:
     BufferResource& operator=(BufferResource&&) noexcept;
 
     BufferResource clone() const;
+    BufferResource shared() const;
     void destroy(bool deferred = true);
 
     void update(const void* data, std::size_t size, std::size_t offset) noexcept;
@@ -73,6 +74,9 @@ public:
     VersionType getVersion() const noexcept { return version; }
 
 protected:
+    BufferResource(const BufferResource&) noexcept;
+protected:
+
     Context& context;
     std::size_t size;
     std::uint32_t usage;

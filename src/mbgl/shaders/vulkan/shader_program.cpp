@@ -251,6 +251,11 @@ void ShaderProgram::initVertexAttribute(const shaders::AttributeInfo& info) {
     vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
 #endif
     vertexAttributes.set(info.id, index, info.dataType, 1);
+
+    if (info.ubo != -1) {
+        auto& attrib = static_cast<VertexAttribute&>(*vertexAttributes.get(info.id));
+        attrib.setUBO(info.ubo);
+    }
 }
 
 void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
@@ -262,6 +267,11 @@ void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
     instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
 #endif
     instanceAttributes.set(info.id, index, info.dataType, 1);
+
+    if (info.ubo != -1) {
+        auto& attrib = static_cast<VertexAttribute&>(*instanceAttributes.get(info.id));
+        attrib.setUBO(info.ubo);
+    }
 }
 
 void ShaderProgram::initTexture(const shaders::TextureInfo& info) {

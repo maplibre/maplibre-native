@@ -57,8 +57,8 @@ BufferResource::BufferResource(
     std::size_t totalSize = size;
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT ||
-        (usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT && (usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0)) {
+    if ((usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0 && 
+        (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT || usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)) {
         const auto& backend = context.getBackend();
         const auto& deviceProps = backend.getDeviceProperties();
 
@@ -128,6 +128,16 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
     other.bufferAllocation = nullptr;
 }
 
+BufferResource::BufferResource(const BufferResource& other) noexcept
+    : context(other.context),
+      size(other.size),
+      usage(other.usage),
+      version(other.version),
+      persistent(other.persistent),
+      bufferAllocation(other.bufferAllocation),
+      bufferWindowSize(other.bufferWindowSize),
+      bufferWindowVersions(other.bufferWindowVersions) {}
+
 BufferResource::~BufferResource() noexcept {
     destroy(true);
 }
@@ -158,6 +168,10 @@ void BufferResource::destroy(bool deferred) {
 
 BufferResource BufferResource::clone() const {
     return {context, contents(), size, usage, persistent};
+}
+
+BufferResource BufferResource::shared() const {
+    return BufferResource(*this);
 }
 
 BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {

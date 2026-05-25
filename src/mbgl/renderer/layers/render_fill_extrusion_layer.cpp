@@ -466,47 +466,12 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             instancedBuilder.flush(context);
 
-#if MLN_RENDER_BACKEND_VULKAN
-#if 0
-            const auto instancedSSBO = context.createUniformBuffer(
-                bucket.sharedVertices->getRawData(),
-                bucket.sharedVertices->getRawCount() * bucket.sharedVertices->getRawSize(),
-                true,
-                true);
-            auto& uniforms = layerGroup->mutableUniformBuffers();
-            uniforms.set(idFillExtrusionInstancedDrawableUBO, instancedSSBO);
-#else
-            struct InstanceData {
-                int posX;
-                int posY;
-                int ed_discardX;
-                int ed_discardY;
-            };
-
-            std::vector<InstanceData> instanceSSBOData;
-            for (const auto& vertex : bucket.vertices.vector()) {
-                instanceSSBOData.push_back({.posX = vertex.a1[0],
-                                            .posY = vertex.a1[1],
-                                            .ed_discardX = vertex.a2[0],
-                                            .ed_discardY = vertex.a2[1]});
-            }
-
-            const auto instancedSSBO = context.createUniformBuffer(
-                instanceSSBOData.data(), instanceSSBOData.size() * sizeof(InstanceData), true, true);
-#endif
-#endif
-
             for (auto& drawable : instancedBuilder.clearDrawables()) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<std::size_t>(hasPattern));
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData.bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
-
-#if MLN_RENDER_BACKEND_VULKAN
-                auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.set(idFillExtrusionInstanced, instancedSSBO);
-#endif
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

@@ -5,13 +5,15 @@
 namespace mbgl {
 namespace shaders {
 
+// idFillExtrusionInstanced is shared between instanced and non-instanced drawables
+
 //
 // Fill extrusion
 
 using FillExtrusionShaderSource = ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>;
 
 const std::array<AttributeInfo, 4> FillExtrusionShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute, idFillExtrusionInstanced},
     AttributeInfo{1, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
@@ -28,8 +30,8 @@ const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attribute
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
 };
 const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceAttributes = {
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, idFillExtrusionInstanced},
+    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute, idFillExtrusionInstanced},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
@@ -44,7 +46,7 @@ const std::array<TextureInfo, 0> FillExtrusionInstancedShaderSource::textures = 
 using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>;
 
 const std::array<AttributeInfo, 5> FillExtrusionPatternShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute, idFillExtrusionInstanced},
     AttributeInfo{1, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
     AttributeInfo{3, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
@@ -64,8 +66,8 @@ const std::array<AttributeInfo, 1> FillExtrusionPatternInstancedShaderSource::at
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
 };
 const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::instanceAttributes = {
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, idFillExtrusionInstanced},
+    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute, idFillExtrusionInstanced},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},

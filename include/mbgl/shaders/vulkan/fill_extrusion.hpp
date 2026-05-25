@@ -224,18 +224,10 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     float pad2;
 } props;
 
-//#define USE_PACK
-#ifdef USE_PACK
 struct OutlineInstance {
     int pos;
     uint ed_discard;
 };
-#else
-struct OutlineInstance {
-    ivec2 pos;
-    ivec2 ed_discard;
-};
-#endif
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
     OutlineInstance instance[];
@@ -653,18 +645,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
-//#define USE_PACK
-#ifdef USE_PACK
 struct OutlineInstance {
     int pos;
     uint ed_discard;
 };
-#else
-struct OutlineInstance {
-    ivec2 pos;
-    ivec2 ed_discard;
-};
-#endif
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
     OutlineInstance instance[];

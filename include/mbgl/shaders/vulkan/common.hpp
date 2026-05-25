@@ -3,9 +3,6 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
-// TODO make this a dynamic string based on the CPU defines
-#include <mbgl/shaders/shader_defines.hpp>
-
 namespace mbgl {
 namespace shaders {
 
@@ -70,7 +67,6 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
-#ifdef USE_PACK
 vec2 unpack_int(int value) {
     const int low  = (value << 16) >> 16;
     const int high = value >> 16;
@@ -84,15 +80,6 @@ vec2 unpack_uint(uint value) {
 
     return vec2(low, high);
 }
-#else
-vec2 unpack_int(ivec2 value) {
-    return vec2(float(value.x), float(value.y));
-}
-
-vec2 unpack_uint(ivec2 value) {
-    return vec2(float(value.x), float(value.y));
-}
-#endif
 
 #define GLOBAL_SET_INDEX                    0
 #define LAYER_SET_INDEX                     1
