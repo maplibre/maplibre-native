@@ -95,7 +95,7 @@ public:
                 return;
             }
 
-            pmtiles::headerv3 header = header_cache.at(url).header;
+            pmtiles::headerv3 header = header_cache.at(url);
 
             if (resource.tileData->z < header.min_zoom || resource.tileData->z > header.max_zoom) {
                 Response response;
@@ -143,10 +143,11 @@ public:
                     }
 
                     Resource tileResource(Resource::Kind::Source, url);
+                    tileResource.loadingMethod = Resource::LoadingMethod::All;
                     tileResource.dataRange = std::make_pair(tileAddress.first,
                                                             tileAddress.first + tileAddress.second - 1);
 
-                    cacheFirstThenNetwork(req, tileResource, [=](const Response& tileResponse) {
+                    tasks[req] = getFileSource()->request(tileResource, [=](const Response& tileResponse) {
                         Response response;
                         response.noContent = true;
 
@@ -155,6 +156,10 @@ public:
                                 tileResponse.error->reason,
                                 std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
                             ref.invoke(&FileSourceRequest::setResponse, response);
+                            return;
+                        }
+
+                        if (tileResponse.notModified) {
                             return;
                         }
 
@@ -220,26 +225,11 @@ private:
     ClientOptions clientOptions;
 
     std::shared_ptr<FileSource> fileSource;
-
-    struct CachedHeader {
-        pmtiles::headerv3 header;
-        std::optional<std::string> etag;
-    };
-    std::map<std::string, CachedHeader> header_cache;
+    std::map<std::string, pmtiles::headerv3> header_cache;
     std::map<std::string, std::string> metadata_cache;
     std::map<std::string, std::map<std::string, std::vector<pmtiles::entryv3>>> directory_cache;
     std::map<std::string, std::vector<std::string>> directory_cache_control;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
-
-    // Clears all in-memory caches for a URL. Called when ETag-mismatch detection in
-    // `cacheFirstThenNetwork` notices the upstream archive has been replaced. The next
-    // request triggers a fresh `getHeader()` which repopulates with the new archive.
-    void invalidateArchive(const std::string& url) {
-        header_cache.erase(url);
-        directory_cache.erase(url);
-        directory_cache_control.erase(url);
-        metadata_cache.erase(url);
-    }
 
     std::shared_ptr<FileSource> getFileSource() {
         if (!fileSource) {
@@ -250,49 +240,6 @@ private:
         return fileSource;
     }
 
-    // Cache-first-then-network helper to handle fetches. `LoadingMethod::All` fires
-    // cache revalidation requests when tiles are served from the SQLite cache,
-    // which are wasteful in the context of PMTiles sources. This helper emulates
-    // the behavior of `LoadingMethod::All`, but without cache revalidation requests.
-    void cacheFirstThenNetwork(AsyncRequest* req,
-                               Resource resource,
-                               std::function<void(const Response&)> userCallback) {
-        Resource cacheResource = resource;
-        cacheResource.loadingMethod = Resource::LoadingMethod::CacheOnly;
-
-        tasks[req] = getFileSource()->request(cacheResource, [=, this](const Response& cacheResponse) {
-            if (cacheResponse.data && !cacheResponse.error) {
-                userCallback(cacheResponse);
-                return;
-            }
-
-            Resource networkResource = resource;
-            networkResource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
-
-            auto cacheReqKeepAlive = std::shared_ptr<AsyncRequest>(std::move(tasks[req]));
-            tasks[req] = getFileSource()->request(
-                networkResource, [=, this, keepAlive = std::move(cacheReqKeepAlive)](const Response& netResponse) {
-                    // Upstream archive-replacement detection: if the server's ETag on this
-                    // sub-request differs from the ETag we observed when the archive header
-                    // was parsed, the archive has been replaced. Invalidate the in-memory
-                    // caches and surface an error so the renderer's retry path triggers a
-                    // fresh getHeader().
-                    auto it = header_cache.find(resource.url);
-                    if (it != header_cache.end() && it->second.etag && netResponse.etag &&
-                        *it->second.etag != *netResponse.etag) {
-                        invalidateArchive(resource.url);
-                        Response err;
-                        err.error = std::make_unique<Response::Error>(
-                            Response::Error::Reason::Other, "PMTiles archive replaced upstream; retry needed");
-                        userCallback(err);
-                        return;
-                    }
-                    userCallback(netResponse);
-                });
-        });
-    }
-
-    // PMTiles archives are immutable per upload, so we only revalidate the header on first call
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (header_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
@@ -301,6 +248,7 @@ private:
 
         Resource resource(Resource::Kind::Source, url);
         resource.loadingMethod = Resource::LoadingMethod::All;
+
         resource.dataRange = std::make_pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
                                                                 pmtilesHeaderOffset + pmtilesHeaderLength - 1);
 
@@ -324,6 +272,10 @@ private:
                     return;
                 }
 
+                if (response.notModified) {
+                    return;
+                }
+
                 if (!response.data) {
                     callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
                                                                "PMTiles header response has no data"));
@@ -340,7 +292,7 @@ private:
                         throw std::runtime_error("Compression method not supported");
                     }
 
-                    header_cache.insert_or_assign(url, CachedHeader{header, response.etag});
+                    header_cache.emplace(url, header);
 
                     callback(std::unique_ptr<Response::Error>());
                 } catch (const std::exception& e) {
@@ -365,7 +317,7 @@ private:
                     return;
                 }
 
-                pmtiles::headerv3 header = header_cache.at(url).header;
+                pmtiles::headerv3 header = header_cache.at(url);
 
                 auto parse_callback = [=, this](const std::string& data) {
                     Document doc;
@@ -461,17 +413,18 @@ private:
                     doc["maxzoom"] = maxzoom;
 
                     std::string metadata = serialize(doc);
-                    metadata_cache.insert_or_assign(url, metadata);
+                    metadata_cache.emplace(url, metadata);
 
                     callback(std::unique_ptr<Response::Error>());
                 };
 
                 if (header.json_metadata_bytes > 0) {
                     Resource resource(Resource::Kind::Source, url);
+                    resource.loadingMethod = Resource::LoadingMethod::All;
                     resource.dataRange = std::make_pair(header.json_metadata_offset,
                                                         header.json_metadata_offset + header.json_metadata_bytes - 1);
 
-                    cacheFirstThenNetwork(req, resource, [=](const Response& responseMetadata) {
+                    tasks[req] = getFileSource()->request(resource, [=](const Response& responseMetadata) {
                         if (responseMetadata.error) {
                             callback(std::make_unique<Response::Error>(
                                 responseMetadata.error->reason,
@@ -480,17 +433,16 @@ private:
                             return;
                         }
 
+                        if (responseMetadata.notModified) {
+                            return;
+                        }
+
                         if (!responseMetadata.data) {
-                            std::string detail = "PMTiles metadata response has no data (noContent=";
-                            detail += responseMetadata.noContent ? "true" : "false";
-                            detail += ", notModified=";
-                            detail += responseMetadata.notModified ? "true" : "false";
-                            detail += ", range=";
-                            detail += std::to_string(header.json_metadata_offset) + "-" +
-                                      std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1);
-                            detail += ")";
-                            callback(
-                                std::make_unique<Response::Error>(Response::Error::Reason::Other, std::move(detail)));
+                            callback(std::make_unique<Response::Error>(
+                                Response::Error::Reason::Other,
+                                "PMTiles metadata response has no data (range=" +
+                                    std::to_string(header.json_metadata_offset) + "-" +
+                                    std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1) + ")"));
                             return;
                         }
 
@@ -561,17 +513,22 @@ private:
                 return;
             }
 
-            pmtiles::headerv3 header = header_cache.at(url).header;
+            pmtiles::headerv3 header = header_cache.at(url);
 
             Resource resource(Resource::Kind::Source, url);
+            resource.loadingMethod = Resource::LoadingMethod::All;
             resource.dataRange = std::make_pair(directoryOffset, directoryOffset + directoryLength - 1);
 
-            cacheFirstThenNetwork(req, resource, [=, this](const Response& response) {
+            tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
                 if (response.error) {
                     callback(std::make_unique<Response::Error>(
                         response.error->reason,
                         std::string("Error fetching PMTiles directory: ") + response.error->message));
 
+                    return;
+                }
+
+                if (response.notModified) {
                     return;
                 }
 
@@ -627,18 +584,7 @@ private:
                     return;
                 }
 
-                // A concurrent request may have detected upstream archive replacement and
-                // cleared `header_cache` since this request started. Bail with a retry-needed
-                // error rather than dereferencing a missing entry.
-                auto headerIt = header_cache.find(url);
-                if (headerIt == header_cache.end()) {
-                    callback(std::make_pair(0, 0),
-                             std::make_unique<Response::Error>(
-                                 Response::Error::Reason::Other,
-                                 "PMTiles header cache invalidated mid-request; retry needed"));
-                    return;
-                }
-                pmtiles::headerv3 header = headerIt->second.header;
+                pmtiles::headerv3 header = header_cache.at(url);
                 std::vector<pmtiles::entryv3> directory = directory_cache.at(url).at(
                     url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength));
 
