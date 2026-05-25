@@ -442,7 +442,8 @@ private:
                                 Response::Error::Reason::Other,
                                 "PMTiles metadata response has no data (range=" +
                                     std::to_string(header.json_metadata_offset) + "-" +
-                                    std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1) + ")"));
+                                    std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1) +
+                                    ")"));
                             return;
                         }
 
