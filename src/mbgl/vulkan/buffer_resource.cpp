@@ -207,6 +207,9 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     uint8_t* data = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset;
 
     if (memcmp(data, newData, updateSize) == 0) {
+        if (bufferWindowSize) {
+            bufferWindowVersions[context.getCurrentFrameResourceIndex()] = version;
+        }
         return;
     }
 
@@ -228,8 +231,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     }
 
     if (bufferWindowSize) {
-        const auto frameIndex = context.getCurrentFrameResourceIndex();
-        bufferWindowVersions[frameIndex] = version;
+        bufferWindowVersions[context.getCurrentFrameResourceIndex()] = version;
     }
 }
 
