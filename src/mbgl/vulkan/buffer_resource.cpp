@@ -143,25 +143,29 @@ BufferResource::~BufferResource() noexcept {
 }
 
 void BufferResource::destroy(bool deferred) {
-    if (isValid()) {
-        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
-            stats.numBuffers--;
-
-            if (bufferWindowSize > 0) {
-                stats.memBuffers -= bufferWindowSize * context.getBackend().getMaxFrames();
-            } else {
-                stats.memBuffers -= size;
-            }
-        });
-    }
-
     if (!bufferAllocation) {
         return;
     }
 
+    const size_t size_ = bufferWindowSize > 0 ? bufferWindowSize * bufferWindowVersions.size() : size;
+
     if (deferred) {
-        context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
+        context.enqueueDeletion([size_, allocation = std::move(bufferAllocation)](auto& context_) mutable { 
+            if (allocation.use_count() == 1) {
+                context_.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+                    stats.numBuffers--;
+                    stats.memBuffers -= size_;
+                });  
+            }
+            allocation.reset();    
+        });
     } else {
+        if (bufferAllocation.use_count() == 1) {
+            context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+                stats.numBuffers--;
+                stats.memBuffers -= size_;
+            });
+        }
         bufferAllocation.reset();
     }
 }
