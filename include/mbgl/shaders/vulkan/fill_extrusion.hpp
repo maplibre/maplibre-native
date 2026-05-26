@@ -384,13 +384,17 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionTilePropsUBO) uniform FillExtrusionTilePropsUBO {
+struct FillExtrusionTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionTilePropsUBO) readonly buffer FillExtrusionTilePropsUBOVector {
+    FillExtrusionTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
@@ -420,6 +424,7 @@ layout(location = 4) out mediump vec4 frag_pattern_to;
 
 void main() {
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
@@ -654,13 +659,17 @@ layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedD
     OutlineInstance instance[];
 } instanceVector;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionTilePropsUBO) uniform FillExtrusionTilePropsUBO {
+struct FillExtrusionTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionTilePropsUBO) readonly buffer FillExtrusionTilePropsUBOVector {
+    FillExtrusionTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
@@ -698,6 +707,7 @@ void main() {
     }
 
     const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
@@ -716,7 +726,7 @@ void main() {
     const vec2 perp = normalize(p1 - p2);
 
     const vec3 normal = vec3(-perp.y, -perp.x, 1.0);
-    const float edgedistance = unpack_int(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
+    const float edgedistance = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
     const float t = float(in_position.y);
     const float z = t != 0.0 ? height : base;
 
