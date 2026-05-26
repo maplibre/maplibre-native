@@ -31,8 +31,8 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
             return uploadPass.getBuffer(attrib.sharedRawData, usage, forceUpdate);
         } else {
             if (!attrib.rawData.empty()) {
-                auto buffer = std::make_unique<VertexBufferResource>(uploadPass.createBufferResource(
-                    attrib.rawData.data(), attrib.rawData.size(), usage, false));
+                auto buffer = std::make_unique<VertexBufferResource>(
+                    uploadPass.createBufferResource(attrib.rawData.data(), attrib.rawData.size(), usage, false));
                 attrib.setBuffer(std::move(buffer));
                 attrib.setRawData({});
                 attrib_.setDirty(false);

@@ -75,8 +75,8 @@ public:
 
 protected:
     BufferResource(const BufferResource&) noexcept;
-protected:
 
+protected:
     Context& context;
     std::size_t size;
     std::uint32_t usage;

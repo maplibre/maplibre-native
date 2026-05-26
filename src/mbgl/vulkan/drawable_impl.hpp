@@ -24,8 +24,10 @@ using namespace platform;
 class Drawable::Impl final {
 public:
     Impl()
-        : uniformBuffers(
-              DescriptorSetType::DrawableUniform, shaders::drawableSSBOStartId, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable) {}
+        : uniformBuffers(DescriptorSetType::DrawableUniform,
+                         shaders::drawableSSBOStartId,
+                         shaders::maxSSBOCountPerDrawable,
+                         shaders::maxUBOCountPerDrawable) {}
 
     ~Impl() = default;
 

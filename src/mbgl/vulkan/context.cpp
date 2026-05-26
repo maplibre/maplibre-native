@@ -99,7 +99,8 @@ void Context::initFrameResources() {
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable, 0));
+        DescriptorPoolGrowable(
+            drawableUniformDescriptorPoolSize, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,

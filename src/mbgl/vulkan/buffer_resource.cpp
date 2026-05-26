@@ -57,7 +57,7 @@ BufferResource::BufferResource(
     std::size_t totalSize = size;
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    if ((usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0 && 
+    if ((usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0 &&
         (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT || usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)) {
         const auto& backend = context.getBackend();
         const auto& deviceProps = backend.getDeviceProperties();
@@ -150,14 +150,14 @@ void BufferResource::destroy(bool deferred) {
     const size_t size_ = bufferWindowSize > 0 ? bufferWindowSize * bufferWindowVersions.size() : size;
 
     if (deferred) {
-        context.enqueueDeletion([size_, allocation = std::move(bufferAllocation)](auto& context_) mutable { 
+        context.enqueueDeletion([size_, allocation = std::move(bufferAllocation)](auto& context_) mutable {
             if (allocation.use_count() == 1) {
                 context_.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
                     stats.numBuffers--;
                     stats.memBuffers -= size_;
-                });  
+                });
             }
-            allocation.reset();    
+            allocation.reset();
         });
     } else {
         if (bufferAllocation.use_count() == 1) {
