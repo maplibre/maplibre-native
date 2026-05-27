@@ -123,6 +123,11 @@ enum {
 };
 
 enum {
+    idHeatmapTexturePropsUBO = getEnumValue(drawableReservedUBOCount, layerUBOStartId),
+    heatmapTextureUBOCount
+};
+
+enum {
     idHillshadeEvaluatedPropsUBO = getEnumValue(hillshadeLayerSSBOCount, layerUBOStartId),
     hillshadeLayerUBOCount
 };
@@ -212,11 +217,6 @@ enum {
 
 enum {
     fillExtrusionUBOCount = getEnumValue(fillExtrusionLayerUBOCount, drawableUBOStartId)
-};
-
-enum {
-    idHeatmapTexturePropsUBO = getEnumValue(drawableReservedUBOCount, drawableUBOStartId),
-    heatmapTextureUBOCount
 };
 
 enum {
