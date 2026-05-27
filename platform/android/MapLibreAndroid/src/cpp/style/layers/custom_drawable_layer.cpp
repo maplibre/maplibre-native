@@ -33,8 +33,7 @@ CustomDrawableJavaLayerPeerFactory::~CustomDrawableJavaLayerPeerFactory() = defa
 
 jni::Local<jni::Object<Layer>> CustomDrawableJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
                                                                                        mbgl::style::Layer& layer) {
-    return createJavaPeer(env,
-                          new CustomDrawableLayer(static_cast<mbgl::style::CustomDrawableLayer&>(layer)));
+    return createJavaPeer(env, new CustomDrawableLayer(static_cast<mbgl::style::CustomDrawableLayer&>(layer)));
 }
 
 jni::Local<jni::Object<Layer>> CustomDrawableJavaLayerPeerFactory::createJavaLayerPeer(
@@ -50,11 +49,11 @@ void CustomDrawableJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
     jni::RegisterNativePeer<CustomDrawableLayer>(env,
-                                                  javaClass,
-                                                  "nativePtr",
-                                                  jni::MakePeer<CustomDrawableLayer, const jni::String&, jni::jlong>,
-                                                  "initialize",
-                                                  "finalize");
+                                                 javaClass,
+                                                 "nativePtr",
+                                                 jni::MakePeer<CustomDrawableLayer, const jni::String&, jni::jlong>,
+                                                 "initialize",
+                                                 "finalize");
 }
 
 } // namespace android

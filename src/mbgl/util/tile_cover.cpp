@@ -216,22 +216,19 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double radiusOfMaxLvlLodInTiles = std::max(1.0, state.tileLodMinRadius);
 
     const auto newRootTile = [&](int16_t wrap) -> Node {
-        // Define a maximum height for your 3D space. 
-        // 2.0 to 7.0 is usually enough to cover tall buildings/models 
+        // Define a maximum height for your 3D space.
+        // 2.0 to 7.0 is usually enough to cover tall buildings/models
         // without causing massive overhead in the search tree.
-        const double maxHeight = 5.0; 
-    
-        return {
-            .aabb = AABB(
-                {{wrap * numTiles, 0.0, 0.0}},        // Min point (x, y, z)
-                {{(wrap + 1) * numTiles, numTiles, maxHeight}} // Max point (x, y, maxHeight)
-            ),
-            .zoom = uint8_t(0),
-            .x = uint16_t(0),
-            .y = uint16_t(0),
-            .wrap = wrap,
-            .fullyVisible = false
-        };
+        const double maxHeight = 5.0;
+
+        return {.aabb = AABB({{wrap * numTiles, 0.0, 0.0}},                 // Min point (x, y, z)
+                             {{(wrap + 1) * numTiles, numTiles, maxHeight}} // Max point (x, y, maxHeight)
+                             ),
+                .zoom = uint8_t(0),
+                .x = uint16_t(0),
+                .y = uint16_t(0),
+                .wrap = wrap,
+                .fullyVisible = false};
     };
 
     // Perform depth-first traversal on tile tree to find visible tiles

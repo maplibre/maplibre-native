@@ -404,8 +404,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
                     const auto& solidBackground = layer.getSolidBackground();
                     if (solidBackground) {
-                        const bool drawSky =
-                            renderTreeParameters->transformParams.state.getPitch() >= util::MIN_PITCH_FOR_SKY;
+                        const bool drawSky = renderTreeParameters->transformParams.state.getPitch() >=
+                                             util::MIN_PITCH_FOR_SKY;
                         if (drawSky) {
                             // Clear to sky color for uncovered areas above the horizon; render the
                             // background layer so tile drawables paint ground below the horizon.

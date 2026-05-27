@@ -67,8 +67,8 @@ GltfModelLayerHost::GltfModelLayerHost(std::vector<uint8_t> modelData_,
 
 void GltfModelLayerHost::initialize() {
     if (!modelData.empty()) {
-        Log::Info(Event::General, "GltfModelLayerHost: loading model from memory (" +
-                  std::to_string(modelData.size()) + " bytes)");
+        Log::Info(Event::General,
+                  "GltfModelLayerHost: loading model from memory (" + std::to_string(modelData.size()) + " bytes)");
         std::string dataStr(reinterpret_cast<const char*>(modelData.data()), modelData.size());
         model = util::loadGltfFromMemory(dataStr);
         modelData.clear();
@@ -81,13 +81,12 @@ void GltfModelLayerHost::initialize() {
         Log::Error(Event::General, "GltfModelLayerHost: failed to load model");
     } else {
         Log::Info(Event::General,
-                  "GltfModelLayerHost: loaded " + std::to_string(model.meshes.size()) + " mesh(es), texture=" +
-                      std::to_string(model.texture.has_value()));
+                  "GltfModelLayerHost: loaded " + std::to_string(model.meshes.size()) +
+                      " mesh(es), texture=" + std::to_string(model.texture.has_value()));
         for (size_t i = 0; i < model.meshes.size(); ++i) {
             Log::Info(Event::General,
-                      "  mesh[" + std::to_string(i) + "]: " +
-                          std::to_string(model.meshes[i].vertices->elements()) + " vertices, " +
-                          std::to_string(model.meshes[i].indices->elements()) + " triangles");
+                      "  mesh[" + std::to_string(i) + "]: " + std::to_string(model.meshes[i].vertices->elements()) +
+                          " vertices, " + std::to_string(model.meshes[i].indices->elements()) + " triangles");
         }
     }
 }
@@ -102,8 +101,8 @@ void GltfModelLayerHost::update(Interface& interface) {
         return;
     }
 
-    Log::Info(Event::General, "GltfModelLayerHost::update: adding geometry for " +
-              std::to_string(model.meshes.size()) + " mesh(es)");
+    Log::Info(Event::General,
+              "GltfModelLayerHost::update: adding geometry for " + std::to_string(model.meshes.size()) + " mesh(es)");
 
     struct FrameCache {
         uint64_t lastFrameCount = std::numeric_limits<uint64_t>::max();
@@ -116,39 +115,38 @@ void GltfModelLayerHost::update(Interface& interface) {
     const auto invariants = transformInvariants;
     auto frameCache = std::make_shared<FrameCache>();
 
-    interface.setGeometryTweakerCallback(
-        [loc, modelScale, invariants, frameCache]([[maybe_unused]] gfx::Drawable& drawable,
-                                                  const PaintParameters& params,
-                                                  Interface::GeometryOptions& opts) {
-            if (frameCache->lastFrameCount != params.frameCount) {
-                frameCache->lastFrameCount = params.frameCount;
-                const Point<double>& center = projectLocation(loc, params.state);
+    interface.setGeometryTweakerCallback([loc, modelScale, invariants, frameCache](
+                                             [[maybe_unused]] gfx::Drawable& drawable,
+                                             const PaintParameters& params,
+                                             Interface::GeometryOptions& opts) {
+        if (frameCache->lastFrameCount != params.frameCount) {
+            frameCache->lastFrameCount = params.frameCount;
+            const Point<double>& center = projectLocation(loc, params.state);
 
-                // Convert model units (meters) to world pixels for X/Y axes.
-                // worldSize = 512 * 2^zoom; earthCircum at latitude in meters.
-                // Z axis is kept in meters because the camera's worldToCamera matrix
-                // already applies pixelsPerMeter scaling to Z (see Camera::getWorldToCamera).
-                const double worldSize = 512.0 * params.state.getScale();
-                frameCache->xyScale = static_cast<float>(worldSize / invariants.earthCircumAtLat) * modelScale;
+            // Convert model units (meters) to world pixels for X/Y axes.
+            // worldSize = 512 * 2^zoom; earthCircum at latitude in meters.
+            // Z axis is kept in meters because the camera's worldToCamera matrix
+            // already applies pixelsPerMeter scaling to Z (see Camera::getWorldToCamera).
+            const double worldSize = 512.0 * params.state.getScale();
+            frameCache->xyScale = static_cast<float>(worldSize / invariants.earthCircumAtLat) * modelScale;
 
-                mat4 translation = matrix::identity4();
-                matrix::translate(translation, translation, center.x, center.y, 0.0);
-                matrix::multiply(frameCache->nearClippedProjectionTranslated,
-                                 params.transformParams.nearClippedProjMatrix,
-                                 translation);
-            }
+            mat4 translation = matrix::identity4();
+            matrix::translate(translation, translation, center.x, center.y, 0.0);
+            matrix::multiply(
+                frameCache->nearClippedProjectionTranslated, params.transformParams.nearClippedProjMatrix, translation);
+        }
 
-            mat4 m = matrix::identity4();
-            matrix::scale(
-                m, m, frameCache->xyScale * invariants.sx, frameCache->xyScale * invariants.sy, modelScale * invariants.sz);
+        mat4 m = matrix::identity4();
+        matrix::scale(
+            m, m, frameCache->xyScale * invariants.sx, frameCache->xyScale * invariants.sy, modelScale * invariants.sz);
 
-            // User-specified rotations
-            matrix::rotate_x(m, m, invariants.rotX);
-            matrix::rotate_y(m, m, invariants.rotY);
-            matrix::rotate_z(m, m, invariants.rotZ);
+        // User-specified rotations
+        matrix::rotate_x(m, m, invariants.rotX);
+        matrix::rotate_y(m, m, invariants.rotY);
+        matrix::rotate_z(m, m, invariants.rotZ);
 
-            matrix::multiply(opts.matrix, frameCache->nearClippedProjectionTranslated, m);
-        });
+        matrix::multiply(opts.matrix, frameCache->nearClippedProjectionTranslated, m);
+    });
 
     Interface::GeometryOptions options;
     if (model.texture) {
@@ -223,12 +221,13 @@ jni::jlong GltfModelLayerHost::createNativeHostFromData(jni::JNIEnv& env,
 
 void GltfModelLayerHost::registerNative(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<GltfModelLayerHost>::Singleton(env);
-    jni::RegisterNatives(env,
-                         *javaClass,
-                         jni::MakeNativeMethod<decltype(&GltfModelLayerHost::createNativeHost),
-                                               &GltfModelLayerHost::createNativeHost>("nativeCreateHost"),
-                         jni::MakeNativeMethod<decltype(&GltfModelLayerHost::createNativeHostFromData),
-                                               &GltfModelLayerHost::createNativeHostFromData>("nativeCreateHostFromData"));
+    jni::RegisterNatives(
+        env,
+        *javaClass,
+        jni::MakeNativeMethod<decltype(&GltfModelLayerHost::createNativeHost), &GltfModelLayerHost::createNativeHost>(
+            "nativeCreateHost"),
+        jni::MakeNativeMethod<decltype(&GltfModelLayerHost::createNativeHostFromData),
+                              &GltfModelLayerHost::createNativeHostFromData>("nativeCreateHostFromData"));
 }
 
 } // namespace android

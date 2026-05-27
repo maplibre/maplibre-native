@@ -68,8 +68,8 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     } else {
         const float pitch = static_cast<float>(state.getPitch());
         const float viewportHeight = static_cast<float>(state.getSize().height);
-        const float horizonClipY =
-            static_cast<float>(state.getHorizonClipY().value_or(2.0)) + util::SKY_HORIZON_NDC_OFFSET;
+        const float horizonClipY = static_cast<float>(state.getHorizonClipY().value_or(2.0)) +
+                                   util::SKY_HORIZON_NDC_OFFSET;
         const BackgroundPropsUBO propsUBO = {.color = evaluated.get<BackgroundColor>(),
                                              .opacity = evaluated.get<BackgroundOpacity>(),
                                              .pitch = pitch,

@@ -256,12 +256,15 @@ GltfModel loadGltfFromMemory(const std::string& data, const std::string& baseDir
 
     // Try binary (GLB) first
     if (data.size() >= 4 && data[0] == 'g' && data[1] == 'l' && data[2] == 'T' && data[3] == 'F') {
-        success = loader.LoadBinaryFromMemory(
-            &model, &err, &warn, reinterpret_cast<const unsigned char*>(data.data()),
-            static_cast<unsigned int>(data.size()), baseDir);
+        success = loader.LoadBinaryFromMemory(&model,
+                                              &err,
+                                              &warn,
+                                              reinterpret_cast<const unsigned char*>(data.data()),
+                                              static_cast<unsigned int>(data.size()),
+                                              baseDir);
     } else {
-        success = loader.LoadASCIIFromString(&model, &err, &warn, data.c_str(),
-                                              static_cast<unsigned int>(data.size()), baseDir);
+        success = loader.LoadASCIIFromString(
+            &model, &err, &warn, data.c_str(), static_cast<unsigned int>(data.size()), baseDir);
     }
 
     if (!warn.empty()) {

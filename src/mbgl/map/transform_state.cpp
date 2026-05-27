@@ -172,8 +172,8 @@ void TransformState::getProjMatrix(mat4& projMatrix,
     assert(tanMultiple < 1);
 
     // Horizon distance with pitch-aware floor (all tilts) and ceiling (steep tilt only).
-    const double furthestDistance =
-        computeHorizonFurthestDistance(cameraToSeaLevelDistance, tanMultiple, horizonProfile);
+    const double furthestDistance = computeHorizonFurthestDistance(
+        cameraToSeaLevelDistance, tanMultiple, horizonProfile);
 
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
@@ -1096,9 +1096,9 @@ double TransformState::computeTanMultiple() const {
     }
     const double limitedPitch = util::clamp(getPitch(), 0.0, maxMercatorHorizonAngle);
     const ScreenCoordinate offset = getCenterOffset();
-    const double tanFovAboveCenter =
-        (0.5 + (offset.y - frustumOffset.top()) / size.height) * 2.0 * std::tan(fov / 2.0) *
-        (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
+    const double tanFovAboveCenter = (0.5 + (offset.y - frustumOffset.top()) / size.height) * 2.0 *
+                                     std::tan(fov / 2.0) *
+                                     (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
     return util::clamp(tanFovAboveCenter * std::tan(limitedPitch), 0.0, kTanMultipleClamp);
 }
 
@@ -1117,8 +1117,7 @@ double TransformState::computeHorizonFurthestDistance(double cameraToSeaLevelDis
 
 float TransformState::getHorizonDistanceCullMultiplier() const {
     const auto [minMultiplier, maxMultiplier] = horizonLimitsForProfile(HorizonDistanceProfile::Default);
-    return static_cast<float>(
-        horizonMaxDistanceMultiplier(computeTanMultiple(), minMultiplier, maxMultiplier));
+    return static_cast<float>(horizonMaxDistanceMultiplier(computeTanMultiple(), minMultiplier, maxMultiplier));
 }
 
 float TransformState::getEffectiveHorizonCullMultiplier() const {

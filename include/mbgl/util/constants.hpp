@@ -33,7 +33,7 @@ constexpr double LONGITUDE_MAX = 180;
 constexpr double DEGREES_MAX = 360;
 constexpr double PITCH_MIN = 0.0;
 constexpr double DEFAULT_PITCH_MAX = M_PI * 7.0 / 18.0;
-constexpr double PITCH_MAX = M_PI * 7.0 / 18.0; 
+constexpr double PITCH_MAX = M_PI * 7.0 / 18.0;
 // Default vertical field of view in radians.
 constexpr double DEFAULT_FOV = 0.95;
 // Solid sky color used above the horizon when the map is pitched (CSS "skyblue").

@@ -529,7 +529,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
-
         // MapLibre symbols often ignore farZ depth clipping; cull tiles that are
         // entirely behind the camera or entirely beyond the effective projection
         // far plane. Use the NEAREST tile corner, not the geometric center: a
