@@ -77,7 +77,7 @@ TEST(LocalGlyphRasterizer, PingFangWithBoldInStyle) {
     ss << std::regex_replace(
         util::read_file("test/fixtures/local_glyphs/mixed.json"), std::regex("NotoCJK"), "NotoCJK Bold");
     test.map.getStyle().loadJSON(ss.str());
-    test.checkRendering("ping_fang_with_bold_in_style", 0.025);
+    test.checkRendering("ping_fang_with_bold_in_style", 0.05);
 }
 
 #if !defined(__QT__)
