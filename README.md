@@ -9,8 +9,9 @@ An experimental fork of **[MapLibre Native](https://github.com/maplibre/maplibre
 
 ## Relationship to MapLibre Native
 
-| | [Official MapLibre Native](https://github.com/maplibre/maplibre-native) | This repo |
+| | [Official MapLibre Native](https://github.com/maplibre/maplibre-native) | This fork |
 |---|--------|-----------|
+| Repo | [maplibre/maplibre-native](https://github.com/maplibre/maplibre-native) | [sdivjot/custom-maplibre-native](https://github.com/sdivjot/custom-maplibre-native) |
 | Purpose | Production cross-platform map SDK | Experimental Android 3D rendering |
 | Maintained by | MapLibre organization | Independent fork |
 | Docs | [maplibre.org/maplibre-native](https://maplibre.org/maplibre-native/) | [ACCOMPLISHMENTS.md](./ACCOMPLISHMENTS.md) |
