@@ -270,7 +270,7 @@ void main() {
     const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
     const vec2 perp = normalize(p1 - p2);
 
-    const vec3 normal = vec3(-perp.y, -perp.x, 1.0);
+    const vec3 normal = vec3(-perp.y, perp.x, 0.0);
     const float t = float(in_position.y);
     const float z = t != 0.0 ? height : base;
 
@@ -725,7 +725,7 @@ void main() {
     const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
     const vec2 perp = normalize(p1 - p2);
 
-    const vec3 normal = vec3(-perp.y, -perp.x, 1.0);
+    const vec3 normal = vec3(perp.y, -perp.x, 0.0);
     const float edgedistance = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
     const float t = float(in_position.y);
     const float z = t != 0.0 ? height : base;
@@ -769,9 +769,7 @@ void main() {
     const vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
-    const vec2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
-        ? vec2(in_position) // extrusion top
-        : vec2(edgedistance, z * drawable.height_factor); // extrusion side
+    const vec2 pos = vec2(edgedistance, z * drawable.height_factor); // extrusion side
 
     vec4 lighting = vec4(0.0, 0.0, 0.0, 1.0);
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
