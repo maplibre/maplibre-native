@@ -24,15 +24,51 @@ If `upstream` is missing, add it:
 git remote add upstream https://github.com/maplibre/maplibre-native.git
 ```
 
-## Why `git merge upstream/main` fails
+## Git history
 
-This repo was published with a **fresh git history** (single initial commit). Upstream has years of commits. Git treats them as **unrelated histories** and refuses a normal merge.
+This repo is based on **upstream `main`** with **1 commit** of 3D rendering changes on top:
 
-**Do not run** `git merge upstream/main --allow-unrelated-histories` — that attempts to merge two entire codebases and produces massive conflicts.
+```bash
+git log upstream/main..main --oneline
+# b117004 Add Android 3D rendering extensions on MapLibre Native.
+```
 
-## Sync workflow (recommended)
+GitHub compare URL (after push):
 
-Use `upstream` to **fetch, compare, and selectively port** changes — not to merge wholesale.
+https://github.com/maplibre/maplibre-native/compare/main...sdivjot:custom-maplibre-rendering-engine:main
+
+## Get the GitHub “forked from” badge
+
+GitHub only shows **“forked from maplibre/maplibre-native”** if the repo was created with the **Fork** button. To get that badge:
+
+1. Go to [maplibre/maplibre-native](https://github.com/maplibre/maplibre-native) → **Fork** → create under your account.
+2. Rename the fork to `custom-maplibre-rendering-engine` (Settings → General → Repository name).
+3. Force-push this repo (full history + your commit):
+
+```bash
+git push origin main --force-with-lease
+git push origin feature/android-3d-rendering
+```
+
+After that, GitHub shows **“1 commit ahead of maplibre:main”** and a file diff vs upstream.
+
+## Show your branch on MapLibre Native (Pull Request)
+
+You **cannot** push a branch directly to `maplibre/maplibre-native` without maintainer access. Instead:
+
+1. Push your feature branch to **your fork**:
+
+```bash
+git push -u origin feature/android-3d-rendering
+```
+
+2. Open a Pull Request:
+
+https://github.com/maplibre/maplibre-native/compare/main...sdivjot:custom-maplibre-rendering-engine:feature/android-3d-rendering
+
+Your branch then appears in the PR on the official repo (for review/discussion), even if it is not merged.
+
+## Sync workflow
 
 ### 1. Fetch latest upstream
 
@@ -55,25 +91,14 @@ git diff upstream/main -- platform/android/MapLibreAndroid/src/cpp/style/layers/
 git diff upstream/main --stat
 ```
 
-### 3. Port a specific upstream fix
+### 3. Merge upstream updates (normal merge works now)
 
 ```bash
 git fetch upstream
-git cherry-pick <commit-sha>    # only if the patch applies cleanly
+git merge upstream/main
 ```
 
-If cherry-pick fails, open the upstream commit on GitHub and apply the change manually to the matching files in this repo.
-
-### 4. Rebase onto a newer upstream release (major upgrade)
-
-When jumping many versions (e.g. 13.0.0 → 13.2.0):
-
-1. Clone official MapLibre Native at the target tag in a separate directory.
-2. Copy your custom files / diffs from this repo (glTF layer, transform changes, shaders, test app).
-3. Build and fix conflicts manually.
-4. Update `platform/android/VERSION` and note the new base in this file.
-
-There is no one-command merge because of the unrelated histories.
+Resolve any conflicts, then push. Your 3D commit stays on top of the latest MapLibre Native.
 
 ## Link this repo on GitHub
 
