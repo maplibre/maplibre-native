@@ -725,7 +725,7 @@ void main() {
     const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
     const vec2 perp = normalize(p1 - p2);
 
-    const vec3 normal = vec3(perp.y, -perp.x, 0.0);
+    const vec3 normal = vec3(-perp.y, perp.x, 0.0);
     const float edgedistance = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
     const float t = float(in_position.y);
     const float z = t != 0.0 ? height : base;
