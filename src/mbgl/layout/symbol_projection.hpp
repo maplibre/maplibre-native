@@ -68,6 +68,10 @@ std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float 
                                                                           const mat4& labelPlaneMatrix,
                                                                           bool returnTileDistance);
 
+/// Returns false when the anchor is behind the camera, outside the padded viewport, or above the
+/// pitched-map horizon (clip space). Uses the same space as `tile.matrix` / `reprojectLineLabels`.
+bool isSymbolAnchorVisible(const vec4& anchorPos, const TransformState& state);
+
 void hideGlyphs(std::size_t numGlyphs,
                 gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray);
 void addDynamicAttributes(const Point<float>& anchorPoint,

@@ -18,7 +18,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -27,17 +27,18 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec4 in_normal_ed;
+layout(location = 2) in vec2 in_edge_distance;
 
 #if !defined(HAS_UNIFORM_u_color)
-layout(location = 2) in vec4 in_color;
+layout(location = 3) in vec4 in_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 3) in vec2 in_base;
+layout(location = 4) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 4) in vec2 in_height;
+layout(location = 5) in vec2 in_height;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -166,7 +167,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -175,21 +176,22 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec4 in_normal_ed;
+layout(location = 2) in vec2 in_edge_distance;
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 2) in vec2 in_base;
+layout(location = 3) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 3) in vec2 in_height;
+layout(location = 4) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in uvec4 in_pattern_from;
+layout(location = 5) in uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in uvec4 in_pattern_to;
+layout(location = 6) in uvec4 in_pattern_to;
 #endif
 
 layout(push_constant) uniform Constants {

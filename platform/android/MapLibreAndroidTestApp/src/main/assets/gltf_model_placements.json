@@ -1,0 +1,14 @@
+[
+  {
+    "id": "Duck",
+    "displayName": "Duck",
+    "asset": "glbModel/Duck.glb",
+    "lat": 37.7749,
+    "lng": -122.4194,
+    "heightMeters": 5,
+    "scale": 0.001,
+    "rotationX": 90,
+    "rotationY": 0,
+    "rotationZ": 0
+  }
+]

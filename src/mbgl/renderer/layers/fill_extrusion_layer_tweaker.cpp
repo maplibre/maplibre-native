@@ -13,6 +13,7 @@
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
+#include <mbgl/util/constants.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
@@ -54,7 +55,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         .fade = crossfade.t,
         .from_scale = crossfade.fromScale,
         .to_scale = crossfade.toScale,
-        .pad2 = 0};
+        .bevel_radius = util::FILL_EXTRUSION_BEVEL_RADIUS};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 

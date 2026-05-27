@@ -37,7 +37,6 @@ layout (std140) uniform SymbolDrawableUBO {
     bool u_pitch_with_map;
     bool u_is_size_zoom_constant;
     bool u_is_size_feature_constant;
-    bool u_is_offset;
 
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
@@ -123,9 +122,7 @@ void main() {
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    if (!u_is_offset) {
-        size *= perspective_ratio;
-    }
+    size *= perspective_ratio;
 
     float fontScale = u_is_text_prop ? size / 24.0 : size;
 

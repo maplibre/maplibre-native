@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="description_custom_layer">Overlay a custom native layer on the map</string>
+    <string name="description_gltf_model_layer">Render a 3D glTF model at a geographic location</string>
     <string name="description_info_window_adapter">Learn how to create a custom InfoWindow</string>
     <string name="description_cameraposition">CameraPosition capabilities</string>
     <string name="description_map_fragment">Showcase MapFragment</string>
@@ -55,7 +56,6 @@
     <string name="description_visibility_map">Changes visibility of map and view parent</string>
     <string name="description_add_remove_markers">Change Symbol icon when zoom levels changes</string>
     <string name="description_style_file">Use a local file as the style</string>
-    <string name="description_style_url">Load a map style dynamically from a URL</string>
     <string name="description_map_in_dialog">Display a map inside a dialog fragment</string>
     <string name="description_circle_layer">Show bus stops and route in Singapore</string>
     <string name="description_collection_style_change">Verify that updating the GeoJsonSource across style changes allows for smooth transitions</string>

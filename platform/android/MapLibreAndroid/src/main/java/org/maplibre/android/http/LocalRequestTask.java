@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.maplibre.android.MapStrictMode;
+import org.maplibre.android.MapLibre;
 import org.maplibre.android.log.Logger;
 
 import java.io.IOException;
@@ -16,18 +17,16 @@ class LocalRequestTask extends AsyncTask<String, Void, byte[]> {
 
   private static final String TAG = "Mbgl-LocalRequestTask";
 
-  private final AssetManager assets;
   private OnLocalRequestResponse requestResponse;
 
-  LocalRequestTask(@NonNull AssetManager assets, OnLocalRequestResponse requestResponse) {
-    this.assets = assets;
+  LocalRequestTask(OnLocalRequestResponse requestResponse) {
     this.requestResponse = requestResponse;
   }
 
   @Nullable
   @Override
   protected byte[] doInBackground(String... strings) {
-    return loadFile(assets,
+    return loadFile(MapLibre.getApplicationContext().getAssets(),
       "integration/" + strings[0]
         .substring(8)
         .replaceAll("%20", " ")

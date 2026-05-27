@@ -81,10 +81,6 @@ void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
     observer->onShaderCompileFailed(shaderID, type, additionalDefines);
 }
 
-void Renderer::Impl::onRenderError(std::exception_ptr error) {
-    observer->onRenderError(error);
-}
-
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
@@ -190,7 +186,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     observer->onWillStartRenderingFrame();
 
     const TransformState& state = renderTreeParameters.transformParams.state;
-    const Size& size = staticData->backendSize;
+    const Size& size = state.getSize();
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
     const gfx::ScissorRect scissorRect = {
         .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
@@ -199,8 +195,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 #else
         .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
-        .width = size.width - static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
-        .height = size.height - static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
+        .width = static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
+        .height = static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
     };
 
     PaintParameters parameters{

@@ -16,9 +16,9 @@ namespace webgpu {
 
 class HeadlessRenderableResource final : public webgpu::RenderableResource {
 public:
-    HeadlessRenderableResource(HeadlessBackend&, webgpu::Context& context_, Size size_)
+    HeadlessRenderableResource(HeadlessBackend&, webgpu::Context& context_, Size size)
         : context(context_),
-          size(size_) {
+          size(size) {
         // Create offscreen texture using the proper WebGPU OffscreenTexture class
         offscreenTexture = context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte, true, true);
     }

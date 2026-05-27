@@ -1000,17 +1000,7 @@ final class NativeMapView implements NativeMap {
     if (checkState("removeLayer")) {
       return false;
     }
-    if (layer.isDetached()) {
-      Logger.w(TAG, "Ignoring removeLayer() call on detached layer reference.");
-      return false;
-    }
-
-    final long nativePtr = layer.getNativePtr();
-    if (nativePtr == 0L) {
-      Logger.w(TAG, "Ignoring removeLayer() call on released layer pointer.");
-      return false;
-    }
-    return nativeRemoveLayer(nativePtr);
+    return nativeRemoveLayer(layer.getNativePtr());
   }
 
   @Override
@@ -1386,13 +1376,6 @@ final class NativeMapView implements NativeMap {
   private void onSpriteRequested(String id, String url) {
     if (stateCallback != null) {
       stateCallback.onSpriteRequested(id, url);
-    }
-  }
-
-  @Keep
-  private void onRenderError() {
-    if (stateCallback != null) {
-      stateCallback.onRenderError();
     }
   }
 
@@ -1884,7 +1867,5 @@ final class NativeMapView implements NativeMap {
     void onSpriteError(String id, String url);
 
     void onSpriteRequested(String id, String url);
-
-    void onRenderError();
   }
 }

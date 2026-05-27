@@ -45,3 +45,22 @@ suspend fun MapLibreMap.animateCameraSuspend(cameraUpdate: CameraUpdate, duratio
             }
         })
     }
+
+/** Ease camera for smoother zoom/pan transitions (ease-in-out). */
+suspend fun MapLibreMap.easeCameraSuspend(cameraUpdate: CameraUpdate, durationMs: Int): Unit =
+    suspendCancellableCoroutine { continuation ->
+        easeCamera(cameraUpdate, durationMs, object : CancelableCallback {
+            var resumed = false
+
+            override fun onCancel() {
+                continuation.cancel()
+            }
+
+            override fun onFinish() {
+                if (!resumed) {
+                    resumed = true
+                    continuation.resume(Unit)
+                }
+            }
+        })
+    }

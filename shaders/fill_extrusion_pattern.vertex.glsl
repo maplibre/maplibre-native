@@ -1,5 +1,6 @@
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
+layout (location = 2) in vec2 a_edge_distance;
 
 out vec2 v_pos_a;
 out vec2 v_pos_b;
@@ -54,6 +55,7 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_from_scale;
     highp float u_to_scale;
     lowp float props_pad2;
+    highp float u_bevel_radius;
 };
 
 #pragma mapbox: define lowp float base

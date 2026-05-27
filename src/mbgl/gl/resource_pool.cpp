@@ -154,9 +154,6 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
                                   Enum<gfx::TexturePixelType>::to(desc.pixelFormat),
                                   Enum<gfx::TextureChannelDataType>::to(desc.channelType),
                                   nullptr));
-    if (glGetError()) {
-        throw std::bad_alloc();
-    }
 
     // Update stats
     context->renderingStats().numCreatedTextures++;

@@ -124,6 +124,12 @@ struct TransformStateProperties {
     std::optional<EdgeInsets> frustumOffset;
 };
 
+/// Controls how far the projection far plane extends (as multiples of camera altitude).
+enum class HorizonDistanceProfile {
+    Default,       ///< Basemap tiles and symbol culling (slightly beyond 3D content).
+    FillExtrusion, ///< Fill-extrusion layers and GLTF / custom 3D models.
+};
+
 class TransformState {
 public:
     TransformState(ConstrainMode = ConstrainMode::HeightOnly, ViewportMode = ViewportMode::Default);
@@ -132,7 +138,10 @@ public:
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
-    void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
+    void getProjMatrix(mat4& matrix,
+                       uint16_t nearZ = 1,
+                       bool aligned = false,
+                       HorizonDistanceProfile horizonProfile = HorizonDistanceProfile::Default) const;
 
     // Dimensions
     Size getSize() const;
@@ -239,7 +248,26 @@ public:
     bool valid() const { return !size.isEmpty() && (scale >= min_scale && scale <= max_scale); }
 
     float getCameraToTileDistance(const UnwrappedTileID&) const;
+
+    /// Minimum clip-space W over the four corners of the tile that lie in front of the
+    /// camera (W > 0). Returns -1.0 if every corner is at or behind the camera plane.
+    ///
+    /// Prefer this over `getCameraToTileDistance` for "is this tile in view?" tests:
+    /// the geometric center is not a safe proxy for an overzoomed tile (a single source
+    /// tile rendered across many viewport tiles), where the center can be far from the
+    /// visible part of the tile in either direction along the camera-forward axis.
+    float getNearestCameraToTileDistance(const UnwrappedTileID&) const;
+
     float maxPitchScaleFactor() const;
+
+    /// Pitch-aware horizon distance multiplier for tile / label culling (matches getProjMatrix far plane).
+    float getHorizonDistanceCullMultiplier() const;
+
+    /// Effective far-plane distance / camera-to-center distance (matches `getProjMatrix` after min/max clamp).
+    float getEffectiveHorizonCullMultiplier() const;
+
+    /// Clip-space Y (NDC) of the map horizon at the top-center of the viewport, if pitched.
+    std::optional<double> getHorizonClipY() const;
 
     /** Recenter the map so that the given coordinate is located at the given
         point on screen. */
@@ -263,6 +291,11 @@ private:
     // Viewport center offset, from [size.width / 2, size.height / 2], defined
     // by |edgeInsets| in screen coordinates, with top left origin.
     ScreenCoordinate getCenterOffset() const;
+
+    double computeTanMultiple() const;
+    double computeHorizonFurthestDistance(double cameraToSeaLevelDistance,
+                                          double tanMultiple,
+                                          HorizonDistanceProfile horizonProfile) const;
 
     LatLngBounds bounds;
 

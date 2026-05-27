@@ -512,11 +512,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         });
     }
 
-    const auto& layout = impl_cast(baseImpl).layout;
-    const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
+    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
-    const bool isOffset = !layout.get<IconOffset>().isUndefined();
 
     const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
@@ -531,6 +529,30 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
+
+        // MapLibre symbols often ignore farZ depth clipping; cull tiles that are
+        // entirely behind the camera or entirely beyond the effective projection
+        // far plane. Use the NEAREST tile corner, not the geometric center: a
+        // single source tile that is overzoomed (e.g. the LocationComponent puck
+        // source has maxzoom=16, but view zoom routinely exceeds 16) spans many
+        // viewport tiles of world space, and its geometric center can sit far
+        // from the visible content along the camera-forward axis. A center-only
+        // check then drops the tile while the visible part (the puck) is still
+        // dead-center on screen, and because `continue` here skips the per-frame
+        // dynamic vertex upload to the GPU, the drawable keeps rendering with
+        // last frame's data — the puck appears stuck/disappears until the user
+        // pans or zooms enough to shift the tile center back into the cull box.
+        // Per-symbol horizon culling in `Placement::updateBucketDynamicVertices`
+        // handles individual sky-bound symbols within tiles that do pass here.
+        const float nearestTileDistance = state.getNearestCameraToTileDistance(tile.id);
+        if (nearestTileDistance < 0.0f) {
+            continue;
+        }
+        const float cameraAltitude = state.getCameraToCenterDistance();
+        if (nearestTileDistance > cameraAltitude * state.getEffectiveHorizonCullMultiplier()) {
+            continue;
+        }
+
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
@@ -562,9 +584,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
 
-            const auto& bucketLayout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
-                                       : iconPropertyValues(evaluated, bucketLayout);
+            const auto& layout = *bucket.layout;
+            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
             const std::string suffix = isText ? "text/" : "icon/";
 
             const auto addVertices = [&collisionBuilder](const auto& vertices) {
@@ -711,9 +732,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        const auto& bucketLayout = *bucket.layout;
-        const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
-                                   : iconPropertyValues(evaluated, bucketLayout);
+        const auto& layout = *bucket.layout;
+        const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
 
         const auto& atlases = tile.getAtlasTextures();
         if (!atlases) {
@@ -763,7 +783,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                                                                      textSizeIsZoomConstant);
             }
             if (!isText && !tileInfo.iconTweaker) {
-                const bool iconScaled = bucketLayout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+                const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
                 tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                                      idSymbolImageIconTexture,
                                                                                      idSymbolImageTexture,
@@ -823,9 +843,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     /*.symbolType=*/renderable.type,
                     /*.pitchAlignment=*/values.pitchAlignment,
                     /*.rotationAlignment=*/values.rotationAlignment,
-                    /*.placement=*/bucketLayout.get<SymbolPlacement>(),
-                    /*.textFit=*/bucketLayout.get<IconTextFit>(),
-                    /*.isOffset=*/isOffset));
+                    /*.placement=*/layout.get<SymbolPlacement>(),
+                    /*.textFit=*/layout.get<IconTextFit>()));
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

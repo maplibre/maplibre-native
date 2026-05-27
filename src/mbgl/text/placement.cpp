@@ -861,6 +861,13 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                 // the extra math to figure out what incremental shift to apply.
                 hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicVertices());
             } else {
+                vec4 anchorPos = {{symbol.anchorPoint.x, symbol.anchorPoint.y, 0, 1}};
+                matrix::transformMat4(anchorPos, anchorPos, tile.matrix);
+                if (!isSymbolAnchorVisible(anchorPos, state)) {
+                    hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicVertices());
+                    continue;
+                }
+
                 const Point<float> tileAnchor = symbol.anchorPoint;
                 const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
                 const float perspectiveRatio = 0.5f +
@@ -933,15 +940,21 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
 
         result = true;
     } else if (bucket.allowVerticalPlacement && bucket.hasTextData()) {
-        const auto updateDynamicVertices = [](SymbolBucket::Buffer& buffer) {
+        const auto updateDynamicVertices = [&](SymbolBucket::Buffer& buffer) {
             buffer.sharedDynamicVertices->clear();
             for (const PlacedSymbol& symbol : buffer.placedSymbols) {
                 if (symbol.hidden || !symbol.placedOrientation) {
                     hideGlyphs(symbol.glyphOffsets.size(), buffer.dynamicVertices());
-                } else {
-                    for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
-                        addDynamicAttributes(symbol.anchorPoint, symbol.angle, buffer.dynamicVertices());
-                    }
+                    continue;
+                }
+                vec4 anchorPos = {{symbol.anchorPoint.x, symbol.anchorPoint.y, 0, 1}};
+                matrix::transformMat4(anchorPos, anchorPos, tile.matrix);
+                if (!isSymbolAnchorVisible(anchorPos, state)) {
+                    hideGlyphs(symbol.glyphOffsets.size(), buffer.dynamicVertices());
+                    continue;
+                }
+                for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
+                    addDynamicAttributes(symbol.anchorPoint, symbol.angle, buffer.dynamicVertices());
                 }
             }
         };
@@ -953,6 +966,57 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
             updateDynamicVertices(bucket.sdfIcon);
         }
 
+        result = true;
+    } else if (!alongLine && state.getPitch() >= 0.01) {
+        const auto updatePointSymbols = [&](SymbolBucket::Buffer& buffer) {
+            buffer.sharedDynamicVertices->clear();
+            if (buffer.placedSymbols.empty()) {
+                return;
+            }
+            for (const PlacedSymbol& symbol : buffer.placedSymbols) {
+                // NOTE: Do NOT skip on `symbol.hidden` here. `symbol.hidden` is set
+                // by `updateBucketOpacities` whenever a symbol's current fade opacity
+                // is 0 — most importantly during the fade-in of a freshly placed tile.
+                // Writing degenerate vertex data while a tile is fading in causes the
+                // newly-placed puck/symbol to be at (0,0) for the duration of the fade
+                // (the old tile remains visible at a stale position via cross-fade).
+                // Once the old tile is culled (e.g. by horizon culling), the puck
+                // appears to "snap" to the correct position. The opacity system
+                // already handles fade-in/out via the `a_placed` attribute, so the
+                // dynamic vertex (anchor) data should always be correct regardless
+                // of fade state.
+                vec4 anchorPos = {{symbol.anchorPoint.x, symbol.anchorPoint.y, 0, 1}};
+                matrix::transformMat4(anchorPos, anchorPos, tile.matrix);
+                // Only hide point symbols behind the camera or above the horizon.
+                // Do NOT hide based on the padded-viewport bounds: near-camera
+                // point symbols (e.g. navigation puck) can project below the
+                // bottom edge of the viewport while still being on screen.
+                if (anchorPos[3] <= 0.0) {
+                    hideGlyphs(symbol.glyphOffsets.size(), buffer.dynamicVertices());
+                    continue;
+                }
+                if (const auto horizonClipY = state.getHorizonClipY()) {
+                    const double clipY = anchorPos[1] / anchorPos[3];
+                    if (clipY > *horizonClipY + 0.01) {
+                        hideGlyphs(symbol.glyphOffsets.size(), buffer.dynamicVertices());
+                        continue;
+                    }
+                }
+                for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
+                    addDynamicAttributes(symbol.anchorPoint, symbol.angle, buffer.dynamicVertices());
+                }
+            }
+        };
+
+        if (bucket.hasTextData()) {
+            updatePointSymbols(bucket.text);
+        }
+        if (bucket.hasIconData()) {
+            updatePointSymbols(bucket.icon);
+        }
+        if (bucket.hasSdfIconData()) {
+            updatePointSymbols(bucket.sdfIcon);
+        }
         result = true;
     }
 

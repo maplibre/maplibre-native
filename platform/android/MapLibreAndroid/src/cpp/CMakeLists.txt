@@ -151,6 +151,10 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.hpp
+            ${PROJECT_SOURCE_DIR}/style/layers/custom_drawable_layer.cpp
+            ${PROJECT_SOURCE_DIR}/style/layers/custom_drawable_layer.hpp
+            ${PROJECT_SOURCE_DIR}/style/layers/gltf_model_layer_host.cpp
+            ${PROJECT_SOURCE_DIR}/style/layers/gltf_model_layer_host.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_layer.cpp

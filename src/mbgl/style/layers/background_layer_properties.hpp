@@ -28,10 +28,20 @@ struct BackgroundPattern : CrossFadedPaintProperty<expression::Image> {
     static expression::Image defaultValue() { return {}; }
 };
 
+struct BackgroundSkyBottomColor : PaintProperty<Color> {
+    static Color defaultValue() { return Color::white(); }
+};
+
+struct BackgroundSkyTopColor : PaintProperty<Color> {
+    static Color defaultValue() { return { 0.5294117647058824, 0.807843137254902, 0.9215686274509803, 1 }; }
+};
+
 class BackgroundPaintProperties : public Properties<
     BackgroundColor,
     BackgroundOpacity,
-    BackgroundPattern
+    BackgroundPattern,
+    BackgroundSkyBottomColor,
+    BackgroundSkyTopColor
 > {};
 
 class BackgroundLayerProperties final : public LayerProperties {

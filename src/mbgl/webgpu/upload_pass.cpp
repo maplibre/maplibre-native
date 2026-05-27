@@ -187,7 +187,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ static_cast<uint32_t>(stride),
                 /*.vertexBufferResource = */ dummyBuffer.get(),
                 /*.vertexOffset = */ 0,
-                /*.bufferIndex = */ 0,
             };
 
             // Store the buffer so it doesn't get destroyed
@@ -206,7 +205,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
                 /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
-                /*.bufferIndex = */ 0,
             };
             return;
         }
@@ -221,7 +219,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
                 /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ 0,
-                /*.bufferIndex = */ 0,
             };
             return;
         }

@@ -910,12 +910,11 @@ TEST(Transform, MinMaxPitch) {
 
     transform.jumpTo(CameraOptions().withZoom(1.0).withPitch(60));
     ASSERT_DOUBLE_EQ(1, transform.getZoom());
-    ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
     ASSERT_DOUBLE_EQ(util::deg2rad(60), transform.getPitch());
 
-    transform.setMaxPitch(70);
     transform.jumpTo(CameraOptions().withPitch(70));
     ASSERT_DOUBLE_EQ(transform.getState().getMaxPitch(), transform.getPitch());
+    ASSERT_DOUBLE_EQ(util::deg2rad(70), transform.getPitch());
 
     transform.setMaxPitch(45);
     transform.jumpTo(CameraOptions().withPitch(60));

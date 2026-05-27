@@ -92,8 +92,6 @@ public:
     AndroidRendererBackend& getRendererBackend() const { return *backend; }
     const TaggedScheduler& getThreadPool() const { return threadPool; }
 
-    void SetAsyncRendererCleanup(bool value) { asyncRendererCleanup = value; }
-
 protected:
     // Called from the GL Thread //
 
@@ -158,7 +156,6 @@ private:
 
     bool framebufferSizeChanged = false;
     bool swapBehaviorFlush = false;
-    bool asyncRendererCleanup = false;
 
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`

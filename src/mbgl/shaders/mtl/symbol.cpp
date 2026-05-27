@@ -10,18 +10,15 @@ namespace shaders {
 using SymbolIconShaderSource = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 6> SymbolIconShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, symbolUBOCount + 0, idSymbolDataVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPixelOffsetVertexAttribute},
+    // always attributes
+    AttributeInfo{symbolUBOCount + 0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
+    AttributeInfo{symbolUBOCount + 1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
+    AttributeInfo{symbolUBOCount + 2, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
+    AttributeInfo{symbolUBOCount + 3, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
+    AttributeInfo{symbolUBOCount + 4, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
 
-    // Dynamic
-    AttributeInfo{3, gfx::AttributeDataType::Float3, symbolUBOCount + 1, idSymbolProjectedPosVertexAttribute},
-
-    // Opacity
-    AttributeInfo{4, gfx::AttributeDataType::Float, symbolUBOCount + 2, idSymbolFadeOpacityVertexAttribute},
-
-    // Data driven
-    AttributeInfo{5, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolOpacityVertexAttribute},
+    // sometimes uniforms
+    AttributeInfo{symbolUBOCount + 5, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
@@ -33,22 +30,19 @@ const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
 using SymbolSDFShaderSource = ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 10> SymbolSDFShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, symbolUBOCount + 0, idSymbolDataVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPixelOffsetVertexAttribute},
+    // always attributes
+    AttributeInfo{symbolUBOCount + 0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
+    AttributeInfo{symbolUBOCount + 1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
+    AttributeInfo{symbolUBOCount + 2, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
+    AttributeInfo{symbolUBOCount + 3, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
+    AttributeInfo{symbolUBOCount + 4, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
 
-    // Dynamic
-    AttributeInfo{3, gfx::AttributeDataType::Float3, symbolUBOCount + 1, idSymbolProjectedPosVertexAttribute},
-
-    // Opacity
-    AttributeInfo{4, gfx::AttributeDataType::Float, symbolUBOCount + 2, idSymbolFadeOpacityVertexAttribute},
-
-    // Data driven
-    AttributeInfo{5, gfx::AttributeDataType::Float4, symbolUBOCount + 3, idSymbolColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float4, symbolUBOCount + 3, idSymbolHaloColorVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolOpacityVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{9, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolHaloBlurVertexAttribute},
+    // sometimes uniforms
+    AttributeInfo{symbolUBOCount + 5, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
+    AttributeInfo{symbolUBOCount + 6, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
+    AttributeInfo{symbolUBOCount + 7, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
+    AttributeInfo{symbolUBOCount + 8, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
+    AttributeInfo{symbolUBOCount + 9, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
 };
 const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
@@ -60,21 +54,18 @@ const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
 using SymbolTextAndIconShaderSource = ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 9> SymbolTextAndIconShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short4, symbolUBOCount + 0, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, symbolUBOCount + 0, idSymbolDataVertexAttribute},
+    // always attributes
+    AttributeInfo{symbolUBOCount + 0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
+    AttributeInfo{symbolUBOCount + 1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
+    AttributeInfo{symbolUBOCount + 2, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
+    AttributeInfo{symbolUBOCount + 3, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
 
-    // Dynamic
-    AttributeInfo{2, gfx::AttributeDataType::Float3, symbolUBOCount + 1, idSymbolProjectedPosVertexAttribute},
-
-    // Opacity
-    AttributeInfo{3, gfx::AttributeDataType::Float, symbolUBOCount + 2, idSymbolFadeOpacityVertexAttribute},
-
-    // Data driven
-    AttributeInfo{4, gfx::AttributeDataType::Float4, symbolUBOCount + 3, idSymbolColorVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float4, symbolUBOCount + 3, idSymbolHaloColorVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolOpacityVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float, symbolUBOCount + 3, idSymbolHaloBlurVertexAttribute},
+    // sometimes uniforms
+    AttributeInfo{symbolUBOCount + 4, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
+    AttributeInfo{symbolUBOCount + 5, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
+    AttributeInfo{symbolUBOCount + 6, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
+    AttributeInfo{symbolUBOCount + 7, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
+    AttributeInfo{symbolUBOCount + 8, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
 };
 const std::array<TextureInfo, 2> SymbolTextAndIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},

@@ -56,10 +56,6 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
 void DynamicTexture::uploadDeferredImages() {
     std::scoped_lock lock(mutex);
 
-    if (texturesToBlit.empty()) {
-        return;
-    }
-
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
     context.submitOneTimeCommand(commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
         textureVK->transitionToTransferWriteLayout(commandBuffer);
@@ -137,7 +133,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     UniqueBufferAllocation bufferAllocation = std::make_unique<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
-        throw std::bad_alloc();
+        return;
     }
 
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
@@ -150,10 +146,6 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
 
 void DynamicTexture::uploadDeferredImages() {
     std::scoped_lock lock(mutex);
-
-    if (textureBuffersToUpload.empty()) {
-        return;
-    }
 
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
     context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {

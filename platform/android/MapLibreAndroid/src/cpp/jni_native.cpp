@@ -59,6 +59,7 @@
 #include "logger.hpp"
 #include "text/local_glyph_rasterizer_jni.hpp"
 #include "tile/tile_operation.hpp"
+#include "style/layers/gltf_model_layer_host.hpp"
 
 namespace mbgl {
 namespace android {
@@ -173,6 +174,9 @@ void registerNatives(JavaVM* vm) {
     // Util
     DefaultStyle::registerNative(env);
     TileServerOptions::registerNative(env);
+
+    // 3D Model
+    GltfModelLayerHost::registerNative(env);
 }
 
 } // namespace android

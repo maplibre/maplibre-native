@@ -95,7 +95,7 @@ BufferResource::BufferResource(
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
-        throw std::bad_alloc();
+        return;
     }
 
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
@@ -188,9 +188,6 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     uint8_t* data = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset;
 
     if (memcmp(data, newData, updateSize) == 0) {
-        if (bufferWindowSize) {
-            bufferWindowVersions[context.getCurrentFrameResourceIndex()] = version;
-        }
         return;
     }
 
@@ -212,7 +209,8 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     }
 
     if (bufferWindowSize) {
-        bufferWindowVersions[context.getCurrentFrameResourceIndex()] = version;
+        const auto frameIndex = context.getCurrentFrameResourceIndex();
+        bufferWindowVersions[frameIndex] = version;
     }
 }
 

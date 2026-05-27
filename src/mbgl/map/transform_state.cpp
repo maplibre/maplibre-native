@@ -9,6 +9,8 @@
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 
+#include <array>
+#include <limits>
 #include <numbers>
 
 using namespace std::numbers;
@@ -22,6 +24,27 @@ namespace mbgl {
  * the number of tiles needed to render the map.
  */
 const double maxMercatorHorizonAngle = util::deg2rad(89.25);
+
+namespace {
+
+constexpr double kTanMultipleClamp = 0.99;
+
+std::pair<double, double> horizonLimitsForProfile(HorizonDistanceProfile profile) {
+    switch (profile) {
+        case HorizonDistanceProfile::FillExtrusion:
+            return {util::HORIZON_FILL_EXTRUSION_MIN_MULTIPLIER, util::HORIZON_FILL_EXTRUSION_MAX_MULTIPLIER};
+        case HorizonDistanceProfile::Default:
+            break;
+    }
+    return {util::HORIZON_DISTANCE_MIN_MULTIPLIER, util::HORIZON_DISTANCE_MAX_MULTIPLIER};
+}
+
+double horizonMaxDistanceMultiplier(double tanMultiple, double minMultiplier, double maxMultiplier) {
+    const double pitchT = tanMultiple / kTanMultipleClamp;
+    return util::interpolate(minMultiplier, maxMultiplier, pitchT);
+}
+
+} // namespace
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
@@ -125,7 +148,10 @@ void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) cons
     matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
 }
 
-void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligned) const {
+void TransformState::getProjMatrix(mat4& projMatrix,
+                                   uint16_t nearZ,
+                                   bool aligned,
+                                   HorizonDistanceProfile horizonProfile) const {
     if (size.isEmpty()) {
         return;
     }
@@ -142,14 +168,13 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     // 1 Z unit is equivalent to 1 horizontal px at the center of the map
     // (the distance between[width/2, height/2] and [width/2 + 1, height/2])
     // See https://github.com/mapbox/mapbox-gl-native/pull/15195 for details.
-    // See TransformState::fov description: fov = 2 * arctan((height / 2) / (height * 1.5)).
-    const double tanFovAboveCenter = (0.5 + (offset.y - frustumOffset.top()) / size.height) * 2.0 *
-                                     std::tan(fov / 2.0) *
-                                     (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
-    const double tanMultiple = util::clamp(tanFovAboveCenter * std::tan(limitedPitch), 0.0, 0.99);
+    const double tanMultiple = computeTanMultiple();
     assert(tanMultiple < 1);
-    // Calculate z distance of the farthest fragment that should be rendered.
-    const double furthestDistance = cameraToSeaLevelDistance / (1 - tanMultiple);
+
+    // Horizon distance with pitch-aware floor (all tilts) and ceiling (steep tilt only).
+    const double furthestDistance =
+        computeHorizonFurthestDistance(cameraToSeaLevelDistance, tanMultiple, horizonProfile);
+
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
 
@@ -1048,14 +1073,115 @@ void TransformState::setScalePoint(const double newScale, const ScreenCoordinate
     requestMatricesUpdate = true;
 }
 
+std::optional<double> TransformState::getHorizonClipY() const {
+    if (getPitch() < util::MIN_PITCH_FOR_SKY || size.isEmpty()) {
+        return std::nullopt;
+    }
+
+    // Top-center of the viewport lies on the map horizon when pitched.
+    const LatLng horizonLatLng = screenCoordinateToLatLng({size.width * 0.5, 0.0});
+    const Point<double> mercator = Projection::project(horizonLatLng, getScale()) / util::tileSize_D;
+    const vec4 pos = {{mercator.x, mercator.y, 0.0, 1.0}};
+    vec4 clip;
+    matrix::transformMat4(clip, pos, getProjectionMatrix());
+    if (clip[3] == 0.0) {
+        return std::nullopt;
+    }
+    return clip[1] / clip[3];
+}
+
+double TransformState::computeTanMultiple() const {
+    if (size.isEmpty()) {
+        return 0.0;
+    }
+    const double limitedPitch = util::clamp(getPitch(), 0.0, maxMercatorHorizonAngle);
+    const ScreenCoordinate offset = getCenterOffset();
+    const double tanFovAboveCenter =
+        (0.5 + (offset.y - frustumOffset.top()) / size.height) * 2.0 * std::tan(fov / 2.0) *
+        (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
+    return util::clamp(tanFovAboveCenter * std::tan(limitedPitch), 0.0, kTanMultipleClamp);
+}
+
+double TransformState::computeHorizonFurthestDistance(double cameraToSeaLevelDistance,
+                                                      double tanMultiple,
+                                                      HorizonDistanceProfile horizonProfile) const {
+    const auto [minMultiplier, maxMultiplier] = horizonLimitsForProfile(horizonProfile);
+    double furthestDistance = cameraToSeaLevelDistance / (1.0 - tanMultiple);
+    const double maxDistanceMultiplier = horizonMaxDistanceMultiplier(tanMultiple, minMultiplier, maxMultiplier);
+    furthestDistance = std::max(furthestDistance, cameraToSeaLevelDistance * minMultiplier);
+    if (furthestDistance > cameraToSeaLevelDistance * maxDistanceMultiplier) {
+        furthestDistance = cameraToSeaLevelDistance * maxDistanceMultiplier;
+    }
+    return furthestDistance;
+}
+
+float TransformState::getHorizonDistanceCullMultiplier() const {
+    const auto [minMultiplier, maxMultiplier] = horizonLimitsForProfile(HorizonDistanceProfile::Default);
+    return static_cast<float>(
+        horizonMaxDistanceMultiplier(computeTanMultiple(), minMultiplier, maxMultiplier));
+}
+
+float TransformState::getEffectiveHorizonCullMultiplier() const {
+    if (size.isEmpty()) {
+        return 0.0f;
+    }
+    const double cameraToCenterDistance = getCameraToCenterDistance();
+    const double limitedPitch = util::clamp(getPitch(), 0.0, maxMercatorHorizonAngle);
+    const double cameraToSeaLevelDistance = cameraToCenterDistance + std::abs(z) / std::cos(limitedPitch);
+    const double furthestDistance = computeHorizonFurthestDistance(
+        cameraToSeaLevelDistance, computeTanMultiple(), HorizonDistanceProfile::Default);
+    return static_cast<float>(furthestDistance / cameraToCenterDistance);
+}
+
 float TransformState::getCameraToTileDistance(const UnwrappedTileID& tileID) const {
     mat4 tileProjectionMatrix;
     matrixFor(tileProjectionMatrix, tileID);
     matrix::multiply(tileProjectionMatrix, getProjectionMatrix(), tileProjectionMatrix);
-    vec4 tileCenter = {{util::tileSize_D / 2, util::tileSize_D / 2, 0, 1}};
+    vec4 tileCenter = {{util::EXTENT / 2.0, util::EXTENT / 2.0, 0, 1}};
     vec4 projectedCenter;
     matrix::transformMat4(projectedCenter, tileCenter, tileProjectionMatrix);
     return static_cast<float>(projectedCenter[3]);
+}
+
+float TransformState::getNearestCameraToTileDistance(const UnwrappedTileID& tileID) const {
+    mat4 tileProjectionMatrix;
+    matrixFor(tileProjectionMatrix, tileID);
+    matrix::multiply(tileProjectionMatrix, getProjectionMatrix(), tileProjectionMatrix);
+
+    // Iterate the 4 tile corners (in tile coords) and project each to clip space.
+    // Return the smallest positive W (closest in-front-of-camera corner). If every
+    // corner has W <= 0, the entire tile is behind the camera plane; return -1.
+    //
+    // Why this is needed: `getCameraToTileDistance` only projects the geometric
+    // tile center. For overzoomed sources (e.g. the LocationComponent puck source
+    // with maxzoom=16 viewed at higher zoom), one source tile can span many
+    // viewport tiles' worth of world space, and the geometric center is not where
+    // the visible content (the puck) actually is. A center-only check can declare
+    // the tile "behind the camera" or "beyond the far plane" while the visible
+    // part of the tile is dead-center on screen.
+    constexpr std::array<std::array<double, 2>, 4> corners = {{
+        {{0.0, 0.0}},
+        {{static_cast<double>(util::EXTENT), 0.0}},
+        {{0.0, static_cast<double>(util::EXTENT)}},
+        {{static_cast<double>(util::EXTENT), static_cast<double>(util::EXTENT)}},
+    }};
+
+    float minDistance = std::numeric_limits<float>::infinity();
+    bool anyInFront = false;
+    for (const auto& corner : corners) {
+        const vec4 cornerVec = {{corner[0], corner[1], 0.0, 1.0}};
+        vec4 projected;
+        matrix::transformMat4(projected, cornerVec, tileProjectionMatrix);
+        if (projected[3] > 0.0) {
+            anyInFront = true;
+            minDistance = std::min(minDistance, static_cast<float>(projected[3]));
+        }
+    }
+
+    if (!anyInFront) {
+        return -1.0f;
+    }
+    return minDistance;
 }
 
 float TransformState::maxPitchScaleFactor() const {

@@ -68,6 +68,8 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     MBGL_VERIFY_THREAD(tid);
 
+    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+
     destroyResources();
 
     {
@@ -439,15 +441,11 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
-    tileLayerGroup->setObserver(observer);
-    return tileLayerGroup;
+    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
-    layerGroup->setObserver(observer);
-    return layerGroup;
+    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,

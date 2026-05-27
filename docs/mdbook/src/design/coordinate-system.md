@@ -271,15 +271,8 @@ pitch: 45 degrees
 tile: 585/783/11
 ```
 
-On top of this, MapLibre Native uses a field of view of 36.87 degrees
-or 0.6435011087932844 radians. This is somewhat arbitrary. The altitude
-of the camera used to be defined as 1.5 screen heights above the ground.
-The ground is the 3D plane that paints the map tiles. The field of view
-is derived from the following formula:
-
-```
-fov = 2 * arctan((height / 2) / (height * 1.5))
-```
+On top of this, MapLibre Native uses a default vertical field of view of
+54.43 degrees or 0.95 radians.
 
 Factoring only the transformations of zoom, map center, bearing, pitch,
 and tile in, with a viewport of 862 by 742 pixels, the projection matrix

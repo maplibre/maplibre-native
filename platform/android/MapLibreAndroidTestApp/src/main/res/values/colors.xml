@@ -10,4 +10,7 @@
     <color name="blueAccent">#2962FF</color>
     <color name="greenAccent">#1B5E20</color>
 
+    <color name="exploreMenuBackground">#E637474F</color>
+    <color name="exploreMenuText">#FFFFFF</color>
+
 </resources>

@@ -146,12 +146,12 @@ public class MapLibreConstants {
   /**
    * The currently supported maximum pitch level.
    */
-  public static final float MAXIMUM_PITCH = 60.0f;
+  public static final float MAXIMUM_PITCH = 70.0f;
 
   /**
    * The currently supported maximum tilt value.
    */
-  public static final double MAXIMUM_TILT = 60;
+  public static final double MAXIMUM_TILT = 70;
 
   /**
    * The currently supported minimum tilt value.
@@ -171,7 +171,7 @@ public class MapLibreConstants {
   /**
    * The current default vertical field of view (matches mbgl::util::DEFAULT_FOV)
    */
-  public static final double DEFAULT_FOV = 36.86989764584402;
+  public static final double DEFAULT_FOV = 54.43088617685017;
 
   /**
    * The currently used minimum scale factor to clamp to when a quick zoom gesture occurs

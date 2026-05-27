@@ -7,11 +7,9 @@ namespace shaders {
 using HeatmapShaderSource = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 3> HeatmapShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, heatmapUBOCount + 0, idHeatmapPosVertexAttribute},
-
-    // Data driven
-    AttributeInfo{1, gfx::AttributeDataType::Float2, heatmapUBOCount + 1, idHeatmapWeightVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, heatmapUBOCount + 1, idHeatmapRadiusVertexAttribute},
+    AttributeInfo{heatmapUBOCount + 0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
+    AttributeInfo{heatmapUBOCount + 1, gfx::AttributeDataType::Float2, idHeatmapWeightVertexAttribute},
+    AttributeInfo{heatmapUBOCount + 2, gfx::AttributeDataType::Float2, idHeatmapRadiusVertexAttribute},
 };
 const std::array<TextureInfo, 0> HeatmapShaderSource::textures = {};
 

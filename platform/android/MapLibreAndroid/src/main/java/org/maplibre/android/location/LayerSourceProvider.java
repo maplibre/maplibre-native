@@ -28,10 +28,22 @@ class LayerSourceProvider {
 
   @NonNull
   GeoJsonSource generateSource(Feature locationFeature, Boolean synchronousUpdate) {
+    // maxZoom 22 (was 16): the upstream default of 16 leaves the puck source heavily
+    // overzoomed at any view zoom > 16, which the native renderer represents by re-using
+    // a single z=16 source tile scaled up to cover many viewport tiles. An overzoomed
+    // tile's geometric center can sit far from the puck along the camera-forward axis,
+    // which makes a center-only "is this tile in view?" test (e.g. tile-distance
+    // culling in RenderSymbolLayer) drop the tile even when the puck is dead-center on
+    // screen, causing the puck to disappear / stick at high zoom or moderate pitch.
+    // Bumping to 22 means the puck's tile sits at the same zoom as the viewport at all
+    // realistic zoom levels; the source contains a single point feature so the cost of
+    // a higher maxZoom is negligible. The C++ renderer also uses a tile-corner-based
+    // distance check (see `TransformState::getNearestCameraToTileDistance`) for any
+    // overzoom that still slips through (e.g. view zoom > 22).
     return new GeoJsonSource(
       LocationComponentConstants.LOCATION_SOURCE,
       locationFeature,
-      new GeoJsonOptions().withMaxZoom(16).withSynchronousUpdate(synchronousUpdate)
+      new GeoJsonOptions().withMaxZoom(22).withSynchronousUpdate(synchronousUpdate)
     );
   }
 

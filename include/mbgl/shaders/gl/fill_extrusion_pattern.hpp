@@ -10,6 +10,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Ope
     static constexpr const char* name = "FillExtrusionPatternShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
+layout (location = 2) in vec2 a_edge_distance;
 
 out vec2 v_pos_a;
 out vec2 v_pos_b;
@@ -64,22 +65,23 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_from_scale;
     highp float u_to_scale;
     lowp float props_pad2;
+    highp float u_bevel_radius;
 };
 
 #ifndef HAS_UNIFORM_u_base
-layout (location = 2) in lowp vec2 a_base;
+layout (location = 3) in lowp vec2 a_base;
 out lowp float base;
 #endif
 #ifndef HAS_UNIFORM_u_height
-layout (location = 3) in lowp vec2 a_height;
+layout (location = 4) in lowp vec2 a_height;
 out lowp float height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-layout (location = 4) in mediump vec4 a_pattern_from;
+layout (location = 5) in mediump vec4 a_pattern_from;
 out mediump vec4 pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-layout (location = 5) in mediump vec4 a_pattern_to;
+layout (location = 6) in mediump vec4 a_pattern_to;
 out mediump vec4 pattern_to;
 #endif
 
@@ -178,6 +180,7 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_from_scale;
     highp float u_to_scale;
     lowp float props_pad2;
+    highp float u_bevel_radius;
 };
 
 uniform sampler2D u_image;

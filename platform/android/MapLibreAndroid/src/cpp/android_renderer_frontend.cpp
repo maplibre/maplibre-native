@@ -88,8 +88,6 @@ public:
         delegate.invoke(&RendererObserver::onTileAction, op, id, sourceID);
     }
 
-    void onRenderError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onRenderError, err); }
-
 private:
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<RendererObserver> delegate;

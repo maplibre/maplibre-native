@@ -36,9 +36,6 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.vertexBuffer = result;
     MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    if (glGetError()) {
-        throw std::bad_alloc();
-    }
     return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
 }
 
@@ -64,9 +61,6 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = result;
     MBGL_CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    if (glGetError()) {
-        throw std::bad_alloc();
-    }
     return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
 }
 
@@ -167,7 +161,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             /* vertexStride = */ vertexStride,
             /* vertexBufferResource = */ nullptr, // buffer details established later
             /* vertexOffset = */ 0,
-            /*.bufferIndex = */ 0,
         };
     }
 
@@ -188,7 +181,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
                 /*.vertexBufferResource = */ buffer.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
-                /*.bufferIndex = */ 0,
             };
             return;
         }
@@ -232,7 +224,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             /* vertexStride = */ static_cast<uint32_t>(stride),
             /* vertexBufferResource = */ nullptr, // buffer details established later
             /* vertexOffset = */ 0,
-            /*.bufferIndex = */ 0,
         };
 
         pad(allData, align, padding);

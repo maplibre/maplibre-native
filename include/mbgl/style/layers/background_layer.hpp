@@ -39,6 +39,18 @@ public:
     void setBackgroundPatternTransition(const TransitionOptions&);
     TransitionOptions getBackgroundPatternTransition() const;
 
+    static PropertyValue<Color> getDefaultBackgroundSkyBottomColor();
+    const PropertyValue<Color>& getBackgroundSkyBottomColor() const;
+    void setBackgroundSkyBottomColor(const PropertyValue<Color>&);
+    void setBackgroundSkyBottomColorTransition(const TransitionOptions&);
+    TransitionOptions getBackgroundSkyBottomColorTransition() const;
+
+    static PropertyValue<Color> getDefaultBackgroundSkyTopColor();
+    const PropertyValue<Color>& getBackgroundSkyTopColor() const;
+    void setBackgroundSkyTopColor(const PropertyValue<Color>&);
+    void setBackgroundSkyTopColorTransition(const TransitionOptions&);
+    TransitionOptions getBackgroundSkyTopColorTransition() const;
+
     // Private implementation
 
     class Impl;

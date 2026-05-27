@@ -10,7 +10,13 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillExtrusionShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
+layout (location = 2) in vec2 a_edge_distance;
+
+out vec2 v_edge_dist;
+out float v_z_height;
+out vec3 v_normal;
 out vec4 v_color;
+out float v_t;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
@@ -48,17 +54,17 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad2;
+    highp float u_bevel_radius;
 };
 
 #ifndef HAS_UNIFORM_u_base
-layout (location = 2) in highp vec2 a_base;
+layout (location = 3) in highp vec2 a_base;
 #endif
 #ifndef HAS_UNIFORM_u_height
-layout (location = 3) in highp vec2 a_height;
+layout (location = 4) in highp vec2 a_height;
 #endif
 #ifndef HAS_UNIFORM_u_color
-layout (location = 4) in highp vec4 a_color;
+layout (location = 5) in highp vec4 a_color;
 #endif
 
 void main() {
@@ -84,20 +90,75 @@ highp vec4 color = u_color;
     height = max(0.0, height);
 
     float t = mod(normal.x, 2.0);
+    v_z_height = t > 0.0 ? height : base;
+    v_edge_dist = a_edge_distance;
+    v_normal = normal / 16384.0;
+    v_t = t;
 
-    gl_Position = u_matrix * vec4(a_pos, t > 0.0 ? height : base, 1);
-
-    // Relative luminance (how dark/bright is the surface color?)
-    float colorvalue = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
-
-    v_color = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_Position = u_matrix * vec4(a_pos, v_z_height, 1);
 
     // Add slight ambient lighting so no extrusions are totally black
     vec4 ambientlight = vec4(0.03, 0.03, 0.03, 1.0);
-    color += ambientlight;
+    v_color = color + ambientlight;
+}
+)";
+    static constexpr const char* fragment = R"(in vec2 v_edge_dist;
+in float v_z_height;
+in vec3 v_normal;
+in vec4 v_color;
+in float v_t;
+
+layout (std140) uniform FillExtrusionPropsUBO {
+    highp vec4 u_color;
+    highp vec3 u_lightcolor;
+    lowp float props_pad1;
+    highp vec3 u_lightpos;
+    highp float u_base;
+    highp float u_height;
+    highp float u_lightintensity;
+    highp float u_vertical_gradient;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
+    highp float u_bevel_radius;
+};
+
+void main() {
+    // 1. Get base normal
+    vec3 normal = v_normal;
+    vec3 up_vector = vec3(0.0, 0.0, 1.0);
+
+    // 2. Isolate the distance to the roof edge (normalized 0.0 to 1.0)
+    float t_roof = clamp(v_edge_dist.y / u_bevel_radius, 0.0, 1.0);
+
+    // 3. The Micro-Chamfer Curve
+    // Using pow(..., 4.0) ensures the normal only bends at the extreme edge.
+    // 90% of the wall will remain flat, catching normal directional light.
+    float bend_weight = pow(1.0 - t_roof, 4.0);
+
+    // 4. Wall Isolation
+    // Only apply this upward bend to the walls. If we bend the roof normal, it creates artifacts.
+    // MapLibre walls have a Z normal close to 0. Roofs are close to 1.
+    float is_wall = step(normal.z, 0.5);
+
+    // 5. Apply the precise bend
+    vec3 beveled_normal = mix(normal, up_vector, bend_weight * is_wall);
+
+    // 6. Keep the bottom footprint sharp
+    float bottom_sharpness = smoothstep(0.0, u_bevel_radius, v_z_height);
+    beveled_normal = mix(normal, beveled_normal, bottom_sharpness);
+
+    // 7. Finalize
+    beveled_normal = normalize(beveled_normal);
+
+    // Relative luminance (how dark/bright is the surface color?)
+    float colorvalue = v_color.r * 0.2126 + v_color.g * 0.7152 + v_color.b * 0.0722;
+
+    vec4 frag_color = vec4(0.0, 0.0, 0.0, 1.0);
 
     // Calculate cos(theta), where theta is the angle between surface normal and diffuse light ray
-    float directional = clamp(dot(normal / 16384.0, u_lightpos), 0.0, 1.0);
+    float directional = clamp(dot(beveled_normal, u_lightpos), 0.0, 1.0);
 
     // Adjust directional so that
     // the range of values for highlight/shading is narrower
@@ -106,27 +167,19 @@ highp vec4 color = u_color;
     directional = mix((1.0 - u_lightintensity), max((1.0 - colorvalue + u_lightintensity), 1.0), directional);
 
     // Add gradient along z axis of side surfaces
-    if (normal.y != 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
-        // and otherwise calculates the gradient based on base + height
+    if (v_normal.y != 0.0) {
         directional *= (
             (1.0 - u_vertical_gradient) +
-            (u_vertical_gradient * clamp((t + base) * pow(height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - u_lightintensity), 1.0)));
+            (u_vertical_gradient * clamp((v_t + u_base) * pow(u_height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - u_lightintensity), 1.0)));
     }
 
     // Assign final color based on surface + ambient light color, diffuse light directional, and light color
     // with lower bounds adjusted to hue of light
     // so that shading is tinted with the complementary (opposite) color to the light color
-    v_color.r += clamp(color.r * directional * u_lightcolor.r, mix(0.0, 0.3, 1.0 - u_lightcolor.r), 1.0);
-    v_color.g += clamp(color.g * directional * u_lightcolor.g, mix(0.0, 0.3, 1.0 - u_lightcolor.g), 1.0);
-    v_color.b += clamp(color.b * directional * u_lightcolor.b, mix(0.0, 0.3, 1.0 - u_lightcolor.b), 1.0);
-    v_color *= u_opacity;
-}
-)";
-    static constexpr const char* fragment = R"(in vec4 v_color;
-
-void main() {
-    fragColor = v_color;
+    frag_color.r += clamp(v_color.r * directional * u_lightcolor.r, mix(0.0, 0.3, 1.0 - u_lightcolor.r), 1.0);
+    frag_color.g += clamp(v_color.g * directional * u_lightcolor.g, mix(0.0, 0.3, 1.0 - u_lightcolor.g), 1.0);
+    frag_color.b += clamp(v_color.b * directional * u_lightcolor.b, mix(0.0, 0.3, 1.0 - u_lightcolor.b), 1.0);
+    fragColor = frag_color * u_opacity;
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

@@ -8,6 +8,7 @@
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
@@ -65,11 +66,15 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                                                     .opacity = evaluated.get<BackgroundOpacity>()};
         layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context);
     } else {
+        const float pitch = static_cast<float>(state.getPitch());
+        const float viewportHeight = static_cast<float>(state.getSize().height);
+        const float horizonClipY =
+            static_cast<float>(state.getHorizonClipY().value_or(2.0)) + util::SKY_HORIZON_NDC_OFFSET;
         const BackgroundPropsUBO propsUBO = {.color = evaluated.get<BackgroundColor>(),
                                              .opacity = evaluated.get<BackgroundOpacity>(),
-                                             .pad1 = 0,
-                                             .pad2 = 0,
-                                             .pad3 = 0};
+                                             .pitch = pitch,
+                                             .horizon_clip_y = horizonClipY,
+                                             .viewport_height = viewportHeight};
         layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context);
     }
 

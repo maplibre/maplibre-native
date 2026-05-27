@@ -10,7 +10,7 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -18,14 +18,15 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) normal_ed: vec4<i32>,
+    @location(5) edge_distance: vec2<f32>,
 #ifndef HAS_UNIFORM_u_color
-    @location(5) color: vec4<f32>,
+    @location(6) color: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_base
-    @location(6) base: vec2<f32>,
+    @location(7) base: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_height
-    @location(7) height: vec2<f32>,
+    @location(8) height: vec2<f32>,
 #endif
 };
 
@@ -146,7 +147,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionPatternShader";
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -154,17 +155,18 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Web
 struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) normal_ed: vec4<i32>,
+    @location(5) edge_distance: vec2<f32>,
 #ifndef HAS_UNIFORM_u_base
-    @location(5) base: vec2<f32>,
+    @location(6) base: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_height
-    @location(6) height: vec2<f32>,
+    @location(7) height: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(7) pattern_from: vec4<u32>,
+    @location(8) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(8) pattern_to: vec4<u32>,
+    @location(9) pattern_to: vec4<u32>,
 #endif
 };
 

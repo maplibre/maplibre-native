@@ -89,9 +89,6 @@ public:
     virtual void onSpriteLoaded(const std::optional<style::Sprite>&) {}
     virtual void onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr) {}
     virtual void onSpriteRequested(const std::optional<style::Sprite>&) {}
-
-    // Renderer
-    virtual void onRenderError(std::exception_ptr) {}
 };
 
 } // namespace mbgl

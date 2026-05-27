@@ -3,7 +3,9 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/math.hpp>
+#include <mbgl/util/projection.hpp>
 
 #include <numbers>
 
@@ -170,12 +172,40 @@ float evaluateSizeForFeature(const ZoomEvaluatedSize& zoomEvaluatedSize, const P
     }
 }
 
-bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
+namespace {
+
+constexpr double kHorizonClipPadding = 0.01;
+
+std::array<double, 2> getClippingBuffer(const TransformState& state) {
+    const auto& size = state.getSize();
+    return {256.0 / size.width * 2.0 + 1.0, 256.0 / size.height * 2.0 + 1.0};
+}
+
+bool isInPaddedViewport(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
     const double x = anchorPos[0] / anchorPos[3];
     const double y = anchorPos[1] / anchorPos[3];
-    const bool inPaddedViewport = (x >= -clippingBuffer[0] && x <= clippingBuffer[0] && y >= -clippingBuffer[1] &&
-                                   y <= clippingBuffer[1]);
-    return inPaddedViewport;
+    return (x >= -clippingBuffer[0] && x <= clippingBuffer[0] && y >= -clippingBuffer[1] && y <= clippingBuffer[1]);
+}
+
+} // namespace
+
+bool isSymbolAnchorVisible(const vec4& anchorPos, const TransformState& state) {
+    if (anchorPos[3] <= 0.0) {
+        return false;
+    }
+
+    if (!isInPaddedViewport(anchorPos, getClippingBuffer(state))) {
+        return false;
+    }
+
+    if (const auto horizonClipY = state.getHorizonClipY()) {
+        const double clipY = anchorPos[1] / anchorPos[3];
+        if (clipY > *horizonClipY + kHorizonClipPadding) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void addDynamicAttributes(const Point<float>& anchorPoint,
@@ -497,9 +527,6 @@ void reprojectLineLabels(gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttrib
                          const TransformState& state) {
     const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(static_cast<float>(state.getZoom()));
 
-    const std::array<double, 2> clippingBuffer = {
-        {256.0 / state.getSize().width * 2.0 + 1.0, 256.0 / state.getSize().height * 2.0 + 1.0}};
-
     const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
 
     const mat4 labelPlaneMatrix = getLabelPlaneMatrix(posMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
@@ -527,7 +554,7 @@ void reprojectLineLabels(gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttrib
         matrix::transformMat4(anchorPos, anchorPos, posMatrix);
 
         // Don't bother calculating the correct point for invisible labels.
-        if (!isVisible(anchorPos, clippingBuffer)) {
+        if (!isSymbolAnchorVisible(anchorPos, state)) {
             hideGlyphs(placedSymbol.glyphOffsets.size(), dynamicVertexArray);
             continue;
         }

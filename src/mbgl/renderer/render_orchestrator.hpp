@@ -112,11 +112,7 @@ public:
     void visitLayerGroups(Func f) {
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
-                try {
-                    f(*pair.second);
-                } catch (...) {
-                    observer->onRenderError(std::current_exception());
-                }
+                f(*pair.second);
             }
         }
     }
@@ -125,11 +121,7 @@ public:
     void visitLayerGroupsReversed(Func f) {
         for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
             if (rit->second) {
-                try {
-                    f(*rit->second);
-                } catch (...) {
-                    observer->onRenderError(std::current_exception());
-                }
+                f(*rit->second);
             }
         }
     }

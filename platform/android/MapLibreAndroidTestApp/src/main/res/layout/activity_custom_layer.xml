@@ -1,24 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <org.maplibre.android.maps.MapView
         android:id="@id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        app:maplibre_uiLogo="false"
+        app:maplibre_uiAttribution="false"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+    <LinearLayout
+        android:id="@+id/exploreMenuContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_layers"
-        app:backgroundTint="@android:color/white"/>
+        android:layout_gravity="start|top"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="56dp"
+        android:background="@color/exploreMenuBackground"
+        android:elevation="24dp"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:stateListAnimator="@null">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <TextView
+            android:id="@+id/exploreMenuTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:paddingEnd="24dp"
+            android:paddingStart="4dp"
+            android:paddingTop="4dp"
+            android:text="@string/explore_3d"
+            android:textColor="@color/exploreMenuText"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/exploreModelSelector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:padding="8dp"
+            android:textColor="@color/exploreMenuText"
+            android:textSize="14sp"/>
+
+        <LinearLayout
+            android:id="@+id/exploreModelList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</FrameLayout>

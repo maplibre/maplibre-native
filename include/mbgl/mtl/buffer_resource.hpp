@@ -37,7 +37,7 @@ public:
 
     BufferResource clone() const;
 
-    void update(const void* data, std::size_t size, std::size_t offset);
+    void update(const void* data, std::size_t size, std::size_t offset) noexcept;
 
     std::size_t getSizeInBytes() const noexcept { return size; }
     const void* contents() const noexcept { return buffer ? buffer->contents() : (raw.empty() ? nullptr : raw.data()); }

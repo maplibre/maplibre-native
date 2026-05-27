@@ -561,7 +561,7 @@ public final class MapLibreMap {
    * Sets the maximum Pitch the map can be displayed at.
    * </p>
    * <p>
-   * The default and upper bound for maximum Pitch is 60.
+   * The default and upper bound for maximum Pitch is 70.
    * </p>
    *
    * @param maxPitch The new maximum Pitch.

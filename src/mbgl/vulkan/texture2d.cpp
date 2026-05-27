@@ -125,7 +125,7 @@ size_t Texture2D::numChannels() const noexcept {
     }
 }
 
-void Texture2D::create() {
+void Texture2D::create() noexcept {
     if (textureDirty) {
         createTexture();
     }
@@ -136,7 +136,7 @@ void Texture2D::destroy(bool deferred) noexcept {
     destroySampler(deferred);
 }
 
-void Texture2D::upload() {
+void Texture2D::upload() noexcept {
     if (!imageData) return;
 
     upload(imageData->data.get(), imageData->size);
@@ -144,12 +144,12 @@ void Texture2D::upload() {
     imageData.reset();
 }
 
-void Texture2D::upload(const void* pixelData, const Size& size_) {
+void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     setSize(size_);
     uploadSubRegion(pixelData, size_, 0, 0);
 }
 
-void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) {
+void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     const auto& encoder = context.createCommandEncoder();
@@ -163,7 +163,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
                                 const vk::UniqueCommandBuffer& commandBuffer,
-                                bool submit) {
+                                bool submit) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
@@ -187,7 +187,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
-        throw std::bad_alloc();
+        return;
     }
 
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
@@ -348,7 +348,7 @@ void Texture2D::createTexture() {
     imageAllocation = std::make_shared<ImageAllocation>(backend.getAllocator());
     if (!imageAllocation->create(allocCreateInfo, imageCreateInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture allocation failed");
-        throw std::bad_alloc();
+        return;
     }
 
     // defaults to eIdentity
@@ -421,9 +421,6 @@ void Texture2D::createSampler() {
     }
 
     sampler = backend.getDevice()->createSampler(samplerCreateInfo, nullptr, backend.getDispatcher());
-    if (!sampler) {
-        throw std::bad_alloc();
-    }
 
     samplerStateDirty = false;
     lastModified = util::MonotonicTimer::now();

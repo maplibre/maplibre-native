@@ -46,12 +46,14 @@ open class MapLibreApplication : MultiDexApplication() {
                 .penaltyLog()
                 .build()
         )
+        // Use penaltyLog only for VM violations. penaltyDeath() causes crashes when device
+        // vendor code (e.g. OplusSystemUINavigationGestureExtImpl) leaks closables during
+        // map animations; we still detect and log violations without killing the app.
         StrictMode.setVmPolicy(
             VmPolicy.Builder()
                 .detectLeakedSqlLiteObjects()
                 .detectLeakedClosableObjects()
                 .penaltyLog()
-                .penaltyDeath()
                 .build()
         )
     }

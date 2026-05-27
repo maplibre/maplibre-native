@@ -374,7 +374,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         builder->setShader(colorReliefShader);
-        builder->setEnableDepth(false);
+        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setRenderPass(renderPass);

@@ -147,19 +147,77 @@ TransitionOptions BackgroundLayer::getBackgroundPatternTransition() const {
     return impl().paint.template get<BackgroundPattern>().options;
 }
 
+PropertyValue<Color> BackgroundLayer::getDefaultBackgroundSkyBottomColor() {
+    return {Color::white()};
+}
+
+const PropertyValue<Color>& BackgroundLayer::getBackgroundSkyBottomColor() const {
+    return impl().paint.template get<BackgroundSkyBottomColor>().value;
+}
+
+void BackgroundLayer::setBackgroundSkyBottomColor(const PropertyValue<Color>& value) {
+    if (value == getBackgroundSkyBottomColor())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<BackgroundSkyBottomColor>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void BackgroundLayer::setBackgroundSkyBottomColorTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<BackgroundSkyBottomColor>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions BackgroundLayer::getBackgroundSkyBottomColorTransition() const {
+    return impl().paint.template get<BackgroundSkyBottomColor>().options;
+}
+
+PropertyValue<Color> BackgroundLayer::getDefaultBackgroundSkyTopColor() {
+    return {{ 0.5294117647058824, 0.807843137254902, 0.9215686274509803, 1 }};
+}
+
+const PropertyValue<Color>& BackgroundLayer::getBackgroundSkyTopColor() const {
+    return impl().paint.template get<BackgroundSkyTopColor>().value;
+}
+
+void BackgroundLayer::setBackgroundSkyTopColor(const PropertyValue<Color>& value) {
+    if (value == getBackgroundSkyTopColor())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<BackgroundSkyTopColor>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void BackgroundLayer::setBackgroundSkyTopColorTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<BackgroundSkyTopColor>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions BackgroundLayer::getBackgroundSkyTopColorTransition() const {
+    return impl().paint.template get<BackgroundSkyTopColor>().options;
+}
+
 using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 6u;
+constexpr uint8_t kPaintPropertyCount = 10u;
 
 enum class Property : uint8_t {
     BackgroundColor,
     BackgroundOpacity,
     BackgroundPattern,
+    BackgroundSkyBottomColor,
+    BackgroundSkyTopColor,
     BackgroundColorTransition,
     BackgroundOpacityTransition,
     BackgroundPatternTransition,
+    BackgroundSkyBottomColorTransition,
+    BackgroundSkyTopColorTransition,
 };
 
 template <typename T>
@@ -171,9 +229,13 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
     {{"background-color", toUint8(Property::BackgroundColor)},
      {"background-opacity", toUint8(Property::BackgroundOpacity)},
      {"background-pattern", toUint8(Property::BackgroundPattern)},
+     {"background-sky-bottom-color", toUint8(Property::BackgroundSkyBottomColor)},
+     {"background-sky-top-color", toUint8(Property::BackgroundSkyTopColor)},
      {"background-color-transition", toUint8(Property::BackgroundColorTransition)},
      {"background-opacity-transition", toUint8(Property::BackgroundOpacityTransition)},
-     {"background-pattern-transition", toUint8(Property::BackgroundPatternTransition)}});
+     {"background-pattern-transition", toUint8(Property::BackgroundPatternTransition)},
+     {"background-sky-bottom-color-transition", toUint8(Property::BackgroundSkyBottomColorTransition)},
+     {"background-sky-top-color-transition", toUint8(Property::BackgroundSkyTopColorTransition)}});
 
 StyleProperty getLayerProperty(const BackgroundLayer& layer, Property property) {
     switch (property) {
@@ -183,12 +245,20 @@ StyleProperty getLayerProperty(const BackgroundLayer& layer, Property property) 
             return makeStyleProperty(layer.getBackgroundOpacity());
         case Property::BackgroundPattern:
             return makeStyleProperty(layer.getBackgroundPattern());
+        case Property::BackgroundSkyBottomColor:
+            return makeStyleProperty(layer.getBackgroundSkyBottomColor());
+        case Property::BackgroundSkyTopColor:
+            return makeStyleProperty(layer.getBackgroundSkyTopColor());
         case Property::BackgroundColorTransition:
             return makeStyleProperty(layer.getBackgroundColorTransition());
         case Property::BackgroundOpacityTransition:
             return makeStyleProperty(layer.getBackgroundOpacityTransition());
         case Property::BackgroundPatternTransition:
             return makeStyleProperty(layer.getBackgroundPatternTransition());
+        case Property::BackgroundSkyBottomColorTransition:
+            return makeStyleProperty(layer.getBackgroundSkyBottomColorTransition());
+        case Property::BackgroundSkyTopColorTransition:
+            return makeStyleProperty(layer.getBackgroundSkyTopColorTransition());
     }
     return {};
 }
@@ -220,15 +290,28 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
 
     auto property = static_cast<Property>(it->second);
 
-    if (property == Property::BackgroundColor) {
+    if (property == Property::BackgroundColor || property == Property::BackgroundSkyBottomColor ||
+        property == Property::BackgroundSkyTopColor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<Color>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        setBackgroundColor(*typedValue);
-        return std::nullopt;
+        if (property == Property::BackgroundColor) {
+            setBackgroundColor(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::BackgroundSkyBottomColor) {
+            setBackgroundSkyBottomColor(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::BackgroundSkyTopColor) {
+            setBackgroundSkyTopColor(*typedValue);
+            return std::nullopt;
+        }
     }
     if (property == Property::BackgroundOpacity) {
         Error error;
@@ -269,6 +352,16 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
 
     if (property == Property::BackgroundPatternTransition) {
         setBackgroundPatternTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::BackgroundSkyBottomColorTransition) {
+        setBackgroundSkyBottomColorTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::BackgroundSkyTopColorTransition) {
+        setBackgroundSkyTopColorTransition(*transition);
         return std::nullopt;
     }
 

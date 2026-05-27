@@ -260,12 +260,10 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                 requestor.addPendingRequest(missingImage);
             }
 
-            auto removePendingRequests = [weakSelf = weak_from_this(), missingImage] {
-                auto self = weakSelf.lock();
-                if (!self) return;
-                std::scoped_lock readWriteLock(self->rwLock);
-                auto existingRequest = self->requestedImages.find(missingImage);
-                if (existingRequest == self->requestedImages.end()) {
+            auto removePendingRequests = [this, missingImage] {
+                std::scoped_lock readWriteLock(rwLock);
+                auto existingRequest = requestedImages.find(missingImage);
+                if (existingRequest == requestedImages.end()) {
                     return;
                 }
 

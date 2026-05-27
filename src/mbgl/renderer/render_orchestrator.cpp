@@ -28,6 +28,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/constants.hpp>
 
 #include <algorithm>
 
@@ -117,7 +118,7 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
                                        const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
-      imageManager(ImageManager::create()),
+      imageManager(std::make_unique<ImageManager>()),
       lineAtlas(std::make_unique<LineAtlas>()),
       patternAtlas(std::make_unique<PatternAtlas>()),
       imageImpls(makeMutable<std::vector<Immutable<style::Image::Impl>>>()),
@@ -403,9 +404,26 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
                     const auto& solidBackground = layer.getSolidBackground();
                     if (solidBackground) {
-                        renderTreeParameters->backgroundColor = *solidBackground;
-                        continue; // This layer is shown with background color,
-                                  // and it shall not be added to render items.
+                        const bool drawSky =
+                            renderTreeParameters->transformParams.state.getPitch() >= util::MIN_PITCH_FOR_SKY;
+                        if (drawSky) {
+                            // Clear to sky color for uncovered areas above the horizon; render the
+                            // background layer so tile drawables paint ground below the horizon.
+                            renderTreeParameters->backgroundColor = {
+                                util::DEFAULT_SKY_COLOR_R,
+                                util::DEFAULT_SKY_COLOR_G,
+                                util::DEFAULT_SKY_COLOR_B,
+                                util::DEFAULT_SKY_COLOR_A,
+                            };
+                            renderItemsEmplaceHint = layerRenderItems.emplace_hint(
+                                renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
+                            updateList[index] = true;
+                        } else {
+                            renderTreeParameters->backgroundColor = *solidBackground;
+                            continue; // This layer is shown with background color,
+                                      // and it shall not be added to render items.
+                        }
+                        continue;
                     }
                 }
                 renderItemsEmplaceHint = layerRenderItems.emplace_hint(
@@ -977,11 +995,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
             renderLayer.removeAllDrawables();
         }
 #endif
-        try {
-            renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
-        } catch (...) {
-            observer->onRenderError(std::current_exception());
-        }
+        renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);
 }

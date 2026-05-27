@@ -24,6 +24,7 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_from_scale;
     highp float u_to_scale;
     lowp float props_pad2;
+    highp float u_bevel_radius;
 };
 
 uniform sampler2D u_image;

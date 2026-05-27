@@ -756,7 +756,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
 
     builder->setTexture(geometryOptions.texture, shaders::idCustomGeometryTexture);
 
-    builder->addTweaker(std::make_shared<GeometryDrawableTweaker>(geometryOptions, std::move(geometryTweakerCallback)));
+    builder->addTweaker(std::make_shared<GeometryDrawableTweaker>(
+        geometryOptions, CustomDrawableLayerHost::Interface::GeometryTweakerCallback(geometryTweakerCallback)));
 
     const auto& id = builder->getCurrentDrawable(true)->getID();
 
@@ -881,7 +882,7 @@ std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::create
     builder_->setSubLayerIndex(0);
     builder_->setEnableDepth(false);
     builder_->setColorMode(gfx::ColorMode::alphaBlended());
-    builder_->setCullFaceMode(gfx::CullFaceMode::disabled());
+    builder_->setCullFaceMode(gfx::CullFaceMode::backCCW());
     builder_->setRenderPass(RenderPass::Translucent);
 
     return builder_;

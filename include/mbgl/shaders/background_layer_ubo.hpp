@@ -20,9 +20,9 @@ static_assert(sizeof(BackgroundDrawableUBO) == 4 * 16);
 struct alignas(16) BackgroundPropsUBO {
     /*  0 */ Color color;
     /* 16 */ float opacity;
-    /* 20 */ float pad1;
-    /* 24 */ float pad2;
-    /* 28 */ float pad3;
+    /* 20 */ float pitch;
+    /* 24 */ float horizon_clip_y;
+    /* 28 */ float viewport_height;
     /* 32 */
 };
 static_assert(sizeof(BackgroundPropsUBO) == 2 * 16);

@@ -10,13 +10,11 @@ namespace shaders {
 using CollisionBoxShaderSource = ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 5> CollisionBoxShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionAnchorPosVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionExtrudeVertexAttribute},
-
-    // Dynamic
-    AttributeInfo{3, gfx::AttributeDataType::UShort2, collisionUBOCount + 1, idCollisionPlacedVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float2, collisionUBOCount + 1, idCollisionShiftVertexAttribute},
+    AttributeInfo{collisionUBOCount + 0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
+    AttributeInfo{collisionUBOCount + 1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
+    AttributeInfo{collisionUBOCount + 2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
+    AttributeInfo{collisionUBOCount + 3, gfx::AttributeDataType::UShort2, idCollisionPlacedVertexAttribute},
+    AttributeInfo{collisionUBOCount + 4, gfx::AttributeDataType::Float2, idCollisionShiftVertexAttribute},
 };
 const std::array<TextureInfo, 0> CollisionBoxShaderSource::textures = {};
 
@@ -26,12 +24,10 @@ const std::array<TextureInfo, 0> CollisionBoxShaderSource::textures = {};
 using CollisionCircleShaderSource = ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 4> CollisionCircleShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionAnchorPosVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short2, collisionUBOCount + 0, idCollisionExtrudeVertexAttribute},
-
-    // Dynamic
-    AttributeInfo{3, gfx::AttributeDataType::UShort2, collisionUBOCount + 1, idCollisionPlacedVertexAttribute},
+    AttributeInfo{collisionUBOCount + 0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
+    AttributeInfo{collisionUBOCount + 1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
+    AttributeInfo{collisionUBOCount + 2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
+    AttributeInfo{collisionUBOCount + 3, gfx::AttributeDataType::UShort2, idCollisionPlacedVertexAttribute},
 };
 const std::array<TextureInfo, 0> CollisionCircleShaderSource::textures = {};
 

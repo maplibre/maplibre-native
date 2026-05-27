@@ -61,8 +61,9 @@ private:
     using TriangleIndexVectorPtr = std::shared_ptr<TriangleIndexVector>;
     TriangleIndexVectorPtr staticDataIndices;
 
-    using SegmentVectorPtr = std::shared_ptr<SegmentVector>;
-    SegmentVectorPtr staticDataSegments;
+    using RasterSegmentVector = SegmentVector;
+    using RasterSegmentVectorPtr = std::shared_ptr<RasterSegmentVector>;
+    std::shared_ptr<RasterSegmentVector> staticDataSegments;
 };
 
 } // namespace mbgl

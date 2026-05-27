@@ -52,12 +52,12 @@ public:
                                 std::size_t segmentCount) override;
 
 protected:
-    void buildVulkanInputBindings();
+    void buildVulkanInputBindings() noexcept;
 
-    bool bindAttributes(CommandEncoder&) const;
-    bool bindDescriptors(CommandEncoder&) const;
+    bool bindAttributes(CommandEncoder&) const noexcept;
+    bool bindDescriptors(CommandEncoder&) const noexcept;
 
-    void uploadTextures(UploadPass&) const;
+    void uploadTextures(UploadPass&) const noexcept;
 
     class Impl;
     const std::unique_ptr<Impl> impl;

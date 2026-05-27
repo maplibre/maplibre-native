@@ -293,7 +293,7 @@ class CameraPosition
                 centerAltitude = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraCenterAltitude, 0.0f).toDouble()
                 tilt = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f).toDouble()
                 roll = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraRoll, 0.0f).toDouble()
-                fov = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraFov, 36.86989764584402f).toDouble()
+                fov = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraFov, MapLibreConstants.DEFAULT_FOV.toFloat()).toDouble()
                 zoom = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f).toDouble()
             }
         }

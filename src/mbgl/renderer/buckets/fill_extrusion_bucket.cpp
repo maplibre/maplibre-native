@@ -101,27 +101,13 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             for (std::size_t i = 0; i < nVertices; i++) {
                 const auto& p1 = ring[i];
 
-#if MLN_USE_FILL_EXTRUSION_INSTANCING
-                vertices.emplace_back(layoutVertex(p1, edgeDistance, i == nVertices - 1));
-                flatIndices.emplace_back(triangleIndex);
-                triangleIndex++;
+                // x: parametric position along the current wall edge [0, 1] (0 at corners).
+                // y: normalized distance to the roofline (0 at roof/top, 1 at ground).
+                constexpr float kRooflineDistance = 0.0f;
+                constexpr float kGroundlineDistance = 1.0f;
 
-                if (i < nVertices - 1) {
-                    const auto& p2 = ring[i + 1];
-
-                    const auto d1 = convertPoint<double>(p1);
-                    const auto d2 = convertPoint<double>(p2);
-
-                    const size_t dist = util::dist<uint16_t>(d1, d2);
-                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
-                        edgeDistance = 0;
-                    }
-
-                    edgeDistance += dist;
-                }
-#else
-                vertices.emplace_back(
-                    FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
+                vertices.emplace_back(FillExtrusionBucket::layoutVertex(
+                    p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance), 0.0f, kRooflineDistance));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 
@@ -138,16 +124,16 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     }
 
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance), 0.0f, kGroundlineDistance));
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance), 0.0f, kRooflineDistance));
 
                     edgeDistance += dist;
 
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance), 1.0f, kGroundlineDistance));
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance), 1.0f, kRooflineDistance));
 
                     // ┌──────┐
                     // │ 0  1 │ Counter-Clockwise winding order.
@@ -160,7 +146,6 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     triangleSegment.vertexLength += 4;
                     triangleSegment.indexLength += 6;
                 }
-#endif
             }
         }
 
