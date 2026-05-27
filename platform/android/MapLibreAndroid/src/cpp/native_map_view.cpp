@@ -1154,11 +1154,20 @@ jni::jboolean NativeMapView::removeLayerAt(JNIEnv& env, jni::jint index) {
 /**
  * Remove with wrapper object id. Ownership is transferred back to the wrapper
  */
-jni::jboolean NativeMapView::removeLayer(JNIEnv&, jlong layerPtr) {
-    assert(layerPtr != 0);
+jni::jboolean NativeMapView::removeLayer(JNIEnv& env, jlong layerPtr) {
+    if (layerPtr == 0) {
+        Log::Warning(Event::JNI, "Cannot remove layer: native layer pointer is null");
+        return jni::jni_false;
+    }
 
     mbgl::android::Layer* layer = reinterpret_cast<mbgl::android::Layer*>(layerPtr);
-    std::unique_ptr<mbgl::style::Layer> coreLayer = map->getStyle().removeLayer(layer->get().getID());
+    const auto layerId = jni::Make<std::string>(env, layer->getId(env));
+    if (layerId.empty()) {
+        Log::Warning(Event::JNI, "Cannot remove layer: layer reference is detached or invalid");
+        return jni::jni_false;
+    }
+
+    std::unique_ptr<mbgl::style::Layer> coreLayer = map->getStyle().removeLayer(layerId);
     if (coreLayer) {
         layer->setLayer(std::move(coreLayer));
         return jni::jni_true;
