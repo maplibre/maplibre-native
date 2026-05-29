@@ -12,6 +12,7 @@ target_compile_definitions(
 
 list(APPEND
         INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp

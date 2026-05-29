@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/style/layer.hpp>
+#include <mbgl/style/layers/custom_layer_init_parameters.hpp>
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
 #include <array>
@@ -14,14 +15,19 @@ class CustomLayerHost {
 public:
     virtual ~CustomLayerHost() = default;
     /**
-     * Initialize any GL/Metal state needed by the custom layer. This method is called
-     * once, from the main thread, at a point when the GL context is active but
-     * before rendering for the first time.
+     * Initialize any GL/Metal/Vulkan state needed by the custom layer. This method
+     * is called once, from the main thread, at a point when the graphics context
+     * is active but before rendering for the first time.
+     *
+     * The parameters argument provides backend-specific device handles:
+     *   - Vulkan: cast to mbgl::style::vulkan::CustomLayerInitParameters for
+     *     access to vk::Device, vk::PhysicalDevice, and the dispatcher.
+     *   - Metal/GL: base CustomLayerInitParameters (no extra handles currently).
      *
      * Resources that are acquired in this method must be released in the
      * `deinitialize` function.
      */
-    virtual void initialize() = 0;
+    virtual void initialize(const CustomLayerInitParameters&) = 0;
 
     /**
      * Render the layer. This method is called once per frame. The
