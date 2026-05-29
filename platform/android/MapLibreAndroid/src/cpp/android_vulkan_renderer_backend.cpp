@@ -70,8 +70,7 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
 }
 
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
-    // TODO not implemented
-    return PremultipliedImage(Size(2, 2));
+    return std::move(*getResource<AndroidVulkanRenderableResource>().readImage());
 }
 
 } // namespace android

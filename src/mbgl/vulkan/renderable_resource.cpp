@@ -124,7 +124,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
                                    .setPresentMode(presentMode)
                                    .setImageExtent(extent)
                                    .setImageArrayLayers(1)
-                                   .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc);
+                                   .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment |
+                                                  vk::ImageUsageFlagBits::eTransferSrc);
 
     int32_t graphicsQueueIndex = backend.getGraphicsQueueIndex();
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
@@ -459,7 +460,7 @@ std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
 
     bool useBlit = surface &&
                    (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
-                        vk::FormatFeatureFlagBits::eBlitSrc ||
+                        vk::FormatFeatureFlagBits::eBlitSrc &&
                     physicalDevice.getFormatProperties(texture->getVulkanFormat(), dispatcher).linearTilingFeatures &
                         vk::FormatFeatureFlagBits::eBlitDst);
 
