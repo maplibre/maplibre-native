@@ -74,6 +74,7 @@ public:
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
 
+    void enableSurfaceRead(bool value = true);
     std::shared_ptr<PremultipliedImage> readImage();
 
 protected:
@@ -99,6 +100,7 @@ protected:
     vk::Format depthFormat{vk::Format::eUndefined};
 
     int32_t surfaceTransformPollingInterval{-1};
+    bool surfaceRead{false};
 };
 
 class Renderable : public gfx::Renderable {

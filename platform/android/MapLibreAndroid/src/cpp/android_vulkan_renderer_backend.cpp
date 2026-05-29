@@ -69,6 +69,10 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
     }
 }
 
+void AndroidVulkanRendererBackend::enableFramebufferRead(bool value) {
+    getResource<AndroidVulkanRenderableResource>().enableSurfaceRead();
+}
+
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
     return std::move(*getResource<AndroidVulkanRenderableResource>().readImage());
 }

@@ -92,9 +92,17 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         }
     }
 
-    // pick surface size
+    vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+
     capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), dispatcher);
 
+    // when reading from the swapchain disable pre-rotation and enable source transfer usage
+    if (surfaceRead) {
+        capabilities.currentTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
+        imageUsage |= vk::ImageUsageFlagBits::eTransferSrc;
+    }
+
+    // pick surface size
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         extent = capabilities.currentExtent;
     } else {
@@ -124,8 +132,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
                                    .setPresentMode(presentMode)
                                    .setImageExtent(extent)
                                    .setImageArrayLayers(1)
-                                   .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment |
-                                                  vk::ImageUsageFlagBits::eTransferSrc);
+                                   .setImageUsage(imageUsage);
 
     int32_t graphicsQueueIndex = backend.getGraphicsQueueIndex();
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
@@ -420,6 +427,15 @@ void SurfaceRenderableResource::recreateSwapchain() {
     presentSemaphores.clear();
 
     init(extent.width, extent.height);
+}
+
+void SurfaceRenderableResource::enableSurfaceRead(bool value) {
+    if (surfaceRead == value) {
+        return;
+    }
+
+    surfaceRead = value;
+    backend.getContext<Context>().requestSurfaceUpdate(false);
 }
 
 std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {

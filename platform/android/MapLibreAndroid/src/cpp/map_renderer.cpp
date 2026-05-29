@@ -207,6 +207,12 @@ void MapRenderer::resetRenderer() {
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
     snapshotCallback = std::move(callback);
+
+    if (backend) {
+        gfx::BackendScope backendGuard{backend->getImpl()};
+        backend->enableFramebufferRead(true);
+    }
+
     requestRender();
 }
 
