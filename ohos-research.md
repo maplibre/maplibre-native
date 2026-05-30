@@ -4250,3 +4250,86 @@
   `HMS_Rcp_Fetch` / `HMS_Rcp_CancelRequest` to avoid callback deadlock (kept).
 - Next session: fix Remote by fully initializing `Rcp_Request` per `rcp.h`, compare
   with HMS RCP samples, then confirm demotiles MVT/sprites/glyphs on device.
+
+### 2026-05-30 MatePad HMS RCP request-configuration guard
+
+- Investigated the `Remote` crash against the DevEco 6 command-line HMS RCP
+  header at
+  `~/Downloads/command-line-tools/sdk/default/hms/native/sysroot/usr/include/RemoteCommunicationKit/rcp.h`.
+  - `Rcp_Request.configuration` is an optional `Rcp_Configuration *`.
+  - Several nested configuration string fields are documented with default
+    value `""`, but a zero-initialized C struct supplies null pointers.
+  - The previous crash stack (`strlen` -> `std::string` ->
+    `RcpToCppConfiguration` -> `RcpToCppRequest`) is consistent with the RCP
+    bridge converting one of those documented-empty string fields without a
+    null check.
+- Applied a scoped mitigation in
+  `platform/ohos/src/http_file_source_hms_rcp.cpp`:
+  - Added `RcpConfigurationStorage`, which owns a mutable empty string and a
+    default `Rcp_Configuration`.
+  - Sets request/session config string fields that the SDK documents as empty
+    strings to a non-null `""` pointer.
+  - Sets conservative documented defaults for redirect, timeout, path
+    preference, proxy tunnel, system certificate validation, and server auth.
+  - Attaches an owned config to each `Rcp_Request` before `HMS_Rcp_Fetch`.
+  - Clears `request->configuration` before `HMS_Rcp_DestroyRequest`, so the
+    request destructor does not accidentally own storage from `RequestState`.
+  - Also attaches the same kind of owned default config to the RCP session via
+    `Rcp_SessionConfiguration.requestConfiguration` and uses a non-null empty
+    `baseUrl`.
+- Verification:
+  - `pixi run cmake --preset harmonyos-opengl-native` configured successfully
+    with the existing SDK CMake deprecation warnings.
+  - `pixi run cmake --build --preset harmonyos-opengl-native` rebuilt
+    `http_file_source_hms_rcp.cpp`, `libmbgl-core.a`, and
+    `libmaplibre_native_ohos.so`.
+  - `/Users/sargunv/Downloads/command-line-tools/bin/hvigorw assembleApp --no-daemon`
+    rebuilt the sample successfully in `3 s 754 ms`; the missing signing config
+    warning remains.
+  - Re-signed `entry-default-unsigned.hap` manually with the existing
+    `maplibre-debug` AGC debug credentials and installed it on
+    MatePad target `59GYD25808200129`; install succeeded.
+  - The packaged arm64 native library links `librcp_c.so` and does not link
+    `libnet_http.so`. It currently also links `libhilog_ndk.z.so`.
+  - `git diff --check` passed.
+- Runtime status:
+  - Launch was not validated in this pass because the MatePad lock screen
+    blocked `aa start`:
+
+    ```text
+    Error Code:10106102
+    The device screen is locked during the application launch, unlock screen failed.
+    ```
+
+  - `uitest uiInput keyEvent Power` and an upward swipe both reported `No
+    Error`, but the screen remained locked for `aa start`.
+- Next device check after manually unlocking the tablet:
+
+  ```sh
+  HDC=/Users/sargunv/Downloads/command-line-tools/sdk/default/openharmony/toolchains/hdc
+  $HDC shell aa force-stop org.maplibre.native.demo
+  $HDC shell hilog -r
+  ($HDC shell hilog > /tmp/maplibre-rcp-config.hilog) &
+  $HDC shell aa start -b org.maplibre.native.demo -a EntryAbility
+  # tap Remote, wait ~10s, then stop hilog capture
+  grep -E 'MapLibreSample|CPP_CRASH|librcp_c|OnlineFileSourc|map error|glyph|sprite|tile' /tmp/maplibre-rcp-config.hilog
+  ```
+
+  Expected first result: the previous `strlen` / `RcpToCppConfiguration`
+  crash should disappear. Remaining failures, if any, should show up as RCP
+  error codes, style/glyph/sprite/tile errors, or a different native crash.
+
+### 2026-05-30 MatePad remote map success
+
+- After manually unlocking the MatePad and launching the already-installed
+  signed HAP, the sample displayed a working remote map.
+- This validates the immediate HMS RCP mitigation above on-device: the previous
+  `strlen` / `RcpToCppConfiguration` crash no longer blocks remote style
+  loading.
+- Follow-up checks still worth doing before upstreaming:
+  - Capture a fresh `hilog` session while tapping **Remote** and record the
+    final sample counters for style, glyph, sprite, and tile callbacks.
+  - Exercise pan/zoom gestures on the remote style and confirm tiles continue
+    loading after viewport changes.
+  - Revisit whether `libhilog_ndk.z.so` should remain in the native dependency
+    list or whether logging should stay fully on the Linux/default path.

@@ -241,6 +241,47 @@ Response makeNetworkError(const Resource& resource, uint32_t errCode) {
     return response;
 }
 
+class RcpConfigurationStorage {
+public:
+    RcpConfigurationStorage() {
+        configuration.transferConfiguration.autoRedirect = true;
+        configuration.transferConfiguration.timeout.connectMs = 60000;
+        configuration.transferConfiguration.timeout.transferMs = 60000;
+        configuration.transferConfiguration.pathPreference = RCP_PATH_PREFERENCE_AUTO;
+
+        configuration.proxyConfiguration.proxyType = RCP_PROXY_SYSTEM;
+        configuration.proxyConfiguration.customProxy.url = empty();
+        configuration.proxyConfiguration.customProxy.createTunnel = RCP_PROXY_TUNNEL_AUTO;
+        initializeSecurity(configuration.proxyConfiguration.customProxy.securityConfiguration);
+
+        configuration.dnsConfiguration.dnsOverHttps.url = empty();
+        initializeSecurity(configuration.securityConfiguration);
+    }
+
+    Rcp_Configuration* get() { return &configuration; }
+
+    const char* empty() const { return emptyString.data(); }
+
+private:
+    void initializeSecurity(Rcp_SecurityConfiguration& security) {
+        security.remoteValidationType = RCP_REMOTE_VALIDATION_SYSTEM;
+        security.certificateAuthority.content = emptyString.data();
+        security.certificateAuthority.filePath = emptyString.data();
+        security.certificateAuthority.folderPath = emptyString.data();
+        security.certificate.content = emptyString.data();
+        security.certificate.filePath = emptyString.data();
+        security.certificate.key = emptyString.data();
+        security.certificate.keyPassword = emptyString.data();
+        security.certificate.type = RCP_CERT_PEM;
+        security.serverAuthentication.credential.username = emptyString.data();
+        security.serverAuthentication.credential.password = emptyString.data();
+        security.serverAuthentication.authenticationType = RCP_AUTHENTICATION_AUTO;
+    }
+
+    std::array<char, 1> emptyString{{'\0'}};
+    Rcp_Configuration configuration{};
+};
+
 void applyCacheHeaders(Response& response, Rcp_Headers* headers) {
     response.etag = headerValue(headers, "etag");
     if (const auto modified = headerValue(headers, "last-modified")) {
@@ -346,6 +387,8 @@ public:
     RcpSession() {
         Rcp_SessionConfiguration configuration{};
         configuration.type = RCP_SESSION_TYPE_HTTP;
+        configuration.baseUrl = requestConfiguration.empty();
+        configuration.requestConfiguration = requestConfiguration.get();
         uint32_t errCode = 0;
         session = HMS_Rcp_CreateSession(&configuration, &errCode);
         if (!session) {
@@ -387,6 +430,7 @@ public:
 
 private:
     std::mutex mutex;
+    RcpConfigurationStorage requestConfiguration;
     Rcp_Session* session = nullptr;
 };
 
@@ -422,6 +466,9 @@ public:
     void setRequest(Rcp_Request* request_) {
         std::scoped_lock lock(mutex);
         request = request_;
+        if (request) {
+            request->configuration = requestConfiguration.get();
+        }
     }
 
     void cancelOnRunLoop() {
@@ -529,6 +576,7 @@ private:
 
     void destroyRequest(Rcp_Request* requestToDestroy) {
         if (requestToDestroy) {
+            requestToDestroy->configuration = nullptr;
             HMS_Rcp_DestroyRequest(requestToDestroy);
         }
     }
@@ -552,6 +600,7 @@ private:
     Resource resource;
     FileSource::Callback callback;
     Rcp_ResponseCallbackObject callbackObject{};
+    RcpConfigurationStorage requestConfiguration;
     Rcp_Request* request = nullptr;
     mutable std::mutex mutex;
     std::optional<std::size_t> slot;
