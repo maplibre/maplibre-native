@@ -439,16 +439,20 @@ Still needs runtime validation with real remote sprites/images.
 
 ## Logging
 
-The port currently uses default stderr logging rather than an OHOS-specific
-hilog backend. The sample itself logs useful ArkTS-side state through hilog
-with tag `MapLibreSample`, and the native module exposes explicit surface-state
-logging/diagnostics for bring-up.
+The port uses an OHOS-specific `Log::platformRecord` implementation that routes
+native MapLibre logs through hilog with tag `MapLibreNative`. This replaces the
+earlier default stderr sink and the one-off native `OH_LOG_Print` probes used
+during EGL bring-up.
 
-Earlier iterations used `libhilog_ndk.z.so`; later cleanup favored Linux/default
-logging as part of keeping platform differences minimal. Recheck the final
-dynamic dependency list before upstreaming. One recent packaged HarmonyOS build
-still showed `libhilog_ndk.z.so` in `NEEDED`, likely through current native
-module/sample logging paths or SDK linkage.
+Useful emulator command:
+
+```sh
+hdc shell "hilog -x -t app -T MapLibreNative"
+```
+
+Confirmed output includes normal `mbgl::Log` messages such as setup, EGL config,
+default framebuffer, GPU identifier, and sample surface diagnostics. The sample
+itself still logs ArkTS-side state with tag `MapLibreSample`.
 
 ## Sample App
 
@@ -623,8 +627,6 @@ Observed:
 
 High value:
 
-- Capture a clean `hilog` session for the now-working Remote path and record
-  style/glyph/sprite/tile counters.
 - Exercise pan/zoom/rotate/fling on the remote map and record which gestures
   behave acceptably.
 - Validate ImageKit sprite/image decoding on real remote style assets.

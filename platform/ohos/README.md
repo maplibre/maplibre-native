@@ -26,7 +26,7 @@ The current implementation provides:
   `harmonyos-*` presets.
 - OHOS image decoding through ImageSourceNative and PixelmapNative, with
   ImageKit error names and decoded pixel metadata in decoder failure messages.
-- Default stderr logging.
+- Native MapLibre logging through OHOS hilog with tag `MapLibreNative`.
 - Camera, free-camera, bounds, debug, client, resource, tile-cache,
   pixel-ratio, frame-rate, rendering-enable, and memory-reduction
   controls/readback through NAPI.

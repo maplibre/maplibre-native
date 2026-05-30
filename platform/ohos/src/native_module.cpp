@@ -21,8 +21,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include <hilog/log.h>
-
 #include <ace/xcomponent/native_interface_xcomponent.h>
 #include <arkui/native_node.h>
 #include <arkui/native_node_napi.h>
@@ -32,8 +30,6 @@
 
 namespace {
 
-constexpr unsigned int kMapLibreHilogDomain = 0x4d4c4e;
-constexpr char kMapLibreHilogTag[] = "MapLibreNative";
 constexpr std::uint64_t kDefaultDiagnosticsLogIntervalFrames = 180;
 
 using mbgl::ohos::createBoundOptionsObject;
@@ -179,7 +175,7 @@ std::string formatSurfaceDiagnostics(const SurfaceBinding& binding) {
 
 void logSurfaceDiagnostics(const SurfaceBinding& binding, const char* label) {
     const auto message = std::string(label) + ": " + formatSurfaceDiagnostics(binding);
-    OH_LOG_PrintMsg(LOG_APP, LOG_INFO, kMapLibreHilogDomain, kMapLibreHilogTag, message.c_str());
+    mbgl::Log::Info(mbgl::Event::General, message);
 }
 
 void maybeLogPeriodicDiagnostics(SurfaceBinding& binding) {

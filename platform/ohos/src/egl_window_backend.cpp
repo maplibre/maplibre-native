@@ -7,7 +7,6 @@
 #include <mbgl/util/logging.hpp>
 
 #include <GLES3/gl3.h>
-#include <hilog/log.h>
 #include <native_buffer/native_buffer.h>
 
 #include <array>
@@ -21,12 +20,8 @@ namespace mbgl {
 namespace ohos {
 namespace {
 
-constexpr unsigned int kMapLibreHilogDomain = 0x4d4c4e;
-constexpr char kMapLibreHilogTag[] = "MapLibreNative";
-
-void logProbe(const std::string& message) {
+void logDiagnostic(const std::string& message) {
     Log::Info(Event::OpenGL, message);
-    OH_LOG_Print(LOG_APP, LOG_INFO, kMapLibreHilogDomain, kMapLibreHilogTag, "%{public}s", message.c_str());
 }
 
 std::string eglErrorMessage(const char* operation) {
@@ -66,7 +61,7 @@ void logNativeWindowFormat(OHNativeWindow* window) {
 
     std::int32_t format = 0;
     if (OH_NativeWindow_NativeWindowHandleOpt(window, GET_FORMAT, &format) == 0) {
-        logProbe("Native window pixel format: " + std::to_string(format));
+        logDiagnostic("Native window pixel format: " + std::to_string(format));
     }
 }
 
@@ -330,7 +325,7 @@ EGLWindowBackend::EGLWindowBackend(OHNativeWindow* window_, Size size_)
             throw std::runtime_error(eglErrorMessage("eglCreateWindowSurface"));
         }
         eglConfigDiagnostic = formatEGLConfig(displayConfig->display, windowConfig, contextClientVersion);
-        logProbe(eglConfigDiagnostic);
+        logDiagnostic(eglConfigDiagnostic);
     } catch (...) {
         if (eglSurface != EGL_NO_SURFACE) {
             eglDestroySurface(displayConfig->display, eglSurface);
@@ -404,7 +399,7 @@ void EGLWindowBackend::activate() {
     }
     if (framebufferDiagnostic.empty()) {
         framebufferDiagnostic = formatDefaultFramebuffer();
-        logProbe(framebufferDiagnostic);
+        logDiagnostic(framebufferDiagnostic);
     }
 }
 

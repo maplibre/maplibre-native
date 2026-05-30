@@ -55,7 +55,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
@@ -66,6 +65,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/ohos/src/$<IF:$<BOOL:${MLN_OHOS_WITH_HMS_RCP}>,http_file_source_hms_rcp.cpp,http_file_source.cpp>
         ${PROJECT_SOURCE_DIR}/platform/ohos/src/image.cpp
+        ${PROJECT_SOURCE_DIR}/platform/ohos/src/logging_hilog.cpp
 )
 
 if(MLN_WITH_OPENGL)
@@ -93,6 +93,7 @@ target_link_libraries(
         mbgl-vendor-sqlite
         $<$<NOT:$<BOOL:${MLN_OHOS_WITH_HMS_RCP}>>:net_http>
         pixelmap
+        hilog_ndk.z
         $<$<BOOL:${MLN_OHOS_WITH_HMS_RCP}>:${MLN_OHOS_RCP_C_LIBRARY}>
         uv
         z
