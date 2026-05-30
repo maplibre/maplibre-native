@@ -84,6 +84,8 @@ public:
     std::uint64_t getSpritesLoadedCount() const { return spritesLoadedCount; }
     std::uint64_t getSpritesErrorCount() const { return spritesErrorCount; }
     std::int32_t getGlesContextClientVersion() const;
+    const std::string& getEGLConfigDiagnostic() const;
+    const std::string& getFramebufferDiagnostic() const;
     const std::string& getLastMapLoadError() const { return lastMapLoadError; }
     const std::string& getLastRenderError() const { return lastRenderError; }
     const std::string& getLastStyleImageMissing() const { return lastStyleImageMissing; }

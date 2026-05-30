@@ -5,12 +5,9 @@ import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } 
 
 const LOG_DOMAIN: number = 0x4d4c4e;
 const LOG_TAG: string = 'MapLibreSample';
-const DIAG_STYLE_JSON: string =
-  '{"version":8,"sources":{},"layers":[{"id":"bg","type":"background","paint":{"background-color":"#ff0000"}}]}';
 const LOCAL_VECTOR_STYLE_JSON: string =
   '{"version":8,"center":[0,0],"zoom":1,"pitch":0,"bearing":0,"sources":{"test":{"type":"geojson","data":{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-30,-20],[30,-20],[30,20],[-30,20],[-30,-20]]]}}}},"layers":[{"id":"bg","type":"background","paint":{"background-color":"#004488"}},{"id":"fill","type":"fill","source":"test","paint":{"fill-color":"#ffdd00"}}]}';
 
-const EMPTY_STYLE_JSON: string = '{"version":8,"sources":{},"layers":[]}';
 const REMOTE_STYLE_URL: string = 'https://demotiles.maplibre.org/style.json';
 
 @Entry
@@ -22,6 +19,7 @@ struct Index {
 
   private map?: XComponentContext;
   private statusLogTimer: number = -1;
+  private statusLogTicks: number = 0;
 
   aboutToDisappear(): void {
     this.stopStatusLogging();
@@ -55,9 +53,17 @@ struct Index {
 
   private startStatusLogging(): void {
     this.stopStatusLogging();
+    this.statusLogTicks = 0;
     this.statusLogTimer = setInterval(() => {
-      this.logSurfaceState('tick');
-    }, 3000);
+      if (this.map) {
+        this.map.runLoopOnce();
+        this.updateSurfaceState('Live');
+      }
+      this.statusLogTicks++;
+      if (this.statusLogTicks % 6 === 0) {
+        this.logSurfaceState('tick');
+      }
+    }, 500);
   }
 
   private stopStatusLogging(): void {
@@ -127,6 +133,12 @@ struct Index {
     if (state.lastGlyphsError !== undefined) {
       line = line + ' glyphErr=' + state.lastGlyphsError;
     }
+    if (state.eglConfigDiagnostic !== undefined) {
+      line = line + ' egl=' + state.eglConfigDiagnostic;
+    }
+    if (state.framebufferDiagnostic !== undefined) {
+      line = line + ' fb=' + state.framebufferDiagnostic;
+    }
     return line;
   }
 
@@ -195,29 +207,12 @@ struct Index {
       resources = 'sprite error: ' + state.lastSpritesError;
     } else if (state.lastStyleImageMissing !== undefined) {
       resources = 'missing image: ' + state.lastStyleImageMissing;
+    } else if (state.framebufferDiagnostic !== undefined) {
+      resources = state.framebufferDiagnostic;
+    } else if (state.eglConfigDiagnostic !== undefined) {
+      resources = state.eglConfigDiagnostic;
     }
     this.statusResources = resources;
-  }
-
-  private useDiagStyle(): void {
-    if (!this.map) {
-      return;
-    }
-
-    this.map.setStyleJson(DIAG_STYLE_JSON);
-    this.map.jumpTo({ center: { longitude: 0, latitude: 0 }, zoom: 1, bearing: 0, pitch: 0 });
-    this.map.renderFrame();
-    this.updateSurfaceState('Diag red');
-  }
-
-  private useEmptyStyle(): void {
-    if (!this.map) {
-      return;
-    }
-
-    this.map.setStyleJson(EMPTY_STYLE_JSON);
-    this.map.renderFrame();
-    this.updateSurfaceState('Empty style');
   }
 
   private useLocalVectorStyle(): void {
@@ -227,7 +222,6 @@ struct Index {
 
     this.map.setStyleJson(LOCAL_VECTOR_STYLE_JSON);
     this.map.jumpTo({ center: { longitude: 0, latitude: 0 }, zoom: 1, bearing: 0, pitch: 0 });
-    this.map.renderFrame();
     this.updateSurfaceState('Local vector');
   }
 
@@ -238,10 +232,10 @@ struct Index {
 
     this.statusText = 'Remote: loading…';
     this.map.setStyleUrl(REMOTE_STYLE_URL);
+    this.map.jumpTo({ center: { longitude: 0, latitude: 20 }, zoom: 1.25, bearing: 0, pitch: 0 });
     setTimeout(() => {
       if (this.map) {
         this.map.runLoopOnce();
-        this.map.renderFrame();
         this.updateSurfaceState('Remote style');
       }
     }, 500);
@@ -264,7 +258,6 @@ struct Index {
     map.setFrameRateRange({ min: 30, max: 120, expected: 60 });
     map.setPixelRatio(1);
     map.setRenderingEnabled(true);
-    map.setStyleJson(EMPTY_STYLE_JSON);
     map.setBounds({
       bounds: { west: -180, south: -85, east: 180, north: 85 },
       minZoom: 0,
@@ -308,7 +301,7 @@ struct Index {
       map.runLoopOnce();
     }
     map.getTileCacheEnabled();
-    this.updateSurfaceState('Configured');
+    this.useRemoteStyle();
   }
 
   build() {
@@ -365,7 +358,7 @@ struct Index {
       .backgroundColor('#f8fafc')
 
       Row() {
-        Button('Render')
+        Button('Fit')
           .onClick(() => {
             if (!this.map) {
               return;
@@ -373,7 +366,7 @@ struct Index {
 
             const state: SurfaceState = this.map.getSurfaceState();
             if (!state.hasMap) {
-              this.statusText = 'Render blocked: no map surface';
+              this.statusText = 'Fit blocked: no map surface';
               this.statusDetail = state.lastSurfaceError !== undefined ?
                 'surface error: ' + state.lastSurfaceError :
                 'Check EGL/native window setup in logs';
@@ -384,8 +377,7 @@ struct Index {
               bounds: { west: -10, south: -10, east: 10, north: 10 },
               padding: { top: 24, left: 24, bottom: 24, right: 24 }
             });
-            this.map.renderFrame();
-            this.updateSurfaceState('Rendered');
+            this.updateSurfaceState('Fit bounds');
           })
           .height(44)
 
@@ -395,30 +387,9 @@ struct Index {
           })
           .height(44)
 
-        Button('Empty')
-          .onClick(() => {
-            this.useEmptyStyle();
-          })
-          .height(44)
-
-        Button('Diag')
-          .onClick(() => {
-            this.useDiagStyle();
-          })
-          .height(44)
-
         Button('Local')
           .onClick(() => {
             this.useLocalVectorStyle();
-          })
-          .height(44)
-
-        Button('Memory')
-          .onClick(() => {
-            if (this.map) {
-              this.map.reduceMemoryUse();
-              this.updateSurfaceState('Memory reduced');
-            }
           })
           .height(44)
       }

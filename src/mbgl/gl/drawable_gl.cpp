@@ -244,6 +244,12 @@ gfx::ColorMode DrawableGL::makeColorMode(PaintParameters& parameters) const {
 
 gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const {
     if (enableStencil) {
+#ifdef OHOS_PLATFORM
+        // The DevEco emulator reports a complete window framebuffer with no stencil bits, and
+        // stencil clipping rejects fill/line geometry there. Render unclipped until OHOS can
+        // provide a usable stencil attachment for the window surface.
+        return gfx::StencilMode::disabled();
+#endif
         if (!is3D && tileID) {
             return parameters.stencilModeForClipping(tileID->toUnwrapped());
         }

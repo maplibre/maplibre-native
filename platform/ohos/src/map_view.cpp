@@ -229,6 +229,16 @@ std::int32_t MapView::getGlesContextClientVersion() const {
     return backend ? backend->getContextClientVersion() : 0;
 }
 
+const std::string& MapView::getEGLConfigDiagnostic() const {
+    static const std::string empty;
+    return backend ? backend->getEGLConfigDiagnostic() : empty;
+}
+
+const std::string& MapView::getFramebufferDiagnostic() const {
+    static const std::string empty;
+    return backend ? backend->getFramebufferDiagnostic() : empty;
+}
+
 void MapView::setClientOptions(std::string name, std::string version) {
     if (clientName == name && clientVersion == version) {
         return;

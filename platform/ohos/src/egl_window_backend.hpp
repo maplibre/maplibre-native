@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 
 namespace mbgl {
 namespace ohos {
@@ -26,6 +27,8 @@ public:
 
     OHNativeWindow* getNativeWindow() const { return window; }
     std::int32_t getContextClientVersion() const { return contextClientVersion; }
+    const std::string& getEGLConfigDiagnostic() const { return eglConfigDiagnostic; }
+    const std::string& getFramebufferDiagnostic() const { return framebufferDiagnostic; }
     void setSize(Size);
     void swap();
     PremultipliedImage readStillImage();
@@ -45,6 +48,8 @@ private:
     EGLSurface eglSurface = EGL_NO_SURFACE;
     OHNativeWindow* window = nullptr;
     std::int32_t contextClientVersion = 0;
+    std::string eglConfigDiagnostic;
+    std::string framebufferDiagnostic;
 };
 
 } // namespace ohos

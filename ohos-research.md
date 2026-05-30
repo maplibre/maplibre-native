@@ -33,13 +33,35 @@ Confirmed on the MatePad:
   HMS RCP HTTP backend after initializing RCP request/session configuration
   with non-null empty strings.
 
+Confirmed on DevEco emulator:
+
+- Target: `127.0.0.1:5555`
+- Reported model/version:
+  - model `emulator`
+  - API `22`
+  - software `emulator 6.0.0.130(SP7DEVC00E130R4P11)`
+- Existing signed HAP installed successfully.
+- Legacy XComponent path launches and creates a map surface.
+- Remote style loads without the previous RCP crash.
+- Background and symbol layers render.
+- A fill/line rendering gap was reproduced and narrowed down:
+  - The emulator window framebuffer reports complete status but no usable depth
+    or stencil bits:
+    `rgba=0/0/0/0 depth=0 stencil=0 status=0x8cd5 renderer=Mali-G77`.
+  - An offscreen color/depth/stencil FBO plus blit did **not** make fill/line
+    geometry appear.
+  - Disabling GL stencil clipping for OHOS makes both **Remote** country
+    fills/boundaries and the **Local** GeoJSON polygon render on the emulator.
+
 Not yet fully validated:
 
 - OpenHarmony public `net_http` backend at runtime.
 - Remote glyph/sprite/tile counters from a clean captured run.
 - ImageKit decode on real remote sprite/image traffic.
 - Gesture behavior on a real map beyond initial sample interaction checks.
-- Emulator behavior after DevEco Studio installation.
+- Whether the OHOS stencil-clipping bypass has unacceptable tile-edge artifacts
+  during pan/zoom/rotate or on real devices that provide a usable stencil
+  attachment.
 - ArkUI `NodeContainer` / `registerXComponentNode(node)` runtime path on the
   MatePad.
 
@@ -433,20 +455,20 @@ module/sample logging paths or SDK linkage.
 The committed sample app is a small HarmonyOS/OpenHarmony project under
 `platform/ohos/sample`.
 
+The sample now behaves more like the desktop GLFW demo: it loads the remote
+demotiles style on startup, keeps rendering enabled while visible, lets the
+XComponent frame callback drive `MapView::renderFrame()`, and refreshes the
+compact status readout while the map is running.
+
 Current buttons:
 
-- **Render**
+- **Fit**
 - **Remote**
-- **Empty**
-- **Diag**
 - **Local**
-- **Memory**
 
 Current style probes:
 
-- **Diag**: background-only red style.
 - **Local**: inline GeoJSON polygon with blue background and yellow fill.
-- **Empty**: no layers.
 - **Remote**: `https://demotiles.maplibre.org/style.json`.
 
 The sample shows:
@@ -458,6 +480,8 @@ The sample shows:
 - style/load/idle flags
 - glyph/sprite/tile/resource counters
 - last error strings
+- EGL config and default framebuffer diagnostics, including depth/stencil bits
+  while the emulator rendering issue is under investigation
 
 The sample depends on the local type package through:
 
@@ -526,6 +550,42 @@ Important notes:
 8. Remote with HMS RCP after config fix:
    - Remote demotiles style displayed a working map on the MatePad.
 
+9. DevEco emulator run:
+   - Existing signed HAP installed and launched on `127.0.0.1:5555`.
+   - Emulator reports API `22` and software
+     `emulator 6.0.0.130(SP7DEVC00E130R4P11)`.
+   - Remote style loads and symbols render; sample counters after **Remote**
+     showed `window=yes`, `map=yes`, `gl=3`, `style=loaded`, `loaded=yes`,
+     `glyphs=1/1/0`, `sprites=0/1/0`, and tile activity.
+   - Visual result is incomplete: countries and other fill/line geometry are
+     missing. The same problem appears with the inline **Local** GeoJSON style,
+     so this is not only a remote vector-tile data problem.
+
+10. Sample pump cleanup:
+   - The sample starts directly on the remote demotiles style.
+   - Status refreshes every 500 ms while visible, with hilog diagnostics every
+     sixth tick.
+   - The old manual **Render** control is now **Fit**; camera/style changes
+     should be picked up by the native frame pump.
+   - The old **Empty** and **Diag** controls were removed; **Local** is enough
+     for deterministic non-network rendering checks.
+   - Emulator after this change still reports a healthy loaded map, e.g.
+     `Live: 1308x2177 window=yes map=yes render=idle`,
+     `frames=59/59 gl=3`, `style=loaded`, `loaded=yes`, `idle=yes`,
+     `glyphs=1/1/0`, `sprites=0/1/0`, `tiles=129`, but still shows labels over
+     blue background with missing fill/line geometry.
+
+11. DevEco emulator stencil investigation:
+   - Runtime EGL config diagnostics showed the chosen config requested color,
+     depth, and stencil, but the active default framebuffer reported
+     `rgba=0/0/0/0 depth=0 stencil=0 status=0x8cd5 err=0x0 vendor=ARM renderer=Mali-G77`.
+   - Creating an offscreen RGBA8 + DEPTH24_STENCIL8 framebuffer and blitting it
+     back to the window did not restore fill/line rendering.
+   - Disabling `DrawableGL` stencil clipping under `OHOS_PLATFORM` restored both
+     remote country fills/boundaries and the local yellow GeoJSON fill.
+   - The offscreen FBO experiment was removed again; the current workaround is
+     only the OHOS stencil-mode bypass plus runtime diagnostics.
+
 ## Verification Snapshot
 
 Recent useful checks:
@@ -550,6 +610,12 @@ Observed:
   configured ABIs.
 - HarmonyOS native module links `librcp_c.so`, not `libnet_http.so`.
 - Signed HAP installed successfully on MatePad target `59GYD25808200129`.
+- Signed HAP installed and launched successfully on DevEco emulator target
+  `127.0.0.1:5555`.
+- DevEco emulator screenshots confirmed the pumped sample loads remote
+  resources and renders remote fill/line geometry after the stencil bypass.
+- DevEco emulator screenshot confirmed the inline **Local** style renders its
+  yellow GeoJSON polygon after the same stencil bypass.
 - `git diff --check` passed after the latest code/doc changes before this
   condensation.
 
@@ -559,14 +625,19 @@ High value:
 
 - Capture a clean `hilog` session for the now-working Remote path and record
   style/glyph/sprite/tile counters.
-- Run the sample on the newly installed DevEco emulator and compare behavior to
-  the MatePad.
 - Exercise pan/zoom/rotate/fling on the remote map and record which gestures
   behave acceptably.
 - Validate ImageKit sprite/image decoding on real remote style assets.
 - Re-check dynamic dependencies for public OpenHarmony and HarmonyOS/HMS builds.
 - Decide whether the public `net_http` backend is worth keeping as default, or
   whether upstream docs should present HMS RCP as the practical HarmonyOS path.
+- Stress the OHOS stencil-clipping bypass with pan/zoom/rotate and higher zoom
+  levels. The likely risk is tile-edge overdraw or geometry crossing tile
+  boundaries; current whole-world and local-polygon checks look correct.
+- Decide whether the first upstreamable version should keep the unconditional
+  OHOS stencil bypass, or invest in plumbing framebuffer stencil capability into
+  render-time state so devices with usable stencil attachments can keep normal
+  clipping.
 
 Before upstreaming:
 
@@ -601,3 +672,14 @@ User-level Hvigor wrapper/cache paths may have been populated:
 Local signing credentials and generated AGC signing material intentionally live
 outside source control or under the sample signing directory according to
 `platform/ohos/sample/sign/README.md`.
+
+This worktree also has ignored local `mise.local.toml` convenience tasks for
+the repeated emulator loop:
+
+```sh
+mise run ohos-sample-build
+mise run ohos-sample-sign
+mise run ohos-sample-install
+mise run ohos-sample-launch
+mise run ohos-sample-restart
+```

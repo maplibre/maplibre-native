@@ -159,6 +159,12 @@ std::string formatSurfaceDiagnostics(const SurfaceBinding& binding) {
         if (!binding.mapView->getLastGlyphsError().empty()) {
             stream << " glyphErr=" << binding.mapView->getLastGlyphsError();
         }
+        if (!binding.mapView->getEGLConfigDiagnostic().empty()) {
+            stream << " egl=\"" << binding.mapView->getEGLConfigDiagnostic() << '"';
+        }
+        if (!binding.mapView->getFramebufferDiagnostic().empty()) {
+            stream << " fb=\"" << binding.mapView->getFramebufferDiagnostic() << '"';
+        }
     }
     stream << " styleKind=" << styleKindLabel(binding.styleKind);
     if (!binding.style.empty()) {
@@ -618,6 +624,12 @@ napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding)
     setSizeProperty(env, object, "spritesLoadedCount", spritesLoadedCount);
     setSizeProperty(env, object, "spritesErrorCount", spritesErrorCount);
     setInt32Property(env, object, "glesContextClientVersion", glesContextClientVersion);
+    if (binding.mapView && !binding.mapView->getEGLConfigDiagnostic().empty()) {
+        setStringProperty(env, object, "eglConfigDiagnostic", binding.mapView->getEGLConfigDiagnostic());
+    }
+    if (binding.mapView && !binding.mapView->getFramebufferDiagnostic().empty()) {
+        setStringProperty(env, object, "framebufferDiagnostic", binding.mapView->getFramebufferDiagnostic());
+    }
     setSizeProperty(env, object, "frameCallbackCount", binding.frameCallbackCount);
     setSizeProperty(env, object, "touchEventCount", binding.touchEventCount);
     setSizeProperty(env, object, "gestureHandledCount", binding.gestureHandledCount);

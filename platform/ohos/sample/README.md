@@ -41,35 +41,34 @@ The sample bundle name is `org.maplibre.native.demo`, and the entry ability is
 The sample builds MapLibre Native from this checkout through
 `entry/src/main/cpp/CMakeLists.txt`, imports `libmaplibre_native_ohos.so` from
 ArkTS, consumes the local `libmaplibre_native_ohos.so` type package, declares
-`ohos.permission.INTERNET`, packages `libc++_shared.so` with the native module,
-and exercises style read/write, camera, free-camera read/write, bounds,
-client/resource options, debug, surface-state readback including map/style/
-render callback diagnostics, surface callback/error counters, surface
-visibility counters, selected GLES context version, frame/touch/gesture
-callback counters, and lightweight resource callback counters plus the last
-missing-style-image id and last-error strings for map/render/glyph/sprite
-failures, rendering, frame-rate,
-pixel-ratio, tile-cache, and memory lifecycle hooks. The first screen also
-shows a compact native surface-state readout so initial device or emulator runs
-can confirm whether the XComponent, native window, map, render loop, style
-load, and last native error state are moving.
+`ohos.permission.INTERNET`, and packages `libc++_shared.so` with the native
+module. It starts as a pumped map app: the XComponent frame callback drives
+`MapView::renderFrame()`, startup loads
+`https://demotiles.maplibre.org/style.json`, and a compact status readout is
+refreshed while the map is running.
+
+The status readout and logs still expose style read/write, camera, free-camera
+read/write, bounds, client/resource options, debug, surface-state readback
+including map/style/render callback diagnostics, surface callback/error
+counters, surface visibility counters, selected GLES context version,
+frame/touch/gesture callback counters, and lightweight resource callback
+counters plus the last missing-style-image id and last-error strings for
+map/render/glyph/sprite failures, rendering, frame-rate, pixel-ratio,
+tile-cache, and memory lifecycle hooks.
 
 The native module also compile-tests XComponent touch input handling for
 one-finger pan, two-finger pinch/rotate, double-tap zoom, and fling gestures.
-The startup path uses an empty inline style so it can render without network
-access. The sample derives the tile cache path from the ability `cacheDir`
-instead of hardcoding an app sandbox path. The `Remote` button switches to
-`https://demotiles.maplibre.org/style.json`
-so a device run can also exercise the HTTP, glyph, tile, sprite, and image
-loading paths. The `Empty` button switches back to the inline style.
+The sample derives the tile cache path from the ability `cacheDir` instead of
+hardcoding an app sandbox path. The `Remote` and `Local` buttons switch between
+the remote demotiles style and a deterministic inline GeoJSON style. The `Fit`
+button adjusts the camera without manually forcing a render; the native frame
+pump should pick up the camera update.
 
-Runtime behavior still needs validation on a device or emulator. The first
-runtime pass should confirm that the on-screen state reports a nonzero surface
-size, `window=yes`, `map=yes`, increasing frame counts after tapping Render,
-increasing touch/gesture counters after interacting with the map, and no last
-map/render error. After tapping `Remote`, use the on-screen
-glyph/sprite/tile/missing-image counters and runtime logs to inspect native
-`MapLibre` loading behavior while the sample is running. Network failures
-should include the SDK error name and request URL in the reported error string.
-Image decoder failures should include the ImageKit error name or decoded pixel
-metadata in the reported glyph/sprite/map error string.
+Runtime validation should confirm that the on-screen state reports a nonzero
+surface size, `window=yes`, `map=yes`, increasing frame counts while the map is
+running, increasing touch/gesture counters after interacting with the map, and
+no last map/render error. Use the on-screen glyph/sprite/tile/missing-image
+counters and runtime logs to inspect native `MapLibre` loading behavior.
+Network failures should include the SDK error name and request URL in the
+reported error string. Image decoder failures should include the ImageKit error
+name or decoded pixel metadata in the reported glyph/sprite/map error string.

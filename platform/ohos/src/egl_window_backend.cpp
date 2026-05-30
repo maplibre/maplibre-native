@@ -2,9 +2,12 @@
 
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
+#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <GLES3/gl3.h>
+#include <hilog/log.h>
 #include <native_buffer/native_buffer.h>
 
 #include <array>
@@ -17,6 +20,14 @@
 namespace mbgl {
 namespace ohos {
 namespace {
+
+constexpr unsigned int kMapLibreHilogDomain = 0x4d4c4e;
+constexpr char kMapLibreHilogTag[] = "MapLibreNative";
+
+void logProbe(const std::string& message) {
+    Log::Info(Event::OpenGL, message);
+    OH_LOG_Print(LOG_APP, LOG_INFO, kMapLibreHilogDomain, kMapLibreHilogTag, "%{public}s", message.c_str());
+}
 
 std::string eglErrorMessage(const char* operation) {
     std::ostringstream stream;
@@ -55,7 +66,7 @@ void logNativeWindowFormat(OHNativeWindow* window) {
 
     std::int32_t format = 0;
     if (OH_NativeWindow_NativeWindowHandleOpt(window, GET_FORMAT, &format) == 0) {
-        Log::Info(Event::OpenGL, "Native window pixel format: " + std::to_string(format));
+        logProbe("Native window pixel format: " + std::to_string(format));
     }
 }
 
@@ -65,6 +76,65 @@ struct PixelFormatPreference {
     EGLint blue;
     EGLint alpha;
 };
+
+EGLint getConfigAttribute(EGLDisplay display, EGLConfig config, EGLint attribute) {
+    EGLint value = 0;
+    if (!eglGetConfigAttrib(display, config, attribute, &value)) {
+        return -1;
+    }
+    return value;
+}
+
+std::string glString(GLenum name) {
+    const auto* value = platform::glGetString(name);
+    return value ? reinterpret_cast<const char*>(value) : "";
+}
+
+std::string formatEGLConfig(EGLDisplay display, EGLConfig config, std::int32_t contextClientVersion) {
+    std::ostringstream stream;
+    stream << "EGL config"
+           << " id=" << getConfigAttribute(display, config, EGL_CONFIG_ID)
+           << " visual=" << getConfigAttribute(display, config, EGL_NATIVE_VISUAL_ID)
+           << " rgba=" << getConfigAttribute(display, config, EGL_RED_SIZE) << '/'
+           << getConfigAttribute(display, config, EGL_GREEN_SIZE) << '/'
+           << getConfigAttribute(display, config, EGL_BLUE_SIZE) << '/'
+           << getConfigAttribute(display, config, EGL_ALPHA_SIZE)
+           << " depth=" << getConfigAttribute(display, config, EGL_DEPTH_SIZE)
+           << " stencil=" << getConfigAttribute(display, config, EGL_STENCIL_SIZE)
+           << " surface=0x" << std::hex << getConfigAttribute(display, config, EGL_SURFACE_TYPE)
+           << " renderable=0x" << getConfigAttribute(display, config, EGL_RENDERABLE_TYPE) << std::dec
+           << " es=" << contextClientVersion;
+    return stream.str();
+}
+
+std::string formatDefaultFramebuffer() {
+    platform::GLint red = 0;
+    platform::GLint green = 0;
+    platform::GLint blue = 0;
+    platform::GLint alpha = 0;
+    platform::GLint depth = 0;
+    platform::GLint stencil = 0;
+    platform::glGetIntegerv(GL_RED_BITS, &red);
+    platform::glGetIntegerv(GL_GREEN_BITS, &green);
+    platform::glGetIntegerv(GL_BLUE_BITS, &blue);
+    platform::glGetIntegerv(GL_ALPHA_BITS, &alpha);
+    platform::glGetIntegerv(GL_DEPTH_BITS, &depth);
+    platform::glGetIntegerv(GL_STENCIL_BITS, &stencil);
+    const auto framebufferStatus = platform::glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const auto error = platform::glGetError();
+
+    std::ostringstream stream;
+    stream << "GL default framebuffer"
+           << " rgba=" << red << '/' << green << '/' << blue << '/' << alpha
+           << " depth=" << depth
+           << " stencil=" << stencil
+           << " status=0x" << std::hex << framebufferStatus
+           << " err=0x" << error << std::dec
+           << " vendor=" << glString(GL_VENDOR)
+           << " renderer=" << glString(GL_RENDERER)
+           << " version=" << glString(GL_VERSION);
+    return stream.str();
+}
 
 bool tryCreateWindowSurface(EGLDisplay display,
                             OHNativeWindow* window,
@@ -259,6 +329,8 @@ EGLWindowBackend::EGLWindowBackend(OHNativeWindow* window_, Size size_)
                                 contextClientVersion)) {
             throw std::runtime_error(eglErrorMessage("eglCreateWindowSurface"));
         }
+        eglConfigDiagnostic = formatEGLConfig(displayConfig->display, windowConfig, contextClientVersion);
+        logProbe(eglConfigDiagnostic);
     } catch (...) {
         if (eglSurface != EGL_NO_SURFACE) {
             eglDestroySurface(displayConfig->display, eglSurface);
@@ -329,6 +401,10 @@ void EGLWindowBackend::activate() {
 
     if (!eglMakeCurrent(displayConfig->display, eglSurface, eglSurface, eglContext)) {
         throw std::runtime_error(eglErrorMessage("eglMakeCurrent"));
+    }
+    if (framebufferDiagnostic.empty()) {
+        framebufferDiagnostic = formatDefaultFramebuffer();
+        logProbe(framebufferDiagnostic);
     }
 }
 
