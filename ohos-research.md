@@ -590,6 +590,30 @@ Important notes:
    - The offscreen FBO experiment was removed again; the current workaround is
      only the OHOS stencil-mode bypass plus runtime diagnostics.
 
+12. Vulkan backend bring-up:
+   - Added an OHOS Vulkan window backend using MapLibre's shared Vulkan
+     renderer and `VK_OHOS_surface` for `OHNativeWindow` presentation.
+   - Added `ohos-vulkan-native` and `harmonyos-vulkan-native` presets, plus a
+     sample renderer switch. The sample now defaults to Vulkan and can be
+     configured back to OpenGL with `MLN_OHOS_SAMPLE_RENDERER=OpenGL`.
+   - The SDK has OHOS Vulkan headers and `libvulkan.so`; this repo's vendored
+     Vulkan headers do not yet define `VK_OHOS_surface`, so the backend carries
+     the minimal OHOS surface declarations locally.
+   - DevEco emulator runtime logs show `Vulkan loader api=1.3.275
+     instanceExtensions=8 VK_KHR_surface=yes VK_OHOS_surface=yes`, followed by
+     `vk::createInstanceUnique: ErrorIncompatibleDriver`. The emulator exposes
+     the loader and OHOS surface extension, but apparently not a compatible
+     Vulkan driver/runtime.
+   - HarmonyOS MatePad target `59GYD25808200129` successfully creates a
+     `Maleoon 920` Vulkan 1.3.275 device. Remote demotiles renders with country
+     fills, borders, and labels; the local inline GeoJSON style renders its
+     yellow polygon over the blue background.
+   - The tested IDE is DevEco Studio 6.0.2 Release, build 6.0.2.642, built on
+     March 4, 2026. That is still before the 6.1.0 Beta2 emulator Vulkan support
+     boundary in Huawei's emulator specification, so the emulator
+     `VK_ERROR_INCOMPATIBLE_DRIVER` result is consistent with the published
+     support matrix even though the loader reports `VK_OHOS_surface`.
+
 ## Verification Snapshot
 
 Recent useful checks:
@@ -622,6 +646,13 @@ Observed:
   yellow GeoJSON polygon after the same stencil bypass.
 - `git diff --check` passed after the latest code/doc changes before this
   condensation.
+- `harmonyos-vulkan-native` builds `libmaplibre_native_ohos.so`.
+- The Vulkan sample HAP builds, signs, installs, and launches on the DevEco
+  emulator, but fails before map creation with `VK_ERROR_INCOMPATIBLE_DRIVER`
+  from `vkCreateInstance`.
+- The same signed Vulkan HAP installs and runs on HarmonyOS MatePad target
+  `59GYD25808200129`; logs report `Vulkan device name="Maleoon 920" api=1.3.275`
+  and screenshots confirm both remote and local styles render correctly.
 
 ## Remaining Work
 
@@ -652,6 +683,14 @@ Before upstreaming:
   XComponent/EGL.
 - Decide how much of the experimental ArkTS/NAPI API belongs in the first PR.
 - Re-test with the updated DevEco Studio SDK/emulator and record exact versions.
+- Find or configure a DevEco emulator image that provides a compatible Vulkan
+  runtime. The tested emulator advertises the OHOS surface extension but fails
+  `vkCreateInstance`. Useful reference:
+  <https://developer.huawei.com/consumer/en/doc/harmonyos-guides/ide-emulator-specification>.
+  It says emulator versions before DevEco Studio 6.1.0 Beta2 do not support
+  Vulkan; DevEco Studio 6.1.0 Beta2 and newer support Vulkan APIs except
+  `vkGetSwapchainGrallocUsageOHOS`, `vkAcquireImageOHOS`, and
+  `vkQueueSignalReleaseImageOHOS`.
 
 ## Local Side Effects To Know About
 

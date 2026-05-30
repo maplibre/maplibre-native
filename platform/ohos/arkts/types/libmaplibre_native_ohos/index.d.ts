@@ -125,6 +125,7 @@ export interface SurfaceState {
   glesContextClientVersion: number;
   eglConfigDiagnostic?: string;
   framebufferDiagnostic?: string;
+  rendererDiagnostic?: string;
   frameCallbackCount: number;
   touchEventCount: number;
   gestureHandledCount: number;

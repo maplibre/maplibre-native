@@ -1,5 +1,7 @@
 #pragma once
 
+#include "window_backend.hpp"
+
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/util/image.hpp>
@@ -15,7 +17,7 @@
 namespace mbgl {
 namespace ohos {
 
-class EGLWindowBackend final : public gl::RendererBackend, public gfx::Renderable {
+class EGLWindowBackend final : public WindowBackend, public gl::RendererBackend, public gfx::Renderable {
 public:
     EGLWindowBackend(OHNativeWindow*, Size);
     ~EGLWindowBackend() override;
@@ -23,13 +25,14 @@ public:
     EGLWindowBackend(const EGLWindowBackend&) = delete;
     EGLWindowBackend& operator=(const EGLWindowBackend&) = delete;
 
+    gfx::RendererBackend& getRendererBackend() override { return *this; }
     gfx::Renderable& getDefaultRenderable() override { return *this; }
 
-    OHNativeWindow* getNativeWindow() const { return window; }
-    std::int32_t getContextClientVersion() const { return contextClientVersion; }
-    const std::string& getEGLConfigDiagnostic() const { return eglConfigDiagnostic; }
-    const std::string& getFramebufferDiagnostic() const { return framebufferDiagnostic; }
-    void setSize(Size);
+    OHNativeWindow* getNativeWindow() const override { return window; }
+    std::int32_t getGlesContextClientVersion() const override { return contextClientVersion; }
+    const std::string& getEGLConfigDiagnostic() const override { return eglConfigDiagnostic; }
+    const std::string& getFramebufferDiagnostic() const override { return framebufferDiagnostic; }
+    void setSize(Size) override;
     void swap();
     PremultipliedImage readStillImage();
 

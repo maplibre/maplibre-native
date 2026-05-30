@@ -42,18 +42,34 @@ The sample builds MapLibre Native from this checkout through
 `entry/src/main/cpp/CMakeLists.txt`, imports `libmaplibre_native_ohos.so` from
 ArkTS, consumes the local `libmaplibre_native_ohos.so` type package, declares
 `ohos.permission.INTERNET`, and packages `libc++_shared.so` with the native
-module. It starts as a pumped map app: the XComponent frame callback drives
+module. The sample defaults to the Vulkan renderer; configure with
+`-DMLN_OHOS_SAMPLE_RENDERER=OpenGL` to build the EGL/GLES backend instead. It
+starts as a pumped map app: the XComponent frame callback drives
 `MapView::renderFrame()`, startup loads
 `https://demotiles.maplibre.org/style.json`, and a compact status readout is
 refreshed while the map is running.
 
+On the DevEco emulator tested on 2026-05-30, the Vulkan loader advertises
+Vulkan 1.3.275 with `VK_KHR_surface` and `VK_OHOS_surface`, but
+`vkCreateInstance` returns `VK_ERROR_INCOMPATIBLE_DRIVER`. The same Vulkan
+sample runs on a HarmonyOS tablet with a `Maleoon 920` Vulkan 1.3.275 device and
+renders both the remote demotiles style and the local inline GeoJSON style. Use
+the OpenGL sample renderer for emulator rendering checks unless a Vulkan-capable
+emulator image is available. Huawei's DevEco Studio emulator specifications are
+published at
+<https://developer.huawei.com/consumer/en/doc/harmonyos-guides/ide-emulator-specification>.
+They state that emulator versions before DevEco Studio 6.1.0 Beta2 do not
+support Vulkan; DevEco Studio 6.1.0 Beta2 and newer support Vulkan APIs except
+`vkGetSwapchainGrallocUsageOHOS`, `vkAcquireImageOHOS`, and
+`vkQueueSignalReleaseImageOHOS`.
+
 The status readout and logs still expose style read/write, camera, free-camera
 read/write, bounds, client/resource options, debug, surface-state readback
 including map/style/render callback diagnostics, surface callback/error
-counters, surface visibility counters, selected GLES context version,
-frame/touch/gesture callback counters, and lightweight resource callback
-counters plus the last missing-style-image id and last-error strings for
-map/render/glyph/sprite failures, rendering, frame-rate, pixel-ratio,
+counters, surface visibility counters, selected GLES context version, renderer
+diagnostics, frame/touch/gesture callback counters, and lightweight resource
+callback counters plus the last missing-style-image id and last-error strings
+for map/render/glyph/sprite failures, rendering, frame-rate, pixel-ratio,
 tile-cache, and memory lifecycle hooks.
 
 The native module also compile-tests XComponent touch input handling for

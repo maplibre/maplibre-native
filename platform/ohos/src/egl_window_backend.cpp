@@ -1,5 +1,7 @@
 #include "egl_window_backend.hpp"
 
+#include "native_window_utils.hpp"
+
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/platform/gl_functions.hpp>
@@ -10,8 +12,6 @@
 #include <native_buffer/native_buffer.h>
 
 #include <array>
-#include <cstdint>
-#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -28,19 +28,6 @@ std::string eglErrorMessage(const char* operation) {
     std::ostringstream stream;
     stream << operation << " failed with EGL error 0x" << std::hex << eglGetError();
     return stream.str();
-}
-
-bool setNativeWindowBufferGeometry(OHNativeWindow* window, Size size) {
-    if (window == nullptr || size.isEmpty() ||
-        size.width > static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) ||
-        size.height > static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max())) {
-        return false;
-    }
-
-    return OH_NativeWindow_NativeWindowHandleOpt(window,
-                                                SET_BUFFER_GEOMETRY,
-                                                static_cast<std::int32_t>(size.width),
-                                                static_cast<std::int32_t>(size.height)) == 0;
 }
 
 void setNativeWindowPixelFormat(OHNativeWindow* window) {

@@ -1,15 +1,18 @@
 # OpenHarmony
 
 This platform support is experimental. It targets the OpenHarmony/HarmonyOS
-native SDK with EGL/GLES and ArkUI XComponent surfaces.
+native SDK with Vulkan or EGL/GLES rendering and ArkUI XComponent surfaces.
 
 ## Status
 
-This support is still compile/package tested only. No device or emulator has
-validated rendering, input, networking, or image decoding behavior yet.
+This support has been validated on a HarmonyOS tablet with both Vulkan and
+EGL/GLES backends, and on the DevEco emulator with the EGL/GLES backend. The
+tested DevEco emulator image exposes the Vulkan loader but not a compatible
+Vulkan driver.
 
 The current implementation provides:
 
+- Vulkan rendering to `OHNativeWindow` surfaces through `VK_OHOS_surface`.
 - EGL/GLES rendering to `OHNativeWindow` surfaces, preferring OpenGL ES 3 and
   falling back to OpenGL ES 2 when needed.
 - ArkUI XComponent integration through both legacy `libraryname` context
@@ -18,9 +21,9 @@ The current implementation provides:
   a native window/map currently exists, plus map/style/render callback
   diagnostics, surface callback/error counters, lightweight resource callback
   counters, last missing-style-image id, last glyph/sprite error strings, the
-  selected GLES context client version, frame/touch/gesture callback counters,
-  ArkUI surface visibility counters, and last-error strings for runtime
-  validation.
+  selected GLES context client version, renderer diagnostics, frame/touch and
+  gesture callback counters, ArkUI surface visibility counters, and last-error
+  strings for runtime validation.
 - OpenHarmony NetworkKit `net_http` networking by default.
 - Optional HarmonyOS HMS RemoteCommunicationKit networking through the
   `harmonyos-*` presets.
@@ -46,6 +49,9 @@ pixi run cmake --build --preset ohos-opengl
 
 pixi run cmake --preset ohos-opengl-native
 pixi run cmake --build --preset ohos-opengl-native
+
+pixi run cmake --preset ohos-vulkan-native
+pixi run cmake --build --preset ohos-vulkan-native
 ```
 
 The configure and build presets are disabled until the required SDK environment
@@ -77,7 +83,25 @@ but still need runtime network validation:
 ```sh
 pixi run cmake --preset harmonyos-opengl-native
 pixi run cmake --build --preset harmonyos-opengl-native
+
+pixi run cmake --preset harmonyos-vulkan-native
+pixi run cmake --build --preset harmonyos-vulkan-native
 ```
+
+The DevEco emulator tested on 2026-05-30 exposes `libvulkan.so` and advertises
+`VK_KHR_surface` plus `VK_OHOS_surface`, but Vulkan map creation fails at
+`vkCreateInstance` with `VK_ERROR_INCOMPATIBLE_DRIVER`. That points to an
+emulator driver/runtime limitation rather than a missing OHOS surface extension.
+The same Vulkan sample runs on a HarmonyOS tablet with a `Maleoon 920` Vulkan
+1.3.275 device, renders the remote demotiles style, and renders the local
+inline GeoJSON style. Use the EGL/GLES backend for emulator validation until a
+working Vulkan emulator image is available. When choosing emulator images, check
+Huawei's DevEco Studio emulator specifications:
+<https://developer.huawei.com/consumer/en/doc/harmonyos-guides/ide-emulator-specification>.
+That document says emulator versions before DevEco Studio 6.1.0 Beta2 do not
+support Vulkan. Starting with DevEco Studio 6.1.0 Beta2, the emulator supports
+Vulkan APIs except `vkGetSwapchainGrallocUsageOHOS`, `vkAcquireImageOHOS`, and
+`vkQueueSignalReleaseImageOHOS`.
 
 Apps that load remote styles, tiles, sprites, or glyphs must declare the
 network permission in `module.json5`:
@@ -114,11 +138,15 @@ Native as a CMake subdirectory and enable the experimental native module:
 
 ```cmake
 set(MLN_WITH_GLFW OFF CACHE BOOL "" FORCE)
-set(MLN_WITH_OPENGL ON CACHE BOOL "" FORCE)
-set(MLN_WITH_EGL ON CACHE BOOL "" FORCE)
+set(MLN_WITH_VULKAN ON CACHE BOOL "" FORCE)
+set(MLN_WITH_OPENGL OFF CACHE BOOL "" FORCE)
+set(MLN_WITH_EGL OFF CACHE BOOL "" FORCE)
 set(MLN_OHOS_BUILD_NATIVE_MODULE ON CACHE BOOL "" FORCE)
 add_subdirectory("${MAPLIBRE_NATIVE_ROOT}" "${CMAKE_BINARY_DIR}/maplibre-native")
 ```
+
+For the EGL/GLES backend, set `MLN_WITH_OPENGL=ON`, `MLN_WITH_EGL=ON`, and
+`MLN_WITH_VULKAN=OFF` instead.
 
 The native module target builds `libmaplibre_native_ohos.so`, matching the NAPI
 module name `maplibre_native_ohos`. The shared C++ runtime setting is important:
@@ -129,8 +157,9 @@ platform build suppresses only that command-line diagnostic while keeping
 warnings-as-errors enabled.
 
 The public OpenHarmony native module should link against platform libraries
-only, plus the packaged shared C++ runtime. Its expected dynamic dependencies
-are `libEGL.so`, `libGLESv3.so`, `libace_napi.z.so`, `libace_ndk.z.so`,
+only, plus the packaged shared C++ runtime. The Vulkan build links
+`libvulkan.so`; the EGL/GLES build links `libEGL.so` and `libGLESv3.so`. Both
+builds also depend on `libace_napi.z.so`, `libace_ndk.z.so`,
 `libc++_shared.so`, `libc.so`, `libimage_source.so`, `libnative_window.so`,
 `libnet_http.so`, `libpixelmap.so`, `libuv.so`, and `libz.so`. The
 HarmonyOS/HMS RCP variant replaces `libnet_http.so` with `librcp_c.so`.

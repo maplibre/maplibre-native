@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/renderer/renderer_frontend.hpp>
 
 #include <memory>
@@ -13,11 +14,9 @@ class UpdateParameters;
 
 namespace ohos {
 
-class EGLWindowBackend;
-
 class RendererFrontend final : public mbgl::RendererFrontend {
 public:
-    RendererFrontend(EGLWindowBackend&, float pixelRatio, std::optional<std::string> localFontFamily = std::nullopt);
+    RendererFrontend(gfx::RendererBackend&, float pixelRatio, std::optional<std::string> localFontFamily = std::nullopt);
     ~RendererFrontend() override;
 
     void reset() override;
@@ -33,7 +32,7 @@ public:
     Renderer* getRenderer();
 
 private:
-    EGLWindowBackend& backend;
+    gfx::RendererBackend& backend;
     std::unique_ptr<Renderer> renderer;
     std::shared_ptr<UpdateParameters> updateParameters;
     bool needsRender = false;

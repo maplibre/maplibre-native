@@ -1,8 +1,7 @@
 #include "renderer_frontend.hpp"
 
-#include "egl_window_backend.hpp"
-
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
@@ -15,7 +14,7 @@
 namespace mbgl {
 namespace ohos {
 
-RendererFrontend::RendererFrontend(EGLWindowBackend& backend_,
+RendererFrontend::RendererFrontend(gfx::RendererBackend& backend_,
                                    const float pixelRatio,
                                    std::optional<std::string> localFontFamily)
     : backend(backend_),

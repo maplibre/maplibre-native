@@ -296,6 +296,19 @@
       }
     },
     {
+      "name": "ohos-vulkan-native",
+      "inherits": "ohos",
+      "binaryDir": "${sourceDir}/build-ohos-vulkan-native",
+      "displayName": "OpenHarmony Vulkan Native Module",
+      "description": "OpenHarmony Vulkan build with the experimental NAPI/XComponent native module",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
+      }
+    },
+    {
       "name": "ohos-opengl-core",
       "inherits": "ohos",
       "binaryDir": "${sourceDir}/build-ohos-core",
@@ -355,6 +368,19 @@
       "displayName": "HarmonyOS Native Module",
       "description": "HarmonyOS GLES/EGL and HMS RCP build with the experimental NAPI/XComponent native module",
       "cacheVariables": {
+        "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
+      }
+    },
+    {
+      "name": "harmonyos-vulkan-native",
+      "inherits": "harmonyos",
+      "binaryDir": "${sourceDir}/build-harmonyos-vulkan-native",
+      "displayName": "HarmonyOS Vulkan Native Module",
+      "description": "HarmonyOS Vulkan and HMS RCP build with the experimental NAPI/XComponent native module",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "ON",
         "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
       }
     },
@@ -539,6 +565,12 @@
       "targets": ["maplibre-native-ohos"]
     },
     {
+      "name": "ohos-vulkan-native",
+      "inherits": "ohos-build",
+      "configurePreset": "ohos-vulkan-native",
+      "targets": ["maplibre-native-ohos"]
+    },
+    {
       "name": "harmonyos-opengl",
       "inherits": "harmonyos-build",
       "configurePreset": "harmonyos-opengl",
@@ -554,6 +586,12 @@
       "name": "harmonyos-opengl-native",
       "inherits": "harmonyos-build",
       "configurePreset": "harmonyos-opengl-native",
+      "targets": ["maplibre-native-ohos"]
+    },
+    {
+      "name": "harmonyos-vulkan-native",
+      "inherits": "harmonyos-build",
+      "configurePreset": "harmonyos-vulkan-native",
       "targets": ["maplibre-native-ohos"]
     },
     {

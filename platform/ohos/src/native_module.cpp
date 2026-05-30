@@ -161,6 +161,9 @@ std::string formatSurfaceDiagnostics(const SurfaceBinding& binding) {
         if (!binding.mapView->getFramebufferDiagnostic().empty()) {
             stream << " fb=\"" << binding.mapView->getFramebufferDiagnostic() << '"';
         }
+        if (!binding.mapView->getRendererDiagnostic().empty()) {
+            stream << " renderer=\"" << binding.mapView->getRendererDiagnostic() << '"';
+        }
     }
     stream << " styleKind=" << styleKindLabel(binding.styleKind);
     if (!binding.style.empty()) {
@@ -319,7 +322,7 @@ void updateSurface(SurfaceBinding& binding) {
         ++binding.surfaceErrorCount;
         binding.lastSurfaceError = exception.what();
         clearBindingSurface(binding);
-        mbgl::Log::Error(mbgl::Event::OpenGL, exception.what());
+        mbgl::Log::Error(mbgl::Event::Render, exception.what());
     }
 }
 
@@ -625,6 +628,9 @@ napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding)
     }
     if (binding.mapView && !binding.mapView->getFramebufferDiagnostic().empty()) {
         setStringProperty(env, object, "framebufferDiagnostic", binding.mapView->getFramebufferDiagnostic());
+    }
+    if (binding.mapView && !binding.mapView->getRendererDiagnostic().empty()) {
+        setStringProperty(env, object, "rendererDiagnostic", binding.mapView->getRendererDiagnostic());
     }
     setSizeProperty(env, object, "frameCallbackCount", binding.frameCallbackCount);
     setSizeProperty(env, object, "touchEventCount", binding.touchEventCount);

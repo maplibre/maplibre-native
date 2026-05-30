@@ -1,8 +1,8 @@
 #pragma once
 
 #include "camera_bounds_options.hpp"
-#include "egl_window_backend.hpp"
 #include "renderer_frontend.hpp"
+#include "window_backend.hpp"
 
 #include <mbgl/map/bound_options.hpp>
 #include <mbgl/map/map.hpp>
@@ -86,6 +86,7 @@ public:
     std::int32_t getGlesContextClientVersion() const;
     const std::string& getEGLConfigDiagnostic() const;
     const std::string& getFramebufferDiagnostic() const;
+    const std::string& getRendererDiagnostic() const;
     const std::string& getLastMapLoadError() const { return lastMapLoadError; }
     const std::string& getLastRenderError() const { return lastRenderError; }
     const std::string& getLastStyleImageMissing() const { return lastStyleImageMissing; }
@@ -122,7 +123,7 @@ private:
     float pixelRatio = 1.0f;
     OHNativeWindow* window = nullptr;
     Size surfaceSize;
-    std::unique_ptr<EGLWindowBackend> backend;
+    std::unique_ptr<WindowBackend> backend;
     std::unique_ptr<RendererFrontend> frontend;
     std::unique_ptr<Map> map;
     std::optional<CameraOptions> desiredCamera;

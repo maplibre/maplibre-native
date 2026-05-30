@@ -1,5 +1,11 @@
 #include "map_view.hpp"
 
+#if MLN_RENDER_BACKEND_VULKAN
+#include "vulkan_window_backend.hpp"
+#else
+#include "egl_window_backend.hpp"
+#endif
+
 #include <mbgl/math/angles.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/style/style.hpp>
@@ -226,7 +232,7 @@ bool MapView::isFullyLoaded() const {
 }
 
 std::int32_t MapView::getGlesContextClientVersion() const {
-    return backend ? backend->getContextClientVersion() : 0;
+    return backend ? backend->getGlesContextClientVersion() : 0;
 }
 
 const std::string& MapView::getEGLConfigDiagnostic() const {
@@ -237,6 +243,11 @@ const std::string& MapView::getEGLConfigDiagnostic() const {
 const std::string& MapView::getFramebufferDiagnostic() const {
     static const std::string empty;
     return backend ? backend->getFramebufferDiagnostic() : empty;
+}
+
+const std::string& MapView::getRendererDiagnostic() const {
+    static const std::string empty;
+    return backend ? backend->getRendererDiagnostic() : empty;
 }
 
 void MapView::setClientOptions(std::string name, std::string version) {
@@ -293,8 +304,12 @@ void MapView::setSize(Size size) {
 void MapView::createMap(OHNativeWindow* newWindow, Size size) {
     clearSurface();
 
+#if MLN_RENDER_BACKEND_VULKAN
+    backend = std::make_unique<VulkanWindowBackend>(newWindow, size);
+#else
     backend = std::make_unique<EGLWindowBackend>(newWindow, size);
-    frontend = std::make_unique<RendererFrontend>(*backend, pixelRatio);
+#endif
+    frontend = std::make_unique<RendererFrontend>(backend->getRendererBackend(), pixelRatio);
     frontend->setTileCacheEnabled(tileCacheEnabled);
 
     MapOptions mapOptions;

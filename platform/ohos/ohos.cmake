@@ -78,6 +78,26 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC
+            VK_USE_PLATFORM_OHOS=1
+    )
+
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            vulkan
+    )
+endif()
+
 target_include_directories(
     mbgl-core
     PRIVATE
@@ -138,10 +158,16 @@ if(MLN_OHOS_BUILD_LINK_SMOKE)
 endif()
 
 if(MLN_OHOS_BUILD_NATIVE_MODULE)
+    if(MLN_WITH_VULKAN)
+        set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${PROJECT_SOURCE_DIR}/platform/ohos/src/vulkan_window_backend.cpp)
+    else()
+        set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${PROJECT_SOURCE_DIR}/platform/ohos/src/egl_window_backend.cpp)
+    endif()
+
     add_library(
         maplibre-native-ohos
         SHARED
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/egl_window_backend.cpp
+            ${MLN_OHOS_WINDOW_BACKEND_SOURCE}
             ${PROJECT_SOURCE_DIR}/platform/ohos/src/gesture_handler.cpp
             ${PROJECT_SOURCE_DIR}/platform/ohos/src/map_view.cpp
             ${PROJECT_SOURCE_DIR}/platform/ohos/src/native_module.cpp
@@ -161,6 +187,12 @@ if(MLN_OHOS_BUILD_NATIVE_MODULE)
             OHOS_PLATFORM
     )
 
+    target_include_directories(
+        maplibre-native-ohos
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/src
+    )
+
     mbgl_enable_ohos_libcxx_experimental(maplibre-native-ohos)
 
     target_link_libraries(
@@ -169,10 +201,11 @@ if(MLN_OHOS_BUILD_NATIVE_MODULE)
             mbgl-compiler-options
             ace_napi.z
             ace_ndk.z
-            EGL
-            GLESv3
             hilog_ndk.z
             native_window
+            $<$<BOOL:${MLN_WITH_OPENGL}>:EGL>
+            $<$<BOOL:${MLN_WITH_OPENGL}>:GLESv3>
+            $<$<BOOL:${MLN_WITH_VULKAN}>:vulkan>
     )
 
     mln_ohos_link_core_whole_archive(maplibre-native-ohos)
