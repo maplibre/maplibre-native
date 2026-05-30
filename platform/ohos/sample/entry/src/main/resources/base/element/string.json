@@ -1,0 +1,21 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "MapLibre Native"
+    },
+    {
+      "name": "module_desc",
+      "value": "MapLibre Native OpenHarmony sample"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "MapLibre Native sample entry ability"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "MapLibre Native"
+    }
+  ]
+}
+

@@ -13,3 +13,5 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
 else()
     add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp)
 endif()
+
+mbgl_enable_ohos_libcxx_experimental(mlt-cpp)

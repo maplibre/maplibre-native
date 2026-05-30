@@ -1,0 +1,12 @@
+{
+  "modelVersion": "6.0.0",
+  "name": "maplibre-native-ohos-sample",
+  "version": "1.0.0",
+  "description": "Minimal MapLibre Native OpenHarmony sample.",
+  "license": "BSD-2-Clause",
+  "author": "MapLibre contributors",
+  "main": "",
+  "dependencies": {},
+  "devDependencies": {}
+}
+

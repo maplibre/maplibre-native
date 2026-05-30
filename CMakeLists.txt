@@ -35,6 +35,25 @@ endif()
 
 project("MapLibre Native" LANGUAGES CXX C)
 
+if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
+    # The OHOS SDK toolchain injects --gcc-toolchain, which clang reports as unused.
+    add_compile_options(
+        $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
+    )
+endif()
+
+function(mbgl_enable_ohos_libcxx_experimental target)
+    if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
+        # OHOS SDK 6.0.1 ships libc++ ranges algorithms behind this clang switch.
+        target_compile_options(
+            ${target}
+            PRIVATE
+                $<$<COMPILE_LANGUAGE:CXX>:-fexperimental-library>
+        )
+    endif()
+endfunction()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
 
@@ -131,6 +150,8 @@ if(MLN_WITH_QT)
 else()
     add_library(mbgl-core STATIC)
 endif()
+
+mbgl_enable_ohos_libcxx_experimental(mbgl-core)
 
 # Override visibility for mbgl-core when building amalgamation
 if(MLN_CREATE_AMALGAMATION)
@@ -954,6 +975,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/quaternion.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/source_location.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/std.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/stopwatch.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/stopwatch.hpp
@@ -1275,6 +1297,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL OHOS)
+    include(${PROJECT_SOURCE_DIR}/platform/ohos/ohos.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
     include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)

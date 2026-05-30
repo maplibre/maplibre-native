@@ -1,0 +1,34 @@
+{
+    "version-name": "2.0.0",
+    "version-code": 2,
+    "uuid": "00000000-0000-0000-0000-000000000000",
+    "validity": {
+        "not-before": 1780162870,
+        "not-after": 1811698870
+    },
+    "type": "debug",
+    "bundle-info": {
+        "developer-id": "OpenHarmony",
+        "development-certificate": "-----BEGIN CERTIFICATE-----\nMIICMzCCAbegAwIBAgIEaOC/zDAMBggqhkjOPQQDAwUAMGMxCzAJBgNVBAYTAkNO\nMRQwEgYDVQQKEwtPcGVuSGFybW9ueTEZMBcGA1UECxMQT3Blbkhhcm1vbnkgVGVh\nbTEjMCEGA1UEAxMaT3Blbkhhcm1vbnkgQXBwbGljYXRpb24gQ0EwHhcNMjEwMjAy\nMTIxOTMxWhcNNDkxMjMxMTIxOTMxWjBoMQswCQYDVQQGEwJDTjEUMBIGA1UEChML\nT3Blbkhhcm1vbnkxGTAXBgNVBAsTEE9wZW5IYXJtb255IFRlYW0xKDAmBgNVBAMT\nH09wZW5IYXJtb255IEFwcGxpY2F0aW9uIFJlbGVhc2UwWTATBgcqhkjOPQIBBggq\nhkjOPQMBBwNCAATbYOCQQpW5fdkYHN45v0X3AHax12jPBdEDosFRIZ1eXmxOYzSG\nJwMfsHhUU90E8lI0TXYZnNmgM1sovubeQqATo1IwUDAfBgNVHSMEGDAWgBTbhrci\nFtULoUu33SV7ufEFfaItRzAOBgNVHQ8BAf8EBAMCB4AwHQYDVR0OBBYEFPtxruhl\ncRBQsJdwcZqLu9oNUVgaMAwGCCqGSM49BAMDBQADaAAwZQIxAJta0PQ2p4DIu/ps\nLMdLCDgQ5UH1l0B4PGhBlMgdi2zf8nk9spazEQI/0XNwpft8QAIwHSuA2WelVi/o\nzAlF08DnbJrOOtOnQq5wHOPlDYB4OtUzOYJk9scotrEnJxJzGsh/\n-----END CERTIFICATE-----\n",
+        "bundle-name": "org.maplibre.native.ohos.sample",
+        "apl": "normal",
+        "app-feature": "hos_normal_app"
+    },
+    "acls": {
+        "allowed-acls": [
+            ""
+        ]
+    },
+    "permissions": {
+        "restricted-permissions": [
+            ""
+        ]
+    },
+    "debug-info": {
+        "device-ids": [
+            "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "device-id-type": "udid"
+    },
+    "issuer": "pki_internal"
+}

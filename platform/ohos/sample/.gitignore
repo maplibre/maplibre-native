@@ -1,0 +1,10 @@
+.hvigor/
+oh_modules/
+build/
+entry/.cxx/
+entry/build/
+sign/*.p12
+sign/*.cer
+sign/*.p7b
+sign/*.hap
+sign/profile.json
