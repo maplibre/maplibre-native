@@ -294,6 +294,34 @@ Result:
 
 - Remote map loading works on the MatePad with the HMS RCP backend.
 
+Later Liberty stress finding:
+
+- The OpenFreeMap Liberty style can intermittently show an obviously wrong tile
+  at some zooms, then crash.
+- Latest captured crash:
+
+```text
+2026-05-30 16:40:13.821
+record_id: 03851508495760502232
+Reason: SIGSEGV(SEGV_MAPERR)@0x0000000000000024
+Thread: OnlineFileSourc
+#00 librcp_c.so HMS_Rcp_GetResponseCookieAttrEntries+24
+#01 librcp_c.so OHOS::NetStackExt::RcpC::RcpToCppRequest(...)
+#02 librcp_c.so OHOS::NetStackExt::RcpC::RcpSessionBasedFetchHandle(...)
+#03 libmaplibre_native_ohos.so mbgl::HTTPFileSource::request(...)
+#04 libmaplibre_native_ohos.so mbgl::OnlineFileSourceThread::activateRequest(...)
+```
+
+- The exact deployed `libmaplibre_native_ohos.so` build ID was
+  `9f14fedf944277f4b8ec23aae185f699441dc762`; local symbolization maps the
+  MapLibre frames to `http_file_source_hms_rcp.cpp` and
+  `online_file_source.cpp`.
+- The crash is in the HarmonyOS RCP HTTP path, not Vulkan rendering.
+- Nearby MapLibre logs before death included Liberty `invalid tag exception`
+  vector tile failures and `OH_ImageSourceNative_CreatePixelmap` failures for
+  `ne2_shaded` PNG raster tiles.
+- Crash artifacts were saved locally in `/tmp/maplibre-ohos-crash/`.
+
 ## Rendering And XComponent
 
 ### Working Path
@@ -459,21 +487,25 @@ itself still logs ArkTS-side state with tag `MapLibreSample`.
 The committed sample app is a small HarmonyOS/OpenHarmony project under
 `platform/ohos/sample`.
 
-The sample now behaves more like the desktop GLFW demo: it loads the remote
-demotiles style on startup, keeps rendering enabled while visible, lets the
+The sample now behaves more like the desktop GLFW demo: it loads the Demo
+remote style on startup, keeps rendering enabled while visible, lets the
 XComponent frame callback drive `MapView::renderFrame()`, and refreshes the
 compact status readout while the map is running.
 
 Current buttons:
 
 - **Fit**
-- **Remote**
+- **Demo**
+- **Bright**
+- **Liberty**
 - **Local**
 
 Current style probes:
 
 - **Local**: inline GeoJSON polygon with blue background and yellow fill.
-- **Remote**: `https://demotiles.maplibre.org/style.json`.
+- **Demo**: `https://demotiles.maplibre.org/style.json`.
+- **Bright**: `https://tiles.openfreemap.org/styles/bright`.
+- **Liberty**: `https://tiles.openfreemap.org/styles/liberty`.
 
 The sample shows:
 
@@ -653,31 +685,55 @@ Observed:
 - The same signed Vulkan HAP installs and runs on HarmonyOS MatePad target
   `59GYD25808200129`; logs report `Vulkan device name="Maleoon 920" api=1.3.275`
   and screenshots confirm both remote and local styles render correctly.
+- Tablet gestures work: pan, pinch zoom, rotate, double tap, and fling all
+  behave acceptably in the sample.
+- Tablet stress checks with pan/zoom/rotate and higher zooms did not reveal
+  correctness issues. Frame rate is rough enough to revisit later, probably in
+  release builds and/or after reviewing the current run-loop pump.
+- Tablet background/foreground, resize, and repeated style switching work.
+- Bright loads on the MatePad Vulkan path and exercises OpenFreeMap glyphs,
+  sprites, vector tiles, and raster source metadata without style load failure.
+- Liberty loads on the MatePad Vulkan path but exposes remaining data/decoder
+  gaps: `invalid tag exception` for some `openmaptiles` vector tiles and
+  `IMAGE_UNSUPPORTED_OPERATION` for some `ne2_shaded` PNG raster tiles.
+- A stale wrong-tile artifact seen in Bright/Liberty disappeared after
+  uninstalling the app, which clears the app sandbox and MapLibre's on-disk
+  resource cache. The likely cause was an earlier RCP callback user-data slot
+  reuse bug that allowed a late response to be associated with a newer request
+  and then cached under the newer resource key.
+- A repeatable Liberty crash was fixed in the RCP backend. Fault logs showed
+  `OnlineFileSourc` crashing in `strlen` from
+  `OHOS::NetStackExt::RcpC::RcpToCppRequest+100`; disassembly showed that
+  offset reads `Rcp_SessionConfiguration::baseUrl`. `HMS_Rcp_CreateSession`
+  appears to retain the provided session configuration, so the local stack
+  `Rcp_SessionConfiguration` in `RcpSession` became dangling. Keeping the
+  session configuration as an `RcpSession` member fixed the crash. The backend
+  also now keeps RCP callback contexts process-alive and keeps request URL/header
+  strings alive for the request lifetime.
+- Rebuilt and signed the sample, installed on MatePad target `59GYD25808200129`,
+  selected Liberty, and observed no new `org.maplibre.native.demo` CppCrash
+  records over a 20 second smoke test after the session configuration lifetime
+  fix. Final validated native build ID:
+  `28c415f0d6ad8aac8fceae8c436b55db6faaa93c`.
 
 ## Remaining Work
 
 High value:
 
-- Exercise pan/zoom/rotate/fling on the remote map and record which gestures
-  behave acceptably.
-- Validate ImageKit sprite/image decoding on real remote style assets.
-- Re-check dynamic dependencies for public OpenHarmony and HarmonyOS/HMS builds.
-- Decide whether the public `net_http` backend is worth keeping as default, or
-  whether upstream docs should present HMS RCP as the practical HarmonyOS path.
-- Stress the OHOS stencil-clipping bypass with pan/zoom/rotate and higher zoom
-  levels. The likely risk is tile-edge overdraw or geometry crossing tile
-  boundaries; current whole-world and local-polygon checks look correct.
+- Investigate Liberty style failures if Liberty needs to be a fully green
+  sample style. Bright already exercises remote glyphs, sprites, vector tiles,
+  and raster source metadata successfully.
+- Investigate frame pacing/performance later. Current Vulkan correctness looks
+  good on the MatePad, but frame rate is rough in the debug sample.
 - Decide whether the first upstreamable version should keep the unconditional
   OHOS stencil bypass, or invest in plumbing framebuffer stencil capability into
   render-time state so devices with usable stencil attachments can keep normal
   clipping.
+- Public OpenHarmony and `net_http` validation are deferred until an Oniro or
+  similar OpenHarmony SDK/device setup is available.
 
 Before upstreaming:
 
-- Refresh `platform/ohos/README.md`; parts of it still describe the platform as
-  compile/package tested only, which is now stale after MatePad validation.
-- Reduce the sample API surface to a coherent demo instead of a broad compile
-  harness, or clearly label it as a diagnostic sample.
 - Add a concise maintainer-facing design note explaining why the port starts
   from Linux/default sources and only specializes HTTP, image decoding, and
   XComponent/EGL.

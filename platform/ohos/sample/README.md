@@ -47,7 +47,11 @@ module. The sample defaults to the Vulkan renderer; configure with
 starts as a pumped map app: the XComponent frame callback drives
 `MapView::renderFrame()`, startup loads
 `https://demotiles.maplibre.org/style.json`, and a compact status readout is
-refreshed while the map is running.
+refreshed while the map is running. The remote style buttons load:
+
+- Demo: `https://demotiles.maplibre.org/style.json`
+- Bright: `https://tiles.openfreemap.org/styles/bright`
+- Liberty: `https://tiles.openfreemap.org/styles/liberty`
 
 On the DevEco emulator tested on 2026-05-30, the Vulkan loader advertises
 Vulkan 1.3.275 with `VK_KHR_surface` and `VK_OHOS_surface`, but
@@ -75,10 +79,10 @@ tile-cache, and memory lifecycle hooks.
 The native module also compile-tests XComponent touch input handling for
 one-finger pan, two-finger pinch/rotate, double-tap zoom, and fling gestures.
 The sample derives the tile cache path from the ability `cacheDir` instead of
-hardcoding an app sandbox path. The `Remote` and `Local` buttons switch between
-the remote demotiles style and a deterministic inline GeoJSON style. The `Fit`
-button adjusts the camera without manually forcing a render; the native frame
-pump should pick up the camera update.
+hardcoding an app sandbox path. The `Demo`, `Bright`, `Liberty`, and `Local`
+buttons switch between remote styles and a deterministic inline GeoJSON style.
+The `Fit` button adjusts the camera without manually forcing a render; the
+native frame pump should pick up the camera update.
 
 Runtime validation should confirm that the on-screen state reports a nonzero
 surface size, `window=yes`, `map=yes`, increasing frame counts while the map is

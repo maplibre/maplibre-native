@@ -17,6 +17,7 @@
 #include <array>
 #include <cctype>
 #include <cstddef>
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -61,26 +62,8 @@ constexpr uint32_t RCP_ERROR_PROXY_TYPE_UNSUPPORTED = 1007900996;
 constexpr uint32_t RCP_ERROR_INVALID_CONTENT_TYPE = 1007900997;
 constexpr uint32_t RCP_ERROR_METHOD_UNSUPPORTED = 1007900998;
 constexpr uint32_t RCP_ERROR_INTERNAL = 1007900999;
-constexpr std::size_t MaxConcurrentRequests = 128;
 
 class RequestState;
-
-struct CallbackContext {
-    std::size_t slot = 0;
-};
-
-std::array<CallbackContext, MaxConcurrentRequests> makeCallbackContexts() {
-    std::array<CallbackContext, MaxConcurrentRequests> contexts{};
-    for (std::size_t i = 0; i < contexts.size(); ++i) {
-        contexts[i].slot = i;
-    }
-    return contexts;
-}
-
-CallbackContext* callbackContext(std::size_t slot) {
-    static auto contexts = makeCallbackContexts();
-    return slot < contexts.size() ? &contexts[slot] : nullptr;
-}
 
 void dispatchResponse(void* ctx, Rcp_Response* response, uint32_t errCode);
 
@@ -343,49 +326,48 @@ Response makeResponse(const Resource& resource, Rcp_Response* rcpResponse, uint3
     return response;
 }
 
-class CallbackSlots {
+class CallbackContext {
 public:
-    // RCP callbacks carry user data, but the SDK may still report cancellation
-    // after AsyncRequest destruction. Use stable slot contexts instead of a
-    // RequestState* so late callbacks cannot dereference freed request state.
-    static std::optional<std::size_t> acquire(const std::shared_ptr<RequestState>& state) {
+    explicit CallbackContext(const std::shared_ptr<RequestState>& state_) : state(state_) {}
+
+    std::shared_ptr<RequestState> get() const {
         std::scoped_lock lock(mutex);
-        for (std::size_t i = 0; i < slots.size(); ++i) {
-            if (slots[i].expired()) {
-                slots[i] = state;
-                return i;
-            }
-        }
-        return std::nullopt;
+        return state.lock();
     }
 
-    static std::shared_ptr<RequestState> get(std::size_t slot) {
+    void clear() {
         std::scoped_lock lock(mutex);
-        if (slot >= slots.size()) {
-            return nullptr;
-        }
-        return slots[slot].lock();
+        state.reset();
     }
 
-    static void release(std::size_t slot) {
+private:
+    mutable std::mutex mutex;
+    std::weak_ptr<RequestState> state;
+};
+
+class CallbackContexts {
+public:
+    // RCP can report callbacks after request cancellation/destruction. Keep the
+    // small user-data contexts alive for process lifetime and clear their weak
+    // state reference when MapLibre no longer owns the request.
+    static std::shared_ptr<CallbackContext> create(const std::shared_ptr<RequestState>& state) {
+        auto context = std::make_shared<CallbackContext>(state);
         std::scoped_lock lock(mutex);
-        if (slot < slots.size()) {
-            slots[slot].reset();
-        }
+        contexts.push_back(context);
+        return context;
     }
 
 private:
     static std::mutex mutex;
-    static std::array<std::weak_ptr<RequestState>, MaxConcurrentRequests> slots;
+    static std::deque<std::shared_ptr<CallbackContext>> contexts;
 };
 
-std::mutex CallbackSlots::mutex;
-std::array<std::weak_ptr<RequestState>, MaxConcurrentRequests> CallbackSlots::slots;
+std::mutex CallbackContexts::mutex;
+std::deque<std::shared_ptr<CallbackContext>> CallbackContexts::contexts;
 
 class RcpSession final {
 public:
     RcpSession() {
-        Rcp_SessionConfiguration configuration{};
         configuration.type = RCP_SESSION_TYPE_HTTP;
         configuration.baseUrl = requestConfiguration.empty();
         configuration.requestConfiguration = requestConfiguration.get();
@@ -431,6 +413,7 @@ public:
 private:
     std::mutex mutex;
     RcpConfigurationStorage requestConfiguration;
+    Rcp_SessionConfiguration configuration{};
     Rcp_Session* session = nullptr;
 };
 
@@ -448,19 +431,10 @@ public:
 
     void keepAlive() { self = shared_from_this(); }
 
-    bool setSlot(std::size_t slot_) {
-        auto* context = callbackContext(slot_);
-        if (context == nullptr) {
-            return false;
-        }
-
+    void setCallbackContext(std::shared_ptr<CallbackContext> context_) {
         std::scoped_lock lock(mutex);
-        if (slot) {
-            return false;
-        }
-        slot = slot_;
-        callbackObject.usrCtx = context;
-        return true;
+        context = std::move(context_);
+        callbackObject.usrCtx = context.get();
     }
 
     void setRequest(Rcp_Request* request_) {
@@ -469,6 +443,11 @@ public:
         if (request) {
             request->configuration = requestConfiguration.get();
         }
+    }
+
+    const char* keepString(std::string value) {
+        requestStrings.push_back(std::move(value));
+        return requestStrings.back().c_str();
     }
 
     void cancelOnRunLoop() {
@@ -582,16 +561,16 @@ private:
     }
 
     void release() {
-        std::optional<std::size_t> slotToRelease;
+        std::shared_ptr<CallbackContext> contextToClear;
         {
             std::scoped_lock lock(mutex);
-            slotToRelease = slot;
-            slot.reset();
+            contextToClear = context;
+            context.reset();
             self.reset();
         }
 
-        if (slotToRelease) {
-            CallbackSlots::release(*slotToRelease);
+        if (contextToClear) {
+            contextToClear->clear();
         }
     }
 
@@ -601,9 +580,10 @@ private:
     FileSource::Callback callback;
     Rcp_ResponseCallbackObject callbackObject{};
     RcpConfigurationStorage requestConfiguration;
+    std::deque<std::string> requestStrings;
     Rcp_Request* request = nullptr;
     mutable std::mutex mutex;
-    std::optional<std::size_t> slot;
+    std::shared_ptr<CallbackContext> context;
     bool canceled = false;
     bool finished = false;
     std::shared_ptr<RequestState> self;
@@ -618,7 +598,7 @@ void dispatchResponse(void* ctx, Rcp_Response* response, uint32_t errCode) {
         return;
     }
 
-    auto state = CallbackSlots::get(context->slot);
+    auto state = context->get();
     if (!state) {
         if (response && response->destroyResponse) {
             response->destroyResponse(response);
@@ -643,16 +623,9 @@ public:
           state(std::make_shared<RequestState>(
               *util::RunLoop::Get(), std::move(session_), std::move(resource), std::move(callback))) {
         state->keepAlive();
-        const auto slot = CallbackSlots::acquire(state);
-        if (!slot || !state->setSlot(*slot)) {
-            if (slot) {
-                CallbackSlots::release(*slot);
-            }
-            state->complete(nullptr, RCP_ERROR_OUT_OF_MEMORY);
-            return;
-        }
+        state->setCallbackContext(CallbackContexts::create(state));
 
-        Rcp_Request* request = HMS_Rcp_CreateRequest(state->getResource().url.c_str());
+        Rcp_Request* request = HMS_Rcp_CreateRequest(state->keepString(state->getResource().url));
         if (!request) {
             state->complete(nullptr, RCP_ERROR_OUT_OF_MEMORY);
             return;
@@ -663,17 +636,17 @@ public:
         request->headers = HMS_Rcp_CreateHeaders();
         if (request->headers) {
             HMS_Rcp_SetHeaderValue(request->headers, "Accept-Encoding", "gzip, deflate");
-            HMS_Rcp_SetHeaderValue(request->headers, "User-Agent", userAgent.c_str());
+            HMS_Rcp_SetHeaderValue(request->headers, "User-Agent", state->keepString(userAgent));
             if (state->getResource().dataRange) {
                 const auto range = std::string{"bytes="} + util::toString(state->getResource().dataRange->first) + "-" +
                                    util::toString(state->getResource().dataRange->second);
-                HMS_Rcp_SetHeaderValue(request->headers, "Range", range.c_str());
+                HMS_Rcp_SetHeaderValue(request->headers, "Range", state->keepString(range));
             }
             if (state->getResource().priorEtag) {
-                HMS_Rcp_SetHeaderValue(request->headers, "If-None-Match", state->getResource().priorEtag->c_str());
+                HMS_Rcp_SetHeaderValue(request->headers, "If-None-Match", state->keepString(*state->getResource().priorEtag));
             } else if (state->getResource().priorModified) {
                 const auto modified = util::rfc1123(*state->getResource().priorModified);
-                HMS_Rcp_SetHeaderValue(request->headers, "If-Modified-Since", modified.c_str());
+                HMS_Rcp_SetHeaderValue(request->headers, "If-Modified-Since", state->keepString(modified));
             }
         }
 

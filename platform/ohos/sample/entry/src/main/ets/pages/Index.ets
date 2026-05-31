@@ -8,7 +8,9 @@ const LOG_TAG: string = 'MapLibreSample';
 const LOCAL_VECTOR_STYLE_JSON: string =
   '{"version":8,"center":[0,0],"zoom":1,"pitch":0,"bearing":0,"sources":{"test":{"type":"geojson","data":{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-30,-20],[30,-20],[30,20],[-30,20],[-30,-20]]]}}}},"layers":[{"id":"bg","type":"background","paint":{"background-color":"#004488"}},{"id":"fill","type":"fill","source":"test","paint":{"fill-color":"#ffdd00"}}]}';
 
-const REMOTE_STYLE_URL: string = 'https://demotiles.maplibre.org/style.json';
+const DEMO_STYLE_URL: string = 'https://demotiles.maplibre.org/style.json';
+const BRIGHT_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/bright';
+const LIBERTY_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/liberty';
 
 @Entry
 @Component
@@ -225,18 +227,18 @@ struct Index {
     this.updateSurfaceState('Local vector');
   }
 
-  private useRemoteStyle(): void {
+  private useRemoteStyle(name: string, url: string): void {
     if (!this.map) {
       return;
     }
 
-    this.statusText = 'Remote: loading…';
-    this.map.setStyleUrl(REMOTE_STYLE_URL);
+    this.statusText = name + ': loading…';
+    this.map.setStyleUrl(url);
     this.map.jumpTo({ center: { longitude: 0, latitude: 20 }, zoom: 1.25, bearing: 0, pitch: 0 });
     setTimeout(() => {
       if (this.map) {
         this.map.runLoopOnce();
-        this.updateSurfaceState('Remote style');
+        this.updateSurfaceState(name + ' style');
       }
     }, 500);
   }
@@ -301,7 +303,7 @@ struct Index {
       map.runLoopOnce();
     }
     map.getTileCacheEnabled();
-    this.useRemoteStyle();
+    this.useRemoteStyle('Demo', DEMO_STYLE_URL);
   }
 
   build() {
@@ -381,9 +383,21 @@ struct Index {
           })
           .height(44)
 
-        Button('Remote')
+        Button('Demo')
           .onClick(() => {
-            this.useRemoteStyle();
+            this.useRemoteStyle('Demo', DEMO_STYLE_URL);
+          })
+          .height(44)
+
+        Button('Bright')
+          .onClick(() => {
+            this.useRemoteStyle('Bright', BRIGHT_STYLE_URL);
+          })
+          .height(44)
+
+        Button('Liberty')
+          .onClick(() => {
+            this.useRemoteStyle('Liberty', LIBERTY_STYLE_URL);
           })
           .height(44)
 

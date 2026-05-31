@@ -320,9 +320,9 @@ cd platform/ohos/sample
 /path/to/command-line-tools/bin/hvigorw assembleApp --no-daemon
 ```
 
-The sample is intended as a build and packaging integration check until device
-or emulator runtime validation is available. It starts with an empty inline
-style for deterministic surface/render validation and includes a `Remote`
-button that switches to `https://demotiles.maplibre.org/style.json` for first
-device checks of HTTP, glyph, tile, sprite, and image loading behavior. Missing
-style image callbacks report both a count and the last requested image id.
+The sample is intended as a build, packaging, and runtime diagnostic check. It
+starts with `https://demotiles.maplibre.org/style.json`, includes `Demo`,
+`Bright`, and `Liberty` remote style buttons for HTTP, glyph, tile, sprite, and
+image loading checks, and includes a `Local` button for deterministic inline
+GeoJSON rendering. Missing style image callbacks report both a count and the
+last requested image id.
