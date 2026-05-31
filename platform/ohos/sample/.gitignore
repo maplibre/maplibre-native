@@ -1,4 +1,5 @@
 .hvigor/
+.appanalyzer/
 oh_modules/
 build/
 entry/.cxx/

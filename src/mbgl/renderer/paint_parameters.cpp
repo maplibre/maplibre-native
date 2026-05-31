@@ -169,10 +169,10 @@ void PaintParameters::clearStencil() {
 #endif
 }
 
-void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
+bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     // We can avoid updating the mask if it already contains the same set of tiles.
     if (!renderTiles || !renderPass || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
-        return;
+        return true;
     }
 
     tileClippingMaskIDs.clear();
@@ -292,7 +292,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
     if (!program) {
-        return;
+        return false;
     }
 
     static_cast<gl::Context&>(context).renderingStats().stencilUpdates++;
@@ -313,32 +313,37 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             continue;
         }
 
-        program->draw(context,
-                      *renderPass,
-                      gfx::Triangles(),
-                      gfx::DepthMode::disabled(),
-                      gfx::StencilMode{gfx::StencilMode::Always{},
-                                       stencilID,
-                                       0b11111111,
-                                       gfx::StencilOpType::Keep,
-                                       gfx::StencilOpType::Keep,
-                                       gfx::StencilOpType::Replace},
-                      gfx::ColorMode::disabled(),
-                      gfx::CullFaceMode::disabled(),
-                      *staticData.quadTriangleIndexBuffer,
-                      staticData.clippingMaskSegments,
-                      ClippingMaskProgram::computeAllUniformValues(
-                          ClippingMaskProgram::LayoutUniformValues{
-                              uniforms::matrix::Value(matrixForTile(tileID)),
-                          },
-                          paintAttributeData,
-                          properties,
-                          static_cast<float>(state.getZoom())),
-                      ClippingMaskProgram::computeAllAttributeBindings(
-                          *staticData.tileVertexBuffer, paintAttributeData, properties),
-                      "clipping/" + util::toString(stencilID));
+        if (!program->draw(context,
+                           *renderPass,
+                           gfx::Triangles(),
+                           gfx::DepthMode::disabled(),
+                           gfx::StencilMode{gfx::StencilMode::Always{},
+                                            stencilID,
+                                            0b11111111,
+                                            gfx::StencilOpType::Keep,
+                                            gfx::StencilOpType::Keep,
+                                            gfx::StencilOpType::Replace},
+                           gfx::ColorMode::disabled(),
+                           gfx::CullFaceMode::disabled(),
+                           *staticData.quadTriangleIndexBuffer,
+                           staticData.clippingMaskSegments,
+                           ClippingMaskProgram::computeAllUniformValues(
+                               ClippingMaskProgram::LayoutUniformValues{
+                                   uniforms::matrix::Value(matrixForTile(tileID)),
+                               },
+                               paintAttributeData,
+                               properties,
+                               static_cast<float>(state.getZoom())),
+                           ClippingMaskProgram::computeAllAttributeBindings(
+                               *staticData.tileVertexBuffer, paintAttributeData, properties),
+                           "clipping/" + util::toString(stencilID))) {
+            tileClippingMaskIDs.clear();
+            return false;
+        }
     }
 #endif // MLN_RENDER_BACKEND_OPENGL
+
+    return true;
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {

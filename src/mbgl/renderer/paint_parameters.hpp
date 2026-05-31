@@ -97,7 +97,11 @@ public:
 
     // Stencil handling
 public:
-    void renderTileClippingMasks(const RenderTiles&);
+    /// Whether GL stencil clipping can be used for non-3D drawables in the current render target.
+    bool stencilClippingAvailable = true;
+
+    /// @return False when the clipping mask could not be rendered and stencil clipping should be disabled.
+    bool renderTileClippingMasks(const RenderTiles&);
 
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
     void clearStencil();
