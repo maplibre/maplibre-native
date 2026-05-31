@@ -584,6 +584,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/quaternion.hpp",
     "src/mbgl/util/rapidjson.cpp",
     "src/mbgl/util/rapidjson.hpp",
+    "src/mbgl/util/source_location.hpp",
     "src/mbgl/util/std.hpp",
     "src/mbgl/util/stopwatch.cpp",
     "src/mbgl/util/stopwatch.hpp",

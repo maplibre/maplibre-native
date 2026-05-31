@@ -209,6 +209,8 @@ C++20 compatibility:
   - Symbol guard diagnostics use `mbgl::SourceLocation`, which aliases
     `std::source_location` where available and falls back to file/function/line
     on incomplete SDKs.
+  - This replaces the previous `symbol_instance.hpp` workaround that declared
+    a fallback `std::source_location` inside `namespace std`.
 
 Known recurring build noise:
 
