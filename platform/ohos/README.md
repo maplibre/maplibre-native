@@ -3,6 +3,10 @@
 This platform support is experimental. It targets the HarmonyOS native SDK, not
 yet OpenHarmony.
 
+Public OpenHarmony platform documentation is maintained in the
+[OpenHarmony docs repository](https://github.com/openharmony/docs). This branch
+has not yet been validated against the public OpenHarmony SDK.
+
 The `platform/ohos/sample` app is the easiest way to build and run the current
 NAPI/XComponent integration in DevEco Studio.
 

@@ -262,41 +262,57 @@ The initial OHOS target should be smaller than both:
 - Keep it advisory at first if SDK setup is brittle, matching the Node workflow's
   non-blocking posture for non-core coverage.
 
-SDK setup audit:
+SDK source findings:
 
-- `jiwangyihao/setup-harmonyos-sdk` is the most relevant third-party action, but
-  it downloads SDK archives from a separate `jiwangyihao/hos-sdk` GitHub release
-  mirror rather than from Huawei directly. The latest inspected release was
-  `5.1.1.823`, with macOS command-line tools and ArkUI-X assets only. The action
-  also configures npm/ohpm registries, disables `ohpm strict_ssl`, installs
-  unrelated macOS packages, creates a fake `devecoStudio` executable, and
-  configures ACE/ArkUI-X. Even pinned by SHA, this is too broad for root CMake
-  CI and does not currently provide the Linux runner path described above.
-- `harmonyos-dev/hos-sdk`, the upstream mirror behind that family of repos,
-  shows the useful underlying approach: download a command-line-tools archive,
-  then run `sdkmgr install ... --accept-license`. Its published example is old
-  and OpenHarmony/API-9 oriented, but the `sdkmgr` flow is the right shape to
-  reproduce in a first-party setup step if the official SDK download URL and
-  license terms are acceptable for CI.
-- `applibgroup/HarmonyOsSdk` is not suitable. It is a Windows `cmd` composite
-  action that sets `OHOS_SDK_HOME` to the action checkout, copies config files,
-  then runs `gradlew assembleDebug sonarqube --info`. The repository vendors a
-  large old SDK tree directly, appears focused on Java/JS/ETS SDK 2.x/3.x era
-  packaging, and does not include the native SDK layout needed here.
+- `https://repo.huaweicloud.com/harmonyos/` is the useful public entry point.
+- `harmonyos/os/` currently mirrors the public OpenHarmony SDK archive shape also
+  visible at `https://repo.huaweicloud.com/openharmony/os/`. The latest observed
+  public SDK archive was `6.1-Release`, but these `ohos-sdk-*-public` archives
+  do not include the HMS `hms/native` overlay used by this branch.
+- `harmonyos/ohpm/5.1.0/commandline-tools-linux-x64-5.1.0.840.zip` verified
+  against its sibling SHA-256 file. It contains command-line tools `5.1.0.840`
+  and bundled SDK metadata for HarmonyOS `5.1.0`, SDK `5.1.0.125`, API `18`.
+- That command-line-tools archive includes both `sdk/default/openharmony` and
+  `sdk/default/hms`. The HMS native SDK contains `hms/native`,
+  `hmos.toolchain.cmake`, `hmos.toolchain.bisheng.cmake`, BiSheng,
+  `RemoteCommunicationKit/rcp.h`, and `librcp_c.so`. This is the only public
+  anonymous source found so far that contains the HMS native overlay needed by
+  the current RCP backend.
+- The command-line-tools archive does not provide a top-level `sdkmgr`
+  executable. Its embedded SDK-manager packages only map HarmonyOS versions
+  through `5.1.0`/API 18, so treat this as a fixed downloadable SDK bundle, not
+  evidence that CI can install newer HMS SDKs.
+- The archive is governed by the Huawei DevEco Studio agreement. Maintainers
+  need to be comfortable with that license/source before hosted CI relies on it.
+- The Huawei developer download-center web app can return newer tool metadata
+  only after a logged-in developer session and accepted agreements, so it is not
+  suitable for public GitHub-hosted CI.
 
-Recommended first implementation: avoid third-party checked-in SDK bundles.
-Prefer a small first-party setup step that obtains official command-line tools,
-runs `sdkmgr`, caches the resulting SDK, and exports only the paths this project
-needs. If the only immediately workable source is a third-party GitHub release
-mirror, keep that workflow manual/advisory, pin the action/release by immutable
-SHA, and verify archive checksums explicitly.
+Other CI setup options:
+
+- `openharmony-rs/setup-ohos-sdk` is a good future path for public
+  OpenHarmony-only CI. It downloads public `ohos-sdk-*-public` archives from
+  Huawei Cloud or its own GitHub release mirror, verifies SHA-256, and exports
+  `OHOS_SDK_NATIVE`. It does not provide HMS.
+- Third-party HarmonyOS actions inspected so far are too broad, stale, or
+  mirror-based for this PR's root CMake CI. Prefer direct Huawei Cloud archives
+  if hosted HarmonyOS CI is added.
+- The OpenHarmony docs repo (`https://github.com/openharmony/docs`) documents
+  DevEco and command-line NDK/CMake usage with `ohos.toolchain.cmake`, but did
+  not provide a hosted-CI recipe.
+
+Recommended first implementation: no hosted HarmonyOS CI in this PR unless the
+DevEco command-line-tools license/source is explicitly accepted. For public
+OpenHarmony later, add a separate advisory CMake build job using
+`openharmony-rs/setup-ohos-sdk`, then restore an OpenHarmony HTTP backend.
 
 ## Networking
 
-The current PR uses only the HarmonyOS HMS RemoteCommunicationKit backend. A
-public OpenHarmony `net_http` backend was explored and then removed from the
-branch because this PR has not been validated against public OpenHarmony yet.
-The useful notes to preserve for a future OpenHarmony pass:
+The current PR uses only the HarmonyOS HMS RemoteCommunicationKit backend
+because that is the network path validated on the MatePad. A public OpenHarmony
+`net_http` backend was explored first and then removed from the branch because
+it failed device validation and this PR has not been validated against public
+OpenHarmony yet. The useful notes to preserve for a future OpenHarmony pass:
 
 - Header/library: `network/netstack/net_http.h`, `libnet_http.so`.
 - Compile/link testing worked in the earlier prototype.
@@ -318,8 +334,11 @@ This came from the SDK path, not from exhausting local callback slots.
 
 - Header/library: `RemoteCommunicationKit/rcp.h`, `librcp_c.so`.
 - Better API fit because callbacks carry user context.
-- Used by the committed HarmonyOS build path; the non-RCP HTTP path was removed
-  until public OpenHarmony validation is restored.
+- Used by the committed HarmonyOS build path because remote style loading works
+  with RCP after the lifetime/config fixes below.
+- If a future `net_http` backend works on both public OpenHarmony and HarmonyOS,
+  RCP can become optional or be removed from the default build. That has not
+  been validated yet.
 - Initial remote-style load crashed in the RCP worker thread:
 
 ```text
