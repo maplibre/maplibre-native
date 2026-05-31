@@ -7,4 +7,4 @@ sign/*.p12
 sign/*.cer
 sign/*.p7b
 sign/*.hap
-sign/profile.json
+sign/signing.local.json

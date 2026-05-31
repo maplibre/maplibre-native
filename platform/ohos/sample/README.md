@@ -19,10 +19,8 @@ Install it once `hdc list targets` shows a device or emulator:
   entry/build/default/outputs/default/app/entry-default.hap
 ```
 
-The command-line build currently warns `No signingConfig found for product
-default`, and the generated HAP has no signature files. A real device install may
-require adding a DevEco/Harmony signing config or signing the HAP with the target
-device's accepted profile before running `hdc install`.
+For device installs, configure local signing first with the instructions in
+`sign/README.md`.
 
 The sample builds MapLibre Native from this checkout through
 `entry/src/main/cpp/CMakeLists.txt`, imports `libmaplibre_native_ohos.so` from
