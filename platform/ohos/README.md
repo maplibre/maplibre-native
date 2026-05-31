@@ -15,8 +15,9 @@ The current implementation provides:
 - Vulkan rendering to `OHNativeWindow` surfaces through `VK_OHOS_surface`.
 - EGL/GLES rendering to `OHNativeWindow` surfaces, preferring OpenGL ES 3 and
   falling back to OpenGL ES 2 when needed.
-- ArkUI XComponent integration through both legacy `libraryname` context
-  loading and `registerXComponentNode(node)`.
+- ArkUI XComponent integration through legacy `libraryname` context loading.
+  The native module also contains an experimental `registerXComponentNode(node)`
+  path for ArkUI node-handle integration, but the sample uses the legacy path.
 - XComponent lifecycle readback for the last reported surface size and whether
   a native window/map currently exists, plus map/style/render callback
   diagnostics, surface callback/error counters, lightweight resource callback
@@ -33,8 +34,8 @@ The current implementation provides:
 - Camera, free-camera, bounds, debug, client, resource, tile-cache,
   pixel-ratio, frame-rate, rendering-enable, and memory-reduction
   controls/readback through NAPI.
-- Basic one-finger pan, two-finger pinch, two-finger rotation, double-tap zoom,
-  and single-finger fling gesture bridging.
+- Basic one-finger pan, two-finger pinch, two-finger rotation, two-finger shove
+  pitch, double-tap zoom, and single-finger fling gesture bridging.
 
 ## Build
 
@@ -44,14 +45,14 @@ Set the native SDK paths, then use the CMake presets:
 export OHOS_SDK_NATIVE=/path/to/openharmony/native
 export HMOS_SDK_NATIVE=/path/to/hms/native
 
-pixi run cmake --preset ohos-opengl
-pixi run cmake --build --preset ohos-opengl
+cmake --preset ohos-opengl
+cmake --build --preset ohos-opengl
 
-pixi run cmake --preset ohos-opengl-native
-pixi run cmake --build --preset ohos-opengl-native
+cmake --preset ohos-opengl-native
+cmake --build --preset ohos-opengl-native
 
-pixi run cmake --preset ohos-vulkan-native
-pixi run cmake --build --preset ohos-vulkan-native
+cmake --preset ohos-vulkan-native
+cmake --build --preset ohos-vulkan-native
 ```
 
 The configure and build presets are disabled until the required SDK environment
@@ -81,11 +82,11 @@ backends include SDK error names and request URLs in network failure messages,
 but still need runtime network validation:
 
 ```sh
-pixi run cmake --preset harmonyos-opengl-native
-pixi run cmake --build --preset harmonyos-opengl-native
+cmake --preset harmonyos-opengl-native
+cmake --build --preset harmonyos-opengl-native
 
-pixi run cmake --preset harmonyos-vulkan-native
-pixi run cmake --build --preset harmonyos-vulkan-native
+cmake --preset harmonyos-vulkan-native
+cmake --build --preset harmonyos-vulkan-native
 ```
 
 The DevEco emulator tested on 2026-05-30 exposes `libvulkan.so` and advertises
@@ -93,10 +94,10 @@ The DevEco emulator tested on 2026-05-30 exposes `libvulkan.so` and advertises
 `vkCreateInstance` with `VK_ERROR_INCOMPATIBLE_DRIVER`. That points to an
 emulator driver/runtime limitation rather than a missing OHOS surface extension.
 The same Vulkan sample runs on a HarmonyOS tablet with a `Maleoon 920` Vulkan
-1.3.275 device, renders the remote demotiles style, and renders the local
-inline GeoJSON style. Use the EGL/GLES backend for emulator validation until a
-working Vulkan emulator image is available. When choosing emulator images, check
-Huawei's DevEco Studio emulator specifications:
+1.3.275 device and renders the Demo, Bright, and Liberty remote styles. Use the
+EGL/GLES backend for emulator validation until a working Vulkan emulator image
+is available. When choosing emulator images, check Huawei's DevEco Studio
+emulator specifications:
 <https://developer.huawei.com/consumer/en/doc/harmonyos-guides/ide-emulator-specification>.
 That document says emulator versions before DevEco Studio 6.1.0 Beta2 do not
 support Vulkan. Starting with DevEco Studio 6.1.0 Beta2, the emulator supports
@@ -164,11 +165,11 @@ builds also depend on `libace_napi.z.so`, `libace_ndk.z.so`,
 `libnet_http.so`, `libpixelmap.so`, `libuv.so`, and `libz.so`. The
 HarmonyOS/HMS RCP variant replaces `libnet_http.so` with `librcp_c.so`.
 
-For ArkTS type metadata, add
+For sample ArkTS type metadata, add
 `platform/ohos/arkts/types/libmaplibre_native_ohos` as an OH package dependency
 or copy it into the app module's `src/main/cpp/types/` directory. Treat
-`index.d.ts` in that package as the authoritative API surface while this
-platform support is experimental.
+`index.d.ts` in that package as experimental sample metadata, not a stable
+public language binding.
 
 ## ArkTS Usage
 
@@ -250,11 +251,13 @@ XComponent({
   });
 ```
 
-The module also exposes `registerXComponentNode(node)` for ArkUI node-handle
-integration. This is the preferred path for `NodeContainer`/`NodeController`
-XComponents created from ArkTS. Release the returned native binding with
-`destroy(binding)` when the ArkTS owner is disposed. Module-level map operations
-require this explicit binding:
+The module also compile-tests `registerXComponentNode(node)` for ArkUI
+node-handle integration. This path is intended for `NodeContainer` /
+`NodeController` XComponents created from ArkTS, but first validation uses the
+legacy XComponent path because `OH_ArkUI_SurfaceHolder_Create(node)` failed on
+the tested HarmonyOS 6.1 MatePad. If this path is used, release the returned
+native binding with `destroy(binding)` when the ArkTS owner is disposed.
+Module-level map operations require this explicit binding:
 
 ```ts
 import { NodeController, typeNode } from '@kit.ArkUI';
@@ -321,8 +324,7 @@ cd platform/ohos/sample
 ```
 
 The sample is intended as a build, packaging, and runtime diagnostic check. It
-starts with `https://demotiles.maplibre.org/style.json`, includes `Demo`,
+starts with `https://tiles.openfreemap.org/styles/bright` and includes `Demo`,
 `Bright`, and `Liberty` remote style buttons for HTTP, glyph, tile, sprite, and
-image loading checks, and includes a `Local` button for deterministic inline
-GeoJSON rendering. Missing style image callbacks report both a count and the
+image loading checks. Missing style image callbacks report both a count and the
 last requested image id.

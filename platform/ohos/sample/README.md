@@ -46,8 +46,9 @@ module. The sample defaults to the Vulkan renderer; configure with
 `-DMLN_OHOS_SAMPLE_RENDERER=OpenGL` to build the EGL/GLES backend instead. It
 starts as a pumped map app: the XComponent frame callback drives
 `MapView::renderFrame()`, startup loads
-`https://demotiles.maplibre.org/style.json`, and a compact status readout is
-refreshed while the map is running. The remote style buttons load:
+`https://tiles.openfreemap.org/styles/bright`, and compact overlaid status plus
+style-sourced attribution are refreshed while the map is running. The remote
+style buttons load:
 
 - Demo: `https://demotiles.maplibre.org/style.json`
 - Bright: `https://tiles.openfreemap.org/styles/bright`
@@ -57,32 +58,27 @@ On the DevEco emulator tested on 2026-05-30, the Vulkan loader advertises
 Vulkan 1.3.275 with `VK_KHR_surface` and `VK_OHOS_surface`, but
 `vkCreateInstance` returns `VK_ERROR_INCOMPATIBLE_DRIVER`. The same Vulkan
 sample runs on a HarmonyOS tablet with a `Maleoon 920` Vulkan 1.3.275 device and
-renders both the remote demotiles style and the local inline GeoJSON style. Use
-the OpenGL sample renderer for emulator rendering checks unless a Vulkan-capable
-emulator image is available. Huawei's DevEco Studio emulator specifications are
-published at
+renders the Demo, Bright, and Liberty remote styles. Use the OpenGL sample
+renderer for emulator rendering checks unless a Vulkan-capable emulator image is
+available. Huawei's DevEco Studio emulator specifications are published at
 <https://developer.huawei.com/consumer/en/doc/harmonyos-guides/ide-emulator-specification>.
 They state that emulator versions before DevEco Studio 6.1.0 Beta2 do not
 support Vulkan; DevEco Studio 6.1.0 Beta2 and newer support Vulkan APIs except
 `vkGetSwapchainGrallocUsageOHOS`, `vkAcquireImageOHOS`, and
 `vkQueueSignalReleaseImageOHOS`.
 
-The status readout and logs still expose style read/write, camera, free-camera
-read/write, bounds, client/resource options, debug, surface-state readback
-including map/style/render callback diagnostics, surface callback/error
-counters, surface visibility counters, selected GLES context version, renderer
-diagnostics, frame/touch/gesture callback counters, and lightweight resource
-callback counters plus the last missing-style-image id and last-error strings
-for map/render/glyph/sprite failures, rendering, frame-rate, pixel-ratio,
-tile-cache, and memory lifecycle hooks.
+The status readout shows the surface size, pixel ratio, measured FPS,
+XComponent tick rate, renderer identity, and render pending/idle state. Native
+logs and `SurfaceState` expose additional map/style/render callback diagnostics,
+surface callback/error counters, surface visibility counters, selected GLES
+context version, renderer diagnostics, frame/touch/gesture counters, lightweight
+resource callback counters, the last missing-style-image id, and last-error
+strings for map/render/glyph/sprite failures.
 
 The native module also compile-tests XComponent touch input handling for
-one-finger pan, two-finger pinch/rotate, double-tap zoom, and fling gestures.
-The sample derives the tile cache path from the ability `cacheDir` instead of
-hardcoding an app sandbox path. The `Demo`, `Bright`, `Liberty`, and `Local`
-buttons switch between remote styles and a deterministic inline GeoJSON style.
-The `Fit` button adjusts the camera without manually forcing a render; the
-native frame pump should pick up the camera update.
+one-finger pan, two-finger pinch/rotate, two-finger shove pitch, double-tap zoom,
+and fling gestures. The sample derives the tile cache path from the ability
+`cacheDir` instead of hardcoding an app sandbox path.
 
 Runtime validation should confirm that the on-screen state reports a nonzero
 surface size, `window=yes`, `map=yes`, increasing frame counts while the map is

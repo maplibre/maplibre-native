@@ -7,9 +7,9 @@ Place your AGC debug files here (gitignored):
 - `maplibre-debug.p7b` — debug profile for bundle `org.maplibre.native.demo`
 - `profile.json` — local unsigned debug profile; copy `profile.example.json` if needed
 
-Passwords live in `~/Downloads/maplibre-ohos-sample-signing-credentials.txt`.
+Keep signing passwords outside the repository.
 
-## Build and sign (command line, no DevEco)
+## Build and sign from the command line
 
 `hvigor` expects encrypted 32+ character passwords in `build-profile.json5`, so sign the
 unsigned HAP manually after `assembleApp`:
