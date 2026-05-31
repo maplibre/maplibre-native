@@ -28,6 +28,11 @@ struct GestureState {
     float lastTapY = 0.0f;
     std::chrono::steady_clock::time_point lastTapTime;
     bool pinchActive = false;
+    bool shoveActive = false;
+    float pinchStartCenterX = 0.0f;
+    float pinchStartCenterY = 0.0f;
+    double pinchStartDistance = 0.0;
+    double pinchStartAngle = 0.0;
     float pinchCenterX = 0.0f;
     float pinchCenterY = 0.0f;
     double pinchDistance = 0.0;

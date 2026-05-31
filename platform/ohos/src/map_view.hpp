@@ -41,6 +41,7 @@ public:
     void setFreeCameraOptions(FreeCameraOptions);
     void setGestureInProgress(bool);
     void moveBy(double x, double y, AnimationOptions = {});
+    void pitchBy(double deltaPitch);
     void scaleBy(double scale, double anchorX, double anchorY);
     void rotateBy(double previousAngle, double currentAngle, double anchorX, double anchorY);
     void setDebugOptions(MapDebugOptions);

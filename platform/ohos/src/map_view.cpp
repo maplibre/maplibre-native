@@ -183,6 +183,25 @@ void MapView::moveBy(double x, double y, AnimationOptions animationOptions) {
     desiredCamera = map->getCameraOptions();
 }
 
+void MapView::pitchBy(double deltaPitch) {
+    if (!map || !std::isfinite(deltaPitch)) {
+        return;
+    }
+
+    const auto currentCamera = map->getCameraOptions();
+    const auto bounds = map->getBounds();
+    const double minPitch = bounds.minPitch.value_or(0.0);
+    const double maxPitch = bounds.maxPitch.value_or(60.0);
+    const double lowerPitch = std::min(minPitch, maxPitch);
+    const double upperPitch = std::max(minPitch, maxPitch);
+    const double currentPitch = currentCamera.pitch.value_or(0.0);
+    const double nextPitch = std::clamp(currentPitch + deltaPitch, lowerPitch, upperPitch);
+    map->easeTo(CameraOptions().withPitch(nextPitch), AnimationOptions{});
+    desiredCameraBounds.reset();
+    desiredFreeCamera.reset();
+    desiredCamera = map->getCameraOptions();
+}
+
 void MapView::scaleBy(double scale, double anchorX, double anchorY) {
     if (!map || !std::isfinite(scale) || scale <= 0.0) {
         return;

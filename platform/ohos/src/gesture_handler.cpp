@@ -43,9 +43,21 @@ constexpr auto FlingAnimationDuration = std::chrono::milliseconds(450);
 constexpr double FlingDistanceSeconds = 0.25;
 constexpr double MinFlingVelocity = 250.0;
 constexpr double MaxFlingDistance = 1200.0;
+constexpr double Pi = 3.14159265358979323846;
+constexpr double TwoPi = 2.0 * Pi;
+constexpr double ShoveStartMovement = 16.0;
+constexpr double ShoveVerticalRatio = 1.5;
+constexpr double ShoveMaxDistanceScaleDelta = 0.06;
+constexpr double ShoveMaxAngleDelta = Pi / 18.0;
+constexpr double ShovePixelChangeFactor = 0.1;
 
 double distanceBetween(float firstX, float firstY, float secondX, float secondY) {
     return std::hypot(static_cast<double>(secondX - firstX), static_cast<double>(secondY - firstY));
+}
+
+double normalizedAngleDelta(double firstAngle, double secondAngle) {
+    const double delta = std::remainder(secondAngle - firstAngle, TwoPi);
+    return std::abs(delta);
 }
 
 double clampFlingDistance(double distance) {
@@ -226,6 +238,11 @@ bool handleTouchAction(GestureState& state,
         state.touchVelocityX = 0.0;
         state.touchVelocityY = 0.0;
         state.pinchActive = true;
+        state.shoveActive = false;
+        state.pinchStartCenterX = pinch->centerX;
+        state.pinchStartCenterY = pinch->centerY;
+        state.pinchStartDistance = pinch->distance;
+        state.pinchStartAngle = pinch->angle;
         state.pinchCenterX = pinch->centerX;
         state.pinchCenterY = pinch->centerY;
         state.pinchDistance = pinch->distance;
@@ -246,6 +263,7 @@ bool handleTouchAction(GestureState& state,
             }
             state.touchActive = true;
             state.pinchActive = false;
+            state.shoveActive = false;
             state.touchId = point->id;
             state.touchX = point->x;
             state.touchY = point->y;
@@ -270,6 +288,20 @@ bool handleTouchAction(GestureState& state,
                 if (!mapView) {
                     return false;
                 }
+                const double totalDx = pinch->centerX - state.pinchStartCenterX;
+                const double totalDy = pinch->centerY - state.pinchStartCenterY;
+                const double totalVerticalMovement = std::abs(totalDy);
+                const double totalHorizontalMovement = std::abs(totalDx);
+                const double distanceScaleDelta = state.pinchStartDistance > 0.0
+                                                      ? std::abs((pinch->distance / state.pinchStartDistance) - 1.0)
+                                                      : 0.0;
+                const double angleDelta = normalizedAngleDelta(state.pinchStartAngle, pinch->angle);
+                if (!state.shoveActive && totalVerticalMovement >= ShoveStartMovement &&
+                    totalVerticalMovement >= totalHorizontalMovement * ShoveVerticalRatio &&
+                    distanceScaleDelta <= ShoveMaxDistanceScaleDelta && angleDelta <= ShoveMaxAngleDelta) {
+                    state.shoveActive = true;
+                }
+
                 const double scale = pinch->distance / state.pinchDistance;
                 const double dx = pinch->centerX - state.pinchCenterX;
                 const double dy = pinch->centerY - state.pinchCenterY;
@@ -278,6 +310,11 @@ bool handleTouchAction(GestureState& state,
                 state.pinchCenterY = pinch->centerY;
                 state.pinchDistance = pinch->distance;
                 state.pinchAngle = pinch->angle;
+                if (state.shoveActive) {
+                    mapView->pitchBy(-dy * ShovePixelChangeFactor);
+                    return true;
+                }
+
                 mapView->scaleBy(scale, pinch->centerX, pinch->centerY);
                 mapView->rotateBy(previousAngle, pinch->angle, pinch->centerX, pinch->centerY);
                 mapView->moveBy(dx, dy);
@@ -318,6 +355,7 @@ bool handleTouchAction(GestureState& state,
                                      velocity >= MinFlingVelocity;
             state.touchActive = false;
             state.pinchActive = false;
+            state.shoveActive = false;
             if (mapView) {
                 mapView->setGestureInProgress(false);
                 if (!canHandleTap || !handleTap(*point)) {
