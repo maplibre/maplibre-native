@@ -2,8 +2,6 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL OHOS)
     message(FATAL_ERROR "HarmonyOS platform support requires the OHOS/HarmonyOS CMake toolchain")
 endif()
 
-option(MLN_OHOS_BUILD_NATIVE_MODULE "Build the experimental OHOS NAPI/XComponent native module" OFF)
-
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
@@ -142,57 +140,3 @@ function(mln_ohos_link_core_whole_archive target)
             LINKER:--no-undefined
     )
 endfunction()
-
-if(MLN_OHOS_BUILD_NATIVE_MODULE)
-    if(MLN_WITH_VULKAN)
-        set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${PROJECT_SOURCE_DIR}/platform/ohos/src/vulkan_window_backend.cpp)
-    else()
-        set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${PROJECT_SOURCE_DIR}/platform/ohos/src/egl_window_backend.cpp)
-    endif()
-
-    add_library(
-        maplibre-native-ohos
-        SHARED
-            ${MLN_OHOS_WINDOW_BACKEND_SOURCE}
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/gesture_handler.cpp
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/map_view.cpp
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/native_module.cpp
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/native_values.cpp
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/renderer_frontend.cpp
-    )
-
-    set_target_properties(
-        maplibre-native-ohos
-        PROPERTIES
-            OUTPUT_NAME maplibre_native_ohos
-    )
-
-    target_compile_definitions(
-        maplibre-native-ohos
-        PRIVATE
-            OHOS_PLATFORM
-    )
-
-    target_include_directories(
-        maplibre-native-ohos
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/src
-    )
-
-    mbgl_enable_ohos_libcxx_experimental(maplibre-native-ohos)
-
-    target_link_libraries(
-        maplibre-native-ohos
-        PRIVATE
-            mbgl-compiler-options
-            ace_napi.z
-            ace_ndk.z
-            hilog_ndk.z
-            native_window
-            $<$<BOOL:${MLN_WITH_OPENGL}>:EGL>
-            $<$<BOOL:${MLN_WITH_OPENGL}>:GLESv3>
-            $<$<BOOL:${MLN_WITH_VULKAN}>:vulkan>
-    )
-
-    mln_ohos_link_core_whole_archive(maplibre-native-ohos)
-endif()

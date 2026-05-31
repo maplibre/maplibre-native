@@ -30,8 +30,6 @@ public:
 
     OHNativeWindow* getNativeWindow() const override { return window; }
     std::int32_t getGlesContextClientVersion() const override { return contextClientVersion; }
-    const std::string& getEGLConfigDiagnostic() const override { return eglConfigDiagnostic; }
-    const std::string& getFramebufferDiagnostic() const override { return framebufferDiagnostic; }
     void setSize(Size) override;
     void swap();
     PremultipliedImage readStillImage();

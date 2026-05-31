@@ -20,8 +20,6 @@ public:
     virtual void setSize(Size) = 0;
 
     virtual std::int32_t getGlesContextClientVersion() const { return 0; }
-    virtual const std::string& getEGLConfigDiagnostic() const { return emptyDiagnostic(); }
-    virtual const std::string& getFramebufferDiagnostic() const { return emptyDiagnostic(); }
     virtual const std::string& getRendererDiagnostic() const { return emptyDiagnostic(); }
 
 private:

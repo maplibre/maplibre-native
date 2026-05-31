@@ -7,6 +7,6 @@
   "main": "",
   "dependencies": {},
   "devDependencies": {
-    "libmaplibre_native_ohos.so": "file:../../arkts/types/libmaplibre_native_ohos"
+    "libmaplibre_native_ohos.so": "file:types/libmaplibre_native_ohos"
   }
 }

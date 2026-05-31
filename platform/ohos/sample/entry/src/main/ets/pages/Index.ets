@@ -1,7 +1,6 @@
 import { common } from '@kit.AbilityKit';
 import { display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import maplibreNative from 'libmaplibre_native_ohos.so';
 import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
 
 const LOG_DOMAIN: number = 0x4d4c4e;
@@ -290,7 +289,6 @@ struct Index {
       minPitch: 0,
       maxPitch: 60
     });
-    map.setDebugOptions(0);
     map.jumpTo(DEFAULT_CAMERA);
     map.renderFrame();
     this.useRemoteStyle(DEFAULT_STYLE_NAME, DEFAULT_STYLE_URL);

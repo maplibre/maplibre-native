@@ -1,7 +1,5 @@
 #include "native_values.hpp"
 
-#include <array>
-#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <utility>
@@ -10,17 +8,6 @@
 namespace mbgl {
 namespace ohos {
 namespace {
-
-constexpr std::array<const char*, 3> Vector3PropertyNames = {"x", "y", "z"};
-constexpr std::array<const char*, 4> QuaternionPropertyNames = {"x", "y", "z", "w"};
-
-constexpr std::uint32_t DebugOptionsMask = static_cast<std::uint32_t>(MapDebugOptions::TileBorders) |
-                                           static_cast<std::uint32_t>(MapDebugOptions::ParseStatus) |
-                                           static_cast<std::uint32_t>(MapDebugOptions::Timestamps) |
-                                           static_cast<std::uint32_t>(MapDebugOptions::Collision) |
-                                           static_cast<std::uint32_t>(MapDebugOptions::Overdraw) |
-                                           static_cast<std::uint32_t>(MapDebugOptions::StencilClip) |
-                                           static_cast<std::uint32_t>(MapDebugOptions::DepthBuffer);
 
 bool isString(napi_env env, napi_value value) {
     napi_valuetype type = napi_undefined;
@@ -69,48 +56,6 @@ bool getOptionalFiniteDoubleProperty(napi_env env, napi_value object, const char
     }
 
     result = number;
-    return true;
-}
-
-template <std::size_t N>
-bool getFiniteVectorObject(napi_env env,
-                           napi_value value,
-                           const std::array<const char*, N>& names,
-                           std::array<double, N>& result) {
-    if (!isObject(env, value)) {
-        return false;
-    }
-
-    for (std::size_t i = 0; i < N; ++i) {
-        std::optional<double> component;
-        if (!getOptionalFiniteDoubleProperty(env, value, names[i], component) || !component) {
-            return false;
-        }
-        result[i] = *component;
-    }
-    return true;
-}
-
-template <std::size_t N>
-bool getOptionalFiniteVectorProperty(napi_env env,
-                                     napi_value object,
-                                     const char* name,
-                                     const std::array<const char*, N>& names,
-                                     std::optional<std::array<double, N>>& result) {
-    napi_value vectorObject = nullptr;
-    if (!getOptionalObjectProperty(env, object, name, vectorObject)) {
-        return false;
-    }
-    if (vectorObject == nullptr) {
-        return true;
-    }
-
-    std::array<double, N> vector{};
-    if (!getFiniteVectorObject(env, vectorObject, names, vector)) {
-        return false;
-    }
-
-    result = vector;
     return true;
 }
 
@@ -235,18 +180,6 @@ void setDoubleProperty(napi_env env, napi_value object, const char* name, double
     napi_set_named_property(env, object, name, property);
 }
 
-void setStringProperty(napi_env env, napi_value object, const char* name, const std::string& value) {
-    napi_value property = nullptr;
-    napi_create_string_utf8(env, value.c_str(), value.size(), &property);
-    napi_set_named_property(env, object, name, property);
-}
-
-void setOptionalStringProperty(napi_env env, napi_value object, const char* name, const std::string& value) {
-    if (!value.empty()) {
-        setStringProperty(env, object, name, value);
-    }
-}
-
 void setOptionalDoubleProperty(napi_env env, napi_value object, const char* name, const std::optional<double>& value) {
     if (value) {
         setDoubleProperty(env, object, name, *value);
@@ -269,34 +202,6 @@ void setCameraAnchorProperty(napi_env env, napi_value object, const ScreenCoordi
     setDoubleProperty(env, anchorObject, "x", anchor.x);
     setDoubleProperty(env, anchorObject, "y", anchor.y);
     napi_set_named_property(env, object, "anchor", anchorObject);
-}
-
-void setLatLngBoundsProperty(napi_env env, napi_value object, const char* name, const LatLngBounds& bounds) {
-    napi_value boundsObject = nullptr;
-    napi_create_object(env, &boundsObject);
-    setDoubleProperty(env, boundsObject, "west", bounds.west());
-    setDoubleProperty(env, boundsObject, "south", bounds.south());
-    setDoubleProperty(env, boundsObject, "east", bounds.east());
-    setDoubleProperty(env, boundsObject, "north", bounds.north());
-    napi_set_named_property(env, object, name, boundsObject);
-}
-
-template <std::size_t N>
-napi_value createVectorObject(napi_env env,
-                              const std::array<double, N>& vector,
-                              const std::array<const char*, N>& names) {
-    napi_value object = nullptr;
-    napi_create_object(env, &object);
-    for (std::size_t i = 0; i < N; ++i) {
-        setDoubleProperty(env, object, names[i], vector[i]);
-    }
-    return object;
-}
-
-void setUint32Property(napi_env env, napi_value object, const char* name, std::uint32_t value) {
-    napi_value property = nullptr;
-    napi_create_uint32(env, value, &property);
-    napi_set_named_property(env, object, name, property);
 }
 
 } // namespace
@@ -333,16 +238,8 @@ bool getDouble(napi_env env, napi_value value, double& result) {
     return value != nullptr && napi_get_value_double(env, value, &result) == napi_ok;
 }
 
-bool getUint32(napi_env env, napi_value value, std::uint32_t& result) {
-    return value != nullptr && napi_get_value_uint32(env, value, &result) == napi_ok;
-}
-
 bool getBool(napi_env env, napi_value value, bool& result) {
     return value != nullptr && napi_get_value_bool(env, value, &result) == napi_ok;
-}
-
-bool isValidDebugOptions(std::uint32_t options) {
-    return (options & ~DebugOptionsMask) == 0;
 }
 
 bool isObject(napi_env env, napi_value value) {
@@ -420,27 +317,6 @@ bool getCameraOptionsObject(napi_env env, napi_value value, CameraOptions& camer
     return true;
 }
 
-bool getFreeCameraOptionsObject(napi_env env, napi_value value, FreeCameraOptions& cameraOptions) {
-    if (!isObject(env, value)) {
-        return false;
-    }
-
-    if (!getOptionalFiniteVectorProperty(env, value, "position", Vector3PropertyNames, cameraOptions.position) ||
-        !getOptionalFiniteVectorProperty(
-            env, value, "orientation", QuaternionPropertyNames, cameraOptions.orientation)) {
-        return false;
-    }
-
-    if (cameraOptions.orientation) {
-        const auto& q = *cameraOptions.orientation;
-        if (q[0] == 0.0 && q[1] == 0.0 && q[2] == 0.0 && q[3] == 0.0) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 bool getBoundOptions(napi_env env, napi_value value, BoundOptions& boundOptions) {
     if (!isObject(env, value)) {
         return false;
@@ -483,64 +359,6 @@ bool getBoundOptions(napi_env env, napi_value value, BoundOptions& boundOptions)
     return true;
 }
 
-bool getCameraBoundsOptions(napi_env env, napi_value value, CameraBoundsOptions& options) {
-    if (!isObject(env, value)) {
-        return false;
-    }
-
-    std::optional<LatLngBounds> bounds;
-    std::optional<EdgeInsets> padding;
-    std::optional<double> bearing;
-    std::optional<double> pitch;
-    if (!getOptionalLatLngBoundsProperty(env, value, "bounds", bounds) || !bounds ||
-        !getCameraPadding(env, value, padding) || !getOptionalFiniteDoubleProperty(env, value, "bearing", bearing) ||
-        !getOptionalFiniteDoubleProperty(env, value, "pitch", pitch)) {
-        return false;
-    }
-
-    options.bounds = *bounds;
-    options.padding = padding.value_or(EdgeInsets());
-    options.bearing = bearing;
-    options.pitch = pitch;
-    return true;
-}
-
-bool getAnimationOptions(napi_env env, napi_value value, AnimationOptions& animationOptions) {
-    if (isNullOrUndefined(env, value)) {
-        return true;
-    }
-    if (!isObject(env, value)) {
-        return false;
-    }
-
-    std::optional<double> duration;
-    std::optional<double> velocity;
-    std::optional<double> minZoom;
-    if (!getOptionalFiniteDoubleProperty(env, value, "duration", duration) ||
-        !getOptionalFiniteDoubleProperty(env, value, "velocity", velocity) ||
-        !getOptionalFiniteDoubleProperty(env, value, "minZoom", minZoom)) {
-        return false;
-    }
-
-    if (duration) {
-        if (*duration < 0.0) {
-            return false;
-        }
-        animationOptions.duration = std::chrono::duration_cast<Duration>(
-            std::chrono::duration<double, std::milli>(*duration));
-    }
-    if (velocity) {
-        if (*velocity <= 0.0) {
-            return false;
-        }
-        animationOptions.velocity = *velocity;
-    }
-    if (minZoom) {
-        animationOptions.minZoom = *minZoom;
-    }
-    return true;
-}
-
 napi_value createCameraOptionsObject(napi_env env, const CameraOptions& cameraOptions) {
     napi_value object = nullptr;
     napi_create_object(env, &object);
@@ -563,68 +381,10 @@ napi_value createCameraOptionsObject(napi_env env, const CameraOptions& cameraOp
     return object;
 }
 
-napi_value createFreeCameraOptionsObject(napi_env env, const FreeCameraOptions& cameraOptions) {
-    napi_value object = nullptr;
-    napi_create_object(env, &object);
-    if (cameraOptions.position) {
-        napi_set_named_property(
-            env, object, "position", createVectorObject(env, *cameraOptions.position, Vector3PropertyNames));
-    }
-    if (cameraOptions.orientation) {
-        napi_set_named_property(
-            env, object, "orientation", createVectorObject(env, *cameraOptions.orientation, QuaternionPropertyNames));
-    }
-    return object;
-}
-
-napi_value createBoundOptionsObject(napi_env env, const BoundOptions& boundOptions) {
-    napi_value object = nullptr;
-    napi_create_object(env, &object);
-    if (boundOptions.bounds) {
-        setLatLngBoundsProperty(env, object, "bounds", *boundOptions.bounds);
-    }
-    setOptionalDoubleProperty(env, object, "minZoom", boundOptions.minZoom);
-    setOptionalDoubleProperty(env, object, "maxZoom", boundOptions.maxZoom);
-    setOptionalDoubleProperty(env, object, "minPitch", boundOptions.minPitch);
-    setOptionalDoubleProperty(env, object, "maxPitch", boundOptions.maxPitch);
-    return object;
-}
-
-napi_value createClientOptionsObject(napi_env env, const std::string& name, const std::string& version) {
-    napi_value object = nullptr;
-    napi_create_object(env, &object);
-    setStringProperty(env, object, "name", name);
-    setOptionalStringProperty(env, object, "version", version);
-    return object;
-}
-
-napi_value createResourceOptionsObject(napi_env env, const ResourceOptions& resourceOptions) {
-    napi_value object = nullptr;
-    napi_create_object(env, &object);
-    setOptionalStringProperty(env, object, "apiKey", resourceOptions.apiKey());
-    setOptionalStringProperty(env, object, "cachePath", resourceOptions.cachePath());
-    setOptionalStringProperty(env, object, "assetPath", resourceOptions.assetPath());
-    return object;
-}
-
 napi_value createStringValue(napi_env env, const std::string& value) {
     napi_value result = nullptr;
     napi_create_string_utf8(env, value.c_str(), value.size(), &result);
     return result;
-}
-
-napi_value createDebugOptionsObject(napi_env env) {
-    napi_value object = nullptr;
-    napi_create_object(env, &object);
-    setUint32Property(env, object, "NoDebug", static_cast<std::uint32_t>(MapDebugOptions::NoDebug));
-    setUint32Property(env, object, "TileBorders", static_cast<std::uint32_t>(MapDebugOptions::TileBorders));
-    setUint32Property(env, object, "ParseStatus", static_cast<std::uint32_t>(MapDebugOptions::ParseStatus));
-    setUint32Property(env, object, "Timestamps", static_cast<std::uint32_t>(MapDebugOptions::Timestamps));
-    setUint32Property(env, object, "Collision", static_cast<std::uint32_t>(MapDebugOptions::Collision));
-    setUint32Property(env, object, "Overdraw", static_cast<std::uint32_t>(MapDebugOptions::Overdraw));
-    setUint32Property(env, object, "StencilClip", static_cast<std::uint32_t>(MapDebugOptions::StencilClip));
-    setUint32Property(env, object, "DepthBuffer", static_cast<std::uint32_t>(MapDebugOptions::DepthBuffer));
-    return object;
 }
 
 } // namespace ohos

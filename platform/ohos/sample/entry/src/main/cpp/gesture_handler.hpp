@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include <ace/xcomponent/native_interface_xcomponent.h>
-#include <arkui/ui_input_event.h>
 
 namespace mbgl {
 namespace ohos {
@@ -42,7 +41,6 @@ struct GestureState {
 bool hasActiveGesture(const GestureState&);
 void resetGestureState(GestureState&);
 bool handleTouchEvent(GestureState&, MapView*, const OH_NativeXComponent_TouchEvent&);
-bool handleInputEvent(GestureState&, MapView*, const ArkUI_UIInputEvent*);
 
 } // namespace ohos
 } // namespace mbgl

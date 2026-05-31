@@ -139,46 +139,6 @@ std::optional<std::array<TouchPoint, 2>> touchPairForEvent(const OH_NativeXCompo
     };
 }
 
-std::optional<TouchPoint> touchPointForInputEvent(const ArkUI_UIInputEvent* event, std::optional<int32_t> activeId) {
-    if (event == nullptr) {
-        return std::nullopt;
-    }
-
-    const auto pointerCount = OH_ArkUI_PointerEvent_GetPointerCount(event);
-    if (pointerCount == 0) {
-        return TouchPoint{activeId.value_or(0), OH_ArkUI_PointerEvent_GetX(event), OH_ArkUI_PointerEvent_GetY(event)};
-    }
-
-    for (std::uint32_t i = 0; i < pointerCount; ++i) {
-        const auto id = OH_ArkUI_PointerEvent_GetPointerId(event, i);
-        if (!activeId || id == *activeId) {
-            return TouchPoint{
-                id, OH_ArkUI_PointerEvent_GetXByIndex(event, i), OH_ArkUI_PointerEvent_GetYByIndex(event, i)};
-        }
-    }
-
-    return std::nullopt;
-}
-
-std::optional<std::array<TouchPoint, 2>> touchPairForInputEvent(const ArkUI_UIInputEvent* event) {
-    if (event == nullptr || OH_ArkUI_PointerEvent_GetPointerCount(event) < 2) {
-        return std::nullopt;
-    }
-
-    return std::array<TouchPoint, 2>{
-        TouchPoint{
-            OH_ArkUI_PointerEvent_GetPointerId(event, 0),
-            OH_ArkUI_PointerEvent_GetXByIndex(event, 0),
-            OH_ArkUI_PointerEvent_GetYByIndex(event, 0),
-        },
-        TouchPoint{
-            OH_ArkUI_PointerEvent_GetPointerId(event, 1),
-            OH_ArkUI_PointerEvent_GetXByIndex(event, 1),
-            OH_ArkUI_PointerEvent_GetYByIndex(event, 1),
-        },
-    };
-}
-
 std::optional<PinchState> pinchStateForPoints(const std::optional<std::array<TouchPoint, 2>>& points) {
     if (!points) {
         return std::nullopt;
@@ -213,21 +173,6 @@ TouchAction toTouchAction(OH_NativeXComponent_TouchEventType type) {
             return TouchAction::Unknown;
     }
     return TouchAction::Unknown;
-}
-
-TouchAction toTouchAction(int32_t action) {
-    switch (action) {
-        case UI_TOUCH_EVENT_ACTION_DOWN:
-            return TouchAction::Down;
-        case UI_TOUCH_EVENT_ACTION_MOVE:
-            return TouchAction::Move;
-        case UI_TOUCH_EVENT_ACTION_UP:
-            return TouchAction::Up;
-        case UI_TOUCH_EVENT_ACTION_CANCEL:
-            return TouchAction::Cancel;
-        default:
-            return TouchAction::Unknown;
-    }
 }
 
 bool handleTouchAction(GestureState& state,
@@ -446,19 +391,6 @@ bool handleTouchEvent(GestureState& state, MapView* mapView, const OH_NativeXCom
                                                    : touchPointForEvent(event, std::nullopt);
     const auto pinch = pinchStateForPoints(touchPairForEvent(event));
     return handleTouchAction(state, mapView, action, point, pinch, event.numPoints > 1);
-}
-
-bool handleInputEvent(GestureState& state, MapView* mapView, const ArkUI_UIInputEvent* event) {
-    if (event == nullptr || OH_ArkUI_UIInputEvent_GetType(event) != ARKUI_UIINPUTEVENT_TYPE_TOUCH) {
-        return false;
-    }
-
-    const auto action = toTouchAction(OH_ArkUI_UIInputEvent_GetAction(event));
-    const auto point = action == TouchAction::Move ? touchPointForInputEvent(event, state.touchId)
-                                                   : touchPointForInputEvent(event, std::nullopt);
-    const auto pointerCount = OH_ArkUI_PointerEvent_GetPointerCount(event);
-    const auto pinch = pinchStateForPoints(touchPairForInputEvent(event));
-    return handleTouchAction(state, mapView, action, point, pinch, pointerCount > 1);
 }
 
 } // namespace ohos

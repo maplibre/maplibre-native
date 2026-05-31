@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MapLibreNativeOhosSample)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(MAPLIBRE_NATIVE_ROOT
     "${CMAKE_CURRENT_LIST_DIR}/../../../../../../.."
     CACHE PATH
@@ -24,6 +27,64 @@ elseif(MLN_OHOS_SAMPLE_RENDERER STREQUAL "OpenGL")
 else()
     message(FATAL_ERROR "Unsupported MLN_OHOS_SAMPLE_RENDERER: ${MLN_OHOS_SAMPLE_RENDERER}")
 endif()
-set(MLN_OHOS_BUILD_NATIVE_MODULE ON CACHE BOOL "" FORCE)
 
 add_subdirectory("${MAPLIBRE_NATIVE_ROOT}" "${CMAKE_BINARY_DIR}/maplibre-native")
+
+if(MLN_WITH_VULKAN)
+    set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/vulkan_window_backend.cpp)
+else()
+    set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/egl_window_backend.cpp)
+endif()
+
+add_library(
+    maplibre-native-ohos
+    SHARED
+        ${MLN_OHOS_WINDOW_BACKEND_SOURCE}
+        ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/map_view.cpp
+        ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/renderer_frontend.cpp
+        gesture_handler.cpp
+        native_module.cpp
+        native_values.cpp
+)
+
+set_target_properties(
+    maplibre-native-ohos
+    PROPERTIES
+        OUTPUT_NAME maplibre_native_ohos
+)
+
+target_compile_definitions(
+    maplibre-native-ohos
+    PRIVATE
+        OHOS_PLATFORM
+)
+
+target_compile_options(
+    maplibre-native-ohos
+    PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
+)
+
+target_include_directories(
+    maplibre-native-ohos
+    PRIVATE
+        ${MAPLIBRE_NATIVE_ROOT}/src
+        ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src
+)
+
+mbgl_enable_ohos_libcxx_experimental(maplibre-native-ohos)
+
+target_link_libraries(
+    maplibre-native-ohos
+    PRIVATE
+        mbgl-compiler-options
+        ace_napi.z
+        ace_ndk.z
+        hilog_ndk.z
+        native_window
+        $<$<BOOL:${MLN_WITH_OPENGL}>:EGL>
+        $<$<BOOL:${MLN_WITH_OPENGL}>:GLESv3>
+        $<$<BOOL:${MLN_WITH_VULKAN}>:vulkan>
+)
+
+mln_ohos_link_core_whole_archive(maplibre-native-ohos)

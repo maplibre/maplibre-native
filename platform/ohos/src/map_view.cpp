@@ -16,7 +16,6 @@
 #include <mbgl/util/string.hpp>
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <exception>
 #include <set>
@@ -82,34 +81,24 @@ void MapView::clearSurface() {
 }
 
 bool MapView::renderFrame() {
-    using std::chrono::duration;
-    using std::chrono::steady_clock;
-
-    const auto frameStart = steady_clock::now();
-    lastRenderTimeMs = 0.0;
     bool attemptedRender = false;
     bool rendered = false;
     auto renderIfNeeded = [&] {
         if (frontend && frontend->hasPendingRender()) {
             attemptedRender = true;
-            const auto renderStart = steady_clock::now();
             if (frontend->renderFrame()) {
                 ++renderedFrameCount;
                 rendered = true;
             }
-            lastRenderTimeMs += duration<double, std::milli>(steady_clock::now() - renderStart).count();
         }
     };
 
     // Keep interaction frames from waiting behind a burst of resource callbacks.
     renderIfNeeded();
-    const auto runLoopStart = steady_clock::now();
     runLoopOnce();
-    lastRunLoopTimeMs = duration<double, std::milli>(steady_clock::now() - runLoopStart).count();
     if (!attemptedRender) {
         renderIfNeeded();
     }
-    lastFrameTimeMs = duration<double, std::milli>(steady_clock::now() - frameStart).count();
 
     return rendered;
 }
@@ -349,16 +338,6 @@ std::int32_t MapView::getGlesContextClientVersion() const {
     return backend ? backend->getGlesContextClientVersion() : 0;
 }
 
-const std::string& MapView::getEGLConfigDiagnostic() const {
-    static const std::string empty;
-    return backend ? backend->getEGLConfigDiagnostic() : empty;
-}
-
-const std::string& MapView::getFramebufferDiagnostic() const {
-    static const std::string empty;
-    return backend ? backend->getFramebufferDiagnostic() : empty;
-}
-
 const std::string& MapView::getRendererDiagnostic() const {
     static const std::string empty;
     return backend ? backend->getRendererDiagnostic() : empty;
@@ -529,10 +508,8 @@ void MapView::applyDesiredCamera() {
 }
 
 void MapView::onDidFailLoadingMap(MapLoadError, const std::string& message) {
-    ++mapLoadErrorCount;
     mapLoaded = false;
     styleLoaded = false;
-    idle = false;
     lastMapLoadError = message;
     Log::Error(Event::Style, lastMapLoadError);
 }
@@ -543,7 +520,6 @@ void MapView::onDidFinishLoadingMap() {
 
 void MapView::onDidFinishLoadingStyle() {
     styleLoaded = true;
-    idle = false;
     if (!map) {
         return;
     }
@@ -563,68 +539,19 @@ void MapView::onDidFinishLoadingStyle() {
     applyDesiredCamera();
 }
 
-void MapView::onWillStartRenderingFrame() {
-    idle = false;
-}
-
-void MapView::onDidFinishRenderingFrame(const RenderFrameStatus& status) {
-    ++coreFrameCount;
-    lastNeedsRepaint = status.needsRepaint;
-    lastFrameComplete = status.mode == RenderMode::Full;
-}
-
-void MapView::onDidBecomeIdle() {
-    idle = true;
-}
-
-void MapView::onSourceChanged(style::Source&) {
-    ++sourceChangedCount;
-    idle = false;
-}
-
 void MapView::onStyleImageMissing(const std::string& id) {
-    ++styleImageMissingCount;
     lastStyleImageMissing = id;
 }
 
-void MapView::onGlyphsLoaded(const FontStack&, const GlyphRange&) {
-    ++glyphsLoadedCount;
-}
-
 void MapView::onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr error) {
-    ++glyphsErrorCount;
     lastGlyphsError = util::toString(error);
 }
 
-void MapView::onGlyphsRequested(const FontStack&, const GlyphRange&) {
-    ++glyphsRequestedCount;
-}
-
-void MapView::onTileAction(TileOperation operation, const OverscaledTileID& tileID, const std::string& sourceID) {
-    ++tileActionCount;
-    if (operation == TileOperation::Error && tileActionCount <= 32) {
-        Log::Error(Event::General,
-                   "Tile error source=" + sourceID + " z=" + std::to_string(tileID.canonical.z) + " x=" +
-                       std::to_string(tileID.canonical.x) + " y=" + std::to_string(tileID.canonical.y));
-    }
-}
-
-void MapView::onSpriteLoaded(const std::optional<style::Sprite>&) {
-    ++spritesLoadedCount;
-}
-
 void MapView::onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr error) {
-    ++spritesErrorCount;
     lastSpritesError = util::toString(error);
 }
 
-void MapView::onSpriteRequested(const std::optional<style::Sprite>&) {
-    ++spritesRequestedCount;
-}
-
 void MapView::onRenderError(std::exception_ptr error) {
-    ++renderErrorCount;
-    idle = false;
     lastRenderError = util::toString(error);
     Log::Error(Event::Render, lastRenderError);
 }
@@ -632,22 +559,7 @@ void MapView::onRenderError(std::exception_ptr error) {
 void MapView::resetRuntimeState() {
     styleLoaded = false;
     mapLoaded = false;
-    idle = false;
-    lastNeedsRepaint = false;
-    lastFrameComplete = false;
     renderedFrameCount = 0;
-    coreFrameCount = 0;
-    mapLoadErrorCount = 0;
-    renderErrorCount = 0;
-    sourceChangedCount = 0;
-    styleImageMissingCount = 0;
-    glyphsRequestedCount = 0;
-    glyphsLoadedCount = 0;
-    glyphsErrorCount = 0;
-    tileActionCount = 0;
-    spritesRequestedCount = 0;
-    spritesLoadedCount = 0;
-    spritesErrorCount = 0;
     lastMapLoadError.clear();
     lastRenderError.clear();
     lastStyleImageMissing.clear();
