@@ -10,6 +10,7 @@ repos:
       - id: check-yaml
         args: [ --allow-multiple-documents, --unsafe ]
       - id: end-of-file-fixer
+        exclude: 'vendor/.*'
         # DevEco Studio rewrites these files without a final newline.
         exclude: 'platform/ohos/sample/(\.clangd|entry/oh-package-lock\.json5)$'
       - id: mixed-line-ending
@@ -18,7 +19,7 @@ repos:
         exclude: 'gradlew\.bat$'
       - id: trailing-whitespace
         # FIXME: these autogenerate files contain trailing whitespace. Need to fix generator.
-        exclude: '(platform/android/MapLibreAndroid/src/main/java/org/maplibre/android/(location/LocationIndicatorLayer|style/layers/PropertyFactory)\.java$)|(platform/windows/vendor/.*)|(platform/ios/vendor/.*)'
+        exclude: '(platform/android/MapLibreAndroid/src/main/java/org/maplibre/android/(location/LocationIndicatorLayer|style/layers/PropertyFactory)\.java$)|(platform/windows/vendor/.*)|(platform/ios/vendor/.*|vendor/.*)'
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v20.1.8

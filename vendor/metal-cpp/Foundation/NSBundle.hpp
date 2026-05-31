@@ -2,7 +2,7 @@
 //
 // Foundation/NSBundle.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,54 +42,54 @@ class String* LocalizedStringWithDefaultValue(const String* pKey, const String* 
 class Bundle : public Referencing<Bundle>
 {
 public:
-    static Bundle*    mainBundle();
+    static Bundle*      mainBundle();
 
-    static Bundle*    bundle(const class String* pPath);
-    static Bundle*    bundle(const class URL* pURL);
+    static Bundle*      bundle(const class String* pPath);
+    static Bundle*      bundle(const class URL* pURL);
 
-    static Bundle*    alloc();
+    static class Array* allBundles();
+    static class Array* allFrameworks();
 
-    Bundle*           init(const class String* pPath);
-    Bundle*           init(const class URL* pURL);
+    static Bundle*      alloc();
 
-    class Array*      allBundles() const;
-    class Array*      allFrameworks() const;
+    Bundle*             init(const class String* pPath);
+    Bundle*             init(const class URL* pURL);
 
-    bool              load();
-    bool              unload();
+    bool                load();
+    bool                unload();
 
-    bool              isLoaded() const;
+    bool                isLoaded() const;
 
-    bool              preflightAndReturnError(class Error** pError) const;
-    bool              loadAndReturnError(class Error** pError);
+    bool                preflightAndReturnError(class Error** pError) const;
+    bool                loadAndReturnError(class Error** pError);
 
-    class URL*        bundleURL() const;
-    class URL*        resourceURL() const;
-    class URL*        executableURL() const;
-    class URL*        URLForAuxiliaryExecutable(const class String* pExecutableName) const;
+    class URL*          bundleURL() const;
+    class URL*          resourceURL() const;
+    class URL*          executableURL() const;
+    class URL*          URLForAuxiliaryExecutable(const class String* pExecutableName) const;
 
-    class URL*        privateFrameworksURL() const;
-    class URL*        sharedFrameworksURL() const;
-    class URL*        sharedSupportURL() const;
-    class URL*        builtInPlugInsURL() const;
-    class URL*        appStoreReceiptURL() const;
+    class URL*          privateFrameworksURL() const;
+    class URL*          sharedFrameworksURL() const;
+    class URL*          sharedSupportURL() const;
+    class URL*          builtInPlugInsURL() const;
+    class URL*          appStoreReceiptURL() const;
 
-    class String*     bundlePath() const;
-    class String*     resourcePath() const;
-    class String*     executablePath() const;
-    class String*     pathForAuxiliaryExecutable(const class String* pExecutableName) const;
+    class String*       bundlePath() const;
+    class String*       resourcePath() const;
+    class String*       executablePath() const;
+    class String*       pathForAuxiliaryExecutable(const class String* pExecutableName) const;
 
-    class String*     privateFrameworksPath() const;
-    class String*     sharedFrameworksPath() const;
-    class String*     sharedSupportPath() const;
-    class String*     builtInPlugInsPath() const;
+    class String*       privateFrameworksPath() const;
+    class String*       sharedFrameworksPath() const;
+    class String*       sharedSupportPath() const;
+    class String*       builtInPlugInsPath() const;
 
-    class String*     bundleIdentifier() const;
-    class Dictionary* infoDictionary() const;
-    class Dictionary* localizedInfoDictionary() const;
-    class Object*     objectForInfoDictionaryKey(const class String* pKey);
+    class String*       bundleIdentifier() const;
+    class Dictionary*   infoDictionary() const;
+    class Dictionary*   localizedInfoDictionary() const;
+    class Object*       objectForInfoDictionaryKey(const class String* pKey);
 
-    class String*     localizedString(const class String* pKey, const class String* pValue = nullptr, const class String* pTableName = nullptr) const;
+    class String*       localizedString(const class String* pKey, const class String* pValue = nullptr, const class String* pTableName = nullptr) const;
 };
 }
 
@@ -149,6 +149,20 @@ _NS_INLINE NS::Bundle* NS::Bundle::bundle(const class URL* pURL)
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+_NS_INLINE NS::Array* NS::Bundle::allBundles()
+{
+    return Object::sendMessage<Array*>(_NS_PRIVATE_CLS(NSBundle), _NS_PRIVATE_SEL(allBundles));
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+_NS_INLINE NS::Array* NS::Bundle::allFrameworks()
+{
+    return Object::sendMessage<Array*>(_NS_PRIVATE_CLS(NSBundle), _NS_PRIVATE_SEL(allFrameworks));
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 _NS_INLINE NS::Bundle* NS::Bundle::alloc()
 {
     return Object::sendMessage<Bundle*>(_NS_PRIVATE_CLS(NSBundle), _NS_PRIVATE_SEL(alloc));
@@ -166,20 +180,6 @@ _NS_INLINE NS::Bundle* NS::Bundle::init(const String* pPath)
 _NS_INLINE NS::Bundle* NS::Bundle::init(const URL* pURL)
 {
     return Object::sendMessage<Bundle*>(this, _NS_PRIVATE_SEL(initWithURL_), pURL);
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-_NS_INLINE NS::Array* NS::Bundle::allBundles() const
-{
-    return Object::sendMessage<Array*>(this, _NS_PRIVATE_SEL(allBundles));
-}
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-_NS_INLINE NS::Array* NS::Bundle::allFrameworks() const
-{
-    return Object::sendMessage<Array*>(this, _NS_PRIVATE_SEL(allFrameworks));
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------

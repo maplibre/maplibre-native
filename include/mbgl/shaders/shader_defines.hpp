@@ -422,7 +422,13 @@ enum {
 
 enum {
     idFillExtrusionPosVertexAttribute,
+
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+    idFillExtrusionOutlinePosAttribute,
+    idFillExtrusionEdDiscardAttribute,
+#else
     idFillExtrusionNormalEdVertexAttribute,
+#endif
 
     // Data driven
     idFillExtrusionBaseVertexAttribute,

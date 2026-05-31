@@ -260,8 +260,13 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Add iOS Rust target
-        run: rustup target add aarch64-apple-ios
+      - name: Ensure iOS Rust targets are installed for active toolchain
+        working-directory: vendor/wgpu-native
+        run: |
+          # vendor/wgpu-native pins its own rust toolchain; install targets for that active toolchain
+          ACTIVE_TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}')
+          rustup target add aarch64-apple-ios --toolchain "$ACTIVE_TOOLCHAIN"
+          rustup target list --toolchain "$ACTIVE_TOOLCHAIN" --installed | grep -x 'aarch64-apple-ios'
 
       - name: Configure build with CMake
         run: cmake --preset ios-webgpu-wgpu

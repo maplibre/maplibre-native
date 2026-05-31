@@ -2,7 +2,7 @@
 //
 // Metal/MTLIOCompressor.hpp
 //
-// Copyright 2020-2023 Apple Inc.
+// Copyright 2020-2024 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,10 +25,12 @@
 #include "MTLPrivate.hpp"
 #include "MTLDevice.hpp"
 
-#include <Foundation/Foundation.hpp>
+#include "../Foundation/Foundation.hpp"
 
 namespace MTL
 {
+using IOCompressionContext=void*;
+
 _MTL_ENUM(NS::Integer, IOCompressionStatus) {
     IOCompressionStatusComplete = 0,
     IOCompressionStatusError = 1,
@@ -36,11 +38,11 @@ _MTL_ENUM(NS::Integer, IOCompressionStatus) {
 
 size_t IOCompressionContextDefaultChunkSize();
 
-void* IOCreateCompressionContext(const char* path, IOCompressionMethod type, size_t chunkSize);
+IOCompressionContext IOCreateCompressionContext(const char* path, IOCompressionMethod type, size_t chunkSize);
 
-void IOCompressionContextAppendData(void* context, const void* data, size_t size);
+void IOCompressionContextAppendData(IOCompressionContext context, const void* data, size_t size);
 
-IOCompressionStatus IOFlushAndDestroyCompressionContext(void* context);
+IOCompressionStatus IOFlushAndDestroyCompressionContext(IOCompressionContext context);
 
 }
 

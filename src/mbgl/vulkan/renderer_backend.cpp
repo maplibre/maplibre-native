@@ -630,10 +630,14 @@ void RendererBackend::initCommandPool() {
 void RendererBackend::destroyResources() {
     if (device) device->waitIdle(dispatcher);
 
+    gfx::BackendScope scope(*this, gfx::BackendScope::ScopeType::Implicit);
+    getThreadPool().runRenderJobs(true /* closeQueue */);
+
     context.reset();
     commandPool.reset();
 
     vmaDestroyAllocator(allocator);
+    allocator = nullptr;
 
     usingSharedContext ? void(device.release()) : device.reset();
 

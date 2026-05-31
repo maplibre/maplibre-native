@@ -1,5 +1,19 @@
 # Changelog MapLibre Native for Android
 
+## 13.2.0
+
+### ✨ Features and improvements
+
+- Optimize fill extrusion memory by using instancing [Core optimization] ([#4256](https://github.com/maplibre/maplibre-native/pull/4256)).
+- Add asynchronous deletion option for Android renderer backend ([#4287](https://github.com/maplibre/maplibre-native/pull/4287)).
+
+### 🐞 Bug fixes
+
+- fix(renderer): guard ImageManager callback against use-after-free ([#4233](https://github.com/maplibre/maplibre-native/pull/4233)).
+- core: clear vulkan allocator handle after destruction ([#4302](https://github.com/maplibre/maplibre-native/pull/4302)).
+- [core] Keep `BackendScope` and context valid when closing the thread pool ([#4307](https://github.com/maplibre/maplibre-native/pull/4307)).
+- [core] Fix buffer versioning ([#4291](https://github.com/maplibre/maplibre-native/pull/4291)).
+
 ## 13.1.0
 
 Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
