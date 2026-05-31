@@ -28,6 +28,8 @@
 namespace mbgl {
 namespace {
 
+// Values documented by RemoteCommunicationKit/rcp.h for Rcp_ResponseCallback errCode.
+// Most are 1007900000 + the corresponding CURL_ERROR_CODE.
 constexpr uint32_t RCP_ERROR_UNSUPPORTED_PROTOCOL = 1007900001;
 constexpr uint32_t RCP_ERROR_INVALID_URL = 1007900003;
 constexpr uint32_t RCP_ERROR_COULDNT_RESOLVE_PROXY = 1007900005;
