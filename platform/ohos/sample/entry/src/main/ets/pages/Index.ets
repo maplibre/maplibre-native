@@ -20,6 +20,11 @@ struct Index {
   private map?: XComponentContext;
   private statusLogTimer: number = -1;
   private statusLogTicks: number = 0;
+  private lastMetricsTimeMs: number = 0;
+  private lastRenderedFrameCount: number = 0;
+  private lastFrameCallbackCount: number = 0;
+  private renderFps: number = 0;
+  private tickFps: number = 0;
 
   aboutToDisappear(): void {
     this.stopStatusLogging();
@@ -82,20 +87,15 @@ struct Index {
   ): string {
     let line: string = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
       ' pr=' + pixelRatio.toString() +
+      ' backend=' + this.backendLabel(state) +
+      ' fps=' + this.formatRate(this.renderFps) +
+      ' tick=' + this.formatRate(this.tickFps) +
       ' window=' + (state.hasWindow ? 'yes' : 'no') +
       ' map=' + (state.hasMap ? 'yes' : 'no') +
       ' render=' + (state.needsRender ? 'pending' : 'idle') +
-      ' frames=' + state.renderedFrameCount.toString() + '/' + state.coreFrameCount.toString() +
-      ' gl=' + state.glesContextClientVersion.toString() +
-      ' cb=' + state.frameCallbackCount.toString() +
-      '/' + state.touchEventCount.toString() +
+      ' touch=' + state.touchEventCount.toString() +
       '/' + state.gestureHandledCount.toString() +
-      ' surface=' + state.surfaceCreatedCount.toString() +
-      '/' + state.surfaceChangedCount.toString() +
-      '/' + state.surfaceDestroyedCount.toString() +
       ' visible=' + (state.surfaceVisible ? 'yes' : 'no') +
-      ' show=' + state.surfaceShownCount.toString() +
-      '/' + state.surfaceHiddenCount.toString() +
       ' style=' + (state.styleLoaded ? 'loaded' : 'pending') +
       ' loaded=' + (state.mapLoaded ? 'yes' : 'no') +
       ' idle=' + (state.idle ? 'yes' : 'no') +
@@ -135,7 +135,7 @@ struct Index {
       line = line + ' renderErr=' + state.lastRenderError;
     }
     if (frameRateRange !== undefined) {
-      line = line + ' fps=' + frameRateRange.min.toString() +
+      line = line + ' target=' + frameRateRange.min.toString() +
         '/' + frameRateRange.expected.toString() +
         '/' + frameRateRange.max.toString();
     }
@@ -172,31 +172,28 @@ struct Index {
       this.statusText = label + ': no binding';
       this.statusDetail = 'No native binding';
       this.statusResources = 'No resource callbacks';
+      this.resetFrameMetrics();
       return;
     }
 
     const state: SurfaceState = this.map.getSurfaceState();
+    this.updateFrameMetrics(state);
+    const pixelRatio = this.map.getPixelRatio();
     this.statusText = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
-      ' pr=' + this.map.getPixelRatio().toString() +
-      ' window=' + (state.hasWindow ? 'yes' : 'no') +
-      ' map=' + (state.hasMap ? 'yes' : 'no') +
+      ' pr=' + this.formatNumber(pixelRatio, 2) +
+      ' ' + this.backendLabel(state) +
+      ' fps=' + this.formatRate(this.renderFps) +
+      ' tick=' + this.formatRate(this.tickFps) +
       ' render=' + (state.needsRender ? 'pending' : 'idle');
 
-    let detail: string = 'frames=' + state.renderedFrameCount.toString() +
-      '/' + state.coreFrameCount.toString() +
-      ' gl=' + state.glesContextClientVersion.toString() +
-      ' cb=' + state.frameCallbackCount.toString() +
-      '/' + state.touchEventCount.toString() +
-      '/' + state.gestureHandledCount.toString() +
-      ' surface=' + state.surfaceCreatedCount.toString() +
-      '/' + state.surfaceChangedCount.toString() +
-      '/' + state.surfaceDestroyedCount.toString() +
+    let detail: string = 'window=' + (state.hasWindow ? 'yes' : 'no') +
+      ' map=' + (state.hasMap ? 'yes' : 'no') +
       ' visible=' + (state.surfaceVisible ? 'yes' : 'no') +
-      ' show=' + state.surfaceShownCount.toString() +
-      '/' + state.surfaceHiddenCount.toString() +
       ' style=' + (state.styleLoaded ? 'loaded' : 'pending') +
       ' loaded=' + (state.mapLoaded ? 'yes' : 'no') +
-      ' idle=' + (state.idle ? 'yes' : 'no');
+      ' idle=' + (state.idle ? 'yes' : 'no') +
+      ' touch=' + state.touchEventCount.toString() +
+      '/' + state.gestureHandledCount.toString();
     if (state.lastSurfaceError !== undefined) {
       detail = 'surface error: ' + state.lastSurfaceError;
     } else if (state.lastMapLoadError !== undefined) {
@@ -206,7 +203,7 @@ struct Index {
     } else {
       const frameRateRange = this.map.getFrameRateRange();
       if (frameRateRange !== undefined) {
-        detail = detail + ' fps=' + frameRateRange.min.toString() +
+        detail = detail + ' target=' + frameRateRange.min.toString() +
           '/' + frameRateRange.expected.toString() +
           '/' + frameRateRange.max.toString();
       }
@@ -233,6 +230,47 @@ struct Index {
       resources = state.eglConfigDiagnostic;
     }
     this.statusResources = resources;
+  }
+
+  private resetFrameMetrics(): void {
+    this.lastMetricsTimeMs = 0;
+    this.lastRenderedFrameCount = 0;
+    this.lastFrameCallbackCount = 0;
+    this.renderFps = 0;
+    this.tickFps = 0;
+  }
+
+  private updateFrameMetrics(state: SurfaceState): void {
+    const now = Date.now();
+    if (this.lastMetricsTimeMs > 0 && now > this.lastMetricsTimeMs) {
+      const elapsedSeconds = (now - this.lastMetricsTimeMs) / 1000;
+      this.renderFps = Math.max(0, (state.renderedFrameCount - this.lastRenderedFrameCount) / elapsedSeconds);
+      this.tickFps = Math.max(0, (state.frameCallbackCount - this.lastFrameCallbackCount) / elapsedSeconds);
+    }
+    this.lastMetricsTimeMs = now;
+    this.lastRenderedFrameCount = state.renderedFrameCount;
+    this.lastFrameCallbackCount = state.frameCallbackCount;
+  }
+
+  private formatNumber(value: number, digits: number): string {
+    if (!Number.isFinite(value)) {
+      return 'n/a';
+    }
+    return value.toFixed(digits);
+  }
+
+  private formatRate(value: number): string {
+    return this.formatNumber(value, 1);
+  }
+
+  private backendLabel(state: SurfaceState): string {
+    if (state.glesContextClientVersion > 0) {
+      return 'OpenGL ES ' + state.glesContextClientVersion.toString();
+    }
+    if (state.rendererDiagnostic !== undefined && state.rendererDiagnostic.indexOf('Vulkan') >= 0) {
+      return 'Vulkan';
+    }
+    return 'unknown';
   }
 
   private useRemoteStyle(name: string, url: string): void {

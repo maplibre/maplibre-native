@@ -362,7 +362,6 @@ void onNodeTouchEvent(ArkUI_NodeEvent* event) {
     }
     if (mbgl::ohos::handleInputEvent(binding->gesture, binding->mapView.get(), inputEvent)) {
         ++binding->gestureHandledCount;
-        renderBindingFrame(*binding);
     }
 }
 
@@ -720,7 +719,6 @@ void onLegacyTouchEvent(OH_NativeXComponent* component, void* window) {
 
     if (mbgl::ohos::handleTouchEvent(binding->gesture, binding->mapView.get(), event)) {
         ++binding->gestureHandledCount;
-        renderBindingFrame(*binding);
     }
 }
 
