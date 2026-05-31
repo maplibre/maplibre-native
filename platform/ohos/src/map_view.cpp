@@ -8,6 +8,7 @@
 
 #include <mbgl/math/angles.hpp>
 #include <mbgl/map/map_options.hpp>
+#include <mbgl/style/source.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/logging.hpp>
@@ -18,6 +19,7 @@
 #include <chrono>
 #include <cmath>
 #include <exception>
+#include <set>
 #include <stdexcept>
 #include <utility>
 
@@ -273,6 +275,37 @@ void MapView::rotateBy(double previousAngle, double currentAngle, double anchorX
 
 CameraOptions MapView::getCameraOptions() const {
     return map ? map->getCameraOptions() : desiredCamera.value_or(CameraOptions());
+}
+
+std::vector<std::string> MapView::getStyleAttributions() const {
+    if (!map) {
+        return {};
+    }
+
+    std::set<std::string> seen;
+    std::vector<std::string> attributions;
+    for (const auto* source : map->getStyle().getSources()) {
+        if (source == nullptr) {
+            continue;
+        }
+
+        auto attribution = source->getAttribution();
+        if (!attribution) {
+            continue;
+        }
+
+        const auto first = attribution->find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) {
+            continue;
+        }
+
+        const auto last = attribution->find_last_not_of(" \t\r\n");
+        auto trimmed = attribution->substr(first, last - first + 1);
+        if (seen.insert(trimmed).second) {
+            attributions.push_back(std::move(trimmed));
+        }
+    }
+    return attributions;
 }
 
 FreeCameraOptions MapView::getFreeCameraOptions() const {

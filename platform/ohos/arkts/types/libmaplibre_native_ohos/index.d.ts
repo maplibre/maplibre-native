@@ -173,6 +173,7 @@ export interface XComponentContext {
   getPixelRatio: () => number;
   getRenderingEnabled: () => boolean;
   getResourceOptions: () => ResourceOptions;
+  getStyleAttributions: () => string[];
   getStyleJson: () => string | undefined;
   getStyleUrl: () => string | undefined;
   getSurfaceState: () => SurfaceState;
@@ -215,6 +216,7 @@ export function getFrameRateRange(binding: NativeBinding): FrameRateRange | unde
 export function getPixelRatio(binding: NativeBinding): number;
 export function getRenderingEnabled(binding: NativeBinding): boolean;
 export function getResourceOptions(binding: NativeBinding): ResourceOptions;
+export function getStyleAttributions(binding: NativeBinding): string[];
 export function getStyleJson(binding: NativeBinding): string | undefined;
 export function getStyleUrl(binding: NativeBinding): string | undefined;
 export function getSurfaceState(binding: NativeBinding): SurfaceState;
@@ -261,6 +263,7 @@ export interface MapLibreNativeModule {
   getPixelRatio: typeof getPixelRatio;
   getRenderingEnabled: typeof getRenderingEnabled;
   getResourceOptions: typeof getResourceOptions;
+  getStyleAttributions: typeof getStyleAttributions;
   getStyleJson: typeof getStyleJson;
   getStyleUrl: typeof getStyleUrl;
   getSurfaceState: typeof getSurfaceState;

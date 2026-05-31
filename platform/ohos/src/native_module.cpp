@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include <ace/xcomponent/native_interface_xcomponent.h>
 #include <arkui/native_node.h>
@@ -550,6 +551,15 @@ napi_value createFrameRateRangeObject(napi_env env, const OH_NativeXComponent_Ex
     setInt32Property(env, object, "max", range.max);
     setInt32Property(env, object, "expected", range.expected);
     return object;
+}
+
+napi_value createStringArray(napi_env env, const std::vector<std::string>& values) {
+    napi_value array = nullptr;
+    napi_create_array_with_length(env, values.size(), &array);
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        napi_set_element(env, array, static_cast<std::uint32_t>(i), createStringValue(env, values[i]));
+    }
+    return array;
 }
 
 void setBoolProperty(napi_env env, napi_value object, const char* name, bool value) {
@@ -1886,6 +1896,22 @@ napi_value getStyleJson(napi_env env, napi_callback_info info) {
     return createStringValue(env, resolved.binding->style);
 }
 
+napi_value getStyleAttributions(napi_env env, napi_callback_info info) {
+    std::size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_value thisArg = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr) != napi_ok) {
+        return throwError(env, "Expected a native XComponent binding handle");
+    }
+
+    ResolvedBinding resolved;
+    if (!resolveBinding(env, thisArg, argc, argv, resolved)) {
+        return getUndefined(env);
+    }
+
+    return createStringArray(env, ensureMapView(*resolved.binding).getStyleAttributions());
+}
+
 napi_value getSurfaceState(napi_env env, napi_callback_info info) {
     std::size_t argc = 1;
     napi_value argv[1] = {nullptr};
@@ -1970,6 +1996,7 @@ napi_value Init(napi_env env, napi_value exports) {
         {"getPixelRatio", nullptr, getPixelRatio, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getRenderingEnabled", nullptr, getRenderingEnabled, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getResourceOptions", nullptr, getResourceOptions, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"getStyleAttributions", nullptr, getStyleAttributions, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getStyleJson", nullptr, getStyleJson, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getStyleUrl", nullptr, getStyleUrl, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getSurfaceState", nullptr, getSurfaceState, nullptr, nullptr, nullptr, napi_default, nullptr},

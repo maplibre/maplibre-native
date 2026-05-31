@@ -14,6 +14,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace mbgl {
 namespace ohos {
@@ -66,6 +67,7 @@ public:
     const std::string& getClientName() const { return clientName; }
     const std::string& getClientVersion() const { return clientVersion; }
     const ResourceOptions& getResourceOptions() const { return resourceOptions; }
+    std::vector<std::string> getStyleAttributions() const;
     bool hasPendingRender() const;
     std::uint64_t getRenderedFrameCount() const { return renderedFrameCount; }
     bool hasLoadedStyle() const { return styleLoaded; }

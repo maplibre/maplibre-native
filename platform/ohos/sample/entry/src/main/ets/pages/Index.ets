@@ -19,12 +19,19 @@ const DEFAULT_CAMERA: CameraOptions = {
   pitch: 0
 };
 
+interface AttributionItem {
+  key: string;
+  label: string;
+  url?: string;
+}
+
 @Entry
 @Component
 struct Index {
   @State private statusText: string = 'Waiting for XComponent';
   @State private statusDetail: string = 'No native binding';
   @State private statusResources: string = 'No resource callbacks';
+  @State private attributionItems: AttributionItem[] = [];
 
   private map?: XComponentContext;
   private statusLogTimer: number = -1;
@@ -181,9 +188,10 @@ struct Index {
 
   private updateSurfaceState(label: string): void {
     if (!this.map) {
-      this.statusText = label + ': no binding';
+      this.statusText = 'no binding';
       this.statusDetail = 'No native binding';
       this.statusResources = 'No resource callbacks';
+      this.attributionItems = [];
       this.resetFrameMetrics();
       return;
     }
@@ -191,14 +199,11 @@ struct Index {
     const state: SurfaceState = this.map.getSurfaceState();
     this.updateFrameMetrics(state);
     const pixelRatio = this.map.getPixelRatio();
-    this.statusText = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
+    this.statusText = state.width.toString() + 'x' + state.height.toString() +
       ' pr=' + this.formatNumber(pixelRatio, 2) +
       ' ' + this.backendLabel(state) +
       ' fps=' + this.formatRate(this.renderFps) +
       ' tick=' + this.formatRate(this.tickFps) +
-      ' work=' + this.formatNumber(state.lastFrameTimeMs, 1) +
-      '/' + this.formatNumber(state.lastRunLoopTimeMs, 1) +
-      '/' + this.formatNumber(state.lastRenderTimeMs, 1) + 'ms' +
       ' render=' + (state.needsRender ? 'pending' : 'idle');
 
     let detail: string = 'window=' + (state.hasWindow ? 'yes' : 'no') +
@@ -245,6 +250,7 @@ struct Index {
       resources = state.eglConfigDiagnostic;
     }
     this.statusResources = resources;
+    this.attributionItems = this.parseAttributions(this.map.getStyleAttributions());
   }
 
   private resetFrameMetrics(): void {
@@ -286,6 +292,86 @@ struct Index {
       return 'Vulkan';
     }
     return 'unknown';
+  }
+
+  private decodeHtmlEntities(value: string): string {
+    return value
+      .replace(/&copy;/g, '©')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private stripAttributionHtml(value: string): string {
+    return this.decodeHtmlEntities(value.replace(/<[^>]*>/g, ''));
+  }
+
+  private appendAttributionItem(items: AttributionItem[], label: string, url?: string): void {
+    const trimmed = label.replace(/\s+/g, ' ').trim();
+    if (trimmed.length === 0) {
+      return;
+    }
+
+    items.push({
+      key: items.length.toString() + ':' + trimmed + ':' + (url ?? ''),
+      label: trimmed,
+      url: url
+    });
+  }
+
+  private appendAttributionHtml(items: AttributionItem[], value: string): void {
+    const anchorPattern: RegExp = /<a[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/g;
+    let cursor = 0;
+    let match: RegExpExecArray | null = anchorPattern.exec(value);
+    while (match !== null) {
+      if (match.index > cursor) {
+        this.appendAttributionItem(items, this.stripAttributionHtml(value.slice(cursor, match.index)));
+      }
+
+      this.appendAttributionItem(items, this.stripAttributionHtml(match[2]), this.decodeHtmlEntities(match[1]));
+      cursor = match.index + match[0].length;
+      match = anchorPattern.exec(value);
+    }
+
+    if (cursor < value.length) {
+      this.appendAttributionItem(items, this.stripAttributionHtml(value.slice(cursor)));
+    }
+  }
+
+  private parseAttributions(values: string[]): AttributionItem[] {
+    const items: AttributionItem[] = [];
+    const seen: string[] = [];
+    values.forEach((value: string) => {
+      const trimmed = value.trim();
+      if (trimmed.length === 0 || seen.indexOf(trimmed) >= 0) {
+        return;
+      }
+
+      if (items.length > 0) {
+        this.appendAttributionItem(items, '|');
+      }
+      seen.push(trimmed);
+      this.appendAttributionHtml(items, trimmed);
+    });
+    return items;
+  }
+
+  private openAttributionUrl(url: string): void {
+    const hostContext = this.getUIContext().getHostContext() as common.UIAbilityContext | undefined;
+    if (!hostContext) {
+      return;
+    }
+
+    hostContext.startAbility({
+      action: 'ohos.want.action.viewData',
+      uri: url
+    }).catch((error: Error) => {
+      hilog.warn(LOG_DOMAIN, LOG_TAG, 'Could not open attribution URL: %{public}s', JSON.stringify(error));
+    });
   }
 
   private useRemoteStyle(name: string, url: string): void {
@@ -398,56 +484,70 @@ struct Index {
 
   build() {
     Column() {
-      XComponent({
-        id: 'maplibre_map',
-        type: XComponentType.SURFACE,
-        libraryname: 'maplibre_native_ohos'
-      })
-        .onLoad((context?: object) => {
-          if (!context) {
-            this.statusText = 'XComponent onLoad returned no context';
-            return;
-          }
-
-          this.configureMap(context as XComponentContext);
+      Stack({ alignContent: Alignment.TopStart }) {
+        XComponent({
+          id: 'maplibre_map',
+          type: XComponentType.SURFACE,
+          libraryname: 'maplibre_native_ohos'
         })
-        .onDestroy(() => {
-          if (this.map) {
-            this.map.destroy();
-            this.map = undefined;
-          }
-          this.statusText = 'XComponent destroyed';
-          this.statusDetail = 'No native binding';
-          this.statusResources = 'No resource callbacks';
-        })
-        .width('100%')
-        .layoutWeight(1)
+          .onLoad((context?: object) => {
+            if (!context) {
+              this.statusText = 'XComponent onLoad returned no context';
+              return;
+            }
 
-      Column() {
+            this.configureMap(context as XComponentContext);
+          })
+          .onDestroy(() => {
+            if (this.map) {
+              this.map.destroy();
+              this.map = undefined;
+            }
+            this.statusText = 'XComponent destroyed';
+            this.statusDetail = 'No native binding';
+            this.statusResources = 'No resource callbacks';
+            this.attributionItems = [];
+          })
+          .width('100%')
+          .height('100%')
+
         Text(this.statusText)
-          .fontSize(13)
-          .fontWeight(FontWeight.Medium)
+          .fontSize(10)
           .fontColor('#111827')
-          .maxLines(2)
-          .width('100%')
+          .maxLines(1)
+          .textShadow({ radius: 2, color: '#ffffff', offsetX: 0, offsetY: 0 })
+          .margin({ left: 8, top: 8 })
+          .hitTestBehavior(HitTestMode.Transparent)
 
-        Text(this.statusDetail)
-          .fontSize(12)
-          .fontColor('#475569')
-          .maxLines(2)
+        Stack({ alignContent: Alignment.BottomEnd }) {
+          Row() {
+            ForEach(this.attributionItems, (item: AttributionItem) => {
+              Text(item.label)
+                .fontSize(10)
+                .fontColor(item.url === undefined ? '#111827' : '#0645ad')
+                .decoration({
+                  type: item.url === undefined ? TextDecorationType.None : TextDecorationType.Underline
+                })
+                .textShadow({ radius: 2, color: '#ffffff', offsetX: 0, offsetY: 0 })
+                .margin({ right: 2 })
+                .onClick(() => {
+                  if (item.url !== undefined) {
+                    this.openAttributionUrl(item.url);
+                  }
+                })
+            }, (item: AttributionItem) => item.key)
+          }
+          .justifyContent(FlexAlign.End)
           .width('100%')
-          .margin({ top: 2 })
-
-        Text(this.statusResources)
-          .fontSize(11)
-          .fontColor('#64748b')
-          .maxLines(2)
-          .width('100%')
-          .margin({ top: 2 })
+          .padding({ left: 8, right: 8, bottom: 8 })
+          .hitTestBehavior(HitTestMode.Transparent)
+        }
+        .width('100%')
+        .height('100%')
+        .hitTestBehavior(HitTestMode.Transparent)
       }
       .width('100%')
-      .padding({ left: 12, right: 12, top: 8, bottom: 6 })
-      .backgroundColor('#f8fafc')
+      .layoutWeight(1)
 
       Row() {
         Button('Demo')
@@ -472,6 +572,7 @@ struct Index {
       .width('100%')
       .padding({ left: 12, right: 12, top: 8, bottom: 8 })
       .justifyContent(FlexAlign.SpaceEvenly)
+      .backgroundColor('#f8fafc')
     }
     .width('100%')
     .height('100%')
