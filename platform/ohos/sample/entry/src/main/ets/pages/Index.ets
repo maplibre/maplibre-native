@@ -9,6 +9,15 @@ const LOG_TAG: string = 'MapLibreSample';
 const DEMO_STYLE_URL: string = 'https://demotiles.maplibre.org/style.json';
 const BRIGHT_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/bright';
 const LIBERTY_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/liberty';
+const DEFAULT_STYLE_NAME: string = 'Bright';
+const DEFAULT_STYLE_URL: string = BRIGHT_STYLE_URL;
+const DEFAULT_CAMERA: CameraOptions = {
+  longitude: 106.5750,
+  latitude: 29.5570,
+  zoom: 12.0,
+  bearing: 0,
+  pitch: 0
+};
 
 @Entry
 @Component
@@ -361,6 +370,7 @@ struct Index {
     map.getResourceOptions();
     map.getStyleJson();
     map.getStyleUrl();
+    map.jumpTo(DEFAULT_CAMERA);
     const surfaceState: SurfaceState = map.getSurfaceState();
     const observedCoreCallbacks: boolean =
       surfaceState.styleLoaded || surfaceState.mapLoaded || surfaceState.coreFrameCount > 0;
@@ -383,7 +393,7 @@ struct Index {
       map.runLoopOnce();
     }
     map.getTileCacheEnabled();
-    this.useRemoteStyle('Demo', DEMO_STYLE_URL);
+    this.useRemoteStyle(DEFAULT_STYLE_NAME, DEFAULT_STYLE_URL);
   }
 
   build() {
