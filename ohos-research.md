@@ -239,6 +239,58 @@ the ArkTS/NAPI native module target. Its shared library output name is:
 libmaplibre_native_ohos.so
 ```
 
+## CI Direction
+
+No OHOS CI is configured yet. The closest existing patterns are:
+
+- `node-ci` is path-filtered, runs a broad platform matrix, and is explicitly
+  advisory via `continue-on-error: true`.
+- `qt-ci` is path-filtered and build-focused across Linux/macOS/Windows; Linux
+  runs `ctest`, while the other platforms are mostly compile/package coverage.
+
+The initial OHOS target should be smaller than both:
+
+- One Linux runner doing cross-compile coverage only.
+- Path filters for `platform/ohos/**`, root CMake inputs, shared source/include
+  trees, `vendor/**`, and `.gitmodules`.
+- SDK setup/cache for the HarmonyOS command-line/native SDK once the legal and
+  mechanical install story is clear.
+- Export `HMOS_SDK_NATIVE` and `OHOS_SDK_NATIVE`, then configure/build both
+  `harmonyos-opengl` and `harmonyos-vulkan`.
+- Skip DevEco/Hvigor sample packaging, signing, device install, and emulator
+  runtime checks until SDK acquisition and signing are reproducible in CI.
+- Keep it advisory at first if SDK setup is brittle, matching the Node workflow's
+  non-blocking posture for non-core coverage.
+
+SDK setup audit:
+
+- `jiwangyihao/setup-harmonyos-sdk` is the most relevant third-party action, but
+  it downloads SDK archives from a separate `jiwangyihao/hos-sdk` GitHub release
+  mirror rather than from Huawei directly. The latest inspected release was
+  `5.1.1.823`, with macOS command-line tools and ArkUI-X assets only. The action
+  also configures npm/ohpm registries, disables `ohpm strict_ssl`, installs
+  unrelated macOS packages, creates a fake `devecoStudio` executable, and
+  configures ACE/ArkUI-X. Even pinned by SHA, this is too broad for root CMake
+  CI and does not currently provide the Linux runner path described above.
+- `harmonyos-dev/hos-sdk`, the upstream mirror behind that family of repos,
+  shows the useful underlying approach: download a command-line-tools archive,
+  then run `sdkmgr install ... --accept-license`. Its published example is old
+  and OpenHarmony/API-9 oriented, but the `sdkmgr` flow is the right shape to
+  reproduce in a first-party setup step if the official SDK download URL and
+  license terms are acceptable for CI.
+- `applibgroup/HarmonyOsSdk` is not suitable. It is a Windows `cmd` composite
+  action that sets `OHOS_SDK_HOME` to the action checkout, copies config files,
+  then runs `gradlew assembleDebug sonarqube --info`. The repository vendors a
+  large old SDK tree directly, appears focused on Java/JS/ETS SDK 2.x/3.x era
+  packaging, and does not include the native SDK layout needed here.
+
+Recommended first implementation: avoid third-party checked-in SDK bundles.
+Prefer a small first-party setup step that obtains official command-line tools,
+runs `sdkmgr`, caches the resulting SDK, and exports only the paths this project
+needs. If the only immediately workable source is a third-party GitHub release
+mirror, keep that workflow manual/advisory, pin the action/release by immutable
+SHA, and verify archive checksums explicitly.
+
 ## Networking
 
 The current PR uses only the HarmonyOS HMS RemoteCommunicationKit backend. A
@@ -656,7 +708,17 @@ Important notes:
      does not disable validation. Validation layers are still requested during
      Vulkan **instance** creation by `RendererBackend::getLayers()` and by the
      GLFW shared `VkContext` instance path; device layers have been deprecated
-     and ignored by modern Vulkan implementations.
+     and ignored by modern Vulkan implementations. The Vulkan specification's
+     device-layer deprecation section says `VkDeviceCreateInfo` layer members
+     are deprecated, their values must be ignored by implementations, and the
+     active device layer sequence is the sequence enabled at parent instance
+     creation:
+     <https://docs.vulkan.org/spec/latest/chapters/extensions.html#extendingvulkan-layers-devicelayerdeprecation>.
+     That matches the current validation-enabled paths: `VK_LAYER_KHRONOS_validation`
+     is requested at instance creation, while logical-device creation leaves
+     the layer list empty. The Vulkan Guide's deprecated-items page recommends
+     that shape for validation layers:
+     <https://docs.vulkan.org/guide/latest/deprecated.html#device-layers>.
    - DevEco emulator runtime logs show `Vulkan loader api=1.3.275
      instanceExtensions=8 VK_KHR_surface=yes VK_OHOS_surface=yes`, followed by
      `vk::createInstanceUnique: ErrorIncompatibleDriver`. The emulator exposes
