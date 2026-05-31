@@ -358,6 +358,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/background_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/circle_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_host.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_init_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp

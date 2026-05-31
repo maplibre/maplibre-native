@@ -3,7 +3,7 @@
 
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer_host.hpp>
 #include <mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp>
 #include <mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp>
 
