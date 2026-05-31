@@ -3,9 +3,6 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <GLES3/gl3.h>
-#if defined(__has_include) && __has_include(<GLES3/gl3ext.h>)
-#include <GLES3/gl3ext.h>
-#endif
 
 namespace mbgl {
 namespace platform {

@@ -126,7 +126,7 @@ where that matches the OHOS SDK:
   - compression
   - text utilities
   - headless frontend pieces
-  - GL function loading with a small optional `GLES3/gl3ext.h` include guard
+  - GL function loading
 - OHOS-specific pieces:
   - EGL window backend for `OHNativeWindow *`
   - Vulkan window backend using `VK_OHOS_surface`

@@ -286,22 +286,18 @@
       "inherits": "harmonyos",
       "binaryDir": "${sourceDir}/build-harmonyos-opengl",
       "displayName": "HarmonyOS OpenGL",
-      "description": "HarmonyOS GLES/EGL and HMS RCP build with the experimental NAPI/XComponent native module",
-      "cacheVariables": {
-        "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
-      }
+      "description": "HarmonyOS GLES/EGL and HMS RCP build"
     },
     {
       "name": "harmonyos-vulkan",
       "inherits": "harmonyos",
       "binaryDir": "${sourceDir}/build-harmonyos-vulkan",
       "displayName": "HarmonyOS Vulkan",
-      "description": "HarmonyOS Vulkan and HMS RCP build with the experimental NAPI/XComponent native module",
+      "description": "HarmonyOS Vulkan and HMS RCP build",
       "cacheVariables": {
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
-        "MLN_WITH_VULKAN": "ON",
-        "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
+        "MLN_WITH_VULKAN": "ON"
       }
     },
     {
@@ -455,13 +451,13 @@
       "name": "harmonyos-opengl",
       "inherits": "harmonyos-build",
       "configurePreset": "harmonyos-opengl",
-      "targets": ["maplibre-native-ohos"]
+      "targets": ["mbgl-core"]
     },
     {
       "name": "harmonyos-vulkan",
       "inherits": "harmonyos-build",
       "configurePreset": "harmonyos-vulkan",
-      "targets": ["maplibre-native-ohos"]
+      "targets": ["mbgl-core"]
     },
     {
       "name": "windows-opengl-core",
