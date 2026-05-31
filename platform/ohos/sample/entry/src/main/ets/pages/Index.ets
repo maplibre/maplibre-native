@@ -1,4 +1,5 @@
 import { common } from '@kit.AbilityKit';
+import { display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import maplibreNative from 'libmaplibre_native_ohos.so';
 import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
@@ -75,8 +76,9 @@ struct Index {
     }
   }
 
-  private formatSurfaceStateLine(state: SurfaceState, camera: CameraOptions, label: string): string {
+  private formatSurfaceStateLine(state: SurfaceState, camera: CameraOptions, label: string, pixelRatio: number): string {
     let line: string = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
+      ' pr=' + pixelRatio.toString() +
       ' window=' + (state.hasWindow ? 'yes' : 'no') +
       ' map=' + (state.hasMap ? 'yes' : 'no') +
       ' render=' + (state.needsRender ? 'pending' : 'idle') +
@@ -152,7 +154,7 @@ struct Index {
 
     const state: SurfaceState = this.map.getSurfaceState();
     const camera: CameraOptions = this.map.getCameraOptions();
-    const line: string = this.formatSurfaceStateLine(state, camera, label);
+    const line: string = this.formatSurfaceStateLine(state, camera, label, this.map.getPixelRatio());
     hilog.info(LOG_DOMAIN, LOG_TAG, '%{public}s', line);
     this.map.logSurfaceState(label);
   }
@@ -167,6 +169,7 @@ struct Index {
 
     const state: SurfaceState = this.map.getSurfaceState();
     this.statusText = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
+      ' pr=' + this.map.getPixelRatio().toString() +
       ' window=' + (state.hasWindow ? 'yes' : 'no') +
       ' map=' + (state.hasMap ? 'yes' : 'no') +
       ' render=' + (state.needsRender ? 'pending' : 'idle');
@@ -252,13 +255,26 @@ struct Index {
     return { cachePath: hostContext.cacheDir + '/maplibre-cache.db' };
   }
 
+  private displayPixelRatio(): number {
+    try {
+      const pixelRatio = display.getDefaultDisplaySync().densityPixels;
+      if (Number.isFinite(pixelRatio) && pixelRatio > 0) {
+        return pixelRatio;
+      }
+    } catch (error) {
+      hilog.warn(LOG_DOMAIN, LOG_TAG, 'Could not read display density: %{public}s', JSON.stringify(error));
+    }
+
+    return 1;
+  }
+
   private configureMap(map: XComponentContext): void {
     this.map = map;
     map.setClientOptions('MapLibreOhosSample', '0.1.0');
     map.setResourceOptions(this.resourceOptions());
     map.setTileCacheEnabled(true);
     map.setFrameRateRange({ min: 30, max: 120, expected: 60 });
-    map.setPixelRatio(1);
+    map.setPixelRatio(this.displayPixelRatio());
     map.setRenderingEnabled(true);
     map.setBounds({
       bounds: { west: -180, south: -85, east: 180, north: 85 },

@@ -14,6 +14,7 @@
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <exception>
 #include <stdexcept>
@@ -21,6 +22,27 @@
 
 namespace mbgl {
 namespace ohos {
+namespace {
+
+std::uint32_t logicalDimensionForFramebufferDimension(const std::uint32_t dimension, const float pixelRatio) {
+    return std::max<std::uint32_t>(1, static_cast<std::uint32_t>(std::ceil(dimension / pixelRatio)));
+}
+
+Size logicalSizeForFramebufferSize(const Size size, const float pixelRatio) {
+    return {logicalDimensionForFramebufferDimension(size.width, pixelRatio),
+            logicalDimensionForFramebufferDimension(size.height, pixelRatio)};
+}
+
+double logicalCoordinateForFramebufferCoordinate(const double coordinate, const float pixelRatio) {
+    return coordinate / pixelRatio;
+}
+
+ScreenCoordinate logicalCoordinateForFramebufferCoordinate(const double x, const double y, const float pixelRatio) {
+    return {logicalCoordinateForFramebufferCoordinate(x, pixelRatio),
+            logicalCoordinateForFramebufferCoordinate(y, pixelRatio)};
+}
+
+} // namespace
 
 MapView::MapView(const float pixelRatio_)
     : pixelRatio(pixelRatio_) {
@@ -155,7 +177,7 @@ void MapView::moveBy(double x, double y, AnimationOptions animationOptions) {
         return;
     }
 
-    map->moveBy({x, y}, std::move(animationOptions));
+    map->moveBy(logicalCoordinateForFramebufferCoordinate(x, y, pixelRatio), std::move(animationOptions));
     desiredCameraBounds.reset();
     desiredFreeCamera.reset();
     desiredCamera = map->getCameraOptions();
@@ -166,7 +188,7 @@ void MapView::scaleBy(double scale, double anchorX, double anchorY) {
         return;
     }
 
-    map->scaleBy(scale, ScreenCoordinate{anchorX, anchorY});
+    map->scaleBy(scale, logicalCoordinateForFramebufferCoordinate(anchorX, anchorY, pixelRatio));
     desiredCameraBounds.reset();
     desiredFreeCamera.reset();
     desiredCamera = map->getCameraOptions();
@@ -183,7 +205,7 @@ void MapView::rotateBy(double previousAngle, double currentAngle, double anchorX
     const double bearingDelta = util::rad2deg(currentAngle - previousAngle);
     map->easeTo(CameraOptions()
                     .withBearing(currentBearing - bearingDelta)
-                    .withAnchor(ScreenCoordinate{anchorX, anchorY}),
+                    .withAnchor(logicalCoordinateForFramebufferCoordinate(anchorX, anchorY, pixelRatio)),
                 AnimationOptions{});
     desiredCameraBounds.reset();
     desiredFreeCamera.reset();
@@ -297,7 +319,7 @@ void MapView::setSize(Size size) {
         backend->setSize(size);
     }
     if (map) {
-        map->setSize(size);
+        map->setSize(logicalSizeForFramebufferSize(size, pixelRatio));
     }
 }
 
@@ -313,7 +335,9 @@ void MapView::createMap(OHNativeWindow* newWindow, Size size) {
     frontend->setTileCacheEnabled(tileCacheEnabled);
 
     MapOptions mapOptions;
-    mapOptions.withSize(size).withPixelRatio(pixelRatio).withMapMode(MapMode::Continuous);
+    mapOptions.withSize(logicalSizeForFramebufferSize(size, pixelRatio))
+        .withPixelRatio(pixelRatio)
+        .withMapMode(MapMode::Continuous);
 
     ClientOptions clientOptions;
     clientOptions.withName(clientName).withVersion(clientVersion);
