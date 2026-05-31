@@ -271,26 +271,27 @@ void RendererBackend::triggerFrameCapture([[maybe_unused]] uint32_t frameCount, 
 
 #ifdef ENABLE_VULKAN_VALIDATION
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                                           VkDebugUtilsMessageTypeFlagsEXT,
-                                                           const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
-                                                           void*) {
+static VKAPI_ATTR vk::Bool32 VKAPI_CALL vkDebugUtilsCallback(
+    vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    vk::DebugUtilsMessageTypeFlagsEXT,
+    const vk::DebugUtilsMessengerCallbackDataEXT* callbackData,
+    void*) {
     EventSeverity mbglSeverity = EventSeverity::Debug;
 
     switch (messageSeverity) {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose:
             mbglSeverity = EventSeverity::Debug;
             break;
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo:
             mbglSeverity = EventSeverity::Info;
             break;
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
             mbglSeverity = EventSeverity::Warning;
             break;
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
             mbglSeverity = EventSeverity::Error;
             break;
 
@@ -303,25 +304,25 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSe
     return VK_FALSE;
 }
 
-static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                                 VkDebugReportObjectTypeEXT objectType,
-                                                 [[maybe_unused]] uint64_t object,
-                                                 [[maybe_unused]] size_t location,
-                                                 int32_t messageCode,
-                                                 const char* pLayerPrefix,
-                                                 const char* pMessage,
-                                                 [[maybe_unused]] void* pUserData) {
+static VKAPI_ATTR vk::Bool32 VKAPI_CALL vkDebugReportCallback(vk::DebugReportFlagsEXT flags,
+                                                              vk::DebugReportObjectTypeEXT objectType,
+                                                              [[maybe_unused]] uint64_t object,
+                                                              [[maybe_unused]] size_t location,
+                                                              int32_t messageCode,
+                                                              const char* pLayerPrefix,
+                                                              const char* pMessage,
+                                                              [[maybe_unused]] void* pUserData) {
     EventSeverity mbglSeverity = EventSeverity::Debug;
 
-    if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+    if (flags & vk::DebugReportFlagBitsEXT::eInformation) {
         mbglSeverity = EventSeverity::Info;
-    } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
+    } else if (flags & vk::DebugReportFlagBitsEXT::eWarning) {
         mbglSeverity = EventSeverity::Warning;
-    } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+    } else if (flags & vk::DebugReportFlagBitsEXT::ePerformanceWarning) {
         mbglSeverity = EventSeverity::Warning;
-    } else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+    } else if (flags & vk::DebugReportFlagBitsEXT::eError) {
         mbglSeverity = EventSeverity::Error;
-    } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+    } else if (flags & vk::DebugReportFlagBitsEXT::eDebug) {
         mbglSeverity = EventSeverity::Debug;
     }
 
