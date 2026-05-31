@@ -6,9 +6,6 @@ import type { CameraOptions, FrameRateRange, ResourceOptions, SurfaceState, XCom
 
 const LOG_DOMAIN: number = 0x4d4c4e;
 const LOG_TAG: string = 'MapLibreSample';
-const LOCAL_VECTOR_STYLE_JSON: string =
-  '{"version":8,"center":[0,0],"zoom":1,"pitch":0,"bearing":0,"sources":{"test":{"type":"geojson","data":{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-30,-20],[30,-20],[30,20],[-30,20],[-30,-20]]]}}}},"layers":[{"id":"bg","type":"background","paint":{"background-color":"#004488"}},{"id":"fill","type":"fill","source":"test","paint":{"fill-color":"#ffdd00"}}]}';
-
 const DEMO_STYLE_URL: string = 'https://demotiles.maplibre.org/style.json';
 const BRIGHT_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/bright';
 const LIBERTY_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/liberty';
@@ -238,15 +235,6 @@ struct Index {
     this.statusResources = resources;
   }
 
-  private useLocalVectorStyle(): void {
-    if (!this.map) {
-      return;
-    }
-
-    this.map.setStyleJson(LOCAL_VECTOR_STYLE_JSON);
-    this.updateSurfaceState('Local vector');
-  }
-
   private useRemoteStyle(name: string, url: string): void {
     if (!this.map) {
       return;
@@ -426,11 +414,6 @@ struct Index {
           })
           .height(44)
 
-        Button('Local')
-          .onClick(() => {
-            this.useLocalVectorStyle();
-          })
-          .height(44)
       }
       .width('100%')
       .padding({ left: 12, right: 12, top: 8, bottom: 8 })
