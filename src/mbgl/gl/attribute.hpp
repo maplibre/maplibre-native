@@ -34,9 +34,11 @@ public:
     void queryLocations(const ProgramID& id) {
         locations = Locations{
             queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())...};
+    }
+
+    bool hasFirstLocation() const {
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        [[maybe_unused]] auto first = locations.template get<TypeOfFirst>();
-        assert(first && first.value() == 0);
+        return locations.template get<TypeOfFirst>().has_value();
     }
 
     static constexpr const char* getFirstAttribName() {
@@ -67,12 +69,19 @@ public:
 
     AttributeBindingArray toBindingArray(const gfx::AttributeBindings<TypeList<As...>>& bindings) const {
         AttributeBindingArray result;
-        result.resize(sizeof...(As));
+
+        auto reserveLocation = [&](const std::optional<AttributeLocation>& location) {
+            if (location && result.size() <= *location) {
+                result.resize(*location + 1);
+            }
+        };
+
+        util::ignore({(reserveLocation(locations.template get<As>()), 0)...});
 
         auto maybeAddBinding = [&](const std::optional<AttributeLocation>& location,
                                    const std::optional<gfx::AttributeBinding>& binding) {
             if (location) {
-                result.at(*location) = binding;
+                result[*location] = binding;
             }
         };
 

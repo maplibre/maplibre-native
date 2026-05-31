@@ -91,7 +91,7 @@ public:
     }
 
     template <class DrawMode>
-    void draw(gfx::Context& context,
+    bool draw(gfx::Context& context,
               gfx::RenderPass& renderPass,
               const DrawMode& drawMode,
               const gfx::DepthMode& depthMode,
@@ -106,7 +106,7 @@ public:
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
         if (!programBase) {
-            return;
+            return false;
         }
 
         auto drawScopeIt = segment.drawScopes.find(layerID);
@@ -114,23 +114,23 @@ public:
             drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
         }
 
-        programBase->draw(context,
-                          renderPass,
-                          drawMode,
-                          depthMode,
-                          stencilMode,
-                          colorMode,
-                          cullFaceMode,
-                          uniformValues,
-                          drawScopeIt->second,
-                          allAttributeBindings.offset(segment.vertexOffset),
-                          indexBuffer,
-                          segment.indexOffset,
-                          segment.indexLength);
+        return programBase->draw(context,
+                                 renderPass,
+                                 drawMode,
+                                 depthMode,
+                                 stencilMode,
+                                 colorMode,
+                                 cullFaceMode,
+                                 uniformValues,
+                                 drawScopeIt->second,
+                                 allAttributeBindings.offset(segment.vertexOffset),
+                                 indexBuffer,
+                                 segment.indexOffset,
+                                 segment.indexLength);
     }
 
     template <class DrawMode>
-    void draw(gfx::Context& context,
+    bool draw(gfx::Context& context,
               gfx::RenderPass& renderPass,
               const DrawMode& drawMode,
               const gfx::DepthMode& depthMode,
@@ -145,9 +145,10 @@ public:
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
         if (!programBase) {
-            return;
+            return false;
         }
 
+        bool result = true;
         for (auto& segment : segments) {
             auto drawScopeIt = segment.drawScopes.find(layerID);
 
@@ -155,20 +156,22 @@ public:
                 drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
             }
 
-            programBase->draw(context,
-                              renderPass,
-                              drawMode,
-                              depthMode,
-                              stencilMode,
-                              colorMode,
-                              cullFaceMode,
-                              uniformValues,
-                              drawScopeIt->second,
-                              allAttributeBindings.offset(segment.vertexOffset),
-                              indexBuffer,
-                              segment.indexOffset,
-                              segment.indexLength);
+            result = programBase->draw(context,
+                                       renderPass,
+                                       drawMode,
+                                       depthMode,
+                                       stencilMode,
+                                       colorMode,
+                                       cullFaceMode,
+                                       uniformValues,
+                                       drawScopeIt->second,
+                                       allAttributeBindings.offset(segment.vertexOffset),
+                                       indexBuffer,
+                                       segment.indexOffset,
+                                       segment.indexLength) &&
+                     result;
         }
+        return result;
     }
 };
 
