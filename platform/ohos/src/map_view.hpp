@@ -30,7 +30,6 @@ public:
     void setSurface(OHNativeWindow*, Size);
     void clearSurface();
     bool renderFrame();
-    void runLoopOnce();
     void reduceMemoryUse();
 
     void setStyleURL(const std::string&);
@@ -108,6 +107,7 @@ private:
     BoundOptions mergeBoundOptions(const BoundOptions&) const;
     void applyDesiredBounds();
     void applyDesiredCamera();
+    void runLoopOnce();
 
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
     void onDidFinishLoadingMap() override;

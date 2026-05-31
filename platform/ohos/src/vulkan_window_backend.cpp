@@ -11,26 +11,11 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
+#include <vulkan/vulkan_ohos.h>
 
 namespace mbgl {
 namespace ohos {
 namespace {
-
-constexpr const char* kOhosSurfaceExtensionName = "VK_OHOS_surface";
-constexpr VkStructureType kOhosSurfaceCreateInfoType = static_cast<VkStructureType>(1000685000);
-
-using VkSurfaceCreateFlagsOHOS = VkFlags;
-struct VkSurfaceCreateInfoOHOS {
-    VkStructureType sType;
-    const void* pNext;
-    VkSurfaceCreateFlagsOHOS flags;
-    OHNativeWindow* window;
-};
-
-using PFN_vkCreateSurfaceOHOS = VkResult(VKAPI_PTR*)(VkInstance,
-                                                     const VkSurfaceCreateInfoOHOS*,
-                                                     const VkAllocationCallbacks*,
-                                                     VkSurfaceKHR*);
 
 std::string formatVulkanDiagnostic(const vulkan::RendererBackend& backend) {
     const auto& properties = backend.getDeviceProperties();
@@ -46,7 +31,7 @@ std::string formatVulkanDiagnostic(const vulkan::RendererBackend& backend) {
     return stream.str();
 }
 
-std::string formatVulkanLoaderDiagnostic(const vk::DispatchLoaderDynamic& dispatcher) {
+std::string formatVulkanLoaderDiagnostic(const vulkan::DispatchLoaderDynamic& dispatcher) {
     std::uint32_t apiVersion = VK_API_VERSION_1_0;
     const auto enumerateInstanceVersion = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(
         dispatcher.vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
@@ -64,7 +49,7 @@ std::string formatVulkanLoaderDiagnostic(const vk::DispatchLoaderDynamic& dispat
             return std::string_view(value.extensionName.data()) == VK_KHR_SURFACE_EXTENSION_NAME;
         });
         hasOhosSurface = std::any_of(extensions.begin(), extensions.end(), [](const vk::ExtensionProperties& value) {
-            return std::string_view(value.extensionName.data()) == kOhosSurfaceExtensionName;
+            return std::string_view(value.extensionName.data()) == VK_OHOS_SURFACE_EXTENSION_NAME;
         });
     } catch (const std::exception& exception) {
         std::ostringstream stream;
@@ -78,7 +63,7 @@ std::string formatVulkanLoaderDiagnostic(const vk::DispatchLoaderDynamic& dispat
            << VK_VERSION_PATCH(apiVersion)
            << " instanceExtensions=" << extensionCount
            << " " << VK_KHR_SURFACE_EXTENSION_NAME << '=' << (hasKhrSurface ? "yes" : "no")
-           << " " << kOhosSurfaceExtensionName << '=' << (hasOhosSurface ? "yes" : "no");
+           << " " << VK_OHOS_SURFACE_EXTENSION_NAME << '=' << (hasOhosSurface ? "yes" : "no");
     return stream.str();
 }
 
@@ -100,7 +85,7 @@ public:
         }
 
         const VkSurfaceCreateInfoOHOS createInfo{
-            .sType = kOhosSurfaceCreateInfoType,
+            .sType = VK_STRUCTURE_TYPE_SURFACE_CREATE_INFO_OHOS,
             .pNext = nullptr,
             .flags = 0,
             .window = backendImpl.getNativeWindow(),
@@ -114,8 +99,7 @@ public:
 
         surface = vk::UniqueSurfaceKHR(
             rawSurface,
-            vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(
-                backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
+            vulkan::ObjectDestroy<vk::Instance>(backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
         setSurfaceTransformPollingInterval(30);
     }
 
@@ -187,7 +171,7 @@ void VulkanWindowBackend::initInstance() {
 std::vector<const char*> VulkanWindowBackend::getInstanceExtensions() {
     auto extensions = vulkan::RendererBackend::getInstanceExtensions();
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-    extensions.push_back(kOhosSurfaceExtensionName);
+    extensions.push_back(VK_OHOS_SURFACE_EXTENSION_NAME);
     return extensions;
 }
 

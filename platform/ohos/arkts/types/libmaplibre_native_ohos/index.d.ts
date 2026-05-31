@@ -106,39 +106,10 @@ export interface SurfaceState {
   styleLoaded: boolean;
   mapLoaded: boolean;
   fullyLoaded: boolean;
-  idle: boolean;
-  lastFrameNeededRepaint: boolean;
-  lastFrameComplete: boolean;
-  renderedFrameCount: number;
-  coreFrameCount: number;
-  mapLoadErrorCount: number;
-  renderErrorCount: number;
-  sourceChangedCount: number;
-  styleImageMissingCount: number;
-  glyphsRequestedCount: number;
-  glyphsLoadedCount: number;
-  glyphsErrorCount: number;
-  tileActionCount: number;
-  spritesRequestedCount: number;
-  spritesLoadedCount: number;
-  spritesErrorCount: number;
-  lastFrameTimeMs: number;
-  lastRunLoopTimeMs: number;
-  lastRenderTimeMs: number;
-  glesContextClientVersion: number;
-  eglConfigDiagnostic?: string;
-  framebufferDiagnostic?: string;
-  rendererDiagnostic?: string;
-  frameCallbackCount: number;
-  touchEventCount: number;
-  gestureHandledCount: number;
+  renderedFrameRate: number;
+  frameCallbackRate: number;
+  backend?: string;
   surfaceVisible: boolean;
-  surfaceCreatedCount: number;
-  surfaceChangedCount: number;
-  surfaceDestroyedCount: number;
-  surfaceShownCount: number;
-  surfaceHiddenCount: number;
-  surfaceErrorCount: number;
   lastSurfaceError?: string;
   lastMapLoadError?: string;
   lastRenderError?: string;
@@ -177,7 +148,6 @@ export interface XComponentContext {
   getStyleJson: () => string | undefined;
   getStyleUrl: () => string | undefined;
   getSurfaceState: () => SurfaceState;
-  logSurfaceState: (label?: string) => void;
   getTileCacheEnabled: () => boolean;
   jumpTo: {
     (options: CameraOptions): void;
@@ -185,7 +155,6 @@ export interface XComponentContext {
   };
   reduceMemoryUse: () => void;
   renderFrame: () => void;
-  runLoopOnce: () => void;
   setBounds: (options: BoundOptions) => void;
   setCameraOptions: (options: CameraOptions) => void;
   setClientOptions: (name: string, version?: string) => void;
@@ -220,7 +189,6 @@ export function getStyleAttributions(binding: NativeBinding): string[];
 export function getStyleJson(binding: NativeBinding): string | undefined;
 export function getStyleUrl(binding: NativeBinding): string | undefined;
 export function getSurfaceState(binding: NativeBinding): SurfaceState;
-export function logSurfaceState(binding: NativeBinding, label?: string): void;
 export function getTileCacheEnabled(binding: NativeBinding): boolean;
 export function jumpTo(
   binding: NativeBinding,
@@ -233,7 +201,6 @@ export function jumpTo(
 export function jumpTo(binding: NativeBinding, options: CameraOptions): void;
 export function renderFrame(binding: NativeBinding): void;
 export function reduceMemoryUse(binding: NativeBinding): void;
-export const runLoopOnce: () => void;
 export function setBounds(binding: NativeBinding, options: BoundOptions): void;
 export function setCameraOptions(binding: NativeBinding, options: CameraOptions): void;
 export function setClientOptions(binding: NativeBinding, name: string, version?: string): void;
@@ -267,13 +234,11 @@ export interface MapLibreNativeModule {
   getStyleJson: typeof getStyleJson;
   getStyleUrl: typeof getStyleUrl;
   getSurfaceState: typeof getSurfaceState;
-  logSurfaceState: typeof logSurfaceState;
   getTileCacheEnabled: typeof getTileCacheEnabled;
   jumpTo: typeof jumpTo;
   registerXComponentNode: typeof registerXComponentNode;
   reduceMemoryUse: typeof reduceMemoryUse;
   renderFrame: typeof renderFrame;
-  runLoopOnce: typeof runLoopOnce;
   setBounds: typeof setBounds;
   setCameraOptions: typeof setCameraOptions;
   setClientOptions: typeof setClientOptions;

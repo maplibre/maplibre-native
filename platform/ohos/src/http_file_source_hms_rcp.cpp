@@ -345,26 +345,6 @@ private:
     std::weak_ptr<RequestState> state;
 };
 
-class CallbackContexts {
-public:
-    // RCP can report callbacks after request cancellation/destruction. Keep the
-    // small user-data contexts alive for process lifetime and clear their weak
-    // state reference when MapLibre no longer owns the request.
-    static std::shared_ptr<CallbackContext> create(const std::shared_ptr<RequestState>& state) {
-        auto context = std::make_shared<CallbackContext>(state);
-        std::scoped_lock lock(mutex);
-        contexts.push_back(context);
-        return context;
-    }
-
-private:
-    static std::mutex mutex;
-    static std::deque<std::shared_ptr<CallbackContext>> contexts;
-};
-
-std::mutex CallbackContexts::mutex;
-std::deque<std::shared_ptr<CallbackContext>> CallbackContexts::contexts;
-
 class RcpSession final {
 public:
     RcpSession() {
@@ -431,9 +411,10 @@ public:
 
     void keepAlive() { self = shared_from_this(); }
 
-    void setCallbackContext(std::shared_ptr<CallbackContext> context_) {
+    void initializeCallbackContext() {
+        auto newContext = std::make_unique<CallbackContext>(shared_from_this());
         std::scoped_lock lock(mutex);
-        context = std::move(context_);
+        context = std::move(newContext);
         callbackObject.usrCtx = context.get();
     }
 
@@ -451,23 +432,20 @@ public:
     }
 
     void cancelOnRunLoop() {
-        Rcp_Request* requestToDestroy = nullptr;
+        Rcp_Request* requestToCancel = nullptr;
         {
             std::scoped_lock lock(mutex);
             if (finished) {
                 return;
             }
             canceled = true;
-            finished = true;
             callback = nullptr;
-            requestToDestroy = takeRequestLocked();
+            requestToCancel = request;
         }
 
-        if (requestToDestroy) {
-            session->cancel(requestToDestroy);
+        if (requestToCancel) {
+            session->cancel(requestToCancel);
         }
-        destroyRequest(requestToDestroy);
-        release();
     }
 
     void cancel() { cancelOnRunLoop(); }
@@ -561,11 +539,10 @@ private:
     }
 
     void release() {
-        std::shared_ptr<CallbackContext> contextToClear;
+        std::unique_ptr<CallbackContext> contextToClear;
         {
             std::scoped_lock lock(mutex);
-            contextToClear = context;
-            context.reset();
+            contextToClear = std::move(context);
             self.reset();
         }
 
@@ -583,7 +560,7 @@ private:
     std::deque<std::string> requestStrings;
     Rcp_Request* request = nullptr;
     mutable std::mutex mutex;
-    std::shared_ptr<CallbackContext> context;
+    std::unique_ptr<CallbackContext> context;
     bool canceled = false;
     bool finished = false;
     std::shared_ptr<RequestState> self;
@@ -623,7 +600,7 @@ public:
           state(std::make_shared<RequestState>(
               *util::RunLoop::Get(), std::move(session_), std::move(resource), std::move(callback))) {
         state->keepAlive();
-        state->setCallbackContext(CallbackContexts::create(state));
+        state->initializeCallbackContext();
 
         Rcp_Request* request = HMS_Rcp_CreateRequest(state->keepString(state->getResource().url));
         if (!request) {

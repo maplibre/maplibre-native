@@ -5,10 +5,10 @@
 
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/size.hpp>
 
 #include <cmath>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -30,8 +30,6 @@
 #include <native_window/external_window.h>
 
 namespace {
-
-constexpr std::uint64_t kDefaultDiagnosticsLogIntervalFrames = 180;
 
 using mbgl::ohos::createBoundOptionsObject;
 using mbgl::ohos::createCameraOptionsObject;
@@ -92,8 +90,11 @@ struct SurfaceBinding {
     std::string lastSurfaceError;
     mbgl::ohos::GestureState gesture;
     std::optional<OH_NativeXComponent_ExpectedRateRange> frameRateRange;
-    std::uint64_t diagnosticsLogIntervalFrames = kDefaultDiagnosticsLogIntervalFrames;
-    std::uint64_t diagnosticsLogFrameCounter = 0;
+    std::chrono::steady_clock::time_point frameRateSampleTime;
+    std::uint64_t frameRateRenderedFrames = 0;
+    std::uint64_t frameRateCallbacks = 0;
+    double renderedFrameRate = 0.0;
+    double frameCallbackRate = 0.0;
 };
 
 const char* styleKindLabel(StyleKind kind) {
@@ -180,17 +181,6 @@ std::string formatSurfaceDiagnostics(const SurfaceBinding& binding) {
 void logSurfaceDiagnostics(const SurfaceBinding& binding, const char* label) {
     const auto message = std::string(label) + ": " + formatSurfaceDiagnostics(binding);
     mbgl::Log::Info(mbgl::Event::General, message);
-}
-
-void maybeLogPeriodicDiagnostics(SurfaceBinding& binding) {
-    if (!binding.mapView || binding.diagnosticsLogIntervalFrames == 0) {
-        return;
-    }
-    ++binding.diagnosticsLogFrameCounter;
-    if (binding.diagnosticsLogFrameCounter % binding.diagnosticsLogIntervalFrames != 0) {
-        return;
-    }
-    logSurfaceDiagnostics(binding, "periodic");
 }
 
 struct ExternalBinding {
@@ -291,7 +281,6 @@ void applyDesiredStyle(SurfaceBinding& binding) {
 void renderBindingFrame(SurfaceBinding& binding) {
     if (binding.renderingEnabled && binding.surfaceVisible && binding.mapView) {
         binding.mapView->renderFrame();
-        maybeLogPeriodicDiagnostics(binding);
     }
 }
 
@@ -584,7 +573,33 @@ void setStringProperty(napi_env env, napi_value object, const char* name, const 
     napi_set_named_property(env, object, name, createStringValue(env, value));
 }
 
-napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding) {
+void updateFrameRates(SurfaceBinding& binding) {
+    const auto now = std::chrono::steady_clock::now();
+    const auto renderedFrames = binding.mapView ? binding.mapView->getRenderedFrameCount() : 0;
+    const auto frameCallbacks = binding.frameCallbackCount;
+
+    if (binding.frameRateSampleTime.time_since_epoch().count() == 0) {
+        binding.frameRateSampleTime = now;
+        binding.frameRateRenderedFrames = renderedFrames;
+        binding.frameRateCallbacks = frameCallbacks;
+        return;
+    }
+
+    const auto elapsed = std::chrono::duration<double>(now - binding.frameRateSampleTime).count();
+    if (elapsed <= 0.0) {
+        return;
+    }
+
+    binding.renderedFrameRate = static_cast<double>(renderedFrames - binding.frameRateRenderedFrames) / elapsed;
+    binding.frameCallbackRate = static_cast<double>(frameCallbacks - binding.frameRateCallbacks) / elapsed;
+    binding.frameRateSampleTime = now;
+    binding.frameRateRenderedFrames = renderedFrames;
+    binding.frameRateCallbacks = frameCallbacks;
+}
+
+napi_value createSurfaceStateObject(napi_env env, SurfaceBinding& binding) {
+    updateFrameRates(binding);
+
     const bool hasWindow = binding.window != nullptr;
     const bool hasSurface = hasWindow && binding.width > 0 && binding.height > 0;
     const bool hasMap = binding.mapView && binding.mapView->hasMap();
@@ -592,26 +607,12 @@ napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding)
     const bool styleLoaded = binding.mapView && binding.mapView->hasLoadedStyle();
     const bool mapLoaded = binding.mapView && binding.mapView->hasLoadedMap();
     const bool fullyLoaded = binding.mapView && binding.mapView->isFullyLoaded();
-    const bool idle = binding.mapView && binding.mapView->isIdle();
-    const bool lastFrameNeededRepaint = binding.mapView && binding.mapView->lastFrameNeededRepaint();
-    const bool lastFrameComplete = binding.mapView && binding.mapView->lastFrameWasComplete();
-    const auto renderedFrameCount = binding.mapView ? binding.mapView->getRenderedFrameCount() : 0;
-    const auto coreFrameCount = binding.mapView ? binding.mapView->getCoreFrameCount() : 0;
-    const auto mapLoadErrorCount = binding.mapView ? binding.mapView->getMapLoadErrorCount() : 0;
-    const auto renderErrorCount = binding.mapView ? binding.mapView->getRenderErrorCount() : 0;
-    const auto sourceChangedCount = binding.mapView ? binding.mapView->getSourceChangedCount() : 0;
-    const auto styleImageMissingCount = binding.mapView ? binding.mapView->getStyleImageMissingCount() : 0;
-    const auto glyphsRequestedCount = binding.mapView ? binding.mapView->getGlyphsRequestedCount() : 0;
-    const auto glyphsLoadedCount = binding.mapView ? binding.mapView->getGlyphsLoadedCount() : 0;
-    const auto glyphsErrorCount = binding.mapView ? binding.mapView->getGlyphsErrorCount() : 0;
-    const auto tileActionCount = binding.mapView ? binding.mapView->getTileActionCount() : 0;
-    const auto spritesRequestedCount = binding.mapView ? binding.mapView->getSpritesRequestedCount() : 0;
-    const auto spritesLoadedCount = binding.mapView ? binding.mapView->getSpritesLoadedCount() : 0;
-    const auto spritesErrorCount = binding.mapView ? binding.mapView->getSpritesErrorCount() : 0;
-    const auto lastFrameTimeMs = binding.mapView ? binding.mapView->getLastFrameTimeMs() : 0.0;
-    const auto lastRunLoopTimeMs = binding.mapView ? binding.mapView->getLastRunLoopTimeMs() : 0.0;
-    const auto lastRenderTimeMs = binding.mapView ? binding.mapView->getLastRenderTimeMs() : 0.0;
-    const auto glesContextClientVersion = binding.mapView ? binding.mapView->getGlesContextClientVersion() : 0;
+    std::string backendLabel;
+    if (binding.mapView && binding.mapView->getGlesContextClientVersion() > 0) {
+        backendLabel = std::string{"OpenGL ES "} + std::to_string(binding.mapView->getGlesContextClientVersion());
+    } else if (binding.mapView && !binding.mapView->getRendererDiagnostic().empty()) {
+        backendLabel = "Vulkan";
+    }
 
     napi_value object = nullptr;
     napi_create_object(env, &object);
@@ -624,45 +625,12 @@ napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding)
     setBoolProperty(env, object, "styleLoaded", styleLoaded);
     setBoolProperty(env, object, "mapLoaded", mapLoaded);
     setBoolProperty(env, object, "fullyLoaded", fullyLoaded);
-    setBoolProperty(env, object, "idle", idle);
-    setBoolProperty(env, object, "lastFrameNeededRepaint", lastFrameNeededRepaint);
-    setBoolProperty(env, object, "lastFrameComplete", lastFrameComplete);
-    setSizeProperty(env, object, "renderedFrameCount", renderedFrameCount);
-    setSizeProperty(env, object, "coreFrameCount", coreFrameCount);
-    setSizeProperty(env, object, "mapLoadErrorCount", mapLoadErrorCount);
-    setSizeProperty(env, object, "renderErrorCount", renderErrorCount);
-    setSizeProperty(env, object, "sourceChangedCount", sourceChangedCount);
-    setSizeProperty(env, object, "styleImageMissingCount", styleImageMissingCount);
-    setSizeProperty(env, object, "glyphsRequestedCount", glyphsRequestedCount);
-    setSizeProperty(env, object, "glyphsLoadedCount", glyphsLoadedCount);
-    setSizeProperty(env, object, "glyphsErrorCount", glyphsErrorCount);
-    setSizeProperty(env, object, "tileActionCount", tileActionCount);
-    setSizeProperty(env, object, "spritesRequestedCount", spritesRequestedCount);
-    setSizeProperty(env, object, "spritesLoadedCount", spritesLoadedCount);
-    setSizeProperty(env, object, "spritesErrorCount", spritesErrorCount);
-    setDoubleProperty(env, object, "lastFrameTimeMs", lastFrameTimeMs);
-    setDoubleProperty(env, object, "lastRunLoopTimeMs", lastRunLoopTimeMs);
-    setDoubleProperty(env, object, "lastRenderTimeMs", lastRenderTimeMs);
-    setInt32Property(env, object, "glesContextClientVersion", glesContextClientVersion);
-    if (binding.mapView && !binding.mapView->getEGLConfigDiagnostic().empty()) {
-        setStringProperty(env, object, "eglConfigDiagnostic", binding.mapView->getEGLConfigDiagnostic());
+    setDoubleProperty(env, object, "renderedFrameRate", binding.renderedFrameRate);
+    setDoubleProperty(env, object, "frameCallbackRate", binding.frameCallbackRate);
+    if (!backendLabel.empty()) {
+        setStringProperty(env, object, "backend", backendLabel);
     }
-    if (binding.mapView && !binding.mapView->getFramebufferDiagnostic().empty()) {
-        setStringProperty(env, object, "framebufferDiagnostic", binding.mapView->getFramebufferDiagnostic());
-    }
-    if (binding.mapView && !binding.mapView->getRendererDiagnostic().empty()) {
-        setStringProperty(env, object, "rendererDiagnostic", binding.mapView->getRendererDiagnostic());
-    }
-    setSizeProperty(env, object, "frameCallbackCount", binding.frameCallbackCount);
-    setSizeProperty(env, object, "touchEventCount", binding.touchEventCount);
-    setSizeProperty(env, object, "gestureHandledCount", binding.gestureHandledCount);
     setBoolProperty(env, object, "surfaceVisible", binding.surfaceVisible);
-    setSizeProperty(env, object, "surfaceCreatedCount", binding.surfaceCreatedCount);
-    setSizeProperty(env, object, "surfaceChangedCount", binding.surfaceChangedCount);
-    setSizeProperty(env, object, "surfaceDestroyedCount", binding.surfaceDestroyedCount);
-    setSizeProperty(env, object, "surfaceShownCount", binding.surfaceShownCount);
-    setSizeProperty(env, object, "surfaceHiddenCount", binding.surfaceHiddenCount);
-    setSizeProperty(env, object, "surfaceErrorCount", binding.surfaceErrorCount);
     if (!binding.lastSurfaceError.empty()) {
         setStringProperty(env, object, "lastSurfaceError", binding.lastSurfaceError);
     }
@@ -1107,11 +1075,6 @@ napi_value reduceMemoryUse(napi_env env, napi_callback_info info) {
     return getUndefined(env);
 }
 
-napi_value runLoopOnce(napi_env env, napi_callback_info) {
-    mbgl::util::RunLoop::Get()->runOnce();
-    return getUndefined(env);
-}
-
 napi_value setStyleUrl(napi_env env, napi_callback_info info) {
     std::size_t argc = 2;
     napi_value argv[2] = {nullptr, nullptr};
@@ -1173,27 +1136,6 @@ napi_value setStyleJson(napi_env env, napi_callback_info info) {
     applyDesiredStyle(*binding);
     logSurfaceDiagnostics(*binding, "setStyleJson");
 
-    return getUndefined(env);
-}
-
-napi_value logSurfaceState(napi_env env, napi_callback_info info) {
-    std::size_t argc = 2;
-    napi_value argv[2] = {nullptr, nullptr};
-    napi_value thisArg = nullptr;
-    if (napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr) != napi_ok || argc < 1 || argv[0] == nullptr) {
-        return throwError(env, "Expected a native XComponent binding handle");
-    }
-
-    ResolvedBindingCall resolved;
-    if (!resolveBindingCall(env, thisArg, argc, argv, resolved)) {
-        return getUndefined(env);
-    }
-
-    std::string label = "manual";
-    if (resolved.offset == 1 && argc >= 2 && argv[1] != nullptr) {
-        getString(env, argv[1], label);
-    }
-    logSurfaceDiagnostics(*resolved.binding, label.c_str());
     return getUndefined(env);
 }
 
@@ -2000,13 +1942,11 @@ napi_value Init(napi_env env, napi_value exports) {
         {"getStyleJson", nullptr, getStyleJson, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getStyleUrl", nullptr, getStyleUrl, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getSurfaceState", nullptr, getSurfaceState, nullptr, nullptr, nullptr, napi_default, nullptr},
-        {"logSurfaceState", nullptr, logSurfaceState, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"getTileCacheEnabled", nullptr, getTileCacheEnabled, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"jumpTo", nullptr, jumpTo, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"registerXComponentNode", nullptr, registerXComponentNode, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"reduceMemoryUse", nullptr, reduceMemoryUse, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"renderFrame", nullptr, renderFrame, nullptr, nullptr, nullptr, napi_default, nullptr},
-        {"runLoopOnce", nullptr, runLoopOnce, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"setCameraOptions", nullptr, setCameraOptions, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"setBounds", nullptr, setBounds, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"setClientOptions", nullptr, setClientOptions, nullptr, nullptr, nullptr, napi_default, nullptr},

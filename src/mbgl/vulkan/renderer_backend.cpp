@@ -507,7 +507,6 @@ void RendererBackend::initAllocator() {
 
 void RendererBackend::initDevice() {
     const auto& extensions = getDeviceExtensions();
-    const auto& layers = getLayers();
     const auto& surface = getDefaultRenderable().getResource<SurfaceRenderableResource>().getPlatformSurface().get();
 
     const auto& isPhysicalDeviceCompatible = [&](const vk::PhysicalDevice& candidate) -> bool {
@@ -600,9 +599,6 @@ void RendererBackend::initDevice() {
                           .setQueueCreateInfos(queueCreateInfos)
                           .setPEnabledExtensionNames(extensions)
                           .setPEnabledFeatures(&physicalDeviceFeatures);
-
-    // this is not needed for newer implementations
-    createInfo.setPEnabledLayerNames(layers);
 
     device = physicalDevice.createDeviceUnique(createInfo, nullptr, dispatcher);
 }

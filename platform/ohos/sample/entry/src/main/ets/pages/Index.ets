@@ -2,7 +2,7 @@ import { common } from '@kit.AbilityKit';
 import { display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import maplibreNative from 'libmaplibre_native_ohos.so';
-import type { CameraOptions, FrameRateRange, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
+import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
 
 const LOG_DOMAIN: number = 0x4d4c4e;
 const LOG_TAG: string = 'MapLibreSample';
@@ -30,20 +30,13 @@ interface AttributionItem {
 struct Index {
   @State private statusText: string = 'Waiting for XComponent';
   @State private statusDetail: string = 'No native binding';
-  @State private statusResources: string = 'No resource callbacks';
   @State private attributionItems: AttributionItem[] = [];
 
   private map?: XComponentContext;
-  private statusLogTimer: number = -1;
-  private statusLogTicks: number = 0;
-  private lastMetricsTimeMs: number = 0;
-  private lastRenderedFrameCount: number = 0;
-  private lastFrameCallbackCount: number = 0;
-  private renderFps: number = 0;
-  private tickFps: number = 0;
+  private statusTimer: number = -1;
 
   aboutToDisappear(): void {
-    this.stopStatusLogging();
+    this.stopStatusUpdates();
     if (this.map) {
       this.map.setRenderingEnabled(false);
       this.map.reduceMemoryUse();
@@ -55,14 +48,14 @@ struct Index {
   onPageShow(): void {
     if (this.map) {
       this.map.setRenderingEnabled(true);
-      this.map.runLoopOnce();
+      this.map.renderFrame();
       this.updateSurfaceState('Visible');
     }
-    this.startStatusLogging();
+    this.startStatusUpdates();
   }
 
   onPageHide(): void {
-    this.stopStatusLogging();
+    this.stopStatusUpdates();
     if (!this.map) {
       return;
     }
@@ -72,205 +65,78 @@ struct Index {
     this.updateSurfaceState('Hidden');
   }
 
-  private startStatusLogging(): void {
-    this.stopStatusLogging();
-    this.statusLogTicks = 0;
-    this.statusLogTimer = setInterval(() => {
+  private startStatusUpdates(): void {
+    this.stopStatusUpdates();
+    this.statusTimer = setInterval(() => {
       if (this.map) {
-        this.map.runLoopOnce();
+        this.map.renderFrame();
         this.updateSurfaceState('Live');
-      }
-      this.statusLogTicks++;
-      if (this.statusLogTicks % 6 === 0) {
-        this.logSurfaceState('tick');
       }
     }, 500);
   }
 
-  private stopStatusLogging(): void {
-    if (this.statusLogTimer >= 0) {
-      clearInterval(this.statusLogTimer);
-      this.statusLogTimer = -1;
+  private stopStatusUpdates(): void {
+    if (this.statusTimer >= 0) {
+      clearInterval(this.statusTimer);
+      this.statusTimer = -1;
     }
   }
 
-  private formatSurfaceStateLine(
-    state: SurfaceState,
-    camera: CameraOptions,
-    label: string,
-    pixelRatio: number,
-    frameRateRange?: FrameRateRange
-  ): string {
-    let line: string = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
-      ' pr=' + pixelRatio.toString() +
-      ' backend=' + this.backendLabel(state) +
-      ' fps=' + this.formatRate(this.renderFps) +
-      ' tick=' + this.formatRate(this.tickFps) +
-      ' work=' + this.formatNumber(state.lastFrameTimeMs, 1) +
-      '/' + this.formatNumber(state.lastRunLoopTimeMs, 1) +
-      '/' + this.formatNumber(state.lastRenderTimeMs, 1) + 'ms' +
-      ' window=' + (state.hasWindow ? 'yes' : 'no') +
-      ' map=' + (state.hasMap ? 'yes' : 'no') +
-      ' render=' + (state.needsRender ? 'pending' : 'idle') +
-      ' touch=' + state.touchEventCount.toString() +
-      '/' + state.gestureHandledCount.toString() +
-      ' visible=' + (state.surfaceVisible ? 'yes' : 'no') +
-      ' style=' + (state.styleLoaded ? 'loaded' : 'pending') +
-      ' loaded=' + (state.mapLoaded ? 'yes' : 'no') +
-      ' idle=' + (state.idle ? 'yes' : 'no') +
-      ' full=' + (state.fullyLoaded ? 'yes' : 'no') +
-      ' repaint=' + (state.lastFrameNeededRepaint ? 'yes' : 'no') +
-      ' complete=' + (state.lastFrameComplete ? 'yes' : 'no') +
-      ' glyphs=' + state.glyphsRequestedCount.toString() +
-      '/' + state.glyphsLoadedCount.toString() +
-      '/' + state.glyphsErrorCount.toString() +
-      ' sprites=' + state.spritesRequestedCount.toString() +
-      '/' + state.spritesLoadedCount.toString() +
-      '/' + state.spritesErrorCount.toString() +
-      ' tiles=' + state.tileActionCount.toString() +
-      ' src=' + state.sourceChangedCount.toString() +
-      ' missing=' + state.styleImageMissingCount.toString();
-    if (camera.latitude !== undefined && camera.longitude !== undefined) {
-      line = line + ' cam=' + camera.latitude.toString() + ',' + camera.longitude.toString();
-    } else if (camera.center !== undefined) {
-      line = line + ' cam=' + camera.center.latitude.toString() + ',' + camera.center.longitude.toString();
-    }
-    if (camera.zoom !== undefined) {
-      line = line + ' z=' + camera.zoom.toString();
-    }
-    if (camera.pitch !== undefined) {
-      line = line + ' p=' + camera.pitch.toString();
-    }
-    if (camera.bearing !== undefined) {
-      line = line + ' b=' + camera.bearing.toString();
-    }
-    if (state.lastSurfaceError !== undefined) {
-      line = line + ' surfaceErr=' + state.lastSurfaceError;
-    }
-    if (state.lastMapLoadError !== undefined) {
-      line = line + ' mapErr=' + state.lastMapLoadError;
-    }
-    if (state.lastRenderError !== undefined) {
-      line = line + ' renderErr=' + state.lastRenderError;
-    }
-    if (frameRateRange !== undefined) {
-      line = line + ' target=' + frameRateRange.min.toString() +
-        '/' + frameRateRange.expected.toString() +
-        '/' + frameRateRange.max.toString();
-    }
-    if (state.lastSpritesError !== undefined) {
-      line = line + ' spriteErr=' + state.lastSpritesError;
-    }
-    if (state.lastGlyphsError !== undefined) {
-      line = line + ' glyphErr=' + state.lastGlyphsError;
-    }
-    if (state.eglConfigDiagnostic !== undefined) {
-      line = line + ' egl=' + state.eglConfigDiagnostic;
-    }
-    if (state.framebufferDiagnostic !== undefined) {
-      line = line + ' fb=' + state.framebufferDiagnostic;
-    }
-    return line;
-  }
-
-  private logSurfaceState(label: string): void {
+  private updateSurfaceState(label: string): void {
     if (!this.map) {
-      hilog.info(LOG_DOMAIN, LOG_TAG, '%{public}s: no map binding', label);
+      this.statusText = 'No native binding';
+      this.statusDetail = 'Waiting for XComponent';
+      this.attributionItems = [];
       return;
     }
 
     const state: SurfaceState = this.map.getSurfaceState();
     const camera: CameraOptions = this.map.getCameraOptions();
-    const line: string = this.formatSurfaceStateLine(state, camera, label, this.map.getPixelRatio(), this.map.getFrameRateRange());
-    hilog.info(LOG_DOMAIN, LOG_TAG, '%{public}s', line);
-    this.map.logSurfaceState(label);
-  }
-
-  private updateSurfaceState(label: string): void {
-    if (!this.map) {
-      this.statusText = 'no binding';
-      this.statusDetail = 'No native binding';
-      this.statusResources = 'No resource callbacks';
-      this.attributionItems = [];
-      this.resetFrameMetrics();
-      return;
-    }
-
-    const state: SurfaceState = this.map.getSurfaceState();
-    this.updateFrameMetrics(state);
     const pixelRatio = this.map.getPixelRatio();
-    this.statusText = state.width.toString() + 'x' + state.height.toString() +
+
+    this.statusText = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
       ' pr=' + this.formatNumber(pixelRatio, 2) +
-      ' ' + this.backendLabel(state) +
-      ' fps=' + this.formatRate(this.renderFps) +
-      ' tick=' + this.formatRate(this.tickFps) +
+      ' ' + (state.backend ?? 'unknown') +
+      ' fps=' + this.formatNumber(state.renderedFrameRate, 1) +
+      ' tick=' + this.formatNumber(state.frameCallbackRate, 1) +
       ' render=' + (state.needsRender ? 'pending' : 'idle');
 
-    let detail: string = 'window=' + (state.hasWindow ? 'yes' : 'no') +
-      ' map=' + (state.hasMap ? 'yes' : 'no') +
-      ' visible=' + (state.surfaceVisible ? 'yes' : 'no') +
-      ' style=' + (state.styleLoaded ? 'loaded' : 'pending') +
-      ' loaded=' + (state.mapLoaded ? 'yes' : 'no') +
-      ' idle=' + (state.idle ? 'yes' : 'no') +
-      ' touch=' + state.touchEventCount.toString() +
-      '/' + state.gestureHandledCount.toString();
     if (state.lastSurfaceError !== undefined) {
-      detail = 'surface error: ' + state.lastSurfaceError;
+      this.statusDetail = 'surface error: ' + state.lastSurfaceError;
     } else if (state.lastMapLoadError !== undefined) {
-      detail = 'map error: ' + state.lastMapLoadError;
+      this.statusDetail = 'map error: ' + state.lastMapLoadError;
     } else if (state.lastRenderError !== undefined) {
-      detail = 'render error: ' + state.lastRenderError;
-    } else {
-      const frameRateRange = this.map.getFrameRateRange();
-      if (frameRateRange !== undefined) {
-        detail = detail + ' target=' + frameRateRange.min.toString() +
-          '/' + frameRateRange.expected.toString() +
-          '/' + frameRateRange.max.toString();
-      }
-    }
-    this.statusDetail = detail;
-    let resources: string = 'glyphs=' + state.glyphsRequestedCount.toString() +
-      '/' + state.glyphsLoadedCount.toString() +
-      '/' + state.glyphsErrorCount.toString() +
-      ' sprites=' + state.spritesRequestedCount.toString() +
-      '/' + state.spritesLoadedCount.toString() +
-      '/' + state.spritesErrorCount.toString() +
-      ' tiles=' + state.tileActionCount.toString() +
-      ' src=' + state.sourceChangedCount.toString() +
-      ' missing=' + state.styleImageMissingCount.toString();
-    if (state.lastGlyphsError !== undefined) {
-      resources = 'glyph error: ' + state.lastGlyphsError;
+      this.statusDetail = 'render error: ' + state.lastRenderError;
+    } else if (state.lastGlyphsError !== undefined) {
+      this.statusDetail = 'glyph error: ' + state.lastGlyphsError;
     } else if (state.lastSpritesError !== undefined) {
-      resources = 'sprite error: ' + state.lastSpritesError;
+      this.statusDetail = 'sprite error: ' + state.lastSpritesError;
     } else if (state.lastStyleImageMissing !== undefined) {
-      resources = 'missing image: ' + state.lastStyleImageMissing;
-    } else if (state.framebufferDiagnostic !== undefined) {
-      resources = state.framebufferDiagnostic;
-    } else if (state.eglConfigDiagnostic !== undefined) {
-      resources = state.eglConfigDiagnostic;
+      this.statusDetail = 'missing image: ' + state.lastStyleImageMissing;
+    } else {
+      this.statusDetail = 'window=' + (state.hasWindow ? 'yes' : 'no') +
+        ' map=' + (state.hasMap ? 'yes' : 'no') +
+        ' visible=' + (state.surfaceVisible ? 'yes' : 'no') +
+        ' style=' + (state.styleLoaded ? 'loaded' : 'pending') +
+        ' loaded=' + (state.mapLoaded ? 'yes' : 'no') +
+        ' full=' + (state.fullyLoaded ? 'yes' : 'no') +
+        this.cameraSummary(camera);
     }
-    this.statusResources = resources;
+
     this.attributionItems = this.parseAttributions(this.map.getStyleAttributions());
   }
 
-  private resetFrameMetrics(): void {
-    this.lastMetricsTimeMs = 0;
-    this.lastRenderedFrameCount = 0;
-    this.lastFrameCallbackCount = 0;
-    this.renderFps = 0;
-    this.tickFps = 0;
-  }
-
-  private updateFrameMetrics(state: SurfaceState): void {
-    const now = Date.now();
-    if (this.lastMetricsTimeMs > 0 && now > this.lastMetricsTimeMs) {
-      const elapsedSeconds = (now - this.lastMetricsTimeMs) / 1000;
-      this.renderFps = Math.max(0, (state.renderedFrameCount - this.lastRenderedFrameCount) / elapsedSeconds);
-      this.tickFps = Math.max(0, (state.frameCallbackCount - this.lastFrameCallbackCount) / elapsedSeconds);
+  private cameraSummary(camera: CameraOptions): string {
+    const latitude = camera.latitude ?? camera.center?.latitude;
+    const longitude = camera.longitude ?? camera.center?.longitude;
+    let summary = '';
+    if (latitude !== undefined && longitude !== undefined) {
+      summary = summary + ' cam=' + this.formatNumber(latitude, 4) + ',' + this.formatNumber(longitude, 4);
     }
-    this.lastMetricsTimeMs = now;
-    this.lastRenderedFrameCount = state.renderedFrameCount;
-    this.lastFrameCallbackCount = state.frameCallbackCount;
+    if (camera.zoom !== undefined) {
+      summary = summary + ' z=' + this.formatNumber(camera.zoom, 2);
+    }
+    return summary;
   }
 
   private formatNumber(value: number, digits: number): string {
@@ -280,23 +146,9 @@ struct Index {
     return value.toFixed(digits);
   }
 
-  private formatRate(value: number): string {
-    return this.formatNumber(value, 1);
-  }
-
-  private backendLabel(state: SurfaceState): string {
-    if (state.glesContextClientVersion > 0) {
-      return 'OpenGL ES ' + state.glesContextClientVersion.toString();
-    }
-    if (state.rendererDiagnostic !== undefined && state.rendererDiagnostic.indexOf('Vulkan') >= 0) {
-      return 'Vulkan';
-    }
-    return 'unknown';
-  }
-
   private decodeHtmlEntities(value: string): string {
     return value
-      .replace(/&copy;/g, '©')
+      .replace(/&copy;/g, '(c)')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -379,14 +231,10 @@ struct Index {
       return;
     }
 
-    this.statusText = name + ': loading…';
+    this.statusText = name + ': loading...';
     this.map.setStyleUrl(url);
-    setTimeout(() => {
-      if (this.map) {
-        this.map.runLoopOnce();
-        this.updateSurfaceState(name + ' style');
-      }
-    }, 500);
+    this.map.renderFrame();
+    this.updateSurfaceState(name);
   }
 
   private resourceOptions(): ResourceOptions {
@@ -442,43 +290,9 @@ struct Index {
       minPitch: 0,
       maxPitch: 60
     });
-    // Debug overlays (ParseStatus tile labels) are useful on desktop but render poorly
-    // on the current MatePad GLES path; leave them off for first device validation.
     map.setDebugOptions(0);
-    map.getBounds();
-    map.getCameraOptions();
-    map.getClientOptions();
-    map.setFreeCameraOptions(map.getFreeCameraOptions());
-    map.getDebugOptions();
-    map.getFrameRateRange();
-    map.getPixelRatio();
-    map.getRenderingEnabled();
-    map.getResourceOptions();
-    map.getStyleJson();
-    map.getStyleUrl();
     map.jumpTo(DEFAULT_CAMERA);
-    const surfaceState: SurfaceState = map.getSurfaceState();
-    const observedCoreCallbacks: boolean =
-      surfaceState.styleLoaded || surfaceState.mapLoaded || surfaceState.coreFrameCount > 0;
-    const observedResourceCallbacks: boolean =
-      surfaceState.glyphsRequestedCount > 0 ||
-        surfaceState.spritesRequestedCount > 0 ||
-        surfaceState.tileActionCount > 0 ||
-        surfaceState.styleImageMissingCount > 0;
-    const observedErrors: boolean =
-        surfaceState.lastSurfaceError !== undefined ||
-        surfaceState.lastMapLoadError !== undefined ||
-        surfaceState.lastRenderError !== undefined ||
-        surfaceState.lastGlyphsError !== undefined ||
-        surfaceState.lastSpritesError !== undefined;
-    if (surfaceState.needsRender &&
-      (surfaceState.renderedFrameCount === 0 ||
-        observedCoreCallbacks ||
-        observedResourceCallbacks ||
-        observedErrors)) {
-      map.runLoopOnce();
-    }
-    map.getTileCacheEnabled();
+    map.renderFrame();
     this.useRemoteStyle(DEFAULT_STYLE_NAME, DEFAULT_STYLE_URL);
   }
 
@@ -505,7 +319,6 @@ struct Index {
             }
             this.statusText = 'XComponent destroyed';
             this.statusDetail = 'No native binding';
-            this.statusResources = 'No resource callbacks';
             this.attributionItems = [];
           })
           .width('100%')
@@ -517,6 +330,14 @@ struct Index {
           .maxLines(1)
           .textShadow({ radius: 2, color: '#ffffff', offsetX: 0, offsetY: 0 })
           .margin({ left: 8, top: 8 })
+          .hitTestBehavior(HitTestMode.Transparent)
+
+        Text(this.statusDetail)
+          .fontSize(10)
+          .fontColor('#111827')
+          .maxLines(1)
+          .textShadow({ radius: 2, color: '#ffffff', offsetX: 0, offsetY: 0 })
+          .margin({ left: 8, top: 24, right: 8 })
           .hitTestBehavior(HitTestMode.Transparent)
 
         Stack({ alignContent: Alignment.BottomEnd }) {
@@ -567,7 +388,6 @@ struct Index {
             this.useRemoteStyle('Liberty', LIBERTY_STYLE_URL);
           })
           .height(44)
-
       }
       .width('100%')
       .padding({ left: 12, right: 12, top: 8, bottom: 8 })

@@ -6,7 +6,7 @@
     },
     {
       "name": "module_desc",
-      "value": "MapLibre Native OpenHarmony sample"
+      "value": "MapLibre Native HarmonyOS sample"
     },
     {
       "name": "EntryAbility_desc",
@@ -18,4 +18,3 @@
     }
   ]
 }
-

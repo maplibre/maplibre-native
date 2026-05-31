@@ -2,7 +2,7 @@
   "name": "libmaplibre_native_ohos.so",
   "types": "./index.d.ts",
   "version": "0.1.0",
-  "description": "MapLibre Native OpenHarmony NAPI module.",
+  "description": "MapLibre Native HarmonyOS NAPI module.",
   "license": "BSD-2-Clause",
   "author": "MapLibre contributors"
 }

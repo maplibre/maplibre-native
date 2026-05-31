@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "version": "1.0.0",
-  "description": "MapLibre Native OpenHarmony sample entry module.",
+  "description": "MapLibre Native HarmonyOS sample entry module.",
   "license": "BSD-2-Clause",
   "author": "MapLibre contributors",
   "main": "",
@@ -10,4 +10,3 @@
     "libmaplibre_native_ohos.so": "file:../../arkts/types/libmaplibre_native_ohos"
   }
 }
-

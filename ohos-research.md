@@ -81,11 +81,11 @@ Native CMake presets:
 export OHOS_SDK_NATIVE=/path/to/openharmony/native
 export HMOS_SDK_NATIVE=/path/to/hms/native
 
-pixi run cmake --preset ohos-opengl-native
-pixi run cmake --build --preset ohos-opengl-native
+pixi run cmake --preset harmonyos-opengl
+pixi run cmake --build --preset harmonyos-opengl
 
-pixi run cmake --preset harmonyos-opengl-native
-pixi run cmake --build --preset harmonyos-opengl-native
+pixi run cmake --preset harmonyos-vulkan
+pixi run cmake --build --preset harmonyos-vulkan
 ```
 
 Sample app:
@@ -230,18 +230,15 @@ Known recurring build noise:
 
 OpenHarmony/public SDK:
 
-- `ohos-opengl-core`
-- `ohos-opengl`
-- `ohos-opengl-link-smoke`
-- `ohos-opengl-native`
+- Removed for now; this branch has only been validated on HarmonyOS. Public
+  OpenHarmony presets can be restored after validation against that SDK.
 
 HarmonyOS/HMS SDK:
 
 - `harmonyos-opengl`
-- `harmonyos-opengl-link-smoke`
-- `harmonyos-opengl-native`
+- `harmonyos-vulkan`
 
-The `harmonyos-*` presets set `MLN_OHOS_WITH_HMS_RCP=ON`, so they use
+The `harmonyos-*` presets build the ArkTS/NAPI native module and use
 `librcp_c.so` instead of `libnet_http.so`.
 
 The native module target is controlled by:
@@ -280,7 +277,8 @@ This came from the SDK path, not from exhausting the local callback slots.
 
 - Header/library: `RemoteCommunicationKit/rcp.h`, `librcp_c.so`.
 - Better API fit because callbacks carry user context.
-- Used by the committed sample through `MLN_OHOS_WITH_HMS_RCP=ON`.
+- Used by the committed HarmonyOS build path; the non-RCP HTTP path was removed
+  until public OpenHarmony validation is restored.
 - Initial remote-style load crashed in the RCP worker thread:
 
 ```text
@@ -658,12 +656,20 @@ Important notes:
 12. Vulkan backend bring-up:
    - Added an OHOS Vulkan window backend using MapLibre's shared Vulkan
      renderer and `VK_OHOS_surface` for `OHNativeWindow` presentation.
-   - Added `ohos-vulkan-native` and `harmonyos-vulkan-native` presets, plus a
-     sample renderer switch. The sample now defaults to Vulkan and can be
-     configured back to OpenGL with `MLN_OHOS_SAMPLE_RENDERER=OpenGL`.
-   - The SDK has OHOS Vulkan headers and `libvulkan.so`; this repo's vendored
-     Vulkan headers do not yet define `VK_OHOS_surface`, so the backend carries
-     the minimal OHOS surface declarations locally.
+   - Added the `harmonyos-vulkan` preset and a sample renderer switch. The
+     sample now defaults to Vulkan and can be configured back to OpenGL with
+     `MLN_OHOS_SAMPLE_RENDERER=OpenGL`.
+   - Updated the vendored Khronos Vulkan-Headers submodule to the latest
+     `v1.4.x` patch so MapLibre's shared Vulkan C++ wrapper headers include the
+     official `VK_OHOS_surface` declarations. The HarmonyOS SDK has C Vulkan
+     headers and `libvulkan.so`, but not Vulkan-Hpp; using the vendored Khronos
+     C/C++ header set keeps `vulkan.hpp`, `vulkan_core.h`, and
+     `vulkan_ohos.h` coherent.
+   - The Vulkan-Hpp update moved dynamic loader and object-destroy helper types
+     under its configured dispatcher/detail types, so MapLibre now aliases
+     `VULKAN_HPP_DISPATCH_LOADER_DYNAMIC_TYPE` and the matching destroyer at the
+     Vulkan backend boundary instead of spelling old top-level Vulkan-Hpp names
+     throughout platform code.
    - DevEco emulator runtime logs show `Vulkan loader api=1.3.275
      instanceExtensions=8 VK_KHR_surface=yes VK_OHOS_surface=yes`, followed by
      `vk::createInstanceUnique: ErrorIncompatibleDriver`. The emulator exposes
@@ -701,11 +707,11 @@ Recent useful checks:
 ```sh
 OHOS_SDK_NATIVE=/Users/sargunv/Downloads/command-line-tools/sdk/default/openharmony/native \
 HMOS_SDK_NATIVE=/Users/sargunv/Downloads/command-line-tools/sdk/default/hms/native \
-pixi run cmake --preset harmonyos-opengl-native
+pixi run cmake --preset harmonyos-opengl
 
 OHOS_SDK_NATIVE=/Users/sargunv/Downloads/command-line-tools/sdk/default/openharmony/native \
 HMOS_SDK_NATIVE=/Users/sargunv/Downloads/command-line-tools/sdk/default/hms/native \
-pixi run cmake --build --preset harmonyos-opengl-native
+pixi run cmake --build --preset harmonyos-opengl
 
 cd platform/ohos/sample
 /Users/sargunv/Downloads/command-line-tools/bin/hvigorw assembleApp --no-daemon
@@ -726,7 +732,7 @@ Observed:
   yellow GeoJSON polygon after the same stencil bypass.
 - `git diff --check` passed after the latest code/doc changes before this
   condensation.
-- `harmonyos-vulkan-native` builds `libmaplibre_native_ohos.so`.
+- `harmonyos-vulkan` builds `libmaplibre_native_ohos.so`.
 - The Vulkan sample HAP builds, signs, installs, and launches on the DevEco
   emulator, but fails before map creation with `VK_ERROR_INCOMPATIBLE_DRIVER`
   from `vkCreateInstance`.

@@ -1,18 +1,14 @@
 if(NOT CMAKE_SYSTEM_NAME STREQUAL OHOS)
-    message(FATAL_ERROR "OpenHarmony platform support requires the OHOS CMake toolchain")
+    message(FATAL_ERROR "HarmonyOS platform support requires the OHOS/HarmonyOS CMake toolchain")
 endif()
 
-option(MLN_OHOS_WITH_HMS_RCP "Use HarmonyOS HMS RemoteCommunicationKit for HTTP requests" OFF)
-option(MLN_OHOS_BUILD_LINK_SMOKE "Build an OHOS shared-library link smoke target" OFF)
 option(MLN_OHOS_BUILD_NATIVE_MODULE "Build the experimental OHOS NAPI/XComponent native module" OFF)
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(MLN_OHOS_WITH_HMS_RCP)
-    find_library(MLN_OHOS_RCP_C_LIBRARY NAMES rcp_c REQUIRED)
-endif()
+find_library(MLN_OHOS_RCP_C_LIBRARY NAMES rcp_c REQUIRED)
 
 set_source_files_properties(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
@@ -63,7 +59,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/ohos/src/$<IF:$<BOOL:${MLN_OHOS_WITH_HMS_RCP}>,http_file_source_hms_rcp.cpp,http_file_source.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/ohos/src/http_file_source_hms_rcp.cpp
         ${PROJECT_SOURCE_DIR}/platform/ohos/src/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/ohos/src/logging_hilog.cpp
 )
@@ -111,10 +107,9 @@ target_link_libraries(
         mbgl-vendor-icu
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
-        $<$<NOT:$<BOOL:${MLN_OHOS_WITH_HMS_RCP}>>:net_http>
         pixelmap
         hilog_ndk.z
-        $<$<BOOL:${MLN_OHOS_WITH_HMS_RCP}>:${MLN_OHOS_RCP_C_LIBRARY}>
+        ${MLN_OHOS_RCP_C_LIBRARY}
         uv
         z
 )
@@ -128,16 +123,17 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
-function(mln_ohos_link_core_whole_archive target)
-    add_dependencies(${target} mbgl-core)
+# The OHOS toolchain is not listed as a built-in CMake platform for this
+# feature, so teach CMake how to whole-archive static targets for the native
+# module link.
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE "-Wl,--whole-archive <LIBRARY> -Wl,--no-whole-archive")
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED True)
 
+function(mln_ohos_link_core_whole_archive target)
     target_link_libraries(
         ${target}
         PRIVATE
-            -Wl,--whole-archive
-            $<TARGET_FILE:mbgl-core>
-            -Wl,--no-whole-archive
-            mbgl-core
+            $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-core>
     )
 
     target_link_options(
@@ -146,16 +142,6 @@ function(mln_ohos_link_core_whole_archive target)
             LINKER:--no-undefined
     )
 endfunction()
-
-if(MLN_OHOS_BUILD_LINK_SMOKE)
-    add_library(
-        mbgl-ohos-link-smoke
-        SHARED
-            ${PROJECT_SOURCE_DIR}/platform/ohos/src/link_smoke.cpp
-    )
-
-    mln_ohos_link_core_whole_archive(mbgl-ohos-link-smoke)
-endif()
 
 if(MLN_OHOS_BUILD_NATIVE_MODULE)
     if(MLN_WITH_VULKAN)

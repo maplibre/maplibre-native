@@ -25,7 +25,5 @@ else()
     message(FATAL_ERROR "Unsupported MLN_OHOS_SAMPLE_RENDERER: ${MLN_OHOS_SAMPLE_RENDERER}")
 endif()
 set(MLN_OHOS_BUILD_NATIVE_MODULE ON CACHE BOOL "" FORCE)
-# net_http returns persistent OH_HTTP_OUT_OF_MEMORY on retail HarmonyOS; use HMS RCP.
-set(MLN_OHOS_WITH_HMS_RCP ON CACHE BOOL "" FORCE)
 
 add_subdirectory("${MAPLIBRE_NATIVE_ROOT}" "${CMAKE_BINARY_DIR}/maplibre-native")

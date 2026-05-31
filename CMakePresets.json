@@ -250,17 +250,29 @@
       }
     },
     {
-      "name": "ohos",
+      "name": "harmonyos",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-ohos",
+      "binaryDir": "${sourceDir}/build-harmonyos",
       "condition": {
-        "type": "notEquals",
-        "lhs": "$env{OHOS_SDK_NATIVE}",
-        "rhs": ""
+        "type": "allOf",
+        "conditions": [
+          {
+            "type": "notEquals",
+            "lhs": "$env{HMOS_SDK_NATIVE}",
+            "rhs": ""
+          },
+          {
+            "type": "notEquals",
+            "lhs": "$env{OHOS_SDK_NATIVE}",
+            "rhs": ""
+          }
+        ]
       },
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{OHOS_SDK_NATIVE}/build/cmake/ohos.toolchain.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "$env{HMOS_SDK_NATIVE}/build/cmake/hmos.toolchain.cmake",
+        "HMOS_SDK_NATIVE": "$env{HMOS_SDK_NATIVE}",
+        "OHOS_SDK_NATIVE": "$env{OHOS_SDK_NATIVE}",
         "OHOS_ARCH": "arm64-v8a",
         "OHOS_STL": "c++_shared",
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -270,112 +282,20 @@
       }
     },
     {
-      "name": "ohos-opengl",
-      "inherits": "ohos",
-      "displayName": "OpenHarmony OpenGL",
-      "description": "OpenHarmony build using GLES/EGL"
-    },
-    {
-      "name": "ohos-opengl-link-smoke",
-      "inherits": "ohos",
-      "binaryDir": "${sourceDir}/build-ohos-link-smoke",
-      "displayName": "OpenHarmony OpenGL Link Smoke",
-      "description": "OpenHarmony GLES/EGL build with a final shared-library link smoke target",
-      "cacheVariables": {
-        "MLN_OHOS_BUILD_LINK_SMOKE": "ON"
-      }
-    },
-    {
-      "name": "ohos-opengl-native",
-      "inherits": "ohos",
-      "binaryDir": "${sourceDir}/build-ohos-native",
-      "displayName": "OpenHarmony Native Module",
-      "description": "OpenHarmony GLES/EGL build with the experimental NAPI/XComponent native module",
-      "cacheVariables": {
-        "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
-      }
-    },
-    {
-      "name": "ohos-vulkan-native",
-      "inherits": "ohos",
-      "binaryDir": "${sourceDir}/build-ohos-vulkan-native",
-      "displayName": "OpenHarmony Vulkan Native Module",
-      "description": "OpenHarmony Vulkan build with the experimental NAPI/XComponent native module",
-      "cacheVariables": {
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_WITH_EGL": "OFF",
-        "MLN_WITH_VULKAN": "ON",
-        "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
-      }
-    },
-    {
-      "name": "ohos-opengl-core",
-      "inherits": "ohos",
-      "binaryDir": "${sourceDir}/build-ohos-core",
-      "displayName": "OpenHarmony OpenGL Core",
-      "description": "OpenHarmony core-only build using GLES/EGL",
-      "cacheVariables": {
-        "MLN_WITH_CORE_ONLY": "ON"
-      }
-    },
-    {
-      "name": "harmonyos",
-      "hidden": true,
-      "inherits": "ohos",
-      "binaryDir": "${sourceDir}/build-harmonyos",
-      "condition": {
-        "type": "allOf",
-        "conditions": [
-          {
-            "type": "notEquals",
-            "lhs": "$env{OHOS_SDK_NATIVE}",
-            "rhs": ""
-          },
-          {
-            "type": "notEquals",
-            "lhs": "$env{HMOS_SDK_NATIVE}",
-            "rhs": ""
-          }
-        ]
-      },
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{HMOS_SDK_NATIVE}/build/cmake/hmos.toolchain.cmake",
-        "OHOS_SDK_NATIVE": "$env{OHOS_SDK_NATIVE}",
-        "HMOS_SDK_NATIVE": "$env{HMOS_SDK_NATIVE}",
-        "MLN_OHOS_WITH_HMS_RCP": "ON"
-      }
-    },
-    {
       "name": "harmonyos-opengl",
       "inherits": "harmonyos",
+      "binaryDir": "${sourceDir}/build-harmonyos-opengl",
       "displayName": "HarmonyOS OpenGL",
-      "description": "HarmonyOS build using GLES/EGL and HMS RemoteCommunicationKit HTTP"
-    },
-    {
-      "name": "harmonyos-opengl-link-smoke",
-      "inherits": "harmonyos",
-      "binaryDir": "${sourceDir}/build-harmonyos-link-smoke",
-      "displayName": "HarmonyOS OpenGL Link Smoke",
-      "description": "HarmonyOS GLES/EGL and HMS RCP build with a final shared-library link smoke target",
-      "cacheVariables": {
-        "MLN_OHOS_BUILD_LINK_SMOKE": "ON"
-      }
-    },
-    {
-      "name": "harmonyos-opengl-native",
-      "inherits": "harmonyos",
-      "binaryDir": "${sourceDir}/build-harmonyos-native",
-      "displayName": "HarmonyOS Native Module",
       "description": "HarmonyOS GLES/EGL and HMS RCP build with the experimental NAPI/XComponent native module",
       "cacheVariables": {
         "MLN_OHOS_BUILD_NATIVE_MODULE": "ON"
       }
     },
     {
-      "name": "harmonyos-vulkan-native",
+      "name": "harmonyos-vulkan",
       "inherits": "harmonyos",
-      "binaryDir": "${sourceDir}/build-harmonyos-vulkan-native",
-      "displayName": "HarmonyOS Vulkan Native Module",
+      "binaryDir": "${sourceDir}/build-harmonyos-vulkan",
+      "displayName": "HarmonyOS Vulkan",
       "description": "HarmonyOS Vulkan and HMS RCP build with the experimental NAPI/XComponent native module",
       "cacheVariables": {
         "MLN_WITH_OPENGL": "OFF",
@@ -513,15 +433,6 @@
       "targets": ["mbgl-core"]
     },
     {
-      "name": "ohos-build",
-      "hidden": true,
-      "condition": {
-        "type": "notEquals",
-        "lhs": "$env{OHOS_SDK_NATIVE}",
-        "rhs": ""
-      }
-    },
-    {
       "name": "harmonyos-build",
       "hidden": true,
       "condition": {
@@ -529,69 +440,27 @@
         "conditions": [
           {
             "type": "notEquals",
-            "lhs": "$env{OHOS_SDK_NATIVE}",
+            "lhs": "$env{HMOS_SDK_NATIVE}",
             "rhs": ""
           },
           {
             "type": "notEquals",
-            "lhs": "$env{HMOS_SDK_NATIVE}",
+            "lhs": "$env{OHOS_SDK_NATIVE}",
             "rhs": ""
           }
         ]
       }
     },
     {
-      "name": "ohos-opengl-core",
-      "inherits": "ohos-build",
-      "configurePreset": "ohos-opengl-core",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "ohos-opengl",
-      "inherits": "ohos-build",
-      "configurePreset": "ohos-opengl",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "ohos-opengl-link-smoke",
-      "inherits": "ohos-build",
-      "configurePreset": "ohos-opengl-link-smoke",
-      "targets": ["mbgl-ohos-link-smoke"]
-    },
-    {
-      "name": "ohos-opengl-native",
-      "inherits": "ohos-build",
-      "configurePreset": "ohos-opengl-native",
-      "targets": ["maplibre-native-ohos"]
-    },
-    {
-      "name": "ohos-vulkan-native",
-      "inherits": "ohos-build",
-      "configurePreset": "ohos-vulkan-native",
-      "targets": ["maplibre-native-ohos"]
-    },
-    {
       "name": "harmonyos-opengl",
       "inherits": "harmonyos-build",
       "configurePreset": "harmonyos-opengl",
-      "targets": ["mbgl-core"]
-    },
-    {
-      "name": "harmonyos-opengl-link-smoke",
-      "inherits": "harmonyos-build",
-      "configurePreset": "harmonyos-opengl-link-smoke",
-      "targets": ["mbgl-ohos-link-smoke"]
-    },
-    {
-      "name": "harmonyos-opengl-native",
-      "inherits": "harmonyos-build",
-      "configurePreset": "harmonyos-opengl-native",
       "targets": ["maplibre-native-ohos"]
     },
     {
-      "name": "harmonyos-vulkan-native",
+      "name": "harmonyos-vulkan",
       "inherits": "harmonyos-build",
-      "configurePreset": "harmonyos-vulkan-native",
+      "configurePreset": "harmonyos-vulkan",
       "targets": ["maplibre-native-ohos"]
     },
     {
