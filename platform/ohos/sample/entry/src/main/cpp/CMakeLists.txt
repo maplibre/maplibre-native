@@ -37,7 +37,7 @@ else()
 endif()
 
 add_library(
-    maplibre-native-ohos
+    maplibre_native_ohos
     SHARED
         ${MLN_OHOS_WINDOW_BACKEND_SOURCE}
         ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/map_view.cpp
@@ -48,34 +48,34 @@ add_library(
 )
 
 set_target_properties(
-    maplibre-native-ohos
+    maplibre_native_ohos
     PROPERTIES
         OUTPUT_NAME maplibre_native_ohos
 )
 
 target_compile_definitions(
-    maplibre-native-ohos
+    maplibre_native_ohos
     PRIVATE
         OHOS_PLATFORM
 )
 
 target_compile_options(
-    maplibre-native-ohos
+    maplibre_native_ohos
     PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
 )
 
 target_include_directories(
-    maplibre-native-ohos
+    maplibre_native_ohos
     PRIVATE
         ${MAPLIBRE_NATIVE_ROOT}/src
         ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src
 )
 
-mbgl_enable_ohos_libcxx_experimental(maplibre-native-ohos)
+mbgl_enable_ohos_libcxx_experimental(maplibre_native_ohos)
 
 target_link_libraries(
-    maplibre-native-ohos
+    maplibre_native_ohos
     PRIVATE
         mbgl-compiler-options
         ace_napi.z
@@ -87,4 +87,4 @@ target_link_libraries(
         $<$<BOOL:${MLN_WITH_VULKAN}>:vulkan>
 )
 
-mln_ohos_link_core_whole_archive(maplibre-native-ohos)
+mln_ohos_link_core_whole_archive(maplibre_native_ohos)

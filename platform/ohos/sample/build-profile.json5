@@ -6,13 +6,19 @@
         "name": "default",
         "compatibleSdkVersion": "6.0.1(21)",
         "targetSdkVersion": "6.0.1(21)",
-        "runtimeOS": "HarmonyOS"
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "nativeCompiler": "BiSheng"
+        }
       },
       {
         "name": "opengl",
         "compatibleSdkVersion": "6.0.1(21)",
         "targetSdkVersion": "6.0.1(21)",
-        "runtimeOS": "HarmonyOS"
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "nativeCompiler": "BiSheng"
+        }
       }
     ]
   },

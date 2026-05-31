@@ -2,27 +2,19 @@ import { common } from '@kit.AbilityKit';
 import { display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
-
-const LOG_DOMAIN: number = 0x4d4c4e;
-const LOG_TAG: string = 'MapLibreSample';
-const DEMO_STYLE_URL: string = 'https://demotiles.maplibre.org/style.json';
-const BRIGHT_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/bright';
-const LIBERTY_STYLE_URL: string = 'https://tiles.openfreemap.org/styles/liberty';
-const DEFAULT_STYLE_NAME: string = 'Bright';
-const DEFAULT_STYLE_URL: string = BRIGHT_STYLE_URL;
-const DEFAULT_CAMERA: CameraOptions = {
-  longitude: 106.5750,
-  latitude: 29.5570,
-  zoom: 12.0,
-  bearing: 0,
-  pitch: 0
-};
-
-interface AttributionItem {
-  key: string;
-  label: string;
-  url?: string;
-}
+import type { AttributionItem } from '../map/Attribution';
+import { createMapStatus } from '../map/MapStatus';
+import {
+  CLIENT_NAME,
+  CLIENT_VERSION,
+  DEFAULT_BOUNDS,
+  DEFAULT_CAMERA,
+  DEFAULT_STYLE,
+  LOG_DOMAIN,
+  LOG_TAG,
+  STYLE_OPTIONS,
+  type StyleOption
+} from '../map/SampleConfig';
 
 @Entry
 @Component
@@ -36,12 +28,7 @@ struct Index {
 
   aboutToDisappear(): void {
     this.stopStatusUpdates();
-    if (this.map) {
-      this.map.setRenderingEnabled(false);
-      this.map.reduceMemoryUse();
-      this.map.destroy();
-      this.map = undefined;
-    }
+    this.destroyMap();
   }
 
   onPageShow(): void {
@@ -83,132 +70,34 @@ struct Index {
 
   private updateSurfaceState(label: string): void {
     if (!this.map) {
-      this.statusText = 'No native binding';
-      this.statusDetail = 'Waiting for XComponent';
-      this.attributionItems = [];
+      this.clearStatus();
       return;
     }
 
     const state: SurfaceState = this.map.getSurfaceState();
     const camera: CameraOptions = this.map.getCameraOptions();
     const pixelRatio = this.map.getPixelRatio();
-
-    this.statusText = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
-      ' pr=' + this.formatNumber(pixelRatio, 2) +
-      ' ' + (state.backend ?? 'unknown') +
-      ' fps=' + this.formatNumber(state.renderedFrameRate, 1) +
-      ' tick=' + this.formatNumber(state.frameCallbackRate, 1) +
-      ' render=' + (state.needsRender ? 'pending' : 'idle');
-
-    if (state.lastSurfaceError !== undefined) {
-      this.statusDetail = 'surface error: ' + state.lastSurfaceError;
-    } else if (state.lastMapLoadError !== undefined) {
-      this.statusDetail = 'map error: ' + state.lastMapLoadError;
-    } else if (state.lastRenderError !== undefined) {
-      this.statusDetail = 'render error: ' + state.lastRenderError;
-    } else if (state.lastGlyphsError !== undefined) {
-      this.statusDetail = 'glyph error: ' + state.lastGlyphsError;
-    } else if (state.lastSpritesError !== undefined) {
-      this.statusDetail = 'sprite error: ' + state.lastSpritesError;
-    } else if (state.lastStyleImageMissing !== undefined) {
-      this.statusDetail = 'missing image: ' + state.lastStyleImageMissing;
-    } else {
-      this.statusDetail = 'window=' + (state.hasWindow ? 'yes' : 'no') +
-        ' map=' + (state.hasMap ? 'yes' : 'no') +
-        ' visible=' + (state.surfaceVisible ? 'yes' : 'no') +
-        ' style=' + (state.styleLoaded ? 'loaded' : 'pending') +
-        ' loaded=' + (state.mapLoaded ? 'yes' : 'no') +
-        ' full=' + (state.fullyLoaded ? 'yes' : 'no') +
-        this.cameraSummary(camera);
-    }
-
-    this.attributionItems = this.parseAttributions(this.map.getStyleAttributions());
+    const status = createMapStatus(label, state, camera, pixelRatio, this.map.getStyleAttributions());
+    this.statusText = status.text;
+    this.statusDetail = status.detail;
+    this.attributionItems = status.attributions;
   }
 
-  private cameraSummary(camera: CameraOptions): string {
-    const latitude = camera.latitude ?? camera.center?.latitude;
-    const longitude = camera.longitude ?? camera.center?.longitude;
-    let summary = '';
-    if (latitude !== undefined && longitude !== undefined) {
-      summary = summary + ' cam=' + this.formatNumber(latitude, 4) + ',' + this.formatNumber(longitude, 4);
-    }
-    if (camera.zoom !== undefined) {
-      summary = summary + ' z=' + this.formatNumber(camera.zoom, 2);
-    }
-    return summary;
+  private clearStatus(): void {
+    this.statusText = 'No native binding';
+    this.statusDetail = 'Waiting for XComponent';
+    this.attributionItems = [];
   }
 
-  private formatNumber(value: number, digits: number): string {
-    if (!Number.isFinite(value)) {
-      return 'n/a';
-    }
-    return value.toFixed(digits);
-  }
-
-  private decodeHtmlEntities(value: string): string {
-    return value
-      .replace(/&copy;/g, '(c)')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  private stripAttributionHtml(value: string): string {
-    return this.decodeHtmlEntities(value.replace(/<[^>]*>/g, ''));
-  }
-
-  private appendAttributionItem(items: AttributionItem[], label: string, url?: string): void {
-    const trimmed = label.replace(/\s+/g, ' ').trim();
-    if (trimmed.length === 0) {
+  private destroyMap(): void {
+    if (!this.map) {
       return;
     }
 
-    items.push({
-      key: items.length.toString() + ':' + trimmed + ':' + (url ?? ''),
-      label: trimmed,
-      url: url
-    });
-  }
-
-  private appendAttributionHtml(items: AttributionItem[], value: string): void {
-    const anchorPattern: RegExp = /<a[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/g;
-    let cursor = 0;
-    let match: RegExpExecArray | null = anchorPattern.exec(value);
-    while (match !== null) {
-      if (match.index > cursor) {
-        this.appendAttributionItem(items, this.stripAttributionHtml(value.slice(cursor, match.index)));
-      }
-
-      this.appendAttributionItem(items, this.stripAttributionHtml(match[2]), this.decodeHtmlEntities(match[1]));
-      cursor = match.index + match[0].length;
-      match = anchorPattern.exec(value);
-    }
-
-    if (cursor < value.length) {
-      this.appendAttributionItem(items, this.stripAttributionHtml(value.slice(cursor)));
-    }
-  }
-
-  private parseAttributions(values: string[]): AttributionItem[] {
-    const items: AttributionItem[] = [];
-    const seen: string[] = [];
-    values.forEach((value: string) => {
-      const trimmed = value.trim();
-      if (trimmed.length === 0 || seen.indexOf(trimmed) >= 0) {
-        return;
-      }
-
-      if (items.length > 0) {
-        this.appendAttributionItem(items, '|');
-      }
-      seen.push(trimmed);
-      this.appendAttributionHtml(items, trimmed);
-    });
-    return items;
+    this.map.setRenderingEnabled(false);
+    this.map.reduceMemoryUse();
+    this.map.destroy();
+    this.map = undefined;
   }
 
   private openAttributionUrl(url: string): void {
@@ -225,15 +114,15 @@ struct Index {
     });
   }
 
-  private useRemoteStyle(name: string, url: string): void {
+  private useStyle(style: StyleOption): void {
     if (!this.map) {
       return;
     }
 
-    this.statusText = name + ': loading...';
-    this.map.setStyleUrl(url);
+    this.statusText = style.name + ': loading...';
+    this.map.setStyleUrl(style.url);
     this.map.renderFrame();
-    this.updateSurfaceState(name);
+    this.updateSurfaceState(style.name);
   }
 
   private resourceOptions(): ResourceOptions {
@@ -275,23 +164,17 @@ struct Index {
 
   private configureMap(map: XComponentContext): void {
     this.map = map;
-    map.setClientOptions('MapLibreOhosSample', '0.1.0');
+    map.setClientOptions(CLIENT_NAME, CLIENT_VERSION);
     map.setResourceOptions(this.resourceOptions());
     map.setTileCacheEnabled(true);
     const refreshRate = this.displayRefreshRate();
     map.setFrameRateRange({ min: Math.min(30, refreshRate), max: refreshRate, expected: refreshRate });
     map.setPixelRatio(this.displayPixelRatio());
     map.setRenderingEnabled(true);
-    map.setBounds({
-      bounds: { west: -180, south: -85, east: 180, north: 85 },
-      minZoom: 0,
-      maxZoom: 22,
-      minPitch: 0,
-      maxPitch: 60
-    });
+    map.setBounds(DEFAULT_BOUNDS);
     map.jumpTo(DEFAULT_CAMERA);
     map.renderFrame();
-    this.useRemoteStyle(DEFAULT_STYLE_NAME, DEFAULT_STYLE_URL);
+    this.useStyle(DEFAULT_STYLE);
   }
 
   build() {
@@ -311,10 +194,7 @@ struct Index {
             this.configureMap(context as XComponentContext);
           })
           .onDestroy(() => {
-            if (this.map) {
-              this.map.destroy();
-              this.map = undefined;
-            }
+            this.destroyMap();
             this.statusText = 'XComponent destroyed';
             this.statusDetail = 'No native binding';
             this.attributionItems = [];
@@ -369,23 +249,13 @@ struct Index {
       .layoutWeight(1)
 
       Row() {
-        Button('Demo')
-          .onClick(() => {
-            this.useRemoteStyle('Demo', DEMO_STYLE_URL);
-          })
-          .height(44)
-
-        Button('Bright')
-          .onClick(() => {
-            this.useRemoteStyle('Bright', BRIGHT_STYLE_URL);
-          })
-          .height(44)
-
-        Button('Liberty')
-          .onClick(() => {
-            this.useRemoteStyle('Liberty', LIBERTY_STYLE_URL);
-          })
-          .height(44)
+        ForEach(STYLE_OPTIONS, (style: StyleOption) => {
+          Button(style.name)
+            .onClick(() => {
+              this.useStyle(style);
+            })
+            .height(44)
+        }, (style: StyleOption) => style.name)
       }
       .width('100%')
       .padding({ left: 12, right: 12, top: 8, bottom: 8 })
