@@ -40,9 +40,9 @@ add_library(
     maplibre_native_ohos
     SHARED
         ${MLN_OHOS_WINDOW_BACKEND_SOURCE}
-        ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/map_view.cpp
         ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/renderer_frontend.cpp
         gesture_handler.cpp
+        map_view.cpp
         native_module.cpp
         native_values.cpp
 )
