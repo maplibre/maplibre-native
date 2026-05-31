@@ -116,6 +116,7 @@ public:
             rawSurface,
             vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(
                 backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
+        setSurfaceTransformPollingInterval(30);
     }
 
     void bind() override {}
