@@ -24,14 +24,19 @@ Confirmed on the MatePad:
 
 - Legacy declarative `XComponent` using
   `libraryname: 'maplibre_native_ohos'` works.
-- EGL/GLES rendering works into the XComponent surface.
-- Local inline styles render:
-  - **Empty**: black framebuffer with no layers.
-  - **Diag**: red background layer.
-  - **Local**: blue background plus yellow GeoJSON polygon fill.
-- Remote `https://demotiles.maplibre.org/style.json` works with the HarmonyOS
-  HMS RCP HTTP backend after initializing RCP request/session configuration
-  with non-null empty strings.
+- Vulkan rendering through `VK_OHOS_surface` works into the XComponent surface
+  and is the desired/default renderer for the sample.
+- EGL/GLES rendering also works as a fallback path.
+- Remote styles work with the HarmonyOS HMS RCP HTTP backend after fixing RCP
+  request/session lifetime and configuration initialization:
+  - **Demo**: `https://demotiles.maplibre.org/style.json`
+  - **Bright**: `https://tiles.openfreemap.org/styles/bright`
+  - **Liberty**: `https://tiles.openfreemap.org/styles/liberty`
+- Bright is the current default style. It exercises remote glyphs, sprites,
+  vector tiles, raster source metadata, density scaling, frame pacing, and
+  style-sourced attribution rendering.
+- Style switching, background/foreground, resize, and the current gesture set
+  have been smoke-tested on device.
 
 Confirmed on DevEco emulator:
 
@@ -43,8 +48,8 @@ Confirmed on DevEco emulator:
 - Existing signed HAP installed successfully.
 - Legacy XComponent path launches and creates a map surface.
 - Remote style loads without the previous RCP crash.
-- Background and symbol layers render.
-- A fill/line rendering gap was reproduced and narrowed down:
+- Background and symbol layers render on the OpenGL sample renderer.
+- A historical OpenGL fill/line rendering gap was reproduced and narrowed down:
   - The emulator window framebuffer reports complete status but no usable depth
     or stencil bits:
     `rgba=0/0/0/0 depth=0 stencil=0 status=0x8cd5 renderer=Mali-G77`.
@@ -52,16 +57,19 @@ Confirmed on DevEco emulator:
     geometry appear.
   - Disabling GL stencil clipping for OHOS makes both **Remote** country
     fills/boundaries and the **Local** GeoJSON polygon render on the emulator.
+- DevEco Studio 6.0.2's macOS emulator exposes the Vulkan loader and
+  `VK_OHOS_surface`, but fails `vkCreateInstance` with
+  `VK_ERROR_INCOMPATIBLE_DRIVER`. That matches Huawei's published note that
+  Vulkan emulator support starts in DevEco Studio 6.1.0 Beta2.
 
 Not yet fully validated:
 
 - OpenHarmony public `net_http` backend at runtime.
-- Remote glyph/sprite/tile counters from a clean captured run.
-- ImageKit decode on real remote sprite/image traffic.
-- Gesture behavior on a real map beyond initial sample interaction checks.
-- Whether the OHOS stencil-clipping bypass has unacceptable tile-edge artifacts
-  during pan/zoom/rotate or on real devices that provide a usable stencil
-  attachment.
+- DevEco Studio 6.1.0 Beta2-or-newer Vulkan emulator runtime.
+- Release/profile performance on the MatePad. Current debug-device correctness
+  is good, but heavy styles can still feel rough.
+- OpenGL fallback behavior and whether the OHOS stencil-clipping bypass should
+  remain unconditional, be gated, or be documented as fallback/emulator-specific.
 - ArkUI `NodeContainer` / `registerXComponentNode(node)` runtime path on the
   MatePad.
 
@@ -83,9 +91,14 @@ pixi run cmake --build --preset harmonyos-opengl-native
 Sample app:
 
 ```sh
-cd platform/ohos/sample
-/path/to/command-line-tools/bin/hvigorw assembleApp --no-daemon
+mise x -- mise run ohos-sample-build
+mise x -- mise run ohos-sample-sign
+mise x -- mise run ohos-sample-install
+mise x -- mise run ohos-sample-launch
 ```
+
+The local `mise.local.toml` tasks default to the emulator target. Override
+`OHOS_TARGET` for the tablet, for example `OHOS_TARGET=59GYD25808200129`.
 
 Manual debug signing is documented in
 `platform/ohos/sample/sign/README.md`. The short version is:
@@ -128,18 +141,22 @@ where that matches the OHOS SDK:
 - OHOS-specific pieces:
   - XComponent/NAPI surface integration
   - EGL window backend for `OHNativeWindow *`
+  - Vulkan window backend using `VK_OHOS_surface`
   - image decoding through ImageSourceNative/PixelmapNative
   - HTTP backends using platform SDK APIs
 
-The main native ownership chain is:
+The main device renderer path is:
 
 ```text
 ArkUI XComponent
   -> OHNativeWindow
-  -> EGLWindowBackend
+  -> VulkanWindowBackend
   -> RendererFrontend
   -> mbgl::Map
 ```
+
+The EGL/GLES backend remains available as an OpenGL fallback and emulator
+investigation path.
 
 Important files:
 
@@ -147,6 +164,8 @@ Important files:
   module target, link smoke target.
 - `platform/ohos/src/egl_window_backend.*`: EGL/GLES context and surface
   management for `OHNativeWindow`.
+- `platform/ohos/src/vulkan_window_backend.*`: Vulkan surface and swapchain
+  integration for `OHNativeWindow`.
 - `platform/ohos/src/renderer_frontend.*`: thin `RendererFrontend` bridge.
 - `platform/ohos/src/map_view.*`: owns the backend, frontend, and `mbgl::Map`;
   stores desired state across surface recreation.
@@ -160,6 +179,8 @@ Important files:
 - `platform/ohos/src/http_file_source_hms_rcp.cpp`: HarmonyOS HMS
   RemoteCommunicationKit backend.
 - `platform/ohos/src/image.cpp`: ImageKit image decoding.
+- `platform/ohos/src/logging_hilog.cpp`: native MapLibre logging routed through
+  hilog.
 
 ## Toolchain Findings
 
@@ -294,11 +315,11 @@ Result:
 
 - Remote map loading works on the MatePad with the HMS RCP backend.
 
-Later Liberty stress finding:
+Historical Liberty stress finding:
 
-- The OpenFreeMap Liberty style can intermittently show an obviously wrong tile
-  at some zooms, then crash.
-- Latest captured crash:
+- The OpenFreeMap Liberty style previously showed an obviously wrong tile at
+  some zooms, then crashed.
+- Captured crash:
 
 ```text
 2026-05-30 16:40:13.821
@@ -321,6 +342,13 @@ Thread: OnlineFileSourc
   vector tile failures and `OH_ImageSourceNative_CreatePixelmap` failures for
   `ne2_shaded` PNG raster tiles.
 - Crash artifacts were saved locally in `/tmp/maplibre-ohos-crash/`.
+- The wrong-tile artifact disappeared after uninstalling the app, which cleared
+  the app sandbox and MapLibre on-disk cache. The likely cause was an earlier
+  RCP callback user-data slot reuse bug that allowed a late response to be
+  associated with a newer request and then cached under the newer resource key.
+- The repeatable crash was fixed by keeping RCP session configuration storage
+  alive for the session lifetime and keeping callback/request string storage
+  alive for the request lifetime.
 
 ## Rendering And XComponent
 
@@ -438,10 +466,12 @@ Gestures implemented in the bridge:
 - one-finger pan
 - two-finger pinch
 - two-finger rotation
-- double-tap zoom
-- single-finger fling
+- two-finger vertical shove for pitch
+- double-tap zoom using animated camera movement
+- single-finger fling, including tuned behavior while pitched
 
-These are enough for smoke testing, but not a polished production gesture
+These are enough for the sample and have been smoke-tested on the MatePad. They
+are still sample-level gesture handling, not a full production SDK gesture
 system.
 
 ## Image Decoding
@@ -463,7 +493,10 @@ Hardening already added:
 - Reject short `OH_PixelmapNative_ReadPixels(...)` reads.
 - Include ImageKit error names and decoded pixel metadata in failure messages.
 
-Still needs runtime validation with real remote sprites/images.
+Bright and Liberty have exercised real remote glyphs, sprites, vector tiles, and
+raster source metadata on the MatePad. Remaining image work is specific failure
+investigation, such as Liberty's `ne2_shaded` PNG raster tiles returning
+`IMAGE_UNSUPPORTED_OPERATION`, not basic remote image validation.
 
 ## Logging
 
@@ -487,37 +520,37 @@ itself still logs ArkTS-side state with tag `MapLibreSample`.
 The committed sample app is a small HarmonyOS/OpenHarmony project under
 `platform/ohos/sample`.
 
-The sample now behaves more like the desktop GLFW demo: it loads the Demo
-remote style on startup, keeps rendering enabled while visible, lets the
-XComponent frame callback drive `MapView::renderFrame()`, and refreshes the
-compact status readout while the map is running.
+The sample now behaves more like the desktop GLFW demo: it loads the Bright
+remote style on startup at a Chongqing camera, keeps rendering enabled while
+visible, lets the XComponent frame callback drive `MapView::renderFrame()`, and
+refreshes a compact status readout while the map is running.
 
 Current buttons:
 
-- **Fit**
 - **Demo**
 - **Bright**
 - **Liberty**
-- **Local**
 
 Current style probes:
 
-- **Local**: inline GeoJSON polygon with blue background and yellow fill.
 - **Demo**: `https://demotiles.maplibre.org/style.json`.
 - **Bright**: `https://tiles.openfreemap.org/styles/bright`.
 - **Liberty**: `https://tiles.openfreemap.org/styles/liberty`.
 
 The sample shows:
 
-- surface/window/map status
-- frame counters
-- GLES context version
-- surface lifecycle counters
-- style/load/idle flags
-- glyph/sprite/tile/resource counters
-- last error strings
-- EGL config and default framebuffer diagnostics, including depth/stencil bits
-  while the emulator rendering issue is under investigation
+- overlaid style-sourced attribution anchored bottom-right
+- compact overlaid status anchored top-left
+- surface size
+- density
+- measured FPS
+- XComponent tick rate
+- renderer identity, either Vulkan diagnostics or OpenGL ES version
+- render pending/idle state
+
+The attribution overlay is populated from loaded style source attribution
+strings through `getStyleAttributions()`. Link taps have been verified on
+device.
 
 The sample depends on the local type package through:
 
@@ -646,6 +679,21 @@ Important notes:
      `VK_ERROR_INCOMPATIBLE_DRIVER` result is consistent with the published
      support matrix even though the loader reports `VK_OHOS_surface`.
 
+13. Sample polish after Vulkan validation:
+   - Fixed density scaling and set the sample frame-rate range from the display
+     refresh rate instead of hard-coding 60 Hz.
+   - Changed render scheduling so XComponent frame callbacks drive rendering;
+     this made FPS telemetry reflect real rendered frames and improved gesture
+     feel.
+   - Removed the inline **Local** style and the **Fit** button. The sample now
+     exposes **Demo**, **Bright**, and **Liberty** style buttons.
+   - Added shove pitch, animated double-tap zoom, and tuned tilted fling
+     behavior.
+   - Changed the default style to Bright with a Chongqing default camera.
+   - Added a style-sourced attribution overlay anchored bottom-right and a
+     compact telemetry overlay anchored top-left. Attribution link taps were
+     verified on device.
+
 ## Verification Snapshot
 
 Recent useful checks:
@@ -685,14 +733,16 @@ Observed:
 - The same signed Vulkan HAP installs and runs on HarmonyOS MatePad target
   `59GYD25808200129`; logs report `Vulkan device name="Maleoon 920" api=1.3.275`
   and screenshots confirm both remote and local styles render correctly.
-- Tablet gestures work: pan, pinch zoom, rotate, double tap, and fling all
-  behave acceptably in the sample.
+- Tablet gestures work: pan, pinch zoom, rotate, shove pitch, double tap, and
+  fling all behave acceptably in the sample.
 - Tablet stress checks with pan/zoom/rotate and higher zooms did not reveal
   correctness issues. Frame rate is rough enough to revisit later, probably in
   release builds and/or after reviewing the current run-loop pump.
 - Tablet background/foreground, resize, and repeated style switching work.
 - Bright loads on the MatePad Vulkan path and exercises OpenFreeMap glyphs,
   sprites, vector tiles, and raster source metadata without style load failure.
+- Style-sourced attribution renders over the map, and attribution link taps open
+  correctly on device.
 - Liberty loads on the MatePad Vulkan path but exposes remaining data/decoder
   gaps: `invalid tag exception` for some `openmaptiles` vector tiles and
   `IMAGE_UNSUPPORTED_OPERATION` for some `ne2_shaded` PNG raster tiles.
@@ -723,21 +773,18 @@ High value:
 - Investigate Liberty style failures if Liberty needs to be a fully green
   sample style. Bright already exercises remote glyphs, sprites, vector tiles,
   and raster source metadata successfully.
-- Investigate frame pacing/performance later. Current Vulkan correctness looks
-  good on the MatePad, but frame rate is rough in the debug sample.
-- Decide whether the first upstreamable version should keep the unconditional
-  OHOS stencil bypass, or invest in plumbing framebuffer stencil capability into
-  render-time state so devices with usable stencil attachments can keep normal
-  clipping.
+- Validate release/profile performance on the MatePad. Current Vulkan
+  correctness looks good, but frame rate is still rough with heavier styles in
+  the debug sample.
+- Decide the OpenGL fallback policy: keep the unconditional OHOS stencil bypass,
+  gate it, or document it as fallback/emulator-specific behavior.
 - Public OpenHarmony and `net_http` validation are deferred until an Oniro or
   similar OpenHarmony SDK/device setup is available.
 
 Before upstreaming:
 
-- Add a concise maintainer-facing design note explaining why the port starts
-  from Linux/default sources and only specializes HTTP, image decoding, and
-  XComponent/EGL.
-- Decide how much of the experimental ArkTS/NAPI API belongs in the first PR.
+- Keep the first PR scoped to the platform implementation and demo app. Broader
+  public language bindings should be split out.
 - Re-test with the updated DevEco Studio SDK/emulator and record exact versions.
 - Find or configure a DevEco emulator image that provides a compatible Vulkan
   runtime. The tested emulator advertises the OHOS surface extension but fails
