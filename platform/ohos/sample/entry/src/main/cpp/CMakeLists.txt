@@ -31,20 +31,20 @@ endif()
 add_subdirectory("${MAPLIBRE_NATIVE_ROOT}" "${CMAKE_BINARY_DIR}/maplibre-native")
 
 if(MLN_WITH_VULKAN)
-    set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/vulkan_window_backend.cpp)
+    set(MLN_OHOS_WINDOW_BACKEND_SOURCE vulkan_window_backend.cpp)
 else()
-    set(MLN_OHOS_WINDOW_BACKEND_SOURCE ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/egl_window_backend.cpp)
+    set(MLN_OHOS_WINDOW_BACKEND_SOURCE egl_window_backend.cpp)
 endif()
 
 add_library(
     maplibre_native_ohos
     SHARED
         ${MLN_OHOS_WINDOW_BACKEND_SOURCE}
-        ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src/renderer_frontend.cpp
         gesture_handler.cpp
         map_view.cpp
         native_module.cpp
         native_values.cpp
+        renderer_frontend.cpp
 )
 
 set_target_properties(
@@ -57,6 +57,7 @@ target_compile_definitions(
     maplibre_native_ohos
     PRIVATE
         OHOS_PLATFORM
+        MLN_RENDER_BACKEND_VULKAN=$<BOOL:${MLN_WITH_VULKAN}>
 )
 
 target_compile_options(
@@ -70,7 +71,6 @@ target_include_directories(
     maplibre_native_ohos
     PRIVATE
         ${MAPLIBRE_NATIVE_ROOT}/src
-        ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src
 )
 
 target_link_libraries(

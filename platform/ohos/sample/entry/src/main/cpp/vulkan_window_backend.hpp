@@ -24,7 +24,7 @@ public:
     gfx::RendererBackend& getRendererBackend() override { return *this; }
     gfx::Renderable& getDefaultRenderable() override { return *this; }
 
-    OHNativeWindow* getNativeWindow() const override { return window; }
+    OHNativeWindow* getNativeWindow() const { return window; }
     void setSize(Size) override;
     const std::string& getRendererDiagnostic() const override { return rendererDiagnostic; }
 

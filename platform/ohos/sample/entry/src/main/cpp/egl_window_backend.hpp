@@ -4,7 +4,6 @@
 
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
-#include <mbgl/util/image.hpp>
 #include <mbgl/util/size.hpp>
 
 #include <EGL/egl.h>
@@ -28,11 +27,9 @@ public:
     gfx::RendererBackend& getRendererBackend() override { return *this; }
     gfx::Renderable& getDefaultRenderable() override { return *this; }
 
-    OHNativeWindow* getNativeWindow() const override { return window; }
     std::int32_t getGlesContextClientVersion() const override { return contextClientVersion; }
     void setSize(Size) override;
     void swap();
-    PremultipliedImage readStillImage();
 
 protected:
     void activate() override;
@@ -49,7 +46,6 @@ private:
     EGLSurface eglSurface = EGL_NO_SURFACE;
     OHNativeWindow* window = nullptr;
     std::int32_t contextClientVersion = 0;
-    std::string eglConfigDiagnostic;
     std::string framebufferDiagnostic;
 };
 

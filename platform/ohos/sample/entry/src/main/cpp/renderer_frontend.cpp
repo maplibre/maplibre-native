@@ -72,18 +72,10 @@ void RendererFrontend::setTileCacheEnabled(bool enable) {
     }
 }
 
-bool RendererFrontend::getTileCacheEnabled() const {
-    return renderer ? renderer->getTileCacheEnabled() : true;
-}
-
 void RendererFrontend::reduceMemoryUse() {
     if (renderer) {
         renderer->reduceMemoryUse();
     }
-}
-
-Renderer* RendererFrontend::getRenderer() {
-    return renderer.get();
 }
 
 } // namespace ohos

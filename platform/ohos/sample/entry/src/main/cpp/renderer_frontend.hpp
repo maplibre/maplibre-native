@@ -29,9 +29,7 @@ public:
     bool renderFrame();
     bool hasPendingRender() const;
     void setTileCacheEnabled(bool);
-    bool getTileCacheEnabled() const;
     void reduceMemoryUse();
-    Renderer* getRenderer();
 
 private:
     gfx::RendererBackend& backend;

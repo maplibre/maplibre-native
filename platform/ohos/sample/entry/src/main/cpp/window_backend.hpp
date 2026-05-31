@@ -3,8 +3,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/util/size.hpp>
 
-#include <native_window/external_window.h>
-
 #include <cstdint>
 #include <string>
 
@@ -16,7 +14,6 @@ public:
     virtual ~WindowBackend() = default;
 
     virtual gfx::RendererBackend& getRendererBackend() = 0;
-    virtual OHNativeWindow* getNativeWindow() const = 0;
     virtual void setSize(Size) = 0;
 
     virtual std::int32_t getGlesContextClientVersion() const { return 0; }

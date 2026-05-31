@@ -10,6 +10,8 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/size.hpp>
 
+#include <native_window/external_window.h>
+
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -59,7 +61,6 @@ public:
     float getPixelRatio() const { return pixelRatio; }
     MapDebugOptions getDebugOptions() const { return debugOptions; }
     BoundOptions getBounds() const;
-    bool getTileCacheEnabled() const { return tileCacheEnabled; }
     CameraOptions getCameraOptions() const;
     FreeCameraOptions getFreeCameraOptions() const;
     CameraOptions cameraForBounds(const CameraBoundsOptions&) const;

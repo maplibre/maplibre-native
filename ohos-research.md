@@ -128,10 +128,9 @@ where that matches the OHOS SDK:
   - headless frontend pieces
   - GL function loading
 - OHOS-specific pieces:
-  - EGL window backend for `OHNativeWindow *`
-  - Vulkan window backend using `VK_OHOS_surface`
   - image decoding through ImageSourceNative/PixelmapNative
   - HTTP backends using platform SDK APIs
+  - sample-scoped EGL/Vulkan `OHNativeWindow` presentation
   - sample-scoped XComponent/NAPI surface integration
 
 The main device renderer path is:
@@ -153,16 +152,17 @@ Important files:
 
 - `platform/ohos/ohos.cmake`: platform source selection, SDK libraries, native
   libraries, and whole-archive helper used by the sample native module.
-- `platform/ohos/src/egl_window_backend.*`: EGL/GLES context and surface
-  management for `OHNativeWindow`.
-- `platform/ohos/src/vulkan_window_backend.*`: Vulkan surface and swapchain
-  integration for `OHNativeWindow`.
-- `platform/ohos/src/renderer_frontend.*`: thin `RendererFrontend` bridge.
 - `platform/ohos/src/http_file_source_hms_rcp.cpp`: HarmonyOS HMS
   RemoteCommunicationKit backend.
 - `platform/ohos/src/image.cpp`: ImageKit image decoding.
 - `platform/ohos/src/logging_hilog.cpp`: native MapLibre logging routed through
   hilog.
+- `platform/ohos/sample/entry/src/main/cpp/egl_window_backend.*`: sample
+  EGL/GLES context and surface management for `OHNativeWindow`.
+- `platform/ohos/sample/entry/src/main/cpp/vulkan_window_backend.*`: sample
+  Vulkan surface and swapchain integration for `OHNativeWindow`.
+- `platform/ohos/sample/entry/src/main/cpp/renderer_frontend.*`: sample
+  `RendererFrontend` bridge for explicit frame pumping.
 - `platform/ohos/sample/entry/src/main/cpp/map_view.*`: sample embedding
   adapter that owns the backend, frontend, and `mbgl::Map`; stores desired
   state across XComponent surface recreation.
@@ -768,9 +768,9 @@ Important notes:
      compact telemetry overlay anchored top-left. Attribution link taps were
      verified on device.
    - Moved `MapView`, `CameraBoundsOptions`, gesture handling, NAPI bindings,
-     and the ArkTS type package into the sample. The reusable platform layer is
-     now limited to the OHOS window backends, renderer frontend, networking,
-     image decoding, logging, and CMake integration.
+     the OHNativeWindow render backends, renderer frontend, and ArkTS type
+     package into the sample. The reusable platform layer is now limited to
+     networking, image decoding, logging, and CMake integration.
    - Renamed the native CMake target to `maplibre_native_ohos` so it matches
      `NAPI_MODULE(maplibre_native_ohos, Init)` and the generated
      `libmaplibre_native_ohos.so` output name.

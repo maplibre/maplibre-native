@@ -296,8 +296,7 @@ EGLWindowBackend::EGLWindowBackend(OHNativeWindow* window_, Size size_)
                 displayConfig->display, window, windowConfig, eglContext, eglSurface, contextClientVersion)) {
             throw std::runtime_error(eglErrorMessage("eglCreateWindowSurface"));
         }
-        eglConfigDiagnostic = formatEGLConfig(displayConfig->display, windowConfig, contextClientVersion);
-        logDiagnostic(eglConfigDiagnostic);
+        logDiagnostic(formatEGLConfig(displayConfig->display, windowConfig, contextClientVersion));
     } catch (...) {
         if (eglSurface != EGL_NO_SURFACE) {
             eglDestroySurface(displayConfig->display, eglSurface);
@@ -355,12 +354,6 @@ void EGLWindowBackend::swap() {
     if (!eglSwapBuffers(displayConfig->display, eglSurface)) {
         Log::Warning(Event::OpenGL, eglErrorMessage("eglSwapBuffers"));
     }
-}
-
-PremultipliedImage EGLWindowBackend::readStillImage() {
-    MLN_TRACE_FUNC();
-
-    return readFramebuffer(size);
 }
 
 void EGLWindowBackend::activate() {
