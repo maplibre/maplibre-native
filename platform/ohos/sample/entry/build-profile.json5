@@ -3,7 +3,7 @@
   "buildOption": {
     "externalNativeOptions": {
       "path": "./src/main/cpp/CMakeLists.txt",
-      "arguments": "-DOHOS_STL=c++_shared",
+      "arguments": "-DOHOS_STL=c++_shared -DMLN_OHOS_SAMPLE_RENDERER=Vulkan",
       "abiFilters": [
         "arm64-v8a",
         "x86_64"
@@ -15,7 +15,23 @@
     {
       "name": "default",
       "runtimeOS": "HarmonyOS"
+    },
+    {
+      "name": "opengl",
+      "runtimeOS": "HarmonyOS",
+      "config": {
+        "buildOption": {
+          "externalNativeOptions": {
+            "path": "./src/main/cpp/CMakeLists.txt",
+            "arguments": "-DOHOS_STL=c++_shared -DMLN_OHOS_SAMPLE_RENDERER=OpenGL",
+            "abiFilters": [
+              "arm64-v8a",
+              "x86_64"
+            ],
+            "cppFlags": ""
+          }
+        }
+      }
     }
   ]
 }
-

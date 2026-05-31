@@ -9,6 +9,7 @@ Build it with the DevEco command-line tools:
 cd platform/ohos/sample
 (cd entry && /path/to/command-line-tools/bin/ohpm install)
 /path/to/command-line-tools/bin/hvigorw assembleApp --no-daemon
+/path/to/command-line-tools/bin/hvigorw assembleApp -p product=opengl --no-daemon
 ```
 
 Install it once `hdc list targets` shows a device or emulator:
@@ -29,10 +30,10 @@ ArkTS, consumes the local `libmaplibre_native_ohos.so` type package, declares
 `ohos.permission.INTERNET`, and packages `libc++_shared.so` with the native
 module.
 
-The sample defaults to the Vulkan renderer. Configure with
-`-DMLN_OHOS_SAMPLE_RENDERER=OpenGL` to build the EGL/GLES backend instead. The UI
-starts with `https://tiles.openfreemap.org/styles/bright`, displays the backend
-label and frame rates, shows style attribution, and includes remote style buttons:
+The default product uses the Vulkan renderer. Use `-p product=opengl` to build
+the EGL/GLES product instead. The UI starts with
+`https://tiles.openfreemap.org/styles/bright`, displays the backend label and
+frame rates, shows style attribution, and includes remote style buttons:
 
 - Demo: `https://demotiles.maplibre.org/style.json`
 - Bright: `https://tiles.openfreemap.org/styles/bright`

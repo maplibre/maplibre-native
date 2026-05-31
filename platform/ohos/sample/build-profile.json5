@@ -7,6 +7,12 @@
         "compatibleSdkVersion": "6.0.1(21)",
         "targetSdkVersion": "6.0.1(21)",
         "runtimeOS": "HarmonyOS"
+      },
+      {
+        "name": "opengl",
+        "compatibleSdkVersion": "6.0.1(21)",
+        "targetSdkVersion": "6.0.1(21)",
+        "runtimeOS": "HarmonyOS"
       }
     ]
   },
@@ -20,9 +26,14 @@
           "applyToProducts": [
             "default"
           ]
+        },
+        {
+          "name": "opengl",
+          "applyToProducts": [
+            "opengl"
+          ]
         }
       ]
     }
   ]
 }
-
