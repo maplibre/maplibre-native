@@ -107,7 +107,7 @@ public:
         context.setCullFaceMode(cullFaceMode);
 
         const uint32_t key = gl::AttributeKey<AttributeList>::compute(attributeBindings);
-        if (failedInstances.count(key)) {
+        if (failedInstances.contains(key)) {
             return false;
         }
 
