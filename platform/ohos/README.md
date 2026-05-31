@@ -3,17 +3,11 @@
 This platform support is experimental. It targets the HarmonyOS native SDK, not
 yet OpenHarmony.
 
-Public OpenHarmony platform documentation is maintained in the
-[OpenHarmony docs repository](https://github.com/openharmony/docs). This branch
-has not yet been validated against the public OpenHarmony SDK.
+Public OpenHarmony platform documentation is available in the
+[OpenHarmony docs repository](https://github.com/openharmony/docs).
 
-The `platform/ohos/sample` app is the easiest way to build and run the current
-NAPI/XComponent integration in DevEco Studio.
-
-## Sample App
-
-Open `platform/ohos/sample` in DevEco Studio. See
-`platform/ohos/sample/README.md` for local signing and renderer selection.
+See [the sample readme](./sample/README.md) to build and run the NAPI/XComponent
+integration example in DevEco Studio.
 
 ## CMake Build
 
