@@ -37,22 +37,13 @@ project("MapLibre Native" LANGUAGES CXX C)
 
 if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
     # The OHOS SDK toolchain injects --gcc-toolchain, which clang reports as unused.
+    # OHOS SDK 6.0.1 ships libc++ ranges algorithms behind -fexperimental-library.
     add_compile_options(
         $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
         $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
+        $<$<COMPILE_LANGUAGE:CXX>:-fexperimental-library>
     )
 endif()
-
-function(mbgl_enable_ohos_libcxx_experimental target)
-    if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
-        # OHOS SDK 6.0.1 ships libc++ ranges algorithms behind this clang switch.
-        target_compile_options(
-            ${target}
-            PRIVATE
-                $<$<COMPILE_LANGUAGE:CXX>:-fexperimental-library>
-        )
-    endif()
-endfunction()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
@@ -150,8 +141,6 @@ if(MLN_WITH_QT)
 else()
     add_library(mbgl-core STATIC)
 endif()
-
-mbgl_enable_ohos_libcxx_experimental(mbgl-core)
 
 # Override visibility for mbgl-core when building amalgamation
 if(MLN_CREATE_AMALGAMATION)

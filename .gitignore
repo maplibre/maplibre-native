@@ -35,7 +35,6 @@ compile_commands.json
 /platform/android/key.json
 /platform/android/site
 node_modules
-/.hvigor
 .cxx
 .env
 vendor/dawn/

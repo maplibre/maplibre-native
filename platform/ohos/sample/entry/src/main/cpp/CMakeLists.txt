@@ -63,6 +63,7 @@ target_compile_options(
     maplibre_native_ohos
     PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
+        $<$<COMPILE_LANGUAGE:CXX>:-fexperimental-library>
 )
 
 target_include_directories(
@@ -71,8 +72,6 @@ target_include_directories(
         ${MAPLIBRE_NATIVE_ROOT}/src
         ${MAPLIBRE_NATIVE_ROOT}/platform/ohos/src
 )
-
-mbgl_enable_ohos_libcxx_experimental(maplibre_native_ohos)
 
 target_link_libraries(
     maplibre_native_ohos
