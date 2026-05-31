@@ -79,12 +79,26 @@ void MapView::clearSurface() {
 }
 
 bool MapView::renderFrame() {
+    bool attemptedRender = false;
+    bool rendered = false;
+    auto renderIfNeeded = [&] {
+        if (frontend && frontend->hasPendingRender()) {
+            attemptedRender = true;
+            if (frontend->renderFrame()) {
+                ++renderedFrameCount;
+                rendered = true;
+            }
+        }
+    };
+
+    // Keep interaction frames from waiting behind a burst of resource callbacks.
+    renderIfNeeded();
     runLoopOnce();
-    if (frontend && frontend->renderFrame()) {
-        ++renderedFrameCount;
-        return true;
+    if (!attemptedRender) {
+        renderIfNeeded();
     }
-    return false;
+
+    return rendered;
 }
 
 void MapView::runLoopOnce() {
@@ -103,8 +117,6 @@ void MapView::setStyleURL(const std::string& url) {
     }
 
     resetRuntimeState();
-    desiredCameraBounds.reset();
-    desiredCamera.reset();
     map->getStyle().loadURL(url);
 }
 
@@ -208,6 +220,23 @@ void MapView::scaleBy(double scale, double anchorX, double anchorY) {
     }
 
     map->scaleBy(scale, logicalCoordinateForFramebufferCoordinate(anchorX, anchorY, pixelRatio));
+    desiredCameraBounds.reset();
+    desiredFreeCamera.reset();
+    desiredCamera = map->getCameraOptions();
+}
+
+void MapView::flyBy(double scale, double anchorX, double anchorY, AnimationOptions animationOptions) {
+    if (!map || !std::isfinite(scale) || scale <= 0.0 || !std::isfinite(anchorX) || !std::isfinite(anchorY)) {
+        return;
+    }
+
+    const auto currentCamera = map->getCameraOptions();
+    const double currentZoom = currentCamera.zoom.value_or(0.0);
+    const double nextZoom = currentZoom + std::log2(scale);
+    map->flyTo(CameraOptions()
+                   .withZoom(nextZoom)
+                   .withAnchor(logicalCoordinateForFramebufferCoordinate(anchorX, anchorY, pixelRatio)),
+               std::move(animationOptions));
     desiredCameraBounds.reset();
     desiredFreeCamera.reset();
     desiredCamera = map->getCameraOptions();
@@ -476,7 +505,7 @@ void MapView::onDidFinishLoadingStyle() {
     }
     try {
         const auto defaultCamera = map->getStyle().getDefaultCamera();
-        if (defaultCamera.center && defaultCamera.zoom) {
+        if (!desiredCamera && !desiredCameraBounds && !desiredFreeCamera && defaultCamera.center && defaultCamera.zoom) {
             desiredCameraBounds.reset();
             desiredCamera = defaultCamera;
             map->jumpTo(defaultCamera);

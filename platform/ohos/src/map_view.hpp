@@ -43,6 +43,7 @@ public:
     void moveBy(double x, double y, AnimationOptions = {});
     void pitchBy(double deltaPitch);
     void scaleBy(double scale, double anchorX, double anchorY);
+    void flyBy(double scale, double anchorX, double anchorY, AnimationOptions = {});
     void rotateBy(double previousAngle, double currentAngle, double anchorX, double anchorY);
     void setDebugOptions(MapDebugOptions);
     void setBounds(BoundOptions);

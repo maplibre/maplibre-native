@@ -39,6 +39,7 @@ constexpr auto MaxDoubleTapInterval = std::chrono::milliseconds(300);
 constexpr double MaxTapMovement = 24.0;
 constexpr double MaxDoubleTapDistance = 48.0;
 constexpr double DoubleTapZoomScale = 2.0;
+constexpr auto DoubleTapAnimationDuration = std::chrono::milliseconds(300);
 constexpr auto FlingAnimationDuration = std::chrono::milliseconds(450);
 constexpr double FlingDistanceSeconds = 0.25;
 constexpr double MinFlingVelocity = 250.0;
@@ -215,7 +216,7 @@ bool handleTouchAction(GestureState& state,
         if (doubleTap) {
             state.lastTapActive = false;
             if (mapView) {
-                mapView->scaleBy(DoubleTapZoomScale, tap.x, tap.y);
+                mapView->flyBy(DoubleTapZoomScale, tap.x, tap.y, mbgl::AnimationOptions{DoubleTapAnimationDuration});
                 needsRender = true;
             }
             return true;

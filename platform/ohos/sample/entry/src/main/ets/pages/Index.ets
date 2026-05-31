@@ -244,7 +244,6 @@ struct Index {
     }
 
     this.map.setStyleJson(LOCAL_VECTOR_STYLE_JSON);
-    this.map.jumpTo({ center: { longitude: 0, latitude: 0 }, zoom: 1, bearing: 0, pitch: 0 });
     this.updateSurfaceState('Local vector');
   }
 
@@ -255,7 +254,6 @@ struct Index {
 
     this.statusText = name + ': loading…';
     this.map.setStyleUrl(url);
-    this.map.jumpTo({ center: { longitude: 0, latitude: 20 }, zoom: 1.25, bearing: 0, pitch: 0 });
     setTimeout(() => {
       if (this.map) {
         this.map.runLoopOnce();
@@ -410,29 +408,6 @@ struct Index {
       .backgroundColor('#f8fafc')
 
       Row() {
-        Button('Fit')
-          .onClick(() => {
-            if (!this.map) {
-              return;
-            }
-
-            const state: SurfaceState = this.map.getSurfaceState();
-            if (!state.hasMap) {
-              this.statusText = 'Fit blocked: no map surface';
-              this.statusDetail = state.lastSurfaceError !== undefined ?
-                'surface error: ' + state.lastSurfaceError :
-                'Check EGL/native window setup in logs';
-              return;
-            }
-
-            this.map.fitBounds({
-              bounds: { west: -10, south: -10, east: 10, north: 10 },
-              padding: { top: 24, left: 24, bottom: 24, right: 24 }
-            });
-            this.updateSurfaceState('Fit bounds');
-          })
-          .height(44)
-
         Button('Demo')
           .onClick(() => {
             this.useRemoteStyle('Demo', DEMO_STYLE_URL);
