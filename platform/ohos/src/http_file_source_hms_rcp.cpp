@@ -328,7 +328,8 @@ Response makeResponse(const Resource& resource, Rcp_Response* rcpResponse, uint3
 
 class CallbackContext {
 public:
-    explicit CallbackContext(const std::shared_ptr<RequestState>& state_) : state(state_) {}
+    explicit CallbackContext(const std::shared_ptr<RequestState>& state_)
+        : state(state_) {}
 
     std::shared_ptr<RequestState> get() const {
         std::scoped_lock lock(mutex);
@@ -620,7 +621,8 @@ public:
                 HMS_Rcp_SetHeaderValue(request->headers, "Range", state->keepString(range));
             }
             if (state->getResource().priorEtag) {
-                HMS_Rcp_SetHeaderValue(request->headers, "If-None-Match", state->keepString(*state->getResource().priorEtag));
+                HMS_Rcp_SetHeaderValue(
+                    request->headers, "If-None-Match", state->keepString(*state->getResource().priorEtag));
             } else if (state->getResource().priorModified) {
                 const auto modified = util::rfc1123(*state->getResource().priorModified);
                 HMS_Rcp_SetHeaderValue(request->headers, "If-Modified-Since", state->keepString(modified));

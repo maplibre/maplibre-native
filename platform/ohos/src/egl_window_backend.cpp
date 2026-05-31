@@ -82,10 +82,9 @@ std::string formatEGLConfig(EGLDisplay display, EGLConfig config, std::int32_t c
            << getConfigAttribute(display, config, EGL_BLUE_SIZE) << '/'
            << getConfigAttribute(display, config, EGL_ALPHA_SIZE)
            << " depth=" << getConfigAttribute(display, config, EGL_DEPTH_SIZE)
-           << " stencil=" << getConfigAttribute(display, config, EGL_STENCIL_SIZE)
-           << " surface=0x" << std::hex << getConfigAttribute(display, config, EGL_SURFACE_TYPE)
-           << " renderable=0x" << getConfigAttribute(display, config, EGL_RENDERABLE_TYPE) << std::dec
-           << " es=" << contextClientVersion;
+           << " stencil=" << getConfigAttribute(display, config, EGL_STENCIL_SIZE) << " surface=0x" << std::hex
+           << getConfigAttribute(display, config, EGL_SURFACE_TYPE) << " renderable=0x"
+           << getConfigAttribute(display, config, EGL_RENDERABLE_TYPE) << std::dec << " es=" << contextClientVersion;
     return stream.str();
 }
 
@@ -107,13 +106,9 @@ std::string formatDefaultFramebuffer() {
 
     std::ostringstream stream;
     stream << "GL default framebuffer"
-           << " rgba=" << red << '/' << green << '/' << blue << '/' << alpha
-           << " depth=" << depth
-           << " stencil=" << stencil
-           << " status=0x" << std::hex << framebufferStatus
-           << " err=0x" << error << std::dec
-           << " vendor=" << glString(GL_VENDOR)
-           << " renderer=" << glString(GL_RENDERER)
+           << " rgba=" << red << '/' << green << '/' << blue << '/' << alpha << " depth=" << depth
+           << " stencil=" << stencil << " status=0x" << std::hex << framebufferStatus << " err=0x" << error << std::dec
+           << " vendor=" << glString(GL_VENDOR) << " renderer=" << glString(GL_RENDERER)
            << " version=" << glString(GL_VERSION);
     return stream.str();
 }
@@ -193,14 +188,8 @@ bool createWindowEglState(EGLDisplay display,
 
     for (const auto& apiVersion : apiVersions) {
         for (const auto& format : formats) {
-            if (tryCreateWindowSurface(display,
-                                       window,
-                                       apiVersion.first,
-                                       apiVersion.second,
-                                       format,
-                                       config,
-                                       context,
-                                       surface)) {
+            if (tryCreateWindowSurface(
+                    display, window, apiVersion.first, apiVersion.second, format, config, context, surface)) {
                 contextClientVersion = apiVersion.second;
                 if (apiVersion.second == 2) {
                     Log::Warning(Event::OpenGL, "Using OpenGL ES 2 EGL window surface");
@@ -303,12 +292,8 @@ EGLWindowBackend::EGLWindowBackend(OHNativeWindow* window_, Size size_)
         logNativeWindowFormat(window);
 
         EGLConfig windowConfig = nullptr;
-        if (!createWindowEglState(displayConfig->display,
-                                window,
-                                windowConfig,
-                                eglContext,
-                                eglSurface,
-                                contextClientVersion)) {
+        if (!createWindowEglState(
+                displayConfig->display, window, windowConfig, eglContext, eglSurface, contextClientVersion)) {
             throw std::runtime_error(eglErrorMessage("eglCreateWindowSurface"));
         }
         eglConfigDiagnostic = formatEGLConfig(displayConfig->display, windowConfig, contextClientVersion);

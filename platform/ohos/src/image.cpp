@@ -145,10 +145,10 @@ std::string namedValue(const char* name, int32_t value) {
     return std::to_string(value);
 }
 
-std::string pixelmapDescription(uint32_t width, uint32_t height, uint32_t rowStride, int32_t format, int32_t alphaType) {
+std::string pixelmapDescription(
+    uint32_t width, uint32_t height, uint32_t rowStride, int32_t format, int32_t alphaType) {
     return "width=" + std::to_string(width) + ", height=" + std::to_string(height) +
-           ", rowStride=" + std::to_string(rowStride) +
-           ", pixelFormat=" + namedValue(pixelFormatName(format), format) +
+           ", rowStride=" + std::to_string(rowStride) + ", pixelFormat=" + namedValue(pixelFormatName(format), format) +
            ", alphaType=" + namedValue(alphaTypeName(alphaType), alphaType);
 }
 
@@ -208,12 +208,8 @@ std::size_t checkedRowStride(uint32_t width, uint32_t rowStride, const std::stri
     return rowStride;
 }
 
-void copyRows(uint8_t* dst,
-              const uint8_t* src,
-              uint32_t width,
-              uint32_t height,
-              std::size_t rowStride,
-              int32_t format) {
+void copyRows(
+    uint8_t* dst, const uint8_t* src, uint32_t width, uint32_t height, std::size_t rowStride, int32_t format) {
     const auto tightStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
 
     for (uint32_t y = 0; y < height; ++y) {

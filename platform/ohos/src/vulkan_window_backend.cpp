@@ -23,10 +23,8 @@ std::string formatVulkanDiagnostic(const vulkan::RendererBackend& backend) {
     std::ostringstream stream;
     stream << "Vulkan device name=\"" << properties.deviceName.data() << "\""
            << " api=" << VK_VERSION_MAJOR(apiVersion) << '.' << VK_VERSION_MINOR(apiVersion) << '.'
-           << VK_VERSION_PATCH(apiVersion)
-           << " vendor=0x" << std::hex << properties.vendorID
-           << " device=0x" << properties.deviceID << std::dec
-           << " graphicsQueue=" << backend.getGraphicsQueueIndex()
+           << VK_VERSION_PATCH(apiVersion) << " vendor=0x" << std::hex << properties.vendorID << " device=0x"
+           << properties.deviceID << std::dec << " graphicsQueue=" << backend.getGraphicsQueueIndex()
            << " presentQueue=" << backend.getPresentQueueIndex();
     return stream.str();
 }
@@ -60,10 +58,9 @@ std::string formatVulkanLoaderDiagnostic(const vulkan::DispatchLoaderDynamic& di
 
     std::ostringstream stream;
     stream << "Vulkan loader api=" << VK_VERSION_MAJOR(apiVersion) << '.' << VK_VERSION_MINOR(apiVersion) << '.'
-           << VK_VERSION_PATCH(apiVersion)
-           << " instanceExtensions=" << extensionCount
-           << " " << VK_KHR_SURFACE_EXTENSION_NAME << '=' << (hasKhrSurface ? "yes" : "no")
-           << " " << VK_OHOS_SURFACE_EXTENSION_NAME << '=' << (hasOhosSurface ? "yes" : "no");
+           << VK_VERSION_PATCH(apiVersion) << " instanceExtensions=" << extensionCount << " "
+           << VK_KHR_SURFACE_EXTENSION_NAME << '=' << (hasKhrSurface ? "yes" : "no") << " "
+           << VK_OHOS_SURFACE_EXTENSION_NAME << '=' << (hasOhosSurface ? "yes" : "no");
     return stream.str();
 }
 

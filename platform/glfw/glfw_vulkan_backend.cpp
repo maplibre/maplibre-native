@@ -92,9 +92,8 @@ public:
         float queuePriority = 1.0f;
         vk::DeviceQueueCreateInfo queueCreateInfo(vk::DeviceQueueCreateFlags(), getQueueIndex(), 1, &queuePriority);
 
-        auto createInfo = vk::DeviceCreateInfo()
-                              .setQueueCreateInfos(queueCreateInfo)
-                              .setPEnabledExtensionNames(extensions);
+        auto createInfo =
+            vk::DeviceCreateInfo().setQueueCreateInfos(queueCreateInfo).setPEnabledExtensionNames(extensions);
 
         device = physicalDevice.createDeviceUnique(createInfo, nullptr, dispatcher);
         dispatcher.init(device.get());
@@ -133,10 +132,9 @@ public:
             backendImpl.getInstance().get(), backendImpl.getWindow(), nullptr, &surface_);
         if (result != VK_SUCCESS) throw std::runtime_error("Failed to create glfw window surface");
 
-        surface = vk::UniqueSurfaceKHR(
-            surface_,
-            mbgl::vulkan::ObjectDestroy<vk::Instance>(
-                backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
+        surface = vk::UniqueSurfaceKHR(surface_,
+                                       mbgl::vulkan::ObjectDestroy<vk::Instance>(
+                                           backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
     }
 
     void bind() override {}
@@ -188,9 +186,8 @@ void GLFWVulkanBackend::initInstance() {
     usingSharedContext = true;
 
     // this method is required to set `instance` to a valid vkInstance
-    instance = vk::UniqueInstance(
-        VkContext::shared().getInstance(),
-        mbgl::vulkan::ObjectDestroy<vk::NoParent>(nullptr, dispatcher));
+    instance = vk::UniqueInstance(VkContext::shared().getInstance(),
+                                  mbgl::vulkan::ObjectDestroy<vk::NoParent>(nullptr, dispatcher));
 
     // debug builds also require:
     // - enabling either `VK_EXT_debug_utils` (and updating `debugUtilsEnabled`) or `VK_EXT_debug_report` extension
@@ -206,9 +203,8 @@ void GLFWVulkanBackend::initDevice() {
     // `physicalDeviceFeatures` - enabled features (optional)
 
     physicalDevice = VkContext::shared().getPhysicalDevice();
-    device = vk::UniqueDevice(
-        VkContext::shared().getDevice(),
-        mbgl::vulkan::ObjectDestroy<vk::NoParent>(nullptr, dispatcher));
+    device = vk::UniqueDevice(VkContext::shared().getDevice(),
+                              mbgl::vulkan::ObjectDestroy<vk::NoParent>(nullptr, dispatcher));
 
     graphicsQueueIndex = presentQueueIndex = VkContext::shared().getQueueIndex();
     physicalDeviceFeatures = vk::PhysicalDeviceFeatures();

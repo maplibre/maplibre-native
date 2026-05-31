@@ -33,7 +33,10 @@ private:
     const char* functionName;
     std::uint_least32_t lineNumber;
 };
-#define MBGL_CURRENT_SOURCE_LOCATION ::mbgl::SourceLocation { __FILE__, __func__, __LINE__ }
+#define MBGL_CURRENT_SOURCE_LOCATION \
+    ::mbgl::SourceLocation {         \
+        __FILE__, __func__, __LINE__ \
+    }
 #endif
 
 } // namespace mbgl

@@ -80,8 +80,7 @@ mbgl::Size toSize(std::uint64_t width, std::uint64_t height) {
 }
 
 bool exposedResourceOptionsEqual(const mbgl::ResourceOptions& lhs, const mbgl::ResourceOptions& rhs) {
-    return lhs.apiKey() == rhs.apiKey() && lhs.cachePath() == rhs.cachePath() &&
-           lhs.assetPath() == rhs.assetPath();
+    return lhs.apiKey() == rhs.apiKey() && lhs.cachePath() == rhs.cachePath() && lhs.assetPath() == rhs.assetPath();
 }
 
 void clearBindingSurface(SurfaceBinding& binding) {
@@ -453,8 +452,7 @@ void registerLegacyExportedXComponent(napi_env env, napi_value exports) {
         mbgl::Log::Warning(mbgl::Event::Setup, "Could not register legacy XComponent surface callbacks");
     }
 
-    if (OH_NativeXComponent_RegisterOnFrameCallback(component, onLegacyFrame) !=
-        OH_NATIVEXCOMPONENT_RESULT_SUCCESS) {
+    if (OH_NativeXComponent_RegisterOnFrameCallback(component, onLegacyFrame) != OH_NATIVEXCOMPONENT_RESULT_SUCCESS) {
         mbgl::Log::Warning(mbgl::Event::Setup, "Could not register legacy XComponent frame callback");
     } else if (auto* binding = findLegacyBinding(component)) {
         binding->legacyFrameRegistered = true;

@@ -271,11 +271,10 @@ void RendererBackend::triggerFrameCapture([[maybe_unused]] uint32_t frameCount, 
 
 #ifdef ENABLE_VULKAN_VALIDATION
 
-static VKAPI_ATTR vk::Bool32 VKAPI_CALL vkDebugUtilsCallback(
-    vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    vk::DebugUtilsMessageTypeFlagsEXT,
-    const vk::DebugUtilsMessengerCallbackDataEXT* callbackData,
-    void*) {
+static VKAPI_ATTR vk::Bool32 VKAPI_CALL vkDebugUtilsCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                             vk::DebugUtilsMessageTypeFlagsEXT,
+                                                             const vk::DebugUtilsMessengerCallbackDataEXT* callbackData,
+                                                             void*) {
     EventSeverity mbglSeverity = EventSeverity::Debug;
 
     switch (messageSeverity) {

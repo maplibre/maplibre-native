@@ -235,9 +235,8 @@ void MapView::flyBy(double scale, double anchorX, double anchorY, AnimationOptio
     const auto currentCamera = map->getCameraOptions();
     const double currentZoom = currentCamera.zoom.value_or(0.0);
     const double nextZoom = currentZoom + std::log2(scale);
-    map->flyTo(CameraOptions()
-                   .withZoom(nextZoom)
-                   .withAnchor(logicalCoordinateForFramebufferCoordinate(anchorX, anchorY, pixelRatio)),
+    map->flyTo(CameraOptions().withZoom(nextZoom).withAnchor(
+                   logicalCoordinateForFramebufferCoordinate(anchorX, anchorY, pixelRatio)),
                std::move(animationOptions));
     desiredCameraBounds.reset();
     desiredFreeCamera.reset();
@@ -525,7 +524,8 @@ void MapView::onDidFinishLoadingStyle() {
     }
     try {
         const auto defaultCamera = map->getStyle().getDefaultCamera();
-        if (!desiredCamera && !desiredCameraBounds && !desiredFreeCamera && defaultCamera.center && defaultCamera.zoom) {
+        if (!desiredCamera && !desiredCameraBounds && !desiredFreeCamera && defaultCamera.center &&
+            defaultCamera.zoom) {
             desiredCameraBounds.reset();
             desiredCamera = defaultCamera;
             map->jumpTo(defaultCamera);

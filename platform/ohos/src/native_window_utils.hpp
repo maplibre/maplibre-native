@@ -19,9 +19,9 @@ inline bool setNativeWindowBufferGeometry(OHNativeWindow* window, Size size) {
     }
 
     return OH_NativeWindow_NativeWindowHandleOpt(window,
-                                                SET_BUFFER_GEOMETRY,
-                                                static_cast<std::int32_t>(size.width),
-                                                static_cast<std::int32_t>(size.height)) == 0;
+                                                 SET_BUFFER_GEOMETRY,
+                                                 static_cast<std::int32_t>(size.width),
+                                                 static_cast<std::int32_t>(size.height)) == 0;
 }
 
 } // namespace ohos

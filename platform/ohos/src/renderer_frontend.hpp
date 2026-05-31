@@ -16,7 +16,9 @@ namespace ohos {
 
 class RendererFrontend final : public mbgl::RendererFrontend {
 public:
-    RendererFrontend(gfx::RendererBackend&, float pixelRatio, std::optional<std::string> localFontFamily = std::nullopt);
+    RendererFrontend(gfx::RendererBackend&,
+                     float pixelRatio,
+                     std::optional<std::string> localFontFamily = std::nullopt);
     ~RendererFrontend() override;
 
     void reset() override;

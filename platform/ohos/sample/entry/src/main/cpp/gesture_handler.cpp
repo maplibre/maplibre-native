@@ -337,9 +337,8 @@ bool handleTouchAction(GestureState& state,
         case TouchAction::Up:
         case TouchAction::Cancel: {
             const bool canHandleTap = action == TouchAction::Up && !state.pinchActive && point;
-            const double velocity = mapView ? normalizedFlingVelocity(state.touchVelocityX,
-                                                                      state.touchVelocityY,
-                                                                      mapView->getPixelRatio())
+            const double velocity = mapView ? normalizedFlingVelocity(
+                                                  state.touchVelocityX, state.touchVelocityY, mapView->getPixelRatio())
                                             : 0.0;
             const bool shouldFling = action == TouchAction::Up && !state.tapCandidate && !state.pinchActive &&
                                      std::isfinite(velocity) && velocity >= MinFlingVelocity;
