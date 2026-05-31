@@ -1,42 +1,29 @@
 # MapLibre Native HarmonyOS Sample
 
-This is a minimal HarmonyOS XComponent app shell for the experimental
-`maplibre_native_ohos` NAPI module.
+Open this directory in DevEco Studio and let it sync the project.
 
-Build it with the DevEco command-line tools:
+The default product builds the Vulkan renderer. Select the `opengl` product in
+DevEco Studio to build the EGL/GLES renderer instead.
+
+## Signing
+
+Before installing on a device, place your AppGallery Connect debug signing files
+in `sign/` with these names:
+
+- `maplibre-debug.p12` — private keystore
+- `maplibre-debug.cer` — debug certificate
+- `maplibre-debug.p7b` — debug profile for bundle `org.maplibre.native.demo`
+
+Generate the local Hvigor signing config:
 
 ```sh
-cd platform/ohos/sample
-(cd entry && /path/to/command-line-tools/bin/ohpm install)
-/path/to/command-line-tools/bin/hvigorw assembleApp --no-daemon
-/path/to/command-line-tools/bin/hvigorw assembleApp -p product=opengl --no-daemon
+node sign/generate-signing-config.mjs
 ```
 
-Install it once `hdc list targets` shows a device or emulator:
+The script writes `sign/signing.local.json` and `sign/material/`. Keep both
+uncommitted.
 
-```sh
-/path/to/command-line-tools/sdk/default/openharmony/toolchains/hdc install -r \
-  entry/build/default/outputs/default/app/entry-default.hap
-```
+If DevEco Studio writes a signing config into `build-profile.json5`, revert
+`build-profile.json5` before sending a PR.
 
-For device installs, configure local signing first with the instructions in
-`sign/README.md`.
-
-The sample builds MapLibre Native from this checkout through
-`entry/src/main/cpp/CMakeLists.txt`, imports `libmaplibre_native_ohos.so` from
-ArkTS, consumes the local `libmaplibre_native_ohos.so` type package, declares
-`ohos.permission.INTERNET`, and packages `libc++_shared.so` with the native
-module.
-
-The default product uses the Vulkan renderer. Use `-p product=opengl` to build
-the EGL/GLES product instead. The UI starts with
-`https://tiles.openfreemap.org/styles/bright`, displays the backend label and
-frame rates, shows style attribution, and includes remote style buttons:
-
-- Demo: `https://demotiles.maplibre.org/style.json`
-- Bright: `https://tiles.openfreemap.org/styles/bright`
-- Liberty: `https://tiles.openfreemap.org/styles/liberty`
-
-Runtime validation should confirm that the on-screen state reports a nonzero
-surface size, `window=yes`, `map=yes`, a backend label, increasing frame rates
-while the map is running, and no last map/render/glyph/sprite error.
+Keep signing passwords outside the repository.

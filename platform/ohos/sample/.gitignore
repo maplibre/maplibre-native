@@ -7,4 +7,5 @@ sign/*.p12
 sign/*.cer
 sign/*.p7b
 sign/*.hap
+sign/material/
 sign/signing.local.json

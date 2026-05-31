@@ -150,16 +150,5 @@ lifecycle hooks.
 
 ## Sample App
 
-`platform/ohos/sample` contains a minimal HarmonyOS app shell that builds the
-native module from this checkout, imports `libmaplibre_native_ohos.so` from
-ArkTS, and packages a HAP:
-
-```sh
-cd platform/ohos/sample
-(cd entry && /path/to/command-line-tools/bin/ohpm install)
-/path/to/command-line-tools/bin/hvigorw assembleApp --no-daemon
-```
-
-The sample starts with `https://tiles.openfreemap.org/styles/bright` and includes
-`Demo`, `Bright`, and `Liberty` remote style buttons for HTTP, glyph, tile,
-sprite, and image loading checks.
+Open `platform/ohos/sample` in DevEco Studio. See
+`platform/ohos/sample/README.md` for local signing and renderer selection.
