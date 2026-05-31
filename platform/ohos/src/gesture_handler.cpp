@@ -40,10 +40,15 @@ constexpr double MaxTapMovement = 24.0;
 constexpr double MaxDoubleTapDistance = 48.0;
 constexpr double DoubleTapZoomScale = 2.0;
 constexpr auto DoubleTapAnimationDuration = std::chrono::milliseconds(300);
-constexpr auto FlingAnimationDuration = std::chrono::milliseconds(450);
-constexpr double FlingDistanceSeconds = 0.25;
-constexpr double MinFlingVelocity = 250.0;
+constexpr double FlingAnimationBaseMilliseconds = 180.0;
+constexpr double MinFlingVelocity = 1000.0;
+constexpr double FlingVelocityDivisor = 7.0;
+constexpr double FlingTiltBaseFactor = 1.5;
+constexpr double FlingTiltScale = 10.0;
+constexpr double FlingOffsetFactor = 0.32;
 constexpr double MaxFlingDistance = 1200.0;
+constexpr double FlingViewportMargin = 1.0;
+constexpr double FlingVerticalPitchLimitScale = 90.0;
 constexpr double Pi = 3.14159265358979323846;
 constexpr double TwoPi = 2.0 * Pi;
 constexpr double ShoveStartMovement = 16.0;
@@ -61,11 +66,47 @@ double normalizedAngleDelta(double firstAngle, double secondAngle) {
     return std::abs(delta);
 }
 
-double clampFlingDistance(double distance) {
-    if (!std::isfinite(distance)) {
+double normalizedFlingVelocity(double velocityX, double velocityY, float pixelRatio) {
+    if (!std::isfinite(pixelRatio) || pixelRatio <= 0.0f) {
+        pixelRatio = 1.0f;
+    }
+    return std::hypot(velocityX / pixelRatio, velocityY / pixelRatio);
+}
+
+std::chrono::milliseconds flingAnimationDuration(double normalizedVelocity, double pitch) {
+    if (!std::isfinite(pitch)) {
+        pitch = 0.0;
+    }
+    const double tiltFactor = std::max(0.1, FlingTiltBaseFactor + (pitch != 0.0 ? pitch / FlingTiltScale : 0.0));
+    const double duration = normalizedVelocity / FlingVelocityDivisor / tiltFactor + FlingAnimationBaseMilliseconds;
+    return std::chrono::milliseconds(static_cast<std::chrono::milliseconds::rep>(duration));
+}
+
+double flingLimitForExtent(std::uint32_t extent) {
+    if (extent <= 2) {
+        return MaxFlingDistance;
+    }
+    return std::max(0.0, std::min(MaxFlingDistance, static_cast<double>(extent) * 0.5 - FlingViewportMargin));
+}
+
+double clampHorizontalFlingOffset(double offset, Size surfaceSize) {
+    if (!std::isfinite(offset)) {
         return 0.0;
     }
-    return std::clamp(distance, -MaxFlingDistance, MaxFlingDistance);
+    const double limit = flingLimitForExtent(surfaceSize.width);
+    return std::clamp(offset, -limit, limit);
+}
+
+double clampVerticalFlingOffset(double offset, Size surfaceSize, double pitch) {
+    if (!std::isfinite(offset)) {
+        return 0.0;
+    }
+    double positiveLimit = flingLimitForExtent(surfaceSize.height);
+    if (std::isfinite(pitch) && pitch > 0.0) {
+        positiveLimit /= 1.0 + pitch / FlingVerticalPitchLimitScale;
+    }
+    const double negativeLimit = flingLimitForExtent(surfaceSize.height);
+    return std::clamp(offset, -negativeLimit, positiveLimit);
 }
 
 std::optional<TouchPoint> touchPointForEvent(const OH_NativeXComponent_TouchEvent& event,
@@ -351,9 +392,12 @@ bool handleTouchAction(GestureState& state,
         case TouchAction::Up:
         case TouchAction::Cancel: {
             const bool canHandleTap = action == TouchAction::Up && !state.pinchActive && point;
-            const double velocity = std::hypot(state.touchVelocityX, state.touchVelocityY);
+            const double velocity = mapView ? normalizedFlingVelocity(state.touchVelocityX,
+                                                                      state.touchVelocityY,
+                                                                      mapView->getPixelRatio())
+                                            : 0.0;
             const bool shouldFling = action == TouchAction::Up && !state.tapCandidate && !state.pinchActive &&
-                                     velocity >= MinFlingVelocity;
+                                     std::isfinite(velocity) && velocity >= MinFlingVelocity;
             state.touchActive = false;
             state.pinchActive = false;
             state.shoveActive = false;
@@ -361,9 +405,15 @@ bool handleTouchAction(GestureState& state,
                 mapView->setGestureInProgress(false);
                 if (!canHandleTap || !handleTap(*point)) {
                     if (shouldFling) {
-                        mapView->moveBy(clampFlingDistance(state.touchVelocityX * FlingDistanceSeconds),
-                                        clampFlingDistance(state.touchVelocityY * FlingDistanceSeconds),
-                                        mbgl::AnimationOptions{FlingAnimationDuration});
+                        const double pitch = mapView->getCameraOptions().pitch.value_or(0.0);
+                        const auto duration = flingAnimationDuration(velocity, pitch);
+                        const double durationSeconds = std::chrono::duration<double>(duration).count();
+                        const auto surfaceSize = mapView->getSurfaceSize();
+                        const double offsetX = state.touchVelocityX * durationSeconds * FlingOffsetFactor;
+                        const double offsetY = state.touchVelocityY * durationSeconds * FlingOffsetFactor;
+                        mapView->moveBy(clampHorizontalFlingOffset(offsetX, surfaceSize),
+                                        clampVerticalFlingOffset(offsetY, surfaceSize, pitch),
+                                        mbgl::AnimationOptions{duration});
                     }
                     needsRender = true;
                 }

@@ -55,6 +55,7 @@ public:
 
     bool hasMap() const { return map != nullptr; }
     OHNativeWindow* getNativeWindow() const { return window; }
+    Size getSurfaceSize() const { return surfaceSize; }
     float getPixelRatio() const { return pixelRatio; }
     MapDebugOptions getDebugOptions() const { return debugOptions; }
     BoundOptions getBounds() const;
