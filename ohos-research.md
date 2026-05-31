@@ -1,8 +1,8 @@
-# OpenHarmony/HarmonyOS Research Notes
+# HarmonyOS / Future OpenHarmony Research Notes
 
 This note compresses the original research log into the pieces a contributor
-needs in order to understand the current OpenHarmony/HarmonyOS port direction,
-what has been proven, and which dead ends are worth remembering.
+needs in order to understand the current HarmonyOS port direction, what has
+been proven, and which OpenHarmony follow-ups are worth remembering.
 
 ## Current Status
 
@@ -12,7 +12,8 @@ what has been proven, and which dead ends are worth remembering.
 - Platform code lives under `platform/ohos/`.
 - Sample app lives under `platform/ohos/sample`.
 - Native module output: `libmaplibre_native_ohos.so`.
-- ArkTS type package: `platform/ohos/arkts/types/libmaplibre_native_ohos`.
+- ArkTS type package:
+  `platform/ohos/sample/entry/types/libmaplibre_native_ohos`.
 - Sample bundle id: `org.maplibre.native.demo`. AppGallery Connect rejected
   bundle ids containing `ohos`, so the original sample id was renamed.
 - Device validation target so far:
@@ -64,7 +65,9 @@ Confirmed on DevEco emulator:
 
 Not yet fully validated:
 
-- OpenHarmony public `net_http` backend at runtime.
+- OpenHarmony public SDK build/runtime support. The current PR is intentionally
+  HarmonyOS/HMS-only; public OpenHarmony paths can be restored after validation
+  against that SDK.
 - DevEco Studio 6.1.0 Beta2-or-newer Vulkan emulator runtime.
 - Release/profile performance on the MatePad. Current debug-device correctness
   is good, but heavy styles can still feel rough.
@@ -91,39 +94,25 @@ pixi run cmake --build --preset harmonyos-vulkan
 Sample app:
 
 ```sh
-mise x -- mise run ohos-sample-build
-mise x -- mise run ohos-sample-sign
-mise x -- mise run ohos-sample-install
-mise x -- mise run ohos-sample-launch
+cd platform/ohos/sample
+/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw assembleApp --no-daemon
+/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw assembleApp -p product=opengl --no-daemon
 ```
 
-The local `mise.local.toml` tasks default to the emulator target. Override
-`OHOS_TARGET` for the tablet, for example `OHOS_TARGET=59GYD25808200129`.
+The preferred developer flow is DevEco Studio: open `platform/ohos/sample`,
+select either the default Vulkan product or the `opengl` product, then use the
+IDE's normal build/install/run actions.
 
-Manual debug signing is documented in
-`platform/ohos/sample/sign/README.md`. The short version is:
+Local signing is generated from ignored files in `platform/ohos/sample/sign/`:
 
 ```sh
-java -jar "$SIGN_LIB/hap-sign-tool.jar" sign-app \
-  -mode localSign \
-  -keyAlias maplibre_debug \
-  -keyPwd 'YOUR_PASSWORD' \
-  -signAlg SHA256withECDSA \
-  -appCertFile ./sign/maplibre-debug.cer \
-  -profileFile ./sign/maplibre-debug.p7b \
-  -inFile entry/build/default/outputs/default/entry-default-unsigned.hap \
-  -keystoreFile ./sign/maplibre-debug.p12 \
-  -keystorePwd 'YOUR_PASSWORD' \
-  -compatibleVersion 21 \
-  -outFile ./sign/entry-default-signed.hap
-
-HDC=/path/to/command-line-tools/sdk/default/openharmony/toolchains/hdc
-$HDC install -r ./sign/entry-default-signed.hap
-$HDC shell aa start -b org.maplibre.native.demo -a EntryAbility
+cd platform/ohos/sample
+node sign/generate-signing-config.mjs
 ```
 
-On the MatePad, `aa start` fails with error `10106102` if the screen is locked.
-Manually unlock the device first.
+The script writes `sign/signing.local.json` and `sign/material/`. Keep both
+uncommitted. On the MatePad, command-line `aa start` fails with error
+`10106102` if the screen is locked; manually unlock the device first.
 
 ## Architecture
 
@@ -139,16 +128,18 @@ where that matches the OHOS SDK:
   - headless frontend pieces
   - GL function loading with a small optional `GLES3/gl3ext.h` include guard
 - OHOS-specific pieces:
-  - XComponent/NAPI surface integration
   - EGL window backend for `OHNativeWindow *`
   - Vulkan window backend using `VK_OHOS_surface`
   - image decoding through ImageSourceNative/PixelmapNative
   - HTTP backends using platform SDK APIs
+  - sample-scoped XComponent/NAPI surface integration
 
 The main device renderer path is:
 
 ```text
 ArkUI XComponent
+  -> sample NAPI/XComponent bridge
+  -> sample MapView
   -> OHNativeWindow
   -> VulkanWindowBackend
   -> RendererFrontend
@@ -161,26 +152,26 @@ investigation path.
 Important files:
 
 - `platform/ohos/ohos.cmake`: platform source selection, SDK libraries, native
-  module target, link smoke target.
+  libraries, and whole-archive helper used by the sample native module.
 - `platform/ohos/src/egl_window_backend.*`: EGL/GLES context and surface
   management for `OHNativeWindow`.
 - `platform/ohos/src/vulkan_window_backend.*`: Vulkan surface and swapchain
   integration for `OHNativeWindow`.
 - `platform/ohos/src/renderer_frontend.*`: thin `RendererFrontend` bridge.
-- `platform/ohos/src/map_view.*`: owns the backend, frontend, and `mbgl::Map`;
-  stores desired state across surface recreation.
-- `platform/ohos/src/native_module.cpp`: NAPI/XComponent lifecycle and ArkTS
-  exports.
-- `platform/ohos/src/native_values.*`: NAPI value parsing/object creation.
-- `platform/ohos/src/gesture_handler.*`: XComponent touch input to MapLibre
-  gesture calls.
-- `platform/ohos/src/http_file_source.cpp`: public OpenHarmony `net_http`
-  backend.
 - `platform/ohos/src/http_file_source_hms_rcp.cpp`: HarmonyOS HMS
   RemoteCommunicationKit backend.
 - `platform/ohos/src/image.cpp`: ImageKit image decoding.
 - `platform/ohos/src/logging_hilog.cpp`: native MapLibre logging routed through
   hilog.
+- `platform/ohos/sample/entry/src/main/cpp/map_view.*`: sample embedding
+  adapter that owns the backend, frontend, and `mbgl::Map`; stores desired
+  state across XComponent surface recreation.
+- `platform/ohos/sample/entry/src/main/cpp/native_module.cpp`: sample
+  NAPI/XComponent lifecycle and ArkTS exports.
+- `platform/ohos/sample/entry/src/main/cpp/native_values.*`: sample NAPI value
+  parsing/object creation.
+- `platform/ohos/sample/entry/src/main/cpp/gesture_handler.*`: sample
+  XComponent touch input to MapLibre gesture calls.
 
 ## Toolchain Findings
 
@@ -238,16 +229,9 @@ HarmonyOS/HMS SDK:
 - `harmonyos-opengl`
 - `harmonyos-vulkan`
 
-The `harmonyos-*` presets build the ArkTS/NAPI native module and use
-`librcp_c.so` instead of `libnet_http.so`.
-
-The native module target is controlled by:
-
-```cmake
-MLN_OHOS_BUILD_NATIVE_MODULE=ON
-```
-
-The shared library output name stays:
+The root `harmonyos-*` presets configure the HarmonyOS platform sources and use
+`librcp_c.so` instead of `libnet_http.so`. The DevEco/Hvigor sample build owns
+the ArkTS/NAPI native module target. Its shared library output name is:
 
 ```text
 libmaplibre_native_ohos.so
@@ -255,23 +239,26 @@ libmaplibre_native_ohos.so
 
 ## Networking
 
-Two HTTP backends exist because the public OpenHarmony and HarmonyOS/HMS SDK
-surfaces differ materially.
-
-### Public OpenHarmony `net_http`
+The current PR uses only the HarmonyOS HMS RemoteCommunicationKit backend. A
+public OpenHarmony `net_http` backend was explored and then removed from the
+branch because this PR has not been validated against public OpenHarmony yet.
+The useful notes to preserve for a future OpenHarmony pass:
 
 - Header/library: `network/netstack/net_http.h`, `libnet_http.so`.
-- Compile/link tested.
-- The callback API does **not** carry per-request user data or request identity.
-- The backend uses a bounded 128-slot callback dispatcher to map SDK callbacks
-  back to MapLibre requests.
-- Earlier runtime attempt on MatePad failed fetching the demotiles style with:
+- Compile/link testing worked in the earlier prototype.
+- The callback API does **not** carry per-request user data or request identity,
+  so a robust backend needs an explicit design for matching SDK callbacks back
+  to MapLibre requests.
+- A bounded callback-slot prototype was not robust enough; it could associate a
+  late response with the wrong request if slot reuse and callback timing lined
+  up badly.
+- An earlier runtime attempt on MatePad failed fetching the demotiles style with:
 
 ```text
 OH_HTTP_OUT_OF_MEMORY (2300027)
 ```
 
-This came from the SDK path, not from exhausting the local callback slots.
+This came from the SDK path, not from exhausting local callback slots.
 
 ### HarmonyOS HMS RCP
 
@@ -362,15 +349,15 @@ XComponent({
 })
 ```
 
-The legacy `onLoad` context exposes no-binding methods such as
-`map.setStyleJson(...)`, `map.setStyleUrl(...)`, `map.renderFrame()`, and
-`map.destroy()`.
+The legacy `onLoad` context exposes sample NAPI methods such as
+`map.setStyleUrl(...)`, `map.jumpTo(...)`, `map.renderFrame()`,
+`map.getSurfaceState(...)`, and `map.destroy()`.
 
 ### ArkUI Node Path
 
-`registerXComponentNode(node)` compiles and links, and the native module still
-contains this path for `NodeContainer`/`NodeController` integration. On the
-MatePad runtime, however, the programmatic node path failed early with:
+`registerXComponentNode(node)` compiled and linked in an earlier prototype, but
+the path has been removed from the current sample scope. On the MatePad runtime,
+the programmatic node path failed early with:
 
 ```text
 Could not create XComponent surface holder callback
@@ -378,7 +365,7 @@ Could not create XComponent surface holder callback
 
 The failure came from the `OH_ArkUI_SurfaceHolder_Create(node)` /
 `OH_ArkUI_SurfaceCallback_Create()` path. Keep this as a follow-up
-SurfaceHolder/API-23 investigation rather than using it for first validation.
+SurfaceHolder/API-23 investigation rather than part of the first PR.
 
 ### EGL Fixes
 
@@ -411,52 +398,38 @@ The sample now checks `getSurfaceState().hasMap` and uses deferred
 
 ## ArkTS/NAPI Surface
 
-The experimental API surface is documented by
-`platform/ohos/arkts/types/libmaplibre_native_ohos/index.d.ts`.
+The sample API surface is documented by
+`platform/ohos/sample/entry/types/libmaplibre_native_ohos/index.d.ts`.
+It intentionally lives with the sample for now. The platform implementation is
+the reusable native OHOS support; the ArkTS/NAPI bridge is one concrete
+XComponent embedding.
 
 Implemented categories:
 
 - lifecycle:
   - `destroy`
   - `setRenderingEnabled`
-  - `getRenderingEnabled`
   - `reduceMemoryUse`
 - style:
-  - `setStyleJson`
   - `setStyleUrl`
-  - `getStyleJson`
-  - `getStyleUrl`
 - camera:
   - positional `jumpTo`
-  - object `setCameraOptions`
   - `getCameraOptions`
-  - `easeTo`
-  - `flyTo`
-  - `fitBounds`
-  - `cameraForBounds`
   - `setBounds`
-  - `getBounds`
-  - free-camera get/set
 - rendering/display:
   - `renderFrame`
-  - `runLoopOnce`
   - `setPixelRatio`
   - `getPixelRatio`
   - `setFrameRateRange`
-  - `getFrameRateRange`
-  - `setDebugOptions`
-  - `getDebugOptions`
 - resources:
   - `setClientOptions`
-  - `getClientOptions`
   - `setResourceOptions`
-  - `getResourceOptions`
   - `setTileCacheEnabled`
-  - `getTileCacheEnabled`
 - diagnostics:
   - `getSurfaceState`
-  - `logSurfaceState`
-  - style/map/frame/resource counters
+  - `getStyleAttributions`
+  - measured frame rates
+  - renderer identity
   - last surface/map/render/glyph/sprite/image error strings
 
 Gestures implemented in the bridge:
@@ -510,8 +483,9 @@ hdc shell "hilog -x -t app -T MapLibreNative"
 ```
 
 Confirmed output includes normal `mbgl::Log` messages such as setup, EGL config,
-default framebuffer, GPU identifier, and sample surface diagnostics. The sample
-itself still logs ArkTS-side state with tag `MapLibreSample`.
+default framebuffer, and GPU identifier. The sample keeps normal ArkTS logging
+to warnings, such as failures to open attribution URLs or query display
+properties, using tag `MapLibreSample`.
 
 ## Sample App
 
@@ -553,30 +527,36 @@ device.
 The sample depends on the local type package through:
 
 ```json5
-"libmaplibre_native_ohos.so": "file:../../arkts/types/libmaplibre_native_ohos"
+"libmaplibre_native_ohos.so": "file:types/libmaplibre_native_ohos"
 ```
 
 ## Signing And Device Install
 
-AGC debug signing was made to work without DevEco Studio:
+AGC debug signing was made to work with DevEco Studio/Hvigor without committing
+local credentials:
 
 - Generate a local debug keystore/CSR with `hap-sign-tool.jar`.
 - Upload the CSR to AppGallery Connect.
 - Download the debug certificate/profile.
 - Put local signing files under `platform/ohos/sample/sign/`.
-- Build unsigned with Hvigor.
-- Sign manually with `hap-sign-tool.jar sign-app`.
-- Install with `hdc install -r`.
+- Run `node sign/generate-signing-config.mjs` from `platform/ohos/sample`.
+- The script writes ignored local files:
+  - `sign/signing.local.json`
+  - `sign/material/`
+- Hvigor reads `sign/signing.local.json` from `hvigorfile.ts`, so DevEco Studio
+  and command-line Hvigor builds both sign through the normal build flow.
 
 Important notes:
 
 - OpenHarmony community signing (`OpenHarmony.p12` +
   `UnsgnedDebugProfileTemplate.json`) failed on the retail HarmonyOS MatePad
   with `code:9568257 fail to verify pkcs7 file`.
-- Hvigor signing config expects encrypted 32+ character passwords in
-  `build-profile.json5`, so manual signing is currently simpler.
-- Passwords are intentionally kept outside the repo in
-  `~/Downloads/maplibre-ohos-sample-signing-credentials.txt`.
+- DevEco Studio may write signing settings into `build-profile.json5` while
+  configuring the local developer environment. Keep those generated settings out
+  of the PR; the committed flow reads ignored local signing data from
+  `sign/signing.local.json`.
+- Passwords and generated signing material are intentionally kept out of source
+  control.
 
 ## Runtime Timeline
 
@@ -632,10 +612,9 @@ Important notes:
    - The sample starts directly on the remote demotiles style.
    - Status refreshes every 500 ms while visible, with hilog diagnostics every
      sixth tick.
-   - The old manual **Render** control is now **Fit**; camera/style changes
-     should be picked up by the native frame pump.
-   - The old **Empty** and **Diag** controls were removed; **Local** is enough
-     for deterministic non-network rendering checks.
+   - At this point in the investigation, the sample still had temporary
+     controls for manual render, fit, diagnostics, and a local style. Those were
+     later removed or replaced during sample polish.
    - Emulator after this change still reports a healthy loaded map, e.g.
      `Live: 1308x2177 window=yes map=yes render=idle`,
      `frames=59/59 gl=3`, `style=loaded`, `loaded=yes`, `idle=yes`,
@@ -670,6 +649,12 @@ Important notes:
      `VULKAN_HPP_DISPATCH_LOADER_DYNAMIC_TYPE` and the matching destroyer at the
      Vulkan backend boundary instead of spelling old top-level Vulkan-Hpp names
      throughout platform code.
+   - A `VK_LAYER_KHRONOS_validation` request was removed from GLFW shared
+     context **device** creation while updating the Vulkan-Hpp type names. This
+     does not disable validation. Validation layers are still requested during
+     Vulkan **instance** creation by `RendererBackend::getLayers()` and by the
+     GLFW shared `VkContext` instance path; device layers have been deprecated
+     and ignored by modern Vulkan implementations.
    - DevEco emulator runtime logs show `Vulkan loader api=1.3.275
      instanceExtensions=8 VK_KHR_surface=yes VK_OHOS_surface=yes`, followed by
      `vk::createInstanceUnique: ErrorIncompatibleDriver`. The emulator exposes
@@ -699,6 +684,15 @@ Important notes:
    - Added a style-sourced attribution overlay anchored bottom-right and a
      compact telemetry overlay anchored top-left. Attribution link taps were
      verified on device.
+   - Moved `MapView`, `CameraBoundsOptions`, gesture handling, NAPI bindings,
+     and the ArkTS type package into the sample. The reusable platform layer is
+     now limited to the OHOS window backends, renderer frontend, networking,
+     image decoding, logging, and CMake integration.
+   - Renamed the native CMake target to `maplibre_native_ohos` so it matches
+     `NAPI_MODULE(maplibre_native_ohos, Init)` and the generated
+     `libmaplibre_native_ohos.so` output name.
+   - Added separate Vulkan/OpenGL sample products in DevEco/Hvigor and selected
+     the BiSheng native compiler for both products.
 
 ## Verification Snapshot
 
@@ -714,7 +708,9 @@ HMOS_SDK_NATIVE=/Users/sargunv/Downloads/command-line-tools/sdk/default/hms/nati
 pixi run cmake --build --preset harmonyos-opengl
 
 cd platform/ohos/sample
-/Users/sargunv/Downloads/command-line-tools/bin/hvigorw assembleApp --no-daemon
+/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw assembleApp --no-daemon
+
+/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin/hvigorw assembleApp -p product=opengl --no-daemon
 ```
 
 Observed:
@@ -728,17 +724,20 @@ Observed:
   `127.0.0.1:5555`.
 - DevEco emulator screenshots confirmed the pumped sample loads remote
   resources and renders remote fill/line geometry after the stencil bypass.
-- DevEco emulator screenshot confirmed the inline **Local** style renders its
-  yellow GeoJSON polygon after the same stencil bypass.
+- Earlier DevEco emulator screenshots confirmed the temporary inline local
+  style rendered its yellow GeoJSON polygon after the same stencil bypass.
 - `git diff --check` passed after the latest code/doc changes before this
   condensation.
-- `harmonyos-vulkan` builds `libmaplibre_native_ohos.so`.
+- The DevEco/Hvigor sample builds and signs both products:
+  - default Vulkan product
+  - `opengl` EGL/GLES product
 - The Vulkan sample HAP builds, signs, installs, and launches on the DevEco
   emulator, but fails before map creation with `VK_ERROR_INCOMPATIBLE_DRIVER`
   from `vkCreateInstance`.
 - The same signed Vulkan HAP installs and runs on HarmonyOS MatePad target
   `59GYD25808200129`; logs report `Vulkan device name="Maleoon 920" api=1.3.275`
-  and screenshots confirm both remote and local styles render correctly.
+  and screenshots confirmed both remote styles and the earlier temporary local
+  style test rendered correctly.
 - Tablet gestures work: pan, pinch zoom, rotate, shove pitch, double tap, and
   fling all behave acceptably in the sample.
 - Tablet stress checks with pan/zoom/rotate and higher zooms did not reveal
@@ -828,7 +827,6 @@ the repeated emulator loop:
 
 ```sh
 mise run ohos-sample-build
-mise run ohos-sample-sign
 mise run ohos-sample-install
 mise run ohos-sample-launch
 mise run ohos-sample-restart
