@@ -15,6 +15,7 @@
 #include <mbgl/util/string.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <exception>
 #include <stdexcept>
@@ -79,24 +80,34 @@ void MapView::clearSurface() {
 }
 
 bool MapView::renderFrame() {
+    using std::chrono::duration;
+    using std::chrono::steady_clock;
+
+    const auto frameStart = steady_clock::now();
+    lastRenderTimeMs = 0.0;
     bool attemptedRender = false;
     bool rendered = false;
     auto renderIfNeeded = [&] {
         if (frontend && frontend->hasPendingRender()) {
             attemptedRender = true;
+            const auto renderStart = steady_clock::now();
             if (frontend->renderFrame()) {
                 ++renderedFrameCount;
                 rendered = true;
             }
+            lastRenderTimeMs += duration<double, std::milli>(steady_clock::now() - renderStart).count();
         }
     };
 
     // Keep interaction frames from waiting behind a burst of resource callbacks.
     renderIfNeeded();
+    const auto runLoopStart = steady_clock::now();
     runLoopOnce();
+    lastRunLoopTimeMs = duration<double, std::milli>(steady_clock::now() - runLoopStart).count();
     if (!attemptedRender) {
         renderIfNeeded();
     }
+    lastFrameTimeMs = duration<double, std::milli>(steady_clock::now() - frameStart).count();
 
     return rendered;
 }

@@ -122,6 +122,9 @@ export interface SurfaceState {
   spritesRequestedCount: number;
   spritesLoadedCount: number;
   spritesErrorCount: number;
+  lastFrameTimeMs: number;
+  lastRunLoopTimeMs: number;
+  lastRenderTimeMs: number;
   glesContextClientVersion: number;
   eglConfigDiagnostic?: string;
   framebufferDiagnostic?: string;

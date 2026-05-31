@@ -564,6 +564,12 @@ void setSizeProperty(napi_env env, napi_value object, const char* name, std::uin
     napi_set_named_property(env, object, name, property);
 }
 
+void setDoubleProperty(napi_env env, napi_value object, const char* name, double value) {
+    napi_value property = nullptr;
+    napi_create_double(env, value, &property);
+    napi_set_named_property(env, object, name, property);
+}
+
 void setStringProperty(napi_env env, napi_value object, const char* name, const std::string& value) {
     napi_set_named_property(env, object, name, createStringValue(env, value));
 }
@@ -592,6 +598,9 @@ napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding)
     const auto spritesRequestedCount = binding.mapView ? binding.mapView->getSpritesRequestedCount() : 0;
     const auto spritesLoadedCount = binding.mapView ? binding.mapView->getSpritesLoadedCount() : 0;
     const auto spritesErrorCount = binding.mapView ? binding.mapView->getSpritesErrorCount() : 0;
+    const auto lastFrameTimeMs = binding.mapView ? binding.mapView->getLastFrameTimeMs() : 0.0;
+    const auto lastRunLoopTimeMs = binding.mapView ? binding.mapView->getLastRunLoopTimeMs() : 0.0;
+    const auto lastRenderTimeMs = binding.mapView ? binding.mapView->getLastRenderTimeMs() : 0.0;
     const auto glesContextClientVersion = binding.mapView ? binding.mapView->getGlesContextClientVersion() : 0;
 
     napi_value object = nullptr;
@@ -621,6 +630,9 @@ napi_value createSurfaceStateObject(napi_env env, const SurfaceBinding& binding)
     setSizeProperty(env, object, "spritesRequestedCount", spritesRequestedCount);
     setSizeProperty(env, object, "spritesLoadedCount", spritesLoadedCount);
     setSizeProperty(env, object, "spritesErrorCount", spritesErrorCount);
+    setDoubleProperty(env, object, "lastFrameTimeMs", lastFrameTimeMs);
+    setDoubleProperty(env, object, "lastRunLoopTimeMs", lastRunLoopTimeMs);
+    setDoubleProperty(env, object, "lastRenderTimeMs", lastRenderTimeMs);
     setInt32Property(env, object, "glesContextClientVersion", glesContextClientVersion);
     if (binding.mapView && !binding.mapView->getEGLConfigDiagnostic().empty()) {
         setStringProperty(env, object, "eglConfigDiagnostic", binding.mapView->getEGLConfigDiagnostic());

@@ -90,6 +90,9 @@ struct Index {
       ' backend=' + this.backendLabel(state) +
       ' fps=' + this.formatRate(this.renderFps) +
       ' tick=' + this.formatRate(this.tickFps) +
+      ' work=' + this.formatNumber(state.lastFrameTimeMs, 1) +
+      '/' + this.formatNumber(state.lastRunLoopTimeMs, 1) +
+      '/' + this.formatNumber(state.lastRenderTimeMs, 1) + 'ms' +
       ' window=' + (state.hasWindow ? 'yes' : 'no') +
       ' map=' + (state.hasMap ? 'yes' : 'no') +
       ' render=' + (state.needsRender ? 'pending' : 'idle') +
@@ -184,6 +187,9 @@ struct Index {
       ' ' + this.backendLabel(state) +
       ' fps=' + this.formatRate(this.renderFps) +
       ' tick=' + this.formatRate(this.tickFps) +
+      ' work=' + this.formatNumber(state.lastFrameTimeMs, 1) +
+      '/' + this.formatNumber(state.lastRunLoopTimeMs, 1) +
+      '/' + this.formatNumber(state.lastRenderTimeMs, 1) + 'ms' +
       ' render=' + (state.needsRender ? 'pending' : 'idle');
 
     let detail: string = 'window=' + (state.hasWindow ? 'yes' : 'no') +
