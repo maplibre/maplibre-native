@@ -2,7 +2,7 @@ import { common } from '@kit.AbilityKit';
 import { display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import maplibreNative from 'libmaplibre_native_ohos.so';
-import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
+import type { CameraOptions, FrameRateRange, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
 
 const LOG_DOMAIN: number = 0x4d4c4e;
 const LOG_TAG: string = 'MapLibreSample';
@@ -76,7 +76,13 @@ struct Index {
     }
   }
 
-  private formatSurfaceStateLine(state: SurfaceState, camera: CameraOptions, label: string, pixelRatio: number): string {
+  private formatSurfaceStateLine(
+    state: SurfaceState,
+    camera: CameraOptions,
+    label: string,
+    pixelRatio: number,
+    frameRateRange?: FrameRateRange
+  ): string {
     let line: string = label + ': ' + state.width.toString() + 'x' + state.height.toString() +
       ' pr=' + pixelRatio.toString() +
       ' window=' + (state.hasWindow ? 'yes' : 'no') +
@@ -131,6 +137,11 @@ struct Index {
     if (state.lastRenderError !== undefined) {
       line = line + ' renderErr=' + state.lastRenderError;
     }
+    if (frameRateRange !== undefined) {
+      line = line + ' fps=' + frameRateRange.min.toString() +
+        '/' + frameRateRange.expected.toString() +
+        '/' + frameRateRange.max.toString();
+    }
     if (state.lastSpritesError !== undefined) {
       line = line + ' spriteErr=' + state.lastSpritesError;
     }
@@ -154,7 +165,7 @@ struct Index {
 
     const state: SurfaceState = this.map.getSurfaceState();
     const camera: CameraOptions = this.map.getCameraOptions();
-    const line: string = this.formatSurfaceStateLine(state, camera, label, this.map.getPixelRatio());
+    const line: string = this.formatSurfaceStateLine(state, camera, label, this.map.getPixelRatio(), this.map.getFrameRateRange());
     hilog.info(LOG_DOMAIN, LOG_TAG, '%{public}s', line);
     this.map.logSurfaceState(label);
   }
@@ -195,6 +206,13 @@ struct Index {
       detail = 'map error: ' + state.lastMapLoadError;
     } else if (state.lastRenderError !== undefined) {
       detail = 'render error: ' + state.lastRenderError;
+    } else {
+      const frameRateRange = this.map.getFrameRateRange();
+      if (frameRateRange !== undefined) {
+        detail = detail + ' fps=' + frameRateRange.min.toString() +
+          '/' + frameRateRange.expected.toString() +
+          '/' + frameRateRange.max.toString();
+      }
     }
     this.statusDetail = detail;
     let resources: string = 'glyphs=' + state.glyphsRequestedCount.toString() +
@@ -257,7 +275,8 @@ struct Index {
 
   private displayPixelRatio(): number {
     try {
-      const pixelRatio = display.getDefaultDisplaySync().densityPixels;
+      const defaultDisplay = display.getDefaultDisplaySync();
+      const pixelRatio = defaultDisplay.densityPixels;
       if (Number.isFinite(pixelRatio) && pixelRatio > 0) {
         return pixelRatio;
       }
@@ -268,12 +287,27 @@ struct Index {
     return 1;
   }
 
+  private displayRefreshRate(): number {
+    try {
+      const defaultDisplay = display.getDefaultDisplaySync();
+      const refreshRate = Math.round(defaultDisplay.refreshRate);
+      if (Number.isFinite(refreshRate) && refreshRate > 0) {
+        return refreshRate;
+      }
+    } catch (error) {
+      hilog.warn(LOG_DOMAIN, LOG_TAG, 'Could not read display refresh rate: %{public}s', JSON.stringify(error));
+    }
+
+    return 60;
+  }
+
   private configureMap(map: XComponentContext): void {
     this.map = map;
     map.setClientOptions('MapLibreOhosSample', '0.1.0');
     map.setResourceOptions(this.resourceOptions());
     map.setTileCacheEnabled(true);
-    map.setFrameRateRange({ min: 30, max: 120, expected: 60 });
+    const refreshRate = this.displayRefreshRate();
+    map.setFrameRateRange({ min: Math.min(30, refreshRate), max: refreshRate, expected: refreshRate });
     map.setPixelRatio(this.displayPixelRatio());
     map.setRenderingEnabled(true);
     map.setBounds({
