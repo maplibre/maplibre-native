@@ -251,7 +251,7 @@ public:
     SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
 
 #if MLN_SYMBOL_GUARDS
-    bool check(SourceLocation) override;
+    bool check(source_location) override;
 #endif
 
     static SymbolLayoutVertex layoutVertex(Point<float> labelAnchor,

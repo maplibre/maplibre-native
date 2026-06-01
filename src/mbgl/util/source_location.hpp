@@ -11,14 +11,14 @@
 namespace mbgl {
 
 #if defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L
-using SourceLocation = std::source_location;
-#define MBGL_CURRENT_SOURCE_LOCATION ::mbgl::SourceLocation::current()
+using source_location = std::source_location;
+#define MLN_CURRENT_SOURCE_LOCATION ::mbgl::source_location::current()
 #else
-class SourceLocation final {
+class source_location final {
 public:
-    constexpr SourceLocation(const char* fileName_ = "",
-                             const char* functionName_ = "",
-                             std::uint_least32_t line_ = 0) noexcept
+    constexpr source_location(const char* fileName_ = "",
+                              const char* functionName_ = "",
+                              std::uint_least32_t line_ = 0) noexcept
         : fileName(fileName_),
           functionName(functionName_),
           lineNumber(line_) {}
@@ -33,8 +33,8 @@ private:
     const char* functionName;
     std::uint_least32_t lineNumber;
 };
-#define MBGL_CURRENT_SOURCE_LOCATION \
-    ::mbgl::SourceLocation {         \
+#define MLN_CURRENT_SOURCE_LOCATION  \
+    ::mbgl::source_location {        \
         __FILE__, __func__, __LINE__ \
     }
 #endif
