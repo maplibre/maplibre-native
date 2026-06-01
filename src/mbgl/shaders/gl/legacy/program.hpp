@@ -148,7 +148,6 @@ public:
             return false;
         }
 
-        bool result = true;
         for (auto& segment : segments) {
             auto drawScopeIt = segment.drawScopes.find(layerID);
 
@@ -156,22 +155,23 @@ public:
                 drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
             }
 
-            result = programBase->draw(context,
-                                       renderPass,
-                                       drawMode,
-                                       depthMode,
-                                       stencilMode,
-                                       colorMode,
-                                       cullFaceMode,
-                                       uniformValues,
-                                       drawScopeIt->second,
-                                       allAttributeBindings.offset(segment.vertexOffset),
-                                       indexBuffer,
-                                       segment.indexOffset,
-                                       segment.indexLength) &&
-                     result;
+            if (!programBase->draw(context,
+                                   renderPass,
+                                   drawMode,
+                                   depthMode,
+                                   stencilMode,
+                                   colorMode,
+                                   cullFaceMode,
+                                   uniformValues,
+                                   drawScopeIt->second,
+                                   allAttributeBindings.offset(segment.vertexOffset),
+                                   indexBuffer,
+                                   segment.indexOffset,
+                                   segment.indexLength)) {
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 };
 
