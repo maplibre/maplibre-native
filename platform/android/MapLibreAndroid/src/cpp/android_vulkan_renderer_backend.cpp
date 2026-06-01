@@ -55,6 +55,21 @@ AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window
 
 AndroidVulkanRendererBackend::~AndroidVulkanRendererBackend() = default;
 
+bool AndroidVulkanRendererBackend::createSurface(ANativeWindow* window_) {
+    window = window_;
+    setResource(std::make_unique<AndroidVulkanRenderableResource>(*this));
+
+    initSurface();
+    initSwapchain();
+
+    return true;
+}
+
+void AndroidVulkanRendererBackend::destroySurface() {
+    window = nullptr;
+    setResource(nullptr);
+}
+
 std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
     auto extensions = mbgl::vulkan::RendererBackend::getInstanceExtensions();
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
