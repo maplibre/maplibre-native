@@ -265,11 +265,7 @@ const vk::Semaphore& SurfaceRenderableResource::getPresentSemaphore() const {
 }
 
 bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
-#ifdef __ANDROID__
     return surface && capabilities.supportedTransforms != vk::SurfaceTransformFlagBitsKHR::eIdentity;
-#else
-    return false;
-#endif
 }
 
 bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
