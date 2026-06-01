@@ -4,7 +4,7 @@ import MetalKit
 import SwiftUI
 import UIKit
 
-// #-example-code(CustomStyleLayerExample)
+/// #-example-code(CustomStyleLayerExample)
 struct CustomStyleLayerExample: UIViewRepresentable {
     func makeCoordinator() -> CustomStyleLayerExample.Coordinator {
         Coordinator(self)

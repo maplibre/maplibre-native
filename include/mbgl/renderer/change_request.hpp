@@ -34,7 +34,7 @@ protected:
 public:
     virtual ~ChangeRequest() = default;
 
-    virtual void execute(RenderOrchestrator &) = 0;
+    virtual void execute(RenderOrchestrator&) = 0;
 };
 
 /**
@@ -44,7 +44,7 @@ class RefChangeRequest : public ChangeRequest {
 protected:
     RefChangeRequest(util::SimpleIdentity id_)
         : id(id_) {}
-    RefChangeRequest(const RefChangeRequest &) = default;
+    RefChangeRequest(const RefChangeRequest&) = default;
 
     util::SimpleIdentity id;
 };
@@ -55,9 +55,9 @@ protected:
 class AddLayerGroupRequest : public ChangeRequest {
 public:
     AddLayerGroupRequest(LayerGroupBasePtr layerGroup_);
-    AddLayerGroupRequest(AddLayerGroupRequest &&other);
+    AddLayerGroupRequest(AddLayerGroupRequest&& other);
 
-    void execute(RenderOrchestrator &) override;
+    void execute(RenderOrchestrator&) override;
 
 protected:
     LayerGroupBasePtr layerGroup;
@@ -70,9 +70,9 @@ class RemoveLayerGroupRequest : public ChangeRequest {
 public:
     RemoveLayerGroupRequest(LayerGroupBasePtr layerGroup_)
         : layerGroup(std::move(layerGroup_)) {}
-    RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
+    RemoveLayerGroupRequest(const RemoveLayerGroupRequest&) = default;
 
-    void execute(RenderOrchestrator &) override;
+    void execute(RenderOrchestrator&) override;
 
 protected:
     LayerGroupBasePtr layerGroup;
@@ -81,9 +81,9 @@ protected:
 class UpdateLayerGroupIndexRequest : public ChangeRequest {
 public:
     UpdateLayerGroupIndexRequest(LayerGroupBasePtr, int32_t newLayerIndex_);
-    UpdateLayerGroupIndexRequest(const UpdateLayerGroupIndexRequest &) = delete;
+    UpdateLayerGroupIndexRequest(const UpdateLayerGroupIndexRequest&) = delete;
 
-    void execute(RenderOrchestrator &) override;
+    void execute(RenderOrchestrator&) override;
 
 protected:
     LayerGroupBasePtr layerGroup;
@@ -97,7 +97,7 @@ class AddRenderTargetRequest : public ChangeRequest {
 public:
     AddRenderTargetRequest(RenderTargetPtr renderTarget_);
 
-    void execute(RenderOrchestrator &) override;
+    void execute(RenderOrchestrator&) override;
 
 protected:
     RenderTargetPtr renderTarget;
@@ -110,7 +110,7 @@ class RemoveRenderTargetRequest : public ChangeRequest {
 public:
     RemoveRenderTargetRequest(RenderTargetPtr renderTarget_);
 
-    void execute(RenderOrchestrator &) override;
+    void execute(RenderOrchestrator&) override;
 
 protected:
     RenderTargetPtr renderTarget;
