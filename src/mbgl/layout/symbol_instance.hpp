@@ -19,7 +19,7 @@
 #endif
 
 #if MLN_SYMBOL_GUARDS
-#define SYM_GUARD_LOC MBGL_CURRENT_SOURCE_LOCATION
+#define SYM_GUARD_LOC MLN_CURRENT_SOURCE_LOCATION
 #else
 #define SYM_GUARD_LOC \
     {                 \
@@ -116,11 +116,11 @@ public:
 
 #if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
-    bool check(const SourceLocation&) const;
+    bool check(const source_location&) const;
     /// Check that an index is in the valid range
-    bool checkIndex(const std::optional<std::size_t>& index, std::size_t size, const SourceLocation&) const;
+    bool checkIndex(const std::optional<std::size_t>& index, std::size_t size, const source_location&) const;
     /// Check all indexes
-    bool checkIndexes(std::size_t textCount, std::size_t iconSize, std::size_t sdfSize, const SourceLocation&) const;
+    bool checkIndexes(std::size_t textCount, std::size_t iconSize, std::size_t sdfSize, const source_location&) const;
     /// Mark this item as failed (due to some external check) so that it cannot be used later
     void forceFail() const;
 #else
@@ -180,8 +180,8 @@ public:
 
 protected:
 #if MLN_SYMBOL_GUARDS
-    bool check(std::uint64_t v, int n, const SourceLocation&) const;
-    bool checkKey(const SourceLocation&) const;
+    bool check(std::uint64_t v, int n, const source_location&) const;
+    bool checkKey(const source_location&) const;
     void forceFailInternal(); // this is just to avoid warnings about the values never being set
 #else
     bool checkKey(std::string_view) const { return true; }

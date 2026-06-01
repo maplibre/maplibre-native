@@ -235,7 +235,7 @@ std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() cons
 }
 
 #if MLN_SYMBOL_GUARDS
-bool SymbolInstance::check(const SourceLocation& source) const {
+bool SymbolInstance::check(const source_location& source) const {
     return !isFailed && check(check01, 1, source) && check(check02, 2, source) && check(check03, 3, source) &&
            check(check04, 4, source) && check(check05, 5, source) && check(check06, 6, source) &&
            check(check07, 7, source) && check(check08, 8, source) && check(check09, 9, source) &&
@@ -251,7 +251,7 @@ bool SymbolInstance::check(const SourceLocation& source) const {
 bool SymbolInstance::checkIndexes(std::size_t textCount,
                                   std::size_t iconSize,
                                   std::size_t sdfSize,
-                                  const SourceLocation& source) const {
+                                  const source_location& source) const {
     return !isFailed && checkIndex(placedRightTextIndex, textCount, source) &&
            checkIndex(placedCenterTextIndex, textCount, source) && checkIndex(placedLeftTextIndex, textCount, source) &&
            checkIndex(placedVerticalTextIndex, textCount, source) &&
@@ -260,12 +260,12 @@ bool SymbolInstance::checkIndexes(std::size_t textCount,
 }
 
 namespace {
-inline std::string locationSuffix(const SourceLocation& source) {
+inline std::string locationSuffix(const source_location& source) {
     return std::string(" from ") + source.function_name() + " (" + source.file_name() + ":" +
            util::toString(source.line()) + ")";
 }
 } // namespace
-bool SymbolInstance::check(std::uint64_t v, int n, const SourceLocation& source) const {
+bool SymbolInstance::check(std::uint64_t v, int n, const source_location& source) const {
     if (!isFailed && v != checkVal) {
         isFailed = true;
         Log::Error(Event::Crash,
@@ -275,7 +275,7 @@ bool SymbolInstance::check(std::uint64_t v, int n, const SourceLocation& source)
     return !isFailed;
 }
 
-bool SymbolInstance::checkKey(const SourceLocation& source) const {
+bool SymbolInstance::checkKey(const source_location& source) const {
     if (!isFailed && key.size() > 10000) { // largest observed value=62
         isFailed = true;
         Log::Error(Event::Crash,
@@ -286,7 +286,7 @@ bool SymbolInstance::checkKey(const SourceLocation& source) const {
 
 bool SymbolInstance::checkIndex(const std::optional<std::size_t>& index,
                                 std::size_t size,
-                                const SourceLocation& source) const {
+                                const source_location& source) const {
     if (index.has_value() && *index >= size) {
         isFailed = true;
         Log::Error(Event::Crash,
