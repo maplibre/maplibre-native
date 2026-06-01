@@ -265,11 +265,7 @@ const vk::Semaphore& SurfaceRenderableResource::getPresentSemaphore() const {
 }
 
 bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
-#if defined(__ANDROID__) || defined(OHOS_PLATFORM)
     return surface && capabilities.supportedTransforms != vk::SurfaceTransformFlagBitsKHR::eIdentity;
-#else
-    return false;
-#endif
 }
 
 bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
@@ -280,10 +276,6 @@ bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
 }
 
 float SurfaceRenderableResource::getRotation() {
-    if (!hasSurfaceTransformSupport()) {
-        return 0.0f * M_PI / 180.0f;
-    }
-
     switch (capabilities.currentTransform) {
         default:
         case vk::SurfaceTransformFlagBitsKHR::eIdentity:
