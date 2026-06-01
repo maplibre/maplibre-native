@@ -693,7 +693,7 @@ void Context::setStencilMode(const gfx::StencilMode& stencil) {
     }
 }
 
-bool Context::hasStencilBuffer() {
+bool Context::hasStencilBuffer() const {
     GLint bits = 0;
     MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_BITS, &bits));
     return bits > 0;
