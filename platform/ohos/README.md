@@ -1,7 +1,8 @@
-# HarmonyOS
+# OpenHarmony
 
-This platform support is experimental. It targets the HarmonyOS native SDK, not
-yet OpenHarmony.
+This platform support is experimental. It targets the
+[OpenHarmony](https://en.wikipedia.org/wiki/OpenHarmony) family of operating
+systems, including [HarmonyOS](https://en.wikipedia.org/wiki/HarmonyOS).
 
 Public OpenHarmony platform documentation is available in the
 [OpenHarmony docs repository](https://github.com/openharmony/docs).
@@ -15,7 +16,6 @@ When invoking CMake directly from this repository root, set the native SDK paths
 before using the HarmonyOS presets:
 
 ```sh
-export HMOS_SDK_NATIVE=/path/to/hms/native
 export OHOS_SDK_NATIVE=/path/to/openharmony/native
 
 cmake --preset harmonyos-opengl
@@ -25,9 +25,8 @@ cmake --preset harmonyos-vulkan
 cmake --build --preset harmonyos-vulkan
 ```
 
-The HarmonyOS toolchain wraps the OHOS base toolchain, so both
-`HMOS_SDK_NATIVE` and `OHOS_SDK_NATIVE` are required. The presets are disabled
-until both variables are set.
+The presets use the OpenHarmony SDK from `OHOS_SDK_NATIVE`. They are disabled
+until that variable is set.
 
-DevEco Studio and Hvigor provide these paths from the configured HarmonyOS SDK
+DevEco Studio and Hvigor provide the native SDK path from the configured SDK
 when building `platform/ohos/sample`.

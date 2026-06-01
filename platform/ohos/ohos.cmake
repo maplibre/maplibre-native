@@ -1,12 +1,12 @@
 if(NOT CMAKE_SYSTEM_NAME STREQUAL OHOS)
-    message(FATAL_ERROR "HarmonyOS platform support requires the OHOS/HarmonyOS CMake toolchain")
+    message(FATAL_ERROR "OpenHarmony platform support requires the OpenHarmony CMake toolchain")
 endif()
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-find_library(MLN_OHOS_RCP_C_LIBRARY NAMES rcp_c REQUIRED)
+find_library(MLN_OHOS_NET_HTTP_LIBRARY NAMES net_http REQUIRED)
 
 set_source_files_properties(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
@@ -57,7 +57,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/ohos/src/http_file_source_hms_rcp.cpp
+        ${PROJECT_SOURCE_DIR}/platform/ohos/src/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/ohos/src/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/ohos/src/logging_hilog.cpp
 )
@@ -107,7 +107,7 @@ target_link_libraries(
         mbgl-vendor-sqlite
         pixelmap
         hilog_ndk.z
-        ${MLN_OHOS_RCP_C_LIBRARY}
+        ${MLN_OHOS_NET_HTTP_LIBRARY}
         uv
         z
 )

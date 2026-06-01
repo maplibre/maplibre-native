@@ -255,23 +255,12 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-harmonyos",
       "condition": {
-        "type": "allOf",
-        "conditions": [
-          {
-            "type": "notEquals",
-            "lhs": "$env{HMOS_SDK_NATIVE}",
-            "rhs": ""
-          },
-          {
-            "type": "notEquals",
-            "lhs": "$env{OHOS_SDK_NATIVE}",
-            "rhs": ""
-          }
-        ]
+        "type": "notEquals",
+        "lhs": "$env{OHOS_SDK_NATIVE}",
+        "rhs": ""
       },
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{HMOS_SDK_NATIVE}/build/cmake/hmos.toolchain.cmake",
-        "HMOS_SDK_NATIVE": "$env{HMOS_SDK_NATIVE}",
+        "CMAKE_TOOLCHAIN_FILE": "$env{OHOS_SDK_NATIVE}/build/cmake/ohos.toolchain.cmake",
         "OHOS_SDK_NATIVE": "$env{OHOS_SDK_NATIVE}",
         "OHOS_ARCH": "arm64-v8a",
         "OHOS_STL": "c++_shared",
@@ -286,14 +275,14 @@
       "inherits": "harmonyos",
       "binaryDir": "${sourceDir}/build-harmonyos-opengl",
       "displayName": "HarmonyOS OpenGL",
-      "description": "HarmonyOS GLES/EGL and HMS RCP build"
+      "description": "OpenHarmony GLES/EGL and NetworkKit HTTP build"
     },
     {
       "name": "harmonyos-vulkan",
       "inherits": "harmonyos",
       "binaryDir": "${sourceDir}/build-harmonyos-vulkan",
       "displayName": "HarmonyOS Vulkan",
-      "description": "HarmonyOS Vulkan and HMS RCP build",
+      "description": "OpenHarmony Vulkan and NetworkKit HTTP build",
       "cacheVariables": {
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
@@ -432,19 +421,9 @@
       "name": "harmonyos-build",
       "hidden": true,
       "condition": {
-        "type": "allOf",
-        "conditions": [
-          {
-            "type": "notEquals",
-            "lhs": "$env{HMOS_SDK_NATIVE}",
-            "rhs": ""
-          },
-          {
-            "type": "notEquals",
-            "lhs": "$env{OHOS_SDK_NATIVE}",
-            "rhs": ""
-          }
-        ]
+        "type": "notEquals",
+        "lhs": "$env{OHOS_SDK_NATIVE}",
+        "rhs": ""
       }
     },
     {
