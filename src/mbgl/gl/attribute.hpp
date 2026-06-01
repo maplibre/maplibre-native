@@ -5,10 +5,11 @@
 #include <mbgl/shaders/attributes.hpp>
 #include <mbgl/util/literal.hpp>
 
-#include <vector>
-#include <string>
+#include <algorithm>
 #include <optional>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 namespace mbgl {
 namespace gl {
@@ -36,9 +37,10 @@ public:
             queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())...};
     }
 
-    bool hasFirstLocation() const {
+    bool hasExpectedFirstLocation() const {
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        return locations.template get<TypeOfFirst>().has_value();
+        const auto location = locations.template get<TypeOfFirst>();
+        return location && *location == 0;
     }
 
     static constexpr const char* getFirstAttribName() {
@@ -70,13 +72,18 @@ public:
     AttributeBindingArray toBindingArray(const gfx::AttributeBindings<TypeList<As...>>& bindings) const {
         AttributeBindingArray result;
 
-        auto reserveLocation = [&](const std::optional<AttributeLocation>& location) {
-            if (location && result.size() <= *location) {
-                result.resize(*location + 1);
+        std::optional<AttributeLocation> maxLocation;
+        auto updateMaxLocation = [&](const std::optional<AttributeLocation>& location) {
+            if (location) {
+                maxLocation = maxLocation ? std::max(*maxLocation, *location) : *location;
             }
         };
 
-        util::ignore({(reserveLocation(locations.template get<As>()), 0)...});
+        util::ignore({(updateMaxLocation(locations.template get<As>()), 0)...});
+
+        if (maxLocation) {
+            result.resize(*maxLocation + 1);
+        }
 
         auto maybeAddBinding = [&](const std::optional<AttributeLocation>& location,
                                    const std::optional<gfx::AttributeBinding>& binding) {

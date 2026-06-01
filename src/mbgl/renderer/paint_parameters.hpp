@@ -97,10 +97,19 @@ public:
 
     // Stencil handling
 public:
-    /// Whether GL stencil clipping can be used for non-3D drawables in the current render target.
-    bool stencilClippingAvailable = true;
+#if MLN_RENDER_BACKEND_OPENGL
+    /// Update cached stencil availability for the currently bound GL framebuffer.
+    void updateStencilBufferAvailability();
 
-    /// @return False when the clipping mask could not be rendered and stencil clipping should be disabled.
+    /// Whether the current GL render target has a stencil buffer.
+    bool renderTargetHasStencilBuffer = true;
+
+    /// Transient GL draw state for the current layer group. GL layer groups reset this from
+    /// `renderTargetHasStencilBuffer`, then disable it if clipping-mask setup fails.
+    bool stencilClippingAvailable = true;
+#endif
+
+    /// @return True when clipping mask state is ready or no update was needed.
     bool renderTileClippingMasks(const RenderTiles&);
 
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)

@@ -64,10 +64,9 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
 
-    const bool hasStencilBuffer = context.hasStencilBuffer();
-    parameters.stencilClippingAvailable = hasStencilBuffer;
+    parameters.stencilClippingAvailable = parameters.renderTargetHasStencilBuffer;
 
-    if (getDrawableCount() && hasStencilBuffer) {
+    if (getDrawableCount() && parameters.stencilClippingAvailable) {
         MLN_TRACE_ZONE(clip masks);
 #if !defined(NDEBUG)
         const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
@@ -177,7 +176,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     auto& context = static_cast<gl::Context&>(parameters.context);
-    parameters.stencilClippingAvailable = context.hasStencilBuffer();
+    parameters.stencilClippingAvailable = parameters.renderTargetHasStencilBuffer;
     if (!parameters.stencilClippingAvailable) {
         context.setStencilMode(gfx::StencilMode::disabled());
     }
