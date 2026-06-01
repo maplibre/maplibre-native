@@ -181,21 +181,13 @@ bool createWindowEglState(EGLDisplay display,
         PixelFormatPreference{5, 6, 5, 0},
     };
 
-    static constexpr std::array<std::pair<EGLint, EGLint>, 2> apiVersions{
-        std::pair{EGL_OPENGL_ES3_BIT, 3},
-        std::pair{EGL_OPENGL_ES2_BIT, 2},
-    };
+    static constexpr EGLint renderableType = EGL_OPENGL_ES3_BIT;
+    static constexpr EGLint contextVersion = 3;
 
-    for (const auto& apiVersion : apiVersions) {
-        for (const auto& format : formats) {
-            if (tryCreateWindowSurface(
-                    display, window, apiVersion.first, apiVersion.second, format, config, context, surface)) {
-                contextClientVersion = apiVersion.second;
-                if (apiVersion.second == 2) {
-                    Log::Warning(Event::OpenGL, "Using OpenGL ES 2 EGL window surface");
-                }
-                return true;
-            }
+    for (const auto& format : formats) {
+        if (tryCreateWindowSurface(display, window, renderableType, contextVersion, format, config, context, surface)) {
+            contextClientVersion = contextVersion;
+            return true;
         }
     }
 
