@@ -128,6 +128,7 @@ VulkanWindowBackend::VulkanWindowBackend(OHNativeWindow* window_, Size size_)
         rendererDiagnostic = formatVulkanDiagnostic(*this);
         Log::Info(Event::Render, rendererDiagnostic);
     } catch (...) {
+        setResource(nullptr);
         OH_NativeWindow_NativeObjectUnreference(window);
         window = nullptr;
         throw;
@@ -138,6 +139,7 @@ VulkanWindowBackend::~VulkanWindowBackend() {
     MLN_TRACE_FUNC();
 
     context.reset();
+    setResource(nullptr);
     if (window != nullptr) {
         OH_NativeWindow_NativeObjectUnreference(window);
         window = nullptr;
