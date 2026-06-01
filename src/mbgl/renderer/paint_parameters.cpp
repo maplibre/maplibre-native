@@ -184,8 +184,12 @@ void PaintParameters::clearStencil() {
 
 bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     // We can avoid updating the mask if it already contains the same set of tiles.
-    if (!renderTiles || !renderPass || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
+    if (!renderTiles || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         return true;
+    }
+
+    if (!renderPass) {
+        return false;
     }
 
     tileClippingMaskIDs.clear();

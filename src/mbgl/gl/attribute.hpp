@@ -37,9 +37,10 @@ public:
             queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())...};
     }
 
-    bool hasFirstLocation() const {
+    bool hasExpectedFirstLocation() const {
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        return locations.template get<TypeOfFirst>().has_value();
+        const auto location = locations.template get<TypeOfFirst>();
+        return location && *location == 0;
     }
 
     static constexpr const char* getFirstAttribName() {

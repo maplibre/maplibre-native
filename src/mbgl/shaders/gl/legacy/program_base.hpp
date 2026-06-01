@@ -47,8 +47,8 @@ public:
                                             context.createShader(ShaderType::Fragment, fragmentSource),
                                             attributeLocations.getFirstAttribName())) {
             attributeLocations.queryLocations(program);
-            if (!attributeLocations.hasFirstLocation()) {
-                throw std::runtime_error("Shader is missing active attribute " +
+            if (!attributeLocations.hasExpectedFirstLocation()) {
+                throw std::runtime_error("Shader is missing active attribute at location 0: " +
                                          std::string(attributeLocations.getFirstAttribName()));
             }
             uniformStates.queryLocations(program);

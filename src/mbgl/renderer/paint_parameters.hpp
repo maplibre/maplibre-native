@@ -109,7 +109,7 @@ public:
     bool stencilClippingAvailable = true;
 #endif
 
-    /// @return True when the clipping mask was rendered successfully.
+    /// @return True when clipping mask state is ready or no update was needed.
     bool renderTileClippingMasks(const RenderTiles&);
 
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
