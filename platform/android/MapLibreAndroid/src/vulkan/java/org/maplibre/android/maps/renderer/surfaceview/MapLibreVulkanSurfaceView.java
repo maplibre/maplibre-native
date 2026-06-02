@@ -64,7 +64,7 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
             if (!hasSurface && !waitingForSurface) {
               MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
               if (view != null && graphicsSurfaceCreated) {
-                  view.renderer.onSurfaceDestroyed();
+                view.renderer.onSurfaceDestroyed();
               }
               graphicsSurfaceCreated = false;
               waitingForSurface = true;
