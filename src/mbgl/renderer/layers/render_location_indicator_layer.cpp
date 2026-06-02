@@ -466,7 +466,7 @@ public:
                 textureInfo.assign(*sharedImage);
                 updated = true;
             }
-        } else if (textureInfo.image) {
+        } else if (textureInfo.image || textureInfo.texture) {
             textureInfo.reset();
             updated = true;
         }
