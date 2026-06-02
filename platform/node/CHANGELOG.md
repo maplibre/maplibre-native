@@ -5,6 +5,16 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+- Update node support to v26, remove node v20, update NAN to 2.27.0 ([#4322](https://github.com/maplibre/maplibre-native/pull/4322)) (by [@acalcutt](https://github.com/acalcutt))
+- core: Add source location fallback ([#4318](https://github.com/maplibre/maplibre-native/pull/4318)) (by [@sargunv](https://github.com/sargunv))
+- core: Update Vulkan headers ([#4319](https://github.com/maplibre/maplibre-native/pull/4319)) (by [@sargunv](https://github.com/sargunv))
+- core: Enable Vulkan surface transforms by capability ([#4320](https://github.com/maplibre/maplibre-native/pull/4320)) (by [@sargunv](https://github.com/sargunv))
+- Fix mlt and icu not included in the macOS amalgamation ([#4316](https://github.com/maplibre/maplibre-native/pull/4316)) (by [@ciscorn](https://github.com/ciscorn))
+## 6.5.0-pre.0
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
 ## 6.4.1
 ### 🐞 Bug fixes
 - core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
