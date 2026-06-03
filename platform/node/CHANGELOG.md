@@ -5,6 +5,10 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+## 6.5.0-pre.0
+### ✨ Features and improvements
+- Update node support to v26, remove node v20, update NAN to 2.27.0 ([#4322](https://github.com/maplibre/maplibre-native/pull/4322)) (by [@acalcutt](https://github.com/acalcutt))
+
 ## 6.4.1
 ### 🐞 Bug fixes
 - core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
