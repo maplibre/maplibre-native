@@ -43,6 +43,9 @@ protected:
     void initSwapchain(uint32_t w, uint32_t h);
 
     void initDepthStencil();
+    void initRenderPass();
+    void setColorFormat(vk::Format format);
+    void setDepthFormat(vk::Format format);
 
     void swap() override;
 
