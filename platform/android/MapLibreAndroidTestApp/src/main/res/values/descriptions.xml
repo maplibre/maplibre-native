@@ -82,6 +82,7 @@
     <string name="description_surfaceview_resize">Resize a map rendered on a SurfaceView</string>
     <string name="description_overlay">Blend an overlay on a map</string>
     <string name="description_grid_source">Example Custom Geometry Source</string>
+    <string name="description_custom_vector_source">CustomVectorSource with synthetic MVT tiles</string>
     <string name="description_no_style">Load a map without providing a style URI or JSON</string>
     <string name="description_vector_tile">Load MVT data</string>
     <string name="description_local_glyph">Suzhou using Droid Sans for Chinese glyphs</string>
