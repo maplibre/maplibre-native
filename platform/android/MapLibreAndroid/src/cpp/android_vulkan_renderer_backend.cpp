@@ -63,7 +63,6 @@ std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
 }
 
 void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
-    size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     if (context) {
         static_cast<vulkan::Context&>(*context).requestSurfaceUpdate();
     }
