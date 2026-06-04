@@ -9,6 +9,7 @@
 #include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
+#include <mbgl/renderer/sources/render_custom_vector_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/constants.hpp>
@@ -52,6 +53,9 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
         case SourceType::CustomVector:
             return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl),
                                                                 std::move(threadPool_));
+        case SourceType::CustomMVTVector:
+            return std::make_unique<RenderCustomVectorSource>(staticImmutableCast<CustomVectorSource::Impl>(impl),
+                                                              std::move(threadPool_));
     }
 
     // Not reachable, but placate GCC.

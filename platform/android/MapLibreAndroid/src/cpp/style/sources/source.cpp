@@ -17,6 +17,7 @@
 #include <string>
 
 // Core Sources
+#include <mbgl/style/sources/custom_vector_source.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/sources/raster_source.hpp>
@@ -29,6 +30,7 @@
 #include "unknown_source.hpp"
 #include "vector_source.hpp"
 #include "custom_geometry_source.hpp"
+#include "custom_vector_source.hpp"
 #include "raster_dem_source.hpp"
 
 namespace mbgl {
@@ -251,6 +253,7 @@ void Source::registerNative(jni::JNIEnv& env) {
     UnknownSource::registerNative(env);
     VectorSource::registerNative(env);
     CustomGeometrySource::registerNative(env);
+    CustomVectorSource::registerNative(env);
     RasterDEMSource::registerNative(env);
 }
 } // namespace android

@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.okhttp3)
     implementation(libs.timber)
     implementation(libs.interpolator)
+    implementation(libs.kotlinxCoroutinesCore)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito)
