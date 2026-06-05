@@ -92,9 +92,17 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         }
     }
 
-    // pick surface size
+    vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+
     capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), dispatcher);
 
+    // when reading from the swapchain disable pre-rotation and enable source transfer usage
+    if (surfaceRead) {
+        capabilities.currentTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
+        imageUsage |= vk::ImageUsageFlagBits::eTransferSrc;
+    }
+
+    // pick surface size
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         extent = capabilities.currentExtent;
     } else {
@@ -124,7 +132,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
                                    .setPresentMode(presentMode)
                                    .setImageExtent(extent)
                                    .setImageArrayLayers(1)
-                                   .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
+                                   .setImageUsage(imageUsage);
 
     int32_t graphicsQueueIndex = backend.getGraphicsQueueIndex();
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
@@ -449,8 +457,95 @@ void SurfaceRenderableResource::recreateSwapchain() {
     init(extent.width, extent.height);
 }
 
-const vk::UniqueFramebuffer& SurfaceRenderableResource::getFramebuffer() const {
-    return swapchainFramebuffers[acquiredImageIndex];
+void SurfaceRenderableResource::enableSurfaceRead(bool value) {
+    if (surfaceRead == value) {
+        return;
+    }
+
+    surfaceRead = value;
+    backend.getContext<Context>().requestSurfaceUpdate(false);
+}
+
+std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
+    auto& contextImpl = backend.getContext<Context>();
+    const auto& dispatcher = backend.getDispatcher();
+    const auto& physicalDevice = backend.getPhysicalDevice();
+
+    auto texture = std::make_unique<Texture2D>(contextImpl);
+    texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
+    texture->setUsage(Texture2DUsage::Read);
+    texture->setSize({extent.width, extent.height});
+
+    contextImpl.waitFrame();
+
+    const auto swapchainImage = getAcquiredImage();
+
+    if (surface) {
+        contextImpl.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& buffer) {
+            const auto barrier = vk::ImageMemoryBarrier()
+                                     .setImage(swapchainImage)
+                                     .setOldLayout(vk::ImageLayout::ePresentSrcKHR)
+                                     .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                     .setSrcAccessMask({})
+                                     .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+            buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                                    vk::PipelineStageFlagBits::eTransfer,
+                                    {},
+                                    nullptr,
+                                    nullptr,
+                                    barrier,
+                                    dispatcher);
+        });
+    }
+
+    bool useBlit = surface &&
+                   (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
+                        vk::FormatFeatureFlagBits::eBlitSrc &&
+                    physicalDevice.getFormatProperties(texture->getVulkanFormat(), dispatcher).linearTilingFeatures &
+                        vk::FormatFeatureFlagBits::eBlitDst);
+
+    if (useBlit) {
+        texture->blitImage(swapchainImage, texture->getSize());
+    } else {
+        texture->copyImage(swapchainImage, texture->getSize());
+    }
+
+    if (surface) {
+        contextImpl.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& buffer) {
+            const auto barrier = vk::ImageMemoryBarrier()
+                                     .setImage(swapchainImage)
+                                     .setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                     .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
+                                     .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)
+                                     .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+            buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                                    vk::PipelineStageFlagBits::eTransfer,
+                                    {},
+                                    nullptr,
+                                    nullptr,
+                                    barrier,
+                                    dispatcher);
+        });
+    }
+
+    const auto image = texture->readImage();
+
+    // swizzle pixels to RGBA
+    if (!useBlit && colorFormat == vk::Format::eB8G8R8A8Unorm) {
+        for (size_t i = 0, size = image->size.area(); i < size; ++i) {
+            std::swap(image->data[i * image->channels + 0], image->data[i * image->channels + 2]);
+        }
+    }
+
+    return image;
 }
 
 } // namespace vulkan

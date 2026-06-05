@@ -24,6 +24,7 @@ public:
     std::vector<const char*> getInstanceExtensions() override;
 
     void resizeFramebuffer(int width, int height) override;
+    void enableFramebufferRead(bool value) override;
     PremultipliedImage readFramebuffer() override;
 
     // mbgl::gfx::RendererBackend implementation

@@ -31,6 +31,7 @@ public:
     virtual void destroySurface() {}
 
     virtual void resizeFramebuffer(int width, int height);
+    virtual void enableFramebufferRead(bool value) {}
     virtual PremultipliedImage readFramebuffer();
 
     gfx::Renderable::SwapBehaviour getSwapBehavior() const { return swapBehaviour; }

@@ -55,7 +55,8 @@ public:
 
     const vk::UniqueSurfaceKHR& getPlatformSurface() const { return surface; }
     const vk::UniqueSwapchainKHR& getSwapchain() const { return swapchain; }
-    const vk::UniqueFramebuffer& getFramebuffer() const override;
+    const vk::UniqueFramebuffer& getFramebuffer() const override { return swapchainFramebuffers[acquiredImageIndex]; }
+    vk::Format getColorFormat() const { return colorFormat; }
 
     uint32_t getImageCount() const { return static_cast<uint32_t>(swapchainFramebuffers.size()); };
     uint32_t getAcquiredImageIndex() const { return acquiredImageIndex; };
@@ -75,6 +76,9 @@ public:
 
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
+
+    void enableSurfaceRead(bool value = true);
+    std::shared_ptr<PremultipliedImage> readImage();
 
 protected:
     vk::UniqueSurfaceKHR surface;
@@ -99,6 +103,7 @@ protected:
     vk::Format depthFormat{vk::Format::eUndefined};
 
     int32_t surfaceTransformPollingInterval{-1};
+    bool surfaceRead{false};
 };
 
 class Renderable : public gfx::Renderable {

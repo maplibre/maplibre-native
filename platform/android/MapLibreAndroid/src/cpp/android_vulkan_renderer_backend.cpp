@@ -83,9 +83,12 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int, int) {
     }
 }
 
+void AndroidVulkanRendererBackend::enableFramebufferRead(bool value) {
+    getResource<AndroidVulkanRenderableResource>().enableSurfaceRead();
+}
+
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
-    // TODO not implemented
-    return PremultipliedImage(Size(2, 2));
+    return std::move(*getResource<AndroidVulkanRenderableResource>().readImage());
 }
 
 } // namespace android
