@@ -27,6 +27,9 @@ public:
     // Ensures the current context is not cleaned up when destroyed
     virtual void markContextLost();
 
+    virtual bool createSurface(ANativeWindow*) { return false; }
+    virtual void destroySurface() {}
+
     virtual void resizeFramebuffer(int width, int height);
     virtual PremultipliedImage readFramebuffer();
 

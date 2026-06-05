@@ -35,7 +35,6 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
 
       boolean sizeChanged = false;
       boolean initSurface = false;
-      boolean destroySurface = false;
       boolean wantRenderNotification = false;
       boolean doRenderNotification = false;
       int w = 0;
@@ -64,10 +63,10 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
             // lost surface
             if (!hasSurface && !waitingForSurface) {
               MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-              if (view != null) {
-                destroySurface = true;
-                graphicsSurfaceCreated = false;
+              if (view != null && graphicsSurfaceCreated) {
+                view.renderer.onSurfaceDestroyed();
               }
+              graphicsSurfaceCreated = false;
               waitingForSurface = true;
               renderThreadManager.notifyAll();
             }
@@ -127,15 +126,6 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
           event.run();
           event = null;
           continue;
-        }
-
-        if (destroySurface) {
-          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onSurfaceDestroyed();
-            destroySurface = false;
-            continue;
-          }
         }
 
         if (initSurface) {

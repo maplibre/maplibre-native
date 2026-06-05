@@ -16,6 +16,9 @@ public:
     ~AndroidVulkanRendererBackend() override;
 
     ANativeWindow* getWindow() { return window; }
+    bool createSurface(ANativeWindow* window) override;
+    void destroySurface() override;
+
     mbgl::gfx::RendererBackend& getImpl() override { return *this; }
 
     std::vector<const char*> getInstanceExtensions() override;
