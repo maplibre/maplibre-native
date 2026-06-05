@@ -454,6 +454,15 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
     return ret;
 }
 
+bool Map::isLatLngOnScreen(const LatLng& latLng) const {
+    const double epsilon = 0.5;
+    ScreenCoordinate pixel = pixelForLatLng(latLng);
+    Size size = getTransfromState().getSize();
+    double w = size.width;
+    double h = size.height;
+    return pixel.x >= -epsilon && pixel.y >= -epsilon && pixel.x <= w + epsilon && pixel.y <= h + epsilon;
+}
+
 // MARK: - Transform
 
 TransformState Map::getTransfromState() const {
