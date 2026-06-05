@@ -39,8 +39,47 @@ jobs:
     outputs:
       published: ${{ steps.check.outputs.published }}
 
-  publish_binaries:
+  create_release:
+    name: Create draft release
     needs: release-check
+    if: ${{ needs.release-check.outputs.published == 'false' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
+      - name: Get version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
+        with:
+          path: platform/node
+
+      - name: Check if prerelease
+        id: prerelease-check
+        run: |
+          if [[ "${{ steps.package-version.outputs.current-version }}" == *"-"* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft release
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
+        with:
+          tag: node-v${{ steps.package-version.outputs.current-version }}
+          name: node-v${{ steps.package-version.outputs.current-version }}
+          draft: true
+          allowUpdates: true
+          prerelease: ${{ steps.prerelease-check.outputs.prerelease }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_binaries:
+    needs: [release-check, create_release]
     if: ${{ needs.release-check.outputs.published == 'false' }}
     runs-on: ${{ matrix.runs-on }}
     permissions:
@@ -232,7 +271,7 @@ jobs:
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./scripts/publish.sh
 
@@ -242,7 +281,7 @@ jobs:
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./scripts/publish.sh --target_arch=arm64
 
