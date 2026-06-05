@@ -767,8 +767,23 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
     const auto pushConstant = vk::PushConstantRange().setSize(sizeof(matf4)).setStageFlags(stages);
 
+    auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
+
+#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+    // GPU assisted validation crashes when using a pipeline without descriptors.
+    // Use a compatible layout with the general pipeline when enabled
+    const std::vector<vk::DescriptorSetLayout> layouts = {
+        globalUniformDescriptorSetLayout.get(),
+        layerUniformDescriptorSetLayout.get(),
+        drawableUniformDescriptorSetLayout.get(),
+        drawableImageDescriptorSetLayout.get(),
+    };
+
+    layoutInfo.setSetLayouts(layouts);
+#endif
+
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant), nullptr, backend.getDispatcher());
+        layoutInfo, nullptr, backend.getDispatcher());
 
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 

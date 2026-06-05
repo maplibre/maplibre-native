@@ -438,10 +438,13 @@ void RendererBackend::initInstance() {
     extensions.insert(extensions.end(), debugExtensions.begin(), debugExtensions.end());
 
 #ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
-    appInfo.setApiVersion(VK_API_VERSION_1_1);
+    appInfo.setApiVersion(VK_API_VERSION_1_2);
 
-    const std::array<vk::ValidationFeatureEnableEXT, 2> validationFeatures = {
-        vk::ValidationFeatureEnableEXT::eGpuAssisted, vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot};
+    const std::vector<vk::ValidationFeatureEnableEXT> validationFeatures = {
+        vk::ValidationFeatureEnableEXT::eGpuAssisted,
+        vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot,
+        vk::ValidationFeatureEnableEXT::eSynchronizationValidation,
+    };
     const vk::ValidationFeaturesEXT validationFeatureInfo(validationFeatures);
 
     createInfo.setPNext(&validationFeatureInfo);
@@ -600,6 +603,14 @@ void RendererBackend::initDevice() {
                           .setQueueCreateInfos(queueCreateInfos)
                           .setPEnabledExtensionNames(extensions)
                           .setPEnabledFeatures(&physicalDeviceFeatures);
+
+#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+    vk::PhysicalDeviceVulkan12Features extraFeatures;
+    extraFeatures.setBufferDeviceAddress(true);
+    extraFeatures.setTimelineSemaphore(true);
+
+    createInfo.setPNext(&extraFeatures);
+#endif
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);
