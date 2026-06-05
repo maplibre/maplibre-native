@@ -53,7 +53,8 @@ jobs:
       - name: Check if prerelease
         id: prerelease-check
         run: |
-          if [[ "${{ needs.release-check.outputs.version }}" == *"-"* ]]; then
+          version="${{ needs.release-check.outputs.version }}"
+          if [[ "$version" == *-* ]]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
