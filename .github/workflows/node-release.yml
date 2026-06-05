@@ -279,7 +279,7 @@ jobs:
 
   publish_npm:
     runs-on: ubuntu-latest
-    needs: publish_binaries
+    needs: [publish_binaries, release-check]
     defaults:
       run:
         shell: bash
@@ -295,12 +295,6 @@ jobs:
           node-version-file: 'platform/node/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Get version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
-        with:
-          path: platform/node
-
       - name: npm ci
         working-directory: platform/node
         run: npm ci --ignore-scripts
@@ -309,7 +303,7 @@ jobs:
         id: prepare_release
         working-directory: platform/node
         run: |
-          RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
+          RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ needs.release-check.outputs.version }}') ? 'prerelease' : 'regular')")"
           if [[ $RELEASE_TYPE == 'regular' ]]; then
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           else
@@ -319,7 +313,7 @@ jobs:
       - name: Extract changelog for version
         working-directory: platform/node
         run: |
-          awk -v ver="## ${{ steps.package-version.outputs.current-version }}" 'BEGIN{p=0} $0==ver{p=1; next} /^## / && p==1{exit} p==1{print}' CHANGELOG.md > changelog_for_version.md
+          awk -v ver="## ${{ needs.release-check.outputs.version }}" 'BEGIN{p=0} $0==ver{p=1; next} /^## / && p==1{exit} p==1{print}' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
 
       - name: Update Release Notes
@@ -328,8 +322,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag: node-v${{ steps.package-version.outputs.current-version }}
-          name: node-v${{ steps.package-version.outputs.current-version }}
+          tag: node-v${{ needs.release-check.outputs.version }}
+          name: node-v${{ needs.release-check.outputs.version }}
           bodyFile: platform/node/changelog_for_version.md
           allowUpdates: true
           draft: true
