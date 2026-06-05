@@ -50,6 +50,10 @@ jobs:
       run:
         shell: bash
     steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          persist-credentials: false
+
       - name: Check if prerelease
         id: prerelease-check
         run: |
@@ -60,11 +64,18 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Extract changelog for version
+        working-directory: platform/node
+        run: |
+          awk -v ver="## ${{ needs.release-check.outputs.version }}" 'BEGIN{p=0} $0==ver{p=1; next} /^## / && p==1{exit} p==1{print}' CHANGELOG.md > changelog_for_version.md
+          cat changelog_for_version.md
+
       - name: Create draft release
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           tag: node-v${{ needs.release-check.outputs.version }}
           name: node-v${{ needs.release-check.outputs.version }}
+          bodyFile: platform/node/changelog_for_version.md
           draft: true
           allowUpdates: true
           prerelease: ${{ steps.prerelease-check.outputs.prerelease }}
@@ -302,33 +313,13 @@ jobs:
 
       - name: Prepare release
         id: prepare_release
-        working-directory: platform/node
         run: |
-          RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ needs.release-check.outputs.version }}') ? 'prerelease' : 'regular')")"
-          if [[ $RELEASE_TYPE == 'regular' ]]; then
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          else
+          version="${{ needs.release-check.outputs.version }}"
+          if [[ "$version" == *-* ]]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Extract changelog for version
-        working-directory: platform/node
-        run: |
-          awk -v ver="## ${{ needs.release-check.outputs.version }}" 'BEGIN{p=0} $0==ver{p=1; next} /^## / && p==1{exit} p==1{print}' CHANGELOG.md > changelog_for_version.md
-          cat changelog_for_version.md
-
-      - name: Update Release Notes
-        id: update_release_notes
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag: node-v${{ needs.release-check.outputs.version }}
-          name: node-v${{ needs.release-check.outputs.version }}
-          bodyFile: platform/node/changelog_for_version.md
-          allowUpdates: true
-          draft: true
-          prerelease: ${{ steps.prepare_release.outputs.prerelease }}
 
       - name: Publish to NPM (release)
         if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
