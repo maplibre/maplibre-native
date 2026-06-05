@@ -34,10 +34,12 @@ jobs:
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
           isPublished="$( npm view "$packageName" versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
           echo "published=$isPublished" >> "$GITHUB_OUTPUT"
+          echo "version=$currentVersion" >> "$GITHUB_OUTPUT"
           echo "currentVersion: $currentVersion"
           echo "isPublished: $isPublished"
     outputs:
       published: ${{ steps.check.outputs.published }}
+      version: ${{ steps.check.outputs.version }}
 
   create_release:
     name: Create draft release
@@ -48,20 +50,10 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
-        with:
-          persist-credentials: false
-
-      - name: Get version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
-        with:
-          path: platform/node
-
       - name: Check if prerelease
         id: prerelease-check
         run: |
-          if [[ "${{ steps.package-version.outputs.current-version }}" == *"-"* ]]; then
+          if [[ "${{ needs.release-check.outputs.version }}" == *"-"* ]]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
@@ -70,8 +62,8 @@ jobs:
       - name: Create draft release
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
-          tag: node-v${{ steps.package-version.outputs.current-version }}
-          name: node-v${{ steps.package-version.outputs.current-version }}
+          tag: node-v${{ needs.release-check.outputs.version }}
+          name: node-v${{ needs.release-check.outputs.version }}
           draft: true
           allowUpdates: true
           prerelease: ${{ steps.prerelease-check.outputs.prerelease }}
