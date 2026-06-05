@@ -15,6 +15,17 @@
         app:maplibre_renderTextureMode="true"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAnimatedResize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_marginLeft="@dimen/fab_margin"
+        android:src="@drawable/ic_animate_coordinates"
+        app:backgroundTint="@color/blueAccent"
+        app:layout_anchorGravity="bottom"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabResize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

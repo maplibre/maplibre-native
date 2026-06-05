@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
+#include <mbgl/gfx/upload_pass.hpp>
 
 #include <memory>
 
@@ -52,6 +53,7 @@ public:
                                 std::size_t segmentCount) override;
 
 protected:
+    void setSharedBuffers(const gfx::VertexAttributeArray&, const gfx::AttributeBindingArray&);
     void buildVulkanInputBindings();
 
     bool bindAttributes(CommandEncoder&) const;
