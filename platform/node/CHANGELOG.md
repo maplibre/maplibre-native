@@ -5,6 +5,17 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
+- replace node-pre-gyp-github with gh release ([#4329](https://github.com/maplibre/maplibre-native/pull/4329)) (by [@acalcutt](https://github.com/acalcutt))
+- Bump js version to 6.5.0-pre.0 ([#4325](https://github.com/maplibre/maplibre-native/pull/4325)) (by [@app/github-actions](https://github.com/app/github-actions))
+- core: Add source location fallback ([#4318](https://github.com/maplibre/maplibre-native/pull/4318)) (by [@sargunv](https://github.com/sargunv))
+- core: Update Vulkan headers ([#4319](https://github.com/maplibre/maplibre-native/pull/4319)) (by [@sargunv](https://github.com/sargunv))
+- core: Enable Vulkan surface transforms by capability ([#4320](https://github.com/maplibre/maplibre-native/pull/4320)) (by [@sargunv](https://github.com/sargunv))
+- Fix mlt and icu not included in the macOS amalgamation ([#4316](https://github.com/maplibre/maplibre-native/pull/4316)) (by [@ciscorn](https://github.com/ciscorn))
+## 6.5.0-pre.1
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
 ## 6.5.0-pre.0
 ### ✨ Features and improvements
 - Update node support to v26, remove node v20, update NAN to 2.27.0 ([#4322](https://github.com/maplibre/maplibre-native/pull/4322)) (by [@acalcutt](https://github.com/acalcutt))
