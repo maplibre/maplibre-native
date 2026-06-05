@@ -52,8 +52,10 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _enco
 void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy) {
     auto& o = borderTileData;
 
-    // Tiles from the same source should always be of the same dimensions.
-    assert(dim == o.dim);
+    assert(dim == o.dim); // debug: catch mismatched tile dimensions early
+    if (dim != o.dim) {   // release: assert is gone, prevent out-of-bounds read
+        return;
+    }
 
     // We determine the pixel range to backfill based which corner/edge
     // `borderTileData` represents. For example, dx = -1, dy = -1 represents the
