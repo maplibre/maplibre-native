@@ -21,10 +21,18 @@ public:
     VertexAttribute(const VertexAttribute& other) = delete;
     ~VertexAttribute() override = default;
 
+    void setUBO(int value) { ubo = value; }
+    int getUBO() const { return ubo; }
+
+    size_t getBufferUsage() const;
+
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
-                                                            const gfx::BufferUsageType,
+                                                            size_t,
                                                             bool forceUpdate);
+
+protected:
+    int ubo = -1;
 };
 
 /// Stores a collection of vertex attributes by name

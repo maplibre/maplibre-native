@@ -6,7 +6,7 @@
 namespace mbgl {
 namespace shaders {
 
-constexpr auto customGeometryShaderPrelude = R"(#define idCustomGeometryDrawableUBO  drawableReservedUBOCount)";
+constexpr auto customGeometryShaderPrelude = R"(#define idCustomGeometryDrawableUBO  drawableUBOStartId)";
 
 template <>
 struct ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::Vulkan> {
