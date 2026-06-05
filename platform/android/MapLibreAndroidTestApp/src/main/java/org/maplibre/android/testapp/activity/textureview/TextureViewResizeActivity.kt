@@ -1,5 +1,6 @@
 package org.maplibre.android.testapp.activity.textureview
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,8 @@ import org.maplibre.android.testapp.styles.TestStyles
  */
 class TextureViewResizeActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
+    private var animatedValue: ValueAnimator? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_textureview_resize)
@@ -43,12 +46,55 @@ class TextureViewResizeActivity : AppCompatActivity() {
     private fun setupFab() {
         val fabDebug = findViewById<FloatingActionButton>(R.id.fabResize)
         fabDebug.setOnClickListener { view: View? ->
+            val parent = findViewById<View>(R.id.coordinator_layout)
+            val params = mapView.layoutParams
+
+            if (animatedValue != null) {
+                animatedValue?.cancel()
+                animatedValue = null
+
+                params.width = parent.width
+                params.height = parent.height
+            }
+
             if (this::mapView.isInitialized) {
-                val parent = findViewById<View>(R.id.coordinator_layout)
-                val width = if (parent.width == mapView.width) parent.width / 2 else parent.width
-                val height =
-                    if (parent.height == mapView.height) parent.height / 2 else parent.height
-                mapView.layoutParams = CoordinatorLayout.LayoutParams(width, height)
+                params.width = if (parent.width == params.width) parent.width / 2 else parent.width
+                params.height =
+                    if (parent.height == params.height) parent.height / 2 else parent.height
+            }
+
+            mapView.requestLayout()
+        }
+
+        val fabAnimatedDebug = findViewById<FloatingActionButton>(R.id.fabAnimatedResize)
+        fabAnimatedDebug.setOnClickListener { view: View? ->
+            val parent = findViewById<View>(R.id.coordinator_layout)
+
+            if (animatedValue != null) {
+                animatedValue?.cancel()
+                animatedValue = null
+
+                mapView.layoutParams.width = parent.width
+                mapView.layoutParams.height = parent.height
+                mapView.requestLayout()
+            } else if (this::mapView.isInitialized) {
+                val minValue = parent.height / 2
+                val maxValue = parent.height
+
+                animatedValue = ValueAnimator.ofInt(maxValue, minValue)
+                animatedValue?.apply {
+                    duration = 1000
+                    repeatCount = ValueAnimator.INFINITE
+                    repeatMode = ValueAnimator.REVERSE
+
+                    addUpdateListener { animator ->
+                        val height = animator.animatedValue as Int
+                        mapView.layoutParams.height = height
+                        mapView.requestLayout()
+                    }
+
+                    start()
+                }
             }
         }
     }

@@ -31,7 +31,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     colorAllocations.reserve(imageCount);
     swapchainImages.reserve(imageCount);
 
-    colorFormat = vk::Format::eR8G8B8A8Unorm;
+    setColorFormat(vk::Format::eR8G8B8A8Unorm);
     extent = vk::Extent2D(w, h);
 
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
@@ -156,7 +156,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo, nullptr, dispatcher);
     swapchainImages = device->getSwapchainImagesKHR(swapchain.get(), dispatcher);
 
-    colorFormat = swapchainCreateInfo.imageFormat;
+    setColorFormat(swapchainCreateInfo.imageFormat);
     extent = swapchainCreateInfo.imageExtent;
 
     acquireSemaphores.reserve(swapchainImages.size());
@@ -193,7 +193,7 @@ void SurfaceRenderableResource::initDepthStencil() {
         return;
     }
 
-    depthFormat = *formatIt;
+    setDepthFormat(*formatIt);
 
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eDepthStencilAttachment |
                             vk::ImageUsageFlagBits::eTransientAttachment;
@@ -240,6 +240,94 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     backend.setDebugName(depthAllocation->image, "SwapchainDepthImage");
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
+}
+
+void SurfaceRenderableResource::initRenderPass() {
+    // The current render pass should be invalidated if:
+    // - color/depth format changes (use setColorFormat/setDepthFormat)
+    // - renderable resource type changes
+    // - this is done currently only by inheritance and it can't change during runtime
+
+    if (renderPass) {
+        return;
+    }
+
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+    const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
+
+    const std::array<vk::AttachmentDescription, 2> attachments = {
+        vk::AttachmentDescription()
+            .setFormat(colorFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eStore)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(colorLayout),
+
+        vk::AttachmentDescription()
+            .setFormat(depthFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
+
+    const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
+    const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+    const auto subpass = vk::SubpassDescription()
+                             .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+                             .setColorAttachmentCount(1)
+                             .setColorAttachments(colorAttachmentRef)
+                             .setPDepthStencilAttachment(&depthAttachmentRef);
+
+    const std::array<vk::SubpassDependency, 2> dependencies = {
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setSrcAccessMask({})
+            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
+
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setSrcAccessMask({})
+            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
+    };
+
+    const auto renderPassCreateInfo =
+        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
+
+    renderPass = device->createRenderPassUnique(renderPassCreateInfo, nullptr, dispatcher);
+}
+
+void SurfaceRenderableResource::setColorFormat(vk::Format format) {
+    if (colorFormat == format) {
+        return;
+    }
+
+    renderPass.reset();
+    colorFormat = format;
+}
+
+void SurfaceRenderableResource::setDepthFormat(vk::Format format) {
+    if (depthFormat == format) {
+        return;
+    }
+
+    renderPass.reset();
+    depthFormat = format;
 }
 
 void SurfaceRenderableResource::swap() {
@@ -327,62 +415,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     initDepthStencil();
 
     // create render pass
-    const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
-
-    const std::array<vk::AttachmentDescription, 2> attachments = {
-        vk::AttachmentDescription()
-            .setFormat(colorFormat)
-            .setSamples(vk::SampleCountFlagBits::e1)
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eStore)
-            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setFinalLayout(colorLayout),
-
-        vk::AttachmentDescription()
-            .setFormat(depthFormat)
-            .setSamples(vk::SampleCountFlagBits::e1)
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
-
-    const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
-    const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-    const auto subpass = vk::SubpassDescription()
-                             .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-                             .setColorAttachmentCount(1)
-                             .setColorAttachments(colorAttachmentRef)
-                             .setPDepthStencilAttachment(&depthAttachmentRef);
-
-    const std::array<vk::SubpassDependency, 2> dependencies = {
-        vk::SubpassDependency()
-            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-            .setDstSubpass(0)
-            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
-
-        vk::SubpassDependency()
-            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-            .setDstSubpass(0)
-            .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
-                             vk::PipelineStageFlagBits::eLateFragmentTests)
-            .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
-                             vk::PipelineStageFlagBits::eLateFragmentTests)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
-    };
-
-    const auto renderPassCreateInfo =
-        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
-
-    renderPass = device->createRenderPassUnique(renderPassCreateInfo, nullptr, dispatcher);
+    initRenderPass();
 
     // create swapchain framebuffers
     swapchainFramebuffers.reserve(swapchainImageViews.size());
@@ -408,7 +441,6 @@ void SurfaceRenderableResource::recreateSwapchain() {
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
     swapchainFramebuffers.clear();
-    renderPass.reset();
     swapchainImageViews.clear();
     swapchainImages.clear();
     acquireSemaphores.clear();
