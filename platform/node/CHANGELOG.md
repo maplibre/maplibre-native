@@ -2,6 +2,9 @@
 ### ✨ Features and improvements
 - _...Add new stuff here..._
 
+### 🐞 Bug fixes
+- _...Add new stuff here..._
+
 ## 6.5.0-pre.1
 ### ✨ Features and improvements
 - Update node support to v26, remove node v20, update NAN to 2.27.0 ([#4322](https://github.com/maplibre/maplibre-native/pull/4322)) (by [@acalcutt](https://github.com/acalcutt))
