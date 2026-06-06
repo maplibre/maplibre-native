@@ -62,7 +62,7 @@ public:
      *
      * Note: in future, annotations implemantation will be moved from the core
      * to platform SDK (see
-     * https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation)
+     * https://github.com/maplibre/maplibre-plugins-android)
      * and this flag won't be needed any more.
      */
     static const bool annotationsEnabled;

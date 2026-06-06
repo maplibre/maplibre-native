@@ -29,6 +29,7 @@
 
 - *...Add new stuff here...*
 - [core] Fix thread-unsafe headless EGL display initialization [#4332](https://github.com/maplibre/maplibre-native/pull/4332)
+- [macos] Fix `mlt-cpp` and `mbgl-vendor-icu` not being included in the amalgamation
 - [core] Fix memory access violation exception in vector_tile_data.cpp [#632](https://github.com/maplibre/maplibre-native/pull/632)
 - [iOS] Fix a bug where the compass was determined to be misplaced when hidden [#498](https://github.com/maplibre/maplibre-native/pull/498).
 - [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-native/pull/198).

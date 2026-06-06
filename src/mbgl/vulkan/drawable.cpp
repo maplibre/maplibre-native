@@ -194,6 +194,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
+
+            const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+            setSharedBuffers(shaderImpl.getVertexAttributes(), impl->attributeBindings);
         }
     }
 
@@ -219,6 +222,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
+
+            const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+            setSharedBuffers(shaderImpl.getInstanceAttributes(), impl->instanceBindings);
         }
     }
 
@@ -356,6 +362,26 @@ const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
 
 gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
+}
+
+void Drawable::setSharedBuffers(const gfx::VertexAttributeArray& attribs, const gfx::AttributeBindingArray& bindings) {
+    // set shared vertex/uniform buffers
+    attribs.visitAttributes([&](const gfx::VertexAttribute& attrib) {
+        const auto& vkAttrib = static_cast<const VertexAttribute&>(attrib);
+        int ubo = vkAttrib.getUBO();
+
+        if (ubo == -1 || impl->uniformBuffers.get(ubo) != nullptr) {
+            return;
+        }
+
+        const auto& binding = bindings[vkAttrib.getIndex()];
+        if (!binding) {
+            return;
+        }
+
+        const auto buffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
+        impl->uniformBuffers.set(ubo, std::make_shared<UniformBuffer>(buffer->get().shared()));
+    });
 }
 
 void Drawable::buildVulkanInputBindings() {
