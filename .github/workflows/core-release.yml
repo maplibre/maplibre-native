@@ -9,6 +9,8 @@ on:
   pull_request:
     paths:
       - .github/workflows/core-release.yml
+      - platform/linux/linux.cmake
+      - platform/linux/cmake/vendored_deps.cmake
 
 jobs:
   create-release:
