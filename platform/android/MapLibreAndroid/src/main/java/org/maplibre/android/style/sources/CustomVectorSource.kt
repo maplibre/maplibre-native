@@ -5,7 +5,7 @@ import androidx.annotation.UiThread
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
@@ -37,7 +37,7 @@ class CustomVectorSource(
         val tileId = TileID(z, x, y)
         activeJobs.remove(tileId)?.cancel()
 
-        val job = scope.launch {
+        val job = scope.launch(start = CoroutineStart.LAZY) {
             try {
                 val tileData = provider.fetchTile(z, x, y)
                 nativeSetTileData(z, x, y, tileData.bytes, tileData.formatId)
@@ -46,10 +46,12 @@ class CustomVectorSource(
             } catch (e: Exception) {
                 nativeSetTileError(z, x, y, e.message ?: "Tile fetch failed")
             } finally {
-                activeJobs.remove(tileId)
+                val self = coroutineContext[Job]!!
+                activeJobs.remove(tileId, self)
             }
         }
         activeJobs[tileId] = job
+        job.start()
     }
 
     @Keep

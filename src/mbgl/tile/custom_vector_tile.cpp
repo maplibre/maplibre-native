@@ -31,12 +31,16 @@ void CustomVectorTile::setTileData(const std::shared_ptr<const std::string>& dat
         case style::TileDataFormat::MVT:
             GeometryTile::setData(data ? std::make_unique<VectorMVTTileData>(data) : nullptr);
             break;
+        default:
+            assert(false && "Unhandled TileDataFormat");
+            GeometryTile::setData(nullptr);
+            break;
     }
 }
 
 void CustomVectorTile::setTileError(std::exception_ptr error) {
     if (obsolete) return;
-    observer->onTileError(*this, error);
+    GeometryTile::setError(std::move(error));
 }
 
 void CustomVectorTile::invalidateTileData() {

@@ -78,8 +78,12 @@ void CustomVectorSource::onRemovedFromMap() {
 
 void CustomVectorSource::setTileData(jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y,
                                       const jni::Array<jni::jbyte>& jData, jni::jint format) {
-    auto data = std::make_shared<std::string>(jData.Length(env), char());
-    jni::GetArrayRegion(env, *jData, 0, data->size(), reinterpret_cast<jbyte*>(&(*data)[0]));
+    std::shared_ptr<std::string> data;
+    jsize length = jData.Length(env);
+    if (length > 0) {
+        data = std::make_shared<std::string>(length, char());
+        jni::GetArrayRegion(env, *jData, 0, length, reinterpret_cast<jbyte*>(&(*data)[0]));
+    }
 
     source.as<mbgl::style::CustomVectorSource>()->setTileData(
         CanonicalTileID(z, x, y),
