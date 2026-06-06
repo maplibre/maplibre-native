@@ -6,10 +6,15 @@
 #include <EGL/egl.h>
 
 #include <cassert>
+#include <mutex>
 #include <sstream>
 
 namespace mbgl {
 namespace gl {
+
+namespace {
+std::mutex eglDisplayMutex;
+} // namespace
 
 // This class provides a singleton that contains information about the
 // configuration used for instantiating new headless rendering contexts.
@@ -48,9 +53,13 @@ public:
         }
     }
 
-    ~EGLDisplayConfig() { eglTerminate(display); }
+    ~EGLDisplayConfig() {
+        std::lock_guard<std::mutex> lock(eglDisplayMutex);
+        eglTerminate(display);
+    }
 
     static std::shared_ptr<const EGLDisplayConfig> create() {
+        std::lock_guard<std::mutex> lock(eglDisplayMutex);
         static std::weak_ptr<const EGLDisplayConfig> instance;
         auto shared = instance.lock();
         if (!shared) {
