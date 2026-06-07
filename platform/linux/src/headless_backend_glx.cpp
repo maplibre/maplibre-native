@@ -4,7 +4,6 @@
 
 #include <cassert>
 #include <memory>
-#include <mutex>
 
 #ifdef CI_BUILD
 #include <chrono>
@@ -16,10 +15,6 @@
 
 namespace mbgl {
 namespace gl {
-
-namespace {
-std::mutex glxDisplayMutex;
-} // namespace
 
 // This class provides a singleton that contains information about the
 // configuration used for instantiating new headless rendering contexts.
@@ -81,13 +76,12 @@ public:
     }
 
     ~GLXDisplayConfig() {
-        std::lock_guard<std::mutex> lock(glxDisplayMutex);
         XFree(fbConfigs);
         XCloseDisplay(xDisplay);
     }
 
     static std::shared_ptr<const GLXDisplayConfig> create() {
-        std::lock_guard<std::mutex> lock(glxDisplayMutex);
+        // C++11 magic static guarantees thread-safe one-shot initialization.
         static const auto instance = std::make_shared<GLXDisplayConfig>(Key{});
         return instance;
     }
