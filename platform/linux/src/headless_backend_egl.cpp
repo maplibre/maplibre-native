@@ -6,6 +6,7 @@
 #include <EGL/egl.h>
 
 #include <cassert>
+#include <memory>
 #include <mutex>
 #include <sstream>
 
@@ -60,12 +61,8 @@ public:
 
     static std::shared_ptr<const EGLDisplayConfig> create() {
         std::lock_guard<std::mutex> lock(eglDisplayMutex);
-        static std::weak_ptr<const EGLDisplayConfig> instance;
-        auto shared = instance.lock();
-        if (!shared) {
-            instance = shared = std::make_shared<EGLDisplayConfig>(Key{});
-        }
-        return shared;
+        static const auto instance = std::make_shared<EGLDisplayConfig>(Key{});
+        return instance;
     }
 
 public:
