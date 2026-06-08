@@ -1,5 +1,22 @@
 # Changelog MapLibre Native for Android
 
+## 13.3.0
+
+### ✨ Features and improvements
+
+- core: Enable Vulkan surface transforms by capability ([#4320](https://github.com/maplibre/maplibre-native/pull/4320)).
+- core: Update Vulkan headers ([#4319](https://github.com/maplibre/maplibre-native/pull/4319)).
+- Improve Vulkan Android surface lifecycle ([#4323](https://github.com/maplibre/maplibre-native/pull/4323)).
+- Implement Vulkan surface snapshot ([#4314](https://github.com/maplibre/maplibre-native/pull/4314)).
+- Vulkan fill extrusion instancing [Core optimization] ([#4310](https://github.com/maplibre/maplibre-native/pull/4310)).
+- Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
+
+### 🐞 Bug fixes
+
+- fix(android): guard stale layer remove path ([#4300](https://github.com/maplibre/maplibre-native/pull/4300)).
+- core: Fix specialized location indicator puck scaling ([#4327](https://github.com/maplibre/maplibre-native/pull/4327)).
+- Fix resize desync between Android surface and renderable ([#4328](https://github.com/maplibre/maplibre-native/pull/4328)).
+
 ## 13.2.0
 
 ### ✨ Features and improvements

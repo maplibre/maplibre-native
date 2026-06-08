@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.27.0
+
+- Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
+
 ## 6.26.1
 
 - Hide vendored HarfBuzz symbols on Apple ([#4263](https://github.com/maplibre/maplibre-native/pull/4263)).
