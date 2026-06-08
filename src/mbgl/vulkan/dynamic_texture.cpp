@@ -1,5 +1,7 @@
 #include <mbgl/vulkan/dynamic_texture.hpp>
 #include <mbgl/vulkan/context.hpp>
+#include <mbgl/vulkan/upload_pass.hpp>
+#include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/util/logging.hpp>
 
 namespace mbgl {
@@ -53,7 +55,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
 }
 
-void DynamicTexture::uploadDeferredImages() {
+void DynamicTexture::uploadDeferredImages(gfx::UploadPass&) {
     std::scoped_lock lock(mutex);
 
     if (texturesToBlit.empty()) {
@@ -134,7 +136,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-    UniqueBufferAllocation bufferAllocation = std::make_unique<BufferAllocation>(allocator);
+    SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
         throw std::bad_alloc();
@@ -148,7 +150,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
 }
 
-void DynamicTexture::uploadDeferredImages() {
+void DynamicTexture::uploadDeferredImages(gfx::UploadPass& uploadPass) {
     std::scoped_lock lock(mutex);
 
     if (textureBuffersToUpload.empty()) {
@@ -156,33 +158,33 @@ void DynamicTexture::uploadDeferredImages() {
     }
 
     const auto& textureVK = static_cast<Texture2D*>(texture.get());
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
-        textureVK->transitionToTransferWriteLayout(commandBuffer);
-        for (const auto& pair : textureBuffersToUpload) {
-            const auto& rect = pair.first.getRectangle();
-            const auto region = vk::BufferImageCopy()
-                                    .setBufferOffset(0)
-                                    .setBufferRowLength(rect.w)
-                                    .setImageSubresource(
-                                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
-                                    .setImageOffset(vk::Offset3D(rect.x, rect.y))
-                                    .setImageExtent(vk::Extent3D(rect.w, rect.h, 1));
+    const auto& commandBuffer = static_cast<UploadPass&>(uploadPass).getCommandEncoder().getCommandBuffer();
 
-            commandBuffer->copyBufferToImage(pair.second->buffer,
-                                             textureVK->getVulkanImage(),
-                                             textureVK->getVulkanImageLayout(),
-                                             region,
-                                             context.getBackend().getDispatcher());
+    textureVK->transitionToTransferWriteLayout(commandBuffer);
+    for (auto& pair : textureBuffersToUpload) {
+        const auto& rect = pair.first.getRectangle();
+        const auto region = vk::BufferImageCopy()
+                                .setBufferOffset(0)
+                                .setBufferRowLength(rect.w)
+                                .setImageSubresource(
+                                    vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                                .setImageOffset(vk::Offset3D(rect.x, rect.y))
+                                .setImageExtent(vk::Extent3D(rect.w, rect.h, 1));
 
-            context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
-                stats.numTextureUpdates++;
-                stats.textureUpdateBytes += rect.w * rect.h * texture->getPixelStride();
-            });
-        }
-        textureVK->transitionToShaderReadLayout(commandBuffer);
-    });
+        commandBuffer->copyBufferToImage(pair.second->buffer,
+                                         textureVK->getVulkanImage(),
+                                         textureVK->getVulkanImageLayout(),
+                                         region,
+                                         context.getBackend().getDispatcher());
 
-    textureBuffersToUpload.clear();
+        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+            stats.numTextureUpdates++;
+            stats.textureUpdateBytes += rect.w * rect.h * texture->getPixelStride();
+        });
+    }
+    textureVK->transitionToShaderReadLayout(commandBuffer);
+
+    context.enqueueDeletion([buffers = std::move(textureBuffersToUpload)](Context&) {});
 }
 
 bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {

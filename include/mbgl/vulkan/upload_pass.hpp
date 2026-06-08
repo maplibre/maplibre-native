@@ -38,6 +38,9 @@ public:
     gfx::Context& getContext() override;
     const gfx::Context& getContext() const override;
 
+    CommandEncoder& getCommandEncoder() { return commandEncoder; }
+    const CommandEncoder& getCommandEncoder() const { return commandEncoder; }
+
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
                                                                           gfx::BufferUsageType,
