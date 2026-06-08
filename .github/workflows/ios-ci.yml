@@ -291,16 +291,17 @@ jobs:
 
       # Trigger release on main if VERSION file changed
 
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          persist-credentials: false
+
       - name: VERSION file changed
         if: github.ref == 'refs/heads/main'
         id: version-file-ios-changed
         uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
         with:
           files: platform/ios/VERSION
-
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
-        with:
-          persist-credentials: false
 
       - name: Run release
         if: github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true'
