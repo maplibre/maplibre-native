@@ -643,7 +643,13 @@ void RendererBackend::initCommandPool() {
 }
 
 void RendererBackend::destroyResources() {
-    if (device) device->waitIdle(dispatcher);
+    if (device) {
+        try {
+            device->waitIdle(dispatcher);
+        } catch (const vk::DeviceLostError& error) {
+            Log::Error(mbgl::Event::Render, "Vulkan device lost during backend shutdown");
+        }
+    }
 
     context.reset();
     commandPool.reset();
