@@ -1,35 +1,39 @@
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 
+#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/layout/symbol_layout.hpp>
+#include <mbgl/layout/symbol_projection.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
+#include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
-#include <mbgl/renderer/upload_parameters.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/text/shaping.hpp>
-#include <mbgl/tile/geometry_tile.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/util/math.hpp>
-
-#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/symbol_drawable_data.hpp>
-#include <mbgl/gfx/collision_drawable_data.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
+#include <mbgl/style/layers/symbol_layer_impl.hpp>
+#include <mbgl/text/shaping.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/tile/geometry_tile.hpp>
+#include <mbgl/tile/tile.hpp>
+#include <mbgl/util/convert.hpp>
+#include <mbgl/util/mat2.hpp>
+#include <mbgl/util/mat4.hpp>
+#include <mbgl/util/math.hpp>
 
+#include <cmath>
 #include <set>
 
 namespace mbgl {
@@ -165,10 +169,10 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
         SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated);
     }
 
-    auto hasIconOpacity = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0 ||
-                          evaluated.get<style::IconHaloColor>().constantOr(Color::black()).a > 0;
-    auto hasTextOpacity = evaluated.get<style::TextColor>().constantOr(Color::black()).a > 0 ||
-                          evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0;
+    const auto hasIconOpacity = evaluated.get<style::IconColor>().constantOr(IconColor::defaultValue()).a > 0 ||
+                                evaluated.get<style::IconHaloColor>().constantOr(IconHaloColor::defaultValue()).a > 0;
+    const auto hasTextOpacity = evaluated.get<style::TextColor>().constantOr(TextColor::defaultValue()).a > 0 ||
+                                evaluated.get<style::TextHaloColor>().constantOr(TextHaloColor::defaultValue()).a > 0;
 
     passes = ((evaluated.get<style::IconOpacity>().constantOr(1) > 0 && hasIconOpacity && iconSize > 0) ||
               (evaluated.get<style::TextOpacity>().constantOr(1) > 0 && hasTextOpacity && textSize > 0))
@@ -235,7 +239,11 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
             auto featureIndex = static_cast<const GeometryTile*>(tile)->getFeatureIndex();
 
             if (bucket->sortKeyRanges.empty()) {
-                placementData.push_back({*bucket, renderTile, featureIndex, baseImpl->source, std::nullopt});
+                placementData.push_back({.bucket = *bucket,
+                                         .tile = renderTile,
+                                         .featureIndex = featureIndex,
+                                         .sourceId = baseImpl->source,
+                                         .sortKeyRange = std::nullopt});
             } else {
                 for (const auto& sortKeyRange : bucket->sortKeyRanges) {
                     BucketPlacementData layerData{.bucket = *bucket,
@@ -437,12 +445,267 @@ std::size_t RenderSymbolLayer::removeAllDrawables() {
     return stats.drawablesRemoved - oldValue;
 }
 
+namespace {
+mat4 getScreenMatrix(vec2f translation) {
+    mat4 m;
+    matrix::ortho(m, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+    matrix::translate(m, m, 0, -util::EXTENT, 0);
+    matrix::translate(m, m, translation[0], translation[1], 0);
+    return m;
+}
+// Rotate the 2D part of a vector with a 2x2 matrix
+vec4 rotate(const mat2& m, const vec4& v) {
+    using namespace matrix;
+    using namespace vector;
+    return vec(m * vec2{v[0], v[1]}, v[2], v[3]);
+}
+} // namespace
+
+void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
+                                                const SymbolBucket& bucket,
+                                                const style::SymbolPaintProperties::PossiblyEvaluated& evaluated,
+                                                const TransformState& state,
+                                                const TransformParameters& transformParams) {
+    if (!bucket.hasData()) {
+        return;
+    }
+
+    const auto& iconOpacity = evaluated.get<IconOpacity>();
+    const auto& iconColor = evaluated.get<IconColor>();
+    const auto& iconHaloColor = evaluated.get<IconHaloColor>();
+    const auto& textOpacity = evaluated.get<TextOpacity>();
+    const auto& textColor = evaluated.get<TextColor>();
+    const auto& textHaloColor = evaluated.get<TextHaloColor>();
+
+    const auto visibleText = bucket.hasTextData() && (textOpacity.constantOr(TextOpacity::defaultValue()) > 0) &&
+                             (textColor.constantOr(TextColor::defaultValue()).a > 0 ||
+                              textHaloColor.constantOr(TextHaloColor::defaultValue()).a > 0);
+    const auto visibleIcons = (bucket.hasIconData() || bucket.hasSdfIconData()) &&
+                              (iconOpacity.constantOr(IconOpacity::defaultValue()) > 0) &&
+                              (iconColor.constantOr(IconColor::defaultValue()).a > 0 ||
+                               iconHaloColor.constantOr(IconHaloColor::defaultValue()).a > 0);
+    if (!visibleText && !visibleIcons) {
+        return;
+    }
+
+    const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
+    const auto& iconBinders = bucketPaintProperties.iconBinders;
+    const auto& textBinders = bucketPaintProperties.textBinders;
+
+    const auto& tileID = tile.getOverscaledTileID().toUnwrapped();
+
+    constexpr bool inViewportPixelUnits = false;
+    constexpr bool nearClipped = false;
+    constexpr bool aligned = false;
+    constexpr bool is3d = false;
+    constexpr bool enableDepth = true;
+    constexpr std::int32_t subLayerIndex = 1;
+
+    const auto textTranslation = evaluated.get<TextTranslate>();
+    const auto iconTranslation = evaluated.get<IconTranslate>();
+    const auto textTranslationAnchor = evaluated.get<TextTranslateAnchor>();
+    const auto iconTranslationAnchor = evaluated.get<IconTranslateAnchor>();
+    const std::optional<mbgl::Point<double>> origin = std::nullopt;
+    const auto zoom = state.getZoom();
+    const auto zoomFraction = state.getZoomFraction();
+    const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, zoom);
+    const auto cameraToCenterDistance = state.getCameraToCenterDistance();
+
+    const auto& bucketLayout = *bucket.layout;
+    const auto placement = bucketLayout.get<SymbolPlacement>();
+    const auto textFit = bucketLayout.get<IconTextFit>();
+
+    const auto& layerProperties = static_cast<const SymbolLayerProperties&>(*evaluatedProperties);
+    const auto& layoutProperties = layerProperties.layerImpl().layout;
+    const auto screenSpaceProp = layoutProperties.get<SymbolScreenSpace>();
+    const bool isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
+                                                            : SymbolScreenSpace::defaultValue();
+    const bool isOffset = !layoutProperties.get<IconOffset>().isUndefined();
+
+    const auto getTileMatrix = [&](const auto& translation, const auto& translationAnchor) {
+        return LayerTweaker::getTileMatrix(tileID,
+                                           state,
+                                           transformParams,
+                                           layerIndex,
+                                           translation,
+                                           translationAnchor,
+                                           origin,
+                                           is3d,
+                                           enableDepth,
+                                           subLayerIndex,
+                                           nearClipped,
+                                           inViewportPixelUnits,
+                                           aligned);
+    };
+    const mat4 textDrawableMatrix = isScreenSpace ? getScreenMatrix(textTranslation)
+                                                  : getTileMatrix(textTranslation, textTranslationAnchor);
+    const mat4 iconDrawableMatrix = isScreenSpace ? getScreenMatrix(iconTranslation)
+                                                  : getTileMatrix(iconTranslation, iconTranslationAnchor);
+
+    // TODO: How to get at the RenderableResource from here?
+    // applySurfaceTransform uses `y=*-1` as the default (`{1,0,0,-1}`), but that doesn't seem to match other results
+    mat2 surfaceRotation{1, 0, 0, 1};
+    // applySurfaceTransform:
+    // if (hasSurfaceTransformSupport) {
+    // float surfaceRotation = renderableResource.getRotation();
+    // /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+    // /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+    // rotation = platformParams.rotation[GLOBAL_SET_INDEX]
+    //     gl_Position.xy = platformParams.rotation * gl_Position.xy;
+    // }
+
+    const auto computeBufferBounds = [&](const SymbolBucket::Buffer& buffer, bool isText) {
+        const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                   : iconPropertyValues(evaluated, bucketLayout);
+        const bool pitchWithMap = values.pitchAlignment == style::AlignmentType::Map;
+        const bool rotateWithMap = values.rotationAlignment == style::AlignmentType::Map;
+        const bool alongLine = placement != SymbolPlacementType::Point &&
+                               values.rotationAlignment == AlignmentType::Map;
+        const bool hasVariablePlacement = bucket.hasVariablePlacement && (isText || textFit != IconTextFitType::None);
+
+        const auto& sizeBinder = isText ? bucket.textSizeBinder : bucket.iconSizeBinder;
+        const auto evaluatedSize = sizeBinder->evaluateForZoom(zoom);
+        const auto u_size = evaluatedSize.size;
+        const auto u_size_t = evaluatedSize.sizeT;
+
+        const mat4 textLabelPlaneMatrix =
+            (alongLine || hasVariablePlacement)
+                ? matrix::identity4()
+                : getLabelPlaneMatrix(textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 iconLabelPlaneMatrix =
+            (alongLine || hasVariablePlacement)
+                ? matrix::identity4()
+                : getLabelPlaneMatrix(iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 textGLCoordMatrix = getGlCoordMatrix(
+            textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 iconGLCoordMatrix = getGlCoordMatrix(
+            iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+
+        const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
+
+        const auto& staticVertices = buffer.vertices();
+        const auto& dynamicVertices = buffer.dynamicVertices();
+
+        for (const auto& symbol : buffer.placedSymbols) {
+            if (symbol.hidden || !symbol.featureId) {
+                continue;
+            }
+
+            const auto vertexOffset = symbol.vertexStartIndex;
+            const auto vertexCount = symbol.glyphOffsets.size() * 4;
+
+            // Consider the dynamic opacity and color of the first vertex.  If either is zero, skip the symbol.
+            const auto& opacityProperty = isText ? textOpacity : iconOpacity;
+            if (!opacityProperty.isConstant()) {
+                const auto& opacityBinder = isText ? textBinders.get<TextOpacity>() : iconBinders.get<IconOpacity>();
+                const auto& interpAlpha = std::get<0>(opacityBinder->getVertexValue(vertexOffset)).a1;
+                if (mbgl::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0) {
+                    continue;
+                }
+            }
+            const auto& colorProperty = isText ? textColor : iconColor;
+            if (!colorProperty.isConstant()) {
+                const auto& colorBinder = isText ? textBinders.get<TextColor>() : iconBinders.get<IconColor>();
+                const auto& packedColor = std::get<0>(colorBinder->getVertexValue(vertexOffset)).a1;
+                if (unpack_mix_alpha(packedColor, zoomFraction) == 0) {
+                    continue;
+                }
+            }
+
+            const auto getVertex = [&](std::size_t i) {
+                using namespace matrix;
+                using namespace vector;
+
+                const auto& staticVertex = staticVertices.at(vertexOffset + i);
+                const auto& dynamicVertex = dynamicVertices.at(vertexOffset + i);
+
+                const vec2 a_pos = {static_cast<double>(staticVertex.a1[0]), static_cast<double>(staticVertex.a1[1])};
+                const vec2 a_offset = {static_cast<double>(staticVertex.a1[2]),
+                                       static_cast<double>(staticVertex.a1[3])};
+                const vec2 a_size = {static_cast<double>(staticVertex.a2[2]), static_cast<double>(staticVertex.a2[3])};
+                const auto a_size_min = floor(a_size[0] * 0.5);
+                const vec2 a_pxoffset = {static_cast<double>(staticVertex.a3[0]),
+                                         static_cast<double>(staticVertex.a3[1])};
+                const vec2 a_minFontScale = {staticVertex.a3[2] / 256.0, staticVertex.a3[3] / 256.0};
+                const vec2 in_projected_pos = {dynamicVertex.a1[0], dynamicVertex.a1[1]};
+                const auto segment_angle = -dynamicVertex.a1[2];
+                const auto& drawableMatrix = isText ? textDrawableMatrix : iconDrawableMatrix;
+                const auto& labelPlaneMatrix = isText ? textLabelPlaneMatrix : iconLabelPlaneMatrix;
+                const auto& glCoordMatrix = isText ? textGLCoordMatrix : iconGLCoordMatrix;
+                const vec4 projectedPoint = matrix::transformMat4({a_pos[0], a_pos[1], 0, 1}, drawableMatrix);
+                const auto camera_to_anchor_distance = projectedPoint[3];
+                const auto aspect_ratio = state.getSize().aspectRatio();
+
+                const float distance_ratio = pitchWithMap ? camera_to_anchor_distance / cameraToCenterDistance
+                                                          : cameraToCenterDistance / camera_to_anchor_distance;
+                const float perspective_ratio = util::clamp(0.5 + 0.5 * distance_ratio, 0.0, 4.0);
+
+                float size;
+                if (!evaluatedSize.isZoomConstant && !evaluatedSize.isFeatureConstant) {
+                    size = util::interpolate(a_size_min, a_size[1], u_size_t) / 128.0;
+                } else if (evaluatedSize.isZoomConstant && !evaluatedSize.isFeatureConstant) {
+                    size = a_size_min / 128.0;
+                } else {
+                    size = u_size;
+                }
+                if (!isOffset) {
+                    size *= perspective_ratio;
+                }
+
+                const auto fontScale = isText ? size / 24.0 : size;
+
+                float symbol_rotation = 0.0;
+                if (rotateInShader) {
+                    const vec4 offsetProjectedPoint = drawableMatrix * vec(a_pos + vec2{1, 0}, 0, 1);
+                    const vec2 a = slice<0, 2>(projectedPoint) / projectedPoint[3];
+                    const vec2 b = slice<0, 2>(offsetProjectedPoint) / offsetProjectedPoint[3];
+                    symbol_rotation = std::atan2((b[1] - a[1]) / aspect_ratio, b[0] - a[0]);
+                }
+
+                const auto angle_sin = sin(segment_angle + symbol_rotation);
+                const auto angle_cos = cos(segment_angle + symbol_rotation);
+                const mat2 rotation_matrix{angle_cos, -1.0 * angle_sin, angle_sin, angle_cos};
+
+                const vec4 projected_pos = labelPlaneMatrix * vec(in_projected_pos, 0, 1);
+                const vec2 pos0 = {projected_pos[0] / projected_pos[3], projected_pos[1] / projected_pos[3]};
+                const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
+
+                const vec4 outPos = rotate(surfaceRotation,
+                                           glCoordMatrix * vec(pos0 + rotation_matrix * posOffset, 0.0, 1.0));
+                return slice<0, 3>(outPos) / outPos[3];
+            };
+            if (const auto bound = computeFeatureNDCBound(vertexCount, getVertex)) {
+                stats.addRenderedFeature(*symbol.featureId, *bound, {tile.getOverscaledTileID()});
+            }
+        }
+    };
+
+    const bool iconsVisible = evaluated.get<style::IconOpacity>().constantOr(1) > 0 &&
+                              (evaluated.get<style::IconColor>().constantOr(IconColor::defaultValue()).a > 0 ||
+                               evaluated.get<style::IconHaloColor>().constantOr(IconHaloColor::defaultValue()).a > 0);
+    const bool textVisible = evaluated.get<style::TextOpacity>().constantOr(1) > 0 &&
+                             (evaluated.get<style::TextColor>().constantOr(TextColor::defaultValue()).a > 0 ||
+                              evaluated.get<style::TextHaloColor>().constantOr(TextHaloColor::defaultValue()).a > 0);
+
+    if (bucket.hasIconData() && iconsVisible) {
+        computeBufferBounds(bucket.icon, /* isText = */ false);
+    }
+    if (bucket.hasTextData() && textVisible) {
+        computeBufferBounds(bucket.text, /* isText = */ true);
+    }
+    if (bucket.hasSdfIconData() && (textVisible || iconsVisible)) {
+        computeBufferBounds(bucket.sdfIcon, /* isText = */ false);
+    }
+}
+
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
-                               const RenderTree&,
+                               const std::shared_ptr<UpdateParameters>& updateParameters,
+                               const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
+    stats.renderedFeatures.clear();
+
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
         return;
@@ -553,6 +816,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         assert(bucket.paintProperties.contains(getID()));
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
+
+        if (updateParameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(tile, bucket, evaluated, state, params);
+        }
 
         auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
             if (!hasCollisionBox && !hasCollisionCircle) return;

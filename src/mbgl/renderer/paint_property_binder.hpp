@@ -15,7 +15,20 @@
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/vectors.hpp>
 
+#include <cstring>
+#include <type_traits>
+
 namespace mbgl {
+
+namespace detail {
+
+template <typename T, typename Variant>
+struct VariantContains : std::false_type {};
+
+template <typename T, typename... Ts>
+struct VariantContains<T, std::variant<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)> {};
+
+} // namespace detail
 
 // Maps vertex range to feature index
 struct FeatureVertexRange {
@@ -166,6 +179,28 @@ public:
 
     virtual std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t index) const = 0;
 
+    template <typename TAttribute, typename TVertexAttribute>
+    void applyPaintProperty(const std::size_t attrIndex, TVertexAttribute& attrib) const {
+        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+        using InterpType = ZoomInterpolatedAttributeType<Type>;
+
+        if (interleavedVertexBuffer) {
+            const auto& interleavedSharedVector = interleavedVertexBuffer->sharedVertexVector;
+
+            const auto rawSize = static_cast<uint32_t>(interleavedVertexBuffer->stride);
+            const bool interpolated = isInterpolated();
+            const auto dataType = interpolated ? InterpType::DataType : Type::DataType;
+
+            assert(interleavedSharedVector->getRawCount() / interleavedVertexBuffer->stride == getVertexCount());
+            attrib.setSharedRawData(interleavedSharedVector, static_cast<uint32_t>(vertexOffset), 0, rawSize, dataType);
+        } else {
+            const auto vertexCount = getVertexCount();
+            for (std::size_t i = 0; i < vertexCount; ++i) {
+                attrib.set(i, getVertexValue(i), attrIndex);
+            }
+        }
+    }
+
     virtual std::size_t getVertexCount() const {
         return interleavedVertexBuffer ? interleavedVertexBuffer->vertexCount : 0;
     }
@@ -307,7 +342,8 @@ public:
         }
         std::optional<std::string> idStr = featureIDtoString(feature.getID());
         if (idStr) {
-            featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
+            featureMap[*idStr].emplace_back(
+                FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
 
@@ -416,7 +452,8 @@ public:
             this->interleavedVertexBuffer->set(i, this->vertexOffset, Vertex{value});
         }
         if (auto idStr = featureIDtoString(feature.getID())) {
-            featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
+            featureMap[*idStr].emplace_back(
+                FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
 

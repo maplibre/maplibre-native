@@ -63,7 +63,8 @@ public:
                     double tileLodScale,
                     double tileLodPitchThreshold,
                     TileLodMode tileLodMode,
-                    const gfx::ScissorRect&);
+                    const gfx::ScissorRect&,
+                    bool captureRenderedFeatures);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -156,6 +157,10 @@ public:
     TileLodMode tileLodMode;
 
     gfx::ScissorRect scissorRect;
+
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
+    bool captureRenderedFeatures = false;
+#endif // MLN_DRAWABLE_LOCATION_INDICATOR
 };
 
 } // namespace mbgl

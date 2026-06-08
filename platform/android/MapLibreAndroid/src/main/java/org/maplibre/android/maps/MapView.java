@@ -922,7 +922,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked before a shader is compiled.
    *
-   * @param listener The callback that's invoked before a shader is compiled
+   * @param callback The callback that's invoked before a shader is compiled
    */
   public void addOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     mapChangeReceiver.addOnPreCompileShaderListener(callback);
@@ -931,7 +931,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked before a shader is compiled.
    *
-   * @param listener The callback that's invoked before a shader is compiled
+   * @param callback The callback that's invoked before a shader is compiled
    */
   public void removeOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     mapChangeReceiver.removeOnPreCompileShaderListener(callback);
@@ -940,7 +940,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a shader is compiled.
    *
-   * @param listener The callback that's invoked after a shader is compiled
+   * @param callback The callback that's invoked after a shader is compiled
    */
   public void addOnPostCompileShaderListener(MapView.OnPostCompileShaderListener callback) {
     mapChangeReceiver.addOnPostCompileShaderListener(callback);
@@ -949,7 +949,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a shader is compiled.
    *
-   * @param listener The callback that's invoked after a shader is compiled
+   * @param callback The callback that's invoked after a shader is compiled
    */
   public void removeOnPostCompileShaderListener(MapView.OnPostCompileShaderListener callback) {
     mapChangeReceiver.removeOnPostCompileShaderListener(callback);
@@ -958,7 +958,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a shader failed to compile.
    *
-   * @param listener The callback that's invoked after a shader failes to compile
+   * @param callback The callback that's invoked after a shader failes to compile
    */
   public void addOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
     mapChangeReceiver.addOnShaderCompileFailedListener(callback);
@@ -967,7 +967,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a shader failed to compile.
    *
-   * @param listener The callback that's invoked after a shader failes to compile
+   * @param callback The callback that's invoked after a shader failes to compile
    */
   public void removeOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
     mapChangeReceiver.removeOnShaderCompileFailedListener(callback);
@@ -976,7 +976,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a range of glyphs are loaded.
    *
-   * @param listener The callback that's invoked after a range of glyphs are loaded
+   * @param callback The callback that's invoked after a range of glyphs are loaded
    */
   public void addOnGlyphsLoadedListener(MapView.OnGlyphsLoadedListener callback) {
     mapChangeReceiver.addOnGlyphsLoadedListener(callback);
@@ -985,7 +985,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a range of glyphs are loaded.
    *
-   * @param listener The callback that's invoked after a range of glyphs are loaded
+   * @param callback The callback that's invoked after a range of glyphs are loaded
    */
   public void removeOnGlyphsLoadedListener(MapView.OnGlyphsLoadedListener callback) {
     mapChangeReceiver.removeOnGlyphsLoadedListener(callback);
@@ -994,7 +994,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a range of glyphs fail to load.
    *
-   * @param listener The callback that's invoked after a range of glyphs fail to load
+   * @param callback The callback that's invoked after a range of glyphs fail to load
    */
   public void addOnGlyphsErrorListener(MapView.OnGlyphsErrorListener callback) {
     mapChangeReceiver.addOnGlyphsErrorListener(callback);
@@ -1003,7 +1003,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a range of glyphs fail to load.
    *
-   * @param listener The callback that's invoked after a range of glyphs fail to load
+   * @param callback The callback that's invoked after a range of glyphs fail to load
    */
   public void removeOnGlyphsErrorListener(MapView.OnGlyphsErrorListener callback) {
     mapChangeReceiver.removeOnGlyphsErrorListener(callback);
@@ -1012,7 +1012,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a range of glyphs are requested.
    *
-   * @param listener The callback that's invoked after a range of glyphs are requested
+   * @param callback The callback that's invoked after a range of glyphs are requested
    */
   public void addOnGlyphsRequestedListener(MapView.OnGlyphsRequestedListener callback) {
     mapChangeReceiver.addOnGlyphsRequestedListener(callback);
@@ -1021,7 +1021,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a range of glyphs are requested.
    *
-   * @param listener The callback that's invoked after a range of glyphs are requested
+   * @param callback The callback that's invoked after a range of glyphs are requested
    */
   public void removeOnGlyphsRequestedListener(MapView.OnGlyphsRequestedListener callback) {
     mapChangeReceiver.removeOnGlyphsRequestedListener(callback);
@@ -1030,16 +1030,16 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a tile action occurs.
    *
-   * @param listener The callback that's invoked after a tile action occurs
+   * @param callback The callback that's invoked after a tile action occurs
    */
   public void addOnTileActionListener(MapView.OnTileActionListener callback) {
     mapChangeReceiver.addOnTileActionListener(callback);
   }
 
   /**
-   * Remove's a callback that's invoked after a tile action occurs.
+   * Removes a callback that's invoked after a tile action occurs.
    *
-   * @param listener The callback that's invoked after a tile action occurs
+   * @param callback The callback that's invoked after a tile action occurs
    */
   public void removeOnTileActionListener(MapView.OnTileActionListener callback) {
     mapChangeReceiver.removeOnTileActionListener(callback);
@@ -1048,7 +1048,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a sprite is loaded.
    *
-   * @param listener The callback that's invoked after a sprite is loaded
+   * @param callback The callback that's invoked after a sprite is loaded
    */
   public void addOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
     mapChangeReceiver.addOnSpriteLoadedListener(callback);
@@ -1057,7 +1057,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a sprite is loaded.
    *
-   * @param listener The callback that's invoked after a sprite is loaded
+   * @param callback The callback that's invoked after a sprite is loaded
    */
   public void removeOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
     mapChangeReceiver.removeOnSpriteLoadedListener(callback);
@@ -1066,7 +1066,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a sprite fails to load.
    *
-   * @param listener The callback that's invoked after a sprite fails to load
+   * @param callback The callback that's invoked after a sprite fails to load
    */
   public void addOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
     mapChangeReceiver.addOnSpriteErrorListener(callback);
@@ -1075,7 +1075,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a sprite fails to load.
    *
-   * @param listener The callback that's invoked after a sprite fails to load
+   * @param callback The callback that's invoked after a sprite fails to load
    */
   public void removeOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
     mapChangeReceiver.removeOnSpriteErrorListener(callback);
@@ -1084,7 +1084,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Set a callback that's invoked after a sprite is requested.
    *
-   * @param listener The callback that's invoked after a sprite is requested
+   * @param callback The callback that's invoked after a sprite is requested
    */
   public void addOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
     mapChangeReceiver.addOnSpriteRequestedListener(callback);
@@ -1093,7 +1093,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Removes a callback that's invoked after a sprite is requested.
    *
-   * @param listener The callback that's invoked after a sprite is requested
+   * @param callback The callback that's invoked after a sprite is requested
    */
   public void removeOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
     mapChangeReceiver.removeOnSpriteRequestedListener(callback);
@@ -1103,7 +1103,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * Set a callback that's invoked after an error occurs
    * while trying to render a layer or drawable.
    *
-   * @param listener The callback that's invoked after an error occurs
+   * @param callback The callback that's invoked after an error occurs
    * while trying to render a layer or drawable.
    */
   public void addOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
@@ -1114,7 +1114,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * Removes a callback that's invoked after an error occurs
    * while trying to render a layer or drawable.
    *
-   * @param listener The callback that's invoked after an error occurs
+   * @param callback The callback that's invoked after an error occurs
    * while trying to render a layer or drawable.
    */
   public void removeOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
@@ -1741,7 +1741,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * Notify listeners, clear when done
      */
     private void onMapReady() {
-      if (onMapReadyCallbackList.size() > 0) {
+      if (!onMapReadyCallbackList.isEmpty()) {
         Iterator<OnMapReadyCallback> iterator = onMapReadyCallbackList.iterator();
         while (iterator.hasNext()) {
           OnMapReadyCallback callback = iterator.next();
@@ -1818,7 +1818,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     @NonNull
     private final AttributionDialogManager defaultDialogManager;
-    private UiSettings uiSettings;
+    private final UiSettings uiSettings;
 
     private AttributionClickListener(@NonNull Context context, @NonNull MapLibreMap maplibreMap) {
       this.defaultDialogManager = new AttributionDialogManager(context, maplibreMap);

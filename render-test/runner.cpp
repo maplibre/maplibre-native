@@ -756,7 +756,7 @@ void TestRunner::run(TestMetadata& metadata) {
                       mbgl::util::toString(metadata.pixelRatio) + "/" +
                       mbgl::util::toString(uint32_t(metadata.crossSourceCollisions));
 
-    if (maps.find(key) == maps.end()) {
+    if (!maps.contains(key)) {
         maps[key] = std::make_unique<TestRunner::Impl>(
             metadata,
             mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()),

@@ -456,8 +456,11 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
 
 // MARK: - Transform
 
-TransformState Map::getTransfromState() const {
+TransformState Map::getTransformState() const {
     return impl->transform.getState();
+}
+TransformState Map::getTransfromState() const {
+    return getTransformState();
 }
 
 // MARK: - Annotations
@@ -602,6 +605,61 @@ ClientOptions Map::getClientOptions() const {
 
 const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
     return impl->actionJournal;
+}
+
+void Map::getRenderedFeatures(const std::optional<std::string>& featureId,
+                              const std::optional<std::string>& layerId,
+                              const std::optional<std::string>& sourceId,
+                              const std::function<bool(const std::string&, const FeatureInfo&)>& result) const {
+    if (!impl->lastFrameStats) {
+        return;
+    }
+
+    const auto& features = impl->lastFrameStats->frameRenderedFeatures;
+
+    using LayerFeaturesMap = gfx::RenderingStats::LayerFeaturesMap;
+    const auto searchFeatures = [&](const LayerFeaturesMap& features) {
+        for (const auto& [fId, fInfo] : features) {
+            if ((!featureId || fId == *featureId) && !result(fId, fInfo)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    if (sourceId && layerId) {
+        // Both source and layer are specified, look for an exact match
+        if (auto it = features.find({.sourceID = *sourceId, .layerID = *layerId}); it != features.end()) {
+            searchFeatures(it->second);
+        }
+    } else {
+        // Linear search for matching items
+        for (const auto& [sourceLayerId, layerFeaturesMap] : features) {
+            if ((!sourceId || sourceLayerId.sourceID == *sourceId) && (!layerId || sourceLayerId.layerID == *layerId)) {
+                if (!searchFeatures(layerFeaturesMap)) {
+                    break;
+                }
+            }
+        }
+    }
+}
+
+std::size_t Map::getRenderedFeatureCount(const std::optional<std::string>& featureId,
+                                         const std::optional<std::string>& layerId,
+                                         const std::optional<std::string>& sourceId,
+                                         std::size_t limit) const {
+    std::size_t count = 0;
+    getRenderedFeatures(
+        featureId, layerId, sourceId, [&](const std::string&, const FeatureInfo&) { return (++count < limit); });
+    return count;
+}
+
+namespace {
+Map::FrameRenderedFeaturesMap emptyFeatures{};
+} // namespace
+
+const Map::FrameRenderedFeaturesMap& Map::getRenderedFeatures() const {
+    return impl->lastFrameStats ? impl->lastFrameStats->frameRenderedFeatures : emptyFeatures;
 }
 
 } // namespace mbgl

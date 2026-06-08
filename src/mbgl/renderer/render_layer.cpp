@@ -1,17 +1,16 @@
 #include <mbgl/renderer/render_layer.hpp>
 
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/style/color_ramp_property_value.hpp>
-#include <mbgl/style/layer.hpp>
 #include <mbgl/style/layer_properties.hpp>
+#include <mbgl/style/layer.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/logging.hpp>
-
-#include <mbgl/renderer/layer_group.hpp>
 
 namespace mbgl {
 
@@ -21,6 +20,10 @@ RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
       baseImpl(evaluatedProperties->baseImpl),
       renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
+
+const std::string& RenderLayer::getId() const {
+    return baseImpl->id;
+}
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
@@ -56,8 +59,11 @@ bool RenderLayer::supportsZoom(float zoom) const {
 void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source);
     assert(params.source->isEnabled());
+
+    sourceForState = params.source;
     renderTiles = params.source->getRenderTiles();
     renderTilesOwner = params.source->getRawRenderTiles();
+
     addRenderPassesFromTiles();
 
     updateRenderTileIDs();
@@ -247,6 +253,112 @@ bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue
         image.data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
     }
     return true;
+}
+
+namespace {
+using FloatPair = std::array<float, 2>;
+using FloatQuad = std::array<float, 4>;
+inline FloatPair operator/(FloatPair a, float b) {
+    return {a[0] / b, a[1] / b};
+}
+inline FloatPair unpack_float(const float packedValue) {
+    const int packedIntValue = int(packedValue);
+    const int v0 = packedIntValue / 256;
+    return {static_cast<float>(v0), static_cast<float>(packedIntValue - v0 * 256)};
+}
+inline float unpack_alpha(const float packedValue) {
+    const int packedIntValue = int(packedValue);
+    return static_cast<float>(packedIntValue - (packedIntValue / 256) * 256); // NOLINT(bugprone-integer-division)
+}
+float decode_alpha(float encoded) {
+    return unpack_alpha(encoded) / 255;
+}
+} // namespace
+
+FloatQuad RenderLayer::decode_color(const FloatPair& encoded) {
+    const auto a = unpack_float(encoded[0]) / 255;
+    const auto b = unpack_float(encoded[1]) / 255;
+    return {a[0], a[1], b[0], b[1]};
+}
+FloatQuad RenderLayer::unpack_mix_color(const FloatQuad& packed, const float t) {
+    const auto c1 = decode_color({packed[0], packed[1]});
+    const auto c2 = decode_color({packed[2], packed[3]});
+    return mbgl::util::interpolate(c1, c2, t);
+}
+float RenderLayer::unpack_mix_alpha(const FloatQuad& packed, const float t) {
+    return mbgl::util::interpolate(decode_alpha(packed[1]), decode_alpha(packed[3]), t);
+}
+
+namespace {
+template <typename T>
+inline std::pair<T, T> minmax(const std::pair<T, T>& a, T b) {
+    return {std::min(a.first, b), std::max(a.second, b)};
+}
+} // namespace
+
+std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(
+    std::size_t vertexCount,
+    const mat4& tileMatrix,
+    bool preTransformed,
+    const std::function<vec3(std::size_t)>& getVertex) {
+    // Compute the feature's bounding box in tile space and project the corners into NDC space.
+    // Faster than projecting every vertex, and good enough for our purposes.
+    constexpr auto initRange = std::make_pair(std::numeric_limits<double>::max(),
+                                              std::numeric_limits<double>::lowest());
+    auto rangeX = initRange;
+    auto rangeY = initRange;
+    auto rangeZ = initRange;
+    for (std::size_t i = 0; i < vertexCount; ++i) {
+        const auto& vertex = getVertex(i);
+        rangeX = minmax(rangeX, vertex[0]);
+        rangeY = minmax(rangeY, vertex[1]);
+        rangeZ = minmax(rangeZ, vertex[2]);
+    }
+
+    if (rangeX.second <= rangeX.first || rangeY.second <= rangeY.first || rangeZ.second < rangeZ.first) {
+        return std::nullopt;
+    }
+
+    const vec4 corners[] = {
+        {rangeX.first, rangeY.first, rangeZ.first, 1},
+        {rangeX.second, rangeY.first, rangeZ.first, 1},
+        {rangeX.second, rangeY.second, rangeZ.first, 1},
+        {rangeX.first, rangeY.second, rangeZ.first, 1},
+        {rangeX.first, rangeY.first, rangeZ.second, 1},
+        {rangeX.second, rangeY.first, rangeZ.second, 1},
+        {rangeX.second, rangeY.second, rangeZ.second, 1},
+        {rangeX.first, rangeY.second, rangeZ.second, 1},
+    };
+    const auto cornersCount = sizeof(corners) / sizeof(corners[0]) / ((rangeZ.first < rangeZ.second) ? 1 : 2);
+
+    // gfx::RenderingStats::FeatureInfo info;
+    auto ndcRangeX = initRange;
+    auto ndcRangeY = initRange;
+    auto ndcRangeZ = initRange;
+    for (std::size_t i = 0; i < cornersCount; ++i) {
+        const auto& viewPos = corners[i];
+
+        vec4 clipPos;
+        if (preTransformed) {
+            clipPos = viewPos;
+        } else {
+            // view -> clip
+            matrix::transformMat4(clipPos, viewPos, tileMatrix);
+        }
+
+        // clip -> ndc
+        ndcRangeX = minmax(ndcRangeX, clipPos[0] / clipPos[3]);
+        ndcRangeY = minmax(ndcRangeY, clipPos[1] / clipPos[3]);
+        ndcRangeZ = minmax(ndcRangeZ, clipPos[2] / clipPos[3]);
+    }
+
+    if (ndcRangeX.first < ndcRangeX.second && ndcRangeY.first < ndcRangeY.second &&
+        ndcRangeZ.first <= ndcRangeZ.second && -1.0 <= ndcRangeX.second && ndcRangeX.first <= 1.0 &&
+        -1.0 <= ndcRangeY.second && ndcRangeY.first <= 1.0) {
+        return NDCBound{
+            .minX = ndcRangeX.first, .maxX = ndcRangeX.second, .minY = ndcRangeY.first, .maxY = ndcRangeY.second};
+    }
+    return std::nullopt;
 }
 
 } // namespace mbgl

@@ -1,18 +1,19 @@
 #pragma once
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/layout/layout.hpp>
+#include <mbgl/renderer/change_request.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/mat4.hpp>
-
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/util/tiny_unordered_map.hpp>
 
+#include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace mbgl {
@@ -89,6 +90,8 @@ protected:
 
 public:
     virtual ~RenderLayer() = default;
+
+    const std::string& getId() const;
 
     // Begin transitions for any properties that have changed since the last frame.
     virtual void transition(const TransitionParameters&) = 0;
@@ -282,6 +285,18 @@ protected:
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
+    using FloatPair = std::array<float, 2>;
+    using FloatQuad = std::array<float, 4>;
+
+    // To minimize the number of attributes needed, we encode a 4-component
+    // color into a pair of floats (i.e. a vec2) as follows:
+    // [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.g * 255 ]
+    static FloatQuad decode_color(const FloatPair& encoded);
+    // Unpack a pair of paint values and interpolate between them.
+    static FloatQuad unpack_mix_color(const FloatQuad& packedColors, const float t);
+    // Unpack and interpolate only the alpha channel
+    static float unpack_mix_alpha(const FloatQuad& packedColors, const float t);
+
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
@@ -317,11 +332,63 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
+    // The source provided in the most recent `prepare()`, used to retrieve feature state for rendered features.
+    RenderSource* sourceForState = nullptr;
+
+public:
     struct Stats {
-        size_t propertyEvaluations = 0;
         size_t drawablesAdded = 0;
         size_t drawablesRemoved = 0;
+
+        using NDCBound = gfx::RenderingStats::NDCBound;
+        using LayerFeaturesMap = gfx::RenderingStats::LayerFeaturesMap;
+        LayerFeaturesMap renderedFeatures;
+
+        /// Add an entry or merge with an existing one
+        void addRenderedFeature(std::string featureID,
+                                const gfx::RenderingStats::NDCBound& bound,
+                                mbgl::unordered_set<OverscaledTileID> tileIDs) {
+            const auto& [iter, inserted] = renderedFeatures.insert(
+                {std::move(featureID), {.ndcBound = bound, .tileIDs = std::move(tileIDs)}});
+            if (auto& value = iter->second; !inserted) {
+                value.mergeFrom(bound, tileIDs);
+            }
+        }
+
+        static void merge(LayerFeaturesMap& into, const LayerFeaturesMap& from) {
+            for (const auto& [featureID, featureInfo] : from) {
+                const auto& [iter, inserted] = into.insert({featureID, featureInfo});
+                if (!inserted) {
+                    iter->second.mergeFrom(featureInfo);
+                }
+            }
+        }
     } stats;
+
+protected:
+    using FeatureInfo = gfx::RenderingStats::FeatureInfo;
+    using NDCBound = gfx::RenderingStats::NDCBound;
+    using GetVertexFn = std::function<vec3(std::size_t)>;
+
+    /// Compute the bounding box of a bucket's vertices in NDC space.
+    /// Returns std::nullopt if the bucket is empty or degenerate.
+    /// @param vertexCount  Number of vertices to iterate over.
+    /// @param tileMatrix   Model matrix for the tile.
+    /// @param preTransformed  If true, the vertices are already in NDC coordinates.
+    /// @param getVertex    Functor that returns (x, y, z) for a given index.
+    static std::optional<NDCBound> computeFeatureNDCBound(std::size_t vertexCount,
+                                                          const mat4& tileMatrix,
+                                                          bool preTransformed,
+                                                          const GetVertexFn& getVertex);
+
+    // Convenience overload for pre-transformed vertices
+    static auto computeFeatureNDCBound(std::size_t count, const GetVertexFn& get) {
+        return computeFeatureNDCBound(count, matrix::identity4(), true, get);
+    }
+    // Convenience overload for non-pre-transformed vertices
+    static auto computeFeatureNDCBound(std::size_t count, const mat4& mat, const GetVertexFn& get) {
+        return computeFeatureNDCBound(count, mat, false, get);
+    }
 
 private:
     // Some layers may not render correctly on some hardware when the vertex

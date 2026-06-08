@@ -9,6 +9,7 @@ public:
     ViewportMode viewportMode = ViewportMode::Default;
     NorthOrientation orientation = NorthOrientation::Upwards;
     bool crossSourceCollisions = true;
+    bool captureRenderedFeatures = false;
     Size size = {64, 64};
     float pixelRatio = 1.0;
     bool fastPFOREnabled = false;
@@ -90,6 +91,15 @@ MapOptions& MapOptions::withFastPFOREnabled(bool enable) {
 
 bool MapOptions::fastPFOREnabled() const {
     return impl_->fastPFOREnabled;
+}
+
+MapOptions& MapOptions::withRenderedFeatureInfo(bool capture) {
+    impl_->captureRenderedFeatures = capture;
+    return *this;
+}
+
+bool MapOptions::renderedFeatureInfo() const {
+    return impl_->captureRenderedFeatures;
 }
 
 } // namespace mbgl

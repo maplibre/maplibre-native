@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
@@ -29,8 +30,9 @@ class Bucket {
 public:
     Bucket(const Bucket&) = delete;
     Bucket& operator=(const Bucket&) = delete;
-
     virtual ~Bucket() = default;
+
+    virtual void reserveFeatures(std::size_t vertexCount) { retainedFeatures.reserve(vertexCount); }
 
     // Feature geometries are also used to populate the feature index.
     // Obtaining these is a costly operation, so we do it only once, and
@@ -79,6 +81,18 @@ public:
     const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
     void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
 
+    void setRetainFeaturesById(bool value) { retainFeaturesById = value; }
+    void retainFeature(std::string featureId, std::size_t vertexOffset, std::size_t vertexCount) {
+        retainedFeatures.emplace_back(RetainedFeature{
+            .featureId = std::move(featureId), .vertexOffset = vertexOffset, .vertexCount = vertexCount});
+    }
+    void retainFeature(const GeometryTileFeature& feature, std::size_t vertexOffset, std::size_t vertexCount) {
+        if (auto idStr = featureIDtoString(feature.getID()); idStr && !idStr->empty()) {
+            retainFeature(std::move(*idStr), vertexOffset, vertexCount);
+        }
+    }
+    const auto& getRetainedFeatures() const { return retainedFeatures; }
+
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
@@ -86,6 +100,15 @@ protected:
     util::SimpleIdentity bucketID;
 
     std::optional<std::thread::id> renderThreadID;
+
+    bool retainFeaturesById = false;
+
+    struct RetainedFeature {
+        std::string featureId;
+        std::size_t vertexOffset;
+        std::size_t vertexCount;
+    };
+    std::vector<RetainedFeature> retainedFeatures;
 };
 
 } // namespace mbgl

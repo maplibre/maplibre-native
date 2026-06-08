@@ -1,11 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/query.hpp>
 #include <mbgl/annotation/annotation.hpp>
+#include <mbgl/renderer/query.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/geojson.hpp>
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>

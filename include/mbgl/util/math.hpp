@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cmath>
+#include <mbgl/util/geometry.hpp>
+
 #include <array>
+#include <cmath>
 #include <limits>
 #include <numbers>
-
-#include <mbgl/util/geometry.hpp>
 
 namespace mbgl {
 namespace util {
@@ -123,6 +123,13 @@ inline T division(const T dividend, const T divisor, const T nan) {
     } else {
         return dividend / divisor;
     }
+}
+
+/// Equivalent to the GLSL-style mod function, using floor instead of truncation.
+/// Unlike the C++ or HLSL versions, the result is always positive.
+template <typename TDividend, typename TDivisor>
+inline auto gl_fmod(TDividend x, TDivisor y) {
+    return x - y * std::floor(x / y);
 }
 
 } // namespace util

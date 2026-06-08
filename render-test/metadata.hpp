@@ -7,8 +7,9 @@
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/size.hpp>
 
-#include "filesystem.hpp"
+#include "filesystem.hpp" // IWYU pragma: keep
 
+#include <functional>
 #include <list>
 #include <map>
 

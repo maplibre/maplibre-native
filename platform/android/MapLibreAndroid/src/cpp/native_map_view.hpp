@@ -367,6 +367,11 @@ public:
     // Renderer
     void onRenderError(std::exception_ptr) override;
 
+    int getRenderedFeatureCount(JNIEnv&,
+                                const jni::String& featureId,
+                                const jni::String& layerId,
+                                const jni::String& sourceId);
+
 private:
     std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 

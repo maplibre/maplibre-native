@@ -17,11 +17,11 @@ public:
     TestRunnerMapObserver() = default;
     void onDidFailLoadingMap(mbgl::MapLoadError, const std::string&) override { mapLoadFailure = true; }
 
-    void onDidFinishRenderingMap(RenderMode mode) override final {
+    void onDidFinishRenderingMap(RenderMode mode) final {
         if (!finishRenderingMap) finishRenderingMap = mode == RenderMode::Full;
     }
 
-    void onDidBecomeIdle() override final { idle = true; }
+    void onDidBecomeIdle() final { idle = true; }
 
     void reset() {
         mapLoadFailure = false;

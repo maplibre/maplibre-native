@@ -26,6 +26,11 @@ target_link_libraries(
     PRIVATE tinyobjloader
 )
 
+target_compile_definitions(
+    mbgl-glfw
+    PRIVATE ENABLE_LOCATION_INDICATOR=1
+)
+
 set_property(
     SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
     PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
@@ -162,8 +167,6 @@ if(NOT WIN32 AND MLN_WITH_OPENGL)
         PRIVATE OpenGL::GL
     )
 endif()
-
-
 
 set_property(TARGET mbgl-glfw PROPERTY FOLDER MapLibre)
 

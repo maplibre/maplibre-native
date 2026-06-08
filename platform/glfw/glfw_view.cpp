@@ -59,12 +59,13 @@
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <utility>
-#include <sstream>
 #include <numbers>
+#include <sstream>
+#include <utility>
 
 using namespace std::numbers;
 
@@ -424,12 +425,25 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
     if (action == GLFW_RELEASE) {
         if (key != GLFW_KEY_R || key != GLFW_KEY_S) view->animateRouteCallback = nullptr;
 
+        // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
         switch (key) {
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(window, true);
                 break;
             case GLFW_KEY_TAB:
                 view->cycleDebugOptions();
+                break;
+            case GLFW_KEY_KP_ADD:
+            case GLFW_KEY_EQUAL:
+                view->map->scaleBy(1.1,
+                                   mbgl::ScreenCoordinate{view->lastX, view->lastY},
+                                   mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
+                break;
+            case GLFW_KEY_KP_SUBTRACT:
+            case GLFW_KEY_MINUS:
+                view->map->scaleBy(1.0 / 1.1,
+                                   mbgl::ScreenCoordinate{view->lastX, view->lastY},
+                                   mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
                 break;
             case GLFW_KEY_X:
                 if (!mods)
@@ -674,6 +688,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
     }
 
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
+        // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
         switch (key) {
             case GLFW_KEY_W:
                 view->popAnnotation();
@@ -753,7 +768,7 @@ void GLFWView::updateFreeCameraDemo() {
     mbgl::FreeCameraOptions camera;
 
     // Update camera position and focus point on the map with interpolated values
-    camera.setLocation({cameraPos, cameraAlt});
+    camera.setLocation({.location = cameraPos, .altitude = cameraAlt});
     camera.lookAtPoint(trainPos);
 
     map->setFreeCameraOptions(camera);
@@ -998,30 +1013,27 @@ void GLFWView::makeSnapshot(bool withOverlay) {
 void GLFWView::onScroll(GLFWwindow *window, double /*xOffset*/, double yOffset) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
-    double delta = yOffset * 40;
+    const double wheelIncrement = 4.000244140625 / 40; // ?
+    const bool isShiftActive = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+                               glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
+    const bool isCtrlActive = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+                              glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+    const bool isWheel = (yOffset != 0) && (std::fmod(yOffset, wheelIncrement) == 0);
+    const double factor = (isWheel ? 40 : 20) * (isShiftActive ? 2.0 : isCtrlActive ? 0.1 : 1.0);
+    const double delta = yOffset * factor;
 
-    bool isWheel = delta != 0 && std::fmod(delta, 4.000244140625) == 0;
-
-    double absDelta = delta < 0 ? -delta : delta;
-    double scale = 2.0 / (1.0 + std::exp(-absDelta / 100.0));
-
-    // Make the scroll wheel a bit slower.
-    if (!isWheel) {
-        scale = (scale - 1.0) / 2.0 + 1.0;
-    }
+    double scaleFactor = 2.0 / (1.0 + std::exp(-std::fabs(delta) / 100.0));
 
     // Zooming out.
-    if (delta < 0 && scale != 0) {
-        scale = 1.0 / scale;
+    if (delta < 0 && scaleFactor != 0) {
+        scaleFactor = 1.0 / scaleFactor;
     }
 
-    view->map->scaleBy(scale, mbgl::ScreenCoordinate{view->lastX, view->lastY});
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    if (view->puck && view->puckFollowsCameraCenter) {
-        mbgl::LatLng mapCenter = view->map->getCameraOptions().center.value();
-        view->puck->setLocation(toArray(mapCenter));
-    }
+    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    view->map->scaleBy(scaleFactor, mbgl::ScreenCoordinate{view->lastX, view->lastY});
+
+#if defined(ENABLE_LOCATION_INDICATOR)
+    view->updatePuckLocation();
 #endif
 }
 
@@ -1116,11 +1128,8 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
     }
     view->lastX = x;
     view->lastY = y;
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    if (view->puck && view->puckFollowsCameraCenter) {
-        mbgl::LatLng mapCenter = view->map->getCameraOptions().center.value();
-        view->puck->setLocation(toArray(mapCenter));
-    }
+#if defined(ENABLE_LOCATION_INDICATOR)
+    view->updatePuckLocation();
 #endif
     auto &style = view->map->getStyle();
     if (style.getLayer("state-fills")) {
@@ -1306,10 +1315,6 @@ void GLFWView::setWindowTitle(const std::string &title) {
 void GLFWView::onDidFinishLoadingStyle() {
     MLN_TRACE_FUNC();
 
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    puck = nullptr;
-#endif
-
     if (show3DExtrusions) {
         toggle3DExtrusions(show3DExtrusions);
     }
@@ -1374,80 +1379,144 @@ void GLFWView::toggleCustomSource() {
     }
 }
 
+#ifdef ENABLE_LOCATION_INDICATOR
+mbgl::style::LocationIndicatorLayer *GLFWView::getPuckLayer() {
+    return map ? static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck")) : nullptr;
+}
+void GLFWView::updatePuckLocation() {
+    using namespace mbgl::style;
+    if (auto *puck = getPuckLayer();
+        puck && puckFollowsCameraCenter && puck->getVisibility() == VisibilityType::Visible) {
+        puck->setLocation(toArray(map->getCameraOptions().center.value()));
+    }
+}
+namespace {
+/// <rate> times per second, change to the next value, covering [0, 1] in <period> seconds
+double cycle(double t, double rate, double period) {
+    return std::fmod(std::trunc(t * rate) / rate, period) / period;
+}
+} // namespace
+void GLFWView::updatePuckState() {
+    using namespace mbgl::style;
+    if (const auto puck = getPuckLayer(); puck && puck->getVisibility() == VisibilityType::Visible) {
+        constexpr auto hz = 20.0;      // heading update rate
+        constexpr auto rot_tau = 5.0;  // rotation period
+        constexpr auto rad_tau = 20.0; // radius period
+        constexpr auto ns_per_s = 1.0e9;
+        const auto t = mbgl::Clock::now().time_since_epoch().count() / ns_per_s;
+
+        puck->setBearing({360 * cycle(t, hz, rot_tau)});
+
+        const auto radius = 20 + 50 * std::sin(std::numbers::pi * cycle(t, hz, rad_tau));
+        puck->setAccuracyRadius({static_cast<float>(radius)});
+    }
+}
+#endif
+
 void GLFWView::toggleLocationIndicatorLayer() {
     MLN_TRACE_FUNC();
 
 #ifdef ENABLE_LOCATION_INDICATOR
-    puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
-    static const mbgl::LatLng puckLocation{35.683389, 139.76525}; // A location on the crossing of 4 tiles
-    if (puck == nullptr) {
-        auto puckLayer = std::make_unique<mbgl::style::LocationIndicatorLayer>("puck");
+    using namespace mbgl;
+    using namespace mbgl::style;
+    const LatLng puckLocation{35.683389, 139.76525}; // A location on the crossing of 4 tiles
+    if (const auto puck = getPuckLayer()) {
+        // Layer already created, cycle through states
+        if (puck->getVisibility() == VisibilityType::Visible) {
+            if (!puckFollowsCameraCenter) {
+                puckFollowsCameraCenter = true;
+            } else {
+                puck->setVisibility(VisibilityType::None);
+                puckFollowsCameraCenter = false;
+            }
+        } else {
+            puck->setLocation(toArray(puckLocation));
+            puck->setVisibility(VisibilityType::Visible);
+            puckFollowsCameraCenter = false;
+        }
+    } else {
+        auto puckLayer = std::make_unique<LocationIndicatorLayer>("puck");
 
-        puckLayer->setLocationTransition(
-            mbgl::style::TransitionOptions(mbgl::Duration::zero(),
-                                           mbgl::Duration::zero())); // Note: This is used here for demo purpose.
-                                                                     // SDKs should not use this, or else the location
-                                                                     // will "jump" to positions.
+        // Note: This is used here for demo purpose.
+        // SDKs should not use this, or else the location will "jump" to positions.
+        puckLayer->setLocationTransition({Duration::zero(), Duration::zero()});
+
         puckLayer->setLocation(toArray(puckLocation));
         puckLayer->setAccuracyRadius(50);
         puckLayer->setAccuracyRadiusColor(
-            premultiply(mbgl::Color{0.0f, 1.0f, 0.0f, 0.2f})); // Note: these must be fed premultiplied
-
-        puckLayer->setBearingTransition(mbgl::style::TransitionOptions(mbgl::Duration::zero(), mbgl::Duration::zero()));
-        puckLayer->setBearing(mbgl::style::Rotation(0.0));
-        puckLayer->setAccuracyRadiusBorderColor(premultiply(mbgl::Color{0.0f, 1.0f, 0.2f, 0.4f}));
+            premultiply(Color{0.0f, 1.0f, 0.0f, 0.2f})); // Note: these must be fed premultiplied
+        puckLayer->setBearingTransition({Duration::zero(), Duration::zero()});
+        puckLayer->setBearing({0.0});
+        puckLayer->setAccuracyRadiusBorderColor(premultiply(Color{0.0f, 1.0f, 0.2f, 0.4f}));
         puckLayer->setTopImageSize(0.18f);
         puckLayer->setBearingImageSize(0.26f);
         puckLayer->setShadowImageSize(0.2f);
         puckLayer->setImageTiltDisplacement(7.0f); // set to 0 for a "flat" puck
         puckLayer->setPerspectiveCompensation(0.9f);
 
-        map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck.png")), 1.0f));
+        map->getStyle().addImage(std::make_unique<style::Image>(
+            "puck.png", decodeImage(util::read_file(mbglPuckAssetsPath + "puck.png")), 1.0f));
 
-        map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck_shadow.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_shadow.png")), 1.0f));
+        map->getStyle().addImage(std::make_unique<style::Image>(
+            "puck_shadow.png", decodeImage(util::read_file(mbglPuckAssetsPath + "puck_shadow.png")), 1.0f));
 
-        map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
-            "puck_hat.png", mbgl::decodeImage(mbgl::util::read_file(mbglPuckAssetsPath + "puck_hat.png")), 1.0f));
+        map->getStyle().addImage(std::make_unique<style::Image>(
+            "puck_hat.png", decodeImage(util::read_file(mbglPuckAssetsPath + "puck_hat.png")), 1.0f));
 
-        puckLayer->setBearingImage(mbgl::style::expression::Image("puck.png"));
-        puckLayer->setShadowImage(mbgl::style::expression::Image("puck_shadow.png"));
-        puckLayer->setTopImage(mbgl::style::expression::Image("puck_hat.png"));
+        puckLayer->setBearingImage(expression::Image("puck.png"));
+        puckLayer->setShadowImage(expression::Image("puck_shadow.png"));
+        puckLayer->setTopImage(expression::Image("puck_hat.png"));
 
-        puck = puckLayer.get();
         map->getStyle().addLayer(std::move(puckLayer));
-    } else {
-        bool visible = puck->getVisibility() == mbgl::style::VisibilityType::Visible;
-        if (visible) {
-            if (!puckFollowsCameraCenter) {
-                mbgl::LatLng mapCenter = map->getCameraOptions().center.value();
-                puck->setLocation(toArray(mapCenter));
-                puckFollowsCameraCenter = true;
-            } else {
-                puckFollowsCameraCenter = false;
-                puck->setVisibility(mbgl::style::VisibilityType(mbgl::style::VisibilityType::None));
-            }
-        } else {
-            puck->setLocation(toArray(puckLocation));
-            puck->setVisibility(mbgl::style::VisibilityType(mbgl::style::VisibilityType::Visible));
-            puckFollowsCameraCenter = false;
-        }
     }
-#endif
+    updatePuckLocation();
+#else
+    mbgl::Log::Warning(mbgl::Event::General, "Location indicator is disabled");
+#endif // ENABLE_LOCATION_INDICATOR
 }
-
-using Nanoseconds = std::chrono::nanoseconds;
 
 void GLFWView::onWillStartRenderingFrame() {
     MLN_TRACE_FUNC();
 
 #ifdef ENABLE_LOCATION_INDICATOR
-    puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
-    if (puck) {
-        uint64_t ns = mbgl::Clock::now().time_since_epoch().count();
-        const double bearing = static_cast<double>(ns % 2000000000) / 2000000000.0 * 360.0;
-        puck->setBearing(mbgl::style::Rotation(bearing));
-    }
+    updatePuckState();
 #endif
+}
+
+namespace {
+using NDCBound = mbgl::gfx::RenderingStats::NDCBound;
+struct scaled {
+    scaled(const NDCBound &bound, const int width, const int height)
+        : x(std::trunc(width * (bound.minX + 1) / 2)),
+          y(std::trunc(height * (1 - (bound.minY + 1) / 2))),
+          w(std::ceil(width * (bound.maxX - bound.minX) / 2)),
+          h(std::ceil(height * (bound.maxY - bound.minY) / 2)) {}
+    friend std::ostream &operator<<(std::ostream &os, const scaled &s) {
+        return os << s.x << "," << s.y << "; " << s.w << "x" << s.h;
+    }
+
+private:
+    int x, y, w, h;
+};
+} // namespace
+
+void GLFWView::onDidFinishRenderingFrame(const RenderFrameStatus &status) {
+    std::size_t totalFeatures = 0;
+    for (const auto &layer : status.renderingStats->frameRenderedFeatures) {
+        totalFeatures += layer.second.size();
+        std::ostringstream ss;
+        ss << "RenderLayer source=" << layer.first.sourceID;
+        ss << " id=" << layer.first.layerID << ": ";
+        ss << layer.second.size() << " features:";
+        for (const auto &feature : layer.second) {
+            const auto &bound = feature.second.ndcBound;
+            ss << "\n id=" << feature.first;
+            ss << " tiles=" << feature.second.tileIDs.size();
+            ss << " bound=" << scaled(bound, width, height);
+        }
+        mbgl::Log::Info(mbgl::Event::Render, ss.str());
+    }
+    if (totalFeatures > 0) {
+        mbgl::Log::Info(mbgl::Event::Render, "Total rendered features:  " + std::to_string(totalFeatures));
+    }
 }

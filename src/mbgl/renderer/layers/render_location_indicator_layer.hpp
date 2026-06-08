@@ -48,6 +48,8 @@ private:
 
     void populateDynamicRenderFeatureIndex(DynamicFeatureIndex &) const override;
 
+    void captureRenderedFeatures();
+
 private:
     bool contextDestroyed = false;
     std::unique_ptr<RenderLocationIndicatorImpl> renderImpl;

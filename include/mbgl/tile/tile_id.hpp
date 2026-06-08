@@ -2,14 +2,13 @@
 
 #include <mbgl/util/constants.hpp>
 
+#include <algorithm>
+#include <array>
+#include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <array>
-#include <tuple>
-#include <forward_list>
-#include <algorithm>
 #include <iosfwd>
-#include <cassert>
+#include <tuple>
 
 namespace mbgl {
 

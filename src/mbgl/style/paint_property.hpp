@@ -8,8 +8,6 @@
 #include <mbgl/renderer/data_driven_property_evaluator.hpp>
 
 #include <array>
-#include <optional>
-#include <utility>
 
 namespace mbgl {
 namespace style {

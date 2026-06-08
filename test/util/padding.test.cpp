@@ -7,6 +7,7 @@
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/property_expression.hpp>
+#include <mbgl/util/vectors.hpp>
 
 #include <mbgl/style/conversion/function.hpp>
 #include <mbgl/style/conversion/property_value.hpp>

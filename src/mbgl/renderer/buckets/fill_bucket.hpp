@@ -39,7 +39,7 @@ public:
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
-                    const mbgl::ImagePositions&,
+                    const ImagePositions&,
                     const PatternLayerMap&,
                     std::size_t,
                     const CanonicalTileID&) override;
@@ -83,6 +83,14 @@ public:
     SegmentVector triangleSegments;
 
     std::map<std::string, FillBinders> paintPropertyBinders;
+
+private:
+    void generateBuffers(const GeometryCollection&);
+    void populateBinders(const GeometryTileFeature&,
+                         const ImagePositions&,
+                         const PatternLayerMap&,
+                         std::size_t featureIndex,
+                         const CanonicalTileID&);
 };
 
 } // namespace mbgl

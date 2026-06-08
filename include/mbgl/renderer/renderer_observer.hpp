@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/gfx/backend.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/text/glyph_range.hpp>
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/tile/tile_operation.hpp>
+#include <mbgl/util/font_stack.hpp>
 
 #include <cstdint>
 #include <exception>
@@ -57,6 +57,13 @@ public:
                                            bool placementChanged,
                                            const gfx::RenderingStats& stats) {
         onDidFinishRenderingFrame(mode, repaint, placementChanged, stats.encodingTime, stats.renderingTime);
+    }
+
+    virtual void onDidFinishRenderingFrame(RenderMode mode,
+                                           bool repaint,
+                                           bool placementChanged,
+                                           std::shared_ptr<gfx::RenderingStats> stats) {
+        onDidFinishRenderingFrame(mode, repaint, placementChanged, *stats);
     }
 
     /// Final frame

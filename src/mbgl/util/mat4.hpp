@@ -22,8 +22,9 @@
 
 #pragma once
 
-#include <array>
 #include <mbgl/util/vectors.hpp>
+
+#include <array>
 
 namespace mbgl {
 
@@ -51,8 +52,23 @@ void rotate_z(mat4& out, const mat4& a, double rad);
 void scale(mat4& out, const mat4& a, double x, double y, double z);
 void multiply(mat4& out, const mat4& a, const mat4& b);
 
+// Transform a 4D vector by a 4x4 matrix (v * m).
+// The result and matrix must not be the same array.
 void transformMat4(vec4& out, const vec4& a, const mat4& m);
 
+// Transform a 4D vector by a 4x4 matrix
+// a * m if m is row-major (C++), m * a if m is column-major (OpenGL).
+inline vec4 transformMat4(const vec4& a, const mat4& m) {
+    vec4 result;
+    transformMat4(result, a, m);
+    return result;
+}
+
+inline vec4 operator*(const mat4& m, const vec4& a) {
+    return transformMat4(a, m);
+}
+
 void diffsplit(matf4& outValue, matf4& outDiff, const mat4& source);
+
 } // namespace matrix
 } // namespace mbgl

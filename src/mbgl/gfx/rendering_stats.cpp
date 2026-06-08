@@ -1,13 +1,15 @@
 #include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
+
+#include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
+#include <mbgl/style/layers/symbol_layer.hpp>
+#include <mbgl/style/sources/custom_geometry_source.hpp>
+#include <mbgl/style/style.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 
 #include <initializer_list>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 namespace mbgl {
 namespace gfx {
@@ -60,6 +62,11 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     memUniformBuffers += r.memUniformBuffers;
     stencilClears += r.stencilClears;
     stencilUpdates += r.stencilUpdates;
+
+    for (const auto& [sourceLayerID, layerFeatures] : r.frameRenderedFeatures) {
+        RenderLayer::Stats::merge(frameRenderedFeatures[sourceLayerID], layerFeatures);
+    }
+
     return *this;
 }
 

@@ -1121,8 +1121,20 @@ final class NativeMapView implements NativeMap {
       coordinates.bottom / pixelRatio,
       layerIds,
       filter != null ? filter.toArray() : null);
-    return features != null ? Arrays.asList(features) : new ArrayList<Feature>();
+    return features != null ? Arrays.asList(features) : new ArrayList<>();
   }
+
+  @Override
+  public int getRenderedFeatureCount(@Nullable String featureId,
+                                     @Nullable String layerId,
+                                     @Nullable String sourceId) {
+    if (checkState("getRenderedFeatureCount")) {
+      return 0;
+    }
+    return nativeGetRenderedFeatureCount(featureId, layerId, sourceId);
+  }
+
+  // Feature State
 
   @Override
   public void setFeatureState(@NonNull String sourceId,
@@ -1744,6 +1756,9 @@ final class NativeMapView implements NativeMap {
                                                              float right, float bottom,
                                                              String[] layerIds,
                                                              Object[] filter);
+
+  @Keep
+  private native int nativeGetRenderedFeatureCount(String feature, String layer, String source);
 
   @Keep
   private native void nativeSetFeatureState(String sourceId,

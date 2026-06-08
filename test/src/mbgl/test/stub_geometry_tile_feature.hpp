@@ -3,8 +3,7 @@
 
 namespace mbgl {
 
-class StubGeometryTileFeature : public GeometryTileFeature {
-public:
+struct StubGeometryTileFeature : public GeometryTileFeature {
     StubGeometryTileFeature(PropertyMap properties_)
         : properties(std::move(properties_)) {}
 
@@ -21,20 +20,18 @@ public:
         : type(type_),
           geometry(std::move(geometry_)) {}
 
+    FeatureType getType() const override { return type; }
+    FeatureIdentifier getID() const override { return id; }
+    const GeometryCollection& getGeometries() const override { return geometry; }
+    std::optional<Value> getValue(const std::string& key) const override {
+        const auto it = properties.find(key);
+        return (it != properties.end()) ? it->second : std::optional<Value>();
+    }
+
     PropertyMap properties;
     FeatureIdentifier id;
     FeatureType type = FeatureType::Point;
     GeometryCollection geometry;
-
-    FeatureType getType() const override { return type; }
-
-    FeatureIdentifier getID() const override { return id; }
-
-    std::optional<Value> getValue(const std::string& key) const override {
-        return properties.count(key) ? properties.at(key) : std::optional<Value>();
-    }
-
-    const GeometryCollection& getGeometries() const override { return geometry; }
 };
 
 } // namespace mbgl

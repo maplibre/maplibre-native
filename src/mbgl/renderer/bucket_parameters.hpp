@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/map/mode.hpp>
+#include <mbgl/renderer/bucket.hpp>
 #include <mbgl/tile/tile_id.hpp>
 
 namespace mbgl {
@@ -14,6 +15,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
+    const bool retainFeaturesById = false;
 };
 
 } // namespace mbgl

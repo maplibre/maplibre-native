@@ -4,9 +4,7 @@
 #include <mbgl/util/containers.hpp>
 #include <mbgl/util/hash.hpp>
 
-#include <iomanip>
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
 #include <sstream>
 #include <string>

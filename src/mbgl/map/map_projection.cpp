@@ -6,7 +6,7 @@
 namespace mbgl {
 
 MapProjection::MapProjection(const Map& map)
-    : transform(std::make_unique<Transform>(map.getTransfromState())) {}
+    : transform(std::make_unique<Transform>(map.getTransformState())) {}
 
 MapProjection::~MapProjection() = default;
 

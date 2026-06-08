@@ -165,6 +165,10 @@ public:
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
+    gfx::RenderingStats::FrameRenderedFeaturesMap&& moveFrameRenderedFeatures() {
+        return std::move(frameRenderedFeatures);
+    }
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
@@ -244,6 +248,8 @@ private:
 
     std::vector<RenderTargetPtr> renderTargets;
     RenderItem::DebugLayerGroupMap debugLayerGroups;
+
+    gfx::RenderingStats::FrameRenderedFeaturesMap frameRenderedFeatures;
 };
 
 } // namespace mbgl

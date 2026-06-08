@@ -1,12 +1,14 @@
 #include <mbgl/layout/merge_lines.hpp>
+
 #include <mbgl/layout/symbol_feature.hpp>
+#include <mbgl/util/containers.hpp>
 #include <mbgl/util/hash.hpp>
 
 namespace mbgl {
 namespace util {
 
 // Map of key -> index into features
-using Index = std::unordered_map<size_t, size_t>;
+using Index = mbgl::unordered_map<size_t, size_t>;
 namespace {
 size_t mergeFromRight(std::vector<SymbolFeature>& features,
                       Index& rightIndex,

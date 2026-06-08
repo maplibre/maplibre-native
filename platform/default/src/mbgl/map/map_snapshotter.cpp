@@ -2,10 +2,10 @@
 
 #include <mbgl/actor/actor_ref.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
-#include <mbgl/map/transform.hpp>
+#include <mbgl/map/map.hpp>
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/map/transform.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/storage/resource_options.hpp>
@@ -14,6 +14,8 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread.hpp>
+
+#include <memory>
 #include <utility>
 
 namespace mbgl {
@@ -39,10 +41,10 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   const gfx::RenderingStats& stats) override {
-        void (RendererObserver::*f)(
-            RenderMode, bool, bool, const gfx::RenderingStats&) = &RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, stats);
+                                   std::shared_ptr<gfx::RenderingStats> stats) override {
+        void (RendererObserver::*f)(RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>) =
+            &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, std::move(stats));
     }
 
     void onStyleImageMissing(const std::string& image, const StyleImageMissingCallback& cb) override {
@@ -97,11 +99,11 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaint,
                                    bool placementChanged,
-                                   const gfx::RenderingStats& stats) override {
+                                   std::shared_ptr<gfx::RenderingStats> stats) override {
         if (mode == RenderMode::Full && hasPendingStillImageRequest) {
             stillImage = frontend.readStillImage();
         }
-        rendererObserver->onDidFinishRenderingFrame(mode, repaint, placementChanged, stats);
+        rendererObserver->onDidFinishRenderingFrame(mode, repaint, placementChanged, std::move(stats));
     }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {

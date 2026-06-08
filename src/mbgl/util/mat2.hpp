@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <mbgl/util/vectors.hpp>
+
 #include <array>
 
 namespace mbgl {
@@ -33,6 +35,14 @@ namespace matrix {
 void identity(mat2& out);
 void rotate(mat2& out, const mat2& a, double rad);
 void scale(mat2& out, const mat2& a, double v0, double v1);
+
+inline vec2 transformMat2(const vec2& a, const mat2& m) {
+    return vec2{a[0] * m[0] + a[1] * m[2], a[0] * m[1] + a[1] * m[3]};
+}
+
+inline vec2 operator*(const mat2& m, const vec2& a) {
+    return transformMat2(a, m);
+}
 
 } // namespace matrix
 } // namespace mbgl

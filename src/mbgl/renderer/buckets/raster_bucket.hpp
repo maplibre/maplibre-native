@@ -2,16 +2,15 @@
 
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <memory>
-#include <optional>
 
 namespace mbgl {
 
@@ -37,7 +36,7 @@ public:
     void setMask(TileMask&&);
 
     static RasterLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
-        return RasterLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+        return RasterLayoutVertex{.a1 = {{p.x, p.y}}, .a2 = {{t.x, t.y}}};
     }
 
     std::shared_ptr<PremultipliedImage> image;

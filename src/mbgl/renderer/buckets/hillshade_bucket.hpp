@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/geometry/dem_data.hpp>
-#include <mbgl/shaders/segment.hpp>
+#include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/renderer/bucket.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
-#include <mbgl/util/tileset.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/util/tileset.hpp>
 
 namespace mbgl {
 
@@ -43,7 +43,7 @@ public:
     void setPrepared(bool preparedState) { prepared = preparedState; }
 
     static HillshadeLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
-        return HillshadeLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+        return HillshadeLayoutVertex{.a1 = {{p.x, p.y}}, .a2 = {{t.x, t.y}}};
     }
 
     // Raster-DEM Tile Sources use the default buffers from Painter

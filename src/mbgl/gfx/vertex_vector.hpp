@@ -3,6 +3,7 @@
 #include <mbgl/util/ignore.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 
+#include <cassert>
 #include <memory>
 #include <vector>
 

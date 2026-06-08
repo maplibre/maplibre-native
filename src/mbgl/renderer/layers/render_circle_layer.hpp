@@ -1,11 +1,13 @@
 #pragma once
 
+#include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 
 namespace mbgl {
 
+class CircleBucket;
 class CircleLayerTweaker;
 using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
 
@@ -35,6 +37,13 @@ private:
                                 float,
                                 const mat4&,
                                 const FeatureState&) const override;
+
+    void captureRenderedFeatures(const CircleBucket&,
+                                 const RenderTile&,
+                                 const CircleBinders&,
+                                 const style::CirclePaintProperties::PossiblyEvaluated&,
+                                 const TransformState&,
+                                 const TransformParameters&);
 
 private:
     // Paint properties

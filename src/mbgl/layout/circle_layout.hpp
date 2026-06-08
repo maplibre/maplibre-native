@@ -16,7 +16,8 @@ public:
                  std::unique_ptr<GeometryTileLayer> sourceLayer_)
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
-          mode(parameters.mode) {
+          mode(parameters.mode),
+          retainFeaturesById(parameters.retainFeaturesById) {
         assert(!group.empty());
         auto leaderLayerProperties = staticImmutableCast<style::CircleLayerProperties>(group.front());
         const auto& unevaluatedLayout = leaderLayerProperties->layerImpl().layout;
@@ -39,7 +40,8 @@ public:
             }
 
             if (!sortFeaturesByKey) {
-                features.push_back({i, std::move(feature), style::CircleSortKey::defaultValue()});
+                features.push_back(
+                    {.i = i, .feature = std::move(feature), .sortKey = style::CircleSortKey::defaultValue()});
                 continue;
             }
 
@@ -61,15 +63,24 @@ public:
                       const bool,
                       const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<CircleBucket>(layerPropertiesMap, mode, zoom);
+        bucket->setRetainFeaturesById(retainFeaturesById);
+        bucket->reserveFeatures(features.size());
 
         for (auto& circleFeature : features) {
             const auto i = circleFeature.i;
-            const std::unique_ptr<GeometryTileFeature>& feature = circleFeature.feature;
-            const GeometryCollection& geometries = feature->getGeometries();
+            const auto& feature = *circleFeature.feature;
+            const GeometryCollection& geometries = feature.getGeometries();
+            const auto vertexOffset = bucket->vertices.elements();
 
-            addCircle(*bucket, *feature, geometries, i, circleFeature.sortKey, canonical);
+            addCircle(*bucket, feature, geometries, i, circleFeature.sortKey, canonical);
 
-            bucket->addFeature(*feature, geometries, {}, PatternLayerMap(), i, canonical);
+            if (retainFeaturesById) {
+                const auto vertexCount = bucket->vertices.elements() - vertexOffset;
+                if (vertexCount > 0) {
+                    bucket->retainFeature(feature, vertexOffset, vertexCount);
+                }
+            }
+
             featureIndex->insert(geometries, i, sourceLayerID, bucketLeaderID);
         }
 
@@ -160,6 +171,7 @@ private:
     const float zoom;
     const MapMode mode;
     std::string sourceLayerID;
+    bool retainFeaturesById = false;
 };
 
 } // namespace mbgl

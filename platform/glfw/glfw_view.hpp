@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/map/map.hpp>
 #include <mbgl/map/map_snapshotter.hpp>
+#include <mbgl/map/map.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
 
-#include <utility>
 #include <optional>
+#include <utility>
 
 #if (defined(MLN_RENDER_BACKEND_OPENGL) || defined(MLN_RENDER_BACKEND_VULKAN) || \
      defined(MLN_RENDER_BACKEND_WEBGPU)) &&                                      \
@@ -71,6 +71,7 @@ public:
     // mbgl::MapObserver implementation
     void onDidFinishLoadingStyle() override;
     void onWillStartRenderingFrame() override;
+    void onDidFinishRenderingFrame(const RenderFrameStatus &) override;
 
 protected:
     // mbgl::Backend implementation
@@ -123,6 +124,12 @@ private:
     mbgl::AnnotationIDs animatedAnnotationIDs;
     std::vector<double> animatedAnnotationAddedTimes;
 
+#ifdef ENABLE_LOCATION_INDICATOR
+    mbgl::style::LocationIndicatorLayer *getPuckLayer();
+    void updatePuckLocation();
+    void updatePuckState();
+#endif
+
 private:
     void toggle3DExtrusions(bool visible);
 
@@ -173,6 +180,5 @@ private:
 
 #ifdef ENABLE_LOCATION_INDICATOR
     bool puckFollowsCameraCenter = false;
-    mbgl::style::LocationIndicatorLayer *puck = nullptr;
 #endif
 };

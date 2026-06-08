@@ -6,8 +6,6 @@
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 
-#include <unordered_map>
-
 namespace mbgl {
 
 namespace style {
@@ -106,6 +104,12 @@ private:
     bool hasCrossfade() const override;
 
     void prepare(const LayerPrepareParameters&) override;
+
+    void captureRenderedFeatures(const RenderTile&,
+                                 const SymbolBucket&,
+                                 const style::SymbolPaintProperties::PossiblyEvaluated&,
+                                 const TransformState&,
+                                 const TransformParameters&);
 
 private:
     // Paint properties

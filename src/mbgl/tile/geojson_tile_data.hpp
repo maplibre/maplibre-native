@@ -1,5 +1,6 @@
 #pragma once
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <memory>
 
 namespace mbgl {
 

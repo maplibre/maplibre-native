@@ -1,25 +1,28 @@
-#include <algorithm>
 #include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/layout/merge_lines.hpp>
+
 #include <mbgl/layout/clip_lines.hpp>
+#include <mbgl/layout/merge_lines.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/text/get_anchors.hpp>
-#include <mbgl/text/shaping.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/text/shaping.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/util/utf.hpp>
 #include <mbgl/util/constants.hpp>
-#include <mbgl/util/string.hpp>
+#include <mbgl/util/containers.hpp>
+#include <mbgl/util/feature.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/platform.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mbgl/util/string.hpp>
+#include <mbgl/util/utf.hpp>
 
 #include <mapbox/polylabel.hpp>
 
+#include <algorithm>
 #include <numbers>
+#include <optional>
 
 using namespace std::numbers;
 
@@ -127,7 +130,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       pixelRatio(parameters.pixelRatio),
       tileSize(static_cast<uint32_t>(util::tileSize_D * overscaling)),
       tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
-      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)) {
+      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)),
+      retainFeaturesById(parameters.retainFeaturesById) {
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
     textSize = leader.layout.get<TextSize>();
@@ -171,8 +175,9 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
     for (size_t i = 0; i < featureCount; ++i) {
         auto feature = sourceLayer->getFeature(i);
         if (!leader.filter(expression::EvaluationContext(this->zoom, feature.get())
-                               .withCanonicalTileID(&parameters.tileID.canonical)))
+                               .withCanonicalTileID(&parameters.tileID.canonical))) {
             continue;
+        }
 
         SymbolFeature ft(std::move(feature));
 
@@ -799,6 +804,8 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                                                   ? SymbolPlacementType::Point
                                                   : layout->get<SymbolPlacement>();
 
+    const auto featureId = retainFeaturesById ? featureIDtoString(feature.getID()) : std::nullopt;
+
     const float textRepeatDistance = symbolSpacing / 2;
     const auto evaluatedLayoutProperties = layout->evaluate(zoom, feature);
     IndexedSubfeature indexedFeature(feature.index, sourceLayer->getName(), bucketLeaderID, symbolInstances.size());
@@ -859,7 +866,9 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                 if (!sortKeyRanges.empty() && sortKeyRanges.back().sortKey == feature.sortKey) {
                     sortKeyRanges.back().end = symbolInstances.size();
                 } else {
-                    sortKeyRanges.push_back({feature.sortKey, symbolInstances.size() - 1, symbolInstances.size()});
+                    sortKeyRanges.push_back({.sortKey = feature.sortKey,
+                                             .start = symbolInstances.size() - 1,
+                                             .end = symbolInstances.size()});
                 }
             }
         }
@@ -1031,6 +1040,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                  std::move(placementModes),
                                                  iconsInText);
 
+    bucket->setRetainFeaturesById(retainFeaturesById);
+
     for (SymbolInstance& symbolInstance : bucket->symbolInstances) {
         if (!symbolInstance.check(SYM_GUARD_LOC)) {
             continue;
@@ -1041,6 +1052,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
         const bool singleLine = symbolInstance.getSingleLine();
 
         const auto& feature = features.at(symbolInstance.getLayoutFeatureIndex());
+        const auto featureId = (retainFeaturesById && feature.feature) ? featureIDtoString(feature.getID())
+                                                                       : std::nullopt;
 
         // Insert final placement into collision tree and add glyphs/icons to buffers
 
@@ -1058,7 +1071,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                       symbolInstance.getIconOffset(),
                                                       writingMode,
                                                       symbolInstance.line(),
-                                                      std::vector<float>());
+                                                      std::vector<float>(),
+                                                      featureId);
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
@@ -1185,6 +1199,9 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
     const bool hasFormatSectionOverrides = bucket.hasFormatSectionOverrides();
     const auto& placedIconIndex = writingMode == WritingModeType::Vertical ? symbolInstance.getPlacedVerticalIconIndex()
                                                                            : symbolInstance.getPlacedIconIndex();
+
+    const auto featureId = (retainFeaturesById && feature.feature) ? featureIDtoString(feature.getID()) : std::nullopt;
+
     bucket.text.placedSymbols.emplace_back(symbolInstance.getAnchor().point,
                                            symbolInstance.getAnchor().segment.value_or(0u),
                                            sizeData.min,
@@ -1193,6 +1210,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                            writingMode,
                                            symbolInstance.line(),
                                            calculateTileDistances(symbolInstance.line(), symbolInstance.getAnchor()),
+                                           featureId,
                                            placedIconIndex);
     placedIndex = bucket.text.placedSymbols.size() - 1;
     PlacedSymbol& placedSymbol = bucket.text.placedSymbols.back();
@@ -1239,6 +1257,9 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
         std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
         buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, sortKey);
     }
+
+    // BUG?: Index is recorded within the current segment, but which segment we're in isn't recorded.
+    // Seems like this can't possibly work when there are more than 64K vertices.
 
     // We're generating triangle fans, so we always start with the first
     // coordinate in this polygon.

@@ -415,9 +415,9 @@ TEST(ActionJournal, ValidateEvents) {
                   OverscaledTileID(0, 0, 0),
                   "");
 
-    const auto onDidFinishRenderingFrame =
-        static_cast<void (RendererObserver::*)(RendererObserver::RenderMode, bool, bool, const gfx::RenderingStats&)>(
-            &RendererObserver::onDidFinishRenderingFrame);
+    using EventGenerator = void (RendererObserver::*)(
+        RendererObserver::RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>);
+    const EventGenerator onDidFinishRenderingFrame = &RendererObserver::onDidFinishRenderingFrame;
 
     validateEvent(test,
                   "onDidBecomeIdle",
@@ -426,7 +426,7 @@ TEST(ActionJournal, ValidateEvents) {
                   RendererObserver::RenderMode::Full,
                   false,
                   false,
-                  gfx::RenderingStats());
+                  std::make_shared<gfx::RenderingStats>());
 }
 
 TEST(ActionJournal, RenderingStats) {
@@ -442,11 +442,11 @@ TEST(ActionJournal, RenderingStats) {
     test.map->getActionJournal()->impl->flush();
     test.map->getActionJournal()->impl->clearLog();
 
-    const auto onDidFinishRenderingFrame =
-        static_cast<void (RendererObserver::*)(RendererObserver::RenderMode, bool, bool, const gfx::RenderingStats&)>(
-            &RendererObserver::onDidFinishRenderingFrame);
+    using EventGenerator = void (RendererObserver::*)(
+        RendererObserver::RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>);
+    const EventGenerator onDidFinishRenderingFrame = &RendererObserver::onDidFinishRenderingFrame;
 
-    const std::vector<gfx::RenderingStats> testStats = {
+    std::vector<gfx::RenderingStats> testStats = {
         {.encodingTime = 0.00273499998729676, .renderingTime = 0.0000957687443587929},
         {.encodingTime = 0.010939366680880388, .renderingTime = 0.0001340633297028641},
         {.encodingTime = 0.023845999967306852, .renderingTime = 0.00011808499693870545},
@@ -491,10 +491,11 @@ TEST(ActionJournal, RenderingStats) {
     };
 
     // accumulate frames in the journal
-    for (const auto& frameStats : testStats) {
+    for (auto& frameStats : testStats) {
         std::this_thread::sleep_for(
             std::chrono::milliseconds(test.options.renderingStatsReportInterval() * 1000 / 2 / testStats.size()));
-        test.map->getImpl().onDidFinishRenderingFrame(RendererObserver::RenderMode::Partial, false, false, frameStats);
+        test.map->getImpl().onDidFinishRenderingFrame(
+            RendererObserver::RenderMode::Partial, false, false, std::make_shared<gfx::RenderingStats>(frameStats));
 
         test.map->getActionJournal()->impl->flush();
         const auto& log = test.map->getActionJournal()->getLog();
@@ -511,5 +512,6 @@ TEST(ActionJournal, RenderingStats) {
                   RendererObserver::RenderMode::Partial,
                   false,
                   false,
-                  gfx::RenderingStats{.encodingTime = encodingAvg, .renderingTime = renderingAvg});
+                  std::make_shared<gfx::RenderingStats>(
+                      gfx::RenderingStats{.encodingTime = encodingAvg, .renderingTime = renderingAvg}));
 }

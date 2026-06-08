@@ -30,6 +30,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <algorithm>
+#include <iterator>
 
 namespace mbgl {
 
@@ -201,7 +202,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                   .tileLodMode = updateParameters->tileLodMode,
-                                  .dynamicTextureAtlas = dynamicTextureAtlas};
+                                  .dynamicTextureAtlas = dynamicTextureAtlas,
+                                  .captureRenderedFeatures = updateParameters->captureRenderedFeatures};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);
@@ -969,8 +971,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
+    allFeatures.reserve(items.size());
+
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
+        const auto& layerId = renderLayer.getId();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -983,8 +989,21 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
+
+        // Accumulate rendered feaures from each render layer, leaving each one empty.
+        if (!renderLayer.stats.renderedFeatures.empty()) {
+            const auto& sourceId = item.source ? item.source->getId() : std::string{};
+            const auto& [it, inserted] = allFeatures.insert(
+                {{.sourceID = sourceId, .layerID = layerId}, std::move(renderLayer.stats.renderedFeatures)});
+            if (!inserted) {
+                RenderLayer::Stats::merge(it->second, renderLayer.stats.renderedFeatures);
+            }
+            renderLayer.stats.renderedFeatures.clear();
+        }
     }
     addChanges(changes);
+
+    std::swap(frameRenderedFeatures, allFeatures);
 }
 
 void RenderOrchestrator::processChanges() {

@@ -1,20 +1,16 @@
-#include <gmock/gmock.h>
-
-#include <algorithm>
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_observer.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
+#include <mbgl/map/map_observer.hpp>
+#include <mbgl/map/map.hpp>
 #include <mbgl/style/layers/circle_layer.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
+#include <mbgl/style/style.hpp>
 #include <mbgl/test/util.hpp>
+#include <mbgl/util/io.hpp>
+#include <mbgl/util/run_loop.hpp>
 
-#include <filesystem>
+#include <gtest/gtest.h>
+
+#include <algorithm>
 
 using namespace mbgl;
 using namespace mbgl::util;
