@@ -2,6 +2,7 @@
 
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/feature.hpp>
+#include <memory>
 
 using namespace mbgl;
 
@@ -18,6 +19,10 @@ public:
           id(std::move(id_)),
           type(type_),
           geometry(std::move(geometry_)) {}
+
+    std::unique_ptr<GeometryTileFeature> clone() const override {
+        return std::make_unique<StubGeometryTileFeature>(id, type, geometry.clone(), properties);
+    }
 
     PropertyMap properties;
     FeatureIdentifier id;

@@ -56,6 +56,14 @@ FillExtrusionBucket::~FillExtrusionBucket() {
     sharedVertices->release();
 }
 
+void FillExtrusionBucket::addFeature(std::unique_ptr<GeometryTileFeature>&& featureOwner,
+                                     const GeometryCollection& geometry,
+                                     const ImagePositions& patternPositions,
+                                     const PatternLayerMap& patternDependencies,
+                                     std::size_t index,
+                                     const CanonicalTileID& canonical) {
+    addFeature(*featureOwner, geometry, patternPositions, patternDependencies, index, canonical);
+}
 void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const GeometryCollection& geometry,
                                      const ImagePositions& patternPositions,

@@ -1,5 +1,6 @@
 #pragma once
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <memory>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -14,15 +15,15 @@
 
 #include <protozero/pbf_reader.hpp>
 
-#include <unordered_map>
-#include <functional>
-#include <utility>
-
 namespace mbgl {
 
 class VectorMVTTileFeature : public GeometryTileFeature {
 public:
     VectorMVTTileFeature(const mapbox::vector_tile::layer&, const protozero::data_view&);
+
+    std::unique_ptr<GeometryTileFeature> clone() const override {
+        return std::make_unique<VectorMVTTileFeature>(layer, dataView);
+    }
 
     FeatureType getType() const override;
     std::optional<Value> getValue(const std::string& key) const override;
@@ -31,6 +32,8 @@ public:
     const GeometryCollection& getGeometries() const override;
 
 private:
+    const mapbox::vector_tile::layer& layer;
+    const protozero::data_view& dataView;
     mapbox::vector_tile::feature feature;
     mutable std::optional<GeometryCollection> lines;
     mutable std::optional<PropertyMap> properties;

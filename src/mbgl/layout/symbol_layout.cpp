@@ -859,7 +859,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                 if (!sortKeyRanges.empty() && sortKeyRanges.back().sortKey == feature.sortKey) {
                     sortKeyRanges.back().end = symbolInstances.size();
                 } else {
-                    sortKeyRanges.push_back({feature.sortKey, symbolInstances.size() - 1, symbolInstances.size()});
+                    sortKeyRanges.push_back({.sortKey=feature.sortKey, .start=symbolInstances.size() - 1, .end=symbolInstances.size()});
                 }
             }
         }

@@ -37,6 +37,7 @@ public:
                 UniqueChangeRequestVec&) override;
 
 private:
+    void prepare(const LayerPrepareParameters&) override;
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
@@ -61,6 +62,8 @@ private:
 #if MLN_TRIANGULATE_FILL_OUTLINES
     gfx::ShaderGroupPtr outlineTriangulatedShaderGroup;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
+
+    RenderSource* sourceForState = nullptr;
 };
 
 } // namespace mbgl

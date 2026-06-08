@@ -3,6 +3,7 @@
 #include <mbgl/annotation/annotation.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <memory>
 
 namespace mbgl {
 
@@ -30,6 +31,10 @@ public:
     FeatureIdentifier getID() const override;
     const GeometryCollection& getGeometries() const override;
 
+    std::unique_ptr<GeometryTileFeature> clone() const override {
+        return std::make_unique<AnnotationTileFeature>(data);
+    }
+    
 private:
     std::shared_ptr<const AnnotationTileFeatureData> data;
 };

@@ -32,6 +32,12 @@ public:
                     const PatternLayerMap&,
                     std::size_t,
                     const CanonicalTileID&) override;
+    void addFeature(std::unique_ptr<GeometryTileFeature>&&,
+                    const GeometryCollection&,
+                    const mbgl::ImagePositions& patternPositions,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override;
 
     bool hasData() const override;
 
@@ -51,25 +57,25 @@ public:
     static LineLayoutVertex layoutVertex(
         Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0) {
         return LineLayoutVertex{
-            {{static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)), static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))}},
-            {{// add 128 to store a byte in an unsigned byte
-              static_cast<uint8_t>(util::clamp(::round(extrudeScale * e.x) + 128, 0., 255.)),
-              static_cast<uint8_t>(util::clamp(::round(extrudeScale * e.y) + 128, 0., 255.)),
+            .a1 = {{static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)), static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))}},
+            .a2 = {{// add 128 to store a byte in an unsigned byte
+                    static_cast<uint8_t>(util::clamp(::round(extrudeScale * e.x) + 128, 0., 255.)),
+                    static_cast<uint8_t>(util::clamp(::round(extrudeScale * e.y) + 128, 0., 255.)),
 
-              // Encode the -1/0/1 direction value into the first two bits of .z
-              // of a_data. Combine it with the lower 6 bits of `linesofar`
-              // (shifted by 2 bites to make room for the direction value). The
-              // upper 8 bits of `linesofar` are placed in the `w` component.
-              // `linesofar` is scaled down by `LINE_DISTANCE_SCALE` so that we
-              // can store longer distances while sacrificing precision.
+                    // Encode the -1/0/1 direction value into the first two bits of .z
+                    // of a_data. Combine it with the lower 6 bits of `linesofar`
+                    // (shifted by 2 bites to make room for the direction value). The
+                    // upper 8 bits of `linesofar` are placed in the `w` component.
+                    // `linesofar` is scaled down by `LINE_DISTANCE_SCALE` so that we
+                    // can store longer distances while sacrificing precision.
 
-              // Encode the -1/0/1 direction value into .zw coordinates of
-              // a_data, which is normally covered by linesofar, so we need to
-              // merge them. The z component's first bit, as well as the sign
-              // bit is reserved for the direction, so we need to shift the
-              // linesofar.
-              static_cast<uint8_t>(((dir == 0 ? 0 : (dir < 0 ? -1 : 1)) + 1) | ((linesofar & 0x3F) << 2)),
-              static_cast<uint8_t>(linesofar >> 6)}}};
+                    // Encode the -1/0/1 direction value into .zw coordinates of
+                    // a_data, which is normally covered by linesofar, so we need to
+                    // merge them. The z component's first bit, as well as the sign
+                    // bit is reserved for the direction, so we need to shift the
+                    // linesofar.
+                    static_cast<uint8_t>(((dir == 0 ? 0 : (dir < 0 ? -1 : 1)) + 1) | ((linesofar & 0x3F) << 2)),
+                    static_cast<uint8_t>(linesofar >> 6)}}};
     }
 
     /*

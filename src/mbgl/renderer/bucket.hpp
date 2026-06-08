@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
@@ -40,7 +41,13 @@ public:
                             const ImagePositions&,
                             const PatternLayerMap&,
                             std::size_t,
-                            const CanonicalTileID&) {}
+                            const CanonicalTileID&) = 0;
+    virtual void addFeature(std::unique_ptr<GeometryTileFeature>&& feature,
+                            const GeometryCollection& geometry,
+                            const ImagePositions& imagePositions,
+                            const PatternLayerMap& patternLayerMap,
+                            std::size_t featureIndex,
+                            const CanonicalTileID& tileId) = 0;
 
     virtual void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {}
 
@@ -79,6 +86,8 @@ public:
     const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
     void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
 
+    const auto& getFeatures() const { return features; }
+
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
@@ -86,6 +95,8 @@ protected:
     util::SimpleIdentity bucketID;
 
     std::optional<std::thread::id> renderThreadID;
+
+    std::map<std::string, std::unique_ptr<GeometryTileFeature>> features;
 };
 
 } // namespace mbgl

@@ -38,7 +38,13 @@ public:
                     const GeometryCollection&,
                     const mbgl::ImagePositions&,
                     const PatternLayerMap&,
-                    std::size_t,
+                    std::size_t featureIndex,
+                    const CanonicalTileID&) override;
+    void addFeature(std::unique_ptr<GeometryTileFeature>&&,
+                    const GeometryCollection&,
+                    const mbgl::ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t featureIndex,
                     const CanonicalTileID&) override;
 
     bool hasData() const override;
@@ -51,12 +57,13 @@ public:
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     static FillExtrusionLayoutVertex layoutVertex(Point<int16_t> p, uint16_t edgeDistance, bool isDiscarded) {
-        return FillExtrusionLayoutVertex{{p.x, p.y},
-                                         { // The edgeDistance attribute is used for wrapping fill_extrusion patterns
-                                             edgeDistance,
-                                             // When used as instance vector this specify if an instance is discarded
-                                             static_cast<uint16_t>(isDiscarded)
-                                         }};
+        return FillExtrusionLayoutVertex{
+            .a1 = {p.x, p.y},
+            .a2 = { // The edgeDistance attribute is used for wrapping fill_extrusion patterns
+                edgeDistance,
+                // When used as instance vector this specify if an instance is discarded
+                static_cast<uint16_t>(isDiscarded)
+            }};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(

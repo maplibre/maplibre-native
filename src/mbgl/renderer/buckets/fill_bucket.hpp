@@ -37,9 +37,15 @@ public:
                float zoom,
                uint32_t overscaling);
 
-    void addFeature(const GeometryTileFeature&,
+    void addFeature(std::unique_ptr<GeometryTileFeature>&&,
                     const GeometryCollection&,
                     const mbgl::ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override;
+    void addFeature(const GeometryTileFeature&,
+                    const GeometryCollection&,
+                    const ImagePositions&,
                     const PatternLayerMap&,
                     std::size_t,
                     const CanonicalTileID&) override;
@@ -83,6 +89,21 @@ public:
     SegmentVector triangleSegments;
 
     std::map<std::string, FillBinders> paintPropertyBinders;
+
+    struct FeatureVertexOffsets {
+        std::string featureId;
+        std::uint32_t fillVertexOffset;
+        std::uint32_t lineVertexOffset;
+    };
+    std::vector<FeatureVertexOffsets> featureVertexOffsets;
+
+private:
+    void generateBuffers(const GeometryCollection&);
+    void populateBinders(const GeometryTileFeature&,
+                         const ImagePositions&,
+                         const PatternLayerMap&,
+                         std::size_t featureIndex,
+                         const CanonicalTileID&);
 };
 
 } // namespace mbgl

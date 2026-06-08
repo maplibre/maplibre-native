@@ -456,8 +456,11 @@ std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& s
 
 // MARK: - Transform
 
-TransformState Map::getTransfromState() const {
+TransformState Map::getTransformState() const {
     return impl->transform.getState();
+}
+TransformState Map::getTransfromState() const {
+    return getTransformState();
 }
 
 // MARK: - Annotations

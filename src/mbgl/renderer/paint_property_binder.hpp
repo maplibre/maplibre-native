@@ -15,7 +15,20 @@
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/vectors.hpp>
 
+#include <cstring>
+#include <type_traits>
+
 namespace mbgl {
+
+namespace detail {
+
+template <typename T, typename Variant>
+struct VariantContains : std::false_type {};
+
+template <typename T, typename... Ts>
+struct VariantContains<T, std::variant<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)> {};
+
+} // namespace detail
 
 // Maps vertex range to feature index
 struct FeatureVertexRange {
@@ -137,11 +150,14 @@ std::array<float, N * 2> zoomInterpolatedAttributeValue(const std::array<float, 
    accomodate this.
 */
 
-template <class T, class UniformValueType, class PossiblyEvaluatedType, class... As>
-class PaintPropertyBinder {
+class PaintPropertyBinderBase {
 public:
-    virtual ~PaintPropertyBinder() = default;
+    virtual ~PaintPropertyBinderBase() = default;
+};
 
+template <class T, class UniformValueType, class PossiblyEvaluatedType, class... As>
+class PaintPropertyBinder : public PaintPropertyBinderBase {
+public:
     virtual void populateVertexVector(const GeometryTileFeature& feature,
                                       std::size_t length,
                                       std::size_t index,
@@ -165,6 +181,76 @@ public:
     virtual bool isInterpolated() const { return false; }
 
     virtual std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t index) const = 0;
+
+    template <typename TAttribute, typename TVertexAttribute>
+    void applyPaintProperty(const std::size_t attrIndex, TVertexAttribute& attrib) const {
+        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+        using InterpType = ZoomInterpolatedAttributeType<Type>;
+
+        if (interleavedVertexBuffer) {
+            const auto& interleavedSharedVector = interleavedVertexBuffer->sharedVertexVector;
+
+            const auto rawSize = static_cast<uint32_t>(interleavedVertexBuffer->stride);
+            const bool interpolated = isInterpolated();
+            const auto dataType = interpolated ? InterpType::DataType : Type::DataType;
+
+            assert(interleavedSharedVector->getRawCount() / interleavedVertexBuffer->stride == getVertexCount());
+            attrib.setSharedRawData(interleavedSharedVector, static_cast<uint32_t>(vertexOffset), 0, rawSize, dataType);
+        } else {
+            const auto vertexCount = getVertexCount();
+            for (std::size_t i = 0; i < vertexCount; ++i) {
+                attrib.set(i, getVertexValue(i), attrIndex);
+            }
+        }
+    }
+
+    template <typename TAttribute, typename TVertexAttribute>
+    auto getPaintProperty(const std::size_t attrIndex,
+                          const TVertexAttribute& attrib,
+                          const std::size_t vertexIndex) const ->
+        typename ZoomInterpolatedAttributeType<typename TAttribute::Type>::Value {
+        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+        using InterpType = ZoomInterpolatedAttributeType<Type>;
+        using InterpValue = typename InterpType::Value;
+
+        (void)attrIndex;
+
+        if (const auto& sharedRaw = attrib.getSharedRawData()) {
+            const auto resolvedVertexIndex = static_cast<std::size_t>(attrib.getSharedVertexOffset()) + vertexIndex;
+            assert(resolvedVertexIndex < sharedRaw->getRawCount());
+
+            const auto byteOffset = static_cast<std::size_t>(attrib.getSharedOffset()) +
+                                    static_cast<std::size_t>(attrib.getSharedStride()) * resolvedVertexIndex;
+            const auto* bytes = static_cast<const std::uint8_t*>(sharedRaw->getRawData());
+
+            if (isInterpolated()) {
+                InterpValue value;
+                std::memcpy(&value, bytes + byteOffset, sizeof(value));
+                return value;
+            }
+
+            typename Type::Value value;
+            std::memcpy(&value, bytes + byteOffset, sizeof(value));
+            return zoomInterpolatedAttributeValue(value, value);
+        }
+
+        const auto& storedValue = attrib.get(vertexIndex);
+
+        // Attribute values copied by applyPaintProperty are stored in interpolated form.
+        if (const auto* value = std::get_if<InterpValue>(&storedValue)) {
+            return *value;
+        }
+
+        if constexpr (Type::Dimensions == 1) {
+            if (const auto* value = std::get_if<typename Type::ElementType>(&storedValue)) {
+                const typename Type::Value scalarValue{{*value}};
+                return zoomInterpolatedAttributeValue(scalarValue, scalarValue);
+            }
+        }
+
+        assert(!"Unexpected paint property attribute value type");
+        return {};
+    }
 
     virtual std::size_t getVertexCount() const {
         return interleavedVertexBuffer ? interleavedVertexBuffer->vertexCount : 0;
@@ -307,7 +393,8 @@ public:
         }
         std::optional<std::string> idStr = featureIDtoString(feature.getID());
         if (idStr) {
-            featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
+            featureMap[*idStr].emplace_back(
+                FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
 
@@ -416,7 +503,8 @@ public:
             this->interleavedVertexBuffer->set(i, this->vertexOffset, Vertex{value});
         }
         if (auto idStr = featureIDtoString(feature.getID())) {
-            featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
+            featureMap[*idStr].emplace_back(
+                FeatureVertexRange{.featureIndex = index, .start = elements, .end = length});
         }
     }
 

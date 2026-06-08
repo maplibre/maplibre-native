@@ -16,11 +16,8 @@
 #include <args.hxx>
 
 #include <csignal>
-#include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include <cstdio>
-#include <array>
 
 namespace {
 
@@ -196,7 +193,7 @@ int main(int argc, char* argv[]) {
             currentStyleIndex = 0;
         }
 
-        mbgl::util::DefaultStyle newStyle = orderedStyles[currentStyleIndex];
+        const auto& newStyle = orderedStyles[currentStyleIndex];
         map.getStyle().loadURL(newStyle.getUrl());
         view->setWindowTitle(newStyle.getName());
 

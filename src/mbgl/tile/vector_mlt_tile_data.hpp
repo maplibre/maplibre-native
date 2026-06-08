@@ -3,8 +3,6 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/containers.hpp>
 
-#include <unordered_map>
-#include <functional>
 #include <utility>
 
 namespace mlt {
@@ -32,6 +30,9 @@ public:
           lines(std::move(other.lines)),
           properties(std::move(other.properties)) {}
 
+          std::unique_ptr<GeometryTileFeature> clone() const override {
+              return std::make_unique<VectorMLTTileFeature>(tile, layer, feature, extent);
+          }
     VectorMLTTileFeature& operator=(VectorMLTTileFeature&&) = delete;
     VectorMLTTileFeature& operator=(const VectorMLTTileFeature&) = delete;
 

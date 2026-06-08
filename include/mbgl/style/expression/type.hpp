@@ -2,7 +2,6 @@
 
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/variant.hpp>
-#include <vector>
 
 #include <optional>
 

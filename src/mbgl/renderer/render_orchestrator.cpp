@@ -1,3 +1,4 @@
+#include <iterator>
 #include <mbgl/renderer/render_orchestrator.hpp>
 
 #include <mbgl/annotation/annotation_manager.hpp>
@@ -30,6 +31,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <algorithm>
+#include "mbgl/util/containers.hpp"
 
 namespace mbgl {
 
@@ -968,6 +970,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    mbgl::unordered_set<std::string> allFeatures;
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
 #if MLN_RENDER_BACKEND_OPENGL
@@ -982,8 +985,19 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
+
+        if (!renderLayer.stats.renderedFeatureIDs.empty()) {
+            mbgl::Log::Info(Event::Render,
+                            "RenderLayer " + renderLayer.getID() + ": " +
+                                std::to_string(renderLayer.stats.renderedFeatureIDs.size()) + " features");
+            allFeatures.insert(std::make_move_iterator(renderLayer.stats.renderedFeatureIDs.begin()),
+                               std::make_move_iterator(renderLayer.stats.renderedFeatureIDs.end()));
+            renderLayer.stats.renderedFeatureIDs.clear();
+        }
     }
     addChanges(changes);
+
+    mbgl::Log::Info(Event::Render, "Total rendered features:  " + std::to_string(allFeatures.size()) + " features");
 }
 
 void RenderOrchestrator::processChanges() {

@@ -317,10 +317,11 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
+    public:
     struct Stats {
-        size_t propertyEvaluations = 0;
         size_t drawablesAdded = 0;
         size_t drawablesRemoved = 0;
+        mbgl::unordered_set<std::string> renderedFeatureIDs;
     } stats;
 
 private:

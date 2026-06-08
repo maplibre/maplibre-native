@@ -226,6 +226,19 @@ public:
                  bool iconsInText);
     ~SymbolBucket() override;
 
+    void addFeature(const GeometryTileFeature&,
+                    const GeometryCollection&,
+                    const ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override {}
+    void addFeature(std::unique_ptr<GeometryTileFeature>&&,
+                    const GeometryCollection&,
+                    const ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override {}
+
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
     std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
@@ -270,12 +283,12 @@ public:
         return {
             // combining pos and offset to reduce number of vertex attributes
             // passed to shader (8 max for some devices)
-            {{static_cast<int16_t>(labelAnchor.x),
+            .a1={{static_cast<int16_t>(labelAnchor.x),
               static_cast<int16_t>(labelAnchor.y),
               static_cast<int16_t>(std::round(o.x * 32)), // use 1/32 pixels for placement
               static_cast<int16_t>(std::round((o.y + glyphOffsetY) * 32))}},
-            {{tx, ty, aSizeMin, aSizeMax}},
-            {{static_cast<int16_t>(pixelOffset.x * 16),
+            .a2={{tx, ty, aSizeMin, aSizeMax}},
+            .a3={{static_cast<int16_t>(pixelOffset.x * 16),
               static_cast<int16_t>(pixelOffset.y * 16),
               static_cast<int16_t>(minFontScale.x * 256),
               static_cast<int16_t>(minFontScale.y * 256)}},
@@ -424,15 +437,15 @@ public:
     static gfx::Vertex<CollisionBoxLayoutAttributes> collisionLayoutVertex(Point<float> a,
                                                                            Point<float> anchor,
                                                                            Point<float> o) {
-        return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
-                {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
-                {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
+        return {.a1={{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
+                .a2={{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+                .a3={{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
     static gfx::Vertex<CollisionBoxDynamicAttributes> collisionDynamicVertex(bool placed,
                                                                              bool notUsed,
                                                                              Point<float> shift) {
-        return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
+        return {.a1={{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, .a2={{shift.x, shift.y}}};
     }
 
     const float tilePixelRatio;

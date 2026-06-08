@@ -11,7 +11,6 @@
 #include <mbgl/util/mat4.hpp>
 
 #include <memory>
-#include <optional>
 
 namespace mbgl {
 
@@ -29,6 +28,19 @@ public:
     RasterBucket(std::shared_ptr<PremultipliedImage>);
     ~RasterBucket() override;
 
+    void addFeature(const GeometryTileFeature&,
+                    const GeometryCollection&,
+                    const ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override {}
+    void addFeature(std::unique_ptr<GeometryTileFeature>&&,
+                    const GeometryCollection&,
+                    const ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override {}
+
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
 
@@ -37,7 +49,7 @@ public:
     void setMask(TileMask&&);
 
     static RasterLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
-        return RasterLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+        return RasterLayoutVertex{.a1 = {{p.x, p.y}}, .a2 = {{t.x, t.y}}};
     }
 
     std::shared_ptr<PremultipliedImage> image;

@@ -1,5 +1,6 @@
 #pragma once
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <memory>
 
 namespace mbgl {
 
@@ -13,6 +14,10 @@ public:
 
     GeoJSONTileFeature(const mapbox::feature::feature<int16_t>& feature_)
         : feature(feature_) {}
+
+    std::unique_ptr<GeometryTileFeature> clone() const override {
+        return std::make_unique<GeoJSONTileFeature>(feature);
+    }
 
     FeatureType getType() const override { return apply_visitor(ToFeatureType(), feature.geometry); }
 

@@ -24,6 +24,12 @@ public:
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
+                    const mbgl::ImagePositions&,
+                    const PatternLayerMap&,
+                    std::size_t,
+                    const CanonicalTileID&) override;
+    void addFeature(std::unique_ptr<GeometryTileFeature>&&,
+                    const GeometryCollection&,
                     const ImagePositions&,
                     const PatternLayerMap&,
                     std::size_t,

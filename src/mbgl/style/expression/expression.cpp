@@ -63,6 +63,8 @@ public:
         }
     }
 
+    std::unique_ptr<GeometryTileFeature> clone() const override { return std::make_unique<GeoJSONFeature>(feature); }
+
     FeatureType getType() const override { return getTypeImpl(); }
 
     const PropertyMap& getProperties() const override { return feature.properties; }

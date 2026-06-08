@@ -8,8 +8,6 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/containers.hpp>
 
-#include <list>
-
 namespace mbgl {
 
 class PatternDependency {
@@ -190,12 +188,12 @@ public:
         auto bucket = std::make_shared<BucketType>(layout, layerPropertiesMap, zoom, overscaling);
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
-            std::unique_ptr<GeometryTileFeature> feature = std::move(patternFeature.feature);
+            auto feature = std::move(patternFeature.feature);
             const PatternLayerMap& patterns = patternFeature.getPatterns();
             const GeometryCollection& geometries = feature->getGeometries();
 
-            bucket->addFeature(*feature, geometries, patternPositions, patterns, i, canonical);
             featureIndex->insert(geometries, i, sourceLayerID, bucketLeaderID);
+            bucket->addFeature(std::move(feature), geometries, patternPositions, patterns, i, canonical);
         }
         if (bucket->hasData()) {
             for (const auto& pair : layerPropertiesMap) {

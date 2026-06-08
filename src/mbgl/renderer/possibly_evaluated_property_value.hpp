@@ -65,6 +65,12 @@ public:
                            });
     }
 
+    T evaluate(const style::expression::EvaluationContext& context, T defaultValue) const {
+        return this->match(
+            [&](const T& constant_) { return constant_; },
+            [&](const style::PropertyExpression<T>& expression) { return expression.evaluate(context, defaultValue); });
+    }
+
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
         return value.match([](const T&) { return Dependency::None; },

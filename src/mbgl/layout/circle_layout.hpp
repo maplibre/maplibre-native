@@ -39,7 +39,8 @@ public:
             }
 
             if (!sortFeaturesByKey) {
-                features.push_back({i, std::move(feature), style::CircleSortKey::defaultValue()});
+                features.push_back(
+                    {.i = i, .feature = std::move(feature), .sortKey = style::CircleSortKey::defaultValue()});
                 continue;
             }
 
@@ -64,12 +65,12 @@ public:
 
         for (auto& circleFeature : features) {
             const auto i = circleFeature.i;
-            const std::unique_ptr<GeometryTileFeature>& feature = circleFeature.feature;
-            const GeometryCollection& geometries = feature->getGeometries();
+            const auto& feature = *circleFeature.feature;
+            const GeometryCollection& geometries = feature.getGeometries();
 
-            addCircle(*bucket, *feature, geometries, i, circleFeature.sortKey, canonical);
+            addCircle(*bucket, feature, geometries, i, circleFeature.sortKey, canonical);
 
-            bucket->addFeature(*feature, geometries, {}, PatternLayerMap(), i, canonical);
+            bucket->addFeature(feature, geometries, {}, PatternLayerMap(), i, canonical);
             featureIndex->insert(geometries, i, sourceLayerID, bucketLeaderID);
         }
 

@@ -68,6 +68,7 @@ public:
     virtual const PropertyMap& getProperties() const;
     virtual FeatureIdentifier getID() const { return NullValue{}; }
     virtual const GeometryCollection& getGeometries() const;
+    virtual std::unique_ptr<GeometryTileFeature> clone() const = 0;
 };
 
 class GeometryTileLayer {

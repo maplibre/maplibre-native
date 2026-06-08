@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <string>
 #include <variant>
@@ -431,43 +430,13 @@ protected:
             if (!isConstant && binder->getVertexCount() > 0) {
                 using Attribute = typename DataDrivenPaintProperty::Attribute;
                 if (const auto& attr = set(dataDrivenAttrId)) {
-                    applyPaintProperty<Attribute>(attrIndex, attr, binder);
+                    binder->template applyPaintProperty<Attribute>(attrIndex, *attr);
                 }
             } else if (propertiesAsUniforms) {
                 propertiesAsUniforms->first.emplace(attributeName);
                 propertiesAsUniforms->second.emplace(dataDrivenAttrId);
             }
             dataDrivenAttrId++;
-        }
-    }
-
-    /// Copy or share the attribute data from a paint property
-    template <typename TAttribute, typename TBinder>
-    static void applyPaintProperty(const std::size_t attrIndex, const UniqueVertexAttribute& attrib, TBinder& binder) {
-        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
-        using InterpType = ZoomInterpolatedAttributeType<Type>;
-
-        if (!attrib) {
-            assert(!"Failed to add attribute");
-            return;
-        }
-
-        if (binder->interleavedVertexBuffer) {
-            const auto& interleavedSharedVector = binder->interleavedVertexBuffer->sharedVertexVector;
-
-            const auto rawSize = static_cast<uint32_t>(binder->interleavedVertexBuffer->stride);
-            const bool isInterpolated = binder->isInterpolated();
-            const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-
-            assert(interleavedSharedVector->getRawCount() / binder->interleavedVertexBuffer->stride ==
-                   binder->getVertexCount());
-            attrib->setSharedRawData(
-                std::move(interleavedSharedVector), static_cast<uint32_t>(binder->vertexOffset), 0, rawSize, dataType);
-        } else {
-            const auto vertexCount = binder->getVertexCount();
-            for (std::size_t i = 0; i < vertexCount; ++i) {
-                attrib->set(i, binder->getVertexValue(i), attrIndex);
-            }
         }
     }
 

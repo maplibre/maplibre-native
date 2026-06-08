@@ -15,6 +15,7 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/containers.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/logging.hpp>
@@ -58,6 +59,11 @@ RenderFillLayer::RenderFillLayer(Immutable<style::FillLayer::Impl> _impl)
 }
 
 RenderFillLayer::~RenderFillLayer() = default;
+
+void RenderFillLayer::prepare(const LayerPrepareParameters& params) {
+    RenderLayer::prepare(params);
+    sourceForState = params.source;
+}
 
 void RenderFillLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
@@ -117,10 +123,41 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
+#if 0
+namespace {
+// TODO: do these already exist somewhere?
+
+using FloatPair = std::array<float, 2>;
+using FloatQuad = std::array<float, 4>;
+FloatPair operator/(FloatPair a, float b) {
+    return {a[0] / b, a[1] / b};
+}
+FloatPair unpack_float(const float packedValue) {
+    const int packedIntValue = int(packedValue);
+    const int v0 = packedIntValue / 256;
+    return {static_cast<float>(v0), static_cast<float>(packedIntValue - v0 * 256)};
+}
+// To minimize the number of attributes needed, we encode a 4-component
+// color into a pair of floats (i.e. a vec2) as follows:
+// [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.g * 255 ]
+FloatQuad decode_color(const std::array<float, 2> encoded) {
+    const auto a = unpack_float(encoded[0]) / 255;
+    const auto b = unpack_float(encoded[1]) / 255;
+    return {a[0], a[1], b[0], b[1]};
+}
+// Unpack a pair of paint values and interpolate between them.
+FloatQuad unpack_mix_color(const std::array<float, 4>& packedColors, const float t) {
+    const auto c1 = decode_color({packedColors[0], packedColors[1]});
+    const auto c2 = decode_color({packedColors[2], packedColors[3]});
+    return mbgl::util::interpolate(c1, c2, t);
+}
+} // namespace
+#endif
+
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState&,
-                             const std::shared_ptr<UpdateParameters>&,
+                             const TransformState& state,
+                             const std::shared_ptr<UpdateParameters>& updateParameters,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
@@ -188,6 +225,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     fillTileLayerGroup->setStencilTiles(renderTiles);
 
+    std::set<std::string> availableImages;
+    if (updateParameters && updateParameters->images.get()) {
+        for (const auto& image : *updateParameters->images) {
+            availableImages.emplace(image->id);
+        }
+    }
+
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -238,7 +282,142 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
+        // Outline always occurs in translucent pass, defaults to fill color
+        // Outline does not default to fill in the pattern case
+        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
+                                                                  unevaluated.get<FillOutlineColor>().isUndefined());
+#if MLN_TRIANGULATE_FILL_OUTLINES
+        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
+                                       !evaluated.get<FillOpacity>().isConstant();
+#endif
+
+        // Examine the FillColor, FillOpacity, and FillOutlineColor attributes in the resulting
+        // vertex attribute buffers to determine whether any are fully transparent.
+
+        for (const auto& pair : bucket.getFeatures()) {
+            const auto& feature = *pair.second;
+            expression::EvaluationContext evalContext(state.getZoom(), &feature);
+            evalContext.withCanonicalTileID(&tileID.canonical);
+            evalContext.withAvailableImages(&availableImages);
+
+            FeatureState featureState;
+            if (sourceForState) {
+                sourceForState->getFeatureState(featureState, baseImpl->sourceLayer, pair.first);
+                evalContext.withFeatureState(&featureState);
+            }
+
+            auto fillOpacity = evaluated.get<FillOpacity>().evaluate(evalContext, FillOpacity::defaultValue());
+            if (fillOpacity <= 0) {
+                // mbgl::Log::Info(Event::General, "Fill Feature " + pair.first + "not rendered");
+                continue;
+            }
+            auto fillColor = evaluated.get<FillColor>().evaluate(evalContext, FillColor::defaultValue());
+            auto outlineColor = evaluated.get<FillOutlineColor>().evaluate(evalContext,
+                                                                           FillOutlineColor::defaultValue());
+            if (fillOpacity * fillColor.a > 0 || outlineColor.a > 0) {
+                stats.renderedFeatureIDs.insert(pair.first);
+                // mbgl::Log::Info(Event::General, "Fill Feature " + pair.first + " rendered");
+            } else {
+                // mbgl::Log::Info(Event::General, "Fill Feature " + pair.first + "not rendered");
+            }
+        }
+        // stats.featuresRendered += bucket.getFeatureIDs().size();
+        // stats.renderedFeatureIDs.insert(bucket.getFeatureIDs().begin(), bucket.getFeatureIDs().end());
+
         const auto fillVertexCount = bucket.vertices.elements();
+
+#if 0
+        // Examine the FillColor, FillOpacity, and FillOutlineColor attributes in the resulting
+        // vertex attribute buffers to determine whether any are fully transparent.
+
+        // Work out whether all features are visible because their color and opacity are not data-driven
+        // TODO: verify that setting color.a=0 *or* opacity=0 results in features not appearing
+        const bool dataDrivenColor = !propertiesAsUniforms.first.contains("color");
+        const bool uniformColorVisible = !dataDrivenColor &&
+                                         evaluated.get<FillColor>().constantOr(FillColor::defaultValue()).a > 0.0f;
+        const bool dataDrivenOpacity = !propertiesAsUniforms.first.contains("opacity");
+        const bool uniformVisible = !dataDrivenOpacity &&
+                                    evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()) > 0.0f;
+        const bool dataDrivenOutlineColor = !propertiesAsUniforms.first.contains("outline_color");
+        const bool uniformOutlineColorVisible =
+            !dataDrivenOutlineColor &&
+            evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()).a > 0.0f;
+        const bool allFeaturesVisible = (uniformVisible && uniformColorVisible) ||
+                                        (doOutline && uniformVisible && uniformOutlineColorVisible);
+
+        const auto zoomFrac = state.getZoomFraction();
+
+        const auto numOffsets = bucket.featureVertexOffsets.size();
+        for (std::size_t i = 0; i < numOffsets; ++i) {
+            const auto item = bucket.featureVertexOffsets[i];
+            if (!allFeaturesVisible) {
+                bool anyVertexVisible = uniformVisible;
+                if (!anyVertexVisible) {
+                    if (const auto& opacityAttr = vertexAttrs->get(idFillOpacityVertexAttribute)) {
+                        const auto startIndex = item.fillVertexOffset;
+                        const auto endIndex = (i + 1 < numOffsets) ? bucket.featureVertexOffsets[i + 1].fillVertexOffset
+                                                                   : bucket.vertices.elements();
+                        for (auto j = startIndex; j < endIndex; ++j) {
+                            const auto opacityValues =
+                                binders.template get<FillOpacity>()->template getPaintProperty<FillOpacity::Attribute>(
+                                    0, *opacityAttr, j);
+                            const auto opacityValue = mbgl::util::interpolate(
+                                opacityValues[0], opacityValues[1], zoomFrac);
+                            // TODO: are these "packed"?
+                            if (opacityValue > 0.0f) {
+                                anyVertexVisible = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                // If all vertices have opacity==0, `color.a` and `outlineColor.a` don't matter
+                if (!anyVertexVisible) {
+                    continue;
+                }
+                anyVertexVisible = uniformColorVisible || uniformOutlineColorVisible;
+                if (!anyVertexVisible) {
+                    if (const auto& colorAttr = vertexAttrs->get(idFillColorVertexAttribute)) {
+                        const auto startIndex = item.fillVertexOffset;
+                        const auto endIndex = (i + 1 < numOffsets) ? bucket.featureVertexOffsets[i + 1].fillVertexOffset
+                                                                   : bucket.vertices.elements();
+                        for (auto j = startIndex; j < endIndex; ++j) {
+                            const auto colorValues =
+                                binders.template get<FillColor>()->template getPaintProperty<FillColor::Attribute>(
+                                    0, *colorAttr, j);
+                            const auto colorValue = unpack_mix_color(colorValues, zoomFrac);
+                            if (colorValue[3] > 0.0f) {
+                                anyVertexVisible = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!anyVertexVisible && doOutline) {
+                    if (const auto& outlineColorAttr = vertexAttrs->get(idFillOutlineColorVertexAttribute)) {
+                        const auto startIndex = item.lineVertexOffset;
+                        const auto endIndex = (i + 1 < numOffsets) ? bucket.featureVertexOffsets[i + 1].lineVertexOffset
+                                                                   : bucket.lineVertices.elements();
+                        for (auto j = startIndex; j < endIndex; ++j) {
+                            const auto colorValues = binders.template get<FillOutlineColor>()
+                                                         ->template getPaintProperty<FillOutlineColor::Attribute>(
+                                                             0, *outlineColorAttr, j);
+                            const auto colorValue = unpack_mix_color(colorValues, zoomFrac);
+                            if (colorValue[3] > 0.0f) {
+                                anyVertexVisible = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!anyVertexVisible) {
+                    continue;
+                }
+            }
+            // mbgl::Log::Info(Event::General, "Fill Feature " + item.featureId + " rendered");
+        }
+#endif
+
         if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
@@ -333,15 +512,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 ++stats.drawablesAdded;
             }
         };
-
-        // Outline always occurs in translucent pass, defaults to fill color
-        // Outline does not default to fill in the pattern case
-        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
-                                                                  unevaluated.get<FillOutlineColor>().isUndefined());
-#if MLN_TRIANGULATE_FILL_OUTLINES
-        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
-                                       !evaluated.get<FillOpacity>().isConstant();
-#endif
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Simple fill

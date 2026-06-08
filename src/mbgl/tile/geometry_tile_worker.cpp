@@ -22,7 +22,6 @@
 #include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
-#include <unordered_set>
 #include <utility>
 
 namespace mbgl {
@@ -490,14 +489,16 @@ void GeometryTileWorker::parse() {
             std::shared_ptr<Bucket> bucket = LayerManager::get()->createBucket(parameters, group);
 
             for (std::size_t i = 0; !obsolete && i < geometryLayer->featureCount(); i++) {
-                std::unique_ptr<GeometryTileFeature> feature = geometryLayer->getFeature(i);
+                auto feature = geometryLayer->getFeature(i);
 
-                if (!filter(expression::EvaluationContext(static_cast<float>(this->id.overscaledZ), feature.get())
-                                .withCanonicalTileID(&id.canonical)))
+                const auto effectiveZ = static_cast<float>(id.overscaledZ);
+                if (!filter(
+                        expression::EvaluationContext(effectiveZ, feature.get()).withCanonicalTileID(&id.canonical))) {
                     continue;
+                }
 
                 const GeometryCollection& geometries = feature->getGeometries();
-                bucket->addFeature(*feature, geometries, {}, PatternLayerMap(), i, id.canonical);
+                bucket->addFeature(std::move(feature), geometries, {}, PatternLayerMap(), i, id.canonical);
                 featureIndex->insert(geometries, i, sourceLayerID, leaderImpl.id);
             }
 

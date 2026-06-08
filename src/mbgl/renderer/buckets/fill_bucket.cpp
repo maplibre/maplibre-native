@@ -23,15 +23,9 @@ FillBucket::~FillBucket() {
     sharedVertices->release();
 }
 
+void FillBucket::generateBuffers(const GeometryCollection& geometry) {
 // MLN_TRIANGULATE_FILL_OUTLINES is defined in fill_bucket.hpp
 #if MLN_TRIANGULATE_FILL_OUTLINES
-void FillBucket::addFeature(const GeometryTileFeature& feature,
-                            const GeometryCollection& geometry,
-                            const ImagePositions& patternPositions,
-                            const PatternLayerMap& patternDependencies,
-                            std::size_t index,
-                            const CanonicalTileID& canonical) {
-    // generate buffers
     gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
                                       triangles,
@@ -41,7 +35,16 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                                       lineSegments,
                                       basicLines,
                                       basicLineSegments);
+#else
+    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
+#endif
+}
 
+void FillBucket::populateBinders(const GeometryTileFeature& feature,
+                                 const ImagePositions& patternPositions,
+                                 const PatternLayerMap& patternDependencies,
+                                 std::size_t index,
+                                 const CanonicalTileID& canonical) {
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
         if (it != patternDependencies.end()) {
@@ -52,27 +55,39 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         }
     }
 }
-#else  // MLN_TRIANGULATE_FILL_OUTLINES
+
 void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometry,
                             const ImagePositions& patternPositions,
                             const PatternLayerMap& patternDependencies,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
-    // generate buffers
-    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
-
-    for (auto& pair : paintPropertyBinders) {
-        const auto it = patternDependencies.find(pair.first);
-        if (it != patternDependencies.end()) {
-            pair.second.populateVertexVectors(
-                feature, vertices.elements(), index, patternPositions, it->second, canonical);
-        } else {
-            pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
-        }
+    // if (captureRenderedFeatures) {
+    if (auto idStr = featureIDtoString(feature.getID())) {
+        features.emplace(*idStr, feature.clone());
+        featureVertexOffsets.emplace_back(std::move(*idStr), vertices.elements(), lineVertices.elements());
     }
+
+    generateBuffers(geometry);
+    populateBinders(feature, patternPositions, patternDependencies, index, canonical);
 }
-#endif // MLN_TRIANGULATE_FILL_OUTLINES
+
+void FillBucket::addFeature(std::unique_ptr<GeometryTileFeature>&& featureOwner,
+                            const GeometryCollection& geometry,
+                            const ImagePositions& patternPositions,
+                            const PatternLayerMap& patternDependencies,
+                            std::size_t index,
+                            const CanonicalTileID& canonical) {
+    const auto& feature = *featureOwner;
+    // if (captureRenderedFeatures) {
+    if (auto idStr = featureIDtoString(feature.getID())) {
+        features.emplace(*idStr, std::move(featureOwner));
+        featureVertexOffsets.emplace_back(std::move(*idStr), vertices.elements(), lineVertices.elements());
+    }
+
+    generateBuffers(geometry);
+    populateBinders(feature, patternPositions, patternDependencies, index, canonical);
+}
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;

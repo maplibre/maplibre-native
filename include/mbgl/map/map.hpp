@@ -122,7 +122,8 @@ public:
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
 
     // Transform
-    TransformState getTransfromState() const;
+    TransformState getTransformState() const;
+    [[deprecated("Use getTransformState()")]] TransformState getTransfromState() const;
 
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);

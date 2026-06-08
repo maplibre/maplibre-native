@@ -11,7 +11,6 @@
 #include <mbgl/util/ignore.hpp>
 #include <mbgl/util/logging.hpp>
 
-#include <bitset>
 #include <tuple>
 
 namespace mbgl {

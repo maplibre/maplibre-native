@@ -424,6 +424,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
     if (action == GLFW_RELEASE) {
         if (key != GLFW_KEY_R || key != GLFW_KEY_S) view->animateRouteCallback = nullptr;
 
+        // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
         switch (key) {
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(window, true);
@@ -674,6 +675,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
     }
 
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
+        // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
         switch (key) {
             case GLFW_KEY_W:
                 view->popAnnotation();
@@ -753,7 +755,7 @@ void GLFWView::updateFreeCameraDemo() {
     mbgl::FreeCameraOptions camera;
 
     // Update camera position and focus point on the map with interpolated values
-    camera.setLocation({cameraPos, cameraAlt});
+    camera.setLocation({.location = cameraPos, .altitude = cameraAlt});
     camera.lookAtPoint(trainPos);
 
     map->setFreeCameraOptions(camera);
@@ -998,25 +1000,25 @@ void GLFWView::makeSnapshot(bool withOverlay) {
 void GLFWView::onScroll(GLFWwindow *window, double /*xOffset*/, double yOffset) {
     MLN_TRACE_FUNC();
 
-    auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
-    double delta = yOffset * 40;
+    const double wheelIncrement = 4.000244140625 / 40; // ?
+    const bool isShiftActive = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+                               glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
+    const bool isCtrlActive = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS ||
+                              glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+    const bool isWheel = (yOffset != 0) && (std::fmod(yOffset, wheelIncrement) == 0);
+    const double factor = (isWheel ? 40 : 20) * (isShiftActive ? 2.0 : isCtrlActive ? 0.1 : 1.0);
+    const double delta = yOffset * factor;
 
-    bool isWheel = delta != 0 && std::fmod(delta, 4.000244140625) == 0;
-
-    double absDelta = delta < 0 ? -delta : delta;
-    double scale = 2.0 / (1.0 + std::exp(-absDelta / 100.0));
-
-    // Make the scroll wheel a bit slower.
-    if (!isWheel) {
-        scale = (scale - 1.0) / 2.0 + 1.0;
-    }
+    double scaleFactor = 2.0 / (1.0 + std::exp(-std::fabs(delta) / 100.0));
 
     // Zooming out.
-    if (delta < 0 && scale != 0) {
-        scale = 1.0 / scale;
+    if (delta < 0 && scaleFactor != 0) {
+        scaleFactor = 1.0 / scaleFactor;
     }
 
-    view->map->scaleBy(scale, mbgl::ScreenCoordinate{view->lastX, view->lastY});
+    auto* view = reinterpret_cast<GLFWView*>(glfwGetWindowUserPointer(window));
+    view->map->scaleBy(scaleFactor, mbgl::ScreenCoordinate{view->lastX, view->lastY});
+
 #if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     if (view->puck && view->puckFollowsCameraCenter) {
         mbgl::LatLng mapCenter = view->map->getCameraOptions().center.value();

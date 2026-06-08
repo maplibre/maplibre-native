@@ -30,6 +30,14 @@ LineBucket::~LineBucket() {
     sharedVertices->release();
 }
 
+void LineBucket::addFeature(std::unique_ptr<GeometryTileFeature>&& featureOwner,
+                            const GeometryCollection& geometryCollection,
+                            const ImagePositions& patternPositions,
+                            const PatternLayerMap& patternDependencies,
+                            std::size_t index,
+                            const CanonicalTileID& canonical) {
+    addFeature(*featureOwner, geometryCollection, patternPositions, patternDependencies, index, canonical);
+}
 void LineBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometryCollection,
                             const ImagePositions& patternPositions,
