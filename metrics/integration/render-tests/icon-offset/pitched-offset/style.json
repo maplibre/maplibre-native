@@ -26,7 +26,7 @@
         }
     }
 },
-"sprite": "local://sprites/almccon",
+"sprite": "local://sprites/sprite",
   "layers": [
     {
       "id": "background",
@@ -56,7 +56,8 @@
       "paint": {
         "line-color": "hsl(0, 0%, 100%)",
         "line-dasharray": [4, 12],
-        "line-offset": 7
+        "line-offset": 25,
+        "line-width": 3
       }
     },
     {
@@ -67,7 +68,8 @@
       "paint": {
         "line-color": "hsl(0, 0%, 100%)",
         "line-dasharray": [4, 12],
-        "line-offset": -7
+        "line-offset": -25,
+        "line-width": 3
       }
     },
     {
@@ -76,16 +78,14 @@
       "source": "geojson",
       "layout": {
         "icon-allow-overlap": true,
-        "icon-image": "through",
+        "icon-image": "oneway",
         "icon-offset": [0, 0],
-        "icon-rotate": 90,
         "icon-rotation-alignment": "map",
         "icon-pitch-alignment": "map",
-        "icon-size": 1,
+        "icon-size": 5,
         "symbol-placement": "line",
         "symbol-spacing": 300
-      },
-      "paint": {"icon-opacity": 0.8}
+      }
     },
     {
       "id": "road-arrows-right",
@@ -93,16 +93,14 @@
       "source": "geojson",
       "layout": {
         "icon-allow-overlap": true,
-        "icon-image": "through",
-        "icon-offset": [50.339999999999996, 0],
-        "icon-rotate": 90,
+        "icon-image": "oneway",
+        "icon-offset": [0, 10],
         "icon-rotation-alignment": "map",
         "icon-pitch-alignment": "map",
-        "icon-size": 1,
+        "icon-size": 5,
         "symbol-placement": "line",
         "symbol-spacing": 300
-      },
-      "paint": {"icon-opacity": 0.8}
+      }
     },
     {
       "id": "road-arrows-left",
@@ -110,16 +108,14 @@
       "source": "geojson",
       "layout": {
         "icon-allow-overlap": true,
-        "icon-image": "through",
-        "icon-offset": [-53.339999999999996, 0],
-        "icon-rotate": 90,
+        "icon-image": "oneway",
+        "icon-offset": [0, -10],
         "icon-rotation-alignment": "map",
         "icon-pitch-alignment": "map",
-        "icon-size": 1,
+        "icon-size": 5,
         "symbol-placement": "line",
         "symbol-spacing": 300
-      },
-      "paint": {"icon-opacity": 0.8}
+      }
     }
-  ]
+  ] 
 }
