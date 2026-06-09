@@ -1,3 +1,7 @@
+MLN_DARWIN_PLUGIN_HEADERS = [
+    "include/mbgl/interface/plugin_platform_darwin.h",
+]
+
 MLN_GENERATED_DARWIN_STYLE_SOURCE = [
     "src/MLNLight.mm",
     "src/MLNBackgroundStyleLayer.mm",
@@ -64,6 +68,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNCompassDirectionFormatter.h",
     "src/MLNComputedShapeSource.h",
     "src/MLNCoordinateFormatter.h",
+    "src/MLNCPPPlugins.h",
     "src/MLNCustomStyleLayer.h",
     "src/MLNCustomDrawableStyleLayer.h",
     "src/MLNDefaultStyle.h",
@@ -81,6 +86,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNMapSnapshotter.h",
     "src/MLNMultiPoint.h",
     "src/MLNNetworkConfiguration.h",
+    "src/MLNNetworkResponse.h",
     "src/MLNOfflinePack.h",
     "src/MLNOfflineRegion.h",
     "src/MLNOfflineStorage.h",
@@ -114,7 +120,6 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNPluginLayer.h",
     "src/MLNPluginStyleLayer.h",
     "src/MLNStyleFilter.h",
-    "src/MLNStyleFilter_Private.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -173,6 +178,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
     "src/MLNPluginStyleLayer_Private.h",
+    "src/MLNStyleFilter_Private.h",
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [

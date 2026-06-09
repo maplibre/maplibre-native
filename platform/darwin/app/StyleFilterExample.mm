@@ -2,6 +2,10 @@
 
 @implementation StyleFilterExample
 
+-(NSString *)filterName {
+    return @"layer-filter";
+}
+
 // This will filter the data passed in
 -(NSData *)filterData:(NSData *)data {
     // Don't call super
