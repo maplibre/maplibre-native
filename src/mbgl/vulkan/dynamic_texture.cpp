@@ -108,13 +108,11 @@ bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
 
 DynamicTexture::DynamicTexture(Context& context_, Size size, gfx::TexturePixelType pixelType)
     : gfx::DynamicTexture(context_, size, pixelType),
-      context(context_) {
-    texture->create();
-}
+      context(context_) {}
 
 DynamicTexture::~DynamicTexture() {
     if (texture) {
-        static_cast<Texture2D&>(*texture).destroy(false);
+        static_cast<Texture2D&>(*texture).destroy(true);
     }
 }
 
@@ -146,6 +144,8 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     memcpy(bufferAllocation->mappedBuffer, pixelData, bufferInfo.size);
 
     textureBuffersToUpload.emplace(texHandle, std::move(bufferAllocation));
+
+    texture->create();
 
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
 }
