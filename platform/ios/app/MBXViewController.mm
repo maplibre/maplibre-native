@@ -33,6 +33,8 @@
 #endif
 #endif
 
+#import "StyleFilterExample.h"
+
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     {.latitude = 38.8999418, .longitude = -77.033996},
     {.latitude = 37.7884307, .longitude = -122.3998631},
@@ -285,6 +287,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
 #endif
 #endif
+
+    [self.mapView addStyleFilter:[[StyleFilterExample alloc] init]];
+
 }
 
 - (void)viewDidLoad {
