@@ -6,6 +6,9 @@
 //#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/plugin/plugin_style_preprocessor.hpp>
+#include <mbgl/plugin/plugin_manager.hpp>
+#include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/render_pass.hpp>
 
 using namespace mbgl::plugin;
 
@@ -15,6 +18,10 @@ using namespace mbgl::plugin;
 extern "C" mbgl::plugin::RenderingContext *createPlatformRenderingContext([[maybe_unused]] mbgl::PaintParameters& paintParameters) {
 
 //    const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+
+    //const mbgl::gl::RenderPass& renderPass = static_cast<mbgl::gl::RenderPass&>(*paintParameters.renderPass);
+    // renderPass.commandEncoder.context.
+
 
     // Call render
     RenderingContextAndroidOpenGL *renderingContext = new RenderingContextAndroidOpenGL();
@@ -29,7 +36,9 @@ extern "C" mbgl::plugin::RenderingContext *createPlatformRenderingContext([[mayb
 extern "C" {
 __attribute__((used))
 __attribute__((visibility("default")))
-void _force_link_MapLayerTypeDarwin() {
+void _force_link_MapLayerTypeAndroid() {
+
+    (void)sizeof(mbgl::plugin::PluginManager);
     (void)sizeof(mbgl::plugin::LayerProperty);
     (void)sizeof(mbgl::plugin::MapLayerType);
     (void)sizeof(mbgl::plugin::DrawingContext);
