@@ -241,7 +241,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 }
 
 void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textureHandles,
-                                         const DynamicTexturePtr& dynamicTexture) {
+                                         const DynamicTexturePtr& dynamicTexture,
+                                         bool free) {
     std::scoped_lock lock(mutex);
     if (!dynamicTexture) {
         return;
@@ -250,7 +251,7 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
     for (const auto& texHandle : textureHandles) {
         dynamicTexture->removeTexture(texHandle);
     }
-    if (dynamicTexture->isEmpty()) {
+    if (free && dynamicTexture->isEmpty()) {
         auto iterator = std::ranges::find(dynamicTextures, dynamicTexture);
         if (iterator != dynamicTextures.end()) {
             dynamicTextures.erase(iterator);

@@ -332,7 +332,7 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
     }
 }
 
-void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t resultCorrelationID) {
+void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64_t resultCorrelationID) {
     MLN_TRACE_FUNC();
 
     loaded = true;
