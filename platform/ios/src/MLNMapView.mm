@@ -4353,8 +4353,21 @@ static void *windowScreenContext = &windowScreenContext;
     completionHandler:(nullable void (^)(void))completion {
   MLNLogDebug(@"Setting flyToCamera: %@ withDuration: %f peakAltitude: %f completionHandler: %@",
               camera, duration, peakAltitude, completion);
+  [self flyToCamera:camera
+            edgePadding:UIEdgeInsetsZero
+           withDuration:duration
+           peakAltitude:peakAltitude
+      completionHandler:completion];
+}
+
+- (void)flyToCamera:(MLNMapCamera *)camera
+          edgePadding:(UIEdgeInsets)insets
+         withDuration:(NSTimeInterval)duration
+         peakAltitude:(CLLocationDistance)peakAltitude
+    completionHandler:(nullable void (^)(void))completion {
+  UIEdgeInsets finalEdgeInsets = MLNEdgeInsetsInsetEdgeInset(insets, self.contentInset);
   [self _flyToCamera:camera
-            edgePadding:self.contentInset
+            edgePadding:finalEdgeInsets
            withDuration:duration
            peakAltitude:peakAltitude
       completionHandler:completion];
@@ -4364,11 +4377,8 @@ static void *windowScreenContext = &windowScreenContext;
           edgePadding:(UIEdgeInsets)insets
          withDuration:(NSTimeInterval)duration
     completionHandler:(nullable void (^)(void))completion {
-  UIEdgeInsets finalEdgeInsets = UIEdgeInsetsMake(
-      self.contentInset.top + insets.top, self.contentInset.left + insets.left,
-      self.contentInset.bottom + insets.bottom, self.contentInset.right + insets.right);
-  [self _flyToCamera:camera
-            edgePadding:finalEdgeInsets
+  [self flyToCamera:camera
+            edgePadding:insets
            withDuration:duration
            peakAltitude:-1
       completionHandler:completion];
