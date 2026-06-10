@@ -3163,6 +3163,11 @@ static void *windowScreenContext = &windowScreenContext;
   [(MLNScaleBar *)self.scaleBar setShouldShowDarkStyles:scaleBarShouldShowDarkStyles];
 }
 
+- (void)setCompassViewShouldWhiteStyle:(BOOL)compassViewShouldWhiteStyle {
+  _compassViewShouldWhiteStyle = compassViewShouldWhiteStyle;
+  self.compassView.shouldWhiteStyle = compassViewShouldWhiteStyle;
+}
+
 - (void)setScaleBarUsesMetricSystem:(BOOL)scaleBarUsesMetricSystem {
   _scaleBarUsesMetricSystem = scaleBarUsesMetricSystem;
   [(MLNScaleBar *)self.scaleBar setUsesMetricSystem:scaleBarUsesMetricSystem];
