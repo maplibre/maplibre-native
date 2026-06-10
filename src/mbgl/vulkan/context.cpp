@@ -68,8 +68,6 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     MBGL_VERIFY_THREAD(tid);
 
-    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
-
     destroyResources();
 
     {
@@ -101,7 +99,8 @@ void Context::initFrameResources() {
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, 0, shaders::maxUBOCountPerDrawable, 0));
+        DescriptorPoolGrowable(
+            drawableUniformDescriptorPoolSize, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
@@ -127,18 +126,18 @@ void Context::initFrameResources() {
     }
 
     // force placeholder texture upload before any descriptor sets
-    (void)getDummyTexture();
+    static_cast<void>(getDummyTexture());
 
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, 0, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
+                                    shaders::layerSSBOStartId,
                                     shaders::maxSSBOCountPerLayer,
                                     shaders::maxUBOCountPerLayer,
                                     "LayerUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
-                                    0,
+                                    shaders::drawableSSBOStartId,
+                                    shaders::maxSSBOCountPerDrawable,
                                     shaders::maxUBOCountPerDrawable,
                                     "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
@@ -669,7 +668,7 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
-                                              size_t startId,
+                                              [[maybe_unused]] size_t startId,
                                               size_t storageCount,
                                               size_t uniformCount,
                                               const std::string& name) {
@@ -679,6 +678,7 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
         if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eVertex;
         }
+
         if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eFragment;
         }
