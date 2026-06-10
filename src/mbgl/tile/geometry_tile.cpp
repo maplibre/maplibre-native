@@ -347,6 +347,10 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64
         atlasTextures = std::make_shared<TileAtlasTextures>();
     }
 
+    if (layoutResult && layoutResult->dynamicTextureAtlas) {
+        layoutResult->dynamicTextureAtlas->removeUnusedTextures();
+    }
+
     if (layoutResult) {
         for (const auto& data : layoutResult->layerRenderData) {
             if (data.second.bucket) {

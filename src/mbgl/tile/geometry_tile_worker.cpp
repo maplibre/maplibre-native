@@ -555,8 +555,8 @@ void GeometryTileWorker::finalizeLayout() {
 
         for (auto& layout : layouts) {
             if (obsolete) {
-                dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture, false);
-                dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture, false);
+                dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
+                dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
                 return;
             }
 

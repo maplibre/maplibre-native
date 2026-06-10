@@ -36,9 +36,8 @@ public:
                                       const ImageMap& patterns,
                                       const ImageVersionMap& versionMap);
 
-    void removeTextures(const std::vector<TextureHandle>& textureHandles,
-                        const DynamicTexturePtr& dynamicTexture,
-                        bool free = true);
+    void removeTextures(const std::vector<TextureHandle>& textureHandles, const DynamicTexturePtr& dynamicTexture);
+    void removeUnusedTextures();
 
 private:
     Context& context;
