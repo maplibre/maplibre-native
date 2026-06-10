@@ -519,6 +519,9 @@ void GeometryTileWorker::parse() {
                                    << " SourceID: " << sourceID.c_str()
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
+    // Mark that the upcoming finalizeLayout() call is triggered directly by parse so
+    // it can emit a partial (geometry-only) result for progressive rendering.
+    comingFromParse = true;
     finalizeLayout();
 }
 
@@ -538,7 +541,32 @@ bool GeometryTileWorker::hasPendingParseResult() const {
 void GeometryTileWorker::finalizeLayout() {
     MLN_TRACE_FUNC();
 
-    if (!data || !layers || !hasPendingParseResult() || hasPendingDependencies()) {
+    if (!data || !layers || !hasPendingParseResult()) {
+        comingFromParse = false;
+        return;
+    }
+
+    if (hasPendingDependencies()) {
+        // Progressive early render: on the first load of a tile, if parse just completed
+        // (comingFromParse=true) but symbol glyph/image dependencies are still pending,
+        // emit a partial LayoutResult containing only the geometry (fill/line/circle)
+        // buckets that are already ready. This lets the tile appear on screen immediately
+        // without waiting for text/icon resources, reducing white-screen time.
+        //
+        // The symbol buckets will arrive in a subsequent full onLayout call once all
+        // dependencies have been resolved.
+        if (firstLoad && comingFromParse && !renderData.empty()) {
+            // renderData holds only non-symbol buckets at this point: symbol layouts
+            // with dependencies were deferred into `layouts` rather than being added to
+            // renderData directly. Copy the map cheaply — buckets are shared_ptr.
+            auto partialRenderData = renderData;
+            parent.invoke(&GeometryTile::onLayout,
+                          std::make_shared<GeometryTile::LayoutResult>(
+                              std::move(partialRenderData), nullptr, gfx::GlyphAtlas{}, gfx::ImageAtlas{}, nullptr),
+                          correlationID,
+                          /*isPartialResult=*/true);
+        }
+        comingFromParse = false;
         return;
     }
 
@@ -557,6 +585,7 @@ void GeometryTileWorker::finalizeLayout() {
             if (obsolete) {
                 dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
                 dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
+                comingFromParse = false;
                 return;
             }
 
@@ -566,7 +595,7 @@ void GeometryTileWorker::finalizeLayout() {
                 continue;
             }
 
-            // layout adds the bucket to buckets
+            // layout adds the bucket to renderData
             layout->createBucket(
                 imageAtlas.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
         }
@@ -575,6 +604,7 @@ void GeometryTileWorker::finalizeLayout() {
     layouts.clear();
 
     firstLoad = false;
+    comingFromParse = false;
 
     MBGL_TIMING_FINISH(watch,
                        " Action: " << "SymbolLayout,"
@@ -588,7 +618,8 @@ void GeometryTileWorker::finalizeLayout() {
                                                                std::move(glyphAtlas),
                                                                std::move(imageAtlas),
                                                                dynamicTextureAtlas),
-                  correlationID);
+                  correlationID,
+                  /*isPartialResult=*/false);
 }
 
 } // namespace mbgl

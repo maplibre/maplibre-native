@@ -89,7 +89,9 @@ public:
 
         ~LayoutResult();
     };
-    void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);
+    // isPartialResult=true means only geometry (fill/line/circle) buckets are present;
+    // symbol buckets are still pending and will arrive in a subsequent full onLayout call.
+    void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID, bool isPartialResult = false);
 
     void onError(std::exception_ptr, uint64_t correlationID);
 
