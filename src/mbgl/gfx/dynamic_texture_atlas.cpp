@@ -253,7 +253,7 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
     }
 }
 
-void DynamicTextureAtlas::removeUnusedTextures() {
+void DynamicTextureAtlas::removeUnusedDynamicTextures() {
     std::scoped_lock lock(mutex);
 
     std::erase_if(dynamicTextures, [](auto& dynamicTexture) { return dynamicTexture->isEmpty(); });

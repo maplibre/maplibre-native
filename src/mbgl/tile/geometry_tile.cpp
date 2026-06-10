@@ -226,7 +226,9 @@ GeometryTile::~GeometryTile() {
 
     if (layoutResult) {
         threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {
+                layoutResult_->dynamicTextureAtlas->removeUnusedDynamicTextures();
+            });
     }
 }
 
@@ -345,10 +347,6 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64
     layoutResult = std::move(result);
     if (!atlasTextures) {
         atlasTextures = std::make_shared<TileAtlasTextures>();
-    }
-
-    if (layoutResult && layoutResult->dynamicTextureAtlas) {
-        layoutResult->dynamicTextureAtlas->removeUnusedTextures();
     }
 
     if (layoutResult) {
