@@ -11,7 +11,11 @@ SurfaceRenderableResource::~SurfaceRenderableResource() {
         return;
     }
 
-    backend.getDevice()->waitIdle(backend.getDispatcher());
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mbgl::Event::Render, "Vulkan device lost during surface shutdown");
+    }
 
     // specific order
     swapchainFramebuffers.clear();
