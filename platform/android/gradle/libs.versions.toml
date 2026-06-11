@@ -24,13 +24,7 @@ appcenter = "1.5"
 commonsIO = "2.21.0"
 assertj = "3.27.7"
 multidex = "2.0.1"
-<<<<<<< mlt-accept
-kotlinxCoroutines = "1.9.0"
-
-androidGradlePlugin = "8.6.0"
-=======
 kotlinxCoroutines = "1.10.2"
->>>>>>> main
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
