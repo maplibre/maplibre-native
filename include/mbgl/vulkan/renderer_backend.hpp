@@ -19,7 +19,7 @@
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include "vk_mem_alloc.h"
 
-#if !defined(NDEBUG) && !defined(__ANDROID__)
+#if !defined(NDEBUG)
 #define ENABLE_VULKAN_VALIDATION
 // #define ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
 // #define ENABLE_VMA_DEBUG
