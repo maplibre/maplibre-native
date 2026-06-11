@@ -23,9 +23,14 @@ struct ColorReliefOpacity : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
 };
 
+struct ColorReliefResampling : PaintProperty<ResamplingType> {
+    static ResamplingType defaultValue() { return ResamplingType::Linear; }
+};
+
 class ColorReliefPaintProperties : public Properties<
     ColorReliefColor,
-    ColorReliefOpacity
+    ColorReliefOpacity,
+    ColorReliefResampling
 > {};
 
 class ColorReliefLayerProperties final : public LayerProperties {

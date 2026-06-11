@@ -282,11 +282,38 @@ TransitionOptions HillshadeLayer::getHillshadeShadowColorTransition() const {
     return impl().paint.template get<HillshadeShadowColor>().options;
 }
 
+PropertyValue<ResamplingType> HillshadeLayer::getDefaultHillshadeResampling() {
+    return {ResamplingType::Linear};
+}
+
+const PropertyValue<ResamplingType>& HillshadeLayer::getHillshadeResampling() const {
+    return impl().paint.template get<HillshadeResampling>().value;
+}
+
+void HillshadeLayer::setHillshadeResampling(const PropertyValue<ResamplingType>& value) {
+    if (value == getHillshadeResampling())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<HillshadeResampling>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void HillshadeLayer::setHillshadeResamplingTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<HillshadeResampling>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions HillshadeLayer::getHillshadeResamplingTransition() const {
+    return impl().paint.template get<HillshadeResampling>().options;
+}
+
 using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 16u;
+constexpr uint8_t kPaintPropertyCount = 18u;
 
 enum class Property : uint8_t {
     HillshadeAccentColor,
@@ -297,6 +324,7 @@ enum class Property : uint8_t {
     HillshadeIlluminationDirection,
     HillshadeMethod,
     HillshadeShadowColor,
+    HillshadeResampling,
     HillshadeAccentColorTransition,
     HillshadeExaggerationTransition,
     HillshadeHighlightColorTransition,
@@ -305,6 +333,7 @@ enum class Property : uint8_t {
     HillshadeIlluminationDirectionTransition,
     HillshadeMethodTransition,
     HillshadeShadowColorTransition,
+    HillshadeResamplingTransition,
 };
 
 template <typename T>
@@ -321,6 +350,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"hillshade-illumination-direction", toUint8(Property::HillshadeIlluminationDirection)},
      {"hillshade-method", toUint8(Property::HillshadeMethod)},
      {"hillshade-shadow-color", toUint8(Property::HillshadeShadowColor)},
+     {"resampling", toUint8(Property::HillshadeResampling)},
      {"hillshade-accent-color-transition", toUint8(Property::HillshadeAccentColorTransition)},
      {"hillshade-exaggeration-transition", toUint8(Property::HillshadeExaggerationTransition)},
      {"hillshade-highlight-color-transition", toUint8(Property::HillshadeHighlightColorTransition)},
@@ -328,7 +358,8 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"hillshade-illumination-anchor-transition", toUint8(Property::HillshadeIlluminationAnchorTransition)},
      {"hillshade-illumination-direction-transition", toUint8(Property::HillshadeIlluminationDirectionTransition)},
      {"hillshade-method-transition", toUint8(Property::HillshadeMethodTransition)},
-     {"hillshade-shadow-color-transition", toUint8(Property::HillshadeShadowColorTransition)}});
+     {"hillshade-shadow-color-transition", toUint8(Property::HillshadeShadowColorTransition)},
+     {"resampling-transition", toUint8(Property::HillshadeResamplingTransition)}});
 
 StyleProperty getLayerProperty(const HillshadeLayer& layer, Property property) {
     switch (property) {
@@ -348,6 +379,8 @@ StyleProperty getLayerProperty(const HillshadeLayer& layer, Property property) {
             return makeStyleProperty(layer.getHillshadeMethod());
         case Property::HillshadeShadowColor:
             return makeStyleProperty(layer.getHillshadeShadowColor());
+        case Property::HillshadeResampling:
+            return makeStyleProperty(layer.getHillshadeResampling());
         case Property::HillshadeAccentColorTransition:
             return makeStyleProperty(layer.getHillshadeAccentColorTransition());
         case Property::HillshadeExaggerationTransition:
@@ -364,6 +397,8 @@ StyleProperty getLayerProperty(const HillshadeLayer& layer, Property property) {
             return makeStyleProperty(layer.getHillshadeMethodTransition());
         case Property::HillshadeShadowColorTransition:
             return makeStyleProperty(layer.getHillshadeShadowColorTransition());
+        case Property::HillshadeResamplingTransition:
+            return makeStyleProperty(layer.getHillshadeResamplingTransition());
     }
     return {};
 }
@@ -469,6 +504,16 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
         setHillshadeMethod(*typedValue);
         return std::nullopt;
     }
+    if (property == Property::HillshadeResampling) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<ResamplingType>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setHillshadeResampling(*typedValue);
+        return std::nullopt;
+    }
 
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
@@ -513,6 +558,11 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
 
     if (property == Property::HillshadeShadowColorTransition) {
         setHillshadeShadowColorTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::HillshadeResamplingTransition) {
+        setHillshadeResamplingTransition(*transition);
         return std::nullopt;
     }
 

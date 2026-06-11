@@ -316,6 +316,18 @@ public class RasterLayer extends Layer {
     return (PropertyValue<Float>) new PropertyValue("raster-fade-duration", nativeGetRasterFadeDuration());
   }
 
+  /**
+   * Get the Resampling property
+   *
+   * @return property wrapper value around String
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<String> getResampling() {
+    checkThread();
+    return (PropertyValue<String>) new PropertyValue("resampling", nativeGetResampling());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetRasterOpacity();
@@ -389,6 +401,10 @@ public class RasterLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetRasterFadeDuration();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetResampling();
 
   @Override
   @Keep
