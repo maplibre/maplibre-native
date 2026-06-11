@@ -286,6 +286,11 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
         headers = curl_slist_append(headers, time.c_str());
     }
 
+    if (!resource.acceptHeader.empty()) {
+        const std::string header = std::string("Accept: ").append(resource.acceptHeader);
+        headers = curl_slist_append(headers, header.c_str());
+    }
+
     if (headers) {
         curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
     }
