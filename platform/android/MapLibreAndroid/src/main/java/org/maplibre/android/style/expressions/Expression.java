@@ -1440,6 +1440,16 @@ public class Expression {
   }
 
   /**
+   * Gets a value from feature state.
+   *
+   * @param property the state property to read
+   * @return the expression
+   */
+  public static Expression featureState(@NonNull String property) {
+    return new Expression("feature-state", literal(property));
+  }
+
+  /**
    * Gets the value of a cluster property accumulated so far. Can only be used in the clusterProperties
    * option of a clustered GeoJSON source.
    * <p>
