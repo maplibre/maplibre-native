@@ -258,6 +258,203 @@ target_link_libraries(
         mbgl-vendor-sqlite
 )
 
+if(MLN_CREATE_AMALGAMATION)
+    if(MSVC)
+        message(FATAL_ERROR "MLN_CREATE_AMALGAMATION=ON only supports on MSYS2/MinGW (not MSVC)")
+    endif()
+
+    if(NOT MINGW)
+        message(FATAL_ERROR "MLN_CREATE_AMALGAMATION=ON requires MSYS2/MinGW toolchain on Windows")
+    endif()
+
+    # ---- Locate tools robustly (CMake cannot use MSYS2 '/mingw64/...' paths directly) ----
+    set(_mln_tool_paths "")
+
+    # Derive MSYS2 root from the running CMake executable path.
+    # Example: CMAKE_COMMAND = C:/msys64/clang64/bin/cmake.exe
+    #   -> msys root: C:/msys64
+    get_filename_component(_mln_cmake_bindir "${CMAKE_COMMAND}" DIRECTORY)
+    get_filename_component(_mln_prefix_dir "${_mln_cmake_bindir}" DIRECTORY)
+    get_filename_component(_mln_msys_root "${_mln_prefix_dir}" DIRECTORY)
+
+    list(APPEND _mln_tool_paths "${_mln_msys_root}/mingw64/bin")
+
+    # Extra fallback: ask cygpath for a Windows/mixed path to /mingw64/bin
+    find_program(_mln_cygpath NAMES cygpath cygpath.exe)
+    if(_mln_cygpath)
+        execute_process(
+            COMMAND "${_mln_cygpath}" -m /mingw64/bin
+            OUTPUT_VARIABLE _mln_mingw64_bin_m
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(_mln_mingw64_bin_m)
+            list(APPEND _mln_tool_paths "${_mln_mingw64_bin_m}")
+        endif()
+    endif()
+
+    list(REMOVE_DUPLICATES _mln_tool_paths)
+
+    # GNU ld.bfd is required for relocatable/partial link on Windows COFF.
+    find_program(MLN_LD_BFD NAMES ld.bfd.exe ld.bfd)
+    if(NOT MLN_LD_BFD)
+        find_program(MLN_LD_BFD NAMES ld.bfd.exe ld.bfd PATHS ${_mln_tool_paths} NO_DEFAULT_PATH)
+    endif()
+
+    # GNU objcopy is required (llvm-objcopy does not support --keep-global-symbol(s) for COFF in this flow).
+    find_program(MLN_GNU_OBJCOPY NAMES objcopy.exe objcopy PATHS ${_mln_tool_paths} NO_DEFAULT_PATH)
+    if(NOT MLN_GNU_OBJCOPY)
+        find_program(MLN_GNU_OBJCOPY NAMES objcopy.exe objcopy)
+    endif()
+
+    find_program(MLN_AR NAMES llvm-ar.exe llvm-ar ar.exe ar)
+    find_program(MLN_RANLIB NAMES llvm-ranlib.exe llvm-ranlib ranlib.exe ranlib)
+
+    if(NOT MLN_LD_BFD)
+        message(FATAL_ERROR "ld.bfd required when MLN_CREATE_AMALGAMATION=ON. Tried: ${_mln_tool_paths} (install mingw-w64-x86_64-binutils)")
+    endif()
+    if(NOT MLN_GNU_OBJCOPY)
+        message(FATAL_ERROR "GNU objcopy required when MLN_CREATE_AMALGAMATION=ON. Tried: ${_mln_tool_paths} (install mingw-w64-x86_64-binutils)")
+    endif()
+    if(NOT MLN_AR)
+        message(FATAL_ERROR "ar required when MLN_CREATE_AMALGAMATION=ON")
+    endif()
+    if(NOT MLN_RANLIB)
+        message(FATAL_ERROR "ranlib required when MLN_CREATE_AMALGAMATION=ON")
+    endif()
+
+    execute_process(
+        COMMAND "${MLN_GNU_OBJCOPY}" --version
+        OUTPUT_VARIABLE _mln_objcopy_version
+        ERROR_VARIABLE _mln_objcopy_version
+    )
+    if(NOT _mln_objcopy_version MATCHES "GNU objcopy")
+        message(FATAL_ERROR "GNU objcopy is required (do not use llvm-objcopy for COFF here). Found: ${MLN_GNU_OBJCOPY}")
+    endif()
+
+    message(STATUS "Found ld.bfd: ${MLN_LD_BFD}")
+    message(STATUS "Found GNU objcopy: ${MLN_GNU_OBJCOPY}")
+    message(STATUS "Found ar: ${MLN_AR}")
+    message(STATUS "Found ranlib: ${MLN_RANLIB}")
+
+    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
+
+    # ---- Collect static libraries to fold into the amalgamation ----
+    set(STATIC_LIBS "")
+    find_static_library(STATIC_LIBS NAMES png)
+    find_static_library(STATIC_LIBS NAMES z)
+    find_static_library(STATIC_LIBS NAMES jpeg)
+    find_static_library(STATIC_LIBS NAMES webp)
+    find_static_library(STATIC_LIBS NAMES uv uv_a)
+    find_static_library(STATIC_LIBS NAMES curl)
+
+    # ICU (system static libs in MSYS2 CLANG64)
+    set(ICU_LIBS "")
+    find_static_library(ICU_LIBS NAMES icuin)
+    find_static_library(ICU_LIBS NAMES icuuc)
+    find_static_library(ICU_LIBS NAMES icudt)
+
+    # Optional deps (do not fail configure if missing)
+    set(OPTIONAL_STATIC_LIBS "")
+    set(_old_suffixes ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    foreach(_mln_opt ssl crypto bz2 bzip2 zstd nghttp2 brotlidec brotlicommon brotlienc cares ssh2 idn2)
+        unset(_mln_found_lib CACHE)
+        find_library(_mln_found_lib NAMES ${_mln_opt})
+        if(_mln_found_lib)
+            message(STATUS "find_static_library: Found optional static [${_mln_opt}] -> ${_mln_found_lib}")
+            list(APPEND OPTIONAL_STATIC_LIBS ${_mln_found_lib})
+        endif()
+    endforeach()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${_old_suffixes})
+    unset(_mln_opt)
+    unset(_mln_found_lib CACHE)
+
+    # Vulkan-only libs (OpenGL preset keeps this empty)
+    set(VULKAN_LIBS "")
+    if(MLN_WITH_VULKAN)
+        list(APPEND VULKAN_LIBS
+            $<TARGET_FILE:glslang>
+            $<TARGET_FILE:SPIRV>
+            $<TARGET_FILE:MachineIndependent>
+            $<TARGET_FILE:GenericCodeGen>
+            $<TARGET_FILE:glslang-default-resource-limits>
+        )
+    endif()
+
+    # Response file content: must NOT use bracket quotes here because we need ${...} expanded.
+    set(MLN_AMALGAM_RSP "${CMAKE_CURRENT_BINARY_DIR}/mbgl-core-amalgam.rsp")
+
+    set(_mln_rsp_content "")
+    string(APPEND _mln_rsp_content "--relocatable\n")
+    string(APPEND _mln_rsp_content "-o\n")
+    string(APPEND _mln_rsp_content "mbgl-core-amalgam-merged.o\n")
+    string(APPEND _mln_rsp_content "--whole-archive\n")
+
+    # Target archives (generator expressions are OK; file(GENERATE) will evaluate them)
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-core>\n")
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-freetype>\n")
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-vendor-csscolorparser>\n")
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-harfbuzz>\n")
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-vendor-nunicode>\n")
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-vendor-sqlite>\n")
+    string(APPEND _mln_rsp_content "$<TARGET_FILE:mbgl-vendor-parsedate>\n")
+
+    # These are plain strings (absolute .a paths); they MUST be expanded now.
+    if(MLN_ICU_LIBS_RSP)
+        string(APPEND _mln_rsp_content "${MLN_ICU_LIBS_RSP}\n")
+    endif()
+    if(MLN_VULKAN_LIBS_RSP)
+        string(APPEND _mln_rsp_content "${MLN_VULKAN_LIBS_RSP}\n")
+    endif()
+    if(MLN_STATIC_LIBS_RSP)
+        string(APPEND _mln_rsp_content "${MLN_STATIC_LIBS_RSP}\n")
+    endif()
+    if(MLN_OPTIONAL_STATIC_LIBS_RSP)
+        string(APPEND _mln_rsp_content "${MLN_OPTIONAL_STATIC_LIBS_RSP}\n")
+    endif()
+
+    string(APPEND _mln_rsp_content "--no-whole-archive\n")
+
+    file(GENERATE
+        OUTPUT "${MLN_AMALGAM_RSP}"
+        CONTENT "${_mln_rsp_content}"
+    )
+
+    # OpenGL goal name (Vulkan is kept for later; harmless under windows-opengl preset)
+    if(MLN_WITH_VULKAN)
+        set(MLN_AMALGAM_FINAL_NAME "libmaplibre-native-core-amalgam-windowx-x64-vulkan.a")
+    else()
+        set(MLN_AMALGAM_FINAL_NAME "libmaplibre-native-core-amalgam-windowx-x64-opengl.a")
+    endif()
+
+    add_custom_command(
+        TARGET mbgl-core
+        POST_BUILD
+        BYPRODUCTS
+            "${CMAKE_CURRENT_BINARY_DIR}/mbgl-core-amalgam-merged.o"
+            "${CMAKE_CURRENT_BINARY_DIR}/mbgl-core-amalgam-merged-public.o"
+            "${CMAKE_CURRENT_BINARY_DIR}/libmbgl-core-amalgam.a"
+            "${CMAKE_CURRENT_BINARY_DIR}/${MLN_AMALGAM_FINAL_NAME}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E rm -f
+            "mbgl-core-amalgam-merged.o"
+            "mbgl-core-amalgam-merged-public.o"
+            "libmbgl-core-amalgam.a"
+            "${MLN_AMALGAM_FINAL_NAME}"
+        COMMAND "${MLN_LD_BFD}" "@${MLN_AMALGAM_RSP}"
+        COMMAND "${MLN_GNU_OBJCOPY}" --wildcard -G "*mbgl*"
+            "mbgl-core-amalgam-merged.o"
+            "mbgl-core-amalgam-merged-public.o"
+        COMMAND "${MLN_AR}" rcs "libmbgl-core-amalgam.a" "mbgl-core-amalgam-merged-public.o"
+        COMMAND "${MLN_RANLIB}" "libmbgl-core-amalgam.a"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "libmbgl-core-amalgam.a"
+            "${MLN_AMALGAM_FINAL_NAME}"
+        VERBATIM
+    )
+endif()
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
