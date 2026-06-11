@@ -196,13 +196,23 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-    backend.reset();
+
+    if (!asyncRendererCleanup) {
+        backend.reset();
+    }
+
     window.reset();
     swapBehaviorFlush = false;
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
     snapshotCallback = std::move(callback);
+
+    if (backend) {
+        gfx::BackendScope backendGuard{backend->getImpl()};
+        backend->enableFramebufferRead(true);
+    }
+
     requestRender();
 }
 
@@ -245,10 +255,23 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     // Lock as the initialization can come from the main thread or the GL thread first
     std::scoped_lock lock(initialisationMutex);
 
-    // The android system will have already destroyed the underlying
-    // GL resources if this is not the first initialization and an
-    // attempt to clean them up will fail
+    UniqueANativeWindow window_ = nullptr;
+
+    if (surface) {
+        window_ = std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>>(
+            ANativeWindow_fromSurface(&env, reinterpret_cast<jobject>(surface.get())),
+            [](ANativeWindow* window_) { ANativeWindow_release(window_); });
+    }
+
     if (backend) {
+        if (backend->createSurface(window_.get())) {
+            window = std::move(window_);
+            return;
+        }
+
+        // The android system will have already destroyed the underlying
+        // GL resources if this is not the first initialization and an
+        // attempt to clean them up will fail
         gfx::BackendScope backendGuard{backend->getImpl()};
         backend->markContextLost();
     }
@@ -260,13 +283,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     // Reset in opposite order
     renderer.reset();
     backend.reset();
-    window.reset();
-
-    if (surface) {
-        window = std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>>(
-            ANativeWindow_fromSurface(&env, reinterpret_cast<jobject>(surface.get())),
-            [](ANativeWindow* window_) { ANativeWindow_release(window_); });
-    }
+    window = std::move(window_);
 
     // Create the new backend and renderer
     backend = AndroidRendererBackend::Create(window.get());
@@ -312,7 +329,11 @@ void MapRenderer::onRendererReset(JNIEnv&) {
 
 // needs to be called on GL thread
 void MapRenderer::onSurfaceDestroyed(JNIEnv&) {
-    resetRenderer();
+    if (backend) {
+        backend->destroySurface();
+    }
+
+    window.reset();
 }
 
 void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {

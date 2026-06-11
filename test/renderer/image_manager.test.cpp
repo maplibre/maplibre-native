@@ -16,66 +16,66 @@
 using namespace mbgl;
 
 TEST(ImageManager, Missing) {
-    ImageManager imageManager;
-    EXPECT_FALSE(imageManager.getImage("doesnotexist"));
+    auto imageManager = ImageManager::create();
+    EXPECT_FALSE(imageManager->getImage("doesnotexist"));
 }
 
 TEST(ImageManager, Basic) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManager = ImageManager::create();
 
     auto images = parseSprite("default",
                               util::read_file("test/fixtures/annotations/emerald.png"),
                               util::read_file("test/fixtures/annotations/emerald.json"));
     for (auto& image : images) {
-        imageManager.addImage(image);
-        auto* stored = imageManager.getImage(image->id);
+        imageManager->addImage(image);
+        auto* stored = imageManager->getImage(image->id);
         ASSERT_TRUE(stored);
         EXPECT_EQ(image->image.size, stored->image.size);
     }
 
-    imageManager.dumpDebugLogs();
+    imageManager->dumpDebugLogs();
 }
 
 TEST(ImageManager, AddRemove) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManager = ImageManager::create();
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
-    imageManager.addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({16, 16}), 2.0f));
-    imageManager.addImage(makeMutable<style::Image::Impl>("three", PremultipliedImage({16, 16}), 2.0f));
+    imageManager->addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
+    imageManager->addImage(makeMutable<style::Image::Impl>("two", PremultipliedImage({16, 16}), 2.0f));
+    imageManager->addImage(makeMutable<style::Image::Impl>("three", PremultipliedImage({16, 16}), 2.0f));
 
-    imageManager.removeImage("one");
-    imageManager.removeImage("two");
+    imageManager->removeImage("one");
+    imageManager->removeImage("two");
 
-    EXPECT_NE(nullptr, imageManager.getImage("three"));
-    EXPECT_EQ(nullptr, imageManager.getImage("two"));
-    EXPECT_EQ(nullptr, imageManager.getImage("four"));
+    EXPECT_NE(nullptr, imageManager->getImage("three"));
+    EXPECT_EQ(nullptr, imageManager->getImage("two"));
+    EXPECT_EQ(nullptr, imageManager->getImage("four"));
 }
 
 TEST(ImageManager, Update) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManager = ImageManager::create();
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
-    EXPECT_EQ(0, imageManager.updatedImageVersions.size());
-    imageManager.updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
-    EXPECT_EQ(1, imageManager.updatedImageVersions.size());
-    imageManager.removeImage("one");
-    EXPECT_EQ(0, imageManager.updatedImageVersions.size());
+    imageManager->addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
+    EXPECT_EQ(0, imageManager->updatedImageVersions.size());
+    imageManager->updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
+    EXPECT_EQ(1, imageManager->updatedImageVersions.size());
+    imageManager->removeImage("one");
+    EXPECT_EQ(0, imageManager->updatedImageVersions.size());
 }
 
 TEST(ImageManager, RemoveReleasesBinPackRect) {
     FixtureLog log;
-    ImageManager imageManager;
+    auto imageManager = ImageManager::create();
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
-    EXPECT_TRUE(imageManager.getImage("big"));
+    imageManager->addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
+    EXPECT_TRUE(imageManager->getImage("big"));
 
-    imageManager.removeImage("big");
+    imageManager->removeImage("big");
 
-    imageManager.addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
-    EXPECT_TRUE(imageManager.getImage("big"));
+    imageManager->addImage(makeMutable<style::Image::Impl>("big", PremultipliedImage({32, 32}), 1.0f));
+    EXPECT_TRUE(imageManager->getImage("big"));
     EXPECT_TRUE(log.empty());
 }
 
@@ -97,13 +97,12 @@ public:
 
 TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
-    auto& imageManager = *imageManagerPtr;
-    StubImageRequestor requestor(imageManagerPtr);
+    auto imageManager = ImageManager::create();
+    StubImageRequestor requestor(imageManager);
     bool notified = false;
 
     ImageManagerObserver observer;
-    imageManager.setObserver(&observer);
+    imageManager->setObserver(&observer);
 
     requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
         notified = true;
@@ -112,23 +111,22 @@ TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
     uint64_t imageCorrelationID = 0;
     ImageDependencies dependencies;
     dependencies.emplace("one", ImageType::Icon);
-    imageManager.getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
+    imageManager->getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
     runLoop.runOnce();
 
     ASSERT_FALSE(notified);
 
-    imageManager.setLoaded(true);
+    imageManager->setLoaded(true);
     runLoop.runOnce();
     ASSERT_FALSE(notified);
-    imageManager.notifyIfMissingImageAdded();
+    imageManager->notifyIfMissingImageAdded();
     runLoop.runOnce();
     ASSERT_TRUE(notified);
 }
 
 TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
-    auto imageManagerPtr = std::make_shared<ImageManager>();
-    auto& imageManager = *imageManagerPtr;
-    StubImageRequestor requestor(imageManagerPtr);
+    auto imageManager = ImageManager::create();
+    StubImageRequestor requestor(imageManager);
     bool notified = false;
 
     requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
@@ -138,8 +136,8 @@ TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
     uint64_t imageCorrelationID = 0;
     ImageDependencies dependencies;
     dependencies.emplace("one", ImageType::Icon);
-    imageManager.addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
-    imageManager.getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
+    imageManager->addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f));
+    imageManager->getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
 
     ASSERT_TRUE(notified);
 }
@@ -164,12 +162,11 @@ public:
 
 TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
-    auto& imageManager = *imageManagerPtr;
-    StubImageRequestor requestor(imageManagerPtr);
+    auto imageManager = ImageManager::create();
+    StubImageRequestor requestor(imageManager);
     StubImageManagerObserver observer;
 
-    imageManager.setObserver(&observer);
+    imageManager->setObserver(&observer);
 
     bool notified = false;
 
@@ -180,19 +177,19 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
     uint64_t imageCorrelationID = 0;
     ImageDependencies dependencies;
     dependencies.emplace("pre", ImageType::Icon);
-    imageManager.getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
+    imageManager->getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
     runLoop.runOnce();
 
     EXPECT_EQ(observer.count, 0);
     ASSERT_FALSE(notified);
 
-    imageManager.setLoaded(true);
+    imageManager->setLoaded(true);
     runLoop.runOnce();
 
     EXPECT_EQ(observer.count, 1);
     ASSERT_FALSE(notified);
 
-    imageManager.notifyIfMissingImageAdded();
+    imageManager->notifyIfMissingImageAdded();
     runLoop.runOnce();
 
     EXPECT_EQ(observer.count, 1);
@@ -201,31 +198,30 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
     // Request for updated dependencies must be dispatched to the
     // observer.
     dependencies.emplace("post", ImageType::Icon);
-    imageManager.getImages(requestor, std::make_pair(dependencies, ++imageCorrelationID));
+    imageManager->getImages(requestor, std::make_pair(dependencies, ++imageCorrelationID));
     ASSERT_TRUE(requestor.hasPendingRequests());
 
     runLoop.runOnce();
     ASSERT_FALSE(requestor.hasPendingRequests());
 
     // Another requestor shall not have pending requests for already obtained images.
-    StubImageRequestor anotherRequestor(imageManagerPtr);
-    imageManager.getImages(anotherRequestor, std::make_pair(dependencies, ++imageCorrelationID));
+    StubImageRequestor anotherRequestor(imageManager);
+    imageManager->getImages(anotherRequestor, std::make_pair(dependencies, ++imageCorrelationID));
     ASSERT_FALSE(anotherRequestor.hasPendingRequests());
 
     dependencies.emplace("unfamiliar", ImageType::Icon);
-    imageManager.getImages(anotherRequestor, std::make_pair(dependencies, ++imageCorrelationID));
+    imageManager->getImages(anotherRequestor, std::make_pair(dependencies, ++imageCorrelationID));
     EXPECT_TRUE(anotherRequestor.hasPendingRequests());
     EXPECT_TRUE(anotherRequestor.hasPendingRequest("unfamiliar"));
 }
 
 TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
-    auto& imageManager = *imageManagerPtr;
-    StubImageRequestor requestor(imageManagerPtr);
+    auto imageManager = ImageManager::create();
+    StubImageRequestor requestor(imageManager);
     StubImageManagerObserver observer;
 
-    imageManager.setObserver(&observer);
+    imageManager->setObserver(&observer);
 
     bool notified = false;
 
@@ -236,19 +232,19 @@ TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
     EXPECT_EQ(observer.count, 0);
     ASSERT_FALSE(notified);
 
-    imageManager.setLoaded(true);
+    imageManager->setLoaded(true);
     runLoop.runOnce();
 
     uint64_t imageCorrelationID = 0;
     ImageDependencies dependencies;
     dependencies.emplace("after", ImageType::Icon);
-    imageManager.getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
+    imageManager->getImages(requestor, std::make_pair(dependencies, imageCorrelationID));
     runLoop.runOnce();
 
     EXPECT_EQ(observer.count, 1);
     ASSERT_FALSE(notified);
 
-    imageManager.notifyIfMissingImageAdded();
+    imageManager->notifyIfMissingImageAdded();
     runLoop.runOnce();
 
     EXPECT_EQ(observer.count, 1);
@@ -257,110 +253,109 @@ TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
 
 TEST(ImageManager, RemoveUnusedStyleImages) {
     util::RunLoop runLoop;
-    auto imageManagerPtr = std::make_shared<ImageManager>();
-    auto& imageManager = *imageManagerPtr;
+    auto imageManager = ImageManager::create();
     StubImageManagerObserver observer;
-    imageManager.setObserver(&observer);
-    imageManager.setLoaded(true);
+    imageManager->setObserver(&observer);
+    imageManager->setLoaded(true);
 
     observer.imageMissing = [&imageManager](const std::string& id) {
         if (id == "1024px") {
-            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({1024, 1024}), 1.0f));
+            imageManager->addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({1024, 1024}), 1.0f));
         } else {
-            imageManager.addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({16, 16}), 1.0f));
+            imageManager->addImage(makeMutable<style::Image::Impl>(id, PremultipliedImage({16, 16}), 1.0f));
         }
     };
 
     observer.removeUnusedStyleImages = [&imageManager](const std::vector<std::string>& ids) {
         for (const auto& id : ids) {
-            assert(imageManager.getImage(id));
-            imageManager.removeImage(id);
+            assert(imageManager->getImage(id));
+            imageManager->removeImage(id);
         }
     };
 
     // Style sprite.
-    imageManager.addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({16, 16}), 1.0f));
+    imageManager->addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({16, 16}), 1.0f));
 
     // Single requestor
     {
-        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManagerPtr);
-        imageManager.getImages(*requestor, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 0ull));
+        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
+        imageManager->getImages(*requestor, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 0ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 1);
-        ASSERT_FALSE(imageManager.getImage("missing") == nullptr);
+        ASSERT_FALSE(imageManager->getImage("missing") == nullptr);
     }
 
     // Within cache limits, no need to notify client.
-    imageManager.reduceMemoryUseIfCacheSizeExceedsLimit();
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
     runLoop.runOnce();
-    ASSERT_FALSE(imageManager.getImage("missing") == nullptr);
+    ASSERT_FALSE(imageManager->getImage("missing") == nullptr);
 
     // Simulate OOM case, forces client notification to be issued.
-    imageManager.reduceMemoryUse();
+    imageManager->reduceMemoryUse();
     runLoop.runOnce();
-    ASSERT_TRUE(imageManager.getImage("missing") == nullptr);
-    ASSERT_FALSE(imageManager.getImage("sprite") == nullptr);
+    ASSERT_TRUE(imageManager->getImage("missing") == nullptr);
+    ASSERT_FALSE(imageManager->getImage("sprite") == nullptr);
 
     // Single requestor, exceed cache size limit.
     {
-        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManagerPtr);
-        imageManager.getImages(*requestor, std::make_pair(ImageDependencies{{"1024px", ImageType::Icon}}, 0ull));
+        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
+        imageManager->getImages(*requestor, std::make_pair(ImageDependencies{{"1024px", ImageType::Icon}}, 0ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 2);
-        ASSERT_FALSE(imageManager.getImage("1024px") == nullptr);
+        ASSERT_FALSE(imageManager->getImage("1024px") == nullptr);
     }
 
     // Over cache limits, need to notify client.
-    imageManager.reduceMemoryUseIfCacheSizeExceedsLimit();
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
     runLoop.runOnce();
-    ASSERT_TRUE(imageManager.getImage("1024px") == nullptr);
-    ASSERT_FALSE(imageManager.getImage("sprite") == nullptr);
+    ASSERT_TRUE(imageManager->getImage("1024px") == nullptr);
+    ASSERT_FALSE(imageManager->getImage("sprite") == nullptr);
 
     // Multiple requestors
     {
-        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManagerPtr);
-        std::unique_ptr<StubImageRequestor> requestor2 = std::make_unique<StubImageRequestor>(imageManagerPtr);
-        imageManager.getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 0ull));
-        imageManager.getImages(*requestor2, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
+        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManager);
+        std::unique_ptr<StubImageRequestor> requestor2 = std::make_unique<StubImageRequestor>(imageManager);
+        imageManager->getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 0ull));
+        imageManager->getImages(*requestor2, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 3);
-        ASSERT_FALSE(imageManager.getImage("missing") == nullptr);
+        ASSERT_FALSE(imageManager->getImage("missing") == nullptr);
     }
 
     // Reduce memory usage and check that unused image was deleted when all requestors are destructed.
-    imageManager.reduceMemoryUseIfCacheSizeExceedsLimit();
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
     runLoop.runOnce();
-    ASSERT_FALSE(imageManager.getImage("missing") == nullptr);
-    imageManager.reduceMemoryUse();
+    ASSERT_FALSE(imageManager->getImage("missing") == nullptr);
+    imageManager->reduceMemoryUse();
     runLoop.runOnce();
-    ASSERT_TRUE(imageManager.getImage("missing") == nullptr);
+    ASSERT_TRUE(imageManager->getImage("missing") == nullptr);
 
     // Multiple requestors, check that image resource is not destroyed if there
     // is at least 1 requestor that uses it.
-    std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManagerPtr);
+    std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
     {
-        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManagerPtr);
-        imageManager.getImages(
+        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManager);
+        imageManager->getImages(
             *requestor,
             std::make_pair(ImageDependencies{{"missing", ImageType::Icon}, {"1024px", ImageType::Icon}}, 0ull));
-        imageManager.getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
+        imageManager->getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 5);
-        ASSERT_FALSE(imageManager.getImage("missing") == nullptr);
-        ASSERT_FALSE(imageManager.getImage("1024px") == nullptr);
+        ASSERT_FALSE(imageManager->getImage("missing") == nullptr);
+        ASSERT_FALSE(imageManager->getImage("1024px") == nullptr);
     }
 
     // Reduce memory usage and check that requested image is not destructed.
-    imageManager.reduceMemoryUseIfCacheSizeExceedsLimit();
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
     runLoop.runOnce();
-    ASSERT_FALSE(imageManager.getImage("missing") == nullptr);
-    ASSERT_FALSE(imageManager.getImage("1024px") == nullptr);
+    ASSERT_FALSE(imageManager->getImage("missing") == nullptr);
+    ASSERT_FALSE(imageManager->getImage("1024px") == nullptr);
 
     // Release last requestor and check if resource was released when cache size is over the limit.
     requestor.reset();
-    imageManager.reduceMemoryUseIfCacheSizeExceedsLimit();
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
     runLoop.runOnce();
-    ASSERT_TRUE(imageManager.getImage("missing") == nullptr);
-    ASSERT_TRUE(imageManager.getImage("1024px") == nullptr);
-    ASSERT_FALSE(imageManager.getImage("sprite") == nullptr);
+    ASSERT_TRUE(imageManager->getImage("missing") == nullptr);
+    ASSERT_TRUE(imageManager->getImage("1024px") == nullptr);
+    ASSERT_FALSE(imageManager->getImage("sprite") == nullptr);
 }

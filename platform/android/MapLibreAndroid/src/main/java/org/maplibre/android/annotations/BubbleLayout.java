@@ -23,7 +23,7 @@ import org.maplibre.android.style.layers.SymbolLayer;
  * {@link android.view.View}, which is then turned into a {@link android.graphics.Bitmap}.
  * After the bitmap is added to the {@link Style} object, a
  * {@link SymbolLayer} or the
- * <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+ * <a href="https://github.com/maplibre/maplibre-plugins-android">
  *   MapLibre Annotation Plugin</a> can reference the image ID.
  */
 @Deprecated

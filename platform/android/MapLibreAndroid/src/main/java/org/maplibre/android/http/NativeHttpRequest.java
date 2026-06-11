@@ -61,7 +61,7 @@ public class NativeHttpRequest implements HttpResponder {
   }
 
   private void executeLocalRequest(String resourceUrl) {
-    new LocalRequestTask(new LocalRequestTask.OnLocalRequestResponse() {
+    new LocalRequestTask(MapLibre.getApplicationContext().getAssets(), new LocalRequestTask.OnLocalRequestResponse() {
       @Override
       public void onResponse(@Nullable byte[] bytes) {
         if (bytes != null) {

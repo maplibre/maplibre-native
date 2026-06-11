@@ -14,6 +14,17 @@
 - Backwards compatibility: All `bool MTL::Device::supports...()` functions check if their required selectors exist and automatically return `false` if not.
 - String (`ErrorDomain`) constants are weak linked and automatically set to `nullptr` if not available.
 
+## Changelog
+
+| Version | Changes |
+|-|-|
+| macOS 26, iOS 26 | Add all the Metal APIs in macOS 26, iOS 26, including support for the **Apple10** GPU family. <br/>Add support for Metal 4 and new denoiser and temporal scalers in MetalFX.|
+| macOS 15, iOS 18 | Add all the Metal APIs in macOS 15 and iOS 18. |
+| macOS 14, iOS 17 | Add support for the **MetalFX** framework. <br/>Add all the APIs in macOS 14 and iOS 17. |
+| macOS 13.3, iOS 16.4 | Add all the APIs in macOS 13.3 and iOS 16.4. |
+| macOS 13, iOS 16| Add all the APIs in macOS 13 and iOS 16.<br />New optional `NS::SharedPtr<T>` type to assist with memory management.<br/>New convenience function to create a `CA::MetalLayer`.<br/>New `MTLSTR(str)` macro allows faster string creation from literals.<br/>Fix a problem with the signature of functions that take an array of pointers as input.<br/>Fix a problem with the signature of the `setGroups()` function in `MTL::LinkedFunctions`.|
+| macOS 12, iOS 15 | Initial release. |
+
 ## Memory Allocation Policy
 
 **metal-cpp** follows the object allocation policies of Cocoa, Cocoa Touch, and CoreFoundation. Understanding these rules is especially important when using metal-cpp, as C++ objects are not eligible for automatic reference counting (ARC).
@@ -103,7 +114,7 @@ If you want to use the QuartzCore wrapper, add:
 Purely optional: You can generate a single header file that contains all **metal-cpp** headers via:
 
 ```shell
-./SingleHeader/MakeSingleHeader.py Foundation/Foundation.hpp QuartzCore/QuartzCore.hpp Metal/Metal.hpp
+./SingleHeader/MakeSingleHeader.py Foundation/Foundation.hpp QuartzCore/QuartzCore.hpp Metal/Metal.hpp MetalFX/MetalFX.hpp
 ```
 
 By default the generator script writes its output to `./SingleHeader/Metal.hpp`. Use the `-o` option to customize output filename.
@@ -246,7 +257,7 @@ printf( "string = \"%s\"\n", [string cStringUsingEncoding: NSASCIIStringEncoding
 ```objc
 NSAutoreleasePool* pool   = [[NSAutoreleasePool alloc] init];
 NSString*          string = [NSString stringWithCString: "Hello World" encoding: NSASCIIStringEncoding];
-
+								
 printf( "string = \"%s\"\n", [string cStringUsingEncoding: NSASCIIStringEncoding] );
 
 [pool release];
@@ -300,11 +311,3 @@ CA::MetalDrawable* pMetalDrawable = pMetalLayer->nextDrawable();
 
 // ...
 ```
-
-## Changelog
-
-| Version | Changes |
-|-|-|
-| macOS 13.3, iOS 16.4 | Add all APIs in macOS 13.3 and iOS 16.4. |
-| macOS 13, iOS 16| Add all APIs for macOS 13 and iOS 16.<br />New optional `NS::SharedPtr<T>` type to assist with memory management.<br/>New convenience function to create a `CA::MetalLayer`.<br/>New `MTLSTR(str)` macro allows faster string creation from literals.<br/>Fix a problem with the signature of functions that take an array of pointers as input.<br/>Fix a problem with the signature of the `setGroups()` function in `MTL::LinkedFunctions`.|
-| macOS 12, iOS 15 | Initial release. |
