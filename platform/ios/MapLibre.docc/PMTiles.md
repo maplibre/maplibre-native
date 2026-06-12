@@ -2,16 +2,35 @@
 
 Working with PMTiles
 
-Starting MapLibre iOS 6.10.0, using [PMTiles](https://docs.protomaps.com/pmtiles/) as a data source is supported. You can prefix your vector tile source with `pmtiles://` to load a PMTiles file. The rest of the URL continue with be `https://` to load a remote PMTiles file, `asset://` to load an asset or `file://` to load a local PMTiles file.
+Starting MapLibre iOS 6.10.0, using [PMTiles](https://docs.protomaps.com/pmtiles/) as a data source is supported. You can prefix your vector tile source with `pmtiles://` to load a PMTiles file. The rest of the URL can use `https://` to load a remote PMTiles file, `asset://` to load an asset, or `file://` to load a local PMTiles file.
 
 > Note: PMTiles sources do not currently support offline pack downloads.
 
-Oliver Wipfli has made a style available that combines a [Protomaps]() basemap togehter with Foursquare's POI dataset. It is available in the [wipfli/foursquare-os-places-pmtiles](https://github.com/wipfli/foursquare-os-places-pmtiles) repository on GitHub. The style to use is
+## Loading a style that uses PMTiles sources
 
+The simplest approach is to load a style JSON that already references PMTiles sources. Pass the style URL when initializing `MLNMapView`:
+
+```swift
+let styleURL = URL(string: "https://example.com/style.json")!
+let mapView = MLNMapView(frame: view.bounds, styleURL: styleURL)
 ```
-https://raw.githubusercontent.com/wipfli/foursquare-os-places-pmtiles/refs/heads/main/style.json
+
+For a working example style that combines a Protomaps basemap with Foursquare's open POI dataset, see the [wipfli/foursquare-os-places-pmtiles](https://github.com/wipfli/foursquare-os-places-pmtiles) repository.
+
+## Adding a PMTiles source programmatically
+
+Use `MLNVectorTileSource` with a `pmtiles://` configuration URL to add a PMTiles archive as a vector source to an existing style:
+
+```swift
+func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
+    guard let style = mapView.style else { return }
+    let sourceURL = URL(string: "pmtiles://https://example.com/tiles.pmtiles")!
+    let source = MLNVectorTileSource(identifier: "my-pmtiles", configurationURL: sourceURL)
+    style.addSource(source)
+    // Add layers referencing "my-pmtiles"
+}
 ```
 
-The neat thing about this style is that it only uses PMTiles vector sources. PMTiles can be hosted with a relatively simple file server (or file hosting service) instead of a more complex specialized tile server.
+PMTiles can be hosted on a simple static file server or CDN instead of a specialized tile server.
 
-![](pmtiles-demo.png)
+![Screenshot of PMTiles based style using Protomaps basemap with Foursquare POIs](pmtiles-demo.png)
