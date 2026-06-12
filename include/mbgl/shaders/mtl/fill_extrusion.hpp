@@ -61,6 +61,9 @@ struct alignas(16) FillExtrusionPropsUBO {
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
 
+#define IS_DISCARDED_BIT 0x8000
+#define DECIMALS_MASK 0x7FFF
+
 )";
 
 template <>
@@ -69,7 +72,7 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -78,15 +81,16 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 pos [[attribute(0)]];
+    ushort2 ed_decimals [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
+    float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(2)]];
+    float base [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(3)]];
+    float height [[attribute(4)]];
 #endif
 };
 
@@ -121,7 +125,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float3 normal = float3(0.0, 0.0, 1.0);
     const float t = 1.0;
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(vertx.pos), z, 1);
+    const float2 decimals = unpack_float(float(vertx.ed_decimals.y & DECIMALS_MASK)) / 128.0;
+    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -212,7 +217,7 @@ struct VertexStage {
 
 struct OutlineInstance {
     short2 pos;
-    ushort2 ed_discard;
+    ushort2 ed_decimals;
 };
 
 struct FragmentStage {
@@ -232,7 +237,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 uint instanceID [[ instance_id ]],
                                 device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
 
-    if (outline[instanceID].ed_discard.y) {
+    if (outline[instanceID].ed_decimals.y & IS_DISCARDED_BIT) {
         return {
             .position = float4(0.0),
             .color    = half4(0.0),
@@ -252,8 +257,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
 
-    float2 p1 = float2(outline[instanceID + 1].pos);
-    float2 p2 = float2(outline[instanceID + 0].pos);
+    float2 p1 = float2(outline[instanceID + 1].pos) + unpack_float(float(outline[instanceID + 1].ed_decimals.y & DECIMALS_MASK)) / 128.0;
+    float2 p2 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].ed_decimals.y & DECIMALS_MASK)) / 128.0;
     float2 perp = p1 - p2;
     float magnitude = sqrt(perp.x * perp.x + perp.y * perp.y);
     if (magnitude > 0) {
@@ -263,7 +268,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float3 normal = float3(-perp.y, perp.x, 0.0);
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(outline[instanceID + vertx.pos.x].pos), z, 1);
+    const float2 decimals = unpack_float(float(outline[instanceID + vertx.pos.x].ed_decimals.y & DECIMALS_MASK)) / 128.0;
+    const float4 position = drawable.matrix * float4(float2(outline[instanceID + vertx.pos.x].pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -331,7 +337,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -340,18 +346,19 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
 
 struct VertexStage {
     short2 pos [[attribute(0)]];
+    ushort2 ed_decimals [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(1)]];
+    float base [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(2)]];
+    float height [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(3)]];
+    ushort4 pattern_from [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(4)]];
+    ushort4 pattern_to [[attribute(5)]];
 #endif
 };
 
@@ -398,7 +405,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float3 normal = float3(0.0, 0.0, 1.0);
     const float t = 1.0;
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(vertx.pos), z, 1);
+    const float2 decimals = unpack_float(float(vertx.ed_decimals.y & DECIMALS_MASK)) / 128.0;
+    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -539,7 +547,7 @@ struct VertexStage {
 
 struct OutlineInstance {
     short2 pos;
-    ushort2 ed_discard;
+    ushort2 ed_decimals;
 };
 
 struct FragmentStage {
@@ -570,7 +578,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 uint instanceID [[ instance_id ]],
                                 device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
 
-    if (outline[instanceID].ed_discard.y) {
+    if (outline[instanceID].ed_decimals.y & IS_DISCARDED_BIT) {
         return {
             .position       = float4(0.0),
             .lighting       = float4(0.0),
@@ -600,8 +608,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
 
-    float2 p1 = float2(outline[instanceID + 1].pos);
-    float2 p2 = float2(outline[instanceID + 0].pos);
+    float2 p1 = float2(outline[instanceID + 1].pos) + unpack_float(float(outline[instanceID + 1].ed_decimals.y & DECIMALS_MASK)) / 128.0;
+    float2 p2 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].ed_decimals.y & DECIMALS_MASK)) / 128.0;
     float2 perp = p1 - p2;
     float magnitude = sqrt(perp.x * perp.x + perp.y * perp.y);
     if (magnitude > 0) {
@@ -609,10 +617,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     }
 
     const float3 normal = float3(-perp.y, perp.x, 0.0);
-    const float edgedistance = outline[instanceID + 1 - vertx.pos.x].ed_discard.x;
+    const float edgedistance = outline[instanceID + 1 - vertx.pos.x].ed_decimals.x;
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(outline[instanceID + vertx.pos.x].pos), z, 1);
+    const float2 decimals = unpack_float(float(outline[instanceID + vertx.pos.x].ed_decimals.y & DECIMALS_MASK)) / 128.0;
+    const float4 position = drawable.matrix * float4(float2(outline[instanceID + vertx.pos.x].pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {

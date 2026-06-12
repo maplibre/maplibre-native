@@ -24,7 +24,7 @@ MBGL_DEFINE_ATTRIBUTE(float, 1, offset);
 MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, ed_discard);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, ed_decimals);
 #else
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, normal_ed);
 #endif

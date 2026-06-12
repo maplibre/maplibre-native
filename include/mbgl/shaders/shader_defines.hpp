@@ -453,7 +453,7 @@ enum {
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionOutlinePosAttribute,
-    idFillExtrusionEdDiscardAttribute,
+    idFillExtrusionEdDecimalsAttribute,
 #else
     idFillExtrusionNormalEdVertexAttribute,
 #endif

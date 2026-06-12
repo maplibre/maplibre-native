@@ -18,7 +18,7 @@ using FillExtrusionBinders = PaintPropertyBinders<style::FillExtrusionPaintPrope
 using FillExtrusionStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::ed_discard>>;
+using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::ed_decimals>>;
 #else
 using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::normal_ed>>;
 #endif
@@ -27,9 +27,9 @@ class FillExtrusionBucket final : public Bucket {
 public:
     ~FillExtrusionBucket() override;
     using PossiblyEvaluatedPaintProperties = style::FillExtrusionPaintProperties::PossiblyEvaluated;
-    using PossiblyEvaluatedLayoutProperties = style::Properties<>::PossiblyEvaluated;
+    using PossiblyEvaluatedLayoutProperties = style::FillExtrusionLayoutProperties::PossiblyEvaluated;
 
-    FillExtrusionBucket(const PossiblyEvaluatedLayoutProperties&,
+    FillExtrusionBucket(const PossiblyEvaluatedLayoutProperties& layout,
                         const std::map<std::string, Immutable<style::LayerProperties>>&,
                         float,
                         uint32_t);
@@ -50,13 +50,16 @@ public:
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-    static FillExtrusionLayoutVertex layoutVertex(Point<int16_t> p, uint16_t edgeDistance, bool isDiscarded) {
-        return FillExtrusionLayoutVertex{{p.x, p.y},
-                                         { // The edgeDistance attribute is used for wrapping fill_extrusion patterns
-                                             edgeDistance,
-                                             // When used as instance vector this specify if an instance is discarded
-                                             static_cast<uint16_t>(isDiscarded)
-                                         }};
+    static FillExtrusionLayoutVertex layoutVertex(const Point<double>& p, uint16_t edgeDistance, bool isDiscarded) {
+        auto intPart = Point<double>(std::floor(p.x), std::floor(p.y));
+        // Multiply factional part by 2^7 to pack them into integers
+        auto fracPart = convertPoint<int8_t>((p - intPart) * 128.0);
+ 
+        return FillExtrusionLayoutVertex{{static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
+                                         {// The edgeDistance attribute is used for wrapping fill_extrusion patterns
+                                          edgeDistance,
+                                          // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
+                                          static_cast<uint16_t>((isDiscarded ? 0x8000 : 0) + fracPart.x * 256 + fracPart.y)}};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(
@@ -74,6 +77,8 @@ public:
                                            static_cast<int16_t>(e)}}};
     }
 #endif
+    
+    PossiblyEvaluatedLayoutProperties layout;
 
     static std::array<float, 3> lightColor(const EvaluatedLight&);
     static std::array<float, 3> lightPosition(const EvaluatedLight&, const TransformState&);
