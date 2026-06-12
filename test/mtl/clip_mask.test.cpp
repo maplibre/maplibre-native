@@ -88,10 +88,9 @@ TEST(MetalClipMask, RebuildBindsFreshBufferAfterAddressReuse) {
     ASSERT_TRUE(context.renderTileClippingMasks(*renderPass, staticData, third));
     const auto bindsAfter = context.renderingStats().numVertexBufferBinds;
 
-    EXPECT_GT(bindsAfter, bindsBefore)
-        << "the third clip-mask rebuild was encoded with the previous rebuild's "
-           "UBO buffer (stale tile matrix + stencil ref): the vertex-bind cache "
-           "took a dangling-pointer cache hit on the recycled stack temporary";
+    EXPECT_GT(bindsAfter, bindsBefore) << "the third clip-mask rebuild was encoded with the previous rebuild's "
+                                          "UBO buffer (stale tile matrix + stencil ref): the vertex-bind cache "
+                                          "took a dangling-pointer cache hit on the recycled stack temporary";
 }
 
 #endif // MLN_RENDER_BACKEND_METAL
