@@ -318,6 +318,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
+#if MLN_RENDER_BACKEND_OPENGL
+            parameters.updateStencilBufferAvailability();
+#endif
 
             // TODO is this needed?
             // if (!parameters.staticData.depthRenderbuffer ||
@@ -368,6 +371,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                  .clearColor = color,
                  .clearDepth = 1.0f,
                  .clearStencil = 0});
+#if MLN_RENDER_BACKEND_OPENGL
+            parameters.updateStencilBufferAvailability();
+#endif
         }
     };
 
