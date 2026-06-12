@@ -83,8 +83,8 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int, int) {
     }
 }
 
-void AndroidVulkanRendererBackend::enableFramebufferRead(bool value) {
-    getResource<AndroidVulkanRenderableResource>().enableSurfaceRead();
+void AndroidVulkanRendererBackend::enableFramebufferRead(bool) {
+    getResource<AndroidVulkanRenderableResource>().queueSurfaceRead();
 }
 
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
