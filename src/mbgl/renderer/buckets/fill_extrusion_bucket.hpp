@@ -54,12 +54,14 @@ public:
         auto intPart = Point<double>(std::floor(p.x), std::floor(p.y));
         // Multiply factional part by 2^7 to pack them into integers
         auto fracPart = convertPoint<int8_t>((p - intPart) * 128.0);
- 
-        return FillExtrusionLayoutVertex{{static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
-                                         {// The edgeDistance attribute is used for wrapping fill_extrusion patterns
-                                          edgeDistance,
-                                          // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
-                                          static_cast<uint16_t>((isDiscarded ? 0x8000 : 0) + fracPart.x * 256 + fracPart.y)}};
+
+        return FillExtrusionLayoutVertex{
+            {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
+            { // The edgeDistance attribute is used for wrapping fill_extrusion patterns
+                edgeDistance,
+                // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
+                static_cast<uint16_t>((isDiscarded ? 0x8000 : 0) + fracPart.x * 256 + fracPart.y)
+            }};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(
@@ -77,7 +79,7 @@ public:
                                            static_cast<int16_t>(e)}}};
     }
 #endif
-    
+
     PossiblyEvaluatedLayoutProperties layout;
 
     static std::array<float, 3> lightColor(const EvaluatedLight&);

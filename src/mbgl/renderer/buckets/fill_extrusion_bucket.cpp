@@ -31,7 +31,6 @@ struct nth<1, mbgl::GeometryCoordinate> {
     static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
 };
 
-
 template <>
 struct nth<0, mbgl::GeometryCoordinateFloat> {
     static float get(const mbgl::GeometryCoordinateFloat& t) { return t.x; };
@@ -83,15 +82,17 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         if (roundedCornerDistance > 0) {
             polyVariant = roundPolygonCorners(polygon, roundedCornerDistance);
         }
-        
+
         std::size_t totalVertices = 0;
 
-        std::visit([&totalVertices](const auto& polygon) {
-            for (const auto& ring : polygon) {
-                totalVertices += ring.size();
-                if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
-            }
-        }, polyVariant);
+        std::visit(
+            [&totalVertices](const auto& polygon) {
+                for (const auto& ring : polygon) {
+                    totalVertices += ring.size();
+                    if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
+                }
+            },
+            polyVariant);
 
         if (totalVertices == 0) continue;
 
@@ -111,86 +112,89 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         assert(triangleIndex + (5 * (totalVertices - 1) + 1) <= std::numeric_limits<uint16_t>::max());
 
-        const auto processRingPoints = [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
+        const auto processRingPoints =
+            [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-            vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2));
-            flatIndices.emplace_back(triangleIndex);
-            triangleIndex++;
+                vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2));
+                flatIndices.emplace_back(triangleIndex);
+                triangleIndex++;
 
-            if (p2) {
-                const size_t dist = util::dist<uint16_t>(p1, p2.value());
-                if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
-                    edgeDistance = 0;
-                }
-
-                edgeDistance += dist;
-            }
-#else
-            vertices.emplace_back(
-                FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
-            flatIndices.emplace_back(triangleIndex);
-            triangleIndex++;
-
-            if (i != 0) {
-                const auto& p2 = ring[i - 1];
-
-                const auto d1 = convertPoint<double>(p1);
-                const auto d2 = convertPoint<double>(p2);
-
-                const Point<double> perp = util::unit(util::perp(d1 - d2));
-                const size_t dist = util::dist<int16_t>(d1, d2);
-                if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
-                    edgeDistance = 0;
-                }
-
-                vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                    p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                    p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
-
-                edgeDistance += dist;
-
-                vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                    p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                    p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
-
-                // ┌──────┐
-                // │ 0  1 │ Counter-Clockwise winding order.
-                // │      │ Triangle 1: 0 => 2 => 1
-                // │ 2  3 │ Triangle 2: 1 => 2 => 3
-                // └──────┘
-                triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
-                triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
-                triangleIndex += 4;
-                triangleSegment.vertexLength += 4;
-                triangleSegment.indexLength += 6;
-            }
-#endif
-        };
-        
-        std::vector<uint32_t> indices;
-        std::visit([&indices, processRingPoints](const auto& polygon) {
-            for (const auto& ring : polygon) {
-                std::size_t nVertices = ring.size();
-
-                if (nVertices == 0) continue;
-
-                std::size_t edgeDistance = 0;
-
-                for (std::size_t i = 0; i < nVertices; i++) {
-                    const auto p1 = convertPoint<double>(ring[i]);
-                    
-                    std::optional<Point<double>> p2 = std::nullopt;
-                    if (i < nVertices - 1) {
-                        p2 = convertPoint<double>(ring[i + 1]);
+                if (p2) {
+                    const size_t dist = util::dist<uint16_t>(p1, p2.value());
+                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<uint16_t>::max())) {
+                        edgeDistance = 0;
                     }
-                    processRingPoints(p1, p2, edgeDistance);
-                }
-            }
 
-            indices = mapbox::earcut(polygon);
-        }, polyVariant);
+                    edgeDistance += dist;
+                }
+#else
+                vertices.emplace_back(
+                    FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
+                flatIndices.emplace_back(triangleIndex);
+                triangleIndex++;
+
+                if (i != 0) {
+                    const auto& p2 = ring[i - 1];
+
+                    const auto d1 = convertPoint<double>(p1);
+                    const auto d2 = convertPoint<double>(p2);
+
+                    const Point<double> perp = util::unit(util::perp(d1 - d2));
+                    const size_t dist = util::dist<int16_t>(d1, d2);
+                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
+                        edgeDistance = 0;
+                    }
+
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
+                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
+                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+
+                    edgeDistance += dist;
+
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
+                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
+                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+
+                    // ┌──────┐
+                    // │ 0  1 │ Counter-Clockwise winding order.
+                    // │      │ Triangle 1: 0 => 2 => 1
+                    // │ 2  3 │ Triangle 2: 1 => 2 => 3
+                    // └──────┘
+                    triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
+                    triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
+                    triangleIndex += 4;
+                    triangleSegment.vertexLength += 4;
+                    triangleSegment.indexLength += 6;
+                }
+#endif
+            };
+
+        std::vector<uint32_t> indices;
+        std::visit(
+            [&indices, processRingPoints](const auto& polygon) {
+                for (const auto& ring : polygon) {
+                    std::size_t nVertices = ring.size();
+
+                    if (nVertices == 0) continue;
+
+                    std::size_t edgeDistance = 0;
+
+                    for (std::size_t i = 0; i < nVertices; i++) {
+                        const auto p1 = convertPoint<double>(ring[i]);
+
+                        std::optional<Point<double>> p2 = std::nullopt;
+                        if (i < nVertices - 1) {
+                            p2 = convertPoint<double>(ring[i + 1]);
+                        }
+                        processRingPoints(p1, p2, edgeDistance);
+                    }
+                }
+
+                indices = mapbox::earcut(polygon);
+            },
+            polyVariant);
 
         std::size_t nIndices = indices.size();
         assert(nIndices % 3 == 0);
