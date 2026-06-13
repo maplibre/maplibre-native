@@ -78,7 +78,7 @@ const PropertyMap& VectorMLTTileFeature::getProperties() const {
 }
 
 FeatureIdentifier VectorMLTTileFeature::getID() const {
-    return feature.getID();
+    return feature.getID().has_value() ? mapbox::feature::identifier(*feature.getID()) : mapbox::feature::null_value;
 }
 
 namespace {
@@ -174,12 +174,14 @@ std::string VectorMLTTileLayer::getName() const {
     return layer.getName();
 }
 
-VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data_)
-    : data(std::move(data_)) {}
+VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data_, bool supportFastPFOR)
+    : data(std::move(data_)),
+      supportFastPFOR(supportFastPFOR) {}
 
 VectorMLTTileData::VectorMLTTileData(const VectorMLTTileData& other)
     : data(other.data),
-      tile(other.tile) {}
+      tile(other.tile),
+      supportFastPFOR(other.supportFastPFOR) {}
 
 std::unique_ptr<GeometryTileData> VectorMLTTileData::clone() const {
     return std::make_unique<VectorMLTTileData>(*this);
@@ -191,7 +193,7 @@ std::unique_ptr<GeometryTileLayer> VectorMLTTileData::getLayer(const std::string
     if (data && !tile) {
         try {
             mlt::DataView tileData{data->data(), data->size()};
-            tile = std::make_shared<MapLibreTile>(mlt::Decoder().decode(tileData));
+            tile = std::make_shared<MapLibreTile>(mlt::Decoder(supportFastPFOR).decode(tileData));
         } catch (const std::exception& ex) {
             Log::Warning(Event::ParseTile, "MLT parse failed: " + std::string(ex.what()));
         }

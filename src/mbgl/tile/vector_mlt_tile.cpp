@@ -12,8 +12,10 @@ VectorMLTTile::VectorMLTTile(const OverscaledTileID& id_,
                              std::string sourceID_,
                              const TileParameters& parameters_,
                              const Tileset& tileset_,
-                             TileObserver* observer_)
-    : VectorTile(id_, std::move(sourceID_), parameters_, tileset_, observer_) {}
+                             TileObserver* observer_,
+                             bool supportFastPFOR)
+    : VectorTile(id_, std::move(sourceID_), parameters_, tileset_, observer_),
+      supportFastPFOR(supportFastPFOR) {}
 
 VectorMLTTile::~VectorMLTTile() {
     // this needs to be explicitly deleted in the most-derived destructor
@@ -26,7 +28,7 @@ VectorMLTTile::~VectorMLTTile() {
 
 void VectorMLTTile::setData(const std::shared_ptr<const std::string>& data_) {
     if (!obsolete) {
-        GeometryTile::setData(data_ ? std::make_unique<VectorMLTTileData>(data_) : nullptr);
+        GeometryTile::setData(data_ ? std::make_unique<VectorMLTTileData>(data_, supportFastPFOR) : nullptr);
     }
 }
 
