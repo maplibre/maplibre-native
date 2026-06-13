@@ -367,7 +367,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         hillshadeBuilder->setShader(hillshadeShader);
-        hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
+        hillshadeBuilder->setEnableDepth(false);
         hillshadeBuilder->setColorMode(gfx::ColorMode::alphaBlended());
         hillshadeBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
         hillshadeBuilder->setRenderPass(renderPass);

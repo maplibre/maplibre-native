@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
-#include <mbgl/gfx/offscreen_texture.hpp>
 
 namespace mbgl {
 
@@ -40,7 +40,18 @@ private:
 
     gfx::ShaderGroupPtr fillExtrusionGroup;
     gfx::ShaderGroupPtr fillExtrusionPatternGroup;
-    std::unique_ptr<gfx::OffscreenTexture> renderTexture;
+
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+    gfx::ShaderGroupPtr fillExtrusionInstancedGroup;
+    gfx::ShaderGroupPtr fillExtrusionPatternInstancedGroup;
+
+    using FillExtrusionVertexVector = gfx::VertexVector<FillExtrusionStaticVertex>;
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+
+    std::shared_ptr<FillExtrusionVertexVector> staticDataVertices;
+    std::shared_ptr<TriangleIndexVector> staticDataIndices;
+    std::shared_ptr<SegmentVector> staticDataSegments;
+#endif
 };
 
 } // namespace mbgl

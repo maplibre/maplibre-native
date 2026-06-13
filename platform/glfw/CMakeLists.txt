@@ -118,8 +118,6 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/src
 )
 
-include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
-
 # Use target_link_directories when we move away from CMake 3.10.
 target_link_libraries(
     mbgl-glfw

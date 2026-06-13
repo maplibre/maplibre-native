@@ -8,8 +8,8 @@ namespace shaders {
 
 constexpr auto hillshadePrepareShaderPrelude = R"(
 
-#define idHillshadePrepareDrawableUBO       idDrawableReservedVertexOnlyUBO
-#define idHillshadePrepareTilePropsUBO      drawableReservedUBOCount
+#define idHillshadePrepareDrawableUBO       drawableUBOStartId
+#define idHillshadePrepareTilePropsUBO      drawableUBOStartId + 1
 
 )";
 
@@ -43,7 +43,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    applySurfaceTransform();
+    gl_Position.y *= -1.0;
 
     const vec2 epsilon = vec2(1.0) / tileProps.dimension;
     const float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;

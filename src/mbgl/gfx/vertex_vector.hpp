@@ -33,8 +33,8 @@ public:
     std::chrono::duration<double> getLastModified() const { return lastModified; }
     bool isModifiedAfter(std::chrono::duration<double> t) const { return t < lastModified; }
 
-    void updateModified() {
-        if (dirty) {
+    void updateModified(bool force = false) {
+        if (dirty || force) {
             lastModified = util::MonotonicTimer::now();
             dirty = false;
         }

@@ -5,7 +5,17 @@
 ### 🐞 Bug fixes
 - _...Add new stuff here..._
 
-## 6.3.1-pre.0
+## 6.5.0-pre.1
+### ✨ Features and improvements
+- Update node support to v26, remove node v20, update NAN to 2.27.0 ([#4322](https://github.com/maplibre/maplibre-native/pull/4322)) (by [@acalcutt](https://github.com/acalcutt))
+- replace node-pre-gyp-github with gh release ([#4329](https://github.com/maplibre/maplibre-native/pull/4329)) (by [@acalcutt](https://github.com/acalcutt))
+
+## 6.4.1
+### 🐞 Bug fixes
+- core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)) (by [@acalcutt](https://github.com/acalcutt))
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)) (by [@TimSylvester](https://github.com/TimSylvester))
+
+## 6.4.0
 ### ✨ Features and improvements
 - core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)) (by [acalcutt](https://github.com/acalcutt))
 - Node - Update NAN and node-pre-gyp  ([#4128](https://github.com/maplibre/maplibre-native/pull/4128)) (by [acalcutt](https://github.com/acalcutt))

@@ -18,7 +18,7 @@ jobs:
           {artifactName: ios-cpp-unit-tests, xcTestFile: CppUnitTests.xctest.zip, ipaFile: CppUnitTestsApp.ipa, name: "iOS C++ Unit Tests"},
         ]
       fail-fast: true
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
@@ -26,13 +26,13 @@ jobs:
           persist-credentials: false
 
       - name: Generate token
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
         id: generate_token
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
+      - uses: LouisBrunner/checks-action@dfcbcf801bff1ea7f1414824fc28f2cd697b35da # v3.0.0
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -76,13 +76,13 @@ jobs:
 
       - name: Generate another token (previous one could have expired)
         if: always()
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
         id: generate_token_2
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
+      - uses: LouisBrunner/checks-action@dfcbcf801bff1ea7f1414824fc28f2cd697b35da # v3.0.0
         if: always()
         with:
           token: ${{ steps.generate_token_2.outputs.token }}

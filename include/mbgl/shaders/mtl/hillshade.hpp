@@ -68,8 +68,8 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
 #define BASIC 4
 
 struct VertexStage {
-    short2 pos [[attribute(hillshadeUBOCount + 0)]];
-    short2 texture_pos [[attribute(hillshadeUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short2 texture_pos [[attribute(1)]];
 };
 
 struct FragmentStage {

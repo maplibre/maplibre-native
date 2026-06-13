@@ -17,7 +17,7 @@ namespace vulkan {
 LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
     : mbgl::LayerGroup(layerIndex_, initialCapacity, std::move(name_)),
       uniformBuffers(DescriptorSetType::Layer,
-                     shaders::globalUBOCount,
+                     shaders::layerSSBOStartId,
                      shaders::maxSSBOCountPerLayer,
                      shaders::maxUBOCountPerLayer) {}
 

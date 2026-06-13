@@ -28,7 +28,7 @@ public:
     TransformState transformState;
     util::RunLoop loop;
     AnnotationManager annotationManager{style};
-    std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 

@@ -19,6 +19,7 @@ load(
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
     "MLN_IOS_SDK_HEADERS",
+    "MLN_PUBLIC_IOS_APP_OBJCPP_SOURCE",
     "MLN_PUBLIC_IOS_APP_SOURCE",
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
@@ -62,6 +63,12 @@ filegroup(
 filegroup(
     name = "ios_app_srcs",
     srcs = MLN_PUBLIC_IOS_APP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ios_app_objcpp_srcs",
+    srcs = MLN_PUBLIC_IOS_APP_OBJCPP_SOURCE,
     visibility = ["//visibility:public"],
 )
 

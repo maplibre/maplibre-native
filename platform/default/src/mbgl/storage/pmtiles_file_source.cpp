@@ -143,7 +143,7 @@ public:
                     }
 
                     Resource tileResource(Resource::Kind::Source, url);
-                    tileResource.loadingMethod = Resource::LoadingMethod::Network;
+                    tileResource.loadingMethod = Resource::LoadingMethod::All;
                     tileResource.dataRange = std::make_pair(tileAddress.first,
                                                             tileAddress.first + tileAddress.second - 1);
 
@@ -159,6 +159,17 @@ public:
                             return;
                         }
 
+                        if (tileResponse.notModified) {
+                            return;
+                        }
+
+                        if (!tileResponse.data) {
+                            response.error = std::make_unique<Response::Error>(
+                                Response::Error::Reason::Other, "Error fetching PMTiles tile: response has no data");
+                            ref.invoke(&FileSourceRequest::setResponse, response);
+                            return;
+                        }
+
                         response.data = tileResponse.data;
                         response.noContent = false;
                         response.modified = tileResponse.modified;
@@ -166,7 +177,18 @@ public:
                         response.etag = tileResponse.etag;
 
                         if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
-                            response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                            // Support uncompressed tiles
+                            if (util::is_compressed(*tileResponse.data)) {
+                                try {
+                                    response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                                } catch (const std::exception& e) {
+                                    response.error = std::make_unique<Response::Error>(
+                                        Response::Error::Reason::Other,
+                                        std::string("Error decompressing PMTiles tile: ") + e.what());
+                                }
+                            } else {
+                                response.data = tileResponse.data;
+                            }
                         }
 
                         ref.invoke(&FileSourceRequest::setResponse, response);
@@ -221,10 +243,11 @@ private:
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (header_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         Resource resource(Resource::Kind::Source, url);
-        resource.loadingMethod = Resource::LoadingMethod::Network;
+        resource.loadingMethod = Resource::LoadingMethod::All;
 
         resource.dataRange = std::make_pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
                                                                 pmtilesHeaderOffset + pmtilesHeaderLength - 1);
@@ -246,6 +269,16 @@ private:
 
                     callback(std::make_unique<Response::Error>(response.error->reason, message));
 
+                    return;
+                }
+
+                if (response.notModified) {
+                    return;
+                }
+
+                if (!response.data) {
+                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "PMTiles header response has no data"));
                     return;
                 }
 
@@ -272,6 +305,7 @@ private:
     void getMetadata(std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (metadata_cache.contains(url)) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         getHeader(
@@ -386,7 +420,7 @@ private:
 
                 if (header.json_metadata_bytes > 0) {
                     Resource resource(Resource::Kind::Source, url);
-                    resource.loadingMethod = Resource::LoadingMethod::Network;
+                    resource.loadingMethod = Resource::LoadingMethod::All;
                     resource.dataRange = std::make_pair(header.json_metadata_offset,
                                                         header.json_metadata_offset + header.json_metadata_bytes - 1);
 
@@ -396,6 +430,20 @@ private:
                                 responseMetadata.error->reason,
                                 std::string("Error fetching PMTiles metadata: ") + responseMetadata.error->message));
 
+                            return;
+                        }
+
+                        if (responseMetadata.notModified) {
+                            return;
+                        }
+
+                        if (!responseMetadata.data) {
+                            callback(std::make_unique<Response::Error>(
+                                Response::Error::Reason::Other,
+                                "PMTiles metadata response has no data (range=" +
+                                    std::to_string(header.json_metadata_offset) + "-" +
+                                    std::to_string(header.json_metadata_offset + header.json_metadata_bytes - 1) +
+                                    ")"));
                             return;
                         }
 
@@ -469,7 +517,7 @@ private:
             pmtiles::headerv3 header = header_cache.at(url);
 
             Resource resource(Resource::Kind::Source, url);
-            resource.loadingMethod = Resource::LoadingMethod::Network;
+            resource.loadingMethod = Resource::LoadingMethod::All;
             resource.dataRange = std::make_pair(directoryOffset, directoryOffset + directoryLength - 1);
 
             tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
@@ -478,6 +526,16 @@ private:
                         response.error->reason,
                         std::string("Error fetching PMTiles directory: ") + response.error->message));
 
+                    return;
+                }
+
+                if (response.notModified) {
+                    return;
+                }
+
+                if (!response.data) {
+                    callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               "PMTiles directory response has no data"));
                     return;
                 }
 
