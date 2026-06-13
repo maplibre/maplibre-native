@@ -4,7 +4,7 @@
 
 [Bazel](https://bazel.build/) is used for building on iOS.
 
-You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) intergration.
+You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) integration.
 
 You need to install [bazelisk](https://github.com/bazelbuild/bazelisk), which is a wrapper around Bazel which ensures that the version specified in `.bazelversion` is used.
 

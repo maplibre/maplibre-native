@@ -38,7 +38,7 @@ void main() {
     applySurfaceTransform();
 
     // This vertex shader expects a EXTENT x EXTENT quad,
-    // The UV co-ordinates for the overlay texture can be calculated using that knowledge
+    // The UV coordinates for the overlay texture can be calculated using that knowledge
     frag_uv = in_position / 8192.0;
 }
 )";
