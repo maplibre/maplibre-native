@@ -196,18 +196,6 @@ std::size_t checkedByteCount(std::size_t width, std::size_t height, const char* 
     return width * height;
 }
 
-std::size_t checkedRowStride(uint32_t width, uint32_t rowStride, const std::string& description) {
-    const auto tightStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
-    if (rowStride == 0) {
-        return tightStride;
-    }
-    if (rowStride < tightStride) {
-        throw std::runtime_error("OHOS image decoder returned row stride smaller than RGBA pixel width: " +
-                                 description);
-    }
-    return rowStride;
-}
-
 void copyRows(
     uint8_t* dst, const uint8_t* src, uint32_t width, uint32_t height, std::size_t rowStride, int32_t format) {
     const auto tightStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
@@ -275,7 +263,7 @@ PremultipliedImage decodeImage(const std::string& string) {
         throw std::runtime_error("OHOS image decoder returned unsupported pixel format: " + description);
     }
 
-    const auto sourceRowStride = checkedRowStride(width, rowStride, description);
+    const auto sourceRowStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
     const auto bytesRequired = checkedByteCount(sourceRowStride, height, "pixel buffer size");
     std::vector<uint8_t> pixels(bytesRequired);
     size_t bytesRead = pixels.size();

@@ -3,6 +3,7 @@
 #include "native_window_utils.hpp"
 
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/instrumentation.hpp>
@@ -307,7 +308,15 @@ EGLWindowBackend::EGLWindowBackend(OHNativeWindow* window_, Size size_)
 EGLWindowBackend::~EGLWindowBackend() {
     MLN_TRACE_FUNC();
 
-    if (eglContext != EGL_NO_CONTEXT && eglGetCurrentContext() == eglContext) {
+    if (eglContext != EGL_NO_CONTEXT && eglSurface != EGL_NO_SURFACE) {
+        if (!eglMakeCurrent(displayConfig->display, eglSurface, eglSurface, eglContext)) {
+            Log::Warning(Event::OpenGL, eglErrorMessage("eglMakeCurrent"));
+        }
+    }
+
+    context.reset();
+
+    if (eglContext != EGL_NO_CONTEXT) {
         if (!eglMakeCurrent(displayConfig->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)) {
             Log::Warning(Event::OpenGL, eglErrorMessage("eglMakeCurrent"));
         }
