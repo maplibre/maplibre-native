@@ -67,15 +67,33 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
-#define GLOBAL_SET_INDEX            0
-#define LAYER_SET_INDEX             1
-#define DRAWABLE_UBO_SET_INDEX      2
-#define DRAWABLE_IMAGE_SET_INDEX    3
+vec2 unpack_int(int value) {
+    const int low  = (value << 16) >> 16;
+    const int high = value >> 16;
 
-#define idDrawableReservedVertexOnlyUBO         0
-#define idDrawableReservedFragmentOnlyUBO       1
-#define drawableReservedUBOCount                2
-#define layerUBOStartId                         3
+    return vec2(low, high);
+}
+
+vec2 unpack_uint(uint value) {
+    const uint low  = value & 0xFFFF;
+    const uint high = (value >> 16) & 0xFFFF;
+
+    return vec2(low, high);
+}
+
+#define GLOBAL_SET_INDEX                    0
+#define LAYER_SET_INDEX                     1
+#define DRAWABLE_UBO_SET_INDEX              2
+#define DRAWABLE_IMAGE_SET_INDEX            3
+
+#define layerSSBOStartId                    0
+#define layerUBOStartId                     3
+#define drawableSSBOStartId                 0
+#define drawableUBOStartId                  1
+
+#define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
+#define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
+#define drawableReservedUBOCount            idDrawableReservedFragmentOnlyUBO + 1
 
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
@@ -110,15 +128,19 @@ void applySurfaceTransform() {
 #define M_PI 3.1415926535897932384626433832795
 #define SDF_PX 8.0
 
-#define GLOBAL_SET_INDEX            0
-#define LAYER_SET_INDEX             1
-#define DRAWABLE_UBO_SET_INDEX      2
-#define DRAWABLE_IMAGE_SET_INDEX    3
+#define GLOBAL_SET_INDEX                    0
+#define LAYER_SET_INDEX                     1
+#define DRAWABLE_UBO_SET_INDEX              2
+#define DRAWABLE_IMAGE_SET_INDEX            3
 
-#define idDrawableReservedVertexOnlyUBO         0
-#define idDrawableReservedFragmentOnlyUBO       1
-#define drawableReservedUBOCount                2
-#define layerUBOStartId                         3
+#define layerSSBOStartId                    0
+#define layerUBOStartId                     3
+#define drawableSSBOStartId                 0
+#define drawableUBOStartId                  1
+
+#define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
+#define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
+#define drawableReservedUBOCount            idDrawableReservedFragmentOnlyUBO + 1
 
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
