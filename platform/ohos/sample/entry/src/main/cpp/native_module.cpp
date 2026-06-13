@@ -263,8 +263,8 @@ public:
             throw std::invalid_argument("Expected a NodeContent host");
         }
 
-        auto controller =
-            std::shared_ptr<SurfaceController>(new SurfaceController(createNativeXComponentNode(), content_, true));
+        auto controller = std::shared_ptr<SurfaceController>(
+            new SurfaceController(createNativeXComponentNode(), content_, true));
         try {
             controller->initialize();
             controller->addNodeToContent();
@@ -738,8 +738,8 @@ private:
         }
 
         std::uint32_t changedPointerId = 0;
-        const bool hasChangedPointerId =
-            OH_ArkUI_PointerEvent_GetChangedPointerId(event, &changedPointerId) == ARKUI_ERROR_CODE_NO_ERROR;
+        const bool hasChangedPointerId = OH_ArkUI_PointerEvent_GetChangedPointerId(event, &changedPointerId) ==
+                                         ARKUI_ERROR_CODE_NO_ERROR;
 
         std::optional<std::uint32_t> changedIndex;
         if (hasChangedPointerId) {
