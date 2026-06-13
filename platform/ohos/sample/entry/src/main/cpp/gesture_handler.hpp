@@ -2,8 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
-
-#include <ace/xcomponent/native_interface_xcomponent.h>
+#include <vector>
 
 namespace mbgl {
 namespace ohos {
@@ -38,9 +37,31 @@ struct GestureState {
     double pinchAngle = 0.0;
 };
 
+enum class TouchAction {
+    Down,
+    Move,
+    Up,
+    Cancel,
+    Unknown,
+};
+
+struct TouchPoint {
+    int32_t id = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
+struct TouchEvent {
+    TouchAction action = TouchAction::Unknown;
+    int32_t id = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    std::vector<TouchPoint> points;
+};
+
 bool hasActiveGesture(const GestureState&);
 void resetGestureState(GestureState&);
-bool handleTouchEvent(GestureState&, MapView*, const OH_NativeXComponent_TouchEvent&);
+bool handleTouchEvent(GestureState&, MapView*, const TouchEvent&);
 
 } // namespace ohos
 } // namespace mbgl

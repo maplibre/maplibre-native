@@ -1,3 +1,5 @@
+import type { NodeContent } from '@kit.ArkUI';
+
 export interface ResourceOptions {
   apiKey?: string;
   cachePath?: string;
@@ -96,3 +98,11 @@ export interface XComponentContext {
   setStyleUrl: (url: string) => void;
   setTileCacheEnabled: (enabled: boolean) => void;
 }
+
+export function createMap(nodeContent: NodeContent): XComponentContext;
+
+declare const maplibreNative: {
+  createMap: typeof createMap;
+};
+
+export default maplibreNative;

@@ -1,6 +1,7 @@
 import { common } from '@kit.AbilityKit';
-import { display } from '@kit.ArkUI';
+import { display, NodeContent } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import maplibreNative from 'libmaplibre_native_ohos.so';
 import type { CameraOptions, ResourceOptions, SurfaceState, XComponentContext } from 'libmaplibre_native_ohos.so';
 import type { AttributionItem } from '../map/Attribution';
 import { createMapStatus } from '../map/MapStatus';
@@ -25,6 +26,7 @@ struct Index {
 
   private map?: XComponentContext;
   private statusTimer: number = -1;
+  private readonly mapNodeContent: NodeContent = new NodeContent();
 
   aboutToDisappear(): void {
     this.stopStatusUpdates();
@@ -98,6 +100,40 @@ struct Index {
     this.map.reduceMemoryUse();
     this.map.destroy();
     this.map = undefined;
+  }
+
+  private describeError(error: Error): string {
+    if (error.message) {
+      return error.message;
+    }
+
+    const serialized = JSON.stringify(error);
+    if (serialized && serialized !== '{}') {
+      return serialized;
+    }
+
+    return String(error);
+  }
+
+  private detachMap(): void {
+    this.destroyMap();
+    this.statusText = 'XComponent detached';
+    this.statusDetail = 'No native binding';
+    this.attributionItems = [];
+  }
+
+  private attachMap(): void {
+    this.destroyMap();
+
+    try {
+      this.configureMap(maplibreNative.createMap(this.mapNodeContent));
+    } catch (error) {
+      const detail = this.describeError(error as Error);
+      this.statusText = 'Could not create native map';
+      this.statusDetail = detail;
+      this.attributionItems = [];
+      hilog.error(LOG_DOMAIN, LOG_TAG, 'Could not create native map: %{public}s', detail);
+    }
   }
 
   private openAttributionUrl(url: string): void {
@@ -180,24 +216,14 @@ struct Index {
   build() {
     Column() {
       Stack({ alignContent: Alignment.TopStart }) {
-        XComponent({
-          id: 'maplibre_map',
-          type: XComponentType.SURFACE,
-          libraryname: 'maplibre_native_ohos'
-        })
-          .onLoad((context?: object) => {
-            if (!context) {
-              this.statusText = 'XComponent onLoad returned no context';
-              return;
-            }
-
-            this.configureMap(context as XComponentContext);
+        Stack() {
+          ContentSlot(this.mapNodeContent)
+        }
+          .onAttach(() => {
+            this.attachMap();
           })
-          .onDestroy(() => {
-            this.destroyMap();
-            this.statusText = 'XComponent destroyed';
-            this.statusDetail = 'No native binding';
-            this.attributionItems = [];
+          .onDetach(() => {
+            this.detachMap();
           })
           .width('100%')
           .height('100%')

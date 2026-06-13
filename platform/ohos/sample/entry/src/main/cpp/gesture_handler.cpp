@@ -13,25 +13,11 @@ namespace mbgl {
 namespace ohos {
 namespace {
 
-struct TouchPoint {
-    int32_t id = 0;
-    float x = 0.0f;
-    float y = 0.0f;
-};
-
 struct PinchState {
     float centerX = 0.0f;
     float centerY = 0.0f;
     double distance = 0.0;
     double angle = 0.0;
-};
-
-enum class TouchAction {
-    Down,
-    Move,
-    Up,
-    Cancel,
-    Unknown,
 };
 
 constexpr auto MaxTapDuration = std::chrono::milliseconds(300);
@@ -109,33 +95,28 @@ double clampVerticalFlingOffset(double offset, Size surfaceSize, double pitch) {
     return std::clamp(offset, -negativeLimit, positiveLimit);
 }
 
-std::optional<TouchPoint> touchPointForEvent(const OH_NativeXComponent_TouchEvent& event,
-                                             std::optional<int32_t> activeId) {
-    if (event.numPoints == 0) {
-        if (activeId && event.id != *activeId) {
-            return std::nullopt;
-        }
+std::optional<TouchPoint> touchPointForEvent(const TouchEvent& event, std::optional<int32_t> activeId) {
+    if (!activeId) {
         return TouchPoint{event.id, event.x, event.y};
     }
 
-    for (std::uint32_t i = 0; i < event.numPoints; ++i) {
-        const auto& point = event.touchPoints[i];
+    for (const auto& point : event.points) {
         if (!activeId || point.id == *activeId) {
-            return TouchPoint{point.id, point.x, point.y};
+            return point;
         }
     }
 
     return std::nullopt;
 }
 
-std::optional<std::array<TouchPoint, 2>> touchPairForEvent(const OH_NativeXComponent_TouchEvent& event) {
-    if (event.numPoints < 2) {
+std::optional<std::array<TouchPoint, 2>> touchPairForEvent(const TouchEvent& event) {
+    if (event.points.size() < 2) {
         return std::nullopt;
     }
 
     return std::array<TouchPoint, 2>{
-        TouchPoint{event.touchPoints[0].id, event.touchPoints[0].x, event.touchPoints[0].y},
-        TouchPoint{event.touchPoints[1].id, event.touchPoints[1].x, event.touchPoints[1].y},
+        event.points[0],
+        event.points[1],
     };
 }
 
@@ -157,22 +138,6 @@ std::optional<PinchState> pinchStateForPoints(const std::optional<std::array<Tou
         distance,
         std::atan2(static_cast<double>(second.y - first.y), static_cast<double>(second.x - first.x)),
     };
-}
-
-TouchAction toTouchAction(OH_NativeXComponent_TouchEventType type) {
-    switch (type) {
-        case OH_NATIVEXCOMPONENT_DOWN:
-            return TouchAction::Down;
-        case OH_NATIVEXCOMPONENT_MOVE:
-            return TouchAction::Move;
-        case OH_NATIVEXCOMPONENT_UP:
-            return TouchAction::Up;
-        case OH_NATIVEXCOMPONENT_CANCEL:
-            return TouchAction::Cancel;
-        case OH_NATIVEXCOMPONENT_UNKNOWN:
-            return TouchAction::Unknown;
-    }
-    return TouchAction::Unknown;
 }
 
 bool handleTouchAction(GestureState& state,
@@ -384,12 +349,12 @@ void resetGestureState(GestureState& state) {
     state = GestureState();
 }
 
-bool handleTouchEvent(GestureState& state, MapView* mapView, const OH_NativeXComponent_TouchEvent& event) {
-    const auto action = toTouchAction(event.type);
+bool handleTouchEvent(GestureState& state, MapView* mapView, const TouchEvent& event) {
+    const auto action = event.action;
     const auto point = action == TouchAction::Move ? touchPointForEvent(event, state.touchId)
                                                    : touchPointForEvent(event, std::nullopt);
     const auto pinch = pinchStateForPoints(touchPairForEvent(event));
-    return handleTouchAction(state, mapView, action, point, pinch, event.numPoints > 1);
+    return handleTouchAction(state, mapView, action, point, pinch, event.points.size() > 1);
 }
 
 } // namespace ohos
