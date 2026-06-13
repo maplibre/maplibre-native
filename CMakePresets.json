@@ -250,6 +250,46 @@
       }
     },
     {
+      "name": "harmonyos",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-harmonyos",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "$env{OHOS_SDK_NATIVE}",
+        "rhs": ""
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{OHOS_SDK_NATIVE}/build/cmake/ohos.toolchain.cmake",
+        "OHOS_SDK_NATIVE": "$env{OHOS_SDK_NATIVE}",
+        "OHOS_ARCH": "arm64-v8a",
+        "OHOS_STL": "c++_shared",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_GLFW": "OFF",
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_EGL": "ON"
+      }
+    },
+    {
+      "name": "harmonyos-opengl",
+      "inherits": "harmonyos",
+      "binaryDir": "${sourceDir}/build-harmonyos-opengl",
+      "displayName": "HarmonyOS OpenGL",
+      "description": "OpenHarmony GLES/EGL and NetworkKit HTTP build"
+    },
+    {
+      "name": "harmonyos-vulkan",
+      "inherits": "harmonyos",
+      "binaryDir": "${sourceDir}/build-harmonyos-vulkan",
+      "displayName": "HarmonyOS Vulkan",
+      "description": "OpenHarmony Vulkan and NetworkKit HTTP build",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "ON"
+      }
+    },
+    {
       "name": "windows",
       "hidden": true,
       "generator": "Ninja",
@@ -375,6 +415,27 @@
     {
       "name": "linux-vulkan-core",
       "configurePreset": "linux-vulkan",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "harmonyos-build",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "$env{OHOS_SDK_NATIVE}",
+        "rhs": ""
+      }
+    },
+    {
+      "name": "harmonyos-opengl",
+      "inherits": "harmonyos-build",
+      "configurePreset": "harmonyos-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "harmonyos-vulkan",
+      "inherits": "harmonyos-build",
+      "configurePreset": "harmonyos-vulkan",
       "targets": ["mbgl-core"]
     },
     {

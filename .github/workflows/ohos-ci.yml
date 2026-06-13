@@ -1,0 +1,120 @@
+name: ohos-ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - ohos-*.*.x
+    paths:
+      - CMakeLists.txt
+      - CMakePresets.json
+      - "platform/default/**"
+      - "platform/linux/**"
+      - "platform/ohos/**"
+      - ".github/workflows/ohos-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - ".gitmodules"
+      - "!**/*.md"
+
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - CMakeLists.txt
+      - CMakePresets.json
+      - "platform/default/**"
+      - "platform/linux/**"
+      - "platform/ohos/**"
+      - ".github/workflows/ohos-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - ".gitmodules"
+      - "!**/*.md"
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: OpenGL
+            preset: harmonyos-opengl
+          - name: Vulkan
+            preset: harmonyos-vulkan
+    name: ${{ matrix.name }}
+    env:
+      OHOS_SDK_VERSION: "6.1"
+
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ccache \
+            ninja-build
+          /usr/sbin/update-ccache-symlinks
+
+      - name: Set up OpenHarmony SDK
+        uses: openharmony-rs/setup-ohos-sdk@eb82b94ef522b07269679195c2512f22e922ef3b # v1.0.0
+        with:
+          version: ${{ env.OHOS_SDK_VERSION }}
+          components: native
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@33522472633dbd32578e909b315f5ee43ba878ce # v1.2.22
+        with:
+          key: OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}_${{ github.sha }}
+          restore-keys: |
+            OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}_${{ github.ref }}
+            OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}
+          max-size: 200M
+
+      - name: Print tool versions
+        run: |
+          cmake --version
+          ninja --version
+          "${OHOS_SDK_NATIVE}/llvm/bin/clang" --version
+
+      - name: Configure maplibre-native
+        run: |
+          cmake --preset "${{ matrix.preset }}" \
+            -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache"
+
+      - name: Build mbgl-core
+        run: cmake --build --preset "${{ matrix.preset }}"
