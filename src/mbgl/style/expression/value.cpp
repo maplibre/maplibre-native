@@ -258,6 +258,25 @@ std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValu
         [&](const auto&) { return std::optional<std::vector<T>>(); });
 }
 
+template <>
+std::optional<std::vector<float>> ValueConverter<std::vector<float>>::fromExpressionValue(const Value& value) {
+    if (value.is<std::vector<Value>>()) {
+        const auto& values = value.get<std::vector<Value>>();
+        std::vector<float> result;
+        result.reserve(values.size());
+        for (const auto& v : values) {
+            auto num = ValueConverter<float>::fromExpressionValue(v);
+            if (!num) return std::nullopt;
+            result.push_back(*num);
+        }
+        return result;
+    }
+
+    auto num = ValueConverter<float>::fromExpressionValue(value);
+    if (!num) return std::nullopt;
+    return std::vector<float>{*num};
+}
+
 Value ValueConverter<Position>::toExpressionValue(const mbgl::style::Position& value) {
     return ValueConverter<std::array<float, 3>>::toExpressionValue(value.getSpherical());
 }
