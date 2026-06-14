@@ -21,6 +21,7 @@ option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires amerge)" OFF)
+option(MLN_MAC_CATALYST "Build the iOS-SDK Obj-C wrapper for Mac Catalyst (uses macOS SDK + macabi triple)" OFF)
 
 include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
@@ -1275,6 +1276,26 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL iOS AND MLN_MAC_CATALYST)
+    set(_MLN_CATALYST_IOSSUPPORT_FW "${CMAKE_OSX_SYSROOT}/System/iOSSupport/System/Library/Frameworks")
+    set(_MLN_CATALYST_IOSSUPPORT_INC "${CMAKE_OSX_SYSROOT}/System/iOSSupport/usr/include")
+    target_compile_options(mbgl-compiler-options INTERFACE
+        -target arm64-apple-ios14.0-macabi
+        -iframework ${_MLN_CATALYST_IOSSUPPORT_FW}
+        -isystem ${_MLN_CATALYST_IOSSUPPORT_INC})
+    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
+    include(${PROJECT_SOURCE_DIR}/platform/ios/ios.cmake)
+    foreach(_t mbgl-vendor-calloutview mbgl-vendor-csscolorparser mbgl-vendor-icu mbgl-vendor-parsedate mbgl-vendor-filesystem mbgl-vendor-polylabel mbgl-freetype mbgl-harfbuzz mlt-cpp)
+        if(TARGET ${_t})
+            get_target_property(_t_type ${_t} TYPE)
+            if(NOT _t_type STREQUAL "INTERFACE_LIBRARY")
+                target_compile_options(${_t} PRIVATE
+                    -target arm64-apple-ios14.0-macabi
+                    -iframework ${_MLN_CATALYST_IOSSUPPORT_FW}
+                    -isystem ${_MLN_CATALYST_IOSSUPPORT_INC})
+            endif()
+        endif()
+    endforeach()
 elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
     include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)

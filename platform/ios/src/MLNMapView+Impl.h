@@ -19,8 +19,10 @@ public:
 
   virtual mbgl::gfx::RendererBackend& getRendererBackend() = 0;
 
+#if !TARGET_OS_MACCATALYST
   // Returns a handle to the OpenGL context object if this view is rendered with OpenGL.
   virtual EAGLContext* getEAGLContext() { return nullptr; }
+#endif
 
   // Gets called when the opaqueness of the view changes.
   virtual void setOpaque(bool) = 0;
