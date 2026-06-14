@@ -1042,8 +1042,9 @@ public:
     [self.style didChangeValueForKey:@"layers"];
   }
 
-  if ([self.delegate respondsToSelector:@selector
-                     (mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(
+                                 mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)]) {
     if (!_renderingStats) {
       _renderingStats = [[MLNRenderingStats alloc] init];
     }
@@ -1053,15 +1054,14 @@ public:
                                     fullyRendered:fullyRendered
                                    renderingStats:_renderingStats];
   } else if ([self.delegate
-                 respondsToSelector:@selector
-                 (mapViewDidFinishRenderingFrame:
-                                   fullyRendered:frameEncodingTime:frameRenderingTime:)]) {
+                 respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:
+                                              frameEncodingTime:frameRenderingTime:)]) {
     [self.delegate mapViewDidFinishRenderingFrame:self
                                     fullyRendered:fullyRendered
                                 frameEncodingTime:stats.encodingTime
                                frameRenderingTime:stats.renderingTime];
-  } else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:
-                                                                          fullyRendered:)]) {
+  } else if ([self.delegate
+                 respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)]) {
     [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered];
   }
 }
@@ -1209,8 +1209,9 @@ public:
     return;
   }
 
-  if ([self.delegate respondsToSelector:@selector
-                     (mapView:tileDidTriggerAction:x:y:z:wrap:overscaledZ:sourceID:)]) {
+  if ([self.delegate
+          respondsToSelector:@selector(
+                                 mapView:tileDidTriggerAction:x:y:z:wrap:overscaledZ:sourceID:)]) {
     [self.delegate mapView:self
         tileDidTriggerAction:operation
                            x:x
@@ -2728,11 +2729,11 @@ public:
     positioningRect.origin = [self convertCoordinate:origin toPointToView:self];
   }
 
-  BOOL shouldShowCallout = ([annotation respondsToSelector:@selector(title)] && annotation.title &&
-                            !self.calloutForSelectedAnnotation.shown &&
-                            [self.delegate respondsToSelector:@selector(mapView:
-                                                                  annotationCanShowCallout:)] &&
-                            [self.delegate mapView:self annotationCanShowCallout:annotation]);
+  BOOL shouldShowCallout =
+      ([annotation respondsToSelector:@selector(title)] && annotation.title &&
+       !self.calloutForSelectedAnnotation.shown &&
+       [self.delegate respondsToSelector:@selector(mapView:annotationCanShowCallout:)] &&
+       [self.delegate mapView:self annotationCanShowCallout:annotation]);
 
   if (NSIsEmptyRect(NSIntersectionRect(positioningRect, self.bounds))) {
     if (!moveIntoView && !NSEqualPoints(gesturePoint, NSZeroPoint)) {

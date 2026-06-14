@@ -1,7 +1,7 @@
 import MapLibre
 import SwiftUI
 
-// #-example-code(OfflinePackExample)
+/// #-example-code(OfflinePackExample)
 class OfflinePackExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
     var progressView: UIProgressView!

@@ -27,7 +27,7 @@ Slice::Slice(std::unique_ptr<Expression> input_,
       fromIndex(std::move(fromIndex_)),
       toIndex(std::move(toIndex_)) {}
 
-EvaluationResult Slice::evaluate(const EvaluationContext &params) const {
+EvaluationResult Slice::evaluate(const EvaluationContext& params) const {
     const EvaluationResult evaluatedInput = input->evaluate(params);
     if (!evaluatedInput) {
         return evaluatedInput.error();
@@ -57,15 +57,15 @@ EvaluationResult Slice::evaluate(const EvaluationContext &params) const {
     }
 
     return evaluatedInput->match(
-        [&](const std::string &s) { return evaluateForStringInput(s, fromIndexValue, toIndexValue); },
-        [&](const std::vector<Value> &v) { return evaluateForArrayInput(v, fromIndexValue, toIndexValue); },
-        [&](const auto &) -> EvaluationResult {
+        [&](const std::string& s) { return evaluateForStringInput(s, fromIndexValue, toIndexValue); },
+        [&](const std::vector<Value>& v) { return evaluateForArrayInput(v, fromIndexValue, toIndexValue); },
+        [&](const auto&) -> EvaluationResult {
             return EvaluationError{"Expected first argument to be of type array or string, but found " +
                                    toString(typeOf(*evaluatedInput)) + " instead."};
         });
 }
 
-EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
+EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value>& array,
                                               int fromIndexValue,
                                               int toIndexValue) const {
     int length = static_cast<int>(array.size());
@@ -88,7 +88,7 @@ EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
     return result;
 }
 
-EvaluationResult Slice::evaluateForStringInput(const std::string &string, int fromIndexValue, int toIndexValue) const {
+EvaluationResult Slice::evaluateForStringInput(const std::string& string, int fromIndexValue, int toIndexValue) const {
     int length = static_cast<int>(string.size());
     if (toIndexValue == std::numeric_limits<int>::max()) {
         toIndexValue = length;
@@ -102,7 +102,7 @@ EvaluationResult Slice::evaluateForStringInput(const std::string &string, int fr
     return string.substr(fromIndexValue, toIndexValue - fromIndexValue);
 }
 
-void Slice::eachChild(const std::function<void(const Expression &)> &visit) const {
+void Slice::eachChild(const std::function<void(const Expression&)>& visit) const {
     visit(*input);
     visit(*fromIndex);
     if (toIndex) {
@@ -111,7 +111,7 @@ void Slice::eachChild(const std::function<void(const Expression &)> &visit) cons
 }
 
 using namespace mbgl::style::conversion;
-ParseResult Slice::parse(const Convertible &value, ParsingContext &ctx) {
+ParseResult Slice::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
 
     std::size_t length = arrayLength(value);
@@ -133,9 +133,9 @@ ParseResult Slice::parse(const Convertible &value, ParsingContext &ctx) {
         std::make_unique<Slice>(std::move(*input), std::move(*fromIndex), toIndex ? std::move(*toIndex) : nullptr));
 }
 
-bool Slice::operator==(const Expression &e) const noexcept {
+bool Slice::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Slice) {
-        auto rhs = static_cast<const Slice *>(&e);
+        auto rhs = static_cast<const Slice*>(&e);
         const auto toIndexEqual = (toIndex && rhs->toIndex && *toIndex == *(rhs->toIndex)) ||
                                   (!toIndex && !rhs->toIndex);
         return *input == *(rhs->input) && *fromIndex == *(rhs->fromIndex) && toIndexEqual;

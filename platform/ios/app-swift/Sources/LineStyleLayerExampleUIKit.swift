@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(LineStyleLayerExample)
+/// #-example-code(LineStyleLayerExample)
 class LineStyleLayerExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -22,7 +22,7 @@ class LineStyleLayerExample: UIViewController, MLNMapViewDelegate {
         mapView.delegate = self
     }
 
-    // Wait until the map is loaded before adding to the map.
+    /// Wait until the map is loaded before adding to the map.
     func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {
         loadGeoJson()
     }

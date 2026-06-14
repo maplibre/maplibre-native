@@ -6,14 +6,14 @@ namespace mbgl {
 AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupBasePtr layerGroup_)
     : layerGroup(std::move(layerGroup_)) {}
 
-AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest &&other)
+AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest&& other)
     : layerGroup(std::move(other.layerGroup)) {}
 
-void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
+void AddLayerGroupRequest::execute(RenderOrchestrator& orchestrator) {
     orchestrator.addLayerGroup(std::move(layerGroup));
 }
 
-void RemoveLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
+void RemoveLayerGroupRequest::execute(RenderOrchestrator& orchestrator) {
     orchestrator.removeLayerGroup(layerGroup);
 }
 
@@ -21,21 +21,21 @@ UpdateLayerGroupIndexRequest::UpdateLayerGroupIndexRequest(LayerGroupBasePtr til
     : layerGroup(std::move(tileLayerGroup_)),
       newLayerIndex(newLayerIndex_) {}
 
-void UpdateLayerGroupIndexRequest::execute(RenderOrchestrator &orchestrator) {
+void UpdateLayerGroupIndexRequest::execute(RenderOrchestrator& orchestrator) {
     orchestrator.updateLayerIndex(layerGroup, newLayerIndex);
 }
 
 AddRenderTargetRequest::AddRenderTargetRequest(RenderTargetPtr renderTarget_)
     : renderTarget(std::move(renderTarget_)) {}
 
-void AddRenderTargetRequest::execute(RenderOrchestrator &orchestrator) {
+void AddRenderTargetRequest::execute(RenderOrchestrator& orchestrator) {
     orchestrator.addRenderTarget(std::move(renderTarget));
 }
 
 RemoveRenderTargetRequest::RemoveRenderTargetRequest(RenderTargetPtr renderTarget_)
     : renderTarget(std::move(renderTarget_)) {}
 
-void RemoveRenderTargetRequest::execute(RenderOrchestrator &orchestrator) {
+void RemoveRenderTargetRequest::execute(RenderOrchestrator& orchestrator) {
     orchestrator.removeRenderTarget(renderTarget);
 }
 
