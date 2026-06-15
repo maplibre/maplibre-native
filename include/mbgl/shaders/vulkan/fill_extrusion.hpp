@@ -660,7 +660,7 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
 
 struct OutlineInstance {
     int pos;
-    uint ed_discard;
+    uint decimals_ed;
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
@@ -737,7 +737,7 @@ void main() {
     const vec2 edgevector = normalize(p2 - p1);
 
     const vec3 normal = vec3(-edgevector.y, edgevector.x, 0.0);
-    const float edgedistance = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
+    const float edgedistance = in_position.x == 0.0 ? nextInstanceDecimalsEd.y : instanceDecimalsEd.y;
     const float t = float(in_position.y);
     const float z = t > 0.0 ? height : base;
 
