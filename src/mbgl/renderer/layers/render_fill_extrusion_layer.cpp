@@ -346,21 +346,22 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-#if MLN_USE_FILL_EXTRUSION_INSTANCING
-        if (const auto& attr = vertexAttrs->set(idFillExtrusionEdDecimalsAttribute)) {
+
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionDecimalsEdAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::UShort2);
         }
-#else
-        if (const auto& attr = vertexAttrs->set(idFillExtrusionNormalEdVertexAttribute)) {
+        
+#if !MLN_USE_FILL_EXTRUSION_INSTANCING
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionNormal2DVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
-                                   offsetof(FillExtrusionLayoutVertex, a2),
+                                   offsetof(FillExtrusionLayoutVertex, a3),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
-                                   gfx::AttributeDataType::Short4);
+                                   gfx::AttributeDataType::Short2);
         }
 #endif
 
@@ -446,7 +447,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = instanceAttrs->set(idFillExtrusionEdDecimalsAttribute)) {
+        if (const auto& attr = instanceAttrs->set(idFillExtrusionDecimalsEdAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,

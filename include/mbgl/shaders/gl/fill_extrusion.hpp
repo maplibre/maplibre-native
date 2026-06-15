@@ -9,7 +9,8 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillExtrusionShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
-layout (location = 1) in vec4 a_normal_ed;
+layout (location = 1) in vec2 a_decimals_ed;
+layout (location = 2) in vec2 a_normal2d;
 out vec4 v_color;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
@@ -52,13 +53,13 @@ layout (std140) uniform FillExtrusionPropsUBO {
 };
 
 #ifndef HAS_UNIFORM_u_base
-layout (location = 2) in highp vec2 a_base;
+layout (location = 3) in highp vec2 a_base;
 #endif
 #ifndef HAS_UNIFORM_u_height
-layout (location = 3) in highp vec2 a_height;
+layout (location = 4) in highp vec2 a_height;
 #endif
 #ifndef HAS_UNIFORM_u_color
-layout (location = 4) in highp vec4 a_color;
+layout (location = 5) in highp vec4 a_color;
 #endif
 
 void main() {
@@ -78,14 +79,16 @@ highp vec4 color = unpack_mix_color(a_color, u_color_t);
 highp vec4 color = u_color;
 #endif
 
-    vec3 normal = a_normal_ed.xyz;
+    vec3 normal = vec3(a_normal2d / 16384.0, a_normal2d.x == 0.0 && a_normal2d.y == 0.0 ? 1.0 : 0.0);
 
     base = max(0.0, base);
     height = max(0.0, height);
 
-    float t = mod(normal.x, 2.0);
+    float t = mod(a_decimals_ed.x, 2.0);
+    float z = t > 0.0 ? height : base;
+    vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
-    gl_Position = u_matrix * vec4(a_pos, t > 0.0 ? height : base, 1);
+    gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
 
     // Relative luminance (how dark/bright is the surface color?)
     float colorvalue = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
@@ -97,7 +100,7 @@ highp vec4 color = u_color;
     color += ambientlight;
 
     // Calculate cos(theta), where theta is the angle between surface normal and diffuse light ray
-    float directional = clamp(dot(normal / 16384.0, u_lightpos), 0.0, 1.0);
+    float directional = clamp(dot(normal, u_lightpos), 0.0, 1.0);
 
     // Adjust directional so that
     // the range of values for highlight/shading is narrower
@@ -106,7 +109,7 @@ highp vec4 color = u_color;
     directional = mix((1.0 - u_lightintensity), max((1.0 - colorvalue + u_lightintensity), 1.0), directional);
 
     // Add gradient along z axis of side surfaces
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
         directional *= (
