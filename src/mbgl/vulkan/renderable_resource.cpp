@@ -304,8 +304,9 @@ void SurfaceRenderableResource::initRenderPass() {
             .setDstSubpass(0)
             .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
             .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
+            .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+            .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
 
         vk::SubpassDependency()
             .setSrcSubpass(VK_SUBPASS_EXTERNAL)
@@ -314,8 +315,9 @@ void SurfaceRenderableResource::initRenderPass() {
                              vk::PipelineStageFlagBits::eLateFragmentTests)
             .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
                              vk::PipelineStageFlagBits::eLateFragmentTests)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
+            .setSrcAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+            .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
     };
 
     const auto renderPassCreateInfo =
