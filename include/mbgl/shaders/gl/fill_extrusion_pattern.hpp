@@ -117,6 +117,7 @@ mediump vec4 pattern_to = u_pattern_to;
     float toScale = u_to_scale;
 
     vec3 normal = vec3(a_normal2d / 16384.0, a_normal2d.x == 0.0 && a_normal2d.y == 0.0 ? 1.0 : 0.0);
+    float edgedistance = a_decimals_ed.y;
 
     vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
@@ -127,7 +128,6 @@ mediump vec4 pattern_to = u_pattern_to;
     float t = mod(a_decimals_ed.x, 2.0);
     float z = t > 0.0 ? height : base;
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
-    float edgedistance = a_decimals_ed.y;
 
     gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
 

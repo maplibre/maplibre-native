@@ -123,6 +123,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0;
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
+
     const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -262,6 +263,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float3 normal = float3(-edgevector.y, edgevector.x, 0.0);
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
+
     const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -399,6 +401,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0;
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
+
     const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -612,6 +615,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float edgedistance = outline[instanceID + 1 - vertx.pos.x].decimals_ed.y;
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
+
     const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)

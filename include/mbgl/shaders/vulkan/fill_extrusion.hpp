@@ -104,8 +104,8 @@ void main() {
     const vec3 normal = vec3(0.0, 0.0, 1.0);
     const float t = 1.0;
     const float z = t > 0.0 ? height : base;
-
     const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
+
     gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
     applySurfaceTransform();
 
@@ -447,8 +447,8 @@ void main() {
     const vec3 normal = vec3(0.0, 0.0, 1.0);
     const float t = 1.0;
     const float z = t > 0.0 ? height : base;
-
     const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
+
     gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
     applySurfaceTransform();
 
