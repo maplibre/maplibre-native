@@ -86,8 +86,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         std::size_t totalVertices = 0;
 
         std::visit(
-            [&totalVertices](const auto& polygon) {
-                for (const auto& ring : polygon) {
+            [&totalVertices](const auto& poly) {
+                for (const auto& ring : poly) {
                     totalVertices += ring.size();
                     if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
                 }
@@ -164,8 +164,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         std::vector<uint32_t> indices;
         std::visit(
-            [&indices, processRingPoints](const auto& polygon) {
-                for (const auto& ring : polygon) {
+            [&indices, processRingPoints](const auto& poly) {
+                for (const auto& ring : poly) {
                     std::size_t nVertices = ring.size();
 
                     if (nVertices == 0) continue;
@@ -183,7 +183,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     }
                 }
 
-                indices = mapbox::earcut(polygon);
+                indices = mapbox::earcut(poly);
             },
             polyVariant);
 
