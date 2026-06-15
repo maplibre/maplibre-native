@@ -6,9 +6,11 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-static bool isContinuationByte(uint8_t in) {
+namespace {
+bool isContinuationByte(uint8_t in) {
     return (in & 0xC0) == 0x80;
 }
+} // namespace
 
 // get the number of unicode characters of an utf-8 string
 // precondition: the string must be valid utf-8 (otherwise, the result may be incorrect)
