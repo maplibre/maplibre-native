@@ -52,7 +52,7 @@ jobs:
 
       - name: Create release (draft)
         id: create_release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           name: ${{ steps.prepare_release.outputs.version_tag }}
@@ -82,7 +82,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v4
         with:
           node-version-file: ".nvmrc"
 
@@ -118,7 +118,7 @@ jobs:
              "build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-$version_tag.tar.gz"
 
       - name: Upload release assets (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           fail_on_unmatched_files: true
@@ -149,7 +149,7 @@ jobs:
       - android-build-and-upload-release
     steps:
       - name: Publish release (remove draft)
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           name: ${{ needs.android-create-release.outputs.version_tag }}
@@ -162,7 +162,7 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v4
         with:
           node-version-file: ".nvmrc"
 
