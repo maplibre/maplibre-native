@@ -1,7 +1,9 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/clamp.hpp>
 #include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/math.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -299,4 +301,76 @@ const GeometryCollection& GeometryTileFeature::getGeometries() const {
     return dummy;
 }
 
+GeometryCollectionFloat roundPolygonCorners(GeometryCollection& polygon, double desiredCornerDistance) {
+    const int arcPoints = 3;
+    const double maxEdgeLenPercent = 0.2;
+    const double sinParallelTreshold = sin(util::deg2rad(5));
+    GeometryCollectionFloat roundedCornerPolygon;
+
+    for (auto ring : polygon) {
+        GeometryCoordinatesFloat roundedCornerRing;
+
+        std::size_t nVertices = ring.size() - 1;
+        for (std::size_t i = 0; i < nVertices; i++) {
+            auto prevPoint = convertPoint<double>(ring[(i - 1 + nVertices) % nVertices]);
+            auto cornerPoint = convertPoint<double>(ring[i]);
+            auto nextPoint = convertPoint<double>(ring[(i + 1) % nVertices]);
+
+            // Compute the start and end points of the rounded corner
+            auto edge1Vector = util::normal<double>(prevPoint, cornerPoint);
+            auto edge2Vector = util::normal<double>(cornerPoint, nextPoint);
+
+            auto edge1MaxCornerDistance = util::dist<double>(cornerPoint, prevPoint) * maxEdgeLenPercent;
+            auto edge2MaxCornerDistance = util::dist<double>(cornerPoint, nextPoint) * maxEdgeLenPercent;
+            auto cornerDistance = std::min({desiredCornerDistance, edge1MaxCornerDistance, edge2MaxCornerDistance});
+
+            auto startPoint = cornerPoint - edge1Vector * cornerDistance;
+            auto endPoint = cornerPoint + edge2Vector * cornerDistance;
+
+            // Perpendicular directions
+            auto perp1Vector = util::perp(edge1Vector);
+            auto perp2Vector = util::perp(edge2Vector);
+
+            // Ensure perpendiculars point toward same side
+            if (util::crossProduct(edge1Vector, edge2Vector) < 0) {
+                perp1Vector *= -1.0;
+                perp2Vector *= -1.0;
+            }
+
+            // Center = intersection of perpendiculars
+            auto perpCrossProduct = util::crossProduct(perp1Vector, perp2Vector);
+            if (std::abs(perpCrossProduct) < sinParallelTreshold) {
+                roundedCornerRing.emplace_back(convertPoint<float>(ring[i]));
+                continue;
+            }
+            auto t = util::crossProduct(endPoint - startPoint, perp2Vector) / perpCrossProduct;
+            auto centerPoint = startPoint + perp1Vector * t;
+
+            // Add the start point of the rounded corner
+            roundedCornerRing.emplace_back(convertPoint<float>(startPoint));
+
+            // Generate points along the arc
+            auto radius = util::dist<double>(startPoint, centerPoint);
+            auto startAngle = std::atan2(startPoint.y - centerPoint.y, startPoint.x - centerPoint.x);
+            auto arcAngle = util::angle_between(startPoint - centerPoint, endPoint - centerPoint);
+            for (int k = 1; k <= arcPoints; k++) {
+                double t = (double)k / (arcPoints + 1);
+                double angle = startAngle + arcAngle * t;
+
+                Point arcPoint = {centerPoint.x + std::cos(angle) * radius, centerPoint.y + std::sin(angle) * radius};
+
+                roundedCornerRing.emplace_back(convertPoint<float>(arcPoint));
+            }
+
+            // Add the end point of the rounded corner
+            roundedCornerRing.emplace_back(convertPoint<float>(endPoint));
+        }
+        // Close the ring by repeating the first point at the end
+        roundedCornerRing.emplace_back(roundedCornerRing[0]);
+
+        // Add the ring to the rounded corner polygon
+        roundedCornerPolygon.emplace_back(roundedCornerRing);
+    }
+    return roundedCornerPolygon;
+}
 } // namespace mbgl
