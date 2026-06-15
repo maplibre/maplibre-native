@@ -55,11 +55,13 @@ public:
         // Multiply factional part by 2^7 to pack them into integers [0..127]
         auto fracPart = convertPoint<uint8_t>((p - intPart) * 128.0);
 
-        return FillExtrusionLayoutVertex{{static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
-                                         {// We pack a bool (`isDiscarded`) indicating whether this instance is discarded
-                                          static_cast<uint16_t>((isDiscarded ? 0x8000 : 0) + fracPart.x * 256 + fracPart.y),
-                                          // The edgeDistance attribute is used for wrapping fill_extrusion patterns
-                                          edgeDistance}};
+        return FillExtrusionLayoutVertex{
+            {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
+            { // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
+                static_cast<uint16_t>((isDiscarded ? 0x8000 : 0) + fracPart.x * 256 + fracPart.y),
+                // The edgeDistance attribute is used for wrapping fill_extrusion patterns
+                edgeDistance
+            }};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(
@@ -69,13 +71,14 @@ public:
         // Multiply factional part by 2^7 to pack them into integers [0..127]
         auto fracPart = convertPoint<uint8_t>((p - intPart) * 128.0);
 
-        return FillExtrusionLayoutVertex{{static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
-                                         {// We pack a bool (`t`) indicating whether it is an upper or lower vertex
-                                          static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + t),
-                                          // The edgedistance attribute is used for wrapping fill_extrusion patterns
-                                          edgeDistance},
-                                          // Multiply normal vector components in the 2D plane by 2^14 to pack them into integers
-                                         {static_cast<int16_t>(nx * factor), static_cast<int16_t>(ny * factor)}};
+        return FillExtrusionLayoutVertex{
+            {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
+            {// We pack a bool (`t`) indicating whether it is an upper or lower vertex
+             static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + t),
+             // The edgedistance attribute is used for wrapping fill_extrusion patterns
+             edgeDistance},
+            // Multiply normal vector components in the 2D plane by 2^14 to pack them into integers
+            {static_cast<int16_t>(nx * factor), static_cast<int16_t>(ny * factor)}};
     }
 #endif
 

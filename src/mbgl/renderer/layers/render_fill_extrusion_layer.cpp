@@ -354,7 +354,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::UShort2);
         }
-        
+
 #if !MLN_USE_FILL_EXTRUSION_INSTANCING
         if (const auto& attr = vertexAttrs->set(idFillExtrusionNormal2DVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
