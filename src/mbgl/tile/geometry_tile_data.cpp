@@ -355,7 +355,8 @@ GeometryCollectionFloat roundPolygonCorners(GeometryCollection& polygon, double 
             auto arcAngle = util::angle_between(startPoint - centerPoint, endPoint - centerPoint);
             for (int k = 1; k <= arcPoints; k++) {
                 double angle = startAngle + arcAngle * k / (arcPoints + 1);
-                auto arcPoint = Point(centerPoint.x + std::cos(angle) * radius, centerPoint.y + std::sin(angle) * radius);
+                auto arcPoint = Point(centerPoint.x + std::cos(angle) * radius,
+                                      centerPoint.y + std::sin(angle) * radius);
                 roundedCornerRing.emplace_back(convertPoint<float>(arcPoint));
             }
 
