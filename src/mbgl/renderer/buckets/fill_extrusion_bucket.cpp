@@ -6,6 +6,8 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/constants.hpp>
 
+#include <variant>
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)
