@@ -58,7 +58,7 @@ public:
         return FillExtrusionLayoutVertex{
             {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
             { // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
-                static_cast<uint16_t>((isDiscarded ? 0x8000 : 0) + fracPart.x * 256 + fracPart.y),
+                static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + (isDiscarded ? 1 : 0)),
                 // The edgeDistance attribute is used for wrapping fill_extrusion patterns
                 edgeDistance
             }};
