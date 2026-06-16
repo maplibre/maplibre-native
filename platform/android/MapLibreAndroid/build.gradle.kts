@@ -177,7 +177,7 @@ android {
 
     buildFeatures {
         buildConfig = true
-        prefabPublishing = true
+        prefabPublishing = project.findProperty("maplibre.abis") != "none"
     }
 
     prefab {
@@ -213,10 +213,8 @@ val syncPrefabHeaders by tasks.registering(Sync::class) {
 }
 
 tasks.configureEach {
-    if (name != "syncPrefabHeaders" && (
-            name.contains("Prefab", ignoreCase = true) ||
-            name.contains("bundleLibRuntimeTo", ignoreCase = true)
-        )) {
+    if (name == "syncPrefabHeaders") return@configureEach
+    if (name.contains("Prefab", ignoreCase = true) || name.contains("bundleLibRuntimeTo", ignoreCase = true)) {
         dependsOn(syncPrefabHeaders)
     }
 }
