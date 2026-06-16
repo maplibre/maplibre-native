@@ -249,7 +249,7 @@ public:
     static std::array<float, 4> color;
 
 private:
-    void createShaders(const vk::Device &device, const vk::DispatchLoaderDynamic &dispatcher) {
+    void createShaders(const vk::Device &device, const vk::detail::DispatchLoaderDynamic &dispatcher) {
         try {
             vertexModule = device.createShaderModuleUnique(
                 vk::ShaderModuleCreateInfo{.codeSize = sizeof(kVertSpirv),
@@ -275,7 +275,7 @@ private:
         __android_log_write(ANDROID_LOG_INFO, VK_LOG_TAG, "Shader modules created");
     }
 
-    void createPipelineLayout(const vk::Device &device, const vk::DispatchLoaderDynamic &dispatcher) {
+    void createPipelineLayout(const vk::Device &device, const vk::detail::DispatchLoaderDynamic &dispatcher) {
         const vk::PushConstantRange pushRange{
             .stageFlags = vk::ShaderStageFlagBits::eFragment,
             .offset = 0,
@@ -299,7 +299,7 @@ private:
     }
 
     void createPipeline(const vk::Device &device,
-                        const vk::DispatchLoaderDynamic &dispatcher,
+                        const vk::detail::DispatchLoaderDynamic &dispatcher,
                         vk::RenderPass renderPass) {
         if (!vertexModule || !fragmentModule || !pipelineLayout) return;
 
@@ -395,13 +395,13 @@ private:
     }
 
     vk::Device vulkanDevice;
-    const vk::DispatchLoaderDynamic *vulkanDispatcher = nullptr;
+    const vk::detail::DispatchLoaderDynamic *vulkanDispatcher = nullptr;
 
-    vk::UniqueHandle<vk::ShaderModule, vk::DispatchLoaderDynamic> vertexModule;
-    vk::UniqueHandle<vk::ShaderModule, vk::DispatchLoaderDynamic> fragmentModule;
+    vk::UniqueHandle<vk::ShaderModule, vk::detail::DispatchLoaderDynamic> vertexModule;
+    vk::UniqueHandle<vk::ShaderModule, vk::detail::DispatchLoaderDynamic> fragmentModule;
 
-    vk::UniqueHandle<vk::Pipeline, vk::DispatchLoaderDynamic> pipeline;
-    vk::UniqueHandle<vk::PipelineLayout, vk::DispatchLoaderDynamic> pipelineLayout;
+    vk::UniqueHandle<vk::Pipeline, vk::detail::DispatchLoaderDynamic> pipeline;
+    vk::UniqueHandle<vk::PipelineLayout, vk::detail::DispatchLoaderDynamic> pipelineLayout;
 };
 
 std::array<float, 4> ExampleVulkanCustomLayer::color = {0.0f, 1.0f, 0.0f, 0.5f};
