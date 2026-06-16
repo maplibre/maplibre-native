@@ -192,11 +192,11 @@ class ExampleVulkanCustomLayer : public mbgl::style::CustomLayerHost {
 public:
     ~ExampleVulkanCustomLayer() = default;
 
-    void initialize(const mbgl::style::CustomLayerInitParameters& baseParams) override {
-        const auto& params =
-                static_cast<const mbgl::style::vulkan::CustomLayerInitParameters&>(baseParams);
+    void initialize(const mbgl::style::CustomLayerInitParameters &baseParams) override {
+        const auto &params = static_cast<const mbgl::style::vulkan::CustomLayerInitParameters &>(baseParams);
 
-        __android_log_print(ANDROID_LOG_INFO, VK_LOG_TAG,
+        __android_log_print(ANDROID_LOG_INFO,
+                            VK_LOG_TAG,
                             "initialize: device=%p, physicalDevice=%p",
                             static_cast<VkDevice>(params.device),
                             static_cast<VkPhysicalDevice>(params.physicalDevice));
@@ -209,8 +209,7 @@ public:
     }
 
     void render(const mbgl::style::CustomLayerRenderParameters &baseParams) override {
-        const auto &params =
-                static_cast<const mbgl::style::vulkan::CustomLayerRenderParameters &>(baseParams);
+        const auto &params = static_cast<const mbgl::style::vulkan::CustomLayerRenderParameters &>(baseParams);
 
         const auto &dispatcher = params.dispatcher;
         const auto &cmd = params.commandBuffer;
@@ -221,8 +220,8 @@ public:
 
         if (!pipeline) return;
 
-        cmd.pushConstants(*pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0,
-                          sizeof(color), color.data(), dispatcher);
+        cmd.pushConstants(
+            *pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(color), color.data(), dispatcher);
 
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline, dispatcher);
 
@@ -250,54 +249,48 @@ public:
     static std::array<float, 4> color;
 
 private:
-    void createShaders(const vk::Device &device,
-                       const vk::DispatchLoaderDynamic &dispatcher) {
+    void createShaders(const vk::Device &device, const vk::DispatchLoaderDynamic &dispatcher) {
         try {
             vertexModule = device.createShaderModuleUnique(
-                    vk::ShaderModuleCreateInfo{
-                            .codeSize = sizeof(kVertSpirv),
-                            .pCode = reinterpret_cast<const std::uint32_t *>(kVertSpirv)},
-                    nullptr, dispatcher);
-        }
-        catch (const std::exception &) {
-            __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG,
-                                "Failed to create vertex shader module.");
+                vk::ShaderModuleCreateInfo{.codeSize = sizeof(kVertSpirv),
+                                           .pCode = reinterpret_cast<const std::uint32_t *>(kVertSpirv)},
+                nullptr,
+                dispatcher);
+        } catch (const std::exception &) {
+            __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create vertex shader module.");
             return;
         }
 
         try {
             fragmentModule = device.createShaderModuleUnique(
-                    vk::ShaderModuleCreateInfo{
-                            .codeSize = sizeof(kFragSpirv),
-                            .pCode = reinterpret_cast<const std::uint32_t *>(kFragSpirv)},
-                    nullptr, dispatcher);
-        }
-        catch (const std::exception &) {
-            __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG,
-                                "Failed to create fragment shader module.");
+                vk::ShaderModuleCreateInfo{.codeSize = sizeof(kFragSpirv),
+                                           .pCode = reinterpret_cast<const std::uint32_t *>(kFragSpirv)},
+                nullptr,
+                dispatcher);
+        } catch (const std::exception &) {
+            __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create fragment shader module.");
             return;
         }
 
         __android_log_write(ANDROID_LOG_INFO, VK_LOG_TAG, "Shader modules created");
     }
 
-    void createPipelineLayout(const vk::Device &device,
-                              const vk::DispatchLoaderDynamic &dispatcher) {
+    void createPipelineLayout(const vk::Device &device, const vk::DispatchLoaderDynamic &dispatcher) {
         const vk::PushConstantRange pushRange{
-                .stageFlags = vk::ShaderStageFlagBits::eFragment,
-                .offset = 0,
-                .size = sizeof(float) * 4,
+            .stageFlags = vk::ShaderStageFlagBits::eFragment,
+            .offset = 0,
+            .size = sizeof(float) * 4,
         };
 
         try {
             pipelineLayout = device.createPipelineLayoutUnique(
-                    vk::PipelineLayoutCreateInfo{
-                            .pushConstantRangeCount = 1,
-                            .pPushConstantRanges = &pushRange,
-                    },
-                    nullptr, dispatcher);
-        }
-        catch (const std::exception &) {
+                vk::PipelineLayoutCreateInfo{
+                    .pushConstantRangeCount = 1,
+                    .pPushConstantRanges = &pushRange,
+                },
+                nullptr,
+                dispatcher);
+        } catch (const std::exception &) {
             __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create pipeline layout.");
             return;
         }
@@ -311,92 +304,90 @@ private:
         if (!vertexModule || !fragmentModule || !pipelineLayout) return;
 
         const std::array<vk::PipelineShaderStageCreateInfo, 2> stages = {{
-                {
-                        .stage = vk::ShaderStageFlagBits::eVertex,
-                        .module = *vertexModule,
-                        .pName = "main",
-                },
-                {
-                        .stage = vk::ShaderStageFlagBits::eFragment,
-                        .module = *fragmentModule,
-                        .pName = "main",
-                },
+            {
+                .stage = vk::ShaderStageFlagBits::eVertex,
+                .module = *vertexModule,
+                .pName = "main",
+            },
+            {
+                .stage = vk::ShaderStageFlagBits::eFragment,
+                .module = *fragmentModule,
+                .pName = "main",
+            },
         }};
 
         const vk::PipelineVertexInputStateCreateInfo vertexInput{};
 
         const vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
-                .topology = vk::PrimitiveTopology::eTriangleList,
+            .topology = vk::PrimitiveTopology::eTriangleList,
         };
 
         const std::array<vk::DynamicState, 2> dynamicStates = {
-                vk::DynamicState::eViewport,
-                vk::DynamicState::eScissor,
+            vk::DynamicState::eViewport,
+            vk::DynamicState::eScissor,
         };
         const vk::PipelineDynamicStateCreateInfo dynamicState{
-                .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
-                .pDynamicStates = dynamicStates.data(),
+            .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
+            .pDynamicStates = dynamicStates.data(),
         };
 
         const vk::PipelineViewportStateCreateInfo viewportState{
-                .viewportCount = 1,
-                .scissorCount = 1,
+            .viewportCount = 1,
+            .scissorCount = 1,
         };
 
         const vk::PipelineRasterizationStateCreateInfo rasterizer{
-                .polygonMode = vk::PolygonMode::eFill,
-                .cullMode = vk::CullModeFlagBits::eNone,
-                .frontFace = vk::FrontFace::eClockwise,
-                .lineWidth = 1.0f,
+            .polygonMode = vk::PolygonMode::eFill,
+            .cullMode = vk::CullModeFlagBits::eNone,
+            .frontFace = vk::FrontFace::eClockwise,
+            .lineWidth = 1.0f,
         };
 
         const vk::PipelineMultisampleStateCreateInfo multisampling{
-                .rasterizationSamples = vk::SampleCountFlagBits::e1,
+            .rasterizationSamples = vk::SampleCountFlagBits::e1,
         };
 
         const vk::PipelineColorBlendAttachmentState blendAttachment{
-                .blendEnable = VK_TRUE,
-                .srcColorBlendFactor = vk::BlendFactor::eSrcAlpha,
-                .dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha,
-                .colorBlendOp = vk::BlendOp::eAdd,
-                .srcAlphaBlendFactor = vk::BlendFactor::eOne,
-                .dstAlphaBlendFactor = vk::BlendFactor::eZero,
-                .alphaBlendOp = vk::BlendOp::eAdd,
-                .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
-                                  vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
+            .blendEnable = VK_TRUE,
+            .srcColorBlendFactor = vk::BlendFactor::eSrcAlpha,
+            .dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha,
+            .colorBlendOp = vk::BlendOp::eAdd,
+            .srcAlphaBlendFactor = vk::BlendFactor::eOne,
+            .dstAlphaBlendFactor = vk::BlendFactor::eZero,
+            .alphaBlendOp = vk::BlendOp::eAdd,
+            .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                              vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
         };
 
         const vk::PipelineColorBlendStateCreateInfo colorBlend{
-                .attachmentCount = 1,
-                .pAttachments = &blendAttachment,
+            .attachmentCount = 1,
+            .pAttachments = &blendAttachment,
         };
 
         const vk::PipelineDepthStencilStateCreateInfo depthStencil{
-                .depthTestEnable = VK_FALSE,
-                .depthWriteEnable = VK_FALSE,
+            .depthTestEnable = VK_FALSE,
+            .depthWriteEnable = VK_FALSE,
         };
 
         const vk::GraphicsPipelineCreateInfo pipelineInfo{
-                .stageCount = static_cast<uint32_t>(stages.size()),
-                .pStages = stages.data(),
-                .pVertexInputState = &vertexInput,
-                .pInputAssemblyState = &inputAssembly,
-                .pViewportState = &viewportState,
-                .pRasterizationState = &rasterizer,
-                .pMultisampleState = &multisampling,
-                .pDepthStencilState = &depthStencil,
-                .pColorBlendState = &colorBlend,
-                .pDynamicState = &dynamicState,
-                .layout = *pipelineLayout,
-                .renderPass = renderPass,
-                .subpass = 0,
+            .stageCount = static_cast<uint32_t>(stages.size()),
+            .pStages = stages.data(),
+            .pVertexInputState = &vertexInput,
+            .pInputAssemblyState = &inputAssembly,
+            .pViewportState = &viewportState,
+            .pRasterizationState = &rasterizer,
+            .pMultisampleState = &multisampling,
+            .pDepthStencilState = &depthStencil,
+            .pColorBlendState = &colorBlend,
+            .pDynamicState = &dynamicState,
+            .layout = *pipelineLayout,
+            .renderPass = renderPass,
+            .subpass = 0,
         };
 
-        auto result = device.createGraphicsPipelineUnique(nullptr, pipelineInfo, nullptr,
-                                                          dispatcher);
+        auto result = device.createGraphicsPipelineUnique(nullptr, pipelineInfo, nullptr, dispatcher);
         if (result.result != vk::Result::eSuccess) {
-            __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG,
-                                "Failed to create graphics pipeline");
+            __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create graphics pipeline");
             return;
         }
         pipeline = std::move(result.value);
@@ -404,7 +395,7 @@ private:
     }
 
     vk::Device vulkanDevice;
-    const vk::DispatchLoaderDynamic* vulkanDispatcher = nullptr;
+    const vk::DispatchLoaderDynamic *vulkanDispatcher = nullptr;
 
     vk::UniqueHandle<vk::ShaderModule, vk::DispatchLoaderDynamic> vertexModule;
     vk::UniqueHandle<vk::ShaderModule, vk::DispatchLoaderDynamic> fragmentModule;
@@ -424,11 +415,14 @@ jlong JNICALL nativeCreateContext(JNIEnv *, jobject) {
     return reinterpret_cast<jlong>(new ExampleVulkanCustomLayer());
 }
 
-void JNICALL nativeSetColor(JNIEnv *, jobject,
-                            jfloat red, jfloat green, jfloat blue, jfloat alpha) {
-    __android_log_print(ANDROID_LOG_INFO, VK_LOG_TAG,
-                        "ExampleVulkanCustomLayer.nativeSetColor: %.2f, %.2f, %.2f, %.2f", red,
-                        green, blue, alpha);
+void JNICALL nativeSetColor(JNIEnv *, jobject, jfloat red, jfloat green, jfloat blue, jfloat alpha) {
+    __android_log_print(ANDROID_LOG_INFO,
+                        VK_LOG_TAG,
+                        "ExampleVulkanCustomLayer.nativeSetColor: %.2f, %.2f, %.2f, %.2f",
+                        red,
+                        green,
+                        blue,
+                        alpha);
     ExampleVulkanCustomLayer::color = {red, green, blue, alpha};
 }
 
@@ -438,12 +432,11 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     JNIEnv *env = nullptr;
     vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
 
-    jclass cls = env->FindClass(
-            "org/maplibre/android/testapp/model/customlayer/ExampleVulkanCustomLayer");
+    jclass cls = env->FindClass("org/maplibre/android/testapp/model/customlayer/ExampleVulkanCustomLayer");
 
     const JNINativeMethod methods[] = {
-            {"createContext", "()J",     reinterpret_cast<void *>(&nativeCreateContext)},
-            {"setColor",      "(FFFF)V", reinterpret_cast<void *>(&nativeSetColor)},
+        {"createContext", "()J", reinterpret_cast<void *>(&nativeCreateContext)},
+        {"setColor", "(FFFF)V", reinterpret_cast<void *>(&nativeSetColor)},
     };
 
     if (env->RegisterNatives(cls, methods, 2) < 0) {

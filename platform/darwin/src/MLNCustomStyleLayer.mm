@@ -88,7 +88,7 @@ public:
     layer = nil;
   }
 
-  void initialize(const mbgl::style::CustomLayerInitParameters&) override {
+  void initialize(const mbgl::style::CustomLayerInitParameters &) override {
     if (layerRef == nil)
       return;
     else if (layer == nil)
