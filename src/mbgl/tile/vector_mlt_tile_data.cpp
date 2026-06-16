@@ -174,9 +174,9 @@ std::string VectorMLTTileLayer::getName() const {
     return layer.getName();
 }
 
-VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data_, bool supportFastPFOR)
+VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data_, bool supportFastPFOR_)
     : data(std::move(data_)),
-      supportFastPFOR(supportFastPFOR) {}
+      supportFastPFOR(supportFastPFOR_) {}
 
 VectorMLTTileData::VectorMLTTileData(const VectorMLTTileData& other)
     : data(other.data),

@@ -13,9 +13,9 @@ VectorMLTTile::VectorMLTTile(const OverscaledTileID& id_,
                              const TileParameters& parameters_,
                              const Tileset& tileset_,
                              TileObserver* observer_,
-                             bool supportFastPFOR)
+                             bool supportFastPFOR_)
     : VectorTile(id_, std::move(sourceID_), parameters_, tileset_, observer_),
-      supportFastPFOR(supportFastPFOR) {}
+      supportFastPFOR(supportFastPFOR_) {}
 
 VectorMLTTile::~VectorMLTTile() {
     // this needs to be explicitly deleted in the most-derived destructor
