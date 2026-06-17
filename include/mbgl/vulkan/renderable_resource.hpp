@@ -24,6 +24,7 @@ public:
     const vk::Extent2D& getExtent() const { return extent; }
     const vk::UniqueRenderPass& getRenderPass() const { return renderPass; }
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;
+    virtual float getRotation() const { return 0.0f; }
 
 protected:
     RendererBackend& backend;
@@ -69,7 +70,7 @@ public:
     bool didSurfaceTransformUpdate() const;
 
     // rotation needed to align framebuffer contents with device surface
-    float getRotation();
+    float getRotation() const override;
 
     void setSurfaceTransformPollingInterval(int32_t value) { surfaceTransformPollingInterval = value; }
     int32_t getSurfaceTransformPollingInterval() const { return surfaceTransformPollingInterval; }

@@ -18,9 +18,10 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParame
     auto& vulkanRenderPass = static_cast<mbgl::vulkan::RenderPass&>(*paintParameters.renderPass);
     commandBuffer = vulkanRenderPass.getEncoder().getCommandBuffer().get();
 
-    const auto& resource =
-        paintParameters.backend.getDefaultRenderable().getResource<mbgl::vulkan::RenderableResource>();
+    const auto& renderable = paintParameters.backend.getDefaultRenderable();
+    const auto& resource = renderable.getResource<mbgl::vulkan::RenderableResource>();
     renderPass = resource.getRenderPass().get();
+    screenPreRotationRadiansClockwise = resource.getRotation();
 }
 
 } // namespace vulkan
