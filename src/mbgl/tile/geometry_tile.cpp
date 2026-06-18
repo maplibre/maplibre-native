@@ -332,12 +332,21 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
     }
 }
 
-void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t resultCorrelationID) {
+void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result,
+                            const uint64_t resultCorrelationID,
+                            bool isPartialResult) {
     MLN_TRACE_FUNC();
+
+    // Partial progressive updates are optional visual improvements. Ignore stale
+    // partial callbacks to avoid applying outdated buckets and triggering
+    // redundant tile updates while a newer parse cycle is already in progress.
+    if (isPartialResult && resultCorrelationID != correlationID) {
+        return;
+    }
 
     loaded = true;
     renderable = true;
-    if (resultCorrelationID == correlationID) {
+    if (!isPartialResult && resultCorrelationID == correlationID) {
         pending = false;
         observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }

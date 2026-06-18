@@ -119,6 +119,11 @@ private:
 
     bool showCollisionBoxes;
     bool firstLoad = true;
+    // Set to true at the end of parse() and reset after finalizeLayout() returns.
+    // When true, finalizeLayout() will emit a partial (geometry-only) LayoutResult
+    // immediately without waiting for symbol glyph/image dependencies to resolve,
+    // reducing the white-screen time on first tile load.
+    bool comingFromParse = false;
 
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
