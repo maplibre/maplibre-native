@@ -144,12 +144,25 @@ add_test(
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 find_program(ARMERGE NAMES armerge)
+find_program(
+    LLVM_OBJCOPY
+    NAMES llvm-objcopy
+    HINTS
+        /opt/homebrew/opt/llvm/bin
+        /opt/homebrew/opt/llvm@18/bin
+        /usr/local/opt/llvm/bin
+        /usr/local/opt/llvm@18/bin
+)
 
 if(MLN_CREATE_AMALGAMATION)
     if ("${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
         message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
     endif()
+    if ("${LLVM_OBJCOPY}" STREQUAL "LLVM_OBJCOPY-NOTFOUND")
+        message(FATAL_ERROR "llvm-objcopy required when MLN_CREATE_AMALGAMATION=ON")
+    endif()
     message(STATUS "Found armerge: ${ARMERGE}")
+    message(STATUS "Found llvm-objcopy: ${LLVM_OBJCOPY}")
     include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
     set(STATIC_LIBS "")
 
@@ -170,6 +183,14 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-icu>
             $<TARGET_FILE:mlt-cpp>
             ${STATIC_LIBS}
+        # armerge localizes non-kept symbols, including libc++ RTTI emitted for
+        # standard exceptions. On macOS, localized RTTI can prevent exceptions
+        # from being caught downstream, so restore global symbol visibility.
+        COMMAND ${LLVM_OBJCOPY} --wildcard
+            --globalize-symbol=__ZTISt*
+            --globalize-symbol=__ZTSSt*
+            --globalize-symbol=__ZTVSt*
+            libmbgl-core-amalgam.a
     )
 
 endif()
