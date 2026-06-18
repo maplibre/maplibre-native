@@ -169,6 +169,8 @@ dependencies {
     androidTestImplementation(libs.androidxTestExtJUnit)
     androidTestImplementation(libs.androidxTestCoreKtx)
     androidTestImplementation(libs.kotlinxCoroutinesTest)
+
+    // version conflict when using androidTestImplementation
 }
 
 apply<SentryConditionalPlugin>()
