@@ -41,6 +41,8 @@ protected:
 
 protected:
     ANativeWindow* window;
+
+    MBGL_STORE_THREAD(tid);
 };
 
 } // namespace android
