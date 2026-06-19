@@ -51,6 +51,7 @@ import kotlin.coroutines.resume
 class BenchmarkActivity : AppCompatActivity() {
     private val TAG = "BenchmarkActivity"
     private val useAdvancedMetrics = false
+    private val skipFailingStyles = true
 
     private lateinit var mapView: MapView
     private var handler: Handler? = null
@@ -225,7 +226,15 @@ class BenchmarkActivity : AppCompatActivity() {
         }
 
         mapView.addOnDidFinishRenderingFrameListener(listener)
-        mapView.setStyleSuspend(benchmarkRun.styleURL)
+        val styleResult = mapView.setStyleSuspend(benchmarkRun.styleURL)
+
+        if (skipFailingStyles && !styleResult) {
+            mapView.removeOnDidFinishRenderingFrameListener(listener)
+            metrics?.stop()
+
+            return BenchmarkRunResult(0.0, encodingTimeStore, renderingTimeStore, getThermalStatus(), metrics)
+        }
+
         numFrames = 0
 
         val startTime = System.nanoTime()
