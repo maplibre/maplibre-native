@@ -17,9 +17,13 @@
 
 ## Next Action
 
-- Run the signing bootstrap script if App Store Connect credentials are available locally.
-- Push changes and dispatch `ios-ci.yml` on `louwers/maplibre-native`.
+- Dispatch `ios-ci.yml` on `louwers/maplibre-native`.
 
 ## Attempts
+
+- Signing bootstrap:
+  - Command: `platform/ios/scripts/ios-ci-create-signing-assets.sh`
+  - Result: failed before network/API calls because `APPSTORE_ISSUER_ID` is not available in the local environment.
+  - Impact: `BUILD_CERTIFICATE_BASE64` and related signing secrets were not generated locally before the first workflow dispatch.
 
 No workflow attempts have been dispatched from this branch yet.
