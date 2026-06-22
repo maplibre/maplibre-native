@@ -27,7 +27,7 @@ require_env P12_PASSWORD
 require_env BUILD_PROVISION_PROFILE_BASE64
 require_env KEYCHAIN_PASSWORD
 
-ios_bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibre-native.ci}"
+ios_bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibrenative.ci}"
 maptiler_api_key="${MAPTILER_API_KEY:-0000000000}"
 runner_temp="${RUNNER_TEMP:-$(mktemp -d)}"
 

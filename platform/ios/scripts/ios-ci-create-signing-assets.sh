@@ -3,7 +3,7 @@
 set -euo pipefail
 
 repo="${GITHUB_REPOSITORY:-louwers/maplibre-native}"
-bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibre-native.ci}"
+bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibrenative.ci}"
 profile_name="${IOS_PROFILE_NAME:-MapLibre iOS CI Wildcard Development}"
 certificate_name="${IOS_CERTIFICATE_NAME:-MapLibre iOS CI}"
 
