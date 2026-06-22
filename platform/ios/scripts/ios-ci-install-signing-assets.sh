@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+# Install iOS CI signing assets on a GitHub-hosted macOS runner.
+#
+# Usage in GitHub Actions:
+#   - name: Install Apple signing assets
+#     run: scripts/ios-ci-install-signing-assets.sh
+#     env:
+#       BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+#       P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+#       BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+#       KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+#       IOS_BUNDLE_ID_PREFIX: ${{ vars.IOS_BUNDLE_ID_PREFIX }}
+#
+# The script imports the CI certificate into a temporary keychain, installs the
+# provisioning profile, and writes platform/darwin/bazel/config.bzl so Bazel and
+# rules_xcodeproj use the same team/profile/bundle prefix on ephemeral runners.
+
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,7 +43,7 @@ require_env P12_PASSWORD
 require_env BUILD_PROVISION_PROFILE_BASE64
 require_env KEYCHAIN_PASSWORD
 
-ios_bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibrenative.ci}"
+ios_bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-org.maplibre}"
 maptiler_api_key="${MAPTILER_API_KEY:-0000000000}"
 runner_temp="${RUNNER_TEMP:-$(mktemp -d)}"
 

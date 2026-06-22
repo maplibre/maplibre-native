@@ -1,9 +1,27 @@
 #!/usr/bin/env bash
 
+# Create iOS development signing assets for CI and upload them to GitHub Actions.
+#
+# Usage:
+#   APPSTORE_ISSUER_ID=<issuer-uuid> \
+#   APPSTORE_KEY_ID=<key-id> \
+#   APPSTORE_PRIVATE_KEY="$(cat AuthKey_<key-id>.p8)" \
+#   platform/ios/scripts/ios-ci-create-signing-assets.sh
+#
+# Optional environment:
+#   GITHUB_REPOSITORY=maplibre/maplibre-native
+#   GITHUB_REPOSITORIES="maplibre/maplibre-native another-owner/another-repo"
+#   IOS_BUNDLE_ID_PREFIX=org.maplibre
+#   IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE=1
+#
+# The script creates a wildcard iOS Development provisioning profile for
+# "${IOS_BUNDLE_ID_PREFIX}.*" and stores the certificate, profile, passwords, and
+# bundle ID prefix as GitHub Actions secrets/variables.
+
 set -euo pipefail
 
 repos="${GITHUB_REPOSITORIES:-${GITHUB_REPOSITORY:-maplibre/maplibre-native}}"
-bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibrenative.ci}"
+bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-org.maplibre}"
 profile_name="${IOS_PROFILE_NAME:-MapLibre iOS CI Wildcard Development}"
 certificate_name="${IOS_CERTIFICATE_NAME:-MapLibre iOS CI}"
 
