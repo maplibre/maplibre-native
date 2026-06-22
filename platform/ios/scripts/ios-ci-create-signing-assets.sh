@@ -32,6 +32,16 @@ json_api_created_certificate_ids() {
   '
 }
 
+json_profile_ids_with_name() {
+  ruby -rjson -e '
+    profile_name = ARGV.fetch(0)
+    JSON.parse(STDIN.read).fetch("data", []).each do |item|
+      attrs = item.fetch("attributes")
+      puts item.fetch("id") if attrs["name"] == profile_name
+    end
+  ' -- "$1"
+}
+
 urlencode() {
   ruby -rcgi -e 'print CGI.escape(ARGV.fetch(0))' "$1"
 }
@@ -148,6 +158,14 @@ if [[ "${IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE:-}" == "1" ]]; then
     echo "Deleting existing API-created iOS Development certificate '$certificate_id_to_delete'."
     asc_request DELETE "/v1/certificates/$certificate_id_to_delete" >/dev/null
   done < <(printf '%s' "$certificates_response" | json_api_created_certificate_ids)
+
+  profile_filter="$(urlencode "$profile_name")"
+  profiles_response="$(asc_request GET "/v1/profiles?filter%5Bname%5D=$profile_filter&limit=200")"
+  while IFS= read -r profile_id_to_delete; do
+    [[ -z "$profile_id_to_delete" ]] && continue
+    echo "Deleting existing iOS CI provisioning profile '$profile_id_to_delete'."
+    asc_request DELETE "/v1/profiles/$profile_id_to_delete" >/dev/null
+  done < <(printf '%s' "$profiles_response" | json_profile_ids_with_name "$profile_name")
 fi
 
 csr_content="$(cat "$csr_path")"
