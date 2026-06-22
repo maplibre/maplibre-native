@@ -43,7 +43,7 @@ jobs:
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: macos-15
     concurrency:
       # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -52,6 +52,7 @@ jobs:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
+      IOS_BUNDLE_ID_PREFIX: ${{ vars.IOS_BUNDLE_ID_PREFIX || 'com.louwers.maplibre-native.ci' }}
     defaults:
       run:
         working-directory: platform/ios
@@ -69,6 +70,15 @@ jobs:
       - name: Update submodules
         run: git submodule update --init --recursive
         working-directory: .
+
+      - name: Install Apple signing assets
+        run: scripts/ios-ci-install-signing-assets.sh
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          MAPTILER_API_KEY: ${{ secrets.MAPTILER_API_KEY }}
 
       - name: Cache Bazel
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
