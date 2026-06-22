@@ -88,6 +88,33 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
+      # render test
+
+      - name: Build RenderTest .ipa and .xctest for AWS Device Farm
+        run: |
+          set -e
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
+          cd "$render_test_app_dir"
+          mkdir -p Payload
+          ditto RenderTestApp.app Payload/RenderTestApp.app
+          zip -r RenderTestApp.zip Payload
+          mv RenderTestApp.zip RenderTestApp.ipa
+          cd Payload/RenderTestApp.app/PlugIns
+          zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
+          echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: ios-render-test
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
+            ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
@@ -126,33 +153,6 @@ jobs:
       #       echo "Attempt $retry_count failed. Retrying..."
       #     done
 
-      # render test
-
-      - name: Build RenderTest .ipa and .xctest for AWS Device Farm
-        run: |
-          set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-          build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
-          render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
-          cd "$render_test_app_dir"
-          mkdir Payload
-          mv RenderTestApp.app Payload
-          zip -r RenderTestApp.zip Payload
-          mv RenderTestApp.zip RenderTestApp.ipa
-          cd Payload/RenderTestApp.app/PlugIns
-          zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
-          echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
-
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: ios-render-test
-          retention-days: 3
-          if-no-files-found: error
-          path: |
-            ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
-            ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
-
       # C++ unit tests
 
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
@@ -163,8 +163,8 @@ jobs:
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
           cd "$ios_cpp_test_app_dir"
-          mkdir Payload
-          mv CppUnitTestsApp.app Payload
+          mkdir -p Payload
+          ditto CppUnitTestsApp.app Payload/CppUnitTestsApp.app
           zip -r CppUnitTestsApp.zip Payload
           mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
           cd Payload/CppUnitTestsApp.app/PlugIns

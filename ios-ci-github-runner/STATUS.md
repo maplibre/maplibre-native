@@ -57,5 +57,12 @@
   - Branch: `ios-ci-github-runner`
   - Head SHA: `44e59488472ccf59b1477d512126b42336a4ef5c`
   - Created: `2026-06-22T14:54:37Z`
-  - Status at dispatch check: `queued`
-  - Next step: stop and wait for `continue`; then inspect completion status with `gh`.
+  - Overall result: failed.
+  - `ios-build` job ID: `82745657503`
+  - `ios-build` progress: signing, Swift app build, symbol check, plist lint, and iOS tests passed.
+  - Failure: `Build RenderTest .ipa and .xctest for AWS Device Farm` failed after `xcodebuild` succeeded because `mv RenderTestApp.app Payload/RenderTestApp.app` returned `Permission denied`.
+  - Logs: `ios-ci-github-runner/logs/27961865104/ios-build.log`
+  - Fix:
+    - Moved `Build RenderTest .ipa and .xctest for AWS Device Farm` immediately after Bazel cache restore so the next run reaches it sooner.
+    - Changed RenderTest and CppUnitTests packaging to copy app bundles into `Payload` with `ditto` instead of moving them from Xcode/Bazel build output directories.
+  - Next step: push the workflow fix and dispatch attempt 3.
