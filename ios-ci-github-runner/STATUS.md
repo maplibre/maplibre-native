@@ -26,4 +26,11 @@
   - Result: failed before network/API calls because `APPSTORE_ISSUER_ID` is not available in the local environment.
   - Impact: `BUILD_CERTIFICATE_BASE64` and related signing secrets were not generated locally before the first workflow dispatch.
 
-No workflow attempts have been dispatched from this branch yet.
+- Workflow attempt 1:
+  - Run ID: `27955381487`
+  - URL: https://github.com/louwers/maplibre-native/actions/runs/27955381487
+  - Branch: `ios-ci-github-runner`
+  - Head SHA: `9024ab87ed89b75ca6480dfbd6fed101a203918b`
+  - Created: `2026-06-22T13:14:15Z`
+  - Status at dispatch check: `in_progress`
+  - Next step: stop and wait for `continue`; then inspect completion status with `gh`.
