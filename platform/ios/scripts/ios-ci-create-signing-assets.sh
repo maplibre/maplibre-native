@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-repos="${GITHUB_REPOSITORIES:-${GITHUB_REPOSITORY:-louwers/maplibre-native}}"
+repos="${GITHUB_REPOSITORIES:-${GITHUB_REPOSITORY:-maplibre/maplibre-native}}"
 bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibrenative.ci}"
 profile_name="${IOS_PROFILE_NAME:-MapLibre iOS CI Wildcard Development}"
 certificate_name="${IOS_CERTIFICATE_NAME:-MapLibre iOS CI}"
