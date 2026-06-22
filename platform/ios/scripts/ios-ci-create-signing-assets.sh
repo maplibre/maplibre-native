@@ -60,21 +60,42 @@ asc_request() {
   local path="$2"
   local body="${3:-}"
   local url="https://api.appstoreconnect.apple.com$path"
+  local response_path
+  local status
+
+  response_path="$(mktemp)"
 
   if [[ -n "$body" ]]; then
-    curl -fsS \
+    status="$(curl -sS \
       -X "$method" \
       -H "Authorization: Bearer $ASC_TOKEN" \
       -H "Content-Type: application/json" \
       -d "$body" \
-      "$url"
+      -o "$response_path" \
+      -w "%{http_code}" \
+      "$url")"
   else
-    curl -fsS \
+    status="$(curl -sS \
       -X "$method" \
       -H "Authorization: Bearer $ASC_TOKEN" \
       -H "Content-Type: application/json" \
-      "$url"
+      -o "$response_path" \
+      -w "%{http_code}" \
+      "$url")"
   fi
+
+  if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
+    echo "App Store Connect request failed: $method $path returned HTTP $status" >&2
+    if [[ "$path" == "/v1/certificates" && "$status" == "403" ]]; then
+      echo "Check that the API key has access to Certificates, Identifiers & Profiles." >&2
+    fi
+    cat "$response_path" >&2
+    rm -f "$response_path"
+    return 1
+  fi
+
+  cat "$response_path"
+  rm -f "$response_path"
 }
 
 require_env APPSTORE_ISSUER_ID

@@ -25,6 +25,9 @@
   - Command: `platform/ios/scripts/ios-ci-create-signing-assets.sh`
   - Result: failed before network/API calls because `APPSTORE_ISSUER_ID` is not available in the local environment.
   - Impact: `BUILD_CERTIFICATE_BASE64` and related signing secrets were not generated locally before the first workflow dispatch.
+  - Second attempt with provided App Store Connect issuer/key/private key reached App Store Connect but failed with HTTP `403` while creating an iOS development certificate.
+  - Confirmed Apple response: `FORBIDDEN_ERROR.PLA_NOT_ACCEPTED`; Apple says the team's Account Holder, Bart Louwers, must agree to the latest Program License Agreement.
+  - Impact: `BUILD_CERTIFICATE_BASE64` and `P12_PASSWORD` are still missing from `louwers/maplibre-native`; `BUILD_PROVISION_PROFILE_BASE64` and `KEYCHAIN_PASSWORD` already exist.
 
 - Workflow attempt 1:
   - Run ID: `27955381487`
@@ -32,5 +35,8 @@
   - Branch: `ios-ci-github-runner`
   - Head SHA: `9024ab87ed89b75ca6480dfbd6fed101a203918b`
   - Created: `2026-06-22T13:14:15Z`
-  - Status at dispatch check: `in_progress`
-  - Next step: stop and wait for `continue`; then inspect completion status with `gh`.
+  - `ios-build` job ID: `82723010744`
+  - `ios-build` result: failed in `Install Apple signing assets` because `BUILD_CERTIFICATE_BASE64` was empty.
+  - Logs: `ios-ci-github-runner/logs/27955381487/ios-build.log`
+  - Overall workflow status at last check: still `in_progress` because other jobs were still running.
+  - Next step: accept the latest Apple Developer Program License Agreement, rerun the bootstrap script, then dispatch the next workflow attempt.
