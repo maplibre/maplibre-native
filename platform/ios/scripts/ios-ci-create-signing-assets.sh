@@ -31,7 +31,7 @@ base64_one_line() {
   if base64 --help 2>&1 | grep -q -- '-w'; then
     base64 -w 0 "$1"
   else
-    base64 "$1" | tr -d '\n'
+    base64 -i "$1" | tr -d '\n'
   fi
 }
 
