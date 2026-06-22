@@ -49,4 +49,13 @@
   - `ios-build` result: failed in `Install Apple signing assets` because `BUILD_CERTIFICATE_BASE64` was empty.
   - Logs: `ios-ci-github-runner/logs/27955381487/ios-build.log`
   - Overall workflow status at last check: still `in_progress` because other jobs were still running.
-  - Next step: dispatch the next workflow attempt now that signing secrets exist.
+  - Next step: superseded by workflow attempt 2 after signing secrets were created.
+
+- Workflow attempt 2:
+  - Run ID: `27961865104`
+  - URL: https://github.com/louwers/maplibre-native/actions/runs/27961865104
+  - Branch: `ios-ci-github-runner`
+  - Head SHA: `44e59488472ccf59b1477d512126b42336a4ef5c`
+  - Created: `2026-06-22T14:54:37Z`
+  - Status at dispatch check: `queued`
+  - Next step: stop and wait for `continue`; then inspect completion status with `gh`.
