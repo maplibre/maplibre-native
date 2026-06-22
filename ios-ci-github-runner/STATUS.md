@@ -66,3 +66,12 @@
     - Moved `Build RenderTest .ipa and .xctest for AWS Device Farm` immediately after Bazel cache restore so the next run reaches it sooner.
     - Changed RenderTest and CppUnitTests packaging to copy app bundles into `Payload` with `ditto` instead of moving them from Xcode/Bazel build output directories.
   - Next step: push the workflow fix and dispatch attempt 3.
+
+- Workflow attempt 3:
+  - Run ID: `27967320700`
+  - URL: https://github.com/louwers/maplibre-native/actions/runs/27967320700
+  - Branch: `ios-ci-github-runner`
+  - Head SHA: `5cb892d0a980647f72745934b25a33f688a994cb`
+  - Created: `2026-06-22T16:18:55Z`
+  - Status at dispatch check: `queued`
+  - Next step: stop and wait for `continue`; then inspect completion status with `gh`.
