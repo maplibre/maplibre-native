@@ -4,7 +4,7 @@ There are two iOS apps available in the repo that you can use for MapLibre Nativ
 
 ## Objective-C App
 
-This app is available as "App" in the [generated Xcode project](./README.md).
+This app is available as "App" in the [generated Xcode project](./).
 
 The source code lives in `platform/ios/app`.
 
@@ -22,7 +22,7 @@ bazel run --//:renderer=metal //platform/ios:App
 
 The Swift App is mainly used to demo usage patterns in the [example documentation](./ios-documentation.md#examples).
 
-This app is available as "MapLibreApp" in the [generated Xcode project](./README.md).
+This app is available as "MapLibreApp" in the [generated Xcode project](./).
 
 The source code lives in `platform/ios/swift-app`.
 

@@ -8,8 +8,8 @@ namespace shaders {
 
 constexpr auto collisionShaderPrelude = R"(
 
-#define idCollisionDrawableUBO      idDrawableReservedVertexOnlyUBO
-#define idCollisionTilePropsUBO     drawableReservedUBOCount
+#define idCollisionDrawableUBO      drawableUBOStartId
+#define idCollisionTilePropsUBO     drawableUBOStartId + 1
 
 )";
 
