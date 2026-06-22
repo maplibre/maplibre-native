@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-repo="${GITHUB_REPOSITORY:-louwers/maplibre-native}"
+repos="${GITHUB_REPOSITORIES:-${GITHUB_REPOSITORY:-louwers/maplibre-native}}"
 bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-com.louwers.maplibrenative.ci}"
 profile_name="${IOS_PROFILE_NAME:-MapLibre iOS CI Wildcard Development}"
 certificate_name="${IOS_CERTIFICATE_NAME:-MapLibre iOS CI}"
@@ -211,11 +211,13 @@ profile_response="$(asc_request POST /v1/profiles "$profile_body")"
 profile_content="$(printf '%s' "$profile_response" | json_get data attributes profileContent)"
 printf '%s' "$profile_content" | base64 --decode >"$profile_path" 2>/dev/null || printf '%s' "$profile_content" | base64 -D >"$profile_path"
 
-gh secret set BUILD_CERTIFICATE_BASE64 --repo "$repo" --body "$(base64_one_line "$p12_path")"
-gh secret set P12_PASSWORD --repo "$repo" --body "$p12_password"
-gh secret set BUILD_PROVISION_PROFILE_BASE64 --repo "$repo" --body "$(base64_one_line "$profile_path")"
-gh secret set KEYCHAIN_PASSWORD --repo "$repo" --body "$keychain_password"
-gh variable set IOS_BUNDLE_ID_PREFIX --repo "$repo" --body "$bundle_id_prefix"
+for repo in $repos; do
+  gh secret set BUILD_CERTIFICATE_BASE64 --repo "$repo" --body "$(base64_one_line "$p12_path")"
+  gh secret set P12_PASSWORD --repo "$repo" --body "$p12_password"
+  gh secret set BUILD_PROVISION_PROFILE_BASE64 --repo "$repo" --body "$(base64_one_line "$profile_path")"
+  gh secret set KEYCHAIN_PASSWORD --repo "$repo" --body "$keychain_password"
+  gh variable set IOS_BUNDLE_ID_PREFIX --repo "$repo" --body "$bundle_id_prefix"
+done
 
 echo "Created signing certificate '$certificate_name' and provisioning profile '$profile_name'."
-echo "Updated signing secrets and IOS_BUNDLE_ID_PREFIX for $repo."
+echo "Updated signing secrets and IOS_BUNDLE_ID_PREFIX for: $repos."
