@@ -23,6 +23,15 @@ json_array_ids() {
   ruby -rjson -e 'puts JSON.parse(STDIN.read).fetch("data", []).map { |item| item.fetch("id") }'
 }
 
+json_api_created_certificate_ids() {
+  ruby -rjson -e '
+    JSON.parse(STDIN.read).fetch("data", []).each do |item|
+      attrs = item.fetch("attributes")
+      puts item.fetch("id") if attrs["certificateType"] == "IOS_DEVELOPMENT" && attrs["displayName"] == "Created via API"
+    end
+  '
+}
+
 urlencode() {
   ruby -rcgi -e 'print CGI.escape(ARGV.fetch(0))' "$1"
 }
@@ -131,6 +140,15 @@ openssl req -new -key "$private_key_path" -subj "/CN=$certificate_name" -out "$c
 
 ASC_TOKEN="$(make_jwt)"
 export ASC_TOKEN
+
+if [[ "${IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE:-}" == "1" ]]; then
+  certificates_response="$(asc_request GET '/v1/certificates?filter%5BcertificateType%5D=IOS_DEVELOPMENT&limit=10')"
+  while IFS= read -r certificate_id_to_delete; do
+    [[ -z "$certificate_id_to_delete" ]] && continue
+    echo "Deleting existing API-created iOS Development certificate '$certificate_id_to_delete'."
+    asc_request DELETE "/v1/certificates/$certificate_id_to_delete" >/dev/null
+  done < <(printf '%s' "$certificates_response" | json_api_created_certificate_ids)
+fi
 
 csr_content="$(cat "$csr_path")"
 certificate_response="$(asc_request POST /v1/certificates "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: "IOS_DEVELOPMENT", csrContent: ARGV.fetch(0) } } })' -- "$csr_content")")"
