@@ -112,7 +112,7 @@ ASC_TOKEN="$(make_jwt)"
 export ASC_TOKEN
 
 csr_content="$(cat "$csr_path")"
-certificate_response="$(asc_request POST /v1/certificates "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: "IOS_DEVELOPMENT", csrContent: ARGV.fetch(0) } } })' "$csr_content")")"
+certificate_response="$(asc_request POST /v1/certificates "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: "IOS_DEVELOPMENT", csrContent: ARGV.fetch(0) } } })' -- "$csr_content")")"
 certificate_id="$(printf '%s' "$certificate_response" | json_get data id)"
 certificate_content="$(printf '%s' "$certificate_response" | json_get data attributes certificateContent)"
 
@@ -125,7 +125,7 @@ bundle_response="$(asc_request GET "/v1/bundleIds?filter%5Bidentifier%5D=$bundle
 bundle_id="$(printf '%s' "$bundle_response" | json_get data 0 id)"
 
 if [[ -z "$bundle_id" ]]; then
-  bundle_response="$(asc_request POST /v1/bundleIds "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "bundleIds", attributes: { name: ARGV.fetch(0), identifier: ARGV.fetch(1), platform: "IOS" } } })' "$profile_name" "$wildcard_identifier")")"
+  bundle_response="$(asc_request POST /v1/bundleIds "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "bundleIds", attributes: { name: ARGV.fetch(0), identifier: ARGV.fetch(1), platform: "IOS" } } })' -- "$profile_name" "$wildcard_identifier")")"
   bundle_id="$(printf '%s' "$bundle_response" | json_get data id)"
 fi
 
@@ -147,7 +147,7 @@ profile_body="$(
         relationships: relationships,
       },
     })
-  ' "$profile_name" "$bundle_id" "$certificate_id" <<<"$device_ids"
+  ' -- "$profile_name" "$bundle_id" "$certificate_id" <<<"$device_ids"
 )"
 
 profile_response="$(asc_request POST /v1/profiles "$profile_body")"
