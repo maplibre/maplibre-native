@@ -93,7 +93,7 @@ class ManageOfflineRegionsExample: UIViewController, MLNMapViewDelegate {
         // Setup offline pack notification handlers.
         setupOfflinePackHandler()
 
-        /* 
+        /*
          Create a region that includes the current map camera, to be captured
          in an offline map. Note: Because tile count grows exponentially as zoom level
          increases, you should be conservative with your `toZoomLevel` setting.
@@ -127,7 +127,7 @@ class ManageOfflineRegionsExample: UIViewController, MLNMapViewDelegate {
     // MARK: - MLNOfflinePack notification handlers
 
     @objc func offlinePackProgressDidChange(notification: NSNotification) {
-        /* 
+        /*
          Get the offline pack this notification is referring to,
          along with its associated metadata.
          */
