@@ -44,7 +44,6 @@ require_env BUILD_PROVISION_PROFILE_BASE64
 require_env KEYCHAIN_PASSWORD
 
 ios_bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-org.maplibre}"
-maptiler_api_key="${MAPTILER_API_KEY:-0000000000}"
 runner_temp="${RUNNER_TEMP:-$(mktemp -d)}"
 
 certificate_path="$runner_temp/ios-ci-certificate.p12"
@@ -77,7 +76,7 @@ cat >"$repo_root/platform/darwin/bazel/config.bzl" <<CONFIG
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$team_id"
 APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "$profile_name"
 BUNDLE_ID_PREFIX = "$ios_bundle_id_prefix"
-API_KEY = "$maptiler_api_key"
+API_KEY = "0000000000"
 CONFIG
 
 echo "Installed provisioning profile '$profile_name' for team '$team_id'."

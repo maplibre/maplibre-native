@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Create iOS development signing assets for CI and upload them to GitHub Actions.
+# Create iOS development signing assets for CI and print them as YAML.
 #
 # Usage:
 #   APPSTORE_ISSUER_ID=<issuer-uuid> \
@@ -9,18 +9,15 @@
 #   platform/ios/scripts/ios-ci-create-signing-assets.sh
 #
 # Optional environment:
-#   GITHUB_REPOSITORY=maplibre/maplibre-native
-#   GITHUB_REPOSITORIES="maplibre/maplibre-native another-owner/another-repo"
 #   IOS_BUNDLE_ID_PREFIX=org.maplibre
 #   IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE=1
 #
 # The script creates a wildcard iOS Development provisioning profile for
-# "${IOS_BUNDLE_ID_PREFIX}.*" and stores the certificate, profile, passwords, and
-# bundle ID prefix as GitHub Actions secrets/variables.
+# "${IOS_BUNDLE_ID_PREFIX}.*" and prints the certificate, profile, passwords,
+# and bundle ID prefix as YAML for embedding in ios-ci.yml.
 
 set -euo pipefail
 
-repos="${GITHUB_REPOSITORIES:-${GITHUB_REPOSITORY:-maplibre/maplibre-native}}"
 bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-org.maplibre}"
 profile_name="${IOS_PROFILE_NAME:-MapLibre iOS CI Wildcard Development}"
 certificate_name="${IOS_CERTIFICATE_NAME:-MapLibre iOS CI}"
@@ -99,27 +96,46 @@ asc_request() {
   local url="https://api.appstoreconnect.apple.com$path"
   local response_path
   local status
+  local attempt=0
+  local max_attempts=4
+  local delay=5
 
   response_path="$(mktemp)"
 
-  if [[ -n "$body" ]]; then
-    status="$(curl -sS \
-      -X "$method" \
-      -H "Authorization: Bearer $ASC_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d "$body" \
-      -o "$response_path" \
-      -w "%{http_code}" \
-      "$url")"
-  else
-    status="$(curl -sS \
-      -X "$method" \
-      -H "Authorization: Bearer $ASC_TOKEN" \
-      -H "Content-Type: application/json" \
-      -o "$response_path" \
-      -w "%{http_code}" \
-      "$url")"
-  fi
+  while true; do
+    attempt=$(( attempt + 1 ))
+
+    if [[ -n "$body" ]]; then
+      status="$(curl -sS \
+        -X "$method" \
+        -H "Authorization: Bearer $ASC_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "$body" \
+        -o "$response_path" \
+        -w "%{http_code}" \
+        "$url")"
+    else
+      status="$(curl -sS \
+        -X "$method" \
+        -H "Authorization: Bearer $ASC_TOKEN" \
+        -H "Content-Type: application/json" \
+        -o "$response_path" \
+        -w "%{http_code}" \
+        "$url")"
+    fi
+
+    echo "$status" > "${asc_status_file:-/dev/null}"
+
+    if [[ "$status" -ge 500 && "$attempt" -lt "$max_attempts" ]]; then
+      echo "App Store Connect request failed: $method $path returned HTTP $status (attempt $attempt/$max_attempts, retrying in ${delay}s)" >&2
+      cat "$response_path" >&2
+      sleep "$delay"
+      delay=$(( delay * 2 ))
+      continue
+    fi
+
+    break
+  done
 
   if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
     echo "App Store Connect request failed: $method $path returned HTTP $status" >&2
@@ -139,11 +155,6 @@ require_env APPSTORE_ISSUER_ID
 require_env APPSTORE_KEY_ID
 require_env APPSTORE_PRIVATE_KEY
 
-command -v gh >/dev/null || {
-  echo "gh is required" >&2
-  exit 1
-}
-
 command -v openssl >/dev/null || {
   echo "openssl is required" >&2
   exit 1
@@ -151,6 +162,7 @@ command -v openssl >/dev/null || {
 
 work_dir="$(mktemp -d)"
 trap 'rm -rf "$work_dir"' EXIT
+asc_status_file="$work_dir/asc_status"
 
 p12_password="${P12_PASSWORD:-$(openssl rand -base64 32)}"
 keychain_password="${KEYCHAIN_PASSWORD:-$(openssl rand -base64 32)}"
@@ -187,7 +199,28 @@ if [[ "${IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE:-}" == "1" ]]; then
 fi
 
 csr_content="$(cat "$csr_path")"
-certificate_response="$(asc_request POST /v1/certificates "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: "IOS_DEVELOPMENT", csrContent: ARGV.fetch(0) } } })' -- "$csr_content")")"
+csr_body="$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: "IOS_DEVELOPMENT", csrContent: ARGV.fetch(0) } } })' -- "$csr_content")"
+if ! certificate_response="$(asc_request POST /v1/certificates "$csr_body")"; then
+  if [[ "$(cat "$asc_status_file" 2>/dev/null)" == "409" ]]; then
+    echo "A current iOS Development certificate already exists; deleting and retrying." >&2
+    certificates_response="$(asc_request GET '/v1/certificates?filter%5BcertificateType%5D=IOS_DEVELOPMENT&limit=10')"
+    while IFS= read -r certificate_id_to_delete; do
+      [[ -z "$certificate_id_to_delete" ]] && continue
+      echo "Deleting existing iOS Development certificate '$certificate_id_to_delete'."
+      asc_request DELETE "/v1/certificates/$certificate_id_to_delete" >/dev/null
+    done < <(printf '%s' "$certificates_response" | json_api_created_certificate_ids)
+    profile_filter="$(urlencode "$profile_name")"
+    profiles_response="$(asc_request GET "/v1/profiles?filter%5Bname%5D=$profile_filter&limit=200")"
+    while IFS= read -r profile_id_to_delete; do
+      [[ -z "$profile_id_to_delete" ]] && continue
+      echo "Deleting existing iOS CI provisioning profile '$profile_id_to_delete'."
+      asc_request DELETE "/v1/profiles/$profile_id_to_delete" >/dev/null
+    done < <(printf '%s' "$profiles_response" | json_profile_ids_with_name "$profile_name")
+    certificate_response="$(asc_request POST /v1/certificates "$csr_body")"
+  else
+    exit 1
+  fi
+fi
 certificate_id="$(printf '%s' "$certificate_response" | json_get data id)"
 certificate_content="$(printf '%s' "$certificate_response" | json_get data attributes certificateContent)"
 
@@ -229,13 +262,14 @@ profile_response="$(asc_request POST /v1/profiles "$profile_body")"
 profile_content="$(printf '%s' "$profile_response" | json_get data attributes profileContent)"
 printf '%s' "$profile_content" | base64 --decode >"$profile_path" 2>/dev/null || printf '%s' "$profile_content" | base64 -D >"$profile_path"
 
-for repo in $repos; do
-  gh secret set BUILD_CERTIFICATE_BASE64 --repo "$repo" --body "$(base64_one_line "$p12_path")"
-  gh secret set P12_PASSWORD --repo "$repo" --body "$p12_password"
-  gh secret set BUILD_PROVISION_PROFILE_BASE64 --repo "$repo" --body "$(base64_one_line "$profile_path")"
-  gh secret set KEYCHAIN_PASSWORD --repo "$repo" --body "$keychain_password"
-  gh variable set IOS_BUNDLE_ID_PREFIX --repo "$repo" --body "$bundle_id_prefix"
-done
+cat <<YAML
+# Generated by platform/ios/scripts/ios-ci-create-signing-assets.sh.
+# Paste the following block into the 'Install Apple signing assets' step env in ios-ci.yml.
+BUILD_CERTIFICATE_BASE64: $(base64_one_line "$p12_path")
+P12_PASSWORD: $p12_password
+BUILD_PROVISION_PROFILE_BASE64: $(base64_one_line "$profile_path")
+KEYCHAIN_PASSWORD: $keychain_password
+IOS_BUNDLE_ID_PREFIX: $bundle_id_prefix
+YAML
 
-echo "Created signing certificate '$certificate_name' and provisioning profile '$profile_name'."
-echo "Updated signing secrets and IOS_BUNDLE_ID_PREFIX for: $repos."
+echo "Created signing certificate '$certificate_name' and provisioning profile '$profile_name'." >&2
