@@ -438,10 +438,13 @@ void RendererBackend::initInstance() {
     extensions.insert(extensions.end(), debugExtensions.begin(), debugExtensions.end());
 
 #ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
-    appInfo.setApiVersion(VK_API_VERSION_1_1);
+    appInfo.setApiVersion(VK_API_VERSION_1_2);
 
-    const std::array<vk::ValidationFeatureEnableEXT, 2> validationFeatures = {
-        vk::ValidationFeatureEnableEXT::eGpuAssisted, vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot};
+    const std::vector<vk::ValidationFeatureEnableEXT> validationFeatures = {
+        vk::ValidationFeatureEnableEXT::eGpuAssisted,
+        vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot,
+        vk::ValidationFeatureEnableEXT::eSynchronizationValidation,
+    };
     const vk::ValidationFeaturesEXT validationFeatureInfo(validationFeatures);
 
     createInfo.setPNext(&validationFeatureInfo);
@@ -600,6 +603,14 @@ void RendererBackend::initDevice() {
                           .setPEnabledExtensionNames(extensions)
                           .setPEnabledFeatures(&physicalDeviceFeatures);
 
+#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+    vk::PhysicalDeviceVulkan12Features extraFeatures;
+    extraFeatures.setBufferDeviceAddress(true);
+    extraFeatures.setTimelineSemaphore(true);
+
+    createInfo.setPNext(&extraFeatures);
+#endif
+
     device = physicalDevice.createDeviceUnique(createInfo, nullptr, dispatcher);
 }
 
@@ -628,7 +639,13 @@ void RendererBackend::initCommandPool() {
 }
 
 void RendererBackend::destroyResources() {
-    if (device) device->waitIdle(dispatcher);
+    if (device) {
+        try {
+            device->waitIdle(dispatcher);
+        } catch (const vk::DeviceLostError& error) {
+            Log::Error(mbgl::Event::Render, "Vulkan device lost during backend shutdown");
+        }
+    }
 
     gfx::BackendScope scope(*this, gfx::BackendScope::ScopeType::Implicit);
     getThreadPool().runRenderJobs(true /* closeQueue */);
