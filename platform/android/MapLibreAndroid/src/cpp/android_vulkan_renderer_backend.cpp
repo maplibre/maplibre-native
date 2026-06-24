@@ -83,11 +83,23 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int, int) {
     }
 }
 
-void AndroidVulkanRendererBackend::enableFramebufferRead(bool value) {
-    getResource<AndroidVulkanRenderableResource>().enableSurfaceRead();
+void AndroidVulkanRendererBackend::enableFramebufferRead(bool) {
+    MBGL_VERIFY_THREAD(tid);
+
+    if (!hasResource()) {
+        return;
+    }
+
+    getResource<AndroidVulkanRenderableResource>().queueSurfaceRead();
 }
 
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
+    MBGL_VERIFY_THREAD(tid);
+
+    if (!hasResource()) {
+        return PremultipliedImage();
+    }
+
     return std::move(*getResource<AndroidVulkanRenderableResource>().readImage());
 }
 
