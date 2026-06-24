@@ -22,6 +22,10 @@ RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
       baseImpl(evaluatedProperties->baseImpl),
       renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
 
+const std::string& RenderLayer::getId() const {
+    return baseImpl->id;
+}
+
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
     transition(parameters);

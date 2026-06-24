@@ -1,3 +1,4 @@
+#include <limits>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -29,6 +30,7 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include "mbgl/renderer/render_tree.hpp"
 
 namespace mbgl {
 
@@ -158,7 +160,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
                              const std::shared_ptr<UpdateParameters>& updateParameters,
-                             const RenderTree&,
+                             const RenderTree& renderTree,
                              UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
@@ -291,132 +293,76 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                        !evaluated.get<FillOpacity>().isConstant();
 #endif
 
-        // Examine the FillColor, FillOpacity, and FillOutlineColor attributes in the resulting
-        // vertex attribute buffers to determine whether any are fully transparent.
-
-        for (const auto& pair : bucket.getFeatures()) {
-            const auto& feature = *pair.second;
+        for (const auto& featureEntry : bucket.getFeatures()) {
+            const auto& featureId = featureEntry.first;
+            const auto& feature = *featureEntry.second;
             expression::EvaluationContext evalContext(state.getZoom(), &feature);
             evalContext.withCanonicalTileID(&tileID.canonical);
             evalContext.withAvailableImages(&availableImages);
 
             FeatureState featureState;
             if (sourceForState) {
-                sourceForState->getFeatureState(featureState, baseImpl->sourceLayer, pair.first);
+                sourceForState->getFeatureState(featureState, baseImpl->sourceLayer, featureId);
                 evalContext.withFeatureState(&featureState);
             }
 
-            auto fillOpacity = evaluated.get<FillOpacity>().evaluate(evalContext, FillOpacity::defaultValue());
+            const auto fillOpacity = evaluated.get<FillOpacity>().evaluate(evalContext, FillOpacity::defaultValue());
             if (fillOpacity <= 0) {
-                // mbgl::Log::Info(Event::General, "Fill Feature " + pair.first + "not rendered");
                 continue;
             }
-            auto fillColor = evaluated.get<FillColor>().evaluate(evalContext, FillColor::defaultValue());
-            auto outlineColor = evaluated.get<FillOutlineColor>().evaluate(evalContext,
-                                                                           FillOutlineColor::defaultValue());
+            const auto fillColor = evaluated.get<FillColor>().evaluate(evalContext, FillColor::defaultValue());
+            const auto outlineColor = evaluated.get<FillOutlineColor>().evaluate(evalContext,
+                                                                                 FillOutlineColor::defaultValue());
             if (fillOpacity * fillColor.a > 0 || outlineColor.a > 0) {
-                stats.renderedFeatureIDs.insert(pair.first);
-                // mbgl::Log::Info(Event::General, "Fill Feature " + pair.first + " rendered");
-            } else {
-                // mbgl::Log::Info(Event::General, "Fill Feature " + pair.first + "not rendered");
+                constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+                constexpr bool nearClipped = false;
+                constexpr bool aligned = false;
+                constexpr bool is3d = false;
+                constexpr bool enableDepth = true;
+                constexpr std::int32_t subLayerIndex = 1;
+                const std::array<float, 2> translation{0, 0}; // TODO: from style evaluation
+                const style::TranslateAnchorType translationAnchor = style::TranslateAnchorType::Map; // TODO: ...
+                const std::optional<mbgl::Point<double>> origin = std::nullopt; // TODO: never set for fill?
+                const auto renderTreeParameters = renderTree.getParameters();
+
+                const auto matrix = LayerTweaker::getTileMatrix(
+                    tileID.toUnwrapped(),
+                    state,
+                    renderTreeParameters.transformParams,
+                    layerIndex, // TODO: Confirm that this is the same as PaintParameters::currentLayer
+                    translation,
+                    translationAnchor,
+                    origin,
+                    is3d,
+                    enableDepth,
+                    subLayerIndex,
+                    nearClipped,
+                    inViewportPixelUnits,
+                    aligned);
+
+                // NDC positive is up/right
+                auto left = std::numeric_limits<float>::max();
+                auto top = std::numeric_limits<float>::lowest();
+                auto right = std::numeric_limits<float>::lowest();
+                auto bottom = std::numeric_limits<float>::max();
+                for (std::size_t i = 0; i < bucket.vertices.elements(); ++i) {
+                    const auto& vertex = bucket.vertices.at(i);
+                    const vec4 view_pos{static_cast<double>(vertex.a1[0]), static_cast<double>(vertex.a1[1]), 0, 1};
+                    vec4 clip_pos;
+                    matrix::transformMat4(clip_pos, view_pos, matrix); // view -> clip space
+                    const vec2 ndc_pos{clip_pos[0] / clip_pos[3], clip_pos[1] / clip_pos[3]};
+
+                    left = std::min(left, static_cast<float>(ndc_pos[0]));
+                    top = std::max(top, static_cast<float>(ndc_pos[1]));
+                    right = std::max(right, static_cast<float>(ndc_pos[0]));
+                    bottom = std::min(bottom, static_cast<float>(ndc_pos[1]));
+                }
+
+                stats.renderedFeatures.insert({featureId, {left, top, right, bottom}});
             }
         }
-        // stats.featuresRendered += bucket.getFeatureIDs().size();
-        // stats.renderedFeatureIDs.insert(bucket.getFeatureIDs().begin(), bucket.getFeatureIDs().end());
 
         const auto fillVertexCount = bucket.vertices.elements();
-
-#if 0
-        // Examine the FillColor, FillOpacity, and FillOutlineColor attributes in the resulting
-        // vertex attribute buffers to determine whether any are fully transparent.
-
-        // Work out whether all features are visible because their color and opacity are not data-driven
-        // TODO: verify that setting color.a=0 *or* opacity=0 results in features not appearing
-        const bool dataDrivenColor = !propertiesAsUniforms.first.contains("color");
-        const bool uniformColorVisible = !dataDrivenColor &&
-                                         evaluated.get<FillColor>().constantOr(FillColor::defaultValue()).a > 0.0f;
-        const bool dataDrivenOpacity = !propertiesAsUniforms.first.contains("opacity");
-        const bool uniformVisible = !dataDrivenOpacity &&
-                                    evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()) > 0.0f;
-        const bool dataDrivenOutlineColor = !propertiesAsUniforms.first.contains("outline_color");
-        const bool uniformOutlineColorVisible =
-            !dataDrivenOutlineColor &&
-            evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()).a > 0.0f;
-        const bool allFeaturesVisible = (uniformVisible && uniformColorVisible) ||
-                                        (doOutline && uniformVisible && uniformOutlineColorVisible);
-
-        const auto zoomFrac = state.getZoomFraction();
-
-        const auto numOffsets = bucket.featureVertexOffsets.size();
-        for (std::size_t i = 0; i < numOffsets; ++i) {
-            const auto item = bucket.featureVertexOffsets[i];
-            if (!allFeaturesVisible) {
-                bool anyVertexVisible = uniformVisible;
-                if (!anyVertexVisible) {
-                    if (const auto& opacityAttr = vertexAttrs->get(idFillOpacityVertexAttribute)) {
-                        const auto startIndex = item.fillVertexOffset;
-                        const auto endIndex = (i + 1 < numOffsets) ? bucket.featureVertexOffsets[i + 1].fillVertexOffset
-                                                                   : bucket.vertices.elements();
-                        for (auto j = startIndex; j < endIndex; ++j) {
-                            const auto opacityValues =
-                                binders.template get<FillOpacity>()->template getPaintProperty<FillOpacity::Attribute>(
-                                    0, *opacityAttr, j);
-                            const auto opacityValue = mbgl::util::interpolate(
-                                opacityValues[0], opacityValues[1], zoomFrac);
-                            // TODO: are these "packed"?
-                            if (opacityValue > 0.0f) {
-                                anyVertexVisible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                // If all vertices have opacity==0, `color.a` and `outlineColor.a` don't matter
-                if (!anyVertexVisible) {
-                    continue;
-                }
-                anyVertexVisible = uniformColorVisible || uniformOutlineColorVisible;
-                if (!anyVertexVisible) {
-                    if (const auto& colorAttr = vertexAttrs->get(idFillColorVertexAttribute)) {
-                        const auto startIndex = item.fillVertexOffset;
-                        const auto endIndex = (i + 1 < numOffsets) ? bucket.featureVertexOffsets[i + 1].fillVertexOffset
-                                                                   : bucket.vertices.elements();
-                        for (auto j = startIndex; j < endIndex; ++j) {
-                            const auto colorValues =
-                                binders.template get<FillColor>()->template getPaintProperty<FillColor::Attribute>(
-                                    0, *colorAttr, j);
-                            const auto colorValue = unpack_mix_color(colorValues, zoomFrac);
-                            if (colorValue[3] > 0.0f) {
-                                anyVertexVisible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (!anyVertexVisible && doOutline) {
-                    if (const auto& outlineColorAttr = vertexAttrs->get(idFillOutlineColorVertexAttribute)) {
-                        const auto startIndex = item.lineVertexOffset;
-                        const auto endIndex = (i + 1 < numOffsets) ? bucket.featureVertexOffsets[i + 1].lineVertexOffset
-                                                                   : bucket.lineVertices.elements();
-                        for (auto j = startIndex; j < endIndex; ++j) {
-                            const auto colorValues = binders.template get<FillOutlineColor>()
-                                                         ->template getPaintProperty<FillOutlineColor::Attribute>(
-                                                             0, *outlineColorAttr, j);
-                            const auto colorValue = unpack_mix_color(colorValues, zoomFrac);
-                            if (colorValue[3] > 0.0f) {
-                                anyVertexVisible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (!anyVertexVisible) {
-                    continue;
-                }
-            }
-            // mbgl::Log::Info(Event::General, "Fill Feature " + item.featureId + " rendered");
-        }
-#endif
 
         if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,

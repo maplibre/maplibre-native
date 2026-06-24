@@ -970,9 +970,15 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
-    mbgl::unordered_set<std::string> allFeatures;
+    using LayerFeaturesMap = decltype(RenderLayer::Stats::renderedFeatures);
+    using SourceLayerId = std::pair<std::string, std::string>;
+    std::map<SourceLayerId, LayerFeaturesMap> allFeatures;
+
+    std::size_t totalFeatures = 0;
     for (const auto& item : items) {
+        const auto& sourceId = item.source->getId();
         auto& renderLayer = item.layer.get();
+        const auto& layerId = renderLayer.getId();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -986,18 +992,17 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
             observer->onRenderError(std::current_exception());
         }
 
-        if (!renderLayer.stats.renderedFeatureIDs.empty()) {
+        if (!renderLayer.stats.renderedFeatures.empty()) {
             mbgl::Log::Info(Event::Render,
                             "RenderLayer " + renderLayer.getID() + ": " +
-                                std::to_string(renderLayer.stats.renderedFeatureIDs.size()) + " features");
-            allFeatures.insert(std::make_move_iterator(renderLayer.stats.renderedFeatureIDs.begin()),
-                               std::make_move_iterator(renderLayer.stats.renderedFeatureIDs.end()));
-            renderLayer.stats.renderedFeatureIDs.clear();
+                                std::to_string(renderLayer.stats.renderedFeatures.size()) + " features");
+            totalFeatures += renderLayer.stats.renderedFeatures.size();
+            allFeatures.insert({{sourceId, layerId}, std::move(renderLayer.stats.renderedFeatures)});
         }
     }
     addChanges(changes);
 
-    mbgl::Log::Info(Event::Render, "Total rendered features:  " + std::to_string(allFeatures.size()) + " features");
+    mbgl::Log::Info(Event::Render, "Total rendered features:  " + std::to_string(totalFeatures) + " features");
 }
 
 void RenderOrchestrator::processChanges() {

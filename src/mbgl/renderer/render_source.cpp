@@ -85,6 +85,10 @@ void RenderSource::onTileAction(OverscaledTileID id, std::string sourceID, TileO
     observer->onTileAction(*this, op, id, sourceID);
 }
 
+const std::string& RenderSource::getId() const {
+    return baseImpl->id;
+}
+
 bool RenderSource::isEnabled() const {
     return enabled;
 }

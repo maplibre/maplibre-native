@@ -90,6 +90,8 @@ protected:
 public:
     virtual ~RenderLayer() = default;
 
+    const std::string& getId() const;
+    
     // Begin transitions for any properties that have changed since the last frame.
     virtual void transition(const TransitionParameters&) = 0;
 
@@ -318,10 +320,14 @@ protected:
     bool isRenderable{false};
 
     public:
+        struct FeatureInfo {
+            std::array<float, 4> bounds;
+        };
+
     struct Stats {
         size_t drawablesAdded = 0;
         size_t drawablesRemoved = 0;
-        mbgl::unordered_set<std::string> renderedFeatureIDs;
+        mbgl::unordered_map<std::string, FeatureInfo> renderedFeatures;
     } stats;
 
 private:

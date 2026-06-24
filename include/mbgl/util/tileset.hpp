@@ -4,7 +4,6 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/geo.hpp>
 
-#include <tuple>
 #include <vector>
 #include <string>
 #include <cstdint>

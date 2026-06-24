@@ -53,6 +53,8 @@ public:
     static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&, const TaggedScheduler&);
     ~RenderSource() override;
 
+    const std::string& getId() const;
+
     bool isEnabled() const;
     virtual bool isLoaded() const = 0;
 
