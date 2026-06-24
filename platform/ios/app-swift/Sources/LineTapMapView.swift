@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(LineTapMap)
+/// #-example-code(LineTapMap)
 struct LineTapMap: UIViewRepresentable {
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()

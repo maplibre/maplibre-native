@@ -14,7 +14,7 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
 
 #ifdef WORK_DIRECTORY

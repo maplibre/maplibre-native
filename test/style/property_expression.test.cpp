@@ -346,7 +346,7 @@ TEST(PropertyExpression, WithinExpression) {
 
     // evaluation test with valid geojson source and valid point features
     {
-        auto getPointFeature = [&canonicalTileID](const Point<double> &testPoint) -> StubGeometryTileFeature {
+        auto getPointFeature = [&canonicalTileID](const Point<double>& testPoint) -> StubGeometryTileFeature {
             auto geoPoint = convertGeometry(testPoint, canonicalTileID);
             StubGeometryTileFeature pointFeature(FeatureType::Point, geoPoint);
             return pointFeature;
@@ -483,7 +483,7 @@ TEST(PropertyExpression, WithinExpressionAntiMeridian) {
         ASSERT_TRUE(expression);
         PropertyExpression<bool> propExpr(std::move(expression));
 
-        auto getPointFeature = [&canonicalTileID](const Point<double> &testPoint) -> StubGeometryTileFeature {
+        auto getPointFeature = [&canonicalTileID](const Point<double>& testPoint) -> StubGeometryTileFeature {
             auto geoPoint = convertGeometry(testPoint, canonicalTileID);
             StubGeometryTileFeature pointFeature(FeatureType::Point, geoPoint);
             return pointFeature;
@@ -650,16 +650,16 @@ TEST(PropertyExpression, DistanceExpression) {
         EXPECT_NEAR(59.845, evaluatedResult, 0.01);
     }
 
-    const auto getFeature = [](const std::string &name, FeatureType type, const CanonicalTileID &canonical) {
+    const auto getFeature = [](const std::string& name, FeatureType type, const CanonicalTileID& canonical) {
         const auto geometryInput = mbgl::util::read_file(std::string("test/fixtures/geometry_data/" + name));
         mapbox::geojson::geojson geojson{mapbox::geojson::parse(geometryInput)};
-        const auto &geometry = geojson.match(
-            [](const mapbox::geometry::geometry<double> &geometrySet) { return mbgl::Feature(geometrySet).geometry; },
-            [](const mapbox::feature::feature<double> &feature) { return mbgl::Feature(feature).geometry; },
-            [](const mapbox::feature::feature_collection<double> &features) {
+        const auto& geometry = geojson.match(
+            [](const mapbox::geometry::geometry<double>& geometrySet) { return mbgl::Feature(geometrySet).geometry; },
+            [](const mapbox::feature::feature<double>& feature) { return mbgl::Feature(feature).geometry; },
+            [](const mapbox::feature::feature_collection<double>& features) {
                 return mbgl::Feature(features.front()).geometry;
             },
-            [](const auto &) { return mapbox::geometry::empty(); });
+            [](const auto&) { return mapbox::geometry::empty(); });
         return StubGeometryTileFeature(type, convertGeometry(geometry, canonical));
     };
 
