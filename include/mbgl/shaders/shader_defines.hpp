@@ -521,9 +521,15 @@ enum {
 };
 
 enum {
-    idSymbolPosOffsetVertexAttribute,
-    idSymbolDataVertexAttribute,
-    idSymbolPixelOffsetVertexAttribute,
+    idSymbolPosVertexAttribute,
+    
+    idSymbolPosScaleAttribute,
+    idSymbolOffsetTlTrAttribute,
+    idSymbolOffsetBlBrAttribute,
+    idSymbolTextureRectAttribute,
+    idSymbolPixelOffsetAttribute,
+    idSymbolSizeSdfAttribute,
+    
     idSymbolProjectedPosVertexAttribute,
     idSymbolFadeOpacityVertexAttribute,
 

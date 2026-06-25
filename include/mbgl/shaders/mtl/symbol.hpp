@@ -81,22 +81,27 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 9> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float4 pixeloffset [[attribute(2)]];
-    float3 projected_pos [[attribute(3)]];
-    float fade_opacity [[attribute(4)]];
+    float2 pos [[attribute(0)]];
+
+    float4 pos_scale [[attribute(1)]];
+    float4 offset_tltr [[attribute(2)]];
+    float4 offset_blbr [[attribute(3)]];
+    float4 texture_rect [[attribute(4)]];
+    float4 pixeloffset [[attribute(5)]];
+    float2 size_sdf [[attribute(6)]];
+    float3 projected_pos [[attribute(7)]];
+    float fade_opacity [[attribute(8)]];
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(5)]];
+    float opacity [[attribute(9)]];
 #endif
 };
 
@@ -140,15 +145,28 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             };
         }
 
-    const float2 a_pos = vertx.pos_offset.xy;
-    const float2 a_offset = vertx.pos_offset.zw;
+    const float2 a_pos = vertx.pos_scale.xy;
+    float2 a_offset;
+    if (vertx.pos.x == 0) {
+        if (vertx.pos.y == 0) {
+            a_offset = vertx.offset_tltr.xy; //tl
+        } else {
+            a_offset = vertx.offset_blbr.xy; //bl
+        }
+    } else {
+        if (vertx.pos.y == 0) {
+            a_offset = vertx.offset_tltr.zw; //tr
+        } else {
+            a_offset = vertx.offset_blbr.zw; //br
+        }
+    }
 
-    const float2 a_tex = vertx.data.xy;
-    const float2 a_size = vertx.data.zw;
+    const float2 a_tex = vertx.texture_rect.xy + vertx.pos * vertx.texture_rect.zw;
+    const float2 a_size = vertx.size_sdf;
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const float2 a_pxoffset = vertx.pixeloffset.xy;
-    const float2 a_minFontScale = vertx.pixeloffset.zw / 256.0;
+    const float2 a_pxoffset = vertx.pixeloffset.xy + vertx.pos * (vertx.pixeloffset.zw - vertx.pixeloffset.xy);
+    const float2 a_minFontScale = vertx.pos_scale.zw / 256.0;
 
     const float segment_angle = -vertx.projected_pos[2];
 
@@ -237,34 +255,39 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 10> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 13> instanceAttributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float4 pixeloffset [[attribute(2)]];
-    float3 projected_pos [[attribute(3)]];
-    float fade_opacity [[attribute(4)]];
+    float2 pos [[attribute(0)]];
+
+    float4 pos_scale [[attribute(1)]];
+    float4 offset_tltr [[attribute(2)]];
+    float4 offset_blbr [[attribute(3)]];
+    float4 texture_rect [[attribute(4)]];
+    float4 pixeloffset [[attribute(5)]];
+    float2 size_sdf [[attribute(6)]];
+    float3 projected_pos [[attribute(7)]];
+    float fade_opacity [[attribute(8)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(5)]];
+    float4 fill_color [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(6)]];
+    float4 halo_color [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(7)]];
+    float opacity [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(8)]];
+    float halo_width [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(9)]];
+    float halo_blur [[attribute(13)]];
 #endif
 };
 
@@ -315,14 +338,27 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
-    const float2 a_pos = vertx.pos_offset.xy;
-    const float2 a_offset = vertx.pos_offset.zw;
+    const float2 a_pos = vertx.pos_scale.xy;
+    float2 a_offset;
+    if (vertx.pos.x == 0) {
+        if (vertx.pos.y == 0) {
+            a_offset = vertx.offset_tltr.xy; //tl
+        } else {
+            a_offset = vertx.offset_blbr.xy; //bl
+        }
+    } else {
+        if (vertx.pos.y == 0) {
+            a_offset = vertx.offset_tltr.zw; //tr
+        } else {
+            a_offset = vertx.offset_blbr.zw; //br
+        }
+    }
 
-    const float2 a_tex = vertx.data.xy;
-    const float2 a_size = vertx.data.zw;
+    const float2 a_tex = vertx.texture_rect.xy + vertx.pos * vertx.texture_rect.zw;
+    const float2 a_size = vertx.size_sdf;
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const float2 a_pxoffset = vertx.pixeloffset.xy;
+    const float2 a_pxoffset = vertx.pixeloffset.xy + vertx.pos * (vertx.pixeloffset.zw - vertx.pixeloffset.xy);
 
     const float segment_angle = -vertx.projected_pos[2];
 
@@ -470,8 +506,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 13> instanceAttributes;
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
@@ -481,25 +517,31 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 #define ICON 0.0
 
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float3 projected_pos [[attribute(2)]];
-    float fade_opacity [[attribute(3)]];
+    float2 pos [[attribute(0)]];
+
+    float4 pos_scale [[attribute(1)]];
+    float4 offset_tltr [[attribute(2)]];
+    float4 offset_blbr [[attribute(3)]];
+    float4 texture_rect [[attribute(4)]];
+    float4 pixeloffset [[attribute(5)]];
+    float2 size_sdf [[attribute(6)]];
+    float3 projected_pos [[attribute(7)]];
+    float fade_opacity [[attribute(8)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(4)]];
+    float4 fill_color [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(5)]];
+    float4 halo_color [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(6)]];
+    float opacity [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(7)]];
+    float halo_width [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(8)]];
+    float halo_blur [[attribute(13)]];
 #endif
 };
 
@@ -552,11 +594,24 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
-    const float2 a_pos = vertx.pos_offset.xy;
-    const float2 a_offset = vertx.pos_offset.zw;
+    const float2 a_pos = vertx.pos_scale.xy;
+    float2 a_offset;
+    if (vertx.pos.x == 0) {
+        if (vertx.pos.y == 0) {
+            a_offset = vertx.offset_tltr.xy; //tl
+        } else {
+            a_offset = vertx.offset_blbr.xy; //bl
+        }
+    } else {
+        if (vertx.pos.y == 0) {
+            a_offset = vertx.offset_tltr.zw; //tr
+        } else {
+            a_offset = vertx.offset_blbr.zw; //br
+        }
+    }
 
-    const float2 a_tex = vertx.data.xy;
-    const float2 a_size = vertx.data.zw;
+    const float2 a_tex = vertx.texture_rect.xy + vertx.pos * vertx.texture_rect.zw;
+    const float2 a_size = vertx.size_sdf;
 
     const float a_size_min = floor(a_size[0] * 0.5);
     const float is_sdf = a_size[0] - 2.0 * a_size_min;

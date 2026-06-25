@@ -76,12 +76,36 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
         paintProperties.emplace(std::piecewise_construct,
                                 std::forward_as_tuple(pair.first),
                                 std::forward_as_tuple(PaintProperties{
-                                    .iconBinders = {RenderSymbolLayer::iconPaintProperties(evaluated), zoom},
-                                    .textBinders = {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
+                                    .iconBinders = {iconPaintProperties(evaluated), zoom},
+                                    .textBinders = {textPaintProperties(evaluated), zoom}}));
     }
 }
 
 SymbolBucket::~SymbolBucket() = default;
+
+// static
+style::IconPaintProperties::PossiblyEvaluated SymbolBucket::iconPaintProperties(
+    const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_) {
+    return style::IconPaintProperties::PossiblyEvaluated{evaluated_.get<style::IconOpacity>(),
+                                                         evaluated_.get<style::IconColor>(),
+                                                         evaluated_.get<style::IconHaloColor>(),
+                                                         evaluated_.get<style::IconHaloWidth>(),
+                                                         evaluated_.get<style::IconHaloBlur>(),
+                                                         evaluated_.get<style::IconTranslate>(),
+                                                         evaluated_.get<style::IconTranslateAnchor>()};
+}
+
+// static
+style::TextPaintProperties::PossiblyEvaluated SymbolBucket::textPaintProperties(
+    const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_) {
+    return style::TextPaintProperties::PossiblyEvaluated{evaluated_.get<style::TextOpacity>(),
+                                                         evaluated_.get<style::TextColor>(),
+                                                         evaluated_.get<style::TextHaloColor>(),
+                                                         evaluated_.get<style::TextHaloWidth>(),
+                                                         evaluated_.get<style::TextHaloBlur>(),
+                                                         evaluated_.get<style::TextTranslate>(),
+                                                         evaluated_.get<style::TextTranslateAnchor>()};
+}
 
 void SymbolBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;
@@ -97,15 +121,15 @@ bool SymbolBucket::hasData() const {
 }
 
 bool SymbolBucket::hasTextData() const {
-    return !text.segments.empty();
+    return !text.vertices().empty();
 }
 
 bool SymbolBucket::hasIconData() const {
-    return !icon.segments.empty();
+    return !icon.vertices().empty();
 }
 
 bool SymbolBucket::hasSdfIconData() const {
-    return !sdfIcon.segments.empty();
+    return !sdfIcon.vertices().empty();
 }
 
 bool SymbolBucket::hasIconCollisionBoxData() const {
