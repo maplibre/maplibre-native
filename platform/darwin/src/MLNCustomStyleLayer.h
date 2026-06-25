@@ -30,8 +30,12 @@ typedef struct MLNStyleLayerDrawingContext {
   CGFloat pitch;
   /// The vertical field of view, in degrees, for the map’s perspective.
   CGFloat fieldOfView;
-  /// A 4×4 matrix representing the map view’s current projection state.
+  /// Standard projection matrix (nearZ = 1 tile unit). Use for 2D/flat geometry.
   MLNMatrix4 projectionMatrix;
+  /// Same projection matrix used by fill-extrusion depth writes. Use this
+  /// instead of ``projectionMatrix`` when your 3D geometry must occlude or be
+  /// occluded by fill-extrusion layers.
+  MLNMatrix4 nearClippedProjectionMatrix;
 } MLNStyleLayerDrawingContext;
 
 /// A style layer that is rendered by Metal code that you provide.

@@ -18,6 +18,10 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParame
     mat4 projMatrix;
     state.getProjMatrix(projMatrix);
     projectionMatrix = projMatrix;
+
+    // Populate the near-clipped matrix so custom layers that render 3D geometry
+    // alongside fill-extrusion can use the same depth space.
+    nearClippedProjectionMatrix = paintParameters.transformParams.nearClippedProjMatrix;
 }
 
 } // namespace style
