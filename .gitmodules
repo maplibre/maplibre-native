@@ -113,3 +113,6 @@
 [submodule "vendor/wgpu-native"]
 	path = vendor/wgpu-native
 	url = https://github.com/gfx-rs/wgpu-native.git
+[submodule "vendor/metal-cpp"]
+	path = vendor/metal-cpp
+	url = https://github.com/apple/metal-cpp
