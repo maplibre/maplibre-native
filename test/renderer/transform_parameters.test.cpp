@@ -18,16 +18,12 @@ struct Matrices {
 static Matrices makeMatrices(double zoom, double pitch = 0.0) {
     Transform transform;
     transform.resize({512, 512});
-    transform.jumpTo(CameraOptions()
-                         .withCenter(LatLng{37.7749, -122.4194})
-                         .withZoom(zoom)
-                         .withPitch(pitch));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{37.7749, -122.4194}).withZoom(zoom).withPitch(pitch));
     const TransformState& state = transform.getState();
 
     Matrices m;
     state.getProjMatrix(m.proj);
-    state.getProjMatrix(m.nearClipped,
-                        static_cast<uint16_t>(0.1 * state.getCameraToCenterDistance()));
+    state.getProjMatrix(m.nearClipped, static_cast<uint16_t>(0.1 * state.getCameraToCenterDistance()));
     return m;
 }
 
@@ -55,8 +51,7 @@ TEST(TransformParameters, NearClippedMatrixDiffersFromProjMatrix) {
 TEST(TransformParameters, NearClippedMatrixSharesXYPerspective) {
     const auto m = makeMatrices(15.0, 45.0);
     for (int i = 0; i < 8; ++i) {
-        EXPECT_DOUBLE_EQ(m.proj[i], m.nearClipped[i])
-            << "XY perspective mismatch at index " << i;
+        EXPECT_DOUBLE_EQ(m.proj[i], m.nearClipped[i]) << "XY perspective mismatch at index " << i;
     }
 }
 
