@@ -123,8 +123,7 @@ TEST(CustomLayer, RenderParametersNearClippedMatrixIsPopulated) {
             ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
-    map.getStyle().addLayer(
-        std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
+    map.getStyle().addLayer(std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
 
     frontend.render(map);
 
@@ -144,8 +143,7 @@ TEST(CustomLayer, RenderParametersNearClippedMatrixIsPopulated) {
 
     // XY perspective terms (columns 0–1, indices 0–7) must be identical.
     for (int i = 0; i < 8; ++i) {
-        EXPECT_DOUBLE_EQ(host->lastParams.projectionMatrix[i],
-                         host->lastParams.nearClippedProjectionMatrix[i])
+        EXPECT_DOUBLE_EQ(host->lastParams.projectionMatrix[i], host->lastParams.nearClippedProjectionMatrix[i])
             << "XY perspective mismatch at index " << i;
     }
 }

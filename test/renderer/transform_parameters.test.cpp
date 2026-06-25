@@ -13,10 +13,7 @@ using namespace mbgl;
 static TransformParameters makeParams(double zoom, double pitch = 0.0) {
     Transform transform;
     transform.resize({512, 512});
-    transform.jumpTo(CameraOptions()
-                         .withCenter(LatLng{37.7749, -122.4194})
-                         .withZoom(zoom)
-                         .withPitch(pitch));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{37.7749, -122.4194}).withZoom(zoom).withPitch(pitch));
     return TransformParameters(transform.getState());
 }
 
@@ -45,8 +42,7 @@ TEST(TransformParameters, NearClippedMatrixDiffersFromProjMatrix) {
 TEST(TransformParameters, NearClippedMatrixSharesXYPerspective) {
     const auto p = makeParams(15.0, 45.0);
     for (int i = 0; i < 8; ++i) {
-        EXPECT_DOUBLE_EQ(p.projMatrix[i], p.nearClippedProjMatrix[i])
-            << "XY perspective mismatch at index " << i;
+        EXPECT_DOUBLE_EQ(p.projMatrix[i], p.nearClippedProjMatrix[i]) << "XY perspective mismatch at index " << i;
     }
 }
 
@@ -64,9 +60,7 @@ TEST(TransformParameters, NearClippedMatrixHasSmallerDepthRangeAtZoom15) {
 TEST(TransformParameters, NearClippedMatrixDiffersAtVariousZooms) {
     for (double zoom : {5.0, 10.0, 15.0, 17.0}) {
         const auto p = makeParams(zoom, 30.0);
-        EXPECT_NE(p.projMatrix[10], p.nearClippedProjMatrix[10])
-            << "matrices identical at zoom " << zoom;
-        EXPECT_NE(p.projMatrix[14], p.nearClippedProjMatrix[14])
-            << "matrices identical at zoom " << zoom;
+        EXPECT_NE(p.projMatrix[10], p.nearClippedProjMatrix[10]) << "matrices identical at zoom " << zoom;
+        EXPECT_NE(p.projMatrix[14], p.nearClippedProjMatrix[14]) << "matrices identical at zoom " << zoom;
     }
 }
