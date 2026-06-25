@@ -18,10 +18,7 @@ struct Matrices {
 static Matrices makeMatrices(double zoom, double pitch = 0.0) {
     Transform transform;
     transform.resize({512, 512});
-    transform.jumpTo(CameraOptions()
-                         .withCenter(LatLng{37.7749, -122.4194})
-                         .withZoom(zoom)
-                         .withPitch(pitch));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{37.7749, -122.4194}).withZoom(zoom).withPitch(pitch));
     const TransformState& state = transform.getState();
 
     Matrices m;
