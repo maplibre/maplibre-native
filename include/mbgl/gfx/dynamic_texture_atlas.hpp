@@ -37,6 +37,7 @@ public:
                                       const ImageVersionMap& versionMap);
 
     void removeTextures(const std::vector<TextureHandle>& textureHandles, const DynamicTexturePtr& dynamicTexture);
+    void removeUnusedDynamicTextures();
 
 private:
     Context& context;
