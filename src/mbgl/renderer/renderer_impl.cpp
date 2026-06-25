@@ -29,7 +29,7 @@
 #include <Metal/MTLCaptureManager.hpp>
 #include <Metal/MTLCaptureScope.hpp>
 /// Enable programmatic Metal frame captures for specific frame numbers.
-/// Requries iOS 13
+/// Requires iOS 13
 constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
