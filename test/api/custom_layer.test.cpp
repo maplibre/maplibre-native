@@ -17,6 +17,7 @@
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
 #include <memory>
+#include <optional>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -94,7 +95,7 @@ public:
 // Captures CustomLayerRenderParameters during render for inspection.
 class CapturingLayer : public mbgl::style::CustomLayerHost {
 public:
-    mbgl::style::CustomLayerRenderParameters lastParams{};
+    std::optional<mbgl::style::CustomLayerRenderParameters> lastParams;
     bool renderCalled = false;
 
     void initialize() override {}
@@ -123,27 +124,30 @@ TEST(CustomLayer, RenderParametersNearClippedMatrixIsPopulated) {
             ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
-    map.getStyle().addLayer(std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
+    map.getStyle().addLayer(
+        std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
 
     frontend.render(map);
 
     ASSERT_TRUE(host->renderCalled) << "render() was never called";
+    ASSERT_TRUE(host->lastParams.has_value());
+    const auto& p = host->lastParams.value();
 
     // Both matrices must be non-identity.
     const mat4 identity = matrix::identity4();
-    EXPECT_NE(host->lastParams.projectionMatrix, identity);
-    EXPECT_NE(host->lastParams.nearClippedProjectionMatrix, identity);
+    EXPECT_NE(p.projectionMatrix, identity);
+    EXPECT_NE(p.nearClippedProjectionMatrix, identity);
 
     // The two matrices must differ — they use different near clip planes.
-    EXPECT_NE(host->lastParams.projectionMatrix, host->lastParams.nearClippedProjectionMatrix);
+    EXPECT_NE(p.projectionMatrix, p.nearClippedProjectionMatrix);
 
     // Depth coefficients (column-major indices 10 and 14) must differ.
-    EXPECT_NE(host->lastParams.projectionMatrix[10], host->lastParams.nearClippedProjectionMatrix[10]);
-    EXPECT_NE(host->lastParams.projectionMatrix[14], host->lastParams.nearClippedProjectionMatrix[14]);
+    EXPECT_NE(p.projectionMatrix[10], p.nearClippedProjectionMatrix[10]);
+    EXPECT_NE(p.projectionMatrix[14], p.nearClippedProjectionMatrix[14]);
 
     // XY perspective terms (columns 0–1, indices 0–7) must be identical.
     for (int i = 0; i < 8; ++i) {
-        EXPECT_DOUBLE_EQ(host->lastParams.projectionMatrix[i], host->lastParams.nearClippedProjectionMatrix[i])
+        EXPECT_DOUBLE_EQ(p.projectionMatrix[i], p.nearClippedProjectionMatrix[i])
             << "XY perspective mismatch at index " << i;
     }
 }
