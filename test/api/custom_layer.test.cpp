@@ -124,7 +124,8 @@ TEST(CustomLayer, RenderParametersNearClippedMatrixIsPopulated) {
             ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
-    map.getStyle().addLayer(std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
+    map.getStyle().addLayer(
+        std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
 
     frontend.render(map);
 
@@ -144,10 +145,13 @@ TEST(CustomLayer, RenderParametersNearClippedMatrixIsPopulated) {
     EXPECT_NE(p.projectionMatrix[10], p.nearClippedProjectionMatrix[10]);
     EXPECT_NE(p.projectionMatrix[14], p.nearClippedProjectionMatrix[14]);
 
-    // XY perspective terms (columns 0–1, indices 0–7) must be identical.
-    for (int i = 0; i < 8; ++i) {
-        EXPECT_DOUBLE_EQ(p.projectionMatrix[i], p.nearClippedProjectionMatrix[i])
-            << "XY perspective mismatch at index " << i;
+    // Rows 0 and 1 of the combined matrix are unaffected by the near plane
+    // (column-major: row 0 = indices 0,4,8,12; row 1 = indices 1,5,9,13).
+    for (int col = 0; col < 4; ++col) {
+        EXPECT_DOUBLE_EQ(p.projectionMatrix[col * 4 + 0], p.nearClippedProjectionMatrix[col * 4 + 0])
+            << "row 0 mismatch at col " << col;
+        EXPECT_DOUBLE_EQ(p.projectionMatrix[col * 4 + 1], p.nearClippedProjectionMatrix[col * 4 + 1])
+            << "row 1 mismatch at col " << col;
     }
 }
 
