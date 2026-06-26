@@ -27,9 +27,7 @@ struct CustomLayerRenderParameters {
     /// Use this for 2D/flat custom geometry.
     std::array<double, 16> projectionMatrix;
 
-    /// Same projection matrix used by fill-extrusion depth writes. Use this
-    /// instead of `projectionMatrix` when your 3D geometry must occlude or be
-    /// occluded by fill-extrusion layers.
+    /// A 4×4 matrix representing the map view’s current near clip projection state.
     std::array<double, 16> nearClippedProjectionMatrix;
 
     CustomLayerRenderParameters(const PaintParameters&);

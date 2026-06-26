@@ -32,9 +32,7 @@ typedef struct MLNStyleLayerDrawingContext {
   CGFloat fieldOfView;
   /// Standard projection matrix (nearZ = 1 tile unit). Use for 2D/flat geometry.
   MLNMatrix4 projectionMatrix;
-  /// Same projection matrix used by fill-extrusion depth writes. Use this
-  /// instead of ``projectionMatrix`` when your 3D geometry must occlude or be
-  /// occluded by fill-extrusion layers.
+  /// A 4×4 matrix representing the map view’s current near clip projection state.
   MLNMatrix4 nearClippedProjectionMatrix;
 } MLNStyleLayerDrawingContext;
 
