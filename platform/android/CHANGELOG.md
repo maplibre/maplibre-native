@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## 13.3.1
+
+### ✨ Features and improvements
+
+- Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
+
+### 🐞 Bug fixes
+
+- fix(core): Update image descriptor sets when removing textures ([#4351](https://github.com/maplibre/maplibre-native/pull/4351)).
+- Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
+- core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
+
 ## 13.3.0
 
 ### ✨ Features and improvements
