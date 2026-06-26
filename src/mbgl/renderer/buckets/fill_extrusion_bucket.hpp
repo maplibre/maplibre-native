@@ -31,8 +31,8 @@ public:
 
     FillExtrusionBucket(const PossiblyEvaluatedLayoutProperties&,
                         const std::map<std::string, Immutable<style::LayerProperties>>&,
-                        float,
-                        uint32_t);
+                        float zoom,
+                        uint32_t overscaling);
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,

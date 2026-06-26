@@ -16,7 +16,8 @@ public:
                  std::unique_ptr<GeometryTileLayer> sourceLayer_)
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
-          mode(parameters.mode) {
+          mode(parameters.mode),
+          retainFeaturesById(parameters.retainFeaturesById) {
         assert(!group.empty());
         auto leaderLayerProperties = staticImmutableCast<style::CircleLayerProperties>(group.front());
         const auto& unevaluatedLayout = leaderLayerProperties->layerImpl().layout;
@@ -62,6 +63,7 @@ public:
                       const bool,
                       const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<CircleBucket>(layerPropertiesMap, mode, zoom);
+        bucket->setRetainFeaturesById(retainFeaturesById);
 
         for (auto& circleFeature : features) {
             const auto i = circleFeature.i;
@@ -161,6 +163,7 @@ private:
     const float zoom;
     const MapMode mode;
     std::string sourceLayerID;
+    bool retainFeaturesById = false;
 };
 
 } // namespace mbgl

@@ -133,6 +133,22 @@ public:
      */
     float pixelRatio() const;
 
+    /**
+     * @brief Sets whether to capture rendered features for debugging purposes.
+     * By default, it is set to false.
+     *
+     * @param capture true to enable capturing, false to disable
+     * @return reference to MapOptions for chaining options together.
+     */
+    MapOptions& withCaptureRenderedFeatures(bool capture);
+
+    /**
+     * @brief Gets the previously set (or default) captureRenderedFeatures value.
+     *
+     * @return true if rendered features should be captured, false otherwise.
+     */
+    bool captureRenderedFeatures() const;
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl_;

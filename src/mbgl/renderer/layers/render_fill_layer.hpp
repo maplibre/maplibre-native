@@ -7,6 +7,7 @@
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 
 #include <memory>
+#include <set>
 
 namespace mbgl {
 
@@ -50,6 +51,13 @@ private:
                                 float,
                                 const mat4&,
                                 const FeatureState&) const override;
+
+    void captureRenderedFeatures(const FillBucket&,
+                                 const RenderTile&,
+                                 const style::FillPaintProperties::PossiblyEvaluated&,
+                                 const TransformState&,
+                                 const RenderTree&,
+                                 const std::set<std::string>&);
 
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;

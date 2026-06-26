@@ -90,13 +90,6 @@ public:
 
     std::map<std::string, FillBinders> paintPropertyBinders;
 
-    struct FeatureVertexOffsets {
-        std::string featureId;
-        std::uint32_t fillVertexOffset;
-        std::uint32_t lineVertexOffset;
-    };
-    std::vector<FeatureVertexOffsets> featureVertexOffsets;
-
 private:
     void generateBuffers(const GeometryCollection&);
     void populateBinders(const GeometryTileFeature&,

@@ -96,7 +96,8 @@ public:
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
           overscaling(parameters.tileID.overscaleFactor()),
-          hasPattern(false) {
+          hasPattern(false),
+          retainFeaturesById(parameters.retainFeaturesById) {
         assert(!group.empty());
         auto leaderLayerProperties = staticImmutableCast<LayerPropertiesType>(group.front());
         layout = leaderLayerProperties->layerImpl().layout.evaluate(PropertyEvaluationParameters(zoom));
@@ -186,9 +187,11 @@ public:
                       const bool /*showCollisionBoxes*/,
                       const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<BucketType>(layout, layerPropertiesMap, zoom, overscaling);
+        bucket->setRetainFeaturesById(retainFeaturesById);
+
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
-            auto feature = std::move(patternFeature.feature);
+            auto& feature = patternFeature.feature;
             const PatternLayerMap& patterns = patternFeature.getPatterns();
             const GeometryCollection& geometries = feature->getGeometries();
 
@@ -214,6 +217,7 @@ protected:
     const uint32_t overscaling;
     std::string sourceLayerID;
     bool hasPattern;
+    bool retainFeaturesById = false;
 };
 
 } // namespace mbgl

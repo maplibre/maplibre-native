@@ -14,6 +14,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
+    const bool retainFeaturesById = false;
 };
 
 } // namespace mbgl

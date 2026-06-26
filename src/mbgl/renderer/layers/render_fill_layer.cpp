@@ -125,36 +125,92 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
-#if 0
-namespace {
-// TODO: do these already exist somewhere?
+void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
+                                              const RenderTile& tile,
+                                              const style::FillPaintProperties::PossiblyEvaluated& evaluated,
+                                              const TransformState& state,
+                                              const RenderTree& renderTree,
+                                              const std::set<std::string>& availableImages) {
+    const auto& tileID = tile.getOverscaledTileID();
 
-using FloatPair = std::array<float, 2>;
-using FloatQuad = std::array<float, 4>;
-FloatPair operator/(FloatPair a, float b) {
-    return {a[0] / b, a[1] / b};
+    constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+    constexpr bool nearClipped = false;
+    constexpr bool aligned = false;
+    constexpr bool is3d = false;
+    constexpr bool enableDepth = true;
+    constexpr std::int32_t subLayerIndex = 1;
+    const auto renderTreeParameters = renderTree.getParameters();
+    std::optional<mat4> tileMatrix;
+
+    for (const auto& featureEntry : bucket.getFeaturesById()) {
+        const auto& featureId = featureEntry.first;
+        if (featureId.empty()) {
+            continue;
+        }
+
+        const auto& feature = *featureEntry.second;
+        expression::EvaluationContext evalContext(state.getZoom(), &feature);
+        evalContext.withCanonicalTileID(&tileID.canonical);
+        evalContext.withAvailableImages(&availableImages); // TODO: Can this actually affect the results?
+
+        FeatureState featureState;
+        if (sourceForState) {
+            sourceForState->getFeatureState(featureState, baseImpl->sourceLayer, featureId);
+            evalContext.withFeatureState(&featureState);
+        }
+
+        const auto fillOpacity = evaluated.get<FillOpacity>().evaluate(evalContext, FillOpacity::defaultValue());
+        if (fillOpacity <= 0) {
+            continue;
+        }
+        const auto fillColor = evaluated.get<FillColor>().evaluate(evalContext, FillColor::defaultValue());
+        const auto outlineColor = evaluated.get<FillOutlineColor>().evaluate(evalContext,
+                                                                             FillOutlineColor::defaultValue());
+        const std::array<float, 2> translation{0, 0}; // TODO: from style evaluation
+        const style::TranslateAnchorType translationAnchor = style::TranslateAnchorType::Map; // TODO: ...
+        const std::optional<mbgl::Point<double>> origin = std::nullopt; // TODO: never set for fill?
+        if (fillOpacity * fillColor.a > 0 || outlineColor.a > 0) {
+            if (tileMatrix->empty()) {
+                tileMatrix = LayerTweaker::getTileMatrix(
+                    tileID.toUnwrapped(),
+                    state,
+                    renderTreeParameters.transformParams,
+                    layerIndex, // TODO: Confirm that this is the same as PaintParameters::currentLayer
+                    translation,
+                    translationAnchor,
+                    origin,
+                    is3d,
+                    enableDepth,
+                    subLayerIndex,
+                    nearClipped,
+                    inViewportPixelUnits,
+                    aligned);
+            }
+
+            // NDC positive is up/right
+            auto left = std::numeric_limits<float>::max();
+            auto top = std::numeric_limits<float>::lowest();
+            auto right = std::numeric_limits<float>::lowest();
+            auto bottom = std::numeric_limits<float>::max();
+            for (std::size_t i = 0; i < bucket.vertices.elements(); ++i) {
+                const auto& vertex = bucket.vertices.at(i);
+                const vec4 view_pos{static_cast<double>(vertex.a1[0]), static_cast<double>(vertex.a1[1]), 0, 1};
+                vec4 clip_pos;
+                matrix::transformMat4(clip_pos, view_pos, *tileMatrix); // view -> clip space
+                const vec2 ndc_pos{clip_pos[0] / clip_pos[3], clip_pos[1] / clip_pos[3]};
+
+                left = std::min(left, static_cast<float>(ndc_pos[0]));
+                top = std::max(top, static_cast<float>(ndc_pos[1]));
+                right = std::max(right, static_cast<float>(ndc_pos[0]));
+                bottom = std::min(bottom, static_cast<float>(ndc_pos[1]));
+            }
+
+            if (left < right && bottom < top) {
+                stats.renderedFeatures.insert({featureId, {left, top, right, bottom}});
+            }
+        }
+    }
 }
-FloatPair unpack_float(const float packedValue) {
-    const int packedIntValue = int(packedValue);
-    const int v0 = packedIntValue / 256;
-    return {static_cast<float>(v0), static_cast<float>(packedIntValue - v0 * 256)};
-}
-// To minimize the number of attributes needed, we encode a 4-component
-// color into a pair of floats (i.e. a vec2) as follows:
-// [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.g * 255 ]
-FloatQuad decode_color(const std::array<float, 2> encoded) {
-    const auto a = unpack_float(encoded[0]) / 255;
-    const auto b = unpack_float(encoded[1]) / 255;
-    return {a[0], a[1], b[0], b[1]};
-}
-// Unpack a pair of paint values and interpolate between them.
-FloatQuad unpack_mix_color(const std::array<float, 4>& packedColors, const float t) {
-    const auto c1 = decode_color({packedColors[0], packedColors[1]});
-    const auto c2 = decode_color({packedColors[2], packedColors[3]});
-    return mbgl::util::interpolate(c1, c2, t);
-}
-} // namespace
-#endif
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
@@ -293,73 +349,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                        !evaluated.get<FillOpacity>().isConstant();
 #endif
 
-        for (const auto& featureEntry : bucket.getFeatures()) {
-            const auto& featureId = featureEntry.first;
-            const auto& feature = *featureEntry.second;
-            expression::EvaluationContext evalContext(state.getZoom(), &feature);
-            evalContext.withCanonicalTileID(&tileID.canonical);
-            evalContext.withAvailableImages(&availableImages);
-
-            FeatureState featureState;
-            if (sourceForState) {
-                sourceForState->getFeatureState(featureState, baseImpl->sourceLayer, featureId);
-                evalContext.withFeatureState(&featureState);
-            }
-
-            const auto fillOpacity = evaluated.get<FillOpacity>().evaluate(evalContext, FillOpacity::defaultValue());
-            if (fillOpacity <= 0) {
-                continue;
-            }
-            const auto fillColor = evaluated.get<FillColor>().evaluate(evalContext, FillColor::defaultValue());
-            const auto outlineColor = evaluated.get<FillOutlineColor>().evaluate(evalContext,
-                                                                                 FillOutlineColor::defaultValue());
-            if (fillOpacity * fillColor.a > 0 || outlineColor.a > 0) {
-                constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-                constexpr bool nearClipped = false;
-                constexpr bool aligned = false;
-                constexpr bool is3d = false;
-                constexpr bool enableDepth = true;
-                constexpr std::int32_t subLayerIndex = 1;
-                const std::array<float, 2> translation{0, 0}; // TODO: from style evaluation
-                const style::TranslateAnchorType translationAnchor = style::TranslateAnchorType::Map; // TODO: ...
-                const std::optional<mbgl::Point<double>> origin = std::nullopt; // TODO: never set for fill?
-                const auto renderTreeParameters = renderTree.getParameters();
-
-                const auto matrix = LayerTweaker::getTileMatrix(
-                    tileID.toUnwrapped(),
-                    state,
-                    renderTreeParameters.transformParams,
-                    layerIndex, // TODO: Confirm that this is the same as PaintParameters::currentLayer
-                    translation,
-                    translationAnchor,
-                    origin,
-                    is3d,
-                    enableDepth,
-                    subLayerIndex,
-                    nearClipped,
-                    inViewportPixelUnits,
-                    aligned);
-
-                // NDC positive is up/right
-                auto left = std::numeric_limits<float>::max();
-                auto top = std::numeric_limits<float>::lowest();
-                auto right = std::numeric_limits<float>::lowest();
-                auto bottom = std::numeric_limits<float>::max();
-                for (std::size_t i = 0; i < bucket.vertices.elements(); ++i) {
-                    const auto& vertex = bucket.vertices.at(i);
-                    const vec4 view_pos{static_cast<double>(vertex.a1[0]), static_cast<double>(vertex.a1[1]), 0, 1};
-                    vec4 clip_pos;
-                    matrix::transformMat4(clip_pos, view_pos, matrix); // view -> clip space
-                    const vec2 ndc_pos{clip_pos[0] / clip_pos[3], clip_pos[1] / clip_pos[3]};
-
-                    left = std::min(left, static_cast<float>(ndc_pos[0]));
-                    top = std::max(top, static_cast<float>(ndc_pos[1]));
-                    right = std::max(right, static_cast<float>(ndc_pos[0]));
-                    bottom = std::min(bottom, static_cast<float>(ndc_pos[1]));
-                }
-
-                stats.renderedFeatures.insert({featureId, {left, top, right, bottom}});
-            }
+        if (updateParameters->captureRenderedFeatures) {
+            captureRenderedFeatures(bucket, tile, evaluated, state, renderTree, availableImages);
         }
 
         const auto fillVertexCount = bucket.vertices.elements();

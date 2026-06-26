@@ -10,7 +10,7 @@ namespace mbgl {
 FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
                        const float zoom,
-                       const uint32_t) {
+                       const uint32_t /* overscaling */) {
     using namespace style;
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(std::piecewise_construct,
@@ -62,10 +62,10 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const PatternLayerMap& patternDependencies,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
-    // if (captureRenderedFeatures) {
-    if (auto idStr = featureIDtoString(feature.getID())) {
-        features.emplace(*idStr, feature.clone());
-        featureVertexOffsets.emplace_back(std::move(*idStr), vertices.elements(), lineVertices.elements());
+    if (retainFeaturesById) {
+        if (auto idStr = featureIDtoString(feature.getID()); idStr && !idStr->empty()) {
+            featuresById.emplace(*idStr, feature.clone()); // TODO: clone without geometry?
+        }
     }
 
     generateBuffers(geometry);
@@ -79,10 +79,10 @@ void FillBucket::addFeature(std::unique_ptr<GeometryTileFeature>&& featureOwner,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
     const auto& feature = *featureOwner;
-    // if (captureRenderedFeatures) {
-    if (auto idStr = featureIDtoString(feature.getID())) {
-        features.emplace(*idStr, std::move(featureOwner));
-        featureVertexOffsets.emplace_back(std::move(*idStr), vertices.elements(), lineVertices.elements());
+    if (retainFeaturesById) {
+        if (auto idStr = featureIDtoString(feature.getID()); idStr && !idStr->empty()) {
+            featuresById.emplace(*idStr, std::move(featureOwner));
+        }
     }
 
     generateBuffers(geometry);

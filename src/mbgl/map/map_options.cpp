@@ -9,6 +9,7 @@ public:
     ViewportMode viewportMode = ViewportMode::Default;
     NorthOrientation orientation = NorthOrientation::Upwards;
     bool crossSourceCollisions = true;
+    bool captureRenderedFeatures = false;
     Size size = {64, 64};
     float pixelRatio = 1.0;
 };
@@ -80,6 +81,15 @@ MapOptions& MapOptions::withPixelRatio(float ratio) {
 
 float MapOptions::pixelRatio() const {
     return impl_->pixelRatio;
+}
+
+MapOptions& MapOptions::withCaptureRenderedFeatures(bool capture) {
+    impl_->captureRenderedFeatures = capture;
+    return *this;
+}
+
+bool MapOptions::captureRenderedFeatures() const {
+    return impl_->captureRenderedFeatures;
 }
 
 } // namespace mbgl

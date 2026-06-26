@@ -152,6 +152,7 @@ private:
                // be constrained to one thread
 
     bool needFinalizeSymbolsVal = false;
+    bool retainFeaturesById = false;
 };
 
 } // namespace mbgl

@@ -127,7 +127,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       pixelRatio(parameters.pixelRatio),
       tileSize(static_cast<uint32_t>(util::tileSize_D * overscaling)),
       tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
-      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)) {
+      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)),
+      retainFeaturesById(parameters.retainFeaturesById) {
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
     textSize = leader.layout.get<TextSize>();
@@ -859,7 +860,9 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                 if (!sortKeyRanges.empty() && sortKeyRanges.back().sortKey == feature.sortKey) {
                     sortKeyRanges.back().end = symbolInstances.size();
                 } else {
-                    sortKeyRanges.push_back({.sortKey=feature.sortKey, .start=symbolInstances.size() - 1, .end=symbolInstances.size()});
+                    sortKeyRanges.push_back({.sortKey = feature.sortKey,
+                                             .start = symbolInstances.size() - 1,
+                                             .end = symbolInstances.size()});
                 }
             }
         }
@@ -1030,6 +1033,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                  allowVerticalPlacement,
                                                  std::move(placementModes),
                                                  iconsInText);
+
+    bucket->setRetainFeaturesById(retainFeaturesById);
 
     for (SymbolInstance& symbolInstance : bucket->symbolInstances) {
         if (!symbolInstance.check(SYM_GUARD_LOC)) {

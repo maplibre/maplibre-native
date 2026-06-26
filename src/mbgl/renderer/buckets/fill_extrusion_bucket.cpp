@@ -43,7 +43,7 @@ FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties&,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
     const float zoom,
-    const uint32_t) {
+    const uint32_t /* overscaling */) {
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(
             std::piecewise_construct,

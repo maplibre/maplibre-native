@@ -86,7 +86,9 @@ public:
     const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
     void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
 
-    const auto& getFeatures() const { return features; }
+    const auto& getFeaturesById() const { return featuresById; }
+
+    void setRetainFeaturesById(bool value) { retainFeaturesById = value; }
 
 protected:
     Bucket() = default;
@@ -96,7 +98,9 @@ protected:
 
     std::optional<std::thread::id> renderThreadID;
 
-    std::map<std::string, std::unique_ptr<GeometryTileFeature>> features;
+    bool retainFeaturesById = false;
+    using FeaturesByIdMap = std::map<std::string, std::unique_ptr<GeometryTileFeature>>;
+    FeaturesByIdMap featuresById;
 };
 
 } // namespace mbgl
