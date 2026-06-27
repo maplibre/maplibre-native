@@ -19,7 +19,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionShader";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -27,17 +27,18 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
+layout(location = 1) in uvec2 in_decimals_ed;
 
 #if !defined(HAS_UNIFORM_u_color)
-layout(location = 1) in vec4 in_color;
+layout(location = 2) in vec4 in_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 2) in vec2 in_base;
+layout(location = 3) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 3) in vec2 in_height;
+layout(location = 4) in vec2 in_height;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -102,9 +103,10 @@ void main() {
 
     const vec3 normal = vec3(0.0, 0.0, 1.0);
     const float t = 1.0;
-    const float z = t != 0.0 ? height : base;
+    const float z = t > 0.0 ? height : base;
+    const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
 
-    gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
+    gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -130,7 +132,7 @@ void main() {
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
         // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
@@ -226,7 +228,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 
 struct OutlineInstance {
     int pos;
-    uint ed_discard;
+    uint decimals_ed;
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
@@ -238,9 +240,10 @@ layout(location = 0) out mediump vec4 frag_color;
 void main() {
 
     const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
-    const vec2 instanceEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].ed_discard);
+    const vec2 instanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].decimals_ed);
 
-    if (instanceEd.y > 0.0) {
+    bool isDiscarded = mod(instanceDecimalsEd.x, 2.0) > 0.0;
+    if (isDiscarded) {
         gl_Position = vec4(0.0);
         frag_color = vec4(0.0);
         return;
@@ -265,16 +268,18 @@ void main() {
 #else
     vec4 color = unpack_mix_color(in_color, drawable.color_t);
 #endif
+    const vec2 nextInstancePos = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
+    const vec2 nextInstanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1].decimals_ed);
 
-    const vec2 p1 = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
-    const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
-    const vec2 perp = normalize(p1 - p2);
+    const vec2 p1 = instancePos + unpack_float(floor(instanceDecimalsEd.x / 2)) / 128.0;
+    const vec2 p2 = nextInstancePos + unpack_float(floor(nextInstanceDecimalsEd.x / 2)) / 128.0;
+    const vec2 edgevector = normalize(p2 - p1);
 
-    const vec3 normal = vec3(-perp.y, perp.x, 0.0);
+    const vec3 normal = vec3(-edgevector.y, edgevector.x, 0.0);
     const float t = float(in_position.y);
-    const float z = t != 0.0 ? height : base;
+    const float z = t > 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(unpack_int(instanceVector.instance[gl_InstanceIndex + in_position.x].pos), z, 1.0);
+    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -300,7 +305,7 @@ void main() {
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
         // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
@@ -336,7 +341,7 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -344,21 +349,22 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
     static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
+layout(location = 1) in uvec2 in_decimals_ed;
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 1) in vec2 in_base;
+layout(location = 2) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 2) in vec2 in_height;
+layout(location = 3) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 3) in uvec4 in_pattern_from;
+layout(location = 4) in uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 4) in uvec4 in_pattern_to;
+layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
 layout(push_constant) uniform Constants {
@@ -440,9 +446,10 @@ void main() {
 
     const vec3 normal = vec3(0.0, 0.0, 1.0);
     const float t = 1.0;
-    const float z = t != 0.0 ? height : base;
+    const float z = t > 0.0 ? height : base;
+    const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
 
-    gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
+    gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -487,13 +494,14 @@ void main() {
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
-    if (normal.y != 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
-        // and otherwise calculates the gradient based on base + height
-        directional *= (
-            (1.0 - props.vertical_gradient) +
-            (props.vertical_gradient * clamp((t + base) * pow(height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - props.light_intensity), 1.0)));
-    }
+    if (normal.z == 0.0) {
+        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
+        // vertical gradient, and otherwise calculates the gradient based on base + height
+        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
+        //       the square root when height is a uniform.
+        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
+        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);    }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(vec3(0.0), vec3(0.3), 1.0 - props.light_color_pad.rgb), vec3(1.0));
     lighting *= props.opacity;
@@ -652,7 +660,7 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
 
 struct OutlineInstance {
     int pos;
-    uint ed_discard;
+    uint decimals_ed;
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
@@ -699,9 +707,10 @@ layout(location = 4) out mediump vec4 frag_pattern_to;
 
 void main() {
     const vec2 instancePos = unpack_int(instanceVector.instance[gl_InstanceIndex].pos);
-    const vec2 instanceEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].ed_discard);
+    const vec2 instanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex].decimals_ed);
 
-    if (instanceEd.y > 0.0) {
+    bool isDiscarded = mod(instanceDecimalsEd.x, 2.0) > 0.0;
+    if (isDiscarded) {
         gl_Position = vec4(0.0);
         return;
     }
@@ -720,17 +729,19 @@ void main() {
 #else
     const float height = max(unpack_mix_float(in_height, drawable.height_t), 0.0);
 #endif
+    const vec2 nextInstancePos = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
+    const vec2 nextInstanceDecimalsEd = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1].decimals_ed);
 
-    const vec2 p1 = unpack_int(instanceVector.instance[gl_InstanceIndex + 1].pos);
-    const vec2 p2 = unpack_int(instanceVector.instance[gl_InstanceIndex + 0].pos);
-    const vec2 perp = normalize(p1 - p2);
+    const vec2 p1 = instancePos + unpack_float(floor(instanceDecimalsEd.x / 2)) / 128.0;
+    const vec2 p2 = nextInstancePos + unpack_float(floor(nextInstanceDecimalsEd.x / 2)) / 128.0;
+    const vec2 edgevector = normalize(p2 - p1);
 
-    const vec3 normal = vec3(-perp.y, perp.x, 0.0);
-    const float edgedistance = unpack_uint(instanceVector.instance[gl_InstanceIndex + 1 - in_position.x].ed_discard).x;
+    const vec3 normal = vec3(-edgevector.y, edgevector.x, 0.0);
+    const float edgedistance = in_position.x == 0.0 ? nextInstanceDecimalsEd.y : instanceDecimalsEd.y;
     const float t = float(in_position.y);
-    const float z = t != 0.0 ? height : base;
+    const float z = t > 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(unpack_int(instanceVector.instance[gl_InstanceIndex + in_position.x].pos), z, 1.0);
+    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -775,12 +786,14 @@ void main() {
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
-    if (normal.y != 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
-        // and otherwise calculates the gradient based on base + height
-        directional *= (
-            (1.0 - props.vertical_gradient) +
-            (props.vertical_gradient * clamp((t + base) * pow(height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - props.light_intensity), 1.0)));
+    if (normal.z == 0.0) {
+        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
+        // vertical gradient, and otherwise calculates the gradient based on base + height
+        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
+        //       the square root when height is a uniform.
+        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
+        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(vec3(0.0), vec3(0.3), 1.0 - props.light_color_pad.rgb), vec3(1.0));
