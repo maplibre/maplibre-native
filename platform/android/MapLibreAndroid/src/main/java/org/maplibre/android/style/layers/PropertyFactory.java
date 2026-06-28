@@ -1390,7 +1390,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter. Advised to use the generic esampling paint property instead.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -1400,7 +1400,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter. Advised to use the generic esampling paint property instead.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1427,6 +1427,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
    */
   public static PropertyValue<Expression> rasterFadeDuration(Expression expression) {
     return new PaintPropertyValue<>("raster-fade-duration", expression);
+  }
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> resampling(@Property.RESAMPLING String value) {
+    return new PaintPropertyValue<>("resampling", value);
+  }
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> resampling(Expression expression) {
+    return new PaintPropertyValue<>("resampling", expression);
   }
 
   /**
@@ -1600,6 +1620,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> resampling(@Property.RESAMPLING String value) {
+    return new PaintPropertyValue<>("resampling", value);
+  }
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> resampling(Expression expression) {
+    return new PaintPropertyValue<>("resampling", expression);
+  }
+
+  /**
    * The opacity at which the color-relief will be drawn.
    *
    * @param value a Float value
@@ -1647,6 +1687,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
    */
   public static PropertyValue<Expression> colorReliefColor(Expression expression) {
     return new PaintPropertyValue<>("color-relief-color", expression);
+  }
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> resampling(@Property.RESAMPLING String value) {
+    return new PaintPropertyValue<>("resampling", value);
+  }
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> resampling(Expression expression) {
+    return new PaintPropertyValue<>("resampling", expression);
   }
 
   /**

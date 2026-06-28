@@ -32,6 +32,12 @@ MBGL_DEFINE_ENUM(RasterResamplingType,
                      {RasterResamplingType::Nearest, "nearest"},
                  });
 
+MBGL_DEFINE_ENUM(ResamplingType,
+                 {
+                     {ResamplingType::Linear, "linear"},
+                     {ResamplingType::Nearest, "nearest"},
+                 });
+
 MBGL_DEFINE_ENUM(HillshadeIlluminationAnchorType,
                  {
                      {HillshadeIlluminationAnchorType::Map, "map"},

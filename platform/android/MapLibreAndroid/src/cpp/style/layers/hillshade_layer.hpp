@@ -50,6 +50,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getHillshadeMethod(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getResampling(jni::JNIEnv&);
+
 }; // class HillshadeLayer
 
 class HillshadeJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::HillshadeLayerFactory {
