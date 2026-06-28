@@ -8,6 +8,20 @@ if(NOT MLN_WITH_WEBGPU)
     return()
 endif()
 
+if(MLN_WEBGPU_EMDAWN)
+    message(STATUS "Configuring emdawnwebgpu (host supplies --use-port=emdawnwebgpu)")
+    add_library(mbgl-vendor-dawn INTERFACE)
+    set_target_properties(
+        mbgl-vendor-dawn
+        PROPERTIES
+            INTERFACE_MAPLIBRE_NAME "emdawnwebgpu"
+            INTERFACE_MAPLIBRE_URL "https://dawn.googlesource.com/dawn"
+            INTERFACE_MAPLIBRE_AUTHOR "Chromium Dawn Team"
+            INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/vendor/dawn/LICENSE"
+    )
+    return()
+endif()
+
 if(POLICY CMP0169)
     cmake_policy(SET CMP0169 OLD)
 endif()

@@ -3,11 +3,21 @@
 
 set(MLN_WEBGPU_IMPL_DAWN OFF CACHE STRING "WebGPU with Dawn implementation")
 set(MLN_WEBGPU_IMPL_WGPU OFF CACHE STRING "WebGPU with wgpu implementation")
+set(MLN_WEBGPU_EMDAWN OFF
+    CACHE BOOL "Use Emscripten emdawnwebgpu with Dawn headers (requires MLN_WEBGPU_IMPL_DAWN)")
 
 if(MLN_WITH_WEBGPU)
+    if(MLN_WEBGPU_EMDAWN AND NOT MLN_WEBGPU_IMPL_DAWN)
+        message(FATAL_ERROR "MLN_WEBGPU_EMDAWN requires MLN_WEBGPU_IMPL_DAWN")
+    endif()
+
     if(MLN_WEBGPU_IMPL_DAWN)
         message(STATUS "Using Dawn as WebGPU backend")
         add_compile_definitions(MLN_WEBGPU_IMPL_DAWN)
+        if(MLN_WEBGPU_EMDAWN)
+            message(STATUS "Using emdawnwebgpu port for browser WebGPU")
+            add_compile_definitions(MLN_WEBGPU_EMDAWN)
+        endif()
 
     elseif(MLN_WEBGPU_IMPL_WGPU)
         message(STATUS "Using wgpu as WebGPU backend")
