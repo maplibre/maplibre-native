@@ -7,6 +7,10 @@ set(MLN_WEBGPU_EMDAWN OFF
     CACHE BOOL "Use Emscripten emdawnwebgpu with Dawn headers (requires MLN_WEBGPU_IMPL_DAWN)")
 
 if(MLN_WITH_WEBGPU)
+    if(MLN_WEBGPU_EMDAWN AND NOT EMSCRIPTEN)
+        message(FATAL_ERROR "MLN_WEBGPU_EMDAWN requires Emscripten")
+    endif()
+
     if(MLN_WEBGPU_EMDAWN AND NOT MLN_WEBGPU_IMPL_DAWN)
         message(FATAL_ERROR "MLN_WEBGPU_EMDAWN requires MLN_WEBGPU_IMPL_DAWN")
     endif()
