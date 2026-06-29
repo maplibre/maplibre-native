@@ -11,7 +11,11 @@ SurfaceRenderableResource::~SurfaceRenderableResource() {
         return;
     }
 
-    backend.getDevice()->waitIdle(backend.getDispatcher());
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mbgl::Event::Render, "Vulkan device lost during surface shutdown");
+    }
 
     // specific order
     swapchainFramebuffers.clear();
@@ -23,6 +27,8 @@ SurfaceRenderableResource::~SurfaceRenderableResource() {
 
     depthAllocation.reset();
     colorAllocations.clear();
+
+    readTexture.reset();
 }
 
 void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
@@ -300,8 +306,9 @@ void SurfaceRenderableResource::initRenderPass() {
             .setDstSubpass(0)
             .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
             .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
+            .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+            .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
 
         vk::SubpassDependency()
             .setSrcSubpass(VK_SUBPASS_EXTERNAL)
@@ -310,8 +317,9 @@ void SurfaceRenderableResource::initRenderPass() {
                              vk::PipelineStageFlagBits::eLateFragmentTests)
             .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
                              vk::PipelineStageFlagBits::eLateFragmentTests)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
+            .setSrcAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+            .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
     };
 
     const auto renderPassCreateInfo =
@@ -340,7 +348,17 @@ void SurfaceRenderableResource::setDepthFormat(vk::Format format) {
 
 void SurfaceRenderableResource::swap() {
     auto& context = static_cast<Context&>(backend.getContext());
+
+    if (surfaceRead) {
+        copySurfaceToReadTexture();
+    }
+
     context.submitFrame();
+
+    if (surfaceRead) {
+        context.waitFrame();
+        surfaceRead = false;
+    }
 }
 
 const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
@@ -371,7 +389,7 @@ bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
     return capabilities.currentTransform != updatedCapabilities.currentTransform;
 }
 
-float SurfaceRenderableResource::getRotation() {
+float SurfaceRenderableResource::getRotation() const {
     switch (capabilities.currentTransform) {
         default:
         case vk::SurfaceTransformFlagBitsKHR::eIdentity:
@@ -454,89 +472,106 @@ void SurfaceRenderableResource::recreateSwapchain() {
     acquireSemaphores.clear();
     presentSemaphores.clear();
 
+    readTexture.reset();
+
     init(extent.width, extent.height);
 }
 
-void SurfaceRenderableResource::enableSurfaceRead(bool value) {
-    if (surfaceRead == value) {
+void SurfaceRenderableResource::queueSurfaceRead() {
+    if (surfaceRead) {
         return;
     }
 
-    surfaceRead = value;
+    surfaceRead = true;
     backend.getContext<Context>().requestSurfaceUpdate(false);
 }
 
-std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
+void SurfaceRenderableResource::copySurfaceToReadTexture() {
     auto& contextImpl = backend.getContext<Context>();
     const auto& dispatcher = backend.getDispatcher();
     const auto& physicalDevice = backend.getPhysicalDevice();
 
-    auto texture = std::make_unique<Texture2D>(contextImpl);
-    texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
-    texture->setUsage(Texture2DUsage::Read);
-    texture->setSize({extent.width, extent.height});
+    if (!readTexture) {
+        readTexture = std::make_unique<Texture2D>(contextImpl);
+        readTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
+        readTexture->setUsage(Texture2DUsage::Read);
+    }
 
-    contextImpl.waitFrame();
+    readTexture->setSize({extent.width, extent.height});
 
     const auto swapchainImage = getAcquiredImage();
+    auto& commandBuffer = contextImpl.getCommandBuffer();
 
     if (surface) {
-        contextImpl.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& buffer) {
-            const auto barrier = vk::ImageMemoryBarrier()
-                                     .setImage(swapchainImage)
-                                     .setOldLayout(vk::ImageLayout::ePresentSrcKHR)
-                                     .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
-                                     .setSrcAccessMask({})
-                                     .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
-                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+        const auto barrier = vk::ImageMemoryBarrier()
+                                 .setImage(swapchainImage)
+                                 .setOldLayout(vk::ImageLayout::ePresentSrcKHR)
+                                 .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                 .setSrcAccessMask({})
+                                 .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
-            buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                                    vk::PipelineStageFlagBits::eTransfer,
-                                    {},
-                                    nullptr,
-                                    nullptr,
-                                    barrier,
-                                    dispatcher);
-        });
+        commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                                       vk::PipelineStageFlagBits::eTransfer,
+                                       {},
+                                       nullptr,
+                                       nullptr,
+                                       barrier,
+                                       dispatcher);
     }
 
-    bool useBlit = surface &&
-                   (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
-                        vk::FormatFeatureFlagBits::eBlitSrc &&
-                    physicalDevice.getFormatProperties(texture->getVulkanFormat(), dispatcher).linearTilingFeatures &
-                        vk::FormatFeatureFlagBits::eBlitDst);
+    bool useBlit =
+        surface &&
+        (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitSrc &&
+         physicalDevice.getFormatProperties(readTexture->getVulkanFormat(), dispatcher).linearTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitDst);
 
     if (useBlit) {
-        texture->blitImage(swapchainImage, texture->getSize());
+        readTexture->blitImage(swapchainImage, readTexture->getSize(), 0, 0, commandBuffer);
     } else {
-        texture->copyImage(swapchainImage, texture->getSize());
+        readTexture->copyImage(swapchainImage, readTexture->getSize(), 0, 0, commandBuffer);
     }
 
     if (surface) {
-        contextImpl.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& buffer) {
-            const auto barrier = vk::ImageMemoryBarrier()
-                                     .setImage(swapchainImage)
-                                     .setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
-                                     .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
-                                     .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)
-                                     .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
-                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+        const auto barrier = vk::ImageMemoryBarrier()
+                                 .setImage(swapchainImage)
+                                 .setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                 .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
+                                 .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)
+                                 .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
-            buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                                    vk::PipelineStageFlagBits::eTransfer,
-                                    {},
-                                    nullptr,
-                                    nullptr,
-                                    barrier,
-                                    dispatcher);
-        });
+        commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                                       vk::PipelineStageFlagBits::eTransfer,
+                                       {},
+                                       nullptr,
+                                       nullptr,
+                                       barrier,
+                                       dispatcher);
+    }
+}
+
+std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
+    if (!readTexture) {
+        return nullptr;
     }
 
-    const auto image = texture->readImage();
+    const auto& dispatcher = backend.getDispatcher();
+    const auto& physicalDevice = backend.getPhysicalDevice();
+
+    bool useBlit =
+        surface &&
+        (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitSrc &&
+         physicalDevice.getFormatProperties(readTexture->getVulkanFormat(), dispatcher).linearTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitDst);
+
+    const auto image = readTexture->readImage();
 
     // swizzle pixels to RGBA
     if (!useBlit && colorFormat == vk::Format::eB8G8R8A8Unorm) {

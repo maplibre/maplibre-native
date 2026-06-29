@@ -27,6 +27,7 @@ private:
     void prepare(const LayerPrepareParameters&) override;
 
     bool contextDestroyed = false;
+    bool needsInitialize = true;
     std::shared_ptr<style::CustomLayerHost> host;
 };
 
