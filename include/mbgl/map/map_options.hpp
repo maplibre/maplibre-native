@@ -134,20 +134,21 @@ public:
     float pixelRatio() const;
 
     /**
-     * @brief Sets whether to capture rendered features for debugging purposes.
-     * By default, it is set to false.
+     * @brief Sets whether to retain rendered feature information for the current frame.
+     *  When enabled, feature information will appear in the RenderingStats passed to
+     * `MapObserver::onDidFinishRenderingFrame`.
      *
-     * @param capture true to enable capturing, false to disable
+     * @return true if rendered feature info should be retained, false otherwise.
      * @return reference to MapOptions for chaining options together.
      */
-    MapOptions& withCaptureRenderedFeatures(bool capture);
+    MapOptions& withRenderedFeatureInfo(bool capture);
 
     /**
-     * @brief Gets the previously set (or default) captureRenderedFeatures value.
+     * @brief Gets the previously set (or default) renderedFeatureInfo value.
      *
-     * @return true if rendered features should be captured, false otherwise.
+     * @return true if rendered feature info should be retained, false otherwise.
      */
-    bool captureRenderedFeatures() const;
+    bool renderedFeatureInfo() const;
 
 private:
     class Impl;

@@ -1453,3 +1453,18 @@ void GLFWView::onWillStartRenderingFrame() {
     }
 #endif
 }
+
+void GLFWView::onDidFinishRenderingFrame(const RenderFrameStatus& status) {
+    const auto& renderedFeatures = status.renderingStats.frameRenderedFeatures;
+
+    std::size_t totalFeatures = 0;
+    for (const auto& layer : renderedFeatures) {
+        totalFeatures += layer.second.size();
+        mbgl::Log::Info(mbgl::Event::Render,
+                        "RenderLayer " + layer.first.sourceId + "-" + layer.first.layerId + ": " +
+                            std::to_string(layer.second.size()) + " features");
+    }
+    if (totalFeatures > 0) {
+        mbgl::Log::Info(mbgl::Event::Render, "Total rendered features:  " + std::to_string(totalFeatures));
+    }
+}

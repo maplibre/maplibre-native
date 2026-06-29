@@ -71,6 +71,7 @@ public:
     // mbgl::MapObserver implementation
     void onDidFinishLoadingStyle() override;
     void onWillStartRenderingFrame() override;
+    void onDidFinishRenderingFrame(const RenderFrameStatus&) override;
 
 protected:
     // mbgl::Backend implementation

@@ -109,7 +109,7 @@ public:
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
     /// Set observer
-    void setObserver(gfx::ContextObserver* observer_) { observer = observer_ ? observer_ : &gfx::nullObserver; }
+    void setObserver(gfx::ContextObserver*);
 
 protected:
     const Type type;

@@ -54,7 +54,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       mode(mapOptions.mapMode()),
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
-      captureRenderedFeatures(mapOptions.captureRenderedFeatures()),
+      captureRenderedFeatures(mapOptions.renderedFeatureInfo()),
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
@@ -249,7 +249,7 @@ void Map::Impl::onWillStartRenderingFrame() {
 void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
                                           bool needsRepaint,
                                           bool placemenChanged,
-                                          const gfx::RenderingStats& stats) {
+                                          gfx::RenderingStats&& stats) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
     if (renderingStatsView && style) {
@@ -260,7 +260,7 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
         const MapObserver::RenderFrameStatus frameStatus{.mode = static_cast<MapObserver::RenderMode>(renderMode),
                                                          .needsRepaint = needsRepaint,
                                                          .placementChanged = placemenChanged,
-                                                         .renderingStats = stats};
+                                                         .renderingStats = std::move(stats)};
         observer.onDidFinishRenderingFrame(frameStatus);
 
         if (actionJournal) {

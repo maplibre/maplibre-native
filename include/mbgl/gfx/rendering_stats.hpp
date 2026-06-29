@@ -1,9 +1,12 @@
 #pragma once
 
-#include <cstddef>
-#include <string>
-#include <memory>
 #include <mbgl/util/color.hpp>
+#include <mbgl/util/containers.hpp>
+#include <mbgl/util/hash.hpp>
+
+#include <cstddef>
+#include <functional>
+#include <string>
 
 namespace mbgl {
 
@@ -88,6 +91,37 @@ struct RenderingStats {
     int stencilClears = 0;
     /// Number of stencil buffer updates
     int stencilUpdates = 0;
+
+    struct FeatureInfo {
+        struct {
+            // NDC positive is up/right
+            float minX = std::numeric_limits<float>::max();
+            float maxX = std::numeric_limits<float>::lowest();
+            float minY = std::numeric_limits<float>::max();
+            float maxY = std::numeric_limits<float>::lowest();
+        } ndcBounds;
+    };
+
+    struct SourceLayerId {
+        std::string sourceId;
+        std::string layerId;
+
+        bool operator<(const SourceLayerId& other) const {
+            return std::tie(sourceId, layerId) < std::tie(other.sourceId, other.layerId);
+        }
+        bool operator==(const SourceLayerId& other) const = default;
+    };
+
+    struct SourceLayerIdHash {
+        std::size_t operator()(const SourceLayerId& id) const noexcept {
+            return mbgl::util::hash(id.sourceId, id.layerId);
+        }
+    };
+
+    using LayerFeaturesMap = mbgl::unordered_map<std::string, FeatureInfo>;
+    using FrameRenderedFeaturesMap = mbgl::unordered_map<SourceLayerId, LayerFeaturesMap, SourceLayerIdHash>;
+    /// Collected feature information by layer, if enabled via `MapOptions::withRenderedFeatureStatistics()`
+    FrameRenderedFeaturesMap frameRenderedFeatures{};
 
     RenderingStats& operator+=(const RenderingStats&);
 

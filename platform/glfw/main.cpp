@@ -147,7 +147,10 @@ int main(int argc, char* argv[]) {
 
     mbgl::Map map(rendererFrontend,
                   *view,
-                  mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
+                  mbgl::MapOptions()
+                      .withSize(view->getSize())
+                      .withPixelRatio(view->getPixelRatio())
+                      .withRenderedFeatureInfo(true),
                   resourceOptions,
                   clientOptions,
                   actionJournalOptions);

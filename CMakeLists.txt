@@ -162,6 +162,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
 )
 list(APPEND SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/context.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp

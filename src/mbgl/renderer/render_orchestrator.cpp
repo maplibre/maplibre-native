@@ -971,11 +971,9 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
-    using LayerFeaturesMap = decltype(RenderLayer::Stats::renderedFeatures);
-    using SourceLayerId = std::pair<std::string, std::string>;
-    std::map<SourceLayerId, LayerFeaturesMap> allFeatures;
+    gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
+    allFeatures.reserve(items.size());
 
-    std::size_t totalFeatures = 0;
     for (const auto& item : items) {
         const auto& sourceId = item.source->getId();
         auto& renderLayer = item.layer.get();
@@ -994,16 +992,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         }
 
         if (!renderLayer.stats.renderedFeatures.empty()) {
-            mbgl::Log::Info(Event::Render,
-                            "RenderLayer " + renderLayer.getID() + ": " +
-                                std::to_string(renderLayer.stats.renderedFeatures.size()) + " features");
-            totalFeatures += renderLayer.stats.renderedFeatures.size();
-            allFeatures.insert({{sourceId, layerId}, std::move(renderLayer.stats.renderedFeatures)});
+            allFeatures.insert({gfx::RenderingStats::SourceLayerId{.sourceId = sourceId, .layerId = layerId},
+                                std::move(renderLayer.stats.renderedFeatures)});
         }
     }
     addChanges(changes);
 
-    mbgl::Log::Info(Event::Render, "Total rendered features:  " + std::to_string(totalFeatures) + " features");
+    std::swap(frameRenderedFeatures, allFeatures);
 }
 
 void RenderOrchestrator::processChanges() {

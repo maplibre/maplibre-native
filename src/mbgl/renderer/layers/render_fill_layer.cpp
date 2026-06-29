@@ -140,13 +140,19 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
     constexpr bool enableDepth = true;
     constexpr std::int32_t subLayerIndex = 1;
     const auto renderTreeParameters = renderTree.getParameters();
+    const auto translation = evaluated.get<FillTranslate>();
+    const auto translationAnchor = evaluated.get<FillTranslateAnchor>();
+    const std::optional<mbgl::Point<double>> origin = std::nullopt; // TODO: never set for fill?
+    const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
+                                                              unevaluated.get<FillOutlineColor>().isUndefined());
     std::optional<mat4> tileMatrix;
+
+    stats.renderedFeatures.clear();
+    stats.renderedFeatures.reserve(bucket.getFeaturesById().size());
 
     for (const auto& featureEntry : bucket.getFeaturesById()) {
         const auto& featureId = featureEntry.first;
-        if (featureId.empty()) {
-            continue;
-        }
+        assert(!featureId.empty());
 
         const auto& feature = *featureEntry.second;
         expression::EvaluationContext evalContext(state.getZoom(), &feature);
@@ -160,53 +166,74 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
         }
 
         const auto fillOpacity = evaluated.get<FillOpacity>().evaluate(evalContext, FillOpacity::defaultValue());
-        if (fillOpacity <= 0) {
+        if (fillOpacity == 0) {
             continue;
         }
         const auto fillColor = evaluated.get<FillColor>().evaluate(evalContext, FillColor::defaultValue());
         const auto outlineColor = evaluated.get<FillOutlineColor>().evaluate(evalContext,
                                                                              FillOutlineColor::defaultValue());
-        const std::array<float, 2> translation{0, 0}; // TODO: from style evaluation
-        const style::TranslateAnchorType translationAnchor = style::TranslateAnchorType::Map; // TODO: ...
-        const std::optional<mbgl::Point<double>> origin = std::nullopt; // TODO: never set for fill?
-        if (fillOpacity * fillColor.a > 0 || outlineColor.a > 0) {
-            if (tileMatrix->empty()) {
-                tileMatrix = LayerTweaker::getTileMatrix(
-                    tileID.toUnwrapped(),
-                    state,
-                    renderTreeParameters.transformParams,
-                    layerIndex, // TODO: Confirm that this is the same as PaintParameters::currentLayer
-                    translation,
-                    translationAnchor,
-                    origin,
-                    is3d,
-                    enableDepth,
-                    subLayerIndex,
-                    nearClipped,
-                    inViewportPixelUnits,
-                    aligned);
-            }
+        if (fillColor.a == 0 && (doOutline && outlineColor.a == 0)) {
+            continue;
+        }
 
-            // NDC positive is up/right
-            auto left = std::numeric_limits<float>::max();
-            auto top = std::numeric_limits<float>::lowest();
-            auto right = std::numeric_limits<float>::lowest();
-            auto bottom = std::numeric_limits<float>::max();
-            for (std::size_t i = 0; i < bucket.vertices.elements(); ++i) {
-                const auto& vertex = bucket.vertices.at(i);
-                const vec4 view_pos{static_cast<double>(vertex.a1[0]), static_cast<double>(vertex.a1[1]), 0, 1};
+        // Compute the tile matrix once
+        if (!tileMatrix.has_value()) {
+            tileMatrix = LayerTweaker::getTileMatrix(
+                tileID.toUnwrapped(),
+                state,
+                renderTreeParameters.transformParams,
+                layerIndex, // TODO: Confirm that this is the same as PaintParameters::currentLayer
+                translation,
+                translationAnchor,
+                origin,
+                is3d,
+                enableDepth,
+                subLayerIndex,
+                nearClipped,
+                inViewportPixelUnits,
+                aligned);
+        }
+
+        // Compute the feature's bounding box in tile space and project the corners into NDC space.
+        // Faster than projecting every vertex, and good enough for our purposes.
+        auto minX = std::numeric_limits<short>::max();
+        auto maxX = std::numeric_limits<short>::lowest();
+        auto minY = std::numeric_limits<short>::max();
+        auto maxY = std::numeric_limits<short>::lowest();
+        for (std::size_t i = 0; i < bucket.vertices.elements(); ++i) {
+            const auto& vertex = bucket.vertices.at(i);
+            minX = std::min(minX, vertex.a1[0]);
+            maxX = std::max(maxX, vertex.a1[0]);
+            minY = std::min(minY, vertex.a1[1]);
+            maxY = std::max(maxY, vertex.a1[1]);
+        }
+
+        gfx::RenderingStats::FeatureInfo info;
+        if (minX < maxX && minY < maxY) {
+            const vec4 corners[] = {
+                {static_cast<double>(minX), static_cast<double>(minY), 0, 1},
+                {static_cast<double>(maxX), static_cast<double>(minY), 0, 1},
+                {static_cast<double>(maxX), static_cast<double>(maxY), 0, 1},
+                {static_cast<double>(minX), static_cast<double>(maxY), 0, 1},
+            };
+            for (const auto& view_pos : corners) {
+                // view -> clip space
                 vec4 clip_pos;
-                matrix::transformMat4(clip_pos, view_pos, *tileMatrix); // view -> clip space
-                const vec2 ndc_pos{clip_pos[0] / clip_pos[3], clip_pos[1] / clip_pos[3]};
+                matrix::transformMat4(clip_pos, view_pos, *tileMatrix);
 
-                left = std::min(left, static_cast<float>(ndc_pos[0]));
-                top = std::max(top, static_cast<float>(ndc_pos[1]));
-                right = std::max(right, static_cast<float>(ndc_pos[0]));
-                bottom = std::min(bottom, static_cast<float>(ndc_pos[1]));
+                // clip -> ndc
+                // TODO: Test z for clipping?
+                const auto x = static_cast<float>(clip_pos[0] / clip_pos[3]);
+                const auto y = static_cast<float>(clip_pos[1] / clip_pos[3]);
+
+                info.ndcBounds.minX = std::min(info.ndcBounds.minX, x);
+                info.ndcBounds.maxY = std::max(info.ndcBounds.maxY, y);
+                info.ndcBounds.maxX = std::max(info.ndcBounds.maxX, x);
+                info.ndcBounds.minY = std::min(info.ndcBounds.minY, y);
             }
 
-            if (left < right && bottom < top) {
-                stats.renderedFeatures.insert({featureId, {left, top, right, bottom}});
+            if (info.ndcBounds.minX < info.ndcBounds.maxX && info.ndcBounds.minY < info.ndcBounds.maxY) {
+                stats.renderedFeatures.insert({featureId, info});
             }
         }
     }

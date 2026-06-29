@@ -147,6 +147,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/geometry/line_atlas.hpp",
     "src/mbgl/gfx/attribute.cpp",
     "src/mbgl/gfx/attribute.hpp",
+    "src/mlgl/gfx/context.cpp",
     "src/mbgl/gfx/cull_face_mode.hpp",
     "src/mbgl/gfx/fill_generator.cpp",
     "src/mbgl/gfx/index_buffer.hpp",

@@ -319,15 +319,11 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
-    public:
-        struct FeatureInfo {
-            std::array<float, 4> bounds;
-        };
-
+public:
     struct Stats {
         size_t drawablesAdded = 0;
         size_t drawablesRemoved = 0;
-        mbgl::unordered_map<std::string, FeatureInfo> renderedFeatures;
+        gfx::RenderingStats::LayerFeaturesMap renderedFeatures;
     } stats;
 
 private:

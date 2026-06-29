@@ -83,12 +83,12 @@ float MapOptions::pixelRatio() const {
     return impl_->pixelRatio;
 }
 
-MapOptions& MapOptions::withCaptureRenderedFeatures(bool capture) {
+MapOptions& MapOptions::withRenderedFeatureInfo(bool capture) {
     impl_->captureRenderedFeatures = capture;
     return *this;
 }
 
-bool MapOptions::captureRenderedFeatures() const {
+bool MapOptions::renderedFeatureInfo() const {
     return impl_->captureRenderedFeatures;
 }
 
