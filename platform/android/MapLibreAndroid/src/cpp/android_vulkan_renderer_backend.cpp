@@ -55,6 +55,21 @@ AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window
 
 AndroidVulkanRendererBackend::~AndroidVulkanRendererBackend() = default;
 
+bool AndroidVulkanRendererBackend::createSurface(ANativeWindow* window_) {
+    window = window_;
+    setResource(std::make_unique<AndroidVulkanRenderableResource>(*this));
+
+    initSurface();
+    initSwapchain();
+
+    return true;
+}
+
+void AndroidVulkanRendererBackend::destroySurface() {
+    window = nullptr;
+    setResource(nullptr);
+}
+
 std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
     auto extensions = mbgl::vulkan::RendererBackend::getInstanceExtensions();
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -62,16 +77,18 @@ std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
     return extensions;
 }
 
-void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
-    size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+void AndroidVulkanRendererBackend::resizeFramebuffer(int, int) {
     if (context) {
         static_cast<vulkan::Context&>(*context).requestSurfaceUpdate();
     }
 }
 
+void AndroidVulkanRendererBackend::enableFramebufferRead(bool value) {
+    getResource<AndroidVulkanRenderableResource>().enableSurfaceRead();
+}
+
 PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
-    // TODO not implemented
-    return PremultipliedImage(Size(2, 2));
+    return std::move(*getResource<AndroidVulkanRenderableResource>().readImage());
 }
 
 } // namespace android

@@ -50,6 +50,10 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     static_cast<IndexBufferResource&>(resource).get().update(data, size, /*offset=*/0);
 }
 
+BufferResource UploadPass::createBufferResource(const void* data, std::size_t size, size_t usage, bool persistent) {
+    return commandEncoder.context.createBuffer(data, size, usage, persistent);
+}
+
 struct VertexBuffer : public gfx::VertexBufferBase {
     ~VertexBuffer() override = default;
 
@@ -59,7 +63,7 @@ struct VertexBuffer : public gfx::VertexBufferBase {
 static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
-                                                             const gfx::BufferUsageType usage,
+                                                             size_t usage,
                                                              [[maybe_unused]] bool forceUpdate) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
@@ -81,7 +85,8 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         // Otherwise, create a new one
         if (rawBufSize > 0) {
             auto buffer = std::make_unique<VertexBuffer>();
-            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            buffer->resource = std::make_unique<VertexBufferResource>(
+                createBufferResource(rawBufPtr, rawBufSize, usage, false));
             vec->setBuffer(std::move(buffer));
 
             auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer());
@@ -100,7 +105,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::vector<std::uint8_t>&,
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
-    const gfx::BufferUsageType usage,
+    const gfx::BufferUsageType,
     const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
     gfx::AttributeBindingArray bindings;
@@ -128,7 +133,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // If the attribute references data shared with a bucket, get the corresponding buffer.
-        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage, !lastUpdate)) {
+        if (const auto& buffer = getBuffer(
+                effectiveAttr.getSharedRawData(), defaultAttr.getBufferUsage(), !lastUpdate)) {
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
@@ -146,7 +152,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         // Otherwise, turn the data managed by the attribute into a buffer.
         if (const auto& buffer = VertexAttribute::getBuffer(
-                effectiveAttr, *this, gfx::BufferUsageType::StaticDraw, !lastUpdate)) {
+                effectiveAttr, *this, defaultAttr.getBufferUsage(), !lastUpdate)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
