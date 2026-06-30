@@ -34,7 +34,7 @@ Set `-DMLN_USE_RUST=ON` when generating a configuration with CMake.
 
 Pass the `--//:use_rust` flag to Bazel commands.
 
-Note that when [generating an Xcode project](./ios/README.md) you should not pass this option to Bazel directly, but as follows:
+Note that when [generating an Xcode project](./platforms/ios/) you should not pass this option to Bazel directly, but as follows:
 
 ```shell
 bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//:use_rust"
