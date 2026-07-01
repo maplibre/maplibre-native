@@ -48,7 +48,6 @@ if (!(Test-Path platform\windows\vendor\vcpkg\vcpkg.exe)) {
 .\platform\windows\vendor\vcpkg\vcpkg.exe install libuv:arm64-windows
 .\platform\windows\vendor\vcpkg\vcpkg.exe install icu:arm64-windows
 .\platform\windows\vendor\vcpkg\vcpkg.exe install glfw3:arm64-windows
-.\platform\windows\vendor\vcpkg\vcpkg.exe install dlfcn-win32:arm64-windows
 .\platform\windows\vendor\vcpkg\vcpkg.exe install zlib:arm64-windows
 .\platform\windows\vendor\vcpkg\vcpkg.exe install egl-registry:arm64-windows
 .\platform\windows\vendor\vcpkg\vcpkg.exe install opengl-registry:arm64-windows
