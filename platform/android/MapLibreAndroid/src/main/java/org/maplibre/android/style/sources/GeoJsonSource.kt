@@ -498,8 +498,23 @@ class GeoJsonSource : Source {
     @Keep
     private external fun nativeGetClusterExpansionZoom(feature: Feature): Int
 
+    /**
+     * Overrides the synchronous update flag for this source at runtime.
+     * This is equivalent to constructing the source with [GeoJsonOptions.withSynchronousUpdate],
+     * but can be applied to existing sources loaded from a style JSON.
+     *
+     * @param override whether to force synchronous updates
+     */
+    fun setOverrideSynchronousUpdate(override: Boolean) {
+        checkThread()
+        nativeSetOverrideSynchronousUpdate(override)
+    }
+
     @Keep
     private external fun nativeIsUpdateSynchronous(): Boolean
+
+    @Keep
+    private external fun nativeSetOverrideSynchronousUpdate(override: Boolean)
 
     @Keep
     @Throws(Throwable::class)
