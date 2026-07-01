@@ -68,8 +68,6 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     MBGL_VERIFY_THREAD(tid);
 
-    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
-
     destroyResources();
 
     {
@@ -101,7 +99,8 @@ void Context::initFrameResources() {
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, 0, shaders::maxUBOCountPerDrawable, 0));
+        DescriptorPoolGrowable(
+            drawableUniformDescriptorPoolSize, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
@@ -127,18 +126,18 @@ void Context::initFrameResources() {
     }
 
     // force placeholder texture upload before any descriptor sets
-    (void)getDummyTexture();
+    static_cast<void>(getDummyTexture());
 
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, 0, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
+                                    shaders::layerSSBOStartId,
                                     shaders::maxSSBOCountPerLayer,
                                     shaders::maxUBOCountPerLayer,
                                     "LayerUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
-                                    0,
+                                    shaders::drawableSSBOStartId,
+                                    shaders::maxSSBOCountPerDrawable,
                                     shaders::maxUBOCountPerDrawable,
                                     "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
@@ -147,7 +146,11 @@ void Context::initFrameResources() {
 void Context::destroyResources() {
     MBGL_VERIFY_THREAD(tid);
 
-    backend.getDevice()->waitIdle(backend.getDispatcher());
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mbgl::Event::Render, "Vulkan device lost during context shutdown");
+    }
 
     for (auto& frame : frameResources) {
         frame.runDeletionQueue(*this);
@@ -665,7 +668,7 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
-                                              size_t startId,
+                                              [[maybe_unused]] size_t startId,
                                               size_t storageCount,
                                               size_t uniformCount,
                                               const std::string& name) {
@@ -675,6 +678,7 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
         if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eVertex;
         }
+
         if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eFragment;
         }
@@ -767,8 +771,23 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
     const auto pushConstant = vk::PushConstantRange().setSize(sizeof(matf4)).setStageFlags(stages);
 
+    auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
+
+#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+    // GPU assisted validation crashes when using a pipeline without descriptors.
+    // Use a compatible layout with the general pipeline when enabled
+    const std::vector<vk::DescriptorSetLayout> layouts = {
+        globalUniformDescriptorSetLayout.get(),
+        layerUniformDescriptorSetLayout.get(),
+        drawableUniformDescriptorSetLayout.get(),
+        drawableImageDescriptorSetLayout.get(),
+    };
+
+    layoutInfo.setSetLayouts(layouts);
+#endif
+
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant), nullptr, backend.getDispatcher());
+        layoutInfo, nullptr, backend.getDispatcher());
 
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 

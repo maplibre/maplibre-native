@@ -11,7 +11,7 @@ Binaries are available and downloaded during install for the following platforms
   - Ubuntu 24.04 (amd64/arm64)
   - macOS (amd64/arm64)
   - Windows (amd64/arm64)
-- Node.js 20, 22, 24
+- Node.js 22, 24, 26
 
 Run:
 

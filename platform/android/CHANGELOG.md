@@ -1,5 +1,48 @@
 # Changelog MapLibre Native for Android
 
+## 13.3.1
+
+### ✨ Features and improvements
+
+- Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
+
+### 🐞 Bug fixes
+
+- fix(core): Update image descriptor sets when removing textures ([#4351](https://github.com/maplibre/maplibre-native/pull/4351)).
+- Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
+- core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
+
+## 13.3.0
+
+### ✨ Features and improvements
+
+- core: Enable Vulkan surface transforms by capability ([#4320](https://github.com/maplibre/maplibre-native/pull/4320)).
+- core: Update Vulkan headers ([#4319](https://github.com/maplibre/maplibre-native/pull/4319)).
+- Improve Vulkan Android surface lifecycle ([#4323](https://github.com/maplibre/maplibre-native/pull/4323)).
+- Implement Vulkan surface snapshot ([#4314](https://github.com/maplibre/maplibre-native/pull/4314)).
+- Vulkan fill extrusion instancing [Core optimization] ([#4310](https://github.com/maplibre/maplibre-native/pull/4310)).
+- Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
+
+### 🐞 Bug fixes
+
+- fix(android): guard stale layer remove path ([#4300](https://github.com/maplibre/maplibre-native/pull/4300)).
+- core: Fix specialized location indicator puck scaling ([#4327](https://github.com/maplibre/maplibre-native/pull/4327)).
+- Fix resize desync between Android surface and renderable ([#4328](https://github.com/maplibre/maplibre-native/pull/4328)).
+
+## 13.2.0
+
+### ✨ Features and improvements
+
+- Optimize fill extrusion memory by using instancing [Core optimization] ([#4256](https://github.com/maplibre/maplibre-native/pull/4256)).
+- Add asynchronous deletion option for Android renderer backend ([#4287](https://github.com/maplibre/maplibre-native/pull/4287)).
+
+### 🐞 Bug fixes
+
+- fix(renderer): guard ImageManager callback against use-after-free ([#4233](https://github.com/maplibre/maplibre-native/pull/4233)).
+- core: clear vulkan allocator handle after destruction ([#4302](https://github.com/maplibre/maplibre-native/pull/4302)).
+- [core] Keep `BackendScope` and context valid when closing the thread pool ([#4307](https://github.com/maplibre/maplibre-native/pull/4307)).
+- [core] Fix buffer versioning ([#4291](https://github.com/maplibre/maplibre-native/pull/4291)).
+
 ## 13.1.0
 
 Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.

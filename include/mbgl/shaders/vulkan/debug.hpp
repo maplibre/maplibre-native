@@ -6,7 +6,7 @@
 namespace mbgl {
 namespace shaders {
 
-constexpr auto debugShaderPrelude = R"(#define idDebugUBO  drawableReservedUBOCount)";
+constexpr auto debugShaderPrelude = R"(#define idDebugUBO  drawableUBOStartId)";
 
 template <>
 struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan> {

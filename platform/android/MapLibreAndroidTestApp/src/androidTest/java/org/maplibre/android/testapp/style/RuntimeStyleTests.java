@@ -9,6 +9,7 @@ import androidx.test.espresso.ViewAction;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.maplibre.android.style.layers.CannotAddLayerException;
+import org.maplibre.android.style.layers.BackgroundLayer;
 import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.FillLayer;
 import org.maplibre.android.style.layers.Layer;
@@ -22,6 +23,7 @@ import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.style.sources.VectorSource;
 import org.maplibre.android.testapp.R;
 import org.maplibre.android.testapp.activity.EspressoTest;
+import org.maplibre.android.maps.Style;
 
 import org.hamcrest.Matcher;
 import org.junit.Assert;
@@ -297,6 +299,53 @@ public class RuntimeStyleTests extends EspressoTest {
       assertTrue(maplibreMap.getStyle().removeLayer(firstLayer.getId()));
 
       assertTrue(maplibreMap.getStyle().removeLayerAt(0));
+    });
+  }
+
+  @Test
+  public void testRemoveStaleLayerReferenceDoesNotCrash() {
+    validateTestSetup();
+    onView(withId(R.id.mapView)).perform(new BaseViewAction() {
+      @Override
+      public void perform(UiController uiController, View view) {
+        final Layer[] staleLayerHolder = new Layer[1];
+        final Throwable[] errorHolder = new Throwable[1];
+        final Boolean[] removeResultHolder = new Boolean[1];
+        final boolean[] finished = new boolean[] { false };
+
+        Style.Builder styleABuilder = new Style.Builder()
+            .withLayer(new BackgroundLayer("stale-layer-a")
+                .withProperties(PropertyFactory.backgroundColor(Color.BLUE)));
+        Style.Builder styleBBuilder = new Style.Builder()
+            .withLayer(new BackgroundLayer("style-b-background")
+                .withProperties(PropertyFactory.backgroundColor(Color.DKGRAY)));
+
+        maplibreMap.setStyle(styleABuilder, styleA -> {
+          staleLayerHolder[0] = styleA.getLayer("stale-layer-a");
+
+          maplibreMap.setStyle(styleBBuilder, styleB -> {
+            try {
+              removeResultHolder[0] = styleB.removeLayer(staleLayerHolder[0]);
+            } catch (Throwable error) {
+              errorHolder[0] = error;
+            } finally {
+              finished[0] = true;
+            }
+          });
+        });
+
+        long timeoutMs = 5000;
+        long startMs = System.currentTimeMillis();
+        while (!finished[0] && System.currentTimeMillis() - startMs < timeoutMs) {
+          uiController.loopMainThreadForAtLeast(50);
+        }
+
+        assertTrue("Style switch did not finish in time", finished[0]);
+        assertNotNull("Stale layer should have been captured", staleLayerHolder[0]);
+        assertNull("Removing stale layer reference should not throw", errorHolder[0]);
+        assertFalse("Removing stale layer reference should fail gracefully",
+            Boolean.TRUE.equals(removeResultHolder[0]));
+      }
     });
   }
 

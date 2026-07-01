@@ -87,6 +87,17 @@ public:
     const vk::Sampler& getVulkanSampler();
 
     void copyImage(vk::Image image, Size imageSize, uint16_t xOffset = 0, uint16_t yOffset = 0);
+    void copyImage(vk::Image image,
+                   Size imageSize,
+                   uint16_t xOffset,
+                   uint16_t yOffset,
+                   const vk::UniqueCommandBuffer& commandBuffer);
+    void blitImage(vk::Image image, Size imageSize, uint16_t xOffset = 0, uint16_t yOffset = 0);
+    void blitImage(vk::Image image,
+                   Size imageSize,
+                   uint16_t xOffset,
+                   uint16_t yOffset,
+                   const vk::UniqueCommandBuffer& commandBuffer);
     std::shared_ptr<PremultipliedImage> readImage();
 
 private:
