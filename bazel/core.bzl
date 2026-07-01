@@ -391,6 +391,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/expression/parsing_context.cpp",
     "src/mbgl/style/expression/slice.cpp",
     "src/mbgl/style/expression/step.cpp",
+    "src/mbgl/style/expression/utf8_op_helpers.cpp",
+    "src/mbgl/style/expression/utf8_op_helpers.hpp",
     "src/mbgl/style/expression/util.cpp",
     "src/mbgl/style/expression/util.hpp",
     "src/mbgl/style/expression/value.cpp",

@@ -733,6 +733,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/parsing_context.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/step.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/utf8_op_helpers.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/utf8_op_helpers.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/value.cpp
