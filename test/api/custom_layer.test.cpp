@@ -14,8 +14,10 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
 #include <memory>
+#include <optional>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -89,6 +91,68 @@ public:
     GLuint buffer = 0;
     GLuint a_pos = 0;
 };
+
+// Captures CustomLayerRenderParameters during render for inspection.
+class CapturingLayer : public mbgl::style::CustomLayerHost {
+public:
+    std::optional<mbgl::style::CustomLayerRenderParameters> lastParams;
+    bool renderCalled = false;
+
+    void initialize() override {}
+    void render(const mbgl::style::CustomLayerRenderParameters& params) override {
+        lastParams = params;
+        renderCalled = true;
+    }
+    void contextLost() override {}
+    void deinitialize() override {}
+};
+
+// Verify that a render pass populates nearClippedProjectionMatrix and that it
+// differs from projectionMatrix (issue #4301 fix).
+TEST(CustomLayer, RenderParametersNearClippedMatrixIsPopulated) {
+    if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
+        return;
+    }
+
+    util::RunLoop loop;
+
+    auto* host = new CapturingLayer();
+    HeadlessFrontend frontend{1};
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
+    map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
+    map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
+    map.getStyle().addLayer(std::make_unique<CustomLayer>("capturing", std::unique_ptr<CustomLayerHost>(host)));
+
+    frontend.render(map);
+
+    ASSERT_TRUE(host->renderCalled) << "render() was never called";
+    ASSERT_TRUE(host->lastParams.has_value());
+    const auto& p = host->lastParams.value();
+
+    // Both matrices must be non-identity.
+    const mat4 identity = matrix::identity4();
+    EXPECT_NE(p.projectionMatrix, identity);
+    EXPECT_NE(p.nearClippedProjectionMatrix, identity);
+
+    // The two matrices must differ — they use different near clip planes.
+    EXPECT_NE(p.projectionMatrix, p.nearClippedProjectionMatrix);
+
+    // Depth coefficients (column-major indices 10 and 14) must differ.
+    EXPECT_NE(p.projectionMatrix[10], p.nearClippedProjectionMatrix[10]);
+    EXPECT_NE(p.projectionMatrix[14], p.nearClippedProjectionMatrix[14]);
+
+    // Rows 0 and 1 of the combined matrix are unaffected by the near plane
+    // (column-major: row 0 = indices 0,4,8,12; row 1 = indices 1,5,9,13).
+    for (int col = 0; col < 4; ++col) {
+        EXPECT_DOUBLE_EQ(p.projectionMatrix[col * 4 + 0], p.nearClippedProjectionMatrix[col * 4 + 0])
+            << "row 0 mismatch at col " << col;
+        EXPECT_DOUBLE_EQ(p.projectionMatrix[col * 4 + 1], p.nearClippedProjectionMatrix[col * 4 + 1])
+            << "row 1 mismatch at col " << col;
+    }
+}
 
 TEST(CustomLayer, Basic) {
     if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
