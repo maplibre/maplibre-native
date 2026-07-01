@@ -1,6 +1,6 @@
 set(MLT_WITH_JSON OFF CACHE BOOL "No JSON support" FORCE)
 set(MLT_WITH_PROTOZERO OFF CACHE BOOL "No protozero" FORCE)
-set(MLT_WITH_FASTPFOR OFF CACHE BOOL "disabled for lack of support for ARMv7 in SIMDE and requirement for SSE on x86" FORCE)
+set(MLT_WITH_FASTPFOR ON CACHE BOOL "Enabled" FORCE)
 set(MLT_WITH_TESTS OFF CACHE BOOL "Google Test conflicts with Dawn")
 set(MLT_WITH_TOOLS OFF CACHE BOOL "Not used")
 
@@ -8,8 +8,14 @@ set(MLT_WITH_TOOLS OFF CACHE BOOL "Not used")
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.3)
 set(MLT_OSX_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET} CACHE STRING "Inherited MacOS/iOS target" FORCE)
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
-    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp SYSTEM)
-else()
-    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp)
-endif()
+string(REPLACE ";" " " TEMP "${CMAKE_CXX_COMPILER_PREDEFINES_COMMAND}")
+message(STATUS "Clang predefines command: ${TEMP}")
+
+execute_process(COMMAND bash -c "${TEMP}" OUTPUT_VARIABLE CLANG_DEFINES ERROR_VARIABLE CLANG_DEFINES_ERR OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+message(STATUS "Clang defines: ${CLANG_DEFINES}")
+message(STATUS "Clang errors: ${CLANG_DEFINES_ERR}")
+execute_process(COMMAND cmd /c "${TEMP}" OUTPUT_VARIABLE CLANG_DEFINES ERROR_VARIABLE CLANG_DEFINES_ERR OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+message(STATUS "Clang defines: ${CLANG_DEFINES}")
+message(STATUS "Clang errors: ${CLANG_DEFINES_ERR}")
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp SYSTEM)
