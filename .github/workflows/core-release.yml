@@ -22,6 +22,7 @@ jobs:
         run: |
           tar czf maplibre-native-headers.tar.gz \
             include \
+            platform/default/include \
             vendor/maplibre-native-base/include \
             vendor/maplibre-native-base/deps/variant/include \
             vendor/maplibre-native-base/deps/geometry.hpp/include \
