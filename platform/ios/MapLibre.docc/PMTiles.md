@@ -2,16 +2,35 @@
 
 Working with PMTiles
 
-Starting MapLibre iOS 6.10.0, using [PMTiles](https://docs.protomaps.com/pmtiles/) as a data source is supported. You can prefix your vector tile source with `pmtiles://` to load a PMTiles file. The rest of the URL continue with be `https://` to load a remote PMTiles file, `asset://` to load an asset or `file://` to load a local PMTiles file.
+Starting MapLibre iOS 6.10.0, [PMTiles](https://docs.protomaps.com/pmtiles/) archives are supported as tile sources. Prefix any tile source URL with `pmtiles://` to read from a PMTiles archive:
 
-> Note: PMTiles sources do not currently support offline pack downloads.
+- `pmtiles://https://` — stream tiles from a remote file
+- `pmtiles://file://` — read a file from the device filesystem, including the app bundle
 
-Oliver Wipfli has made a style available that combines a [Protomaps]() basemap togehter with Foursquare's POI dataset. It is available in the [wipfli/foursquare-os-places-pmtiles](https://github.com/wipfli/foursquare-os-places-pmtiles) repository on GitHub. The style to use is
+The `pmtiles://` prefix works with any [tile source type](https://maplibre.org/maplibre-style-spec/sources/) (e.g. `vector`, `raster`, `raster-dem`, etc.), from a style JSON or dynamically.
 
-```
-https://raw.githubusercontent.com/wipfli/foursquare-os-places-pmtiles/refs/heads/main/style.json
-```
+> Note: PMTiles sources do not support offline pack downloads or caching.
 
-The neat thing about this style is that it only uses PMTiles vector sources. PMTiles can be hosted with a relatively simple file server (or file hosting service) instead of a more complex specialized tile server.
+## Loading a style that uses PMTiles sources
 
-![](pmtiles-demo.png)
+Load a style JSON that references `pmtiles://` sources. The example below loads a satellite imagery basemap of the Central Alps and sets the initial camera position:
+
+<!-- include-example(PMTilesStyleURL) -->
+
+## Adding a PMTiles source directly
+
+Add `vector` sources from PMTiles archives to an already-loaded style. The example overlays two places datasets — [Overture Maps](https://overturemaps.org/) (yellow) and [Foursquare OS Places](https://opensource.foursquare.com/os-places/) (blue) — both using `MLNCircleStyleLayer`. The `sourceLayerIdentifier` names the layer within the archive to render:
+
+<!-- include-example(PMTilesAddSource) -->
+
+The same pattern works for `raster` archives using `MLNRasterTileSource` and `MLNRasterStyleLayer`:
+
+<!-- include-example(PMTilesRasterSource) -->
+
+> Note: `raster-dem` sources added programmatically cannot specify `encoding` via the current iOS API. Define `raster-dem` sources with terrarium encoding in the style JSON instead, where the `encoding` field is fully supported.
+
+## Loading a local PMTiles file
+
+Bundle a `.pmtiles` file in your app target and reference it using its bundle URL. iOS app bundle files are accessible via `file://`, so no special handling is needed:
+
+<!-- include-example(PMTilesLocalFile) -->
