@@ -4,6 +4,7 @@ bazel-out
 bazel-bin
 bazel-testlogs
 .cache
+.pixi
 .idea
 .vscode
 .cxx

@@ -693,6 +693,12 @@ void Context::setStencilMode(const gfx::StencilMode& stencil) {
     }
 }
 
+bool Context::hasStencilBuffer() const {
+    GLint bits = 0;
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_BITS, &bits));
+    return bits > 0;
+}
+
 void Context::setColorMode(const gfx::ColorMode& color) {
     if (color.blendFunction.is<gfx::ColorMode::Replace>()) {
         blend = false;
