@@ -4,6 +4,7 @@
 
 ### ✨ Features and improvements
 
+- Add `fill-extrusion-edge-radius` layout property — bucket-time rounding of extruded footprint corners with smooth facade normals (default 0 = off).
 - Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
 
 ### 🐞 Bug fixes

@@ -2767,4 +2767,24 @@ The unit is in density-independent pixels only for SDF sprites that were created
     return new LayoutPropertyValue<>("circle-sort-key", value);
   }
 
+  /**
+   * Radius of a fill extrusion edge in meters. If not zero, rounds extrusion edges for a smoother appearance.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionEdgeRadius(Float value) {
+    return new LayoutPropertyValue<>("fill-extrusion-edge-radius", value);
+  }
+
+  /**
+   * Radius of a fill extrusion edge in meters. If not zero, rounds extrusion edges for a smoother appearance.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Expression> fillExtrusionEdgeRadius(Expression value) {
+    return new LayoutPropertyValue<>("fill-extrusion-edge-radius", value);
+  }
+
 }

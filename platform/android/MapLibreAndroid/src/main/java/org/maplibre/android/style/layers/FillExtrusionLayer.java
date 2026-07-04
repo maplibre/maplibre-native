@@ -144,6 +144,18 @@ public class FillExtrusionLayer extends Layer {
   // Property getters
 
   /**
+   * Get the FillExtrusionEdgeRadius property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillExtrusionEdgeRadius() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-edge-radius", nativeGetFillExtrusionEdgeRadius());
+  }
+
+  /**
    * Get the FillExtrusionOpacity property
    *
    * @return property wrapper value around Float
@@ -381,6 +393,10 @@ public class FillExtrusionLayer extends Layer {
     checkThread();
     return (PropertyValue<Boolean>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
   }
+
+  @NonNull
+  @Keep
+  private native Object nativeGetFillExtrusionEdgeRadius();
 
   @NonNull
   @Keep

@@ -177,6 +177,19 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testFillExtrusionEdgeRadiusAsConstant() {
+    Timber.i("fill-extrusion-edge-radius");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionEdgeRadius().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionEdgeRadius(propertyValue));
+    assertEquals(layer.getFillExtrusionEdgeRadius().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
   public void testFillExtrusionOpacityTransition() {
     Timber.i("fill-extrusion-opacityTransitionOptions");
     assertNotNull(layer);
