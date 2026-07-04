@@ -5,6 +5,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ## 6.27.0
 
 - Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
+- Fix missing depth/stencil render-group state for 3D drawables in layer groups without stencil tiles (previously: Metal rendered without depth, OpenGL discarded all fragments).
 
 ## 6.26.1
 

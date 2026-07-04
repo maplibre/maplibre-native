@@ -8,6 +8,7 @@
 
 ### 🐞 Bug fixes
 
+- Fix missing depth/stencil render-group state for 3D drawables in layer groups without stencil tiles (previously: Metal rendered without depth, OpenGL discarded all fragments).
 - fix(core): Update image descriptor sets when removing textures ([#4351](https://github.com/maplibre/maplibre-native/pull/4351)).
 - Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
 - core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
