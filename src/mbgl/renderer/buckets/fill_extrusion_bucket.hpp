@@ -27,7 +27,7 @@ class FillExtrusionBucket final : public Bucket {
 public:
     ~FillExtrusionBucket() override;
     using PossiblyEvaluatedPaintProperties = style::FillExtrusionPaintProperties::PossiblyEvaluated;
-    using PossiblyEvaluatedLayoutProperties = style::Properties<>::PossiblyEvaluated;
+    using PossiblyEvaluatedLayoutProperties = style::FillExtrusionLayoutProperties::PossiblyEvaluated;
 
     FillExtrusionBucket(const PossiblyEvaluatedLayoutProperties&,
                         const std::map<std::string, Immutable<style::LayerProperties>>&,
@@ -90,6 +90,12 @@ public:
     SegmentVector triangleSegments;
 
     std::unordered_map<std::string, FillExtrusionBinders> paintPropertyBinders;
+
+private:
+    // Plan-view corner-rounding radius (fill-extrusion-edge-radius), in
+    // meters, captured at bucket-construction time from the layout property.
+    // 0 (the default) keeps the geometry path unchanged.
+    const float edgeRadiusMeters_;
 };
 
 } // namespace mbgl
