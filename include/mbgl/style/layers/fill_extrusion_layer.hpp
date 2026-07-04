@@ -19,6 +19,12 @@ public:
     FillExtrusionLayer(const std::string& layerID, const std::string& sourceID);
     ~FillExtrusionLayer() override;
 
+    // Layout properties
+
+    static PropertyValue<float> getDefaultFillExtrusionEdgeRadius();
+    const PropertyValue<float>& getFillExtrusionEdgeRadius() const;
+    void setFillExtrusionEdgeRadius(const PropertyValue<float>&);
+
     // Paint properties
 
     static PropertyValue<float> getDefaultFillExtrusionBase();

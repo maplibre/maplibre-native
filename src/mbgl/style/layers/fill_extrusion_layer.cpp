@@ -58,11 +58,27 @@ std::unique_ptr<Layer> FillExtrusionLayer::cloneRef(const std::string& id_) cons
     return std::make_unique<FillExtrusionLayer>(std::move(impl_));
 }
 
-void FillExtrusionLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
+void FillExtrusionLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
+    layout.stringify(writer);
 }
 
 // Layout properties
 
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionEdgeRadius() {
+    return FillExtrusionEdgeRadius::defaultValue();
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionEdgeRadius() const {
+    return impl().layout.get<FillExtrusionEdgeRadius>();
+}
+
+void FillExtrusionLayer::setFillExtrusionEdgeRadius(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionEdgeRadius()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<FillExtrusionEdgeRadius>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
 
 // Paint properties
 
@@ -305,6 +321,7 @@ enum class Property : uint8_t {
     FillExtrusionTranslateTransition,
     FillExtrusionTranslateAnchorTransition,
     FillExtrusionVerticalGradientTransition,
+    FillExtrusionEdgeRadius = kPaintPropertyCount,
 };
 
 template <typename T>
@@ -328,7 +345,8 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-extrusion-pattern-transition", toUint8(Property::FillExtrusionPatternTransition)},
      {"fill-extrusion-translate-transition", toUint8(Property::FillExtrusionTranslateTransition)},
      {"fill-extrusion-translate-anchor-transition", toUint8(Property::FillExtrusionTranslateAnchorTransition)},
-     {"fill-extrusion-vertical-gradient-transition", toUint8(Property::FillExtrusionVerticalGradientTransition)}});
+     {"fill-extrusion-vertical-gradient-transition", toUint8(Property::FillExtrusionVerticalGradientTransition)},
+     {"fill-extrusion-edge-radius", toUint8(Property::FillExtrusionEdgeRadius)}});
 
 StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property property) {
     switch (property) {
@@ -364,6 +382,8 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property propert
             return makeStyleProperty(layer.getFillExtrusionTranslateAnchorTransition());
         case Property::FillExtrusionVerticalGradientTransition:
             return makeStyleProperty(layer.getFillExtrusionVerticalGradientTransition());
+        case Property::FillExtrusionEdgeRadius:
+            return makeStyleProperty(layer.getFillExtrusionEdgeRadius());
     }
     return {};
 }
@@ -422,15 +442,22 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionColor(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionOpacity) {
+    if (property == Property::FillExtrusionOpacity || property == Property::FillExtrusionEdgeRadius) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        setFillExtrusionOpacity(*typedValue);
-        return std::nullopt;
+        if (property == Property::FillExtrusionOpacity) {
+            setFillExtrusionOpacity(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionEdgeRadius) {
+            setFillExtrusionEdgeRadius(*typedValue);
+            return std::nullopt;
+        }
     }
     if (property == Property::FillExtrusionPattern) {
         Error error;
