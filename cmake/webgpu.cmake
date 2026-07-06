@@ -9,6 +9,12 @@ target_compile_definitions(
         MLN_RENDER_BACKEND_WEBGPU=1
 )
 
+target_include_directories(
+        mbgl-core
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/platform/default/include
+)
+
 list(APPEND
         SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
