@@ -44,6 +44,7 @@ class CrossTileSymbolLayerIndex;
 using SymbolIconBinders = PaintPropertyBinders<style::IconPaintProperties::DataDrivenProperties>;
 using SymbolTextBinders = PaintPropertyBinders<style::TextPaintProperties::DataDrivenProperties>;
 using SymbolStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
+using SymbolInstanceVertex = gfx::Vertex<TypeList<attributes::instance>>;
 using SymbolLayoutVertex = gfx::Vertex<TypeList<attributes::pos_scale, attributes::offset_tltr, attributes::offset_blbr, attributes::texture_rect, attributes::pixeloffset, attributes::size_sdf>>;
 using SymbolDynamicLayoutAttributes = TypeList<attributes::projected_pos>;
 using SymbolOpacityAttributes = TypeList<attributes::fade_opacity>;
@@ -281,6 +282,10 @@ public:
     bool check(source_location) override;
 #endif
 
+    static SymbolInstanceVertex instanceVertex(uint16_t instance) {
+        return {instance};
+    }
+    
     static SymbolLayoutVertex layoutVertex(const SymbolQuad& symbol,
                                            const Anchor& labelAnchor,
                                            const Range<float>& sizeData) {
@@ -350,6 +355,8 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
+    using InstanceVector = gfx::VertexVector<SymbolInstanceVertex>;
+    using InstanceBuffer = gfx::VertexBuffer<SymbolInstanceVertex>;
     using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
     using VertexBuffer = gfx::VertexBuffer<SymbolLayoutVertex>;
     using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
@@ -375,7 +382,11 @@ public:
                 sharedOpacityVertices->updateModified();
             }
         }
-
+        
+        std::shared_ptr<InstanceVector> sharedInstances = std::make_shared<InstanceVector>();
+        InstanceVector& instances() { return *sharedInstances; }
+        const InstanceVector& instances() const { return *sharedInstances; }
+        
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }
@@ -388,9 +399,9 @@ public:
         OpacityVertexVector& opacityVertices() { return *sharedOpacityVertices; }
         const OpacityVertexVector& opacityVertices() const { return *sharedOpacityVertices; }
 
-        using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
-        const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
-        TriangleIndexVector& triangles = *sharedTriangles;
+        //using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+        //const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+        //TriangleIndexVector& triangles = *sharedTriangles;
 
         SegmentVector segments;
         std::vector<PlacedSymbol> placedSymbols;

@@ -279,8 +279,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto primitiveType = getPrimitiveType(mode.type);
             constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
             constexpr auto indexSize = sizeof(std::uint16_t);
-            const NS::UInteger instanceCount = instanceAttributes ? instanceAttributes->getMinCount() : 1;
-            constexpr NS::UInteger baseInstance = 0;
+            const NS::UInteger instanceCount = mlSegment.instanceCount;
+            const NS::UInteger baseInstance = mlSegment.baseInstance;
             const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
                                                                        mlSegment.indexOffset); // in bytes, not indexes
             const NS::Integer baseVertex = static_cast<NS::Integer>(mlSegment.vertexOffset);
@@ -376,6 +376,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
             seg.indexOffset,
             seg.vertexLength,
             seg.indexLength,
+            seg.baseInstance,
+            seg.instanceCount,
             seg.sortKey,
         };
         drawSegs.push_back(std::make_unique<Drawable::DrawSegment>(mode, std::move(segCopy)));

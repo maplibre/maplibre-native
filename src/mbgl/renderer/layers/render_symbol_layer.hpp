@@ -108,7 +108,7 @@ private:
 
     std::shared_ptr<SymbolVertexVector> staticDataVertices;
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
-    std::shared_ptr<SegmentVector> staticDataSegments;
+    //std::shared_ptr<SegmentVector> staticDataSegments;
 };
 
 } // namespace mbgl

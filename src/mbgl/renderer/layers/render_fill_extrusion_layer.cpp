@@ -461,6 +461,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             if (!staticDataIndices->elements()) {
                 return;
             }
+            staticDataSegments->back().instanceCount = bucket.vertices.elements();
             instancedBuilder.setSegments(
                 gfx::Triangles(), staticDataIndices, staticDataSegments->data(), staticDataSegments->size());
 

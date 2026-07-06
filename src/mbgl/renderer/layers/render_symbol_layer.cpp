@@ -245,6 +245,13 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
                           StringIDSetsPair* propertiesAsUniforms) {
+    if (const auto& attr = attribs.set(idSymbolInstanceAttribute)) {
+        attr->setSharedRawData(buffer.sharedInstances,
+                               offsetof(SymbolInstanceVertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolInstanceVertex),
+                               gfx::AttributeDataType::UShort);
+    }
     if (const auto& attr = attribs.set(idSymbolPosScaleAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -495,9 +502,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     if (!staticDataIndices) {
         staticDataIndices = std::make_shared<TriangleIndexVector>(RenderStaticData::symbolTriangleIndices());
     }
-    if (!staticDataSegments) {
+    /*if (!staticDataSegments) {
         staticDataSegments = std::make_shared<SegmentVector>(RenderStaticData::symbolSegments());
-    }
+    }*/
 
     // remove drawables that are dropped out of scope
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
@@ -654,18 +661,18 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto addRenderables = [&](const SymbolBucket::Buffer& buffer, const SymbolType type) mutable {
             if (sortFeaturesByKey) {
                 // Features need to be rendered in a specific order, so we add each segment individually
-                for (const auto& segment : *staticDataSegments) {
-                    assert(segment.vertexOffset + segment.vertexLength <= staticDataVertices->elements());
+                for (const auto& segment : buffer.segments) {
+                    assert(segment.baseInstance + segment.instanceCount <= buffer.vertices().elements());
                     renderableSegments.emplace(SegmentGroup{
                         .renderable = {segment, tile, renderData, bucketPaintProperties, segment.sortKey, type},
                         .segments = emptySegmentVector});
                 }
-            } else if (!staticDataSegments->empty()) {
+            } else if (!buffer.segments.empty()) {
                 // Features can be rendered in the order produced, and as grouped by the bucket
-                const auto& firstSeg = staticDataSegments->front();
+                const auto& firstSeg = buffer.segments.front();
                 renderableSegments.emplace(
                     SegmentGroup{.renderable = {firstSeg, tile, renderData, bucketPaintProperties, serialKey, type},
-                                 .segments = *staticDataSegments});
+                                 .segments = buffer.segments});
                 serialKey += 1.0;
             }
         };

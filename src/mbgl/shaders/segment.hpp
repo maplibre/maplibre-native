@@ -15,11 +15,15 @@ public:
                 std::size_t indexOffset_,
                 std::size_t vertexLength_ = 0,
                 std::size_t indexLength_ = 0,
+                std::size_t baseInstance_ = 0,
+                std::size_t instanceCount_ = 1,
                 float sortKey_ = 0.0f)
         : vertexOffset(vertexOffset_),
           indexOffset(indexOffset_),
           vertexLength(vertexLength_),
           indexLength(indexLength_),
+          baseInstance(baseInstance_),
+          instanceCount(instanceCount_),
           sortKey(sortKey_) {}
 
     // FIXME: clang-tidy-8 still complains here and clang-cl
@@ -34,6 +38,9 @@ public:
 
     std::size_t vertexLength;
     std::size_t indexLength;
+    
+    const std::size_t baseInstance;
+    std::size_t instanceCount;
 
     // One DrawScope per layer ID. This minimizes rebinding in cases where
     // several layers share buckets but have different sets of active
