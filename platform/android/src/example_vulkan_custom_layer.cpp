@@ -10,7 +10,7 @@
 #include <array>
 #include <vector>
 
-const char *VK_LOG_TAG = "VulkanCustomLayer";
+const char* VK_LOG_TAG = "VulkanCustomLayer";
 
 // ---------------------------------------------------------------------------
 // Minimal SPIR-V shaders
@@ -192,8 +192,8 @@ class ExampleVulkanCustomLayer : public mbgl::style::CustomLayerHost {
 public:
     ~ExampleVulkanCustomLayer() = default;
 
-    void initialize(const mbgl::style::CustomLayerInitParameters &baseParams) override {
-        const auto &params = static_cast<const mbgl::style::vulkan::CustomLayerInitParameters &>(baseParams);
+    void initialize(const mbgl::style::CustomLayerInitParameters& baseParams) override {
+        const auto& params = static_cast<const mbgl::style::vulkan::CustomLayerInitParameters&>(baseParams);
 
         __android_log_print(ANDROID_LOG_INFO,
                             VK_LOG_TAG,
@@ -208,11 +208,11 @@ public:
         createPipelineLayout(vulkanDevice, *vulkanDispatcher);
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &baseParams) override {
-        const auto &params = static_cast<const mbgl::style::vulkan::CustomLayerRenderParameters &>(baseParams);
+    void render(const mbgl::style::CustomLayerRenderParameters& baseParams) override {
+        const auto& params = static_cast<const mbgl::style::vulkan::CustomLayerRenderParameters&>(baseParams);
 
-        const auto &dispatcher = params.dispatcher;
-        const auto &cmd = params.commandBuffer;
+        const auto& dispatcher = params.dispatcher;
+        const auto& cmd = params.commandBuffer;
 
         if (!pipeline) {
             createPipeline(params.device, dispatcher, params.renderPass);
@@ -249,14 +249,14 @@ public:
     static std::array<float, 4> color;
 
 private:
-    void createShaders(const vk::Device &device, const vk::detail::DispatchLoaderDynamic &dispatcher) {
+    void createShaders(const vk::Device& device, const vk::detail::DispatchLoaderDynamic& dispatcher) {
         try {
             vertexModule = device.createShaderModuleUnique(
                 vk::ShaderModuleCreateInfo{.codeSize = sizeof(kVertSpirv),
-                                           .pCode = reinterpret_cast<const std::uint32_t *>(kVertSpirv)},
+                                           .pCode = reinterpret_cast<const std::uint32_t*>(kVertSpirv)},
                 nullptr,
                 dispatcher);
-        } catch (const std::exception &) {
+        } catch (const std::exception&) {
             __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create vertex shader module.");
             return;
         }
@@ -264,10 +264,10 @@ private:
         try {
             fragmentModule = device.createShaderModuleUnique(
                 vk::ShaderModuleCreateInfo{.codeSize = sizeof(kFragSpirv),
-                                           .pCode = reinterpret_cast<const std::uint32_t *>(kFragSpirv)},
+                                           .pCode = reinterpret_cast<const std::uint32_t*>(kFragSpirv)},
                 nullptr,
                 dispatcher);
-        } catch (const std::exception &) {
+        } catch (const std::exception&) {
             __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create fragment shader module.");
             return;
         }
@@ -275,7 +275,7 @@ private:
         __android_log_write(ANDROID_LOG_INFO, VK_LOG_TAG, "Shader modules created");
     }
 
-    void createPipelineLayout(const vk::Device &device, const vk::detail::DispatchLoaderDynamic &dispatcher) {
+    void createPipelineLayout(const vk::Device& device, const vk::detail::DispatchLoaderDynamic& dispatcher) {
         const vk::PushConstantRange pushRange{
             .stageFlags = vk::ShaderStageFlagBits::eFragment,
             .offset = 0,
@@ -290,7 +290,7 @@ private:
                 },
                 nullptr,
                 dispatcher);
-        } catch (const std::exception &) {
+        } catch (const std::exception&) {
             __android_log_write(ANDROID_LOG_ERROR, VK_LOG_TAG, "Failed to create pipeline layout.");
             return;
         }
@@ -298,8 +298,8 @@ private:
         __android_log_write(ANDROID_LOG_INFO, VK_LOG_TAG, "Pipeline layout created");
     }
 
-    void createPipeline(const vk::Device &device,
-                        const vk::detail::DispatchLoaderDynamic &dispatcher,
+    void createPipeline(const vk::Device& device,
+                        const vk::detail::DispatchLoaderDynamic& dispatcher,
                         vk::RenderPass renderPass) {
         if (!vertexModule || !fragmentModule || !pipelineLayout) return;
 
@@ -395,7 +395,7 @@ private:
     }
 
     vk::Device vulkanDevice;
-    const vk::detail::DispatchLoaderDynamic *vulkanDispatcher = nullptr;
+    const vk::detail::DispatchLoaderDynamic* vulkanDispatcher = nullptr;
 
     vk::UniqueHandle<vk::ShaderModule, vk::detail::DispatchLoaderDynamic> vertexModule;
     vk::UniqueHandle<vk::ShaderModule, vk::detail::DispatchLoaderDynamic> fragmentModule;
@@ -410,12 +410,12 @@ std::array<float, 4> ExampleVulkanCustomLayer::color = {0.0f, 1.0f, 0.0f, 0.5f};
 // JNI entry points
 // ---------------------------------------------------------------------------
 
-jlong JNICALL nativeCreateContext(JNIEnv *, jobject) {
+jlong JNICALL nativeCreateContext(JNIEnv*, jobject) {
     __android_log_write(ANDROID_LOG_INFO, VK_LOG_TAG, "nativeCreateContext");
     return reinterpret_cast<jlong>(new ExampleVulkanCustomLayer());
 }
 
-void JNICALL nativeSetColor(JNIEnv *, jobject, jfloat red, jfloat green, jfloat blue, jfloat alpha) {
+void JNICALL nativeSetColor(JNIEnv*, jobject, jfloat red, jfloat green, jfloat blue, jfloat alpha) {
     __android_log_print(ANDROID_LOG_INFO,
                         VK_LOG_TAG,
                         "ExampleVulkanCustomLayer.nativeSetColor: %.2f, %.2f, %.2f, %.2f",
@@ -426,17 +426,17 @@ void JNICALL nativeSetColor(JNIEnv *, jobject, jfloat red, jfloat green, jfloat 
     ExampleVulkanCustomLayer::color = {red, green, blue, alpha};
 }
 
-extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     __android_log_write(ANDROID_LOG_INFO, VK_LOG_TAG, "JNI_OnLoad");
 
-    JNIEnv *env = nullptr;
-    vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+    JNIEnv* env = nullptr;
+    vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
 
     jclass cls = env->FindClass("org/maplibre/android/testapp/model/customlayer/ExampleVulkanCustomLayer");
 
     const JNINativeMethod methods[] = {
-        {"createContext", "()J", reinterpret_cast<void *>(&nativeCreateContext)},
-        {"setColor", "(FFFF)V", reinterpret_cast<void *>(&nativeSetColor)},
+        {"createContext", "()J", reinterpret_cast<void*>(&nativeCreateContext)},
+        {"setColor", "(FFFF)V", reinterpret_cast<void*>(&nativeSetColor)},
     };
 
     if (env->RegisterNatives(cls, methods, 2) < 0) {
@@ -447,4 +447,4 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     return JNI_VERSION_1_6;
 }
 
-extern "C" JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *, void *) {}
+extern "C" JNIEXPORT void JNICALL JNI_OnUnload(JavaVM*, void*) {}

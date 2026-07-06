@@ -17,14 +17,14 @@
 namespace mbgl {
 namespace util {
 
-IOException::IOException(int err, const std::string &msg)
+IOException::IOException(int err, const std::string& msg)
     : std::runtime_error(msg + ": " + std::strerror(errno)),
       code(err) {}
 
-void write_file(const std::string &filename, const std::string &data) {
+void write_file(const std::string& filename, const std::string& data) {
     MLN_TRACE_FUNC();
 
-    FILE *fd = fopen(filename.c_str(), MBGL_FOPEN_MODE_WBE);
+    FILE* fd = fopen(filename.c_str(), MBGL_FOPEN_MODE_WBE);
     if (fd) {
         fwrite(data.data(), sizeof(std::string::value_type), data.size(), fd);
         fclose(fd);
@@ -33,7 +33,7 @@ void write_file(const std::string &filename, const std::string &data) {
     }
 }
 
-std::string read_file(const std::string &filename) {
+std::string read_file(const std::string& filename) {
     MLN_TRACE_FUNC();
 
     std::ifstream file(filename, std::ios::binary);
@@ -46,8 +46,8 @@ std::string read_file(const std::string &filename) {
     }
 }
 
-std::optional<std::string> readFile(const std::string &filename,
-                                    const std::optional<std::pair<uint64_t, uint64_t>> &dataRange) {
+std::optional<std::string> readFile(const std::string& filename,
+                                    const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
     MLN_TRACE_FUNC();
 
     std::ifstream file(filename, std::ios::binary);
@@ -67,7 +67,7 @@ std::optional<std::string> readFile(const std::string &filename,
     return {};
 }
 
-void deleteFile(const std::string &filename) {
+void deleteFile(const std::string& filename) {
     MLN_TRACE_FUNC();
 
     const int ret = std::remove(filename.c_str());
@@ -76,7 +76,7 @@ void deleteFile(const std::string &filename) {
     }
 }
 
-void copyFile(const std::string &destination, const std::string &source) {
+void copyFile(const std::string& destination, const std::string& source) {
     MLN_TRACE_FUNC();
 
     std::ifstream src(source, std::ios::binary);

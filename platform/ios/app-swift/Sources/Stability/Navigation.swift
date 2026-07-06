@@ -46,7 +46,7 @@ class NavigationLocationManager: NSObject, MLNLocationManager {
     }
 
     @objc private func update() {
-        guard coordinates.count > 0 else { return }
+        guard !coordinates.isEmpty else { return }
 
         let currentCoord = getCoord(distance: currentDistance)
         let nextCoord = getCoord(distance: currentDistance + 10)
