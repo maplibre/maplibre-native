@@ -98,9 +98,8 @@ void PluginManager::addMapLayerType(std::shared_ptr<MapLayerType> mapLayerType) 
         pluginLayerImpl->setRenderFunction(renderFunction);
 
         // Set the update properties function
-        pluginLayerImpl->setUpdatePropertiesFunction([mapLayer](const std::string& jsonProperties) {
-            mapLayer->onUpdateLayerProperties(jsonProperties);
-        });
+        pluginLayerImpl->setUpdatePropertiesFunction(
+            [mapLayer](const std::string& jsonProperties) { mapLayer->onUpdateLayerProperties(jsonProperties); });
     });
 
     // Add the layer type
