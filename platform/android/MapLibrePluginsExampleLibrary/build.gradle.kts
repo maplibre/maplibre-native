@@ -1,7 +1,14 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
 }
+
+val invokedFromIde = project.hasProperty("android.injected.invoked.from.ide")
+val mapLibreAbis = if (!invokedFromIde && project.hasProperty("maplibre.abis")) {
+    project.property("maplibre.abis") as String
+} else {
+    "all"
+}
+val shouldBuildNative = mapLibreAbis != "none"
 
 android {
     namespace = "org.maplibre.maplibrepluginsexamplelibrary"
@@ -12,12 +19,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-        externalNativeBuild {
-            cmake {
-                cppFlags("")
+        if (shouldBuildNative) {
+            externalNativeBuild {
+                cmake {
+                    cppFlags("")
+                    if (mapLibreAbis != "all") {
+                        abiFilters.addAll(mapLibreAbis.split(" "))
+                    } else if (invokedFromIde && project.hasProperty("android.injected.build.abi")) {
+                        abiFilters.add((project.property("android.injected.build.abi") as String).split(",").first())
+                    } else {
+                        abiFilters.addAll(listOf("armeabi-v7a", "x86", "arm64-v8a", "x86_64"))
+                    }
+                }
             }
         }
-        // Specify which flavor of MapLibreAndroid to use (it has opengl/vulkan flavors)
         missingDimensionStrategy("renderer", "opengl")
     }
 
@@ -28,41 +43,63 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (shouldBuildNative) {
+                externalNativeBuild {
+                    cmake {
+                        arguments(
+                            "-DMAPLIBRE_LIB_DIR=${rootDir}/MapLibreAndroid/build/intermediates/library_jni/openglRelease/copyOpenglReleaseJniLibsProjectOnly/jni"
+                        )
+                    }
+                }
+            }
+        }
+        debug {
+            if (shouldBuildNative) {
+                externalNativeBuild {
+                    cmake {
+                        arguments(
+                            "-DMAPLIBRE_LIB_DIR=${rootDir}/MapLibreAndroid/build/intermediates/library_jni/openglDebug/copyOpenglDebugJniLibsProjectOnly/jni"
+                        )
+                    }
+                }
+            }
         }
     }
-    externalNativeBuild {
-        cmake {
-            path("src/main/cpp/CMakeLists.txt")
+    if (shouldBuildNative) {
+        externalNativeBuild {
+            cmake {
+                path("src/main/cpp/CMakeLists.txt")
+                version = Versions.cmakeVersion
+            }
+        }
+    }
+    packaging {
+        jniLibs {
+            excludes += "**/libmaplibre.so"
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     ndkVersion = Versions.ndkVersion
 }
 
 dependencies {
-    // Depend on MapLibreAndroid to ensure it's built first (for native library linking)
     implementation(project(":MapLibreAndroid"))
 
-    implementation(libs.coreKtx)
-    implementation(libs.appcompat)
-    implementation(libs.supportDesign)
     testImplementation(libs.junit)
     androidTestImplementation(libs.testRunner)
     androidTestImplementation(libs.testEspressoCore)
 }
 
-// Ensure MapLibreAndroid's native build completes before this project's native build
-afterEvaluate {
-    tasks.matching { it.name.contains("externalNativeBuild") || it.name.contains("CMake") }.configureEach {
-        val mapLibreNativeTasks = project(":MapLibreAndroid").tasks.matching {
-            it.name.contains("externalNativeBuild") || it.name.contains("CMake")
+if (shouldBuildNative) {
+    afterEvaluate {
+        tasks.matching { it.name.contains("CMakeDebug") || it.name.contains("externalNativeBuildDebug") }.configureEach {
+            dependsOn(":MapLibreAndroid:copyOpenglDebugJniLibsProjectOnly")
         }
-        dependsOn(mapLibreNativeTasks)
+        tasks.matching { it.name.contains("CMakeRelease") || it.name.contains("externalNativeBuildRelease") }.configureEach {
+            dependsOn(":MapLibreAndroid:copyOpenglReleaseJniLibsProjectOnly")
+        }
     }
 }

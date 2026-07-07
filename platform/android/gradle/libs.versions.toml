@@ -26,8 +26,6 @@ assertj = "3.27.7"
 multidex = "2.0.1"
 kotlinxCoroutines = "1.10.2"
 androidGradlePlugin = "8.6.0"
-coreKtx = "1.10.1"
-appcompat = "1.6.1"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -73,10 +71,7 @@ lintTests = { group = "com.android.tools.lint", name = "lint-tests", version.ref
 androidxTestExtJUnit = { group = "androidx.test.ext", name = "junit", version = "1.3.0" }
 androidxTestCoreKtx = { group = "androidx.test", name = "core-ktx", version = "1.7.0" }
 kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.11.0" }
-gradleNexus = { group = "io.github.gradle-nexus", name = "publish-plugin", version.ref = "gradleNexus" }
 androidGradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
 kotlinter = { id = "org.jmailen.kotlinter", version = "5.4.2" }

@@ -27,14 +27,13 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         # For <plugin/plugin_platform_android.hpp>
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../MapLibreAndroid/src/cpp)
 
-# Find and link against libmaplibre.so from MapLibreAndroid build
-# The library is built to: MapLibreAndroid/build/intermediates/cmake/{variant}/obj/{ABI}/libmaplibre.so
-set(MAPLIBRE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../MapLibreAndroid/build/intermediates/cmake/openglDebug/obj/${ANDROID_ABI})
+if(NOT DEFINED MAPLIBRE_LIB_DIR)
+    message(FATAL_ERROR "MAPLIBRE_LIB_DIR must point to MapLibreAndroid's JNI output directory")
+endif()
 
-add_library(maplibre SHARED IMPORTED)
-set_target_properties(maplibre PROPERTIES IMPORTED_LOCATION ${MAPLIBRE_LIB_DIR}/libmaplibre.so)
+set(MAPLIBRE_LIB_PATH ${MAPLIBRE_LIB_DIR}/${ANDROID_ABI}/libmaplibre.so)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
-        maplibre
+        ${MAPLIBRE_LIB_PATH}
         GLESv3
         log)
