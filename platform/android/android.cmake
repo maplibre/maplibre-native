@@ -143,6 +143,27 @@ target_link_libraries(
         mbgl-compiler-options
 )
 
+if(MLN_WITH_VULKAN)
+    add_library(
+        example-vulkan-custom-layer MODULE
+        ${PROJECT_SOURCE_DIR}/platform/android/src/example_vulkan_custom_layer.cpp
+    )
+
+    target_include_directories(
+        example-vulkan-custom-layer
+        PRIVATE ${PROJECT_SOURCE_DIR}/include
+    )
+
+    target_link_libraries(
+        example-vulkan-custom-layer
+        PRIVATE
+            MapLibreNative::Base
+            log
+            mbgl-compiler-options
+            mbgl-vendor-vulkan-headers
+    )
+endif()
+
 add_library(
     mbgl-test-runner SHARED
     ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c

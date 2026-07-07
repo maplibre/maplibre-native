@@ -781,6 +781,8 @@ MLN_CORE_HEADERS = [
     "include/mbgl/style/layer.hpp",
     "include/mbgl/style/layer_properties.hpp",
     "include/mbgl/style/layers/custom_layer.hpp",
+    "include/mbgl/style/layers/custom_layer_host.hpp",
+    "include/mbgl/style/layers/custom_layer_init_parameters.hpp",
     "include/mbgl/style/layers/custom_layer_render_parameters.hpp",
     "include/mbgl/style/position.hpp",
     "include/mbgl/style/property_expression.hpp",

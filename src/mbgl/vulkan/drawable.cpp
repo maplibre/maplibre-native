@@ -129,6 +129,47 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
     impl->segments = std::move(drawSegs);
 }
 
+void Drawable::setTextures(const Textures& textures_) noexcept {
+    if (textures_ == textures) {
+        return;
+    }
+
+    gfx::Drawable::setTextures(textures_);
+
+    if (impl->imageDescriptorSet) {
+        impl->imageDescriptorSet->markDirty();
+    }
+}
+
+void Drawable::setTextures(Textures&& textures_) noexcept {
+    if (textures_ == textures) {
+        return;
+    }
+
+    gfx::Drawable::setTextures(textures_);
+
+    if (impl->imageDescriptorSet) {
+        impl->imageDescriptorSet->markDirty();
+    }
+}
+
+void Drawable::setTexture(gfx::Texture2DPtr texture, size_t id) {
+    assert(id < textures.size());
+    if (id >= textures.size()) {
+        return;
+    }
+
+    if (textures[id] == texture) {
+        return;
+    }
+
+    textures[id] = std::move(texture);
+
+    if (impl->imageDescriptorSet) {
+        impl->imageDescriptorSet->markDirty();
+    }
+}
+
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
     MLN_TRACE_FUNC();
 
@@ -474,8 +515,12 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const {
             impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
         }
 
+        // check if textures were updated via external pointers (after setTexture call)
         for (const auto& texture : textures) {
-            if (!texture) continue;
+            if (!texture) {
+                continue;
+            }
+
             const auto textureImpl = static_cast<const Texture2D*>(texture.get());
             if (textureImpl->isModifiedAfter(impl->imageDescriptorSet->getLastModified())) {
                 impl->imageDescriptorSet->markDirty();
