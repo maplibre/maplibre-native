@@ -7693,13 +7693,6 @@ static void *windowScreenContext = &windowScreenContext;
   darwinLayerManager->addLayerType(std::move(factory));
 }
 
-- (NSArray<NSString *> *)getActionJournalLogFiles {
-  const auto &actionJournal = _mbglMap->getActionJournal();
-  if (!actionJournal) {
-    return nil;
-  }
-}
-
 /**
  Adds a style filter to the map view
  */
