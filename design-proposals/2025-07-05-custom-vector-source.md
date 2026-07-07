@@ -4,21 +4,22 @@
 
 MapLibre Native currently supports two ways to provide vector tile data:
 
-1. **URL-based sources** (`vector` source type) — tiles are fetched from a remote server via HTTP.
+1. **URL-based sources** (`vector` source type) — tiles are fetched according to the protocol of the URL (`http://`,
+   `file://`, etc.).
 2. **CustomGeometrySource** — accepts GeoJSON features programmatically, but internally re-encodes them into vector
    tiles, adding overhead and limiting control over the tile encoding.
 
-This proposal comes from the need for an efficient way to connect a proprietary data source.
-That data source provides a gRPC service that has a simple API to request tiles by X/Y/Z (similarly to vector tiles) and the
-format itself is pretty close to vector tiles.
-CustomGeometrySource was considered but it has some obvious drawbacks:
+This proposal comes from the need for an efficient and kotlin native way to asynchronously connect a tile data source
+similar to vector tile.
+CustomGeometrySource was considered, but it has some obvious drawbacks:
 
 1. Tile requests are in the format of a bounding box — since it's not a tile X/Y/Z it is pretty unclear what logic it
    conforms to.
     1. Is it just a tile X/Y/Z but converted to geo bounds?
     2. Can it ever request data in a bounding box that is bigger than just one X/Y/Z tile
     3. Additional boilerplate of mapping geo bounds into tile X/Y/Z
-2. Internally CustomGeometrySource spawns a 4 thread threadpool and runs tasks one by one inside. It's a good old technique
+2. Internally CustomGeometrySource spawns a 4 thread threadpool and runs tasks one by one inside. It's a good old
+   technique
    but Kotlin has things like coroutines which are a more ergonomic way to handle suspendable operations (like network
    requests).
 3. CustomGeometrySource operates over GeoJSON. So in case of a vector tiles like format it needs to be converted to
@@ -67,10 +68,10 @@ requests tiles by `CanonicalTileID`, and the application responds asynchronously
 
 ### Key Design Decisions
 
-1. **Binary data, not GeoJSON.** For the Kotlin layer to send data to C++, it needs to be marshalled into some
-   data format that can be passed across languages. One could come up with a new binary format, implement an encoder in Kotlin
-   and a decoder in C++. But it turns out MVT is already such a format — just a binary blob that can be passed simply
-   as a sized buffer. Existing infrastructure of `MVT` tile data is just reused as is.
+1. **Binary data, not GeoJSON.** For the Kotlin layer to send data to C++, it needs to be marshaled into some
+   data format that can be passed across languages. One could come up with a new binary format, implement an encoder in
+   Kotlin and a decoder in C++. But it turns out MVT is already such a format — just a binary blob that can be passed
+   simply as a sized buffer. Existing infrastructure of `MVT` tile data is just reused as is.
 
 2. **Actor-based concurrency.** `CustomVectorTileLoader` runs on a background thread via MapLibre's Actor system. The
    platform callback (fetch/cancel) is invoked on this thread; the platform layer is responsible for dispatching to its
