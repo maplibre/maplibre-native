@@ -115,7 +115,7 @@ if(MLN_WEBGPU_IMPL_DAWN)
     if(TARGET mbgl-vendor-dawn)
         target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
     endif()
-elseif(MLN_WEBGPU_IMPL_WGPU)
+elseif(MLN_WEBGPU_IMPL_WGPU OR MLN_WEBGPU_IMPL_FFI)
     # Include wgpu-native integration
     include(${PROJECT_SOURCE_DIR}/vendor/wgpu.cmake)
     if(TARGET mbgl-vendor-wgpu)
