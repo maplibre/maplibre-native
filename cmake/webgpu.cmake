@@ -9,6 +9,12 @@ target_compile_definitions(
         MLN_RENDER_BACKEND_WEBGPU=1
 )
 
+target_include_directories(
+        mbgl-core
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/platform/default/include
+)
+
 list(APPEND
         SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
@@ -115,7 +121,7 @@ if(MLN_WEBGPU_IMPL_DAWN)
     if(TARGET mbgl-vendor-dawn)
         target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
     endif()
-elseif(MLN_WEBGPU_IMPL_WGPU)
+elseif(MLN_WEBGPU_IMPL_WGPU OR MLN_WEBGPU_IMPL_FFI)
     # Include wgpu-native integration
     include(${PROJECT_SOURCE_DIR}/vendor/wgpu.cmake)
     if(TARGET mbgl-vendor-wgpu)
