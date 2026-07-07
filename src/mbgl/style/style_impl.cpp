@@ -87,21 +87,19 @@ void Style::Impl::loadURL(const std::string& url_) {
 }
 
 void Style::Impl::filterThenParse(const std::string& styleData) {
-    
     auto pm = plugin::PluginManager::get();
     auto stylePreprocessors = pm->getStylePreprocessors();
     if (stylePreprocessors.size() == 0) {
-          parse(styleData);
-          return;
-      }
+        parse(styleData);
+        return;
+    }
 
-      // Otherwise, go through the chain of filters
-      std::string processedStyle = styleData;
-      for (auto preprocessor : stylePreprocessors) {
-          processedStyle = preprocessor->processStyle(processedStyle);
-      }
-      parse(processedStyle);
-    
+    // Otherwise, go through the chain of filters
+    std::string processedStyle = styleData;
+    for (auto preprocessor : stylePreprocessors) {
+        processedStyle = preprocessor->processStyle(processedStyle);
+    }
+    parse(processedStyle);
 }
 
 void Style::Impl::parse(const std::string& json_) {
@@ -264,7 +262,6 @@ std::unique_ptr<Layer> Style::Impl::removeLayer(const std::string& id) {
 void Style::Impl::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter> filter) {
     _styleFilters.push_back(filter);
 }
-
 
 void Style::Impl::setLight(std::unique_ptr<Light> light_) {
     light = std::move(light_);

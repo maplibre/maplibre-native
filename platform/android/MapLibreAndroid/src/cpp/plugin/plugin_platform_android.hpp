@@ -5,16 +5,14 @@
 
 namespace mbgl {
 
-    namespace plugin {
+namespace plugin {
 
-        class RenderingContextAndroidOpenGL: public RenderingContext {
-        public:
-        };
+class RenderingContextAndroidOpenGL : public RenderingContext {
+public:
+};
 
+} // namespace plugin
 
-    }
+} // namespace mbgl
 
-}
-
-
-#endif //MAPLIBREANDROID_PLUGIN_PLATFORM_ANDROID_HPP
+#endif // MAPLIBREANDROID_PLUGIN_PLATFORM_ANDROID_HPP

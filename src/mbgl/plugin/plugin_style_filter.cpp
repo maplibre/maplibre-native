@@ -4,11 +4,9 @@ using namespace mbgl::style;
 
 // This method
 const std::string PluginStyleFilter::filterResponse(const std::string& res) {
-    
     if (_filterStyleFunction) {
         auto tempResult = _filterStyleFunction(res);
         return tempResult;
     }
     return res;
-    
 }

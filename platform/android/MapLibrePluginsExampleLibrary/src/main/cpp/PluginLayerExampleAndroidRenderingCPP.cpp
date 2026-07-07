@@ -26,8 +26,7 @@ typedef struct
 } Vertex;
 */
 
-typedef struct
-{
+typedef struct {
     float positionX;
     float positionY;
     float colorR;
@@ -52,14 +51,12 @@ bool AndroidPluginLayerType::requiresPass3D() {
 // This creates the actual map layer.  Should be overridden by the
 // implementor and return a class descended from the MapLayer below
 std::shared_ptr<mbgl::plugin::MapLayer> AndroidPluginLayerType::createMapLayer() {
-
     std::shared_ptr<AndroidPluginLayer> tempResult = std::make_shared<AndroidPluginLayer>();
     return tempResult;
 }
 
 // The list of properties
 std::vector<std::shared_ptr<mbgl::plugin::LayerProperty>> AndroidPluginLayerType::getLayerProperties() {
-
     std::vector<std::shared_ptr<mbgl::plugin::LayerProperty>> tempResult;
 
     {
@@ -80,15 +77,10 @@ std::vector<std::shared_ptr<mbgl::plugin::LayerProperty>> AndroidPluginLayerType
     }
 
     return tempResult;
-
 }
-
-
-
 
 // Overrides
 void AndroidPluginLayer::onRender(const mbgl::plugin::RenderingContext *renderingContext) {
-
 #if METAL
     auto metalRenderingContext = static_cast<const mbgl::plugin::RenderingContextMetal *>(renderingContext);
     if (!_renderingResourcesCreated) {
@@ -110,10 +102,10 @@ void AndroidPluginLayer::onRender(const mbgl::plugin::RenderingContext *renderin
     float size = 100;
 
     Vertex triangleVerticesWithColor[] = {
-            // 2D positions,    RGBA colors
-            {   (size + _offsetX) * _scale,  (-size + _offsetY) * _scale ,  1, 1, 1, _a  },
-            {  (-size + _offsetX) * _scale,  (-size + _offsetY) * _scale ,  1, 1, 1, _a },
-            {     (0 + _offsetX) * _scale,   (size + _offsetY) * _scale ,  _r, _g, _b, _a  },
+        // 2D positions,    RGBA colors
+        {(size + _offsetX) * _scale, (-size + _offsetY) * _scale, 1, 1, 1, _a},
+        {(-size + _offsetX) * _scale, (-size + _offsetY) * _scale, 1, 1, 1, _a},
+        {(0 + _offsetX) * _scale, (size + _offsetY) * _scale, _r, _g, _b, _a},
     };
 
 #if METAL
@@ -123,34 +115,39 @@ void AndroidPluginLayer::onRender(const mbgl::plugin::RenderingContext *renderin
 
     // Pass in the parameter data.
     [metalRenderingContext->renderEncoder setVertexBytes:triangleVerticesWithColor
-                           length:sizeof(triangleVerticesWithColor)
-                          atIndex:0];
+                                                  length:sizeof(triangleVerticesWithColor)
+                                                 atIndex:0];
 
-    [metalRenderingContext->renderEncoder setVertexBytes:&viewportSize
-                           length:sizeof(viewportSize)
-                           atIndex:1];
+    [metalRenderingContext->renderEncoder setVertexBytes:&viewportSize length:sizeof(viewportSize) atIndex:1];
 
     // Draw the triangle.
-    [metalRenderingContext->renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                      vertexStart:0
-                      vertexCount:3];
+    [metalRenderingContext->renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
 
 #elif defined(OPENGL)
 
     // Prepare vertex data: interleaved position (vec2) and color (vec4)
     float vertices[] = {
         // Vertex 0: position, then color
-        triangleVerticesWithColor[0].positionX, triangleVerticesWithColor[0].positionY,
-        triangleVerticesWithColor[0].colorR, triangleVerticesWithColor[0].colorG,
-        triangleVerticesWithColor[0].colorB, triangleVerticesWithColor[0].colorA,
+        triangleVerticesWithColor[0].positionX,
+        triangleVerticesWithColor[0].positionY,
+        triangleVerticesWithColor[0].colorR,
+        triangleVerticesWithColor[0].colorG,
+        triangleVerticesWithColor[0].colorB,
+        triangleVerticesWithColor[0].colorA,
         // Vertex 1
-        triangleVerticesWithColor[1].positionX, triangleVerticesWithColor[1].positionY,
-        triangleVerticesWithColor[1].colorR, triangleVerticesWithColor[1].colorG,
-        triangleVerticesWithColor[1].colorB, triangleVerticesWithColor[1].colorA,
+        triangleVerticesWithColor[1].positionX,
+        triangleVerticesWithColor[1].positionY,
+        triangleVerticesWithColor[1].colorR,
+        triangleVerticesWithColor[1].colorG,
+        triangleVerticesWithColor[1].colorB,
+        triangleVerticesWithColor[1].colorA,
         // Vertex 2
-        triangleVerticesWithColor[2].positionX, triangleVerticesWithColor[2].positionY,
-        triangleVerticesWithColor[2].colorR, triangleVerticesWithColor[2].colorG,
-        triangleVerticesWithColor[2].colorB, triangleVerticesWithColor[2].colorA,
+        triangleVerticesWithColor[2].positionX,
+        triangleVerticesWithColor[2].positionY,
+        triangleVerticesWithColor[2].colorR,
+        triangleVerticesWithColor[2].colorG,
+        triangleVerticesWithColor[2].colorB,
+        triangleVerticesWithColor[2].colorA,
     };
 
     // Save current OpenGL state that we'll modify
@@ -189,27 +186,22 @@ void AndroidPluginLayer::onRender(const mbgl::plugin::RenderingContext *renderin
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 #endif
-
 }
 
-void AndroidPluginLayer::onAddedToMap() {
-
-}
+void AndroidPluginLayer::onAddedToMap() {}
 
 void AndroidPluginLayer::onUpdate(const mbgl::plugin::DrawingContext &drawingContext) {
     _lastDrawingContext = drawingContext;
 }
 
-bool replace(std::string& str, const std::string& from, const std::string& to) {
+bool replace(std::string &str, const std::string &from, const std::string &to) {
     size_t start_pos = str.find(from);
-    if(start_pos == std::string::npos)
-        return false;
+    if (start_pos == std::string::npos) return false;
     str.replace(start_pos, from.length(), to);
     return true;
 }
 
 void AndroidPluginLayer::onUpdateLayerProperties(const std::string &layerProperties) {
-
     using namespace rapidjson;
 
     Document document;
@@ -237,19 +229,15 @@ void AndroidPluginLayer::onUpdateLayerProperties(const std::string &layerPropert
         _b = std::stof(colorValue) / 255.0;
         std::getline(fileColorSS, colorValue, ',');
         _a = std::stof(colorValue);
-
     }
-
 }
 
-void AndroidPluginLayer::onMemoryReductionEvent() {
-
-}
+void AndroidPluginLayer::onMemoryReductionEvent() {}
 
 #if defined(OPENGL)
 void AndroidPluginLayer::createOpenGLShaders() {
     // Vertex shader - transforms pixel coordinates to normalized device coordinates
-    const char* vertexShaderSource = R"(#version 300 es
+    const char *vertexShaderSource = R"(#version 300 es
         layout (location = 0) in vec2 aPosition;
         layout (location = 1) in vec4 aColor;
 
@@ -266,7 +254,7 @@ void AndroidPluginLayer::createOpenGLShaders() {
     )";
 
     // Fragment shader - outputs the interpolated color
-    const char* fragmentShaderSource = R"(#version 300 es
+    const char *fragmentShaderSource = R"(#version 300 es
         precision mediump float;
 
         in vec4 vertColor;
@@ -339,62 +327,55 @@ void AndroidPluginLayer::createOpenGLShaders() {
     // Set up vertex attribute pointers
     // Position: location 0, 2 floats, stride = 6 floats, offset = 0
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
 
     // Color: location 1, 4 floats, stride = 6 floats, offset = 2 floats
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(2 * sizeof(float)));
 
     // Unbind VAO (VBO stays associated with the VAO)
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _renderingResourcesCreated = true;
-    LOGI("OpenGL shaders and buffers created successfully. Program: %u, VAO: %u, VBO: %u",
-         _shaderProgram, _vao, _vbo);
+    LOGI("OpenGL shaders and buffers created successfully. Program: %u, VAO: %u, VBO: %u", _shaderProgram, _vao, _vbo);
 }
 #endif
 
-
-
-
-
 #if METAL
 void MetalPluginLayer::createMetalShaders(const mbgl::plugin::RenderingContext *renderingContext) {
-
     @autoreleasepool {
-
-        NSString *shaderSource = @
+        NSString *shaderSource =
+            @
     "    #include <metal_stdlib>\n"
-    "    using namespace metal;\n"
-    "    typedef struct\n"
-    "    {\n"
-    "        vector_float2 position;\n"
-    "        vector_float4 color;\n"
-    "    } Vertex;\n"
-    "    struct RasterizerData\n"
-    "    {\n"
-    "        float4 position [[position]];\n"
-    "        float4 color;\n"
-    "    };\n"
-    "    vertex RasterizerData\n"
-    "    vertexShader(uint vertexID [[vertex_id]],\n"
-    "                 constant Vertex *vertices [[buffer(0)]],\n"
-    "                 constant vector_uint2 *viewportSizePointer [[buffer(1)]])\n"
-    "    {\n"
-    "        RasterizerData out;\n"
-    "        float2 pixelSpacePosition = vertices[vertexID].position.xy;\n"
-    "        vector_float2 viewportSize = vector_float2(*viewportSizePointer);\n"
-    "        out.position = vector_float4(0.0, 0.0, 0.0, 1.0);\n"
-    "        out.position.xy = pixelSpacePosition / (viewportSize / 2.0);\n"
-    "        out.color = vertices[vertexID].color;\n"
-    "        return out;\n"
-    "    }\n"
-    "    fragment float4 fragmentShader(RasterizerData in [[stage_in]])\n"
-    "    {\n"
-    "        return in.color;\n"
-    "    }\n";
-
+             "    using namespace metal;\n"
+             "    typedef struct\n"
+             "    {\n"
+             "        vector_float2 position;\n"
+             "        vector_float4 color;\n"
+             "    } Vertex;\n"
+             "    struct RasterizerData\n"
+             "    {\n"
+             "        float4 position [[position]];\n"
+             "        float4 color;\n"
+             "    };\n"
+             "    vertex RasterizerData\n"
+             "    vertexShader(uint vertexID [[vertex_id]],\n"
+             "                 constant Vertex *vertices [[buffer(0)]],\n"
+             "                 constant vector_uint2 *viewportSizePointer [[buffer(1)]])\n"
+             "    {\n"
+             "        RasterizerData out;\n"
+             "        float2 pixelSpacePosition = vertices[vertexID].position.xy;\n"
+             "        vector_float2 viewportSize = vector_float2(*viewportSizePointer);\n"
+             "        out.position = vector_float4(0.0, 0.0, 0.0, 1.0);\n"
+             "        out.position.xy = pixelSpacePosition / (viewportSize / 2.0);\n"
+             "        out.color = vertices[vertexID].color;\n"
+             "        return out;\n"
+             "    }\n"
+             "    fragment float4 fragmentShader(RasterizerData in [[stage_in]])\n"
+             "    {\n"
+             "        return in.color;\n"
+             "    }\n";
 
         auto metalRenderingContext = static_cast<const mbgl::plugin::RenderingContextMetal *>(renderingContext);
 
@@ -413,8 +394,7 @@ void MetalPluginLayer::createMetalShaders(const mbgl::plugin::RenderingContext *
         pipelineStateDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
         pipelineStateDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 
-        _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
-                                                                 error:&error];
+        _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor error:&error];
 
         // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
         MTLDepthStencilDescriptor *depthStencilDescriptor = [[MTLDepthStencilDescriptor alloc] init];
@@ -422,13 +402,9 @@ void MetalPluginLayer::createMetalShaders(const mbgl::plugin::RenderingContext *
         depthStencilDescriptor.depthWriteEnabled = NO;
 
         _depthStencilStateWithoutStencil = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-
-
     }
 
     _renderingResourcesCreated = true;
-
-
 }
 #endif
 
@@ -470,9 +446,7 @@ void main()
 
  */
 
-
-
-class RenderingContextVulkan: public RenderingContext {
+class RenderingContextVulkan : public RenderingContext {
 public:
     VkDevice vulkanDevice;
     VkRenderPass renderPass;
@@ -480,11 +454,10 @@ public:
 
 #include <shaderc/shaderc.hpp>
 
-std::vector<uint32_t> compileGLSL_glslang(const std::string& source, EShLanguage stage)
-{
+std::vector<uint32_t> compileGLSL_glslang(const std::string &source, EShLanguage stage) {
     glslang::InitializeProcess();
 
-    const char* shaderStrings[1];
+    const char *shaderStrings[1];
     shaderStrings[0] = source.c_str();
 
     glslang::TShader shader(stage);
@@ -496,8 +469,7 @@ std::vector<uint32_t> compileGLSL_glslang(const std::string& source, EShLanguage
     glslang::TProgram program;
     program.addShader(&shader);
 
-    if (!program.link(EShMsgDefault))
-        throw std::runtime_error(program.getInfoLog());
+    if (!program.link(EShMsgDefault)) throw std::runtime_error(program.getInfoLog());
 
     std::vector<uint32_t> spirv;
     glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
@@ -528,10 +500,8 @@ info.pCode = spirvCode.data();
 VkShaderModule vertModule;
 vkCreateShaderModule(device, &info, nullptr, &vertModule);
 
-
-void VulkanPluginLayer::createVulkanShaders(const mbgl::plugin::RenderingContext* renderingContext)
-{
-    auto vkCtx = static_cast<const mbgl::plugin::RenderingContextVulkan*>(renderingContext);
+void VulkanPluginLayer::createVulkanShaders(const mbgl::plugin::RenderingContext *renderingContext) {
+    auto vkCtx = static_cast<const mbgl::plugin::RenderingContextVulkan *>(renderingContext);
     VkDevice device = vkCtx->device;
 
     // 1. Load SPIR-V shader modules
@@ -551,7 +521,7 @@ void VulkanPluginLayer::createVulkanShaders(const mbgl::plugin::RenderingContext
     fragStageInfo.module = fragModule;
     fragStageInfo.pName = "main";
 
-    VkPipelineShaderStageCreateInfo shaderStages[] = { vertStageInfo, fragStageInfo };
+    VkPipelineShaderStageCreateInfo shaderStages[] = {vertStageInfo, fragStageInfo};
 
     // 3. Vertex input layout (matches MSL struct)
     VkVertexInputBindingDescription bindingDescription{};
@@ -608,16 +578,13 @@ void VulkanPluginLayer::createVulkanShaders(const mbgl::plugin::RenderingContext
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depthStencil.depthTestEnable = VK_TRUE;
     depthStencil.depthWriteEnable = VK_FALSE;
-    depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;  // MetalCompareFunctionAlways
-    depthStencil.stencilTestEnable = VK_FALSE;           // matches Metal (stencil disabled)
+    depthStencil.depthCompareOp = VK_COMPARE_OP_ALWAYS; // MetalCompareFunctionAlways
+    depthStencil.stencilTestEnable = VK_FALSE;          // matches Metal (stencil disabled)
 
     // 9. Color blend
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask =
-          VK_COLOR_COMPONENT_R_BIT |
-          VK_COLOR_COMPONENT_G_BIT |
-          VK_COLOR_COMPONENT_B_BIT |
-          VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                          VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
@@ -657,7 +624,5 @@ void VulkanPluginLayer::createVulkanShaders(const mbgl::plugin::RenderingContext
 
     _renderingResourcesCreated = true;
 }
-
-
 
 #endif

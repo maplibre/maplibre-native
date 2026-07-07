@@ -181,9 +181,7 @@ std::unique_ptr<Layer> Style::removeLayer(const std::string& id) {
 void Style::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter> filter) {
     impl->mutated = true;
     return impl->addStyleFilter(filter);
-
 }
-
 
 } // namespace style
 } // namespace mbgl

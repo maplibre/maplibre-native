@@ -9,15 +9,14 @@ namespace mbgl {
 
 namespace plugin {
 
-class RenderingContextMetal: public RenderingContext {
+class RenderingContextMetal : public RenderingContext {
 public:
     id<MTLRenderCommandEncoder> renderEncoder;
     id<MTLDevice> metalDevice;
 };
-    
 
-}
+} // namespace plugin
 
-}
+} // namespace mbgl
 
 #endif /* plugin_platform_darwin_hpp */

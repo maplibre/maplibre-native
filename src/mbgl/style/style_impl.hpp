@@ -112,7 +112,7 @@ private:
 
     void filterThenParse(const std::string&);
     std::vector<std::shared_ptr<PluginStyleFilter>> _styleFilters;
-                        
+
     std::shared_ptr<FileSource> fileSource;
 
     std::string url;

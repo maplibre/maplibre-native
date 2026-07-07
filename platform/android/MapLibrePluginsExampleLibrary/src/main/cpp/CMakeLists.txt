@@ -38,4 +38,3 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
         maplibre
         GLESv3
         log)
-

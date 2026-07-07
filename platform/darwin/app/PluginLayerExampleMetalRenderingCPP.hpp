@@ -24,19 +24,19 @@ class MetalPluginLayer final : public mbgl::plugin::MapLayer {
 public:
     // MapLayer Overrides
     void onRender(const mbgl::plugin::RenderingContext *) override;
-    
+
     void onAddedToMap() override;
-    
+
     void onUpdate(const mbgl::plugin::DrawingContext &) override;
 
-    void onUpdateLayerProperties(const std::string&) override;
+    void onUpdateLayerProperties(const std::string &) override;
 
     void onMemoryReductionEvent() override;
-    
+
 private:
     bool _renderingResourcesCreated = false;
     mbgl::plugin::DrawingContext _lastDrawingContext;
-  
+
     // Properties
     float _offsetX = 0;
     float _offsetY = 0;
@@ -50,11 +50,10 @@ private:
     // TODO: Need to pass this in, but where would it come from?
     MTLPixelFormat _pixelFormat = MTLPixelFormatBGRA8Unorm;
 #endif
-    
+
 #if VULKAN
-    
+
 #endif
-    
 };
 
 // This is effectively a definition/factory of the layer
@@ -65,18 +64,15 @@ public:
 
     // If this layer type requires pass 3d
     bool requiresPass3D() override;
-    
+
     // This creates the actual map layer.  Should be overridden by the
     // implementor and return a class descended from the MapLayer below
     std::shared_ptr<mbgl::plugin::MapLayer> createMapLayer() override;
-  
+
     // The list of properties
     std::vector<std::shared_ptr<mbgl::plugin::LayerProperty>> getLayerProperties() override;
-    
 };
 
-
-}
-
+} // namespace app
 
 #endif /* PluginLayerExampleMetalCPP_hpp */

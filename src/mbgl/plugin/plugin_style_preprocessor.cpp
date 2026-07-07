@@ -9,12 +9,9 @@
 
 using namespace mbgl::plugin;
 
+StylePreprocessor::~StylePreprocessor() {}
 
-StylePreprocessor::~StylePreprocessor() {
-
-}
-
-std::string StylePreprocessor::processStyle(const std::string & data) {
+std::string StylePreprocessor::processStyle(const std::string& data) {
     // Base class just returns whatever was passed to it
     return data;
 }
