@@ -100,6 +100,7 @@ jobs:
           cd "$render_test_app_dir"
           mkdir -p Payload
           ditto RenderTestApp.app Payload/RenderTestApp.app
+          chmod -R u+w Payload/RenderTestApp.app
           zip -r RenderTestApp.zip Payload
           mv RenderTestApp.zip RenderTestApp.ipa
           cd Payload/RenderTestApp.app/PlugIns
@@ -165,6 +166,7 @@ jobs:
           cd "$ios_cpp_test_app_dir"
           mkdir -p Payload
           ditto CppUnitTestsApp.app Payload/CppUnitTestsApp.app
+          chmod -R u+w Payload/CppUnitTestsApp.app
           zip -r CppUnitTestsApp.zip Payload
           mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
           cd Payload/CppUnitTestsApp.app/PlugIns
