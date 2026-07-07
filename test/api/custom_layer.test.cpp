@@ -44,7 +44,7 @@ void main() {
 
 class TestLayer : public mbgl::style::CustomLayerHost {
 public:
-    void initialize() override {
+    void initialize(const mbgl::style::CustomLayerInitParameters&) override {
         program = MBGL_CHECK_ERROR(glCreateProgram());
         vertexShader = MBGL_CHECK_ERROR(glCreateShader(GL_VERTEX_SHADER));
         fragmentShader = MBGL_CHECK_ERROR(glCreateShader(GL_FRAGMENT_SHADER));

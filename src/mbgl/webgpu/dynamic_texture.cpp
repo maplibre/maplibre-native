@@ -6,18 +6,37 @@ namespace mbgl {
 namespace webgpu {
 
 DynamicTexture::DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType)
-    : gfx::DynamicTexture(context, size, pixelType) {
+    : gfx::DynamicTexture(size, pixelType),
+      context(context),
+      size(size),
+      pixelType(pixelType) {
     deferredCreation = true;
 }
+
+namespace {
+size_t pixelStride(gfx::TexturePixelType pixelType) {
+    switch (pixelType) {
+        case gfx::TexturePixelType::Alpha:
+        case gfx::TexturePixelType::Luminance:
+            return 1;
+        case gfx::TexturePixelType::RGBA:
+            return 4;
+        case gfx::TexturePixelType::Stencil:
+        case gfx::TexturePixelType::Depth:
+            return 4;
+    }
+    return 4;
+}
+} // namespace
 
 void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) {
     std::scoped_lock lock(mutex);
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
 
-    auto size = imageSize.area() * texture->getPixelStride();
-    auto imageData = std::make_unique<uint8_t[]>(size);
-    std::copy(pixelData, pixelData + size, imageData.get());
+    auto byteSize = imageSize.area() * pixelStride(pixelType);
+    auto imageData = std::make_unique<uint8_t[]>(byteSize);
+    std::copy(pixelData, pixelData + byteSize, imageData.get());
     imagesToUpload.emplace(texHandle, std::move(imageData));
 
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
@@ -26,6 +45,12 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
 void DynamicTexture::uploadDeferredImages(gfx::UploadPass&) {
     std::scoped_lock lock(mutex);
     if (deferredCreation) {
+        texture = context.createTexture2D();
+        texture->setSize(size);
+        texture->setFormat(pixelType, gfx::TextureChannelDataType::UnsignedByte);
+        texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                          .wrapU = gfx::TextureWrapType::Clamp,
+                                          .wrapV = gfx::TextureWrapType::Clamp});
         texture->create();
         deferredCreation = false;
     }

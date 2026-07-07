@@ -88,7 +88,7 @@ public:
     layer = nil;
   }
 
-  void initialize() {
+  void initialize(const mbgl::style::CustomLayerInitParameters &) override {
     if (layerRef == nil)
       return;
     else if (layer == nil)
@@ -99,7 +99,7 @@ public:
     }
   }
 
-  void render(const mbgl::style::CustomLayerRenderParameters &parameters) {
+  void render(const mbgl::style::CustomLayerRenderParameters &parameters) override {
     if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
@@ -125,9 +125,9 @@ public:
     }
   }
 
-  void contextLost() {}
+  void contextLost() override {}
 
-  void deinitialize() {
+  void deinitialize() override {
     if (layer == nil) return;
 
     if (layer.mapView) {

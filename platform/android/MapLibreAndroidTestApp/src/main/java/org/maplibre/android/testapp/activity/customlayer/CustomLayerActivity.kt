@@ -13,8 +13,10 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CustomLayer
+import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.model.customlayer.ExampleCustomLayer
+import org.maplibre.android.testapp.model.customlayer.ExampleVulkanCustomLayer
 import org.maplibre.android.testapp.styles.TestStyles
 
 /**
@@ -29,6 +31,9 @@ class CustomLayerActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private var customLayer: CustomLayer? = null
     private lateinit var fab: FloatingActionButton
+
+    private var isVulkan = BuildConfig.FLAVOR.contains("vulkan")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_custom_layer)
@@ -65,7 +70,7 @@ class CustomLayerActivity : AppCompatActivity() {
         } else {
             customLayer = CustomLayer(
                 "custom",
-                ExampleCustomLayer.createContext()
+                if (!isVulkan) ExampleCustomLayer.createContext() else ExampleVulkanCustomLayer.createContext()
             )
             style!!.addLayerBelow(customLayer!!, "building")
             fab.setImageResource(R.drawable.ic_layers_clear)
@@ -124,18 +129,34 @@ class CustomLayerActivity : AppCompatActivity() {
                 updateLayer()
                 true
             }
+
             R.id.action_set_color_red -> {
-                ExampleCustomLayer.setColor(1f, 0f, 0f, 1f)
+                if (!isVulkan) {
+                    ExampleCustomLayer.setColor(1f, 0f, 0f, 1f)
+                } else {
+                    ExampleVulkanCustomLayer.setColor(1f, 0f, 0f, 1f)
+                }
                 true
             }
+
             R.id.action_set_color_green -> {
-                ExampleCustomLayer.setColor(0f, 1f, 0f, 1f)
+                if (!isVulkan) {
+                    ExampleCustomLayer.setColor(0f, 1f, 0f, 1f)
+                } else {
+                    ExampleVulkanCustomLayer.setColor(0f, 1f, 0f, 1f)
+                }
                 true
             }
+
             R.id.action_set_color_blue -> {
-                ExampleCustomLayer.setColor(0f, 0f, 1f, 1f)
+                if (!isVulkan) {
+                    ExampleCustomLayer.setColor(0f, 0f, 1f, 1f)
+                } else {
+                    ExampleVulkanCustomLayer.setColor(0f, 0f, 1f, 1f)
+                }
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
