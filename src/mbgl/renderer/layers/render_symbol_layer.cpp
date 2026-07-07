@@ -495,7 +495,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     if (!collisionCircleGroup) {
         collisionCircleGroup = shaders.getShaderGroup(std::string(CollisionCircleShaderName));
     }
-    
+
     if (!staticDataVertices) {
         staticDataVertices = std::make_shared<SymbolVertexVector>(RenderStaticData::symbolVertices());
     }
@@ -751,7 +751,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(SymbolStaticVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        
+
         auto instanceAttribs = context.createVertexAttributeArray();
         updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
 

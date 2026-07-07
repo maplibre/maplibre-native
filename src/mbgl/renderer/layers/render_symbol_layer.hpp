@@ -102,13 +102,13 @@ private:
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
 
     LayerTweakerPtr collisionLayerTweaker;
-    
+
     using SymbolVertexVector = gfx::VertexVector<SymbolStaticVertex>;
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
 
     std::shared_ptr<SymbolVertexVector> staticDataVertices;
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
-    //std::shared_ptr<SegmentVector> staticDataSegments;
+    // std::shared_ptr<SegmentVector> staticDataSegments;
 };
 
 } // namespace mbgl

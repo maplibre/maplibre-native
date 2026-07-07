@@ -183,9 +183,9 @@ void addDynamicAttributes(const Point<float>& anchorPoint,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
     auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(anchorPoint, angle);
     dynamicVertexArray.emplace_back(dynamicVertex);
-    //dynamicVertexArray.emplace_back(dynamicVertex);
-    //dynamicVertexArray.emplace_back(dynamicVertex);
-    //dynamicVertexArray.emplace_back(dynamicVertex);
+    // dynamicVertexArray.emplace_back(dynamicVertex);
+    // dynamicVertexArray.emplace_back(dynamicVertex);
+    // dynamicVertexArray.emplace_back(dynamicVertex);
 }
 
 void hideGlyphs(size_t numGlyphs, gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {

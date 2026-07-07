@@ -73,11 +73,11 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
       placementModes(std::move(placementModes_)) {
     for (const auto& pair : paintProperties_) {
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(pair.second);
-        paintProperties.emplace(std::piecewise_construct,
-                                std::forward_as_tuple(pair.first),
-                                std::forward_as_tuple(PaintProperties{
-                                    .iconBinders = {iconPaintProperties(evaluated), zoom},
-                                    .textBinders = {textPaintProperties(evaluated), zoom}}));
+        paintProperties.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(pair.first),
+            std::forward_as_tuple(PaintProperties{.iconBinders = {iconPaintProperties(evaluated), zoom},
+                                                  .textBinders = {textPaintProperties(evaluated), zoom}}));
     }
 }
 

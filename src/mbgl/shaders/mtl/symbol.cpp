@@ -15,7 +15,7 @@ const std::array<AttributeInfo, 1> SymbolIconShaderSource::attributes = {
 };
 const std::array<AttributeInfo, 10> SymbolIconShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::UShort, symbolUBOCount + 1, idSymbolInstanceAttribute},
-    
+
     AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolPosScaleAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolOffsetTlTrAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolOffsetBlBrAttribute},
@@ -47,7 +47,7 @@ const std::array<AttributeInfo, 1> SymbolSDFShaderSource::attributes = {
 };
 const std::array<AttributeInfo, 14> SymbolSDFShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::UShort, symbolUBOCount + 1, idSymbolInstanceAttribute},
-    
+
     AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolPosScaleAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolOffsetTlTrAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolOffsetBlBrAttribute},
@@ -83,7 +83,7 @@ const std::array<AttributeInfo, 1> SymbolTextAndIconShaderSource::attributes = {
 };
 const std::array<AttributeInfo, 14> SymbolTextAndIconShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::UShort, symbolUBOCount + 1, idSymbolInstanceAttribute},
-    
+
     AttributeInfo{2, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolPosScaleAttribute},
     AttributeInfo{3, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolOffsetTlTrAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Short4, symbolUBOCount + 2, idSymbolOffsetBlBrAttribute},

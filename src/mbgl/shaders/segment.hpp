@@ -38,7 +38,7 @@ public:
 
     std::size_t vertexLength;
     std::size_t indexLength;
-    
+
     const std::size_t baseInstance;
     std::size_t instanceCount;
 
