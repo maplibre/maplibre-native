@@ -95,8 +95,6 @@ void PluginManager::addMapLayerType(std::shared_ptr<MapLayerType> mapLayerType) 
             mapLayer->onRender(renderingContext);
         };
 
-        // Set the lambdas
-        // auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         pluginLayerImpl->setRenderFunction(renderFunction);
 
         // Set the update properties function

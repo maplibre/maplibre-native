@@ -258,7 +258,6 @@ std::unique_ptr<Layer> Style::Impl::removeLayer(const std::string& id) {
     return layer;
 }
 
-// Add style parsing filter
 void Style::Impl::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter> filter) {
     _styleFilters.push_back(filter);
 }

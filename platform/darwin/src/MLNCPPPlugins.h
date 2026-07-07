@@ -1,6 +1,4 @@
 #ifndef MLNCPPPlugins_h
 #define MLNCPPPlugins_h
 
-// #include <mbgl/plugin/plugin_layer.hpp>
-
 #endif /* MLNCPPPlugins_h */

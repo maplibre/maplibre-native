@@ -7600,7 +7600,6 @@ static void *windowScreenContext = &windowScreenContext;
   Class layerClass = pluginLayerClass;
   factory->setOnLayerCreatedEvent([layerClass, weakMapView,
                                    pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
-    // NSLog(@"Creating Plugin Layer: %@", layerClass);
     MLNPluginLayer *layer = [[layerClass alloc] init];
     if (!weakMapView.pluginLayers) {
       weakMapView.pluginLayers = [NSMutableArray array];
@@ -7671,8 +7670,6 @@ static void *windowScreenContext = &windowScreenContext;
       [weakPlugInLayer onRenderLayer:strongMapView renderEncoder:encoder];
     };
 
-    // Set the lambdas
-    // auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
     pluginLayerImpl->setRenderFunction(renderFunction);
 
     // Set the update properties function
@@ -7688,18 +7685,12 @@ static void *windowScreenContext = &windowScreenContext;
             NSDictionary *properties = [NSJSONSerialization JSONObjectWithData:d
                                                                        options:0
                                                                          error:&error];
-            if (error) {
-              // TODO: What should we do here?
-            }
             [weakPlugInLayer onUpdateLayerProperties:properties];
           }
         });
   });
 
-  // TODO: Same question as above.  Do we ever want to have a core only layer type?
-  //       This could actually be something that we could set in the layer capabilities class
   darwinLayerManager->addLayerType(std::move(factory));
-  // darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 }
 
 - (NSArray<NSString *> *)getActionJournalLogFiles {

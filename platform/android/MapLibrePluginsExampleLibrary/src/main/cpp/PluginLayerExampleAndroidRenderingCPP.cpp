@@ -94,7 +94,6 @@ void AndroidPluginLayer::onRender(const mbgl::plugin::RenderingContext *renderin
 
     int viewportSizeX = _lastDrawingContext.drawableSize[0];
     int viewportSizeY = _lastDrawingContext.drawableSize[1];
-    //_scale = 1.0;
     _offsetX = 0;
     _offsetY = 0;
     _offsetY = _scale * 30;

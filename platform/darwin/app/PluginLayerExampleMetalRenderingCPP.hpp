@@ -40,7 +40,6 @@ private:
     id<MTLRenderPipelineState> _pipelineState;
     id<MTLDepthStencilState> _depthStencilStateWithoutStencil;
     void createMetalShaders(const mbgl::plugin::RenderingContext *renderingContext);
-    // TODO: Need to pass this in, but where would it come from?
     MTLPixelFormat _pixelFormat = MTLPixelFormatBGRA8Unorm;
 #endif
 

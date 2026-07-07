@@ -72,7 +72,6 @@ public:
     void addLayer(std::unique_ptr<Layer>, const std::optional<std::string>& beforeLayerID = std::nullopt);
     std::unique_ptr<Layer> removeLayer(const std::string& layerID);
 
-    // Add style parsing filter
     void addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter>);
 
     // Private implementation
