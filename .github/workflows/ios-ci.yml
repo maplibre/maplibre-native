@@ -100,6 +100,9 @@ jobs:
           cd "$render_test_app_dir"
           mkdir -p Payload
           ditto RenderTestApp.app Payload/RenderTestApp.app
+          iphoneos_developer_dir="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+          ditto "$iphoneos_developer_dir/Library/Frameworks/Testing.framework" Payload/RenderTestApp.app/Frameworks/Testing.framework
+          ditto "$iphoneos_developer_dir/usr/lib/lib_TestingInterop.dylib" Payload/RenderTestApp.app/Frameworks/lib_TestingInterop.dylib
           chmod -R u+w Payload/RenderTestApp.app
           zip -r RenderTestApp.zip Payload
           mv RenderTestApp.zip RenderTestApp.ipa
@@ -166,6 +169,9 @@ jobs:
           cd "$ios_cpp_test_app_dir"
           mkdir -p Payload
           ditto CppUnitTestsApp.app Payload/CppUnitTestsApp.app
+          iphoneos_developer_dir="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+          ditto "$iphoneos_developer_dir/Library/Frameworks/Testing.framework" Payload/CppUnitTestsApp.app/Frameworks/Testing.framework
+          ditto "$iphoneos_developer_dir/usr/lib/lib_TestingInterop.dylib" Payload/CppUnitTestsApp.app/Frameworks/lib_TestingInterop.dylib
           chmod -R u+w Payload/CppUnitTestsApp.app
           zip -r CppUnitTestsApp.zip Payload
           mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
