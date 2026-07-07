@@ -1,10 +1,3 @@
-//
-//  PluginMapLayer.cpp
-//  App
-//
-//  Created by Malcolm Toon on 11/26/25.
-//
-
 #include <mbgl/plugin/plugin_map_layer.hpp>
 
 using namespace mbgl::plugin;

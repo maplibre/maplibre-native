@@ -1,10 +1,3 @@
-//
-//  plugin.hpp
-//  App
-//
-//  Created by Malcolm Toon on 11/26/25.
-//
-
 #ifndef plugin_hpp
 #define plugin_hpp
 

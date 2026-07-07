@@ -1,10 +1,3 @@
-//
-//  PluginManager.cpp
-//  App
-//
-//  Created by Malcolm Toon on 11/26/25.
-//
-
 #include "plugin_manager.hpp"
 #include <mbgl/plugin/plugin_style_filter.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>

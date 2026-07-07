@@ -1,10 +1,3 @@
-//
-//  PluginLayerExampleMetalCPP.hpp
-//  App
-//
-//  Created by Malcolm Toon on 12/1/25.
-//
-
 #ifndef PluginLayerExampleMetalCPP_hpp
 #define PluginLayerExampleMetalCPP_hpp
 

@@ -1,10 +1,3 @@
-//
-//  PluginManager.hpp
-//  App
-//
-//  Created by Malcolm Toon on 11/26/25.
-//
-
 #ifndef PluginManager_hpp
 #define PluginManager_hpp
 

@@ -1,10 +1,3 @@
-//
-//  PluginLayerExampleMetalCPP.cpp
-//  App
-//
-//  Created by Malcolm Toon on 12/1/25.
-//
-
 #include "PluginLayerExampleMetalRenderingCPP.hpp"
 
 #if METAL
