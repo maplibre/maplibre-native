@@ -35,19 +35,10 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // Get terrain properties
-    const float baseExaggeration = terrain->getExaggeration();
-    // Apply moderate exaggeration for visible 3D terrain (3x)
-    const float exaggeration = baseExaggeration * 3.0f;
+    // Get terrain properties; per the style spec, exaggeration is applied as-is
+    // (default 1.0 renders true-scale elevation)
+    const float exaggeration = terrain->getExaggeration();
     const float elevationOffset = 0.0f;
-
-    static bool hasLoggedExaggeration = false;
-    if (!hasLoggedExaggeration) {
-        Log::Info(Event::Render,
-                  "Terrain exaggeration: base=" + std::to_string(baseExaggeration) +
-                      ", multiplied=" + std::to_string(exaggeration));
-        hasLoggedExaggeration = true;
-    }
 
     // Populate layer-level UBO with terrain properties
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
