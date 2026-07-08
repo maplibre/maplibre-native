@@ -248,9 +248,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Initialize sccache
         run: |
@@ -283,9 +280,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Initialize sccache
         run: |
@@ -332,9 +326,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Initialize sccache
         run: |

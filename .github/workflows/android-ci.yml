@@ -107,9 +107,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Check code style
         if: matrix.renderer == 'opengl'
@@ -224,9 +221,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Build C++ Unit Tests App
         run: |
@@ -266,9 +260,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
         uses: ./.github/actions/android-build-and-upload-render-test
@@ -295,9 +286,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Build WebGPU Dawn library for arm64-v8a
         run: ./gradlew :MapLibreAndroid:assembleWebgpuDawnDebug -Pmaplibre.abis=arm64-v8a
@@ -361,9 +349,6 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
-        with:
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Build WebGPU wgpu-native library for Android
         run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=${{ env.ANDROID_ARCH }}
