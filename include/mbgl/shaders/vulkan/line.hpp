@@ -66,7 +66,7 @@ struct LineDrawableUBO {
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float to_terrain_rtt;
+    float pad1;
     vec4 pad2;
     vec4 pad3;
 };
@@ -174,7 +174,7 @@ void main() {
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
-    if (drawable.to_terrain_rtt != 0.0) {
+    if (drawable.pad1 != 0.0) {
         // Drawn into a terrain render-to-texture tile with an orthographic matrix;
         // perspective scaling happens when the textured terrain mesh is projected
         frag_gamma_scale = 1.0;
