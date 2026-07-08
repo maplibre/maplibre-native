@@ -240,11 +240,29 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
+
+      - name: Initialize sccache
+        run: |
+          sccache --start-server
+          sccache --zero-stats
+
       - name: Configure build with CMake
-        run: cmake --preset ios-metal
+        run: |
+          cmake --preset ios-metal \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build mbgl-core
         run: cmake --build build-ios --target mbgl-core ios-sdk-static app
+
+      - name: Show sccache stats
+        if: always()
+        run: |
+          sccache --show-stats
 
   ios-build-webgpu-dawn:
     needs: pre_job
@@ -256,12 +274,30 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
+
+      - name: Initialize sccache
+        run: |
+          sccache --start-server
+          sccache --zero-stats
+
       - name: Configure build with CMake
-        run: cmake --preset ios-webgpu-dawn
+        run: |
+          cmake --preset ios-webgpu-dawn \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build mbgl-core and iOS SDK
         continue-on-error: true
         run: cmake --build build-ios-webgpu-dawn --target mbgl-core ios-sdk-static
+
+      - name: Show sccache stats
+        if: always()
+        run: |
+          sccache --show-stats
 
   ios-build-webgpu-wgpu:
     needs: pre_job
@@ -286,12 +322,30 @@ jobs:
           rustup target add aarch64-apple-ios --toolchain "$ACTIVE_TOOLCHAIN"
           rustup target list --toolchain "$ACTIVE_TOOLCHAIN" --installed | grep -x 'aarch64-apple-ios'
 
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
+
+      - name: Initialize sccache
+        run: |
+          sccache --start-server
+          sccache --zero-stats
+
       - name: Configure build with CMake
-        run: cmake --preset ios-webgpu-wgpu
+        run: |
+          RUSTC_WRAPPER=sccache cmake --preset ios-webgpu-wgpu \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build mbgl-core and iOS SDK
         continue-on-error: true
-        run: cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
+        run: RUSTC_WRAPPER=sccache cmake --build build-ios-webgpu-wgpu --target mbgl-core ios-sdk-static
+
+      - name: Show sccache stats
+        if: always()
+        run: |
+          sccache --show-stats
 
   ios-ci-result:
     runs-on: ubuntu-latest

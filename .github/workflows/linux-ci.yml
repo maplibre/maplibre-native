@@ -86,8 +86,6 @@ jobs:
       - if: matrix.variant.rust
         run: cargo install cxxbridge-cmd --version 1.0.157 --locked
 
-      - uses: ./.github/actions/install-sccache
-
       - name: Install ctcache
         run: |
           # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
@@ -96,28 +94,16 @@ jobs:
           cd ..
           mv ctcache /usr/local/bin
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
         with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
+          vars: ${{ toJSON(vars) }}
 
       - name: Build MapLibre Native
         env:
           CI: 1
         run: |
           cmake --version
-
-          # sccache configuration
-          export SCCACHE_BUCKET=maplibre-native-sccache
-          export SCCACHE_REGION=eu-central-1
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            export SCCACHE_S3_NO_CREDENTIALS=1
-          fi
 
           # ctcache configuration
           export CTCACHE_HOST=34.229.50.221
