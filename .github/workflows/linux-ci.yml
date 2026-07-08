@@ -86,8 +86,6 @@ jobs:
       - if: matrix.variant.rust
         run: cargo install cxxbridge-cmd --version 1.0.157 --locked
 
-      - uses: ./.github/actions/install-sccache
-
       - name: Install ctcache
         run: |
           # pending open PR https://github.com/matus-chochlik/ctcache/pull/94

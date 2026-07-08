@@ -1,5 +1,5 @@
 name: configure-sccache-s3
-description: "Configure AWS credentials and sccache S3 cache"
+description: "Install sccache and configure AWS credentials and S3 cache"
 inputs:
   role-to-assume:
     description: "AWS role to assume with GitHub OIDC. Leave empty to use sccache without S3 writes."
@@ -23,6 +23,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install sccache
+      shell: bash
+      run: "$GITHUB_ACTION_PATH/../install-sccache/install-sccache"
+
     - name: Configure AWS Credentials
       if: ${{ inputs.role-to-assume != '' }}
       uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
