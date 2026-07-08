@@ -6,7 +6,7 @@
 namespace mbgl {
 namespace shaders {
 
-constexpr auto customSymbolIconShaderPrelude = R"(#define idCustomSymbolDrawableUBO idDrawableReservedVertexOnlyUBO)";
+constexpr auto customSymbolIconShaderPrelude = R"(#define idCustomSymbolDrawableUBO drawableUBOStartId)";
 
 template <>
 struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Vulkan> {

@@ -37,7 +37,7 @@ struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Metal>
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float2 position [[attribute(locationIndicatorUBOCount + 0)]];
+    float2 position [[attribute(0)]];
 };
 
 struct FragmentStage {
@@ -73,8 +73,8 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float2 position [[attribute(locationIndicatorUBOCount + 0)]];
-    float2 uv [[attribute(locationIndicatorUBOCount + 1)]];
+    float2 position [[attribute(0)]];
+    float2 uv [[attribute(1)]];
 };
 
 struct FragmentStage {

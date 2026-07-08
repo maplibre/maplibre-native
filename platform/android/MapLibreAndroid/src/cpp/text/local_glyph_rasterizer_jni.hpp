@@ -4,6 +4,8 @@
 
 #include <jni/jni.hpp>
 
+#include <cstdint>
+
 /*
     android::LocalGlyphRasterizer is the JNI wrapper of
     org/maplibre/android/text/LocalGlyphRasterizer
@@ -24,6 +26,7 @@ public:
     LocalGlyphRasterizer();
 
     PremultipliedImage drawGlyphBitmap(const std::string& fontFamily, const bool bold, const char16_t glyphID);
+    float getLastGlyphTop();
 
 private:
     jni::Global<jni::Object<LocalGlyphRasterizer>, jni::EnvAttachingDeleter> javaObject;

@@ -434,4 +434,8 @@ void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const
     }
 }
 
+void Map::Impl::onRenderError(std::exception_ptr error) {
+    observer.onRenderError(error);
+}
+
 } // namespace mbgl

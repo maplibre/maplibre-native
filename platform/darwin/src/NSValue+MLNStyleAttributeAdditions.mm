@@ -23,9 +23,9 @@
   // Foundation defines padding in counterclockwise order: top, left, bottom, right.
   MLNEdgeInsets insets = {
       .top = paddingArray[0],
-      .right = paddingArray[1],
-      .bottom = paddingArray[2],
       .left = paddingArray[3],
+      .bottom = paddingArray[2],
+      .right = paddingArray[1],
   };
   return [NSValue value:&insets withObjCType:@encode(MLNEdgeInsets)];
 }

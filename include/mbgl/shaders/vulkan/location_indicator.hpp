@@ -6,7 +6,7 @@
 namespace mbgl {
 namespace shaders {
 
-constexpr auto locationIndicatorShaderPrelude = R"(#define idLocationIndicatorDrawableUBO  drawableReservedUBOCount)";
+constexpr auto locationIndicatorShaderPrelude = R"(#define idLocationIndicatorDrawableUBO  drawableUBOStartId)";
 
 template <>
 struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Vulkan> {

@@ -569,7 +569,10 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
                                                 bool renderToTerrain) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    auto tileLayerGroup = std::make_shared<TileLayerGroupGL>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    tileLayerGroup->setObserver(observer);
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
@@ -578,7 +581,9 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
                                         bool renderToTerrain) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    auto layerGroup = std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    layerGroup->setObserver(observer);
+    return layerGroup;
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {

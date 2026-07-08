@@ -222,14 +222,18 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
                                                 std::size_t initialCapacity,
                                                 std::string name,
                                                 bool renderToTerrain) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    tileLayerGroup->setObserver(observer);
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
                                         std::size_t initialCapacity,
                                         std::string name,
                                         bool renderToTerrain) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name, renderToTerrain);
+    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name, renderToTerrain);
+    layerGroup->setObserver(observer);
+    return layerGroup;
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
@@ -374,20 +378,19 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     if (!clipMaskPipelineState) {
         // A vertex descriptor tells Metal what's in the vertex buffer
         auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
-        auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-        auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
-        if (!vertDesc || !attribDesc || !layoutDesc) {
+        if (!vertDesc) {
             return false;
         }
 
-        attribDesc->setBufferIndex(ShaderClass::attributes[0].index);
+        const auto& attribDesc = vertDesc->attributes()->object(ShaderClass::attributes[0].index);
+        attribDesc->setBufferIndex(ShaderClass::attributes[0].bufferIndex);
         attribDesc->setOffset(0);
         attribDesc->setFormat(MTL::VertexFormatShort2);
+
+        const auto& layoutDesc = vertDesc->layouts()->object(ShaderClass::attributes[0].bufferIndex);
         layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
         layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
         layoutDesc->setStepRate(1);
-        vertDesc->attributes()->setObject(attribDesc.get(), ShaderClass::attributes[0].index);
-        vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
@@ -430,7 +433,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     mtlRenderPass.setCullMode(MTL::CullModeNone);
 
-    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
+    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].bufferIndex);
 
     // Instancing is disabled for now because the `[[stencil]]` attribute in the fragment shader output
     // that we need to apply a different stencil value for each tile causes a problem on some older (A8-A11)

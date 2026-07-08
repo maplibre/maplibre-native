@@ -37,8 +37,8 @@ struct ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float3 position [[attribute(customGeometryUBOCount + 0)]];
-    float2 uv [[attribute(customGeometryUBOCount + 1)]];
+    float3 position [[attribute(0)]];
+    float2 uv [[attribute(1)]];
 };
 
 struct FragmentStage {

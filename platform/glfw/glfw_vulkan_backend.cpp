@@ -82,7 +82,6 @@ public:
             return device.get();
         }
 
-        const std::vector<const char*> layers = {"VK_LAYER_KHRONOS_validation"};
         const std::vector<const char*> extensions = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #ifdef __APPLE__
@@ -93,10 +92,8 @@ public:
         float queuePriority = 1.0f;
         vk::DeviceQueueCreateInfo queueCreateInfo(vk::DeviceQueueCreateFlags(), getQueueIndex(), 1, &queuePriority);
 
-        auto createInfo = vk::DeviceCreateInfo()
-                              .setQueueCreateInfos(queueCreateInfo)
-                              .setPEnabledExtensionNames(extensions)
-                              .setPEnabledLayerNames(layers);
+        auto createInfo =
+            vk::DeviceCreateInfo().setQueueCreateInfos(queueCreateInfo).setPEnabledExtensionNames(extensions);
 
         device = physicalDevice.createDeviceUnique(createInfo, nullptr, dispatcher);
         dispatcher.init(device.get());
@@ -107,8 +104,8 @@ public:
     uint32_t getQueueIndex() { return graphicsQueueIndex; }
 
 private:
-    vk::DynamicLoader dynamicLoader;
-    vk::DispatchLoaderDynamic dispatcher;
+    mbgl::vulkan::DynamicLoader dynamicLoader;
+    mbgl::vulkan::DispatchLoaderDynamic dispatcher;
 
     vk::UniqueInstance instance;
     vk::PhysicalDevice physicalDevice;
@@ -136,7 +133,7 @@ public:
         if (result != VK_SUCCESS) throw std::runtime_error("Failed to create glfw window surface");
 
         surface = vk::UniqueSurfaceKHR(surface_,
-                                       vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(
+                                       mbgl::vulkan::ObjectDestroy<vk::Instance>(
                                            backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
     }
 
@@ -190,7 +187,7 @@ void GLFWVulkanBackend::initInstance() {
 
     // this method is required to set `instance` to a valid vkInstance
     instance = vk::UniqueInstance(VkContext::shared().getInstance(),
-                                  vk::ObjectDestroy<vk::NoParent, vk::DispatchLoaderDynamic>(nullptr, dispatcher));
+                                  mbgl::vulkan::ObjectDestroy<vk::NoParent>(nullptr, dispatcher));
 
     // debug builds also require:
     // - enabling either `VK_EXT_debug_utils` (and updating `debugUtilsEnabled`) or `VK_EXT_debug_report` extension
@@ -207,7 +204,7 @@ void GLFWVulkanBackend::initDevice() {
 
     physicalDevice = VkContext::shared().getPhysicalDevice();
     device = vk::UniqueDevice(VkContext::shared().getDevice(),
-                              vk::ObjectDestroy<vk::NoParent, vk::DispatchLoaderDynamic>(nullptr, dispatcher));
+                              mbgl::vulkan::ObjectDestroy<vk::NoParent>(nullptr, dispatcher));
 
     graphicsQueueIndex = presentQueueIndex = VkContext::shared().getQueueIndex();
     physicalDeviceFeatures = vk::PhysicalDeviceFeatures();

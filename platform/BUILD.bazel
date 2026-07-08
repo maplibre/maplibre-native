@@ -242,6 +242,50 @@ objc_library(
     ],
 )
 
+# sdk for the macOS static target which includes the resources.
+objc_library(
+    name = "macos-sdk",
+    hdrs = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:generated_style_public_hdrs",
+        "//platform/macos:macos_public_hdrs",
+    ],
+    data = ["//platform/macos:resources"],
+    module_name = "MapLibre",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "Security",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":macos-objc",
+        ":macos-objcpp",
+    ],
+)
+
+# sdk for the macOS dynamic target. Lacking the resources bundle since for dynamic
+# they are in the main package.
+objc_library(
+    name = "macos-sdk-dynamic",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "Security",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":macos-objc",
+        ":macos-objcpp",
+    ],
+)
+
 objc_library(
     name = "app_custom_drawable_layer_objcpp_srcs",
     srcs = [

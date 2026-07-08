@@ -15,6 +15,12 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     target_include_directories(mbgl-harfbuzz PRIVATE ${CMAKE_CURRENT_LIST_DIR}/freetype/include)
     target_compile_definitions(mbgl-harfbuzz PRIVATE -DHAVE_FREETYPE)
 
+    if(APPLE)
+        # Keep bundled HarfBuzz symbols private so they do not interpose symbols from
+        # app dependencies. See https://github.com/maplibre/maplibre-native/issues/3777.
+        target_compile_options(mbgl-harfbuzz PRIVATE -fvisibility=hidden)
+    endif()
+
     set_target_properties(
         mbgl-harfbuzz
         PROPERTIES

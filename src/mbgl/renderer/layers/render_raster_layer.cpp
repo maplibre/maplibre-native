@@ -141,7 +141,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         staticDataIndices = std::make_shared<TriangleIndexVector>(RenderStaticData::quadTriangleIndices());
     }
     if (!staticDataSegments) {
-        staticDataSegments = std::make_shared<RasterSegmentVector>(RenderStaticData::rasterSegments());
+        staticDataSegments = std::make_shared<SegmentVector>(RenderStaticData::rasterSegments());
     }
 
     const auto createBuilder = [&] {

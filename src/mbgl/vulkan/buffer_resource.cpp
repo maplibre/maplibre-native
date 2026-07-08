@@ -57,7 +57,8 @@ BufferResource::BufferResource(
     std::size_t totalSize = size;
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT || usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) {
+    if ((usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0 &&
+        (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT || usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)) {
         const auto& backend = context.getBackend();
         const auto& deviceProps = backend.getDeviceProperties();
 
@@ -95,7 +96,7 @@ BufferResource::BufferResource(
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
-        return;
+        throw std::bad_alloc();
     }
 
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
@@ -127,36 +128,54 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
     other.bufferAllocation = nullptr;
 }
 
+BufferResource::BufferResource(const BufferResource& other) noexcept
+    : context(other.context),
+      size(other.size),
+      usage(other.usage),
+      version(other.version),
+      persistent(other.persistent),
+      bufferAllocation(other.bufferAllocation),
+      bufferWindowSize(other.bufferWindowSize),
+      bufferWindowVersions(other.bufferWindowVersions) {}
+
 BufferResource::~BufferResource() noexcept {
     destroy(true);
 }
 
 void BufferResource::destroy(bool deferred) {
-    if (isValid()) {
-        context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
-            stats.numBuffers--;
-
-            if (bufferWindowSize > 0) {
-                stats.memBuffers -= bufferWindowSize * context.getBackend().getMaxFrames();
-            } else {
-                stats.memBuffers -= size;
-            }
-        });
-    }
-
     if (!bufferAllocation) {
         return;
     }
 
+    const size_t size_ = bufferWindowSize > 0 ? bufferWindowSize * bufferWindowVersions.size() : size;
+
     if (deferred) {
-        context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
+        context.enqueueDeletion([size_, allocation = std::move(bufferAllocation)](auto& context_) mutable {
+            if (allocation.use_count() == 1) {
+                context_.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+                    stats.numBuffers--;
+                    stats.memBuffers -= size_;
+                });
+            }
+            allocation.reset();
+        });
     } else {
+        if (bufferAllocation.use_count() == 1) {
+            context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
+                stats.numBuffers--;
+                stats.memBuffers -= size_;
+            });
+        }
         bufferAllocation.reset();
     }
 }
 
 BufferResource BufferResource::clone() const {
     return {context, contents(), size, usage, persistent};
+}
+
+BufferResource BufferResource::shared() const {
+    return BufferResource(*this);
 }
 
 BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
@@ -188,6 +207,9 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     uint8_t* data = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset;
 
     if (memcmp(data, newData, updateSize) == 0) {
+        if (bufferWindowSize) {
+            bufferWindowVersions[context.getCurrentFrameResourceIndex()] = version;
+        }
         return;
     }
 
@@ -209,8 +231,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     }
 
     if (bufferWindowSize) {
-        const auto frameIndex = context.getCurrentFrameResourceIndex();
-        bufferWindowVersions[frameIndex] = version;
+        bufferWindowVersions[context.getCurrentFrameResourceIndex()] = version;
     }
 }
 
