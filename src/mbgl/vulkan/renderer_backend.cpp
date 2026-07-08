@@ -26,6 +26,7 @@
 #include <mbgl/shaders/vulkan/location_indicator.hpp>
 #include <mbgl/shaders/vulkan/raster.hpp>
 #include <mbgl/shaders/vulkan/symbol.hpp>
+#include <mbgl/shaders/vulkan/terrain.hpp>
 #include <mbgl/shaders/vulkan/widevector.hpp>
 
 #include <cassert>
@@ -724,6 +725,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::TerrainShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 

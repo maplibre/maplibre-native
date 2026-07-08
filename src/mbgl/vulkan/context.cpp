@@ -718,7 +718,9 @@ void Context::buildImageDescriptorSetLayout() {
     for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(static_cast<uint32_t>(i))
-                               .setStageFlags(vk::ShaderStageFlagBits::eFragment)
+                               // vertex stage included for shaders that sample in the vertex
+                               // shader, e.g. the terrain DEM displacement
+                               .setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment)
                                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
                                .setDescriptorCount(1));
     }

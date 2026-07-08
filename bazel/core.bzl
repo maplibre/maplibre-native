@@ -1194,6 +1194,7 @@ MLN_DRAWABLES_WEBGPU_SOURCE = [
     "src/mbgl/shaders/webgpu/location_indicator.cpp",
     "src/mbgl/shaders/webgpu/raster.cpp",
     "src/mbgl/shaders/webgpu/symbol.cpp",
+    "src/mbgl/shaders/webgpu/terrain.cpp",
     "src/mbgl/shaders/webgpu/widevector.cpp",
 ]
 
@@ -1239,6 +1240,7 @@ MLN_DRAWABLES_WEBGPU_HEADERS = [
     "include/mbgl/shaders/webgpu/shader_group.hpp",
     "include/mbgl/shaders/webgpu/shader_program.hpp",
     "include/mbgl/shaders/webgpu/symbol.hpp",
+    "include/mbgl/shaders/webgpu/terrain.hpp",
     "include/mbgl/shaders/webgpu/wgsl_preprocessor.hpp",
     "include/mbgl/shaders/webgpu/widevector.hpp",
 ]

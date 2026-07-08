@@ -26,6 +26,7 @@
 #include <mbgl/shaders/webgpu/location_indicator.hpp>
 #include <mbgl/shaders/webgpu/raster.hpp>
 #include <mbgl/shaders/webgpu/symbol.hpp>
+#include <mbgl/shaders/webgpu/terrain.hpp>
 #include <mbgl/shaders/webgpu/widevector.hpp>
 
 namespace mbgl {
@@ -120,6 +121,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::TerrainShader,
                   shaders::BuiltIn::WideVectorShader>(registry, parameters);
 }
 
