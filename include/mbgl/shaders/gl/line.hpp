@@ -41,7 +41,7 @@ layout (std140) uniform LineDrawableUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    lowp float u_pad1;
+    lowp float drawable_pad1;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -158,7 +158,7 @@ mediump float width = u_width;
     gl_Position = u_matrix * vec4(pos + offset2 / u_ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
-    if (u_pad1 != 0.0) {
+    if (drawable_pad1 != 0.0) {
         // Drawn into a terrain render-to-texture tile with an orthographic matrix;
         // perspective scaling happens when the textured terrain mesh is projected
         v_gamma_scale = 1.0;
