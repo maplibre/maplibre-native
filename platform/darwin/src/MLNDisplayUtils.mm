@@ -1,11 +1,8 @@
 #import "MLNDisplayUtils.h"
 
 CGFloat MLNEffectiveScaleFactor(CGSize nativePixelBounds, CGSize logicalPointBounds) {
-  // `nativeBounds` is always portrait-up and does not rotate; `bounds` rotates with the interface
-  // orientation. Comparing the `.width` values directly gives the wrong ratio in landscape
-  // (e.g. 1668 / 1194 = ~1.40 instead of 2.0 on iPad Pro 11), under-sizing the drawable and
-  // rendering the map below native resolution. Pair short-side with short-side so the ratio is
-  // orientation independent and still correct for external / CarPlay screens.
+  // `nativeBounds` is always portrait-up while `bounds` rotates with the interface orientation,
+  // so pair short side with short side to keep the ratio orientation independent.
   CGFloat nativeShortSide = MIN(nativePixelBounds.width, nativePixelBounds.height);
   CGFloat pointShortSide = MIN(logicalPointBounds.width, logicalPointBounds.height);
   return pointShortSide > 0.0 ? nativeShortSide / pointShortSide : 0.0;
@@ -17,12 +14,18 @@ CGFloat MLNEffectiveScaleFactorForView(id viewOrNil) {
   UIView *view = (UIView *)viewOrNil;
   UIScreen *screen = view.window.screen ?: [UIScreen mainScreen];
 
-  CGFloat logicalToPixelRatio = MLNEffectiveScaleFactor(screen.nativeBounds.size, screen.bounds.size);
+  // `nativeScale` is orientation-independent and accounts for Display Zoom (unlike `scale`).
+  if ([screen respondsToSelector:@selector(nativeScale)] && screen.nativeScale > 0.0) {
+    return screen.nativeScale;
+  }
+
+  CGFloat logicalToPixelRatio =
+      MLNEffectiveScaleFactor(screen.nativeBounds.size, screen.bounds.size);
   if (logicalToPixelRatio > 0.0) {
     return logicalToPixelRatio;
   }
 
-  return [screen respondsToSelector:@selector(nativeScale)] ? screen.nativeScale : screen.scale;
+  return screen.scale;
 
 #elif TARGET_OS_OSX
 
