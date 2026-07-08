@@ -107,6 +107,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Check code style
         if: matrix.renderer == 'opengl'
@@ -221,6 +223,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build C++ Unit Tests App
         run: |
@@ -260,6 +264,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
         uses: ./.github/actions/android-build-and-upload-render-test
@@ -286,6 +292,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build WebGPU Dawn library for arm64-v8a
         run: ./gradlew :MapLibreAndroid:assembleWebgpuDawnDebug -Pmaplibre.abis=arm64-v8a
@@ -349,6 +357,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build WebGPU wgpu-native library for Android
         run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=${{ env.ANDROID_ARCH }}

@@ -248,6 +248,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Initialize sccache
         run: |
@@ -280,6 +282,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Initialize sccache
         run: |
@@ -326,6 +330,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Initialize sccache
         run: |

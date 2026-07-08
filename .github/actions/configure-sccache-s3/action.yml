@@ -1,6 +1,10 @@
 name: configure-sccache-s3
 description: "Install sccache and configure AWS credentials and S3 cache"
 inputs:
+  vars:
+    description: "JSON-encoded GitHub Actions vars context"
+    required: false
+    default: "{}"
   sccache-bucket:
     description: "S3 bucket used by sccache"
     required: false
@@ -17,11 +21,11 @@ runs:
       run: "$GITHUB_ACTION_PATH/../install-sccache/install-sccache"
 
     - name: Configure AWS Credentials
-      if: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME != '' }}
+      if: fromJSON(inputs.vars).OIDC_AWS_ROLE_TO_ASSUME
       uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
       with:
         aws-region: us-west-2
-        role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+        role-to-assume: ${{ fromJSON(inputs.vars).OIDC_AWS_ROLE_TO_ASSUME }}
         role-session-name: ${{ github.run_id }}
 
     - name: Configure sccache

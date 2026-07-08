@@ -96,6 +96,8 @@ jobs:
 
       - name: Configure sccache
         uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build MapLibre Native
         env:
