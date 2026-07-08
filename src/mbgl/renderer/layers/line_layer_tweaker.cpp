@@ -255,7 +255,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                    .drawable_pad1 = renderingToTerrain ? 1.0f : 0.0f
+                    .pad1 = renderingToTerrain ? 1.0f : 0.0f
                 };
 
 #if !MLN_UBO_CONSOLIDATION

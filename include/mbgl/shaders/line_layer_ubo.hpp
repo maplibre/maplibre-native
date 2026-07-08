@@ -22,7 +22,7 @@ struct alignas(16) LineDrawableUBO {
     /* 80 */ float gapwidth_t;
     /* 84 */ float offset_t;
     /* 88 */ float width_t;
-    /* 92 */ float drawable_pad1; // Reused padding slot to flag terrain render-to-texture tiles
+    /* 92 */ float pad1; // Reused padding slot to flag terrain render-to-texture tiles
     /* 96 */
 };
 static_assert(sizeof(LineDrawableUBO) == 6 * 16);
