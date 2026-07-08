@@ -83,10 +83,12 @@ jobs:
       - name: Cache Bazel
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: ${{ runner.os }}-ios-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
-            ${{ runner.os }}-bazel-
-          path: ~/.cache/bazel
+            ${{ runner.os }}-ios-bazel-
+          path: |
+            /var/tmp/_bazel_runner
+            ~/Library/Caches/bazel
 
       # render test
 
@@ -230,6 +232,10 @@ jobs:
         working-directory: .
         run: |
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+
+      - name: Shut down Bazel
+        if: always()
+        run: command -v bazel >/dev/null && bazel shutdown || true
 
   ios-build-cmake:
     needs: pre_job
