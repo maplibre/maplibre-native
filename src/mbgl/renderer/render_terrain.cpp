@@ -124,7 +124,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         Log::Info(Event::Render, "Terrain examining tile " + util::toString(tileID));
 
         // Skip if we already have a drawable for this tile
-        if (tilesWithDrawables.count(tileID) > 0) {
+        if (tilesWithDrawables.contains(tileID)) {
             Log::Info(Event::Render, "Terrain tile " + util::toString(tileID) + " already has drawable, skipping");
             continue;
         }
@@ -290,7 +290,7 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
 
 std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& context, const DEMData& demData) {
     // Get the DEM image data
-    auto imagePtr = demData.getImagePtr();
+    const auto& imagePtr = demData.getImagePtr();
     if (!imagePtr || imagePtr->size.isEmpty()) {
         Log::Warning(Event::Render, "DEM data has no image");
         return nullptr;

@@ -57,8 +57,8 @@ struct ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(terrainUBOCount + 0)]];
-    short2 texture_pos [[attribute(terrainUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short2 texture_pos [[attribute(1)]];
 };
 
 struct FragmentStage {
