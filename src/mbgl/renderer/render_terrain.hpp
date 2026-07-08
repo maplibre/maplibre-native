@@ -7,6 +7,7 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/renderer/texture_pool.hpp>
 
+#include <array>
 #include <memory>
 #include <map>
 #include <string>
@@ -108,6 +109,11 @@ public:
     bool isEnabled() const;
 
     /**
+     * @brief Get the DEM unpack vector for the source's raster-dem encoding
+     */
+    const std::array<float, 4>& getDEMUnpackVector() const { return demUnpackVector; }
+
+    /**
      * @brief Get the terrain implementation
      */
     const Immutable<style::Terrain::Impl>& getImpl() const { return impl; }
@@ -181,6 +187,9 @@ private:
 
     // Cached DEM source
     RenderSource* demSource = nullptr;
+
+    // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
+    std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
 
     // Layer index (terrain renders early in 3D pass, use negative index)
     static constexpr int32_t TERRAIN_LAYER_INDEX = -1000;

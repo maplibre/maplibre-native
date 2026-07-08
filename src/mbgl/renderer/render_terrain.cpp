@@ -159,6 +159,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             continue;
         }
 
+        // All tiles come from the same raster-dem source, so they share one encoding
+        demUnpackVector = demData.getUnpackVector();
+
         Log::Info(Event::Render,
                   "Terrain creating texture for tile " + util::toString(tileID) + " (DEM size: " +
                       std::to_string(imagePtr->size.width) + "x" + std::to_string(imagePtr->size.height) + ")");

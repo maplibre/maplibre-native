@@ -6,7 +6,11 @@ layout (std140) uniform TerrainDrawableUBO {
 };
 
 layout (std140) uniform TerrainEvaluatedPropsUBO {
+    highp vec4 u_unpack;
     highp float u_exaggeration;
+    highp float u_elevation_offset;
+    lowp float props_pad1;
+    lowp float props_pad2;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -19,18 +23,12 @@ void main() {
     vec2 pos = vec2(a_pos);
     v_uv = pos / 8192.0;
 
-    // Sample DEM texture to get raw RGBA values
-    vec4 demSample = texture(u_dem, v_uv);
-
-    // Decode Mapbox Terrain RGB format to get elevation in meters
-    // Format: height = -10000 + ((R*256*256 + G*256 + B) * 0.1)
-    // DEM values are in range [0, 1] so convert back to [0, 255]
-    float r = demSample.r * 255.0;
-    float g = demSample.g * 255.0;
-    float b = demSample.b * 255.0;
-
-    // Calculate elevation in meters
-    float elevationMeters = -10000.0 + ((r * 256.0 * 256.0 + g * 256.0 + b) * 0.1);
+    // Sample the DEM texture and decode elevation in meters using the source's
+    // unpack vector, matching hillshade/color-relief (supports Mapbox Terrain-RGB
+    // and Terrarium encodings)
+    vec4 demSample = texture(u_dem, v_uv) * 255.0;
+    demSample.a = -1.0;
+    float elevationMeters = dot(demSample, u_unpack);
 
     // Apply exaggeration for visible relief (default: 1.0, can be set higher for dramatic effect)
     v_elevation = elevationMeters * u_exaggeration;

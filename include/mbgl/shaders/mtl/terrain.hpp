@@ -32,13 +32,14 @@ static_assert(sizeof(TerrainTilePropsUBO) == 16, "wrong size");
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) TerrainEvaluatedPropsUBO {
-    /*  0 */ float exaggeration;
-    /*  4 */ float elevation_offset;
-    /*  8 */ float pad1;
-    /* 12 */ float pad2;
-    /* 16 */
+    /*  0 */ float4 unpack; // DEM unpack vector for the source's encoding
+    /* 16 */ float exaggeration;
+    /* 20 */ float elevation_offset;
+    /* 24 */ float pad1;
+    /* 28 */ float pad2;
+    /* 32 */
 };
-static_assert(sizeof(TerrainEvaluatedPropsUBO) == 16, "wrong size");
+static_assert(sizeof(TerrainEvaluatedPropsUBO) == 32, "wrong size");
 
 )";
 
@@ -80,18 +81,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 pos = float2(vertx.pos);
     float2 uv = pos / 8192.0;
 
-    // Sample DEM texture to get raw RGBA values
-    float4 demSample = demTexture.sample(demSampler, uv);
-
-    // Decode Mapbox Terrain RGB format to get elevation in meters
-    // Format: height = -10000 + ((R*256*256 + G*256 + B) * 0.1)
-    // DEM values are in range [0, 1] so convert back to [0, 255]
-    float r = demSample.r * 255.0;
-    float g = demSample.g * 255.0;
-    float b = demSample.b * 255.0;
-
-    // Calculate elevation in meters
-    float elevationMeters = -10000.0 + ((r * 256.0 * 256.0 + g * 256.0 + b) * 0.1);
+    // Sample the DEM texture and decode elevation in meters using the source's
+    // unpack vector, matching hillshade/color-relief (supports Mapbox Terrain-RGB
+    // and Terrarium encodings)
+    float4 demSample = demTexture.sample(demSampler, uv) * 255.0;
+    demSample.a = -1.0;
+    float elevationMeters = dot(demSample, props.unpack);
 
     // Apply exaggeration for visible relief (default: 1.0, can be set higher for dramatic effect)
     float elevation = elevationMeters * props.exaggeration;

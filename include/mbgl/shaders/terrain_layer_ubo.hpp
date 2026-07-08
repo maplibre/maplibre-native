@@ -21,13 +21,14 @@ static_assert(sizeof(TerrainTilePropsUBO) == 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) TerrainEvaluatedPropsUBO {
-    /*  0 */ float exaggeration;
-    /*  4 */ float elevation_offset;
-    /*  8 */ float pad1;
-    /* 12 */ float pad2;
-    /* 16 */
+    /*  0 */ std::array<float, 4> unpack; // DEM unpack vector for the source's encoding
+    /* 16 */ float exaggeration;
+    /* 20 */ float elevation_offset;
+    /* 24 */ float pad1;
+    /* 28 */ float pad2;
+    /* 32 */
 };
-static_assert(sizeof(TerrainEvaluatedPropsUBO) == 16);
+static_assert(sizeof(TerrainEvaluatedPropsUBO) == 32);
 
 } // namespace shaders
 } // namespace mbgl
