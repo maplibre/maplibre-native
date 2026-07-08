@@ -105,23 +105,11 @@ jobs:
         with:
           check_untracked: true
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
         with:
-          aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-
-      - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
 
       - name: Check code style
         if: matrix.renderer == 'opengl'
@@ -234,23 +222,11 @@ jobs:
         run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
         working-directory: .
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
         with:
-          aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-
-      - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
 
       - name: Build C++ Unit Tests App
         run: |
@@ -288,23 +264,11 @@ jobs:
 
       - uses: ./.github/actions/setup-android-ci
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
         with:
-          aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-
-      - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
 
       - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
         uses: ./.github/actions/android-build-and-upload-render-test
@@ -329,23 +293,11 @@ jobs:
 
       - uses: ./.github/actions/setup-android-ci
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
         with:
-          aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-
-      - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
 
       - name: Build WebGPU Dawn library for arm64-v8a
         run: ./gradlew :MapLibreAndroid:assembleWebgpuDawnDebug -Pmaplibre.abis=arm64-v8a
@@ -407,23 +359,11 @@ jobs:
           export "${ENV_VAR}=--sysroot=$NDK_PREBUILT/sysroot --target=${{ env.BINDGEN_TARGET }} -isystem $RESOURCE_DIR/include"
           cargo build --release --target ${{ env.RUST_TARGET }} --no-default-features --features vulkan,wgsl,spirv,glsl
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      - name: Configure sccache
+        uses: ./.github/actions/configure-sccache-s3
         with:
-          aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-
-      - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
 
       - name: Build WebGPU wgpu-native library for Android
         run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=${{ env.ANDROID_ARCH }}

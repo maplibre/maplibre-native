@@ -1,0 +1,46 @@
+name: configure-sccache-s3
+description: "Configure AWS credentials and sccache S3 cache"
+inputs:
+  role-to-assume:
+    description: "AWS role to assume with GitHub OIDC. Leave empty to use sccache without S3 writes."
+    required: false
+  aws-region:
+    description: "AWS region used to assume the role"
+    required: false
+    default: us-west-2
+  role-session-name:
+    description: "AWS role session name"
+    required: false
+    default: GitHubActions
+  sccache-bucket:
+    description: "S3 bucket used by sccache"
+    required: false
+    default: maplibre-native-sccache
+  sccache-region:
+    description: "S3 bucket region used by sccache"
+    required: false
+    default: eu-central-1
+runs:
+  using: "composite"
+  steps:
+    - name: Configure AWS Credentials
+      if: ${{ inputs.role-to-assume != '' }}
+      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
+      with:
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.role-to-assume }}
+        role-session-name: ${{ inputs.role-session-name }}
+
+    - name: Configure sccache
+      shell: bash
+      env:
+        SCCACHE_BUCKET: ${{ inputs.sccache-bucket }}
+        SCCACHE_REGION: ${{ inputs.sccache-region }}
+      run: |
+        echo "SCCACHE_BUCKET=${SCCACHE_BUCKET}" >> "$GITHUB_ENV"
+        echo "SCCACHE_REGION=${SCCACHE_REGION}" >> "$GITHUB_ENV"
+
+        if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+          echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+          echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+        fi
