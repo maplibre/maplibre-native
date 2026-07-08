@@ -57,10 +57,17 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  bool inViewportPixelUnits,
                                  const gfx::Drawable& drawable,
                                  bool aligned,
-                                 bool renderToTerrain) {
+                                 bool renderToTerrain,
+                                 bool* renderingToTerrain) {
     std::optional<UnwrappedTileID> terrainTileID;
     if (renderToTerrain && parameters.texturePool.getRenderTargetAncestorOrDescendant(tileID, terrainTileID)) {
+        if (renderingToTerrain) {
+            *renderingToTerrain = true;
+        }
         return getTerrainRttPosMatrix(tileID, *terrainTileID);
+    }
+    if (renderingToTerrain) {
+        *renderingToTerrain = false;
     }
     // from RenderTile::prepare
     mat4 tileMatrix;

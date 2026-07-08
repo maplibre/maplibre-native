@@ -31,7 +31,7 @@ struct alignas(16) LineDrawableUBO {
     /* 80 */ float gapwidth_t;
     /* 84 */ float offset_t;
     /* 88 */ float width_t;
-    /* 92 */ float pad1;
+    /* 92 */ float to_terrain_rtt; // 1.0 when drawn into a terrain render-to-texture tile
     /* 96 */
 };
 static_assert(sizeof(LineDrawableUBO) == 6 * 16, "wrong size");
@@ -288,7 +288,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
     const float4 position = drawable.matrix * float4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
 
-    // calculate how much the perspective view squishes or stretches the extrude
+    // calculate how much the perspective view squishes or stretches the extrude.
+    // A value of 1.0 is used when drawn into a terrain render-to-texture tile with an
+    // orthographic matrix; perspective scaling happens when the terrain mesh is projected
     const float extrude_length_without_perspective = length(dist);
     const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
@@ -296,7 +298,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position    = position,
         .width2      = float2(outset, inset),
         .normal      = v_normal,
-        .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
+        .gamma_scale = drawable.to_terrain_rtt != 0.0
+                           ? half(1.0)
+                           : half(extrude_length_without_perspective / extrude_length_with_perspective),
 
 #if !defined(HAS_UNIFORM_u_color)
         .color       = unpack_mix_color(vertx.color,   drawable.color_t),

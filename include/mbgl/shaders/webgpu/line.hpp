@@ -44,7 +44,7 @@ struct LineDrawableUBO {
     gapwidth_t: f32,
     offset_t: f32,
     width_t: f32,
-    pad1: f32,
+    to_terrain_rtt: f32,
 };
 
 struct LineEvaluatedPropsUBO {
@@ -169,7 +169,10 @@ fn main(in: VertexInput) -> VertexOutput {
 
     out.v_width2 = vec2<f32>(outset, inset);
     out.v_normal = normal;
-    out.v_gamma_scale = extrude_length_without_perspective / gamma_denom;
+    // A value of 1.0 is used when drawn into a terrain render-to-texture tile with an
+    // orthographic matrix; perspective scaling happens when the terrain mesh is projected
+    out.v_gamma_scale = select(
+        extrude_length_without_perspective / gamma_denom, 1.0, drawable.to_terrain_rtt != 0.0);
     out.v_color = color;
     out.v_blur = blur;
     out.v_opacity = opacity;

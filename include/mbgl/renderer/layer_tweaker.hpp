@@ -49,6 +49,8 @@ public:
     /// Calculate matrices for this tile.
     /// @param nearClipped If true, the near plane is moved further to enhance depth buffer precision.
     /// @param inViewportPixelUnits If false, the translation is scaled based on the current zoom.
+    /// @param renderingToTerrain If provided, set to whether the returned matrix targets a
+    /// terrain render-to-texture tile instead of the map projection.
     static mat4 getTileMatrix(const UnwrappedTileID&,
                               const PaintParameters&,
                               const std::array<float, 2>& translation,
@@ -57,7 +59,8 @@ public:
                               bool inViewportPixelUnits,
                               const gfx::Drawable& drawable,
                               bool aligned = false,
-                              bool renderToTerrain = true);
+                              bool renderToTerrain = true,
+                              bool* renderingToTerrain = nullptr);
 
 protected:
     /// Determine whether this tweaker should apply to the given drawable

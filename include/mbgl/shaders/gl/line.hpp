@@ -41,7 +41,7 @@ layout (std140) uniform LineDrawableUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    lowp float drawable_pad1;
+    lowp float u_to_terrain_rtt;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -158,13 +158,15 @@ mediump float width = u_width;
     gl_Position = u_matrix * vec4(pos + offset2 / u_ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
-#if 1 // TODO: #ifdef TERRAIN3D
-    v_gamma_scale = 1.0; // not needed, because this is done automatically via the mesh
-#else
-    float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
-    v_gamma_scale = 1.0;//extrude_length_without_perspective / extrude_length_with_perspective;
-#endif
+    if (u_to_terrain_rtt != 0.0) {
+        // Drawn into a terrain render-to-texture tile with an orthographic matrix;
+        // perspective scaling happens when the textured terrain mesh is projected
+        v_gamma_scale = 1.0;
+    } else {
+        float extrude_length_without_perspective = length(dist);
+        float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
+        v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+    }
 
     v_width2 = vec2(outset, inset);
 }
