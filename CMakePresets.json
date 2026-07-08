@@ -206,6 +206,18 @@
       }
     },
     {
+      "name": "linux-webgpu-ffi",
+      "binaryDir": "${sourceDir}/build-linux-webgpu-wgpu-ffi",
+      "inherits": "linux",
+      "cacheVariables": {
+        "MLN_WITH_WEBGPU": "ON",
+        "MLN_WEBGPU_IMPL_WGPU": "ON",
+        "MLN_WEBGPU_IMPL_FFI": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
+      }
+    },
+    {
       "name": "android-webgpu-dawn",
       "displayName": "Android WebGPU (Dawn)",
       "generator": "Ninja",
