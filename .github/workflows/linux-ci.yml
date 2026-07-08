@@ -33,7 +33,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -42,7 +42,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
 
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -66,20 +66,20 @@ jobs:
             rust: true
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
         with:
           submodules: recursive
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
+        uses: github/codeql-action/init@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
+      - uses: taiki-e/install-action@4684b8405694ae9dd42c9f39ba901a70ae83f4a3 # v2
         with:
           tool: armerge@2
 
@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload mbgl-render as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: mbgl-render
           path: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: mbgl-benchmark-runner
           path: |
@@ -156,7 +156,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
+        uses: github/codeql-action/analyze@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
         with:
           category: "/language:cpp"
 
@@ -183,7 +183,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: render-test-result-${{ matrix.variant.renderer }}
           path: |
@@ -199,7 +199,7 @@ jobs:
   linux-coverage:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -208,14 +208,14 @@ jobs:
         run: .github/scripts/install-linux-deps
 
       - name: Cache Bazel
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v4
         with:
           node-version-file: '.nvmrc'
 
@@ -235,7 +235,7 @@ jobs:
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
@@ -249,7 +249,7 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
