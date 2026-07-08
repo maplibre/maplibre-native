@@ -125,7 +125,8 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
                                         std::size_t initialCapacity,
                                         std::string name,
                                         bool renderToTerrain) {
-    auto layerGroup = std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    auto layerGroup = std::make_shared<webgpu::LayerGroup>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     return layerGroup;
 }
 

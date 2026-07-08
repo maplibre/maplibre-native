@@ -222,7 +222,8 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
                                                 std::size_t initialCapacity,
                                                 std::string name,
                                                 bool renderToTerrain) {
-    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     tileLayerGroup->setObserver(observer);
     return tileLayerGroup;
 }
