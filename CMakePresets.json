@@ -9,7 +9,7 @@
     {
       "name": "ios",
       "hidden": true,
-      "generator": "Xcode",
+      "generator": "Ninja",
       "description": "Base iOS preset",
       "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
