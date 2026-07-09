@@ -18,6 +18,7 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
 struct VertexInput {
     @location(3) position: vec2<i32>,
     @location(4) normal_ed: vec4<i32>,
+    @location(8) centroid: vec2<i32>,
 #ifndef HAS_UNIFORM_u_color
     @location(5) color: vec4<f32>,
 #endif
@@ -76,6 +77,32 @@ struct GlobalIndexUBO {
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(1) @binding(0) var dem_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+
+// Terrain elevation (meters) at a tile-local coordinate, bilinear on DEM pixel
+// centers (1px backfilled border), matching maplibre-gl-js get_elevation().
+fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionDrawableUBO) -> f32 {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
+    let f = fract(coord);
+    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
+    let d = 1.0 / (drawable.dem_dim + 2.0);
+    var tl = textureSampleLevel(dem_texture, dem_sampler, c, 0.0) * 255.0;
+    tl.a = -1.0;
+    var tr = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
+    tr.a = -1.0;
+    var bl = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
+    bl.a = -1.0;
+    var br = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
+    br.a = -1.0;
+    let elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
+                        mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
+                        f.y);
+    return elevation * drawable.dem_exaggeration;
+}
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -83,16 +110,22 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value];
 
 #ifndef HAS_UNIFORM_u_base
-    let baseValue = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
+    let baseClamped = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
 #else
-    let baseValue = max(props.light_position_base.w, 0.0);
+    let baseClamped = max(props.light_position_base.w, 0.0);
 #endif
 
 #ifndef HAS_UNIFORM_u_height
-    let heightValue = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
+    let heightClamped = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
 #else
-    let heightValue = max(props.height, 0.0);
+    let heightClamped = max(props.height, 0.0);
 #endif
+
+    // Raise the whole extrusion by the terrain elevation at the polygon centroid
+    // (one value per building), with gl-js's "basement" drop for ground-level floors.
+    let ele = fillExtrusionElevation(vec2<f32>(f32(in.centroid.x), f32(in.centroid.y)), drawable);
+    let baseValue = baseClamped + ele - select(10.0, 0.0, baseClamped > 0.0);
+    let heightValue = heightClamped + ele;
 
     let normal_i = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));
     let t = glMod(normal_i.x, 2.0);
