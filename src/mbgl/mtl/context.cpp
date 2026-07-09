@@ -249,12 +249,6 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size,
-                                            const gfx::TextureChannelDataType type,
-                                            const Color& backgroundColor) {
-    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
-}
-
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,

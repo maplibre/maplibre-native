@@ -604,14 +604,6 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size,
-                                            const gfx::TextureChannelDataType type,
-                                            const Color& backgroundColor) {
-    MLN_TRACE_FUNC();
-
-    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
-}
-
 Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     MLN_TRACE_FUNC();
 

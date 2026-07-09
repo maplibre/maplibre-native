@@ -30,11 +30,10 @@ using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 class RenderTarget {
 public:
     RenderTarget(gfx::Context& context, const Size size, const gfx::TextureChannelDataType type);
-    RenderTarget(gfx::Context& context,
-                 const Size size,
-                 const gfx::TextureChannelDataType type,
-                 const Color& backgroundColor);
     ~RenderTarget();
+
+    /// Set the color the render target is cleared to before its layer groups are drawn
+    void setClearColor(const Color& color) { backgroundColor = color; }
 
     /// Get the render target texture
     const gfx::Texture2DPtr& getTexture();

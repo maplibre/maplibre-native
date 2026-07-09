@@ -15,14 +15,6 @@ RenderTarget::RenderTarget(gfx::Context& context_, const Size size, const gfx::T
     offscreenTexture = context.createOffscreenTexture(size, type);
     backgroundColor = Color{0.0f, 0.0f, 0.0f, 1.0f};
 }
-RenderTarget::RenderTarget(gfx::Context& context_,
-                           const Size size,
-                           const gfx::TextureChannelDataType type,
-                           const Color& backgroundColor_)
-    : context(context_),
-      backgroundColor(backgroundColor_) {
-    offscreenTexture = context.createOffscreenTexture(size, type);
-}
 
 RenderTarget::~RenderTarget() {}
 

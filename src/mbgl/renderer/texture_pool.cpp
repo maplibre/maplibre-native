@@ -9,8 +9,9 @@ TexturePool::TexturePool(uint32_t tilesize)
 TexturePool::~TexturePool() {}
 
 void TexturePool::createRenderTarget(gfx::Context& context, const UnwrappedTileID& id, const Color& backgroundColor) {
-    renderTargets[id] = context.createRenderTarget(
-        {tileSize, tileSize}, gfx::TextureChannelDataType::UnsignedByte, backgroundColor);
+    auto renderTarget = context.createRenderTarget({tileSize, tileSize}, gfx::TextureChannelDataType::UnsignedByte);
+    renderTarget->setClearColor(backgroundColor);
+    renderTargets[id] = std::move(renderTarget);
 }
 
 std::shared_ptr<RenderTarget> TexturePool::getRenderTarget(const UnwrappedTileID& id) const {
