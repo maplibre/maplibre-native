@@ -134,33 +134,61 @@ float elevation = get_elevation(demTexture, demSampler, uv);
 
 This enables future work to make all layers terrain-aware (draping symbols, lines, etc. over terrain).
 
-## Current Limitations
+## Current Status
 
-1. **Metal Only**: OpenGL/Vulkan backends not yet supported
-2. **No Drawable Creation**: Terrain mesh data generated but not yet rendered
-3. **No DEM Source Lookup**: Source binding not yet implemented
-4. **No Depth/Coords Passes**: Advanced picking and occlusion not yet implemented
-5. **No Layer Draping**: Other layers don't yet sample elevation for 3D positioning
+Implemented:
 
-## Future Enhancements
+- Terrain shaders and registration for all four backends (OpenGL, Metal, Vulkan, WebGPU)
+- DEM decoding via the source's unpack vector (Mapbox Terrain-RGB and Terrarium),
+  matching hillshade/color-relief and maplibre-gl-js
+- Layer draping: background, fill, line, raster, hillshade, and color-relief layer
+  groups render into per-tile render targets that are draped over the terrain mesh
+  (the same layer set maplibre-gl-js drapes)
+- Style parsing of the `terrain` root property (`source`, `exaggeration`) per the style spec,
+  with exaggeration applied as styled (1.0 = true scale)
+- CPU elevation queries (`RenderTerrain::getElevation`) with DEM tile ancestor fallback
+  and bilinear interpolation, mirroring maplibre-gl-js `Terrain.getDEMElevation`
 
-### Near Term
-- Complete drawable creation and rendering
-- Implement DEM source lookup and binding
-- Add DEM texture sampling in terrain shader
-- Test with real DEM data sources
+## Remaining Work for Production
 
-### Medium Term
-- Add terrain depth pass for proper 3D occlusion
-- Implement coordinate picking for terrain features
-- Enable layer draping (make fill, line, symbol layers terrain-aware)
-- Add terrain to OpenGL backend
+The reference for each phase is the maplibre-gl-js implementation
+(`src/render/terrain.ts`, `src/render/render_to_texture.ts`, `src/shaders/_prelude.vertex.glsl`).
 
-### Long Term
-- Implement tile-specific LOD (Level of Detail)
-- Add terrain caching and optimization
-- Support additional DEM encoding formats
-- Implement terrain lighting and shading
+### Phase 1 - Elevation for non-draped layers (required)
+
+Symbols, circles, and fill-extrusion currently render at z=0, so they float over
+valleys and sink into peaks. gl-js elevates them with a `get_elevation()` helper
+in the vertex shader (`TERRAIN3D` sections of `_prelude.vertex.glsl`):
+
+- Bind the covering DEM tile's texture plus a `TerrainElevationUBO`
+  (dem-tile matrix, unpack vector, exaggeration, dem dimension) to symbol,
+  circle, and fill-extrusion drawables when terrain is enabled
+- Sample the DEM with manual bilinear interpolation on pixel centers
+  (`dim + 2` with the backfilled 1px border, as gl-js does) and displace
+  the vertex z by the decoded elevation
+- Apply to all four backends' symbol (icon/sdf/text-and-icon), circle, and
+  fill-extrusion shaders
+
+### Phase 2 - Symbol occlusion (required)
+
+gl-js renders a depth pass of the terrain mesh into a packed-RGBA texture and
+fades symbols that are behind terrain (`calculate_visibility`/`depthOpacity`).
+Without it, symbols show through mountains.
+
+### Phase 3 - Seams and quality
+
+- Backfilled DEM tile borders and pixel-center sampling to remove seams
+  between DEM tiles
+- Mesh skirts (gl-js `a_pos3d.z` flag + `u_ele_delta`) to hide cracks between
+  neighboring tiles at different zoom levels
+- Camera-terrain collision using `RenderTerrain::getElevation`
+- Coordinate picking against the terrain (gl-js coords/depth framebuffers)
+
+### Cleanup before merging
+
+- Remove the per-frame `Log::Info` debug logging (renderer, drawable, tweaker paths)
+- Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
+- Decide whether heatmap should be draped (gl-js does not drape it)
 
 ## Testing
 
