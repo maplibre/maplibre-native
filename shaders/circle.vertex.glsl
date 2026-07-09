@@ -38,31 +38,6 @@ layout (std140) uniform CircleDrawableUBO {
 
 uniform sampler2D u_dem;
 
-// Sample the terrain elevation in meters at a tile-local coordinate, with manual
-// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
-// as in the maplibre-gl-js get_elevation() prelude function
-float getElevation(vec2 pos) {
-    if (u_dem_enabled == 0.0) {
-        return 0.0;
-    }
-    vec2 coord = (pos * u_dem_coords.x + u_dem_coords.yz) * u_dem_dim + 1.0;
-    vec2 f = fract(coord);
-    vec2 c = (floor(coord) + 0.5) / (u_dem_dim + 2.0);
-    float d = 1.0 / (u_dem_dim + 2.0);
-    vec4 tl = texture(u_dem, c) * 255.0;
-    tl.a = -1.0;
-    vec4 tr = texture(u_dem, c + vec2(d, 0.0)) * 255.0;
-    tr.a = -1.0;
-    vec4 bl = texture(u_dem, c + vec2(0.0, d)) * 255.0;
-    bl.a = -1.0;
-    vec4 br = texture(u_dem, c + vec2(d, d)) * 255.0;
-    br.a = -1.0;
-    float elevation = mix(mix(dot(tl, u_dem_unpack), dot(tr, u_dem_unpack), f.x),
-                          mix(dot(bl, u_dem_unpack), dot(br, u_dem_unpack), f.x),
-                          f.y);
-    return elevation * u_dem_exaggeration;
-}
-
 layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_stroke_color;
@@ -99,7 +74,7 @@ void main(void) {
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
     vec2 circle_center = floor(a_pos * 0.5);
-    float ele = getElevation(circle_center);
+    float ele = get_elevation(circle_center, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
     if (u_pitch_with_map) {
         vec2 corner_position = circle_center;
         if (u_scale_with_map) {

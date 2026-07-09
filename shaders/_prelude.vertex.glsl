@@ -73,3 +73,31 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     vec2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
+
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// as in the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
+// sampler and dem_* values are passed in as arguments rather than read from globals.
+float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
+                    float dem_dim, float dem_exaggeration, float dem_enabled) {
+    if (dem_enabled == 0.0) {
+        return 0.0;
+    }
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.0;
+    vec2 f = fract(coord);
+    vec2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
+    float d = 1.0 / (dem_dim + 2.0);
+    vec4 tl = texture(dem, c) * 255.0;
+    tl.a = -1.0;
+    vec4 tr = texture(dem, c + vec2(d, 0.0)) * 255.0;
+    tr.a = -1.0;
+    vec4 bl = texture(dem, c + vec2(0.0, d)) * 255.0;
+    bl.a = -1.0;
+    vec4 br = texture(dem, c + vec2(d, d)) * 255.0;
+    br.a = -1.0;
+    float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                          mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                          f.y);
+    return elevation * dem_exaggeration;
+}
