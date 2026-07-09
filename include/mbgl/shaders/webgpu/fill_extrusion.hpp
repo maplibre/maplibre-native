@@ -189,10 +189,10 @@ struct FillExtrusionPatternDrawableUBO {
     tile_ratio: f32,
     base_t: f32,
     height_t: f32,
+    color_t: f32,
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
-    pad2: f32,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
