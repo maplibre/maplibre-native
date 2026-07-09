@@ -38,11 +38,11 @@ public:
 
     // WebGPU-specific methods
     void setInstance(void* instance);
-    void setDevice(void* device);
-    void setQueue(void* queue);
+    void setDevice(WGPUDevice device);
+    void setQueue(WGPUQueue queue);
     void* getInstance() const;
-    void* getDevice() const;
-    void* getQueue() const;
+    WGPUDevice getDevice() const;
+    WGPUQueue getQueue() const;
     void* getSurface() const;
 
     // Surface texture access - can be overridden by platform backends
