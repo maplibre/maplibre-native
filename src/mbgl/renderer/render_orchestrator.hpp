@@ -19,6 +19,7 @@
 
 #include <map>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -125,10 +126,10 @@ public:
 
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroupsReversed(Func f) {
-        for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
-            if (rit->second) {
+        for (auto& rit : std::ranges::reverse_view(layerGroupsByLayerIndex)) {
+            if (rit.second) {
                 try {
-                    f(*rit->second);
+                    f(*rit.second);
                 } catch (...) {
                     observer->onRenderError(std::current_exception());
                 }

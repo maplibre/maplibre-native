@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <ranges>
 #include <string>
 
 namespace mbgl {
@@ -69,9 +70,9 @@ public:
     /// Execute the given function for each contained layer group in reversed order
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroupsReversed(Func f) {
-        for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
-            if (rit->second) {
-                f(*rit->second);
+        for (auto& rit : std::ranges::reverse_view(layerGroupsByLayerIndex)) {
+            if (rit.second) {
+                f(*rit.second);
             }
         }
     }
