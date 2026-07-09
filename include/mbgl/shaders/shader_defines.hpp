@@ -308,6 +308,7 @@ enum {
 };
 
 enum {
+    idCircleDEMTexture,
     circleTextureCount
 };
 

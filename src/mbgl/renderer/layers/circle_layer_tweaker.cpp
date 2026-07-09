@@ -5,6 +5,7 @@
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
@@ -87,6 +88,18 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                : parameters.pixelsToGLUnits;
 
+        // When terrain is enabled, bind the covering DEM tile so the vertex
+        // shader can displace circle centers by the terrain elevation
+        std::optional<RenderTerrain::TerrainData> terrainData;
+        if (parameters.terrain && parameters.terrain->isEnabled()) {
+            terrainData = parameters.terrain->getTerrainData(tileID);
+        }
+        if (parameters.terrain) {
+            drawable.setTexture(
+                terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
+                idCircleDEMTexture);
+        }
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -105,7 +118,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .stroke_opacity_t = std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
             .pad1 = 0,
             .pad2 = 0,
-            .pad3 = 0
+            .pad3 = 0,
+
+            .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_unpack = parameters.terrain ? parameters.terrain->getDEMUnpackVector()
+                                             : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_dim = terrainData ? terrainData->demDim : 0.0f,
+            .dem_exaggeration = parameters.terrain ? parameters.terrain->getExaggeration() : 0.0f,
+            .dem_enabled = terrainData ? 1.0f : 0.0f,
+            .pad4 = 0
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

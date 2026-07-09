@@ -114,6 +114,30 @@ public:
     const std::array<float, 4>& getDEMUnpackVector() const { return demUnpackVector; }
 
     /**
+     * @brief Per-tile DEM binding data for layers that sample elevation in their
+     * vertex shaders (the native analog of maplibre-gl-js terrain.getTerrainData)
+     */
+    struct TerrainData {
+        std::shared_ptr<gfx::Texture2D> demTexture;
+        /// scale and x/y offset mapping tile-local coordinates (0..EXTENT) of the
+        /// requested tile into normalized coordinates (0..1) of the DEM tile
+        std::array<float, 4> demCoords;
+        float demDim;
+    };
+
+    /**
+     * @brief Get the DEM texture and coordinate mapping covering the given tile,
+     * from the matching DEM tile or its closest available ancestor
+     */
+    std::optional<TerrainData> getTerrainData(const UnwrappedTileID&) const;
+
+    /**
+     * @brief A 1x1 zero-elevation DEM texture bound when no DEM tile is available,
+     * so shaders that declare the DEM sampler always have a valid binding
+     */
+    const std::shared_ptr<gfx::Texture2D>& getPlaceholderDEMTexture(gfx::Context&);
+
+    /**
      * @brief Get the terrain implementation
      */
     const Immutable<style::Terrain::Impl>& getImpl() const { return impl; }
@@ -190,6 +214,16 @@ private:
 
     // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
     std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+
+    // DEM textures by tile, for elevation sampling by non-draped layers
+    struct DEMTextureEntry {
+        std::shared_ptr<gfx::Texture2D> texture;
+        int32_t dim;
+    };
+    std::map<UnwrappedTileID, DEMTextureEntry> demTextures;
+
+    // See getPlaceholderDEMTexture
+    std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;
 
     // Layer index (terrain renders early in 3D pass, use negative index)
     static constexpr int32_t TERRAIN_LAYER_INDEX = -1000;

@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto vertex = R"(
@@ -72,11 +72,45 @@ struct CircleDrawableUBO {
     float pad1;
     float pad2;
     float pad3;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad4;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idCircleDrawableUBO) readonly buffer CircleDrawableUBOVector {
     CircleDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
+
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// as in the maplibre-gl-js get_elevation() prelude function
+float circleElevation(vec2 pos, const CircleDrawableUBO drawable) {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    const vec2 coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
+    const vec2 f = fract(coord);
+    const vec2 c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
+    const float d = 1.0 / (drawable.dem_dim + 2.0);
+    vec4 tl = textureLod(dem_sampler, c, 0.0) * 255.0;
+    tl.a = -1.0;
+    vec4 tr = textureLod(dem_sampler, c + vec2(d, 0.0), 0.0) * 255.0;
+    tr.a = -1.0;
+    vec4 bl = textureLod(dem_sampler, c + vec2(0.0, d), 0.0) * 255.0;
+    bl.a = -1.0;
+    vec4 br = textureLod(dem_sampler, c + vec2(d, d), 0.0) * 255.0;
+    br.a = -1.0;
+    const float elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
+                                mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
+                                f.y);
+    return elevation * drawable.dem_exaggeration;
+}
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
@@ -143,6 +177,7 @@ void main() {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const vec2 circle_center = floor(in_position * 0.5);
+    const float ele = circleElevation(circle_center, drawable);
 
     if (props.pitch_with_map) {
         vec2 corner_position = circle_center;
@@ -152,14 +187,14 @@ void main() {
             // Pitching the circle with the map effectively scales it with the map
             // To counteract the effect for pitch-scale: viewport, we rescale the
             // whole circle based on the pitch scaling effect at its central point
-            const vec4 projected_center = drawable.matrix * vec4(circle_center, 0, 1);
+            const vec4 projected_center = drawable.matrix * vec4(circle_center, ele, 1);
             corner_position += scaled_extrude * (radius + stroke_width) *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
 
-        gl_Position = drawable.matrix * vec4(corner_position, 0, 1);
+        gl_Position = drawable.matrix * vec4(corner_position, ele, 1);
     } else {
-        gl_Position = drawable.matrix * vec4(circle_center, 0, 1);
+        gl_Position = drawable.matrix * vec4(circle_center, ele, 1);
 
         const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : gl_Position.w;
         gl_Position.xy += scaled_extrude * (radius + stroke_width) * factor;

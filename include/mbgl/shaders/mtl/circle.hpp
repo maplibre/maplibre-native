@@ -30,9 +30,17 @@ struct alignas(16) CircleDrawableUBO {
     /* 100 */ float pad1;
     /* 104 */ float pad2;
     /* 108 */ float pad3;
-    /* 112 */
+
+    // 3D terrain elevation
+    /* 112 */ float4 dem_coords;
+    /* 128 */ float4 dem_unpack;
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float pad4;
+    /* 160 */
 };
-static_assert(sizeof(CircleDrawableUBO) == 7 * 16, "wrong size");
+static_assert(sizeof(CircleDrawableUBO) == 10 * 16, "wrong size");
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) CircleEvaluatedPropsUBO {
@@ -50,6 +58,34 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// as in the maplibre-gl-js get_elevation() prelude function
+float circleElevation(float2 pos,
+                      device const CircleDrawableUBO& drawable,
+                      texture2d<float, access::sample> demTexture,
+                      sampler demSampler) {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    const float2 coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
+    const float2 f = fract(coord);
+    const float2 c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
+    const float d = 1.0 / (drawable.dem_dim + 2.0);
+    float4 tl = demTexture.sample(demSampler, c) * 255.0;
+    tl.a = -1.0;
+    float4 tr = demTexture.sample(demSampler, c + float2(d, 0.0)) * 255.0;
+    tr.a = -1.0;
+    float4 bl = demTexture.sample(demSampler, c + float2(0.0, d)) * 255.0;
+    bl.a = -1.0;
+    float4 br = demTexture.sample(demSampler, c + float2(d, d)) * 255.0;
+    br.a = -1.0;
+    const float elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
+                                mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
+                                f.y);
+    return elevation * drawable.dem_exaggeration;
+}
+
 )";
 
 template <>
@@ -60,7 +96,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto source = R"(
@@ -123,7 +159,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const CircleDrawableUBO* drawableVector [[buffer(idCircleDrawableUBO)]],
-                                device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]]) {
+                                device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]]) {
 
     device const CircleDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -145,6 +183,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const float2 circle_center = floor(float2(vertx.position) * 0.5);
+    const float ele = circleElevation(circle_center, drawable, demTexture, demSampler);
 
     float4 position;
     if (props.pitch_with_map) {
@@ -155,14 +194,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             // Pitching the circle with the map effectively scales it with the map
             // To counteract the effect for pitch-scale: viewport, we rescale the
             // whole circle based on the pitch scaling effect at its central point
-            const float4 projected_center = drawable.matrix * float4(circle_center, 0, 1);
+            const float4 projected_center = drawable.matrix * float4(circle_center, ele, 1);
             corner_position += scaled_extrude * (radius + stroke_width) *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
 
-        position = drawable.matrix * float4(corner_position, 0, 1);
+        position = drawable.matrix * float4(corner_position, ele, 1);
     } else {
-        position = drawable.matrix * float4(circle_center, 0, 1);
+        position = drawable.matrix * float4(circle_center, ele, 1);
 
         const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : position.w;
         position.xy += scaled_extrude * (radius + stroke_width) * factor;

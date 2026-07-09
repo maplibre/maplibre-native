@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = R"(
 struct CircleDrawableUBO {
@@ -29,6 +29,12 @@ struct CircleDrawableUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad4: f32,
 };
 
 struct CircleEvaluatedPropsUBO {
@@ -64,6 +70,33 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<CircleDrawableUBO>;
+@group(1) @binding(0) var dem_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// as in the maplibre-gl-js get_elevation() prelude function
+fn circleElevation(pos: vec2<f32>, drawable: CircleDrawableUBO) -> f32 {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
+    let f = fract(coord);
+    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
+    let d = 1.0 / (drawable.dem_dim + 2.0);
+    var tl = textureSampleLevel(dem_texture, dem_sampler, c, 0.0) * 255.0;
+    tl.a = -1.0;
+    var tr = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
+    tr.a = -1.0;
+    var bl = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
+    bl.a = -1.0;
+    var br = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
+    br.a = -1.0;
+    let elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
+                        mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
+                        f.y);
+    return elevation * drawable.dem_exaggeration;
+}
 @group(0) @binding(4) var<uniform> props: CircleEvaluatedPropsUBO;
 )";
 
@@ -100,6 +133,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude = glMod2v(pos_f, vec2<f32>(2.0, 2.0)) * 2.0 - vec2<f32>(1.0, 1.0);
     let scaled_extrude = extrude * drawable.extrude_scale;
     let circle_center = floor(pos_f * 0.5);
+    let ele = circleElevation(circle_center, drawable);
 
     var color = props.color;
 #ifndef HAS_UNIFORM_u_color
@@ -144,13 +178,13 @@ fn main(in: VertexInput) -> VertexOutput {
         if (scale_with_map) {
             corner_position += scaled_extrude * radius_with_stroke;
         } else {
-            let projected_center = drawable.matrix * vec4<f32>(circle_center, 0.0, 1.0);
+            let projected_center = drawable.matrix * vec4<f32>(circle_center, ele, 1.0);
             corner_position += scaled_extrude * radius_with_stroke *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
-        position = drawable.matrix * vec4<f32>(corner_position, 0.0, 1.0);
+        position = drawable.matrix * vec4<f32>(corner_position, ele, 1.0);
     } else {
-        position = drawable.matrix * vec4<f32>(circle_center, 0.0, 1.0);
+        position = drawable.matrix * vec4<f32>(circle_center, ele, 1.0);
         var factor = position.w;
         if (scale_with_map) {
             factor = paintParams.camera_to_center_distance;

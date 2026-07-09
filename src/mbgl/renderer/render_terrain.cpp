@@ -173,6 +173,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             continue;
         }
 
+        // Keep the texture available for elevation sampling by non-draped layers
+        demTextures[tileID.toUnwrapped()] = {demTexture, demData.dim};
+
         // Create terrain drawable for this tile
         auto drawable = createDrawableForTile(
             context, shaders, tileID, demTexture, texturePool.getRenderTarget(renderTile.id)->getTexture());
@@ -254,6 +257,50 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID, float x, float 
 
 float RenderTerrain::getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const {
     return getElevation(tileID, x, y) * getExaggeration();
+}
+
+std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {
+    // Find the DEM texture matching the requested tile, or its closest available ancestor
+    const UnwrappedTileID* demTileID = nullptr;
+    const DEMTextureEntry* entry = nullptr;
+    int bestZoom = -1;
+    for (const auto& [candidate, candidateEntry] : demTextures) {
+        if ((candidate == tileID || tileID.isChildOf(candidate)) &&
+            static_cast<int>(candidate.canonical.z) > bestZoom) {
+            bestZoom = candidate.canonical.z;
+            demTileID = &candidate;
+            entry = &candidateEntry;
+        }
+    }
+    if (!entry || !entry->texture) {
+        return std::nullopt;
+    }
+
+    // Map tile-local coordinates (0..EXTENT) of the requested tile into
+    // normalized coordinates (0..1) of the (possibly ancestor) DEM tile
+    const int dz = tileID.canonical.z - demTileID->canonical.z;
+    const float scale = static_cast<float>(1u << dz);
+    const float dx = static_cast<float>(tileID.canonical.x - (demTileID->canonical.x << dz));
+    const float dy = static_cast<float>(tileID.canonical.y - (demTileID->canonical.y << dz));
+
+    return TerrainData{
+        .demTexture = entry->texture,
+        .demCoords = {{1.0f / (util::EXTENT * scale), dx / scale, dy / scale, 0.0f}},
+        .demDim = static_cast<float>(entry->dim),
+    };
+}
+
+const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getPlaceholderDEMTexture(gfx::Context& context) {
+    if (!placeholderDEMTexture) {
+        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
+        std::memset(image->data.get(), 0, image->bytes());
+        placeholderDEMTexture = context.createTexture2D();
+        placeholderDEMTexture->setImage(image);
+        placeholderDEMTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                                        .wrapU = gfx::TextureWrapType::Clamp,
+                                                        .wrapV = gfx::TextureWrapType::Clamp});
+    }
+    return placeholderDEMTexture;
 }
 
 float RenderTerrain::getExaggeration() const {

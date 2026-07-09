@@ -62,7 +62,9 @@ const std::vector<AttributeInfo> CircleShaderInfo::attributes = {
     AttributeInfo{"a_stroke_width", idCircleStrokeWidthVertexAttribute},
     AttributeInfo{"a_stroke_opacity", idCircleStrokeOpacityVertexAttribute},
 };
-const std::vector<TextureInfo> CircleShaderInfo::textures = {};
+const std::vector<TextureInfo> CircleShaderInfo::textures = {
+    TextureInfo{"u_dem", idCircleDEMTexture},
+};
 
 // Collision Box
 using CollisionBoxShaderInfo = ShaderInfo<BuiltIn::CollisionBoxShader, gfx::Backend::Type::OpenGL>;

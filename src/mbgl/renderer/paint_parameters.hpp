@@ -28,6 +28,7 @@ class ImageManager;
 class LineAtlas;
 class PatternAtlas;
 class UnwrappedTileID;
+class RenderTerrain;
 
 namespace gfx {
 class Context;
@@ -81,6 +82,9 @@ public:
     LineAtlas& lineAtlas;
     PatternAtlas& patternAtlas;
     TexturePool& texturePool;
+
+    /// Set when 3D terrain is enabled; used by layer tweakers to bind DEM elevation data
+    RenderTerrain* terrain = nullptr;
 
     RenderPass pass = RenderPass::Opaque;
     MapMode mapMode;

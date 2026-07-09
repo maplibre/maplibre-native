@@ -158,7 +158,12 @@ The reference for each phase is the maplibre-gl-js implementation
 
 Symbols, circles, and fill-extrusion currently render at z=0, so they float over
 valleys and sink into peaks. gl-js elevates them with a `get_elevation()` helper
-in the vertex shader (`TERRAIN3D` sections of `_prelude.vertex.glsl`):
+in the vertex shader (`TERRAIN3D` sections of `_prelude.vertex.glsl`).
+
+Status: implemented for **circle** on all four backends (per-drawable DEM texture
+plus `dem_*` fields in `CircleDrawableUBO`, bound by the circle layer tweaker via
+`RenderTerrain::getTerrainData`); symbol and fill-extrusion should follow the
+same pattern:
 
 - Bind the covering DEM tile's texture plus a `TerrainElevationUBO`
   (dem-tile matrix, unpack vector, exaggeration, dem dimension) to symbol,
