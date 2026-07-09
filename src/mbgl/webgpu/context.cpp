@@ -6,6 +6,7 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <array>
+#include <cstring>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/drawable_builder.hpp>
@@ -239,6 +240,24 @@ const BufferResource& Context::getTileIndexBuffer() {
         tileIndexBuffer = createBuffer(indices.data(), indices.bytes(), usage, true, true);
     }
     return *tileIndexBuffer;
+}
+
+// Fallback texture for shader-declared but unbound texture slots (mirrors Vulkan's
+// getDummyTexture). WebGPU requires every bind group a pipeline declares to be set
+// on each draw, so an optional/unbound texture binding must still receive a valid
+// texture and sampler. Its contents are never sampled (shaders guard on a flag), so
+// a 1x1 texture is sufficient.
+const std::shared_ptr<Texture2D>& Context::getDummyTexture() {
+    if (!dummyTexture) {
+        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
+        std::memset(image->data.get(), 0, image->bytes());
+        dummyTexture = std::make_shared<Texture2D>(*this);
+        dummyTexture->setImage(image);
+        dummyTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                               .wrapU = gfx::TextureWrapType::Clamp,
+                                               .wrapV = gfx::TextureWrapType::Clamp});
+    }
+    return dummyTexture;
 }
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
