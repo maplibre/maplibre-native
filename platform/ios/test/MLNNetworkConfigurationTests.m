@@ -2,6 +2,23 @@
 #import <XCTest/XCTest.h>
 #import "MLNNetworkConfiguration_Private.h"
 
+@interface MLNTestNetworkConfigurationDelegate : NSObject <MLNNetworkConfigurationDelegate>
+@property (nonatomic) NSUInteger receivedResponseCount;
+@property (nonatomic, nullable) NSURLResponse *replacementResponse;
+@end
+
+@implementation MLNTestNetworkConfigurationDelegate
+
+- (MLNNetworkResponse *)didReceiveResponse:(MLNNetworkResponse *)response {
+    self.receivedResponseCount += 1;
+    if (self.replacementResponse) {
+        response.response = self.replacementResponse;
+    }
+    return response;
+}
+
+@end
+
 @interface MLNNetworkConfigurationTests : XCTestCase
 @end
 
@@ -39,5 +56,45 @@
     }
 
     [self waitForExpectations:@[expectation] timeout:10.0];
+}
+
+// Regression test: received responses were converted for the delegate but the delegate was
+// never actually called, so `didReceiveResponse:` implementations had no effect.
+- (void)testDidReceiveResponseIsForwardedToTheDelegate {
+    MLNNetworkConfiguration *configuration = [[MLNNetworkConfiguration alloc] init];
+    MLNTestNetworkConfigurationDelegate *delegate = [[MLNTestNetworkConfigurationDelegate alloc] init];
+    configuration.delegate = delegate;
+
+    NSURL *url = [NSURL URLWithString:@"test://tile"];
+    delegate.replacementResponse = [[NSHTTPURLResponse alloc] initWithURL:url
+                                                               statusCode:404
+                                                              HTTPVersion:@"HTTP/1.1"
+                                                             headerFields:nil];
+
+    MLNInternalNetworkResponse *internalResponse = [[MLNInternalNetworkResponse alloc] init];
+    internalResponse.response = [[NSHTTPURLResponse alloc] initWithURL:url
+                                                            statusCode:403
+                                                           HTTPVersion:@"HTTP/1.1"
+                                                          headerFields:nil];
+    internalResponse.data = [@"forbidden" dataUsingEncoding:NSUTF8StringEncoding];
+
+    MLNInternalNetworkResponse *processedResponse =
+        [(id<MLNNativeNetworkDelegate>)configuration didReceiveResponse:internalResponse];
+
+    XCTAssertEqual(delegate.receivedResponseCount, 1);
+    XCTAssertEqual(((NSHTTPURLResponse *)processedResponse.response).statusCode, 404);
+    XCTAssertEqualObjects(processedResponse.data, internalResponse.data);
+}
+
+- (void)testDidReceiveResponseWithoutDelegateReturnsResponseUnchanged {
+    MLNNetworkConfiguration *configuration = [[MLNNetworkConfiguration alloc] init];
+
+    MLNInternalNetworkResponse *internalResponse = [[MLNInternalNetworkResponse alloc] init];
+    internalResponse.data = [@"payload" dataUsingEncoding:NSUTF8StringEncoding];
+
+    MLNInternalNetworkResponse *processedResponse =
+        [(id<MLNNativeNetworkDelegate>)configuration didReceiveResponse:internalResponse];
+
+    XCTAssertEqual(processedResponse, internalResponse);
 }
 @end
