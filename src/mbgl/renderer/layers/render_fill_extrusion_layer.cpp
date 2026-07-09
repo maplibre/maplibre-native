@@ -354,6 +354,13 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionCentroidVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillExtrusionLayoutVertex, a3),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
+        }
 #endif
 
         if (doDepthPass) {

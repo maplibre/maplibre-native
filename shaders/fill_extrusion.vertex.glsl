@@ -1,5 +1,6 @@
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
+layout (location = 2) in vec2 a_centroid;
 out vec4 v_color;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
@@ -15,7 +16,41 @@ layout (std140) uniform FillExtrusionDrawableUBO {
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     lowp float drawable_pad1;
+    // 3D terrain elevation
+    highp vec4 u_dem_coords;
+    highp vec4 u_dem_unpack;
+    highp float u_dem_dim;
+    highp float u_dem_exaggeration;
+    lowp float u_dem_enabled;
+    lowp float drawable_pad2;
 };
+
+uniform sampler2D u_dem;
+
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// as in the maplibre-gl-js get_elevation() prelude function
+float getElevation(vec2 pos) {
+    if (u_dem_enabled == 0.0) {
+        return 0.0;
+    }
+    vec2 coord = (pos * u_dem_coords.x + u_dem_coords.yz) * u_dem_dim + 1.0;
+    vec2 f = fract(coord);
+    vec2 c = (floor(coord) + 0.5) / (u_dem_dim + 2.0);
+    float d = 1.0 / (u_dem_dim + 2.0);
+    vec4 tl = texture(u_dem, c) * 255.0;
+    tl.a = -1.0;
+    vec4 tr = texture(u_dem, c + vec2(d, 0.0)) * 255.0;
+    tr.a = -1.0;
+    vec4 bl = texture(u_dem, c + vec2(0.0, d)) * 255.0;
+    bl.a = -1.0;
+    vec4 br = texture(u_dem, c + vec2(d, d)) * 255.0;
+    br.a = -1.0;
+    float elevation = mix(mix(dot(tl, u_dem_unpack), dot(tr, u_dem_unpack), f.x),
+                          mix(dot(bl, u_dem_unpack), dot(br, u_dem_unpack), f.x),
+                          f.y);
+    return elevation * u_dem_exaggeration;
+}
 
 layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
@@ -56,6 +91,13 @@ void main() {
     height = max(0.0, height);
 
     float t = mod(normal.x, 2.0);
+
+    // Raise the whole extrusion by the terrain elevation sampled once at the
+    // polygon centroid (so it doesn't shear across a slope), and drop ground-level
+    // floors slightly so buildings don't hang off a slope (matches maplibre-gl-js)
+    float ele = getElevation(a_centroid);
+    base += ele - (base > 0.0 ? 0.0 : 10.0);
+    height += ele;
 
     gl_Position = u_matrix * vec4(a_pos, t > 0.0 ? height : base, 1);
 

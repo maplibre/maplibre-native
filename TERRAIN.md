@@ -160,10 +160,19 @@ Symbols, circles, and fill-extrusion currently render at z=0, so they float over
 valleys and sink into peaks. gl-js elevates them with a `get_elevation()` helper
 in the vertex shader (`TERRAIN3D` sections of `_prelude.vertex.glsl`).
 
-Status: implemented for **circle** on all four backends (per-drawable DEM texture
-plus `dem_*` fields in `CircleDrawableUBO`, bound by the circle layer tweaker via
-`RenderTerrain::getTerrainData`); symbol and fill-extrusion should follow the
-same pattern:
+Status:
+- **circle** — implemented on all four backends (per-drawable DEM texture plus
+  `dem_*` fields in `CircleDrawableUBO`, bound by the circle layer tweaker via
+  `RenderTerrain::getTerrainData`).
+- **fill-extrusion** — `dem_*` added to `FillExtrusionDrawableUBO` (all backends,
+  so the consolidated SSBO stride matches) and elevation implemented for the
+  **OpenGL** non-pattern shader; the fill-extrusion tweaker binds the DEM texture
+  and fills `dem_*`. Still TODO: Metal/Vulkan/WebGPU non-pattern (incl. the Metal/
+  Vulkan instanced side-geometry variants) and all pattern variants — their UBO
+  struct is already grown, so each is just the shader elevation logic + textures.
+- **symbol** — not started.
+
+Symbol and fill-extrusion follow the circle pattern:
 
 - Bind the covering DEM tile's texture plus a `TerrainElevationUBO`
   (dem-tile matrix, unpack vector, exaggeration, dem dimension) to symbol,

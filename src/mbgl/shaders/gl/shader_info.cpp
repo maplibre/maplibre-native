@@ -231,11 +231,14 @@ const std::vector<UniformBlockInfo> FillExtrusionShaderInfo::uniformBlocks = {
 const std::vector<AttributeInfo> FillExtrusionShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
     AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
+    AttributeInfo{"a_centroid", idFillExtrusionCentroidVertexAttribute},
     AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
     AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
     AttributeInfo{"a_color", idFillExtrusionColorVertexAttribute},
 };
-const std::vector<TextureInfo> FillExtrusionShaderInfo::textures = {};
+const std::vector<TextureInfo> FillExtrusionShaderInfo::textures = {
+    TextureInfo{"u_dem", idFillExtrusionDEMTexture},
+};
 
 // Fill Extrusion Pattern
 using FillExtrusionPatternShaderInfo = ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>;

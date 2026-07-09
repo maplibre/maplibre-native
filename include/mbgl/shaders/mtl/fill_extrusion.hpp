@@ -30,9 +30,17 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /* 100 */ float pattern_from_t;
     /* 104 */ float pattern_to_t;
     /* 108 */ float pad1;
-    /* 112 */
+
+    // 3D terrain elevation
+    /* 112 */ float4 dem_coords;
+    /* 128 */ float4 dem_unpack;
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float pad2;
+    /* 160 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "wrong size");
+static_assert(sizeof(FillExtrusionDrawableUBO) == 10 * 16, "wrong size");
 
 struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ float4 pattern_from;

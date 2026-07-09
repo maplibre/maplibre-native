@@ -342,6 +342,7 @@ enum {
 
 enum {
     idFillExtrusionImageTexture,
+    idFillExtrusionDEMTexture,
     fillExtrusionTextureCount
 };
 
@@ -482,6 +483,7 @@ enum {
     idFillExtrusionEdDiscardAttribute,
 #else
     idFillExtrusionNormalEdVertexAttribute,
+    idFillExtrusionCentroidVertexAttribute,
 #endif
 
     // Data driven

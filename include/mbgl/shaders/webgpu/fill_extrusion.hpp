@@ -46,6 +46,12 @@ struct FillExtrusionDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad2: f32,
 };
 
 struct FillExtrusionPropsUBO {
@@ -193,6 +199,12 @@ struct FillExtrusionPatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad2: f32,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
