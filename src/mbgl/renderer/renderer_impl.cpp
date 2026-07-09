@@ -303,6 +303,13 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             if (!layerGroupPrexists) {
                 singleTileLayerGroups[terrainTileID.value()] = context.createTileLayerGroup(
                     layerGroup.getLayerIndex(), /*initialCapacity=*/1, layerGroupBase.getName(), true);
+                // Propagate the source layer's stencil tiles to the draped group. Without this,
+                // the draped TileLayerGroup has empty stencilTiles, so it skips clipping-mask
+                // registration (renderTileClippingMasks) and its 2D drawables then call
+                // stencilModeForClipping() for tiles that were never registered — asserting in
+                // debug (Dawn/wgpu) and crashing in release (Vulkan). The original group's tiles
+                // cover the draped drawables' tiles.
+                singleTileLayerGroups[terrainTileID.value()]->setStencilTiles(layerGroup.getStencilTiles());
             }
             TileLayerGroupPtr singleTileLayerGroup = singleTileLayerGroups[terrainTileID.value()];
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);

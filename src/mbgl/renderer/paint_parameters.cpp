@@ -345,17 +345,10 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {
     auto it = tileClippingMaskIDs.find(tileID);
-    if (it == tileClippingMaskIDs.end()) {
-        // A drawable referenced a tile that has no registered clip mask for the current
-        // render pass. This happens in the experimental 3D-terrain draping path (layers
-        // draped into per-tile render targets), where mask setup does not cover every
-        // tile. Fall back to no clipping rather than asserting/crashing the render pass;
-        // on release builds the previous code silently used ref=0 (an always-pass mask),
-        // which crashed some backends (Vulkan/WebGPU) instead of degrading gracefully.
-        return gfx::StencilMode::disabled();
-    }
+    assert(it != tileClippingMaskIDs.end());
+    const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
     return gfx::StencilMode{.test = gfx::StencilMode::Equal{0b11111111},
-                            .ref = it->second,
+                            .ref = id,
                             .mask = 0b00000000,
                             .fail = gfx::StencilOpType::Keep,
                             .depthFail = gfx::StencilOpType::Keep,
