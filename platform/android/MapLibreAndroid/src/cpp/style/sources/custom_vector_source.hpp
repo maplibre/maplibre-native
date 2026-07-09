@@ -27,10 +27,9 @@ public:
     void onRemovedFromMap();
 
 private:
-    void setTileData(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y,
-                     const jni::Array<jni::jbyte>& data, jni::jint format);
-    void setTileError(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y,
-                      const jni::String& message);
+    void setTileData(
+        jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y, const jni::Array<jni::jbyte>& data, jni::jint format);
+    void setTileError(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y, const jni::String& message);
     void invalidateTile(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y);
 };
 

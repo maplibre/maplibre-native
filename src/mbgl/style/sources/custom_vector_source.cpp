@@ -35,8 +35,8 @@ bool CustomVectorSource::supportsLayerType(const mbgl::style::LayerTypeInfo* inf
 }
 
 void CustomVectorSource::setTileData(const CanonicalTileID& tileID,
-                                      const std::shared_ptr<const std::string>& data,
-                                      TileDataFormat format) {
+                                     const std::shared_ptr<const std::string>& data,
+                                     TileDataFormat format) {
     loader->self().invoke(&CustomVectorTileLoader::setTileData, tileID, data, format);
 }
 

@@ -61,8 +61,8 @@ void CustomVectorTileLoader::removeTile(const OverscaledTileID& tileID) {
 }
 
 void CustomVectorTileLoader::setTileData(const CanonicalTileID& tileID,
-                                          const std::shared_ptr<const std::string>& data,
-                                          TileDataFormat format) {
+                                         const std::shared_ptr<const std::string>& data,
+                                         TileDataFormat format) {
     std::scoped_lock guard(dataMutex);
     auto iter = tileCallbackMap.find(tileID);
     if (iter == tileCallbackMap.end()) return;

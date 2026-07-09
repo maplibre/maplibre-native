@@ -76,8 +76,8 @@ void CustomVectorSource::onRemovedFromMap() {
     }
 }
 
-void CustomVectorSource::setTileData(jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y,
-                                      const jni::Array<jni::jbyte>& jData, jni::jint format) {
+void CustomVectorSource::setTileData(
+    jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::Array<jni::jbyte>& jData, jni::jint format) {
     std::shared_ptr<std::string> data;
     jsize length = jData.Length(env);
     if (length > 0) {
@@ -86,17 +86,14 @@ void CustomVectorSource::setTileData(jni::JNIEnv& env, jni::jint z, jni::jint x,
     }
 
     source.as<mbgl::style::CustomVectorSource>()->setTileData(
-        CanonicalTileID(z, x, y),
-        data,
-        static_cast<mbgl::style::TileDataFormat>(format));
+        CanonicalTileID(z, x, y), data, static_cast<mbgl::style::TileDataFormat>(format));
 }
 
-void CustomVectorSource::setTileError(jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y,
-                                       const jni::String& message) {
+void CustomVectorSource::setTileError(
+    jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::String& message) {
     auto msg = jni::Make<std::string>(env, message);
-    source.as<mbgl::style::CustomVectorSource>()->setTileError(
-        CanonicalTileID(z, x, y),
-        std::make_exception_ptr(std::runtime_error(msg)));
+    source.as<mbgl::style::CustomVectorSource>()->setTileError(CanonicalTileID(z, x, y),
+                                                               std::make_exception_ptr(std::runtime_error(msg)));
 }
 
 void CustomVectorSource::invalidateTile(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y) {
@@ -104,9 +101,9 @@ void CustomVectorSource::invalidateTile(jni::JNIEnv&, jni::jint z, jni::jint x, 
 }
 
 void CustomVectorSource::addToMap(JNIEnv& env,
-                                   const jni::Object<Source>& obj,
-                                   mbgl::Map& map,
-                                   AndroidRendererFrontend& frontend) {
+                                  const jni::Object<Source>& obj,
+                                  mbgl::Map& map,
+                                  AndroidRendererFrontend& frontend) {
     Source::addToMap(env, obj, map, frontend);
     onAddedToMap();
 }
