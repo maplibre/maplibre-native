@@ -163,21 +163,18 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                   .setFailOp(pipelineInfo.stencilFail)
                                   .setDepthFailOp(pipelineInfo.stencilDepthFail);
 
-    // A color-only offscreen target (e.g. the terrain drape RTT) has no depth/stencil
-    // attachment, so depth/stencil test/write must be disabled to keep the pipeline
-    // compatible with the render pass. This mirrors Metal's makeDepthStencilState, which
-    // only enables depth/stencil when the attachment texture exists, and GL, which
-    // silently ignores depth/stencil ops when there is no such buffer. (maplibre-gl-js
-    // likewise renders the drape without stencil clipping.)
-    const bool depthStencil = pipelineInfo.renderPassHasDepthStencil;
+    // Offscreen targets (e.g. the terrain drape RTT) have a depth attachment but no
+    // stencil, matching maplibre-gl-js's drape framebuffer. Stencil test/write must be
+    // disabled when the render pass has no stencil attachment to keep the pipeline
+    // compatible with it (GL silently ignores stencil ops with no such buffer).
     const auto depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
-                                       .setDepthTestEnable(depthStencil && pipelineInfo.depthTest)
-                                       .setDepthWriteEnable(depthStencil && pipelineInfo.depthWrite)
+                                       .setDepthTestEnable(pipelineInfo.depthTest)
+                                       .setDepthWriteEnable(pipelineInfo.depthWrite)
                                        .setDepthBoundsTestEnable(false)
                                        .setMinDepthBounds(0.0f)
                                        .setMaxDepthBounds(1.0f)
                                        .setDepthCompareOp(pipelineInfo.depthFunction)
-                                       .setStencilTestEnable(depthStencil && pipelineInfo.stencilTest)
+                                       .setStencilTestEnable(pipelineInfo.renderPassHasStencil && pipelineInfo.stencilTest)
                                        .setFront(stencilState)
                                        .setBack(stencilState);
 

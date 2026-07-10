@@ -139,6 +139,8 @@ public:
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
+    Framebuffer createFramebuffer(const gfx::Texture2D& color,
+                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth);
 
     gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
 

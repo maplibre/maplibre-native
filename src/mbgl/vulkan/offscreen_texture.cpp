@@ -3,6 +3,9 @@
 #include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
+#include <mbgl/util/logging.hpp>
+
+#include <array>
 
 namespace mbgl {
 namespace vulkan {
@@ -33,6 +36,7 @@ public:
     ~OffscreenTextureResource() noexcept override {
         framebuffer.reset();
         renderPass.reset();
+        depthAllocation.reset();
         colorTexture.reset();
 
         backend.getContext().renderingStats().numFrameBuffers--;
@@ -40,13 +44,14 @@ public:
 
     void bind() override {
         colorTexture->create();
+        createDepthImage();
         createRenderPass();
     }
 
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
 
-    // Offscreen render targets are color-only (no depth/stencil attachment).
-    bool hasDepthStencilAttachment() const override { return false; }
+    // Offscreen render targets have a depth attachment but no stencil (matching gl-js).
+    bool hasStencilAttachment() const override { return false; }
 
     PremultipliedImage readStillImage() {
         if (!colorTexture) {
@@ -62,59 +67,115 @@ public:
         return colorTexture;
     }
 
+    // Create a depth-only attachment for the offscreen target, matching gl-js's drape
+    // framebuffer (depth, no stencil). eD32Sfloat is a Vulkan-mandated depth format.
+    void createDepthImage() {
+        if (depthAllocation) return;
+
+        const auto imageCreateInfo = vk::ImageCreateInfo()
+                                         .setImageType(vk::ImageType::e2D)
+                                         .setFormat(depthFormat)
+                                         .setExtent({extent.width, extent.height, 1})
+                                         .setMipLevels(1)
+                                         .setArrayLayers(1)
+                                         .setSamples(vk::SampleCountFlagBits::e1)
+                                         .setTiling(vk::ImageTiling::eOptimal)
+                                         .setUsage(vk::ImageUsageFlagBits::eDepthStencilAttachment)
+                                         .setSharingMode(vk::SharingMode::eExclusive)
+                                         .setInitialLayout(vk::ImageLayout::eUndefined);
+
+        VmaAllocationCreateInfo allocCreateInfo = {};
+        allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+
+        depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
+        if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
+            mbgl::Log::Error(mbgl::Event::Render, "Vulkan offscreen depth allocation failed");
+            depthAllocation.reset();
+            return;
+        }
+
+        const auto imageViewCreateInfo =
+            vk::ImageViewCreateInfo()
+                .setImage(depthAllocation->image)
+                .setViewType(vk::ImageViewType::e2D)
+                .setFormat(depthFormat)
+                .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
+
+        depthAllocation->imageView = backend.getDevice()->createImageViewUnique(
+            imageViewCreateInfo, nullptr, backend.getDispatcher());
+    }
+
     void createRenderPass() {
         if (renderPass) return;
 
         assert(colorTexture);
         auto& texture = static_cast<Texture2D&>(*colorTexture);
 
-        const auto colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                         .setFormat(texture.getVulkanFormat())
-                                         .setSamples(vk::SampleCountFlagBits::e1)
-                                         .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                         .setStoreOp(vk::AttachmentStoreOp::eStore)
-                                         .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                         .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                         .setInitialLayout(vk::ImageLayout::eUndefined)
-                                         .setFinalLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+        const std::array<vk::AttachmentDescription, 2> attachments = {
+            vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
+                .setFormat(texture.getVulkanFormat())
+                .setSamples(vk::SampleCountFlagBits::e1)
+                .setLoadOp(vk::AttachmentLoadOp::eClear)
+                .setStoreOp(vk::AttachmentStoreOp::eStore)
+                .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+                .setInitialLayout(vk::ImageLayout::eUndefined)
+                .setFinalLayout(vk::ImageLayout::eShaderReadOnlyOptimal),
+
+            vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
+                .setFormat(depthFormat)
+                .setSamples(vk::SampleCountFlagBits::e1)
+                .setLoadOp(vk::AttachmentLoadOp::eClear)
+                .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+                .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+                .setInitialLayout(vk::ImageLayout::eUndefined)
+                .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
 
         const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
+        const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
         const auto subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags())
                                  .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-                                 .setColorAttachments(colorAttachmentRef);
+                                 .setColorAttachments(colorAttachmentRef)
+                                 .setPDepthStencilAttachment(&depthAttachmentRef);
 
-        const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                         vk::PipelineStageFlagBits::eLateFragmentTests;
+        const std::array<vk::SubpassDependency, 2> dependencies = {
+            vk::SubpassDependency()
+                .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                .setDstSubpass(0)
+                .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
 
-        const auto subpassDstStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                         vk::PipelineStageFlagBits::eEarlyFragmentTests;
-
-        const auto subpassSrcAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-        const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
-                                          vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-        const auto subpassDependency = vk::SubpassDependency()
-                                           .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                           .setDstSubpass(0)
-                                           .setSrcStageMask(subpassSrcStageMask)
-                                           .setDstStageMask(subpassDstStageMask)
-                                           .setSrcAccessMask(subpassSrcAccessMask)
-                                           .setDstAccessMask(subpassDstAccessMask);
+            vk::SubpassDependency()
+                .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                .setDstSubpass(0)
+                .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                                 vk::PipelineStageFlagBits::eLateFragmentTests)
+                .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                                 vk::PipelineStageFlagBits::eLateFragmentTests)
+                .setSrcAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+                .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+                .setDependencyFlags(vk::DependencyFlagBits::eByRegion)};
 
         const auto renderPassCreateInfo = vk::RenderPassCreateInfo()
-                                              .setAttachments(colorAttachment)
+                                              .setAttachments(attachments)
                                               .setSubpasses(subpass)
-                                              .setDependencies(subpassDependency);
+                                              .setDependencies(dependencies);
 
         renderPass = backend.getDevice()->createRenderPassUnique(
             renderPassCreateInfo, nullptr, backend.getDispatcher());
 
+        const std::array<vk::ImageView, 2> framebufferAttachments = {texture.getVulkanImageView().get(),
+                                                                     depthAllocation->imageView.get()};
+
         const auto framebufferCreateInfo = vk::FramebufferCreateInfo()
                                                .setRenderPass(renderPass.get())
-                                               .setAttachments(texture.getVulkanImageView().get())
-                                               .setAttachmentCount(1)
+                                               .setAttachments(framebufferAttachments)
                                                .setWidth(extent.width)
                                                .setHeight(extent.height)
                                                .setLayers(1);
@@ -128,6 +189,8 @@ private:
     const gfx::TextureChannelDataType type;
 
     gfx::Texture2DPtr colorTexture;
+    UniqueImageAllocation depthAllocation;
+    vk::Format depthFormat{vk::Format::eD32Sfloat};
     vk::UniqueFramebuffer framebuffer;
 };
 
@@ -137,7 +200,8 @@ OffscreenTexture::OffscreenTexture(Context& context,
                                    [[maybe_unused]] bool depth,
                                    [[maybe_unused]] bool stencil)
     : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type)) {
-    assert(!depth);
+    // The offscreen resource always provides a depth attachment (no stencil), matching
+    // gl-js's drape framebuffer; a stencil attachment is not supported.
     assert(!stencil);
 }
 

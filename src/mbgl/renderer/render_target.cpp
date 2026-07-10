@@ -66,9 +66,11 @@ void RenderTarget::upload(gfx::UploadPass& uploadPass) {
 }
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
+    // The offscreen target has a depth attachment (no stencil), matching maplibre-gl-js's
+    // drape framebuffer, so clear depth each frame. Stencil is not present.
     parameters.renderPass = parameters.encoder->createRenderPass(
         "render target",
-        {.renderable = *offscreenTexture, .clearColor = backgroundColor, .clearDepth = {}, .clearStencil = {}});
+        {.renderable = *offscreenTexture, .clearColor = backgroundColor, .clearDepth = 1.0f, .clearStencil = {}});
 
     const gfx::ScissorRect prevScissorRect = parameters.scissorRect;
     const auto& size = getTexture()->getSize();

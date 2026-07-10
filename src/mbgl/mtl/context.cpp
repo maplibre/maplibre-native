@@ -471,7 +471,9 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    return createOffscreenTexture(size, type, false, false);
+    // Render targets (e.g. the terrain drape RTT) get a depth attachment but no stencil,
+    // matching maplibre-gl-js's drape framebuffer.
+    return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {

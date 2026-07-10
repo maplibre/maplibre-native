@@ -26,10 +26,11 @@ public:
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;
     virtual float getRotation() const { return 0.0f; }
 
-    /// Whether this render pass has a depth/stencil attachment. Offscreen render
-    /// targets (e.g. the terrain drape RTT) are color-only, so pipelines rendered
-    /// into them must not enable depth or stencil test/write.
-    virtual bool hasDepthStencilAttachment() const { return true; }
+    /// Whether this render pass has a stencil attachment. Offscreen render targets
+    /// (e.g. the terrain drape RTT) have a depth attachment but no stencil, matching
+    /// maplibre-gl-js's drape framebuffer, so pipelines rendered into them must not
+    /// enable stencil test/write.
+    virtual bool hasStencilAttachment() const { return true; }
 
 protected:
     RendererBackend& backend;

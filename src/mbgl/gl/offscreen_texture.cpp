@@ -2,6 +2,7 @@
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/framebuffer.hpp>
+#include <mbgl/gfx/renderbuffer.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -27,7 +28,10 @@ public:
         if (!framebuffer) {
             assert(texture);
             texture->create();
-            framebuffer = context.createFramebuffer(*texture);
+            // Attach a depth (no stencil) renderbuffer, matching maplibre-gl-js's drape
+            // framebuffer (createFramebuffer(w, h, /*depth*/ true, /*stencil*/ false)).
+            depthBuffer = context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(size);
+            framebuffer = context.createFramebuffer(*texture, *depthBuffer);
         } else {
             context.bindFramebuffer = framebuffer->framebuffer;
         }
@@ -53,6 +57,7 @@ private:
     const Size size;
     gfx::Texture2DPtr texture;
     const gfx::TextureChannelDataType type;
+    std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthBuffer;
     std::optional<gl::Framebuffer> framebuffer;
 };
 

@@ -383,6 +383,15 @@ void checkFramebuffer() {
     }
 }
 
+void bindDepthRenderbuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
+    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC_GL();
+
+    auto& depthResource = depth.getResource<gl::RenderbufferResource>();
+    MBGL_CHECK_ERROR(
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthResource.renderbuffer));
+}
+
 void bindDepthStencilRenderbuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
@@ -614,6 +623,25 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             GL_TEXTURE_2D,
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
+    checkFramebuffer();
+    return {color.getSize(), std::move(fbo)};
+}
+
+Framebuffer Context::createFramebuffer(const gfx::Texture2D& color,
+                                       const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
+    MLN_TRACE_FUNC();
+
+    if (color.getSize() != depth.getSize()) {
+        throw std::runtime_error("Renderbuffer size mismatch");
+    }
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    bindDepthRenderbuffer(depth);
     checkFramebuffer();
     return {color.getSize(), std::move(fbo)};
 }
