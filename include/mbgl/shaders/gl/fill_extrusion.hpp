@@ -99,7 +99,7 @@ highp vec4 color = u_color;
     // polygon centroid (so it doesn't shear across a slope), and drop ground-level
     // floors slightly so buildings don't hang off a slope (matches maplibre-gl-js)
     float ele = get_elevation(a_centroid, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
-    base += ele - (base > 0.0 ? 0.0 : 10.0);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * u_dem_enabled;
     height += ele;
 
     gl_Position = u_matrix * vec4(a_pos, t > 0.0 ? height : base, 1);

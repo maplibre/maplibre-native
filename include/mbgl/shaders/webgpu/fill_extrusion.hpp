@@ -10,9 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
@@ -124,7 +124,7 @@ fn main(in: VertexInput) -> VertexOutput {
     // Raise the whole extrusion by the terrain elevation at the polygon centroid
     // (one value per building), with gl-js's "basement" drop for ground-level floors.
     let ele = fillExtrusionElevation(vec2<f32>(f32(in.centroid.x), f32(in.centroid.y)), drawable);
-    let baseValue = baseClamped + ele - select(10.0, 0.0, baseClamped > 0.0);
+    let baseValue = baseClamped + ele - select(10.0, 0.0, baseClamped > 0.0) * drawable.dem_enabled;
     let heightValue = heightClamped + ele;
 
     let normal_i = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));

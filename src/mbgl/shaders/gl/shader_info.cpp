@@ -543,9 +543,7 @@ const std::vector<TextureInfo> SymbolTextAndIconShaderInfo::textures = {
 using TerrainShaderInfo = ShaderInfo<BuiltIn::TerrainShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> TerrainShaderInfo::uniformBlocks = {
-    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"TerrainDrawableUBO", idTerrainDrawableUBO},
-    UniformBlockInfo{"TerrainTilePropsUBO", idTerrainTilePropsUBO},
     UniformBlockInfo{"TerrainEvaluatedPropsUBO", idTerrainEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> TerrainShaderInfo::attributes = {
