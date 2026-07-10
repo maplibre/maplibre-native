@@ -133,6 +133,23 @@ public:
      */
     float pixelRatio() const;
 
+    /**
+     * @brief Sets whether to enable decoding of MapLibre Tile (MLT) tiles with FastPFOR integer encodings. By default,
+     * it is set to false. Such tiles will fail if not explicitly enabled.
+     *
+     * @param enable true to enable, false to disable
+     * @return MapOptions for chaining options together.
+     */
+    MapOptions& withEnableFastPFOR(bool enable);
+
+    /**
+     * @brief Gets the previously set (or default) enableFastPFOR value.
+     *
+     * @return true if enableFastPFOR is enabled,
+     * false otherwise.
+     */
+    bool enableFastPFOR() const;
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl_;
