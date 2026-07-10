@@ -146,3 +146,71 @@ TEST(FillExtrusionBucket, EdgeRadiusPositiveAddsVertices) {
 
     EXPECT_GT(bucketRounded->vertices.elements(), bucketZero->vertices.elements());
 }
+
+namespace {
+// A long, thin (100 x 4 tile-unit) rectangle: the two short edges force the
+// corner-cut at each end to clamp to ~1.5 units (inLen*0.5 - 0.5), so the four
+// arc samples (start, two bezier mids, end) fall within ~1-2 units of each
+// other. Rounded to int16 several of them collapse onto the SAME integer
+// coordinate. This is the exact degeneracy from Sergey's report — new arc
+// points quantized to short lose sub-unit precision — reproduced minimally.
+GeometryCollection thinRectangleRing() {
+    return {{{{0, 0}, {100, 0}, {100, 4}, {0, 4}, {0, 0}}}};
+}
+
+// True if any two CONSECUTIVE emitted wall vertices share the same footprint
+// position (a1). On the instanced path each ring vertex is emitted once in
+// order, so a consecutive position-duplicate is a zero-length wall edge — its
+// perpendicular (hence directional-light normal) is undefined → (0,0,0), the
+// dark facet/sliver bug. The ring's closing vertex repeats the first point but
+// is NOT adjacent to it in the array, so it is not a false positive.
+bool hasConsecutivePositionDuplicate(const FillExtrusionBucket& bucket) {
+    const auto& v = bucket.vertices.vector();
+    for (std::size_t i = 1; i < v.size(); ++i) {
+        if (v[i].a1 == v[i - 1].a1) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
+
+// Red/green guard for the edge-radius quantization-degeneracy fix. Rounding a
+// corner emits arc points computed in double but stored as int16; when samples
+// quantize onto the same texel the wall edge between them collapses to zero
+// length, and its shader-computed perpendicular degenerates to (0,0,0) — a
+// fully-unlit facet next to correctly-lit neighbours (the half-dark wall split;
+// the NYC corner slivers/fin). Before the fix the thin rectangle produces such
+// consecutive duplicate positions; the dedup at emit removes every zero-length
+// (and folded back-spike) segment, so no wall edge is degenerate.
+TEST(FillExtrusionBucket, EdgeRadiusThinRectangleNoDegenerateWallEdges) {
+    auto bucket = makeBucket(2.0f);
+    addRing(*bucket, thinRectangleRing());
+
+    // The fixture must actually round (else the guard is vacuous): rounding adds
+    // arc vertices beyond the 5 of the unrounded ring.
+    auto bucketZero = makeBucket(0.0f);
+    addRing(*bucketZero, thinRectangleRing());
+    ASSERT_GT(bucket->vertices.elements(), bucketZero->vertices.elements())
+        << "fixture did not round — cannot exercise the degeneracy";
+
+    EXPECT_FALSE(hasConsecutivePositionDuplicate(*bucket))
+        << "a rounded corner emitted a zero-length wall edge (quantization degeneracy)";
+}
+
+// The dedup must NOT touch the radius-0 path: rounding never runs there, so the
+// geometry stays byte-identical to stock upstream (guarded in full by the
+// EdgeRadiusZero* golden tests; this pins the thin-rectangle fixture too).
+TEST(FillExtrusionBucket, EdgeRadiusZeroThinRectangleUnchanged) {
+    auto bucket = makeBucket(0.0f);
+    addRing(*bucket, thinRectangleRing());
+
+    const std::vector<FillExtrusionLayoutVertex> golden = {
+        FillExtrusionBucket::layoutVertex({0, 0}, 0, false),
+        FillExtrusionBucket::layoutVertex({100, 0}, 100, false),
+        FillExtrusionBucket::layoutVertex({100, 4}, 104, false),
+        FillExtrusionBucket::layoutVertex({0, 4}, 204, false),
+        FillExtrusionBucket::layoutVertex({0, 0}, 208, true),
+    };
+    EXPECT_PRED_FORMAT2(VerticesMatch, bucket->vertices.vector(), golden);
+}

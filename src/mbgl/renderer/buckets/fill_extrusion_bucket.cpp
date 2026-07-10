@@ -62,6 +62,31 @@ GeometryCoordinates roundRingCorners(const GeometryCoordinates& ring, double rad
 
     GeometryCoordinates out;
     out.reserve(n * 3 + 1);
+    // Arc points are computed in double precision but the vertex/outline format is int16
+    // (GeometryCoordinate), so every emitted point is quantized to integer tile units. When two
+    // consecutive arc samples (or a short clamped cut) round to the SAME integer coordinate, the
+    // segment between them collapses to zero length. Downstream consumers then misbehave: earcut
+    // emits sliver/fin triangles on the roof cap, and — the wall-shading bug — a zero-length wall
+    // edge has an undefined perpendicular, so its normal degenerates to (0,0,0) (computed in the
+    // instanced wall shader from the int16 outline on Metal/Vulkan, or via unit(perp(0)) = NaN in
+    // the GL smooth-normal path). A (0,0,0) normal reads as fully turned-away from the light, so
+    // that wall facet renders at minimum directional brightness — a hard dark band/sliver next to
+    // its correctly-lit neighbours (the Osokorky half-dark wall split; the NYC corner facets/fin).
+    // Emit through a dedup that (a) drops a point equal to the previous one (zero-length segment)
+    // and (b) collapses an A→B→A back-spike to A (a reversed segment that quantization folded flat).
+    // This keeps the quantized ring free of degenerate/reversed edges on EVERY backend; sub-unit
+    // POSITION quantization of the surviving points is harmless (the format's inherent resolution).
+    const auto emit = [&](int32_t x, int32_t y) {
+        const GeometryCoordinate p{static_cast<int16_t>(x), static_cast<int16_t>(y)};
+        if (!out.empty() && out.back() == p) {
+            return; // zero-length segment: two samples quantized onto the same texel
+        }
+        if (out.size() >= 2 && out[out.size() - 2] == p) {
+            out.pop_back(); // back-spike A→B→A folded flat by quantization: keep A, drop B
+            return;
+        }
+        out.push_back(p);
+    };
     for (std::size_t i = 0; i < n; ++i) {
         const auto& prev = ring[(i + n - 1) % n];
         const auto& curr = ring[i];
@@ -76,7 +101,7 @@ GeometryCoordinates roundRingCorners(const GeometryCoordinates& ring, double rad
         const double inLen = std::sqrt(inVec.x * inVec.x + inVec.y * inVec.y);
         const double outLen = std::sqrt(outVec.x * outVec.x + outVec.y * outVec.y);
         if (inLen < 1e-6 || outLen < 1e-6) {
-            out.emplace_back(curr);
+            emit(curr.x, curr.y);
             continue;
         }
 
@@ -85,14 +110,14 @@ GeometryCoordinates roundRingCorners(const GeometryCoordinates& ring, double rad
         const double dot = inVec.x * outVec.x + inVec.y * outVec.y;
         const double turn = std::abs(std::atan2(cross, dot));
         if (turn < 0.20) {
-            out.emplace_back(curr);
+            emit(curr.x, curr.y);
             continue;
         }
 
         // Clamp the cut so adjacent corners never overlap.
         const double cut = std::min({radiusUnits, inLen * 0.5 - 0.5, outLen * 0.5 - 0.5});
         if (cut < 1.0) {
-            out.emplace_back(curr);
+            emit(curr.x, curr.y);
             continue;
         }
 
@@ -107,19 +132,21 @@ GeometryCoordinates roundRingCorners(const GeometryCoordinates& ring, double rad
         const Point<double> mid2 = start * (1.0 / 9.0) + b * (4.0 / 9.0) + end * (4.0 / 9.0);
 
         const auto push = [&](const Point<double>& p) {
-            out.emplace_back(static_cast<int16_t>(std::lround(p.x)), static_cast<int16_t>(std::lround(p.y)));
+            emit(static_cast<int32_t>(std::lround(p.x)), static_cast<int32_t>(std::lround(p.y)));
         };
         push(start);
         push(mid1);
         push(mid2);
         push(end);
     }
+    // A ring the dedup shrank below a triangle is degenerate — keep the original faceted corners
+    // rather than emit an unrenderable ring.
     if (out.size() < 3) {
         return ring;
     }
-    // Restore closure to match the input convention.
-    if (ring.front() == ring.back()) {
-        out.emplace_back(out.front());
+    // Restore closure to match the input convention (skip if dedup already left it closed).
+    if (ring.front() == ring.back() && !(out.back() == out.front())) {
+        out.push_back(out.front());
     }
     return out;
 }
