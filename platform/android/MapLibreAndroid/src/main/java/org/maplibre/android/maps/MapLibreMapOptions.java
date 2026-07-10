@@ -865,10 +865,10 @@ public class MapLibreMapOptions implements Parcelable {
    * @param enableFastPFOR true to enable, false to disable
    * @return This
    */
-    @NonNull public MapLibreMapOptions enableFastPFOR(boolean enableFastPFOR) {
-        this.enableFastPFOR = enableFastPFOR;
-        return this;
-    }
+  @NonNull public MapLibreMapOptions enableFastPFOR(boolean enableFastPFOR) {
+    this.enableFastPFOR = enableFastPFOR;
+    return this;
+  }
 
   /**
    * Enable local ideograph font family, defaults to true.

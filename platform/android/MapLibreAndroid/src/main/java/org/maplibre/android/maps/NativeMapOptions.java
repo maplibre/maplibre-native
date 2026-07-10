@@ -13,6 +13,7 @@ public class NativeMapOptions {
   private final boolean asyncRendererCleanup;
 
   private final boolean enableFastPFOR;
+
   public NativeMapOptions(MapLibreMapOptions options) {
     pixelRatio = options.getPixelRatio();
     crossSourceCollisions = options.getCrossSourceCollisions();
