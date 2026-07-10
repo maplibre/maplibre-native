@@ -710,7 +710,8 @@ public:
       .withPixelRatio(config.scaleFactor)
       .withConstrainMode(mbgl::ConstrainMode::None)
       .withViewportMode(mbgl::ViewportMode::Default)
-      .withCrossSourceCollisions(enableCrossSourceCollisions);
+      .withCrossSourceCollisions(enableCrossSourceCollisions)
+      .withEnableFastPFOR(mlnMapoptions.enableFastPFOR);
 
   mbgl::TileServerOptions *tileServerOptions =
       [[MLNSettings sharedSettings] tileServerOptionsInternal];

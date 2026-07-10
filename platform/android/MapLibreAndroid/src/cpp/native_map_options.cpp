@@ -47,5 +47,11 @@ bool NativeMapOptions::asyncRendererCleanup(jni::JNIEnv &env, const jni::Object<
     return obj.Get(env, asyncRendererCleanupField);
 }
 
+bool NativeMapOptions::enableFastPFOR(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
+    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+    auto enableFastPFORField = javaClass.GetField<jni::jboolean>(env, "enableFastPFOR");
+    return obj.Get(env, enableFastPFORField);
+}
+
 } // namespace android
 } // namespace mbgl
