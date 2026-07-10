@@ -20,6 +20,7 @@
 #include <mbgl/text/glyph_manager.hpp>
 
 #include <memory>
+#include "mbgl/tile/vector_mlt_tile_data.hpp"
 
 using namespace mbgl;
 
@@ -65,14 +66,7 @@ TEST(VectorTileData, ParseResults) {
     ASSERT_EQ(layer->getName(), "admin");
     ASSERT_EQ(layer->featureCount(), 17154u);
 
-    try {
-        layer->getFeature(17154u);
-        ASSERT_TRUE(false) << "should throw: feature index is out of range.";
-    } catch (const std::out_of_range&) {
-        ASSERT_TRUE(true);
-    } catch (...) { // needed for iOS when MBGL_WITH_RTTI=OFF
-        ASSERT_TRUE(true);
-    }
+    ASSERT_THROW(layer->getFeature(17154u), std::out_of_range);
 
     std::unique_ptr<GeometryTileFeature> feature = layer->getFeature(0u);
     ASSERT_EQ(feature->getType(), mbgl::FeatureType::LineString);
@@ -84,4 +78,51 @@ TEST(VectorTileData, ParseResults) {
     ASSERT_EQ(properties.at("disputed"), *feature->getValue("disputed"));
 
     ASSERT_EQ(feature->getValue("invalid"), std::nullopt);
+}
+
+TEST(VectorTileData, MLTParseResults) {
+    struct SubCase {
+        bool useFastPFOR;
+        bool enableFastPFOR;
+    };
+    for (const auto& testCase : std::vector{
+             SubCase{.useFastPFOR = false, .enableFastPFOR = false},
+             SubCase{.useFastPFOR = false, .enableFastPFOR = true},
+             SubCase{.useFastPFOR = true, .enableFastPFOR = true},
+             SubCase{.useFastPFOR = true, .enableFastPFOR = false},
+         }) {
+        const auto path = "test/fixtures/map/issue12432/0-0-0" +
+                          std::string(testCase.useFastPFOR ? "-fastpfor.mlt" : ".mlt");
+        VectorMLTTileData data(std::make_shared<std::string>(util::read_file(path)), testCase.enableFastPFOR);
+
+        std::vector<std::string> layerNames = data.layerNames();
+
+        if (!testCase.enableFastPFOR && testCase.useFastPFOR) {
+            // If fast PFOR is not enabled, the fast PFOR tile should fail to parse
+            ASSERT_EQ(layerNames.size(), 0u);
+            continue;
+        }
+
+        // MLT layers are presented in the order they're encountered, not sorted alphabetically like MVT layers
+        ASSERT_EQ(layerNames.size(), 2u);
+        ASSERT_EQ(layerNames.at(0), "water");
+        ASSERT_EQ(layerNames.at(1), "admin");
+
+        ASSERT_FALSE(data.getLayer("invalid"));
+
+        std::unique_ptr<GeometryTileLayer> layer = data.getLayer("admin");
+        ASSERT_EQ(layer->getName(), "admin");
+        ASSERT_EQ(layer->featureCount(), 17154u);
+
+        std::unique_ptr<GeometryTileFeature> feature = layer->getFeature(0u);
+        ASSERT_EQ(feature->getType(), mbgl::FeatureType::LineString);
+        ASSERT_TRUE(feature->getID().is<uint64_t>());
+        ASSERT_EQ(feature->getID().get<uint64_t>(), 1u);
+
+        const std::unordered_map<std::string, Value>& properties = feature->getProperties();
+        ASSERT_EQ(properties.size(), 3u);
+        ASSERT_EQ(properties.at("disputed"), *feature->getValue("disputed"));
+
+        ASSERT_EQ(feature->getValue("invalid"), std::nullopt);
+    }
 }

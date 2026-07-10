@@ -21,11 +21,12 @@
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/style.hpp>
 
-#include <mbgl/renderer/sources/render_raster_source.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/sources/render_geojson_source.hpp>
+#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
+#include <mbgl/renderer/sources/render_raster_source.hpp>
+#include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
@@ -46,9 +47,9 @@
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
-#include <cstdint>
-#include <optional>
 #include <gmock/gmock.h>
+
+#include <optional>
 
 using namespace mbgl;
 using SourceType = mbgl::style::SourceType;
