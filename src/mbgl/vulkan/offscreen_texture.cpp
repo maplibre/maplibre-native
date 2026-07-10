@@ -95,12 +95,12 @@ public:
             return;
         }
 
-        const auto imageViewCreateInfo =
-            vk::ImageViewCreateInfo()
-                .setImage(depthAllocation->image)
-                .setViewType(vk::ImageViewType::e2D)
-                .setFormat(depthFormat)
-                .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
+        const auto imageViewCreateInfo = vk::ImageViewCreateInfo()
+                                             .setImage(depthAllocation->image)
+                                             .setViewType(vk::ImageViewType::e2D)
+                                             .setFormat(depthFormat)
+                                             .setSubresourceRange(vk::ImageSubresourceRange(
+                                                 vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
 
         depthAllocation->imageView = backend.getDevice()->createImageViewUnique(
             imageViewCreateInfo, nullptr, backend.getDispatcher());
@@ -162,10 +162,8 @@ public:
                 .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
                 .setDependencyFlags(vk::DependencyFlagBits::eByRegion)};
 
-        const auto renderPassCreateInfo = vk::RenderPassCreateInfo()
-                                              .setAttachments(attachments)
-                                              .setSubpasses(subpass)
-                                              .setDependencies(dependencies);
+        const auto renderPassCreateInfo =
+            vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
 
         renderPass = backend.getDevice()->createRenderPassUnique(
             renderPassCreateInfo, nullptr, backend.getDispatcher());

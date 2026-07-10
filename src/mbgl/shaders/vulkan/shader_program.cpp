@@ -174,7 +174,8 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                        .setMinDepthBounds(0.0f)
                                        .setMaxDepthBounds(1.0f)
                                        .setDepthCompareOp(pipelineInfo.depthFunction)
-                                       .setStencilTestEnable(pipelineInfo.renderPassHasStencil && pipelineInfo.stencilTest)
+                                       .setStencilTestEnable(pipelineInfo.renderPassHasStencil &&
+                                                             pipelineInfo.stencilTest)
                                        .setFront(stencilState)
                                        .setBack(stencilState);
 
