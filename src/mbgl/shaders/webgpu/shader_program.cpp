@@ -748,7 +748,16 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
         depthStencilState.stencilReadMask = 0;
         depthStencilState.stencilWriteMask = 0;
 
-        bool stencilEnabled = true;
+        // A depth-only attachment (e.g. the terrain drape RTT, which uses Depth32Float
+        // to match maplibre-gl-js's depth-only drape framebuffer) has no stencil aspect.
+        // Enabling stencil test/write against it fails pipeline validation, so force
+        // stencil off in that case and render the drape without stencil clipping, exactly
+        // as GL (which silently ignores stencil ops with no stencil buffer) and gl-js do.
+        const bool formatHasStencil = depthFormat == wgpu::TextureFormat::Depth24PlusStencil8 ||
+                                      depthFormat == wgpu::TextureFormat::Depth32FloatStencil8 ||
+                                      depthFormat == wgpu::TextureFormat::Stencil8;
+
+        bool stencilEnabled = formatHasStencil;
         if (stencilMode.test.is<gfx::StencilMode::Always>() && stencilMode.mask == 0 &&
             stencilMode.fail == gfx::StencilOpType::Keep && stencilMode.depthFail == gfx::StencilOpType::Keep &&
             stencilMode.pass == gfx::StencilOpType::Keep) {
@@ -780,7 +789,7 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
             depthStencilState.stencilWriteMask = stencilMode.mask;
         }
 
-        if (shaderName == "ClippingMaskProgram") {
+        if (shaderName == "ClippingMaskProgram" && formatHasStencil) {
             depthStencilState.stencilFront.passOp = WGPUStencilOperation_Replace;
             depthStencilState.stencilBack = depthStencilState.stencilFront;
             if (depthStencilState.stencilWriteMask == 0) {

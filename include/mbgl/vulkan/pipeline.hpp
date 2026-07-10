@@ -44,6 +44,9 @@ public:
 
     // external values (used in hash)
     vk::RenderPass renderPass{};
+    // False when rendering into a color-only offscreen target (e.g. terrain drape RTT);
+    // depth/stencil test/write must be disabled since there is no such attachment.
+    bool renderPassHasDepthStencil = true;
     vk::Extent2D viewExtent{};
     vk::Rect2D scissorRect{};
 

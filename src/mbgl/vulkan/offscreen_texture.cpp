@@ -45,6 +45,9 @@ public:
 
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
 
+    // Offscreen render targets are color-only (no depth/stencil attachment).
+    bool hasDepthStencilAttachment() const override { return false; }
+
     PremultipliedImage readStillImage() {
         if (!colorTexture) {
             return {};
