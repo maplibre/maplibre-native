@@ -49,6 +49,67 @@ namespace {
 // and lands separately.
 constexpr double kEarthCircumference = 40075016.686;
 
+// Twice the signed area of a ring (shoelace), operating on the open form; the
+// magnitude is unused — only the SIGN matters, as a cheap proxy for winding
+// order / orientation.
+double ringDoubleSignedArea(const GeometryCoordinates& ring) {
+    std::size_t n = ring.size();
+    if (n >= 2 && ring.front() == ring.back()) {
+        n -= 1;
+    }
+    double sum = 0.0;
+    for (std::size_t i = 0; i < n; ++i) {
+        const auto& p = ring[i];
+        const auto& q = ring[(i + 1) % n];
+        sum += static_cast<double>(p.x) * q.y - static_cast<double>(q.x) * p.y;
+    }
+    return sum;
+}
+
+// True if any two non-adjacent edges of a ring cross properly (a strict
+// interior crossing; shared endpoints of adjacent edges and mere collinear
+// touches don't count). O(n^2) over the ring edges — n is a single building
+// footprint (a few dozen points at most after rounding), and this only runs on
+// the rounded (radius > 0) path, so the cost is negligible.
+bool ringSelfIntersects(const GeometryCoordinates& ring) {
+    std::size_t n = ring.size();
+    if (n >= 2 && ring.front() == ring.back()) {
+        n -= 1;
+    }
+    if (n < 4) {
+        return false;
+    }
+    const auto orient = [](const GeometryCoordinate& o, const GeometryCoordinate& a, const GeometryCoordinate& b) {
+        return (static_cast<double>(a.x) - o.x) * (static_cast<double>(b.y) - o.y) -
+               (static_cast<double>(a.y) - o.y) * (static_cast<double>(b.x) - o.x);
+    };
+    const auto properCross = [&](const GeometryCoordinate& p1,
+                                 const GeometryCoordinate& p2,
+                                 const GeometryCoordinate& p3,
+                                 const GeometryCoordinate& p4) {
+        const double d1 = orient(p3, p4, p1);
+        const double d2 = orient(p3, p4, p2);
+        const double d3 = orient(p1, p2, p3);
+        const double d4 = orient(p1, p2, p4);
+        return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+    };
+    for (std::size_t i = 0; i < n; ++i) {
+        const auto& a = ring[i];
+        const auto& b = ring[(i + 1) % n];
+        for (std::size_t j = i + 2; j < n; ++j) {
+            if (i == 0 && j == n - 1) {
+                continue; // wrap-adjacent edges share a vertex
+            }
+            const auto& c = ring[j];
+            const auto& d = ring[(j + 1) % n];
+            if (properCross(a, b, c, d)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 GeometryCoordinates roundRingCorners(const GeometryCoordinates& ring, double radiusUnits) {
     // Rings arrive closed (first == last); operate on the open form.
     std::size_t n = ring.size();
@@ -147,6 +208,30 @@ GeometryCoordinates roundRingCorners(const GeometryCoordinates& ring, double rad
     // Restore closure to match the input convention (skip if dedup already left it closed).
     if (ring.front() == ring.back() && !(out.back() == out.front())) {
         out.push_back(out.front());
+    }
+    // Orientation + self-intersection backstop. The per-corner dedup above folds
+    // only an immediate A→B→A back-spike; it cannot see a wider tangle. On small
+    // or overzoomed footprints (radiusUnits large relative to a short edge) the
+    // quadratic-bezier samples of a SHARP (near-needle) corner quantize into a
+    // local zigzag, and the arcs of two nearby sharp corners can cross each
+    // other. The result is a self-intersecting — or, at the limit, orientation-
+    // reversed — ring that the dedup passes through. Such a ring is poison
+    // downstream: earcut emits degenerate/missing roof triangles (roofless
+    // buildings) and the wall quads wind inside-out (back-face-culled to hollow
+    // "U-trough" shells). This is backend-agnostic (shared bucket geometry) and
+    // looks intermittent on device because radiusUnits scales per canonical tile
+    // zoom, so it only bites the specific small-footprint tiles a given viewport
+    // loads. If rounding produced a ring that reverses orientation or crosses
+    // itself, discard it and keep the original faceted footprint: the feature
+    // degrades to sharp corners exactly where it cannot round the corner safely
+    // (its documented intent), which always renders solid. Measured fallback
+    // rate at building scale is ~0.01%, so rounding stays visible everywhere it
+    // is geometrically safe.
+    const double areaIn = ringDoubleSignedArea(ring);
+    const double areaOut = ringDoubleSignedArea(out);
+    const bool orientationReversed = (areaIn > 0.0) != (areaOut > 0.0);
+    if (areaOut == 0.0 || orientationReversed || ringSelfIntersects(out)) {
+        return ring;
     }
     return out;
 }

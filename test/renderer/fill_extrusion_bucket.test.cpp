@@ -214,3 +214,124 @@ TEST(FillExtrusionBucket, EdgeRadiusZeroThinRectangleUnchanged) {
     };
     EXPECT_PRED_FORMAT2(VerticesMatch, bucket->vertices.vector(), golden);
 }
+
+namespace {
+// Reconstruct the plan-view footprint ring the bucket actually emitted. On the
+// instanced fill-extrusion path (this Metal/Vulkan build,
+// MLN_USE_FILL_EXTRUSION_INSTANCING == 1) each footprint outline vertex is
+// emitted exactly once, in ring order, with its tile-unit position in a1 — so
+// the vertex position stream IS the rounded ring. (On the non-instanced GL path
+// the same ring is walked but expanded into wall quads; these ring-shape
+// invariants are checked here on the instanced build the test suite compiles.)
+GeometryCoordinates emittedFootprint(const FillExtrusionBucket& bucket) {
+    GeometryCoordinates ring;
+    for (const auto& v : bucket.vertices.vector()) {
+        ring.emplace_back(v.a1[0], v.a1[1]);
+    }
+    return ring;
+}
+
+// Twice the signed area of a ring (open form); only the sign is used, as a
+// winding-order / orientation proxy.
+double footprintDoubleSignedArea(const GeometryCoordinates& ring) {
+    std::size_t n = ring.size();
+    if (n >= 2 && ring.front() == ring.back()) n -= 1;
+    double sum = 0.0;
+    for (std::size_t i = 0; i < n; ++i) {
+        const auto& p = ring[i];
+        const auto& q = ring[(i + 1) % n];
+        sum += static_cast<double>(p.x) * q.y - static_cast<double>(q.x) * p.y;
+    }
+    return sum;
+}
+
+// True if any two non-adjacent edges of the ring cross properly (strict interior
+// crossing). A self-intersecting footprint breaks earcut (missing/degenerate
+// roof cap) and winds wall quads inside-out — the hollow "U-trough" buildings.
+bool footprintSelfIntersects(const GeometryCoordinates& ring) {
+    std::size_t n = ring.size();
+    if (n >= 2 && ring.front() == ring.back()) n -= 1;
+    if (n < 4) return false;
+    const auto orient = [](const GeometryCoordinate& o, const GeometryCoordinate& a, const GeometryCoordinate& b) {
+        return (static_cast<double>(a.x) - o.x) * (static_cast<double>(b.y) - o.y) -
+               (static_cast<double>(a.y) - o.y) * (static_cast<double>(b.x) - o.x);
+    };
+    const auto properCross = [&](const GeometryCoordinate& p1,
+                                 const GeometryCoordinate& p2,
+                                 const GeometryCoordinate& p3,
+                                 const GeometryCoordinate& p4) {
+        const double d1 = orient(p3, p4, p1), d2 = orient(p3, p4, p2);
+        const double d3 = orient(p1, p2, p3), d4 = orient(p1, p2, p4);
+        return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+    };
+    for (std::size_t i = 0; i < n; ++i) {
+        const auto& a = ring[i];
+        const auto& b = ring[(i + 1) % n];
+        for (std::size_t j = i + 2; j < n; ++j) {
+            if (i == 0 && j == n - 1) continue; // wrap-adjacent edges share a vertex
+            if (properCross(a, b, ring[j], ring[(j + 1) % n])) return true;
+        }
+    }
+    return false;
+}
+
+// A small, simple (non-self-intersecting) footprint with sharp corners and one
+// short edge, at a scale where — at z15 with a 2 m radius, radiusUnits ~= 13.4 —
+// the quadratic-bezier arc samples of the sharp corners quantize into a local
+// zigzag and the arcs of two nearby corners cross. This is a minimal, clean
+// stand-in for the small/overzoomed real building footprints that turned up
+// hollow and roofless on device with the edge-radius feature on. Found by a
+// fuzzer over simple rings; verified simple and CCW below.
+GeometryCollection sharpCornerFootprint() {
+    return {{{{247, 178}, {265, 230}, {168, 270}, {118, 223}, {138, 191}, {175, 123}, {248, 181}, {247, 178}}}};
+}
+} // namespace
+
+// RED/GREEN guard for the edge-radius ring-reversal / self-intersection bug (THE
+// release blocker). The per-corner dedup folds only an immediate A->B->A back-
+// spike; it cannot see a wider tangle. On this footprint the sharp corners round
+// into arcs that quantize and cross, so BEFORE the fix the emitted footprint
+// self-intersects — which makes earcut drop/degenerate the roof cap and winds
+// the wall quads inside-out (culled to a hollow shell). The orientation +
+// self-intersection backstop in roundRingCorners catches this and degrades the
+// ring to its original faceted corners (which always render solid), so AFTER the
+// fix the emitted footprint is simple, keeps its winding, and still caps a roof.
+TEST(FillExtrusionBucket, EdgeRadiusSharpFootprintStaysSimpleAndCapped) {
+    // Sanity: the input footprint really is a simple ring to begin with.
+    auto zero = makeBucket(0.0f);
+    addRing(*zero, sharpCornerFootprint());
+    const GeometryCoordinates unrounded = emittedFootprint(*zero);
+    ASSERT_FALSE(footprintSelfIntersects(unrounded)) << "fixture is not a simple ring";
+
+    auto rounded = makeBucket(2.0f);
+    addRing(*rounded, sharpCornerFootprint());
+    const GeometryCoordinates footprint = emittedFootprint(*rounded);
+
+    // The emitted footprint must never self-cross (the ring-reversal bug).
+    EXPECT_FALSE(footprintSelfIntersects(footprint)) << "rounded footprint self-intersects — hollow/roofless building";
+
+    // Orientation (winding) must be preserved relative to the unrounded ring.
+    EXPECT_EQ(footprintDoubleSignedArea(footprint) > 0.0, footprintDoubleSignedArea(unrounded) > 0.0)
+        << "rounded footprint reversed winding";
+
+    // Earcut must still produce a roof cap (indices are the roof triangles on the
+    // instanced path); a self-intersecting ring would starve it.
+    EXPECT_GT(rounded->triangles.elements(), 0u) << "no roof triangles emitted";
+    EXPECT_EQ(rounded->triangles.elements() % 3u, 0u);
+}
+
+// The backstop must not disturb footprints that round safely: a plain square
+// still rounds (more vertices than radius 0) and keeps its winding + simplicity.
+TEST(FillExtrusionBucket, EdgeRadiusSafeCornerStillRoundsPreservingWinding) {
+    auto zero = makeBucket(0.0f);
+    addRing(*zero, squareRing());
+    const GeometryCoordinates unrounded = emittedFootprint(*zero);
+
+    auto rounded = makeBucket(2.0f);
+    addRing(*rounded, squareRing());
+    const GeometryCoordinates footprint = emittedFootprint(*rounded);
+
+    EXPECT_GT(footprint.size(), unrounded.size()) << "square did not round (backstop over-triggered)";
+    EXPECT_FALSE(footprintSelfIntersects(footprint));
+    EXPECT_EQ(footprintDoubleSignedArea(footprint) > 0.0, footprintDoubleSignedArea(unrounded) > 0.0);
+}
