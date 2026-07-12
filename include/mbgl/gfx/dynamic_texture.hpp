@@ -65,8 +65,11 @@ public:
     virtual bool removeTexture(const TextureHandle& texHandle);
 
 protected:
+    DynamicTexture(Size size, TexturePixelType pixelType);
+
     mapbox::ShelfPack shelfPack;
     Texture2DPtr texture;
+    TexturePixelType pixelFormat;
     int numTextures = 0;
     std::mutex mutex;
 };

@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/headless_backend.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include "mbgl/gfx/offscreen_texture.hpp"
 #include <memory>
 
 namespace mbgl {
@@ -17,6 +18,12 @@ public:
     gfx::Renderable& getDefaultRenderable() override;
     PremultipliedImage readStillImage() override;
     RendererBackend* getRendererBackend() override;
+    /*!
+     * \brief takeTexture
+     * Take ownership of the current texture
+     * \return
+     */
+    gfx::Texture2DPtr takeTexture();
 
     // Override WebGPU-specific methods
     void* getCurrentTextureView() override;

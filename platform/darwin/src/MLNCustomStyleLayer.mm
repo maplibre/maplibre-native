@@ -88,7 +88,7 @@ public:
     layer = nil;
   }
 
-  void initialize() {
+  void initialize(const mbgl::style::CustomLayerInitParameters &) override {
     if (layerRef == nil)
       return;
     else if (layer == nil)
@@ -99,7 +99,7 @@ public:
     }
   }
 
-  void render(const mbgl::style::CustomLayerRenderParameters &parameters) {
+  void render(const mbgl::style::CustomLayerRenderParameters &parameters) override {
     if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
@@ -117,16 +117,17 @@ public:
         .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
         .pitch = static_cast<CGFloat>(parameters.pitch),
         .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)};
+        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
+        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
 
     if (layer.mapView) {
       [layer drawInMapView:layer.mapView withContext:drawingContext];
     }
   }
 
-  void contextLost() {}
+  void contextLost() override {}
 
-  void deinitialize() {
+  void deinitialize() override {
     if (layer == nil) return;
 
     if (layer.mapView) {

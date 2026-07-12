@@ -5,11 +5,15 @@
 namespace mbgl {
 namespace gfx {
 
-DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pixelType) {
+DynamicTexture::DynamicTexture(Size size, TexturePixelType pixelType)
+    : pixelFormat(pixelType) {
     mapbox::ShelfPack::ShelfPackOptions options;
     options.autoResize = false;
     shelfPack = mapbox::ShelfPack(size.width, size.height, options);
+}
 
+DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pixelType)
+    : DynamicTexture(size, pixelType) {
     texture = context.createTexture2D();
     texture->setSize(size);
     texture->setFormat(pixelType, gfx::TextureChannelDataType::UnsignedByte);
@@ -24,7 +28,7 @@ const gfx::Texture2DPtr& DynamicTexture::getTexture() const {
 }
 
 TexturePixelType DynamicTexture::getPixelFormat() const {
-    return getTexture()->getFormat();
+    return pixelFormat;
 }
 
 bool DynamicTexture::isEmpty() const {

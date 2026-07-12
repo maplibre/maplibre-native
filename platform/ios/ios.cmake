@@ -64,6 +64,8 @@ add_custom_target(create-framework-bundle
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mapbox.bundle/Assets.car
 )
 
+mbgl_add_darwin_style_code_target()
+
 add_library(
     ios-sdk-static
     STATIC ${IOS_SDK_SOURCE_FILES} ${MLN_GENERATED_DARWIN_STYLE_SOURCE}
