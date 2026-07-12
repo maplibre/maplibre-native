@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Convert a PMTiles metadata decompression failure into an error response instead of an uncaught exception ([#4400](https://github.com/maplibre/maplibre-native/pull/4400)).
+
 ## 13.3.1
 
 ### ✨ Features and improvements
