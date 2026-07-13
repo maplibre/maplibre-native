@@ -75,6 +75,8 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
         return;
     }
 
+    mapRenderer.SetAsyncRendererCleanup(NativeMapOptions::asyncRendererCleanup(_env, jNativeMapOptions));
+
     // Create a renderer frontend
     rendererFrontend = AndroidRendererFrontend::create(_env, jMapRenderer);
 
@@ -1206,11 +1208,20 @@ jni::jboolean NativeMapView::removeLayerAt(JNIEnv& env, jni::jint index) {
 /**
  * Remove with wrapper object id. Ownership is transferred back to the wrapper
  */
-jni::jboolean NativeMapView::removeLayer(JNIEnv&, jlong layerPtr) {
-    assert(layerPtr != 0);
+jni::jboolean NativeMapView::removeLayer(JNIEnv& env, jlong layerPtr) {
+    if (layerPtr == 0) {
+        Log::Warning(Event::JNI, "Cannot remove layer: native layer pointer is null");
+        return jni::jni_false;
+    }
 
     mbgl::android::Layer* layer = reinterpret_cast<mbgl::android::Layer*>(layerPtr);
-    std::unique_ptr<mbgl::style::Layer> coreLayer = map->getStyle().removeLayer(layer->get().getID());
+    const auto layerId = jni::Make<std::string>(env, layer->getId(env));
+    if (layerId.empty()) {
+        Log::Warning(Event::JNI, "Cannot remove layer: layer reference is detached or invalid");
+        return jni::jni_false;
+    }
+
+    std::unique_ptr<mbgl::style::Layer> coreLayer = map->getStyle().removeLayer(layerId);
     if (coreLayer) {
         layer->setLayer(std::move(coreLayer));
         return jni::jni_true;
@@ -1710,6 +1721,18 @@ void NativeMapView::onSpriteRequested(const std::optional<style::Sprite>& sprite
             weakReference.Call(
                 *_env, onSpriteRequested, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
         }
+    }
+}
+
+void NativeMapView::onRenderError(std::exception_ptr) {
+    assert(vm != nullptr);
+
+    android::UniqueEnv _env = android::AttachEnv();
+    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+    static auto onRenderError = javaClass.GetMethod<void()>(*_env, "onRenderError");
+    auto weakReference = javaPeer.get(*_env);
+    if (weakReference) {
+        weakReference.Call(*_env, onRenderError);
     }
 }
 

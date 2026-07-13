@@ -87,6 +87,7 @@ public:
   void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
   void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
   void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
+  void onRenderError(std::exception_ptr) override;
 
 protected:
   /// Cocoa map view that this adapter bridges to.

@@ -235,7 +235,7 @@ SymbolInstanceReferences SymbolBucket::getSymbols(const std::optional<SortKeyRan
 }
 
 #if MLN_SYMBOL_GUARDS
-bool SymbolBucket::check(std::source_location source) {
+bool SymbolBucket::check(source_location source) {
     if (text.vertices().elements() != text.dynamicVertices().elements() ||
         text.vertices().elements() != text.opacityVertices().elements() ||
         icon.vertices().elements() != icon.dynamicVertices().elements() ||

@@ -7,6 +7,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import org.maplibre.android.testapp.activity.fragment.ViewPagerActivity
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +15,7 @@ import org.junit.runner.RunWith
 /**
  * Regression test that validates MapFragment integration with a ViewPager
  */
+@Ignore("https://github.com/maplibre/maplibre-native/issues/4254")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class ViewPagerScrollTest : BaseIntegrationTest() {
 

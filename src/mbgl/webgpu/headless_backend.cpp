@@ -4,6 +4,7 @@
 #include <mbgl/webgpu/offscreen_texture.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
+#include <mbgl/webgpu/texture2d.hpp>
 
 #if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/DawnNative.h>
@@ -16,9 +17,9 @@ namespace webgpu {
 
 class HeadlessRenderableResource final : public webgpu::RenderableResource {
 public:
-    HeadlessRenderableResource(HeadlessBackend&, webgpu::Context& context_, Size size)
+    HeadlessRenderableResource(HeadlessBackend&, webgpu::Context& context_, Size size_)
         : context(context_),
-          size(size) {
+          size(size_) {
         // Create offscreen texture using the proper WebGPU OffscreenTexture class
         offscreenTexture = context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte, true, true);
     }
@@ -83,6 +84,8 @@ public:
         }
         return PremultipliedImage(size);
     }
+
+    gfx::Texture2DPtr takeTexture() { return static_cast<OffscreenTexture*>(offscreenTexture.get())->takeTexture(); }
 
 private:
     webgpu::Context& context;
@@ -153,7 +156,7 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
     setDevice(impl->device.Get());
     setQueue(impl->queue.Get());
     setInstance(impl->instance->Get());
-#elif MLN_WEBGPU_IMPL_WGPU
+#elif MLN_WEBGPU_IMPL_WGPU && !MLN_WEBGPU_IMPL_FFI
     // wgpu-native backend initialization
     wgpu::InstanceDescriptor instanceDesc = {};
     impl->instance = wgpu::createInstance(instanceDesc);
@@ -330,6 +333,13 @@ PremultipliedImage HeadlessBackend::readStillImage() {
         return getResource<HeadlessRenderableResource>().readStillImage();
     }
     return PremultipliedImage(getSize());
+}
+
+gfx::Texture2DPtr HeadlessBackend::takeTexture() {
+    if (hasResource()) {
+        return getResource<HeadlessRenderableResource>().takeTexture();
+    }
+    return nullptr;
 }
 
 RendererBackend* HeadlessBackend::getRendererBackend() {

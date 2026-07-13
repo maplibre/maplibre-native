@@ -6,7 +6,7 @@
 namespace mbgl {
 namespace shaders {
 
-constexpr auto debugShaderPrelude = R"(#define idDebugUBO  drawableReservedUBOCount)";
+constexpr auto debugShaderPrelude = R"(#define idDebugUBO  drawableUBOStartId)";
 
 template <>
 struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan> {
@@ -38,7 +38,7 @@ void main() {
     applySurfaceTransform();
 
     // This vertex shader expects a EXTENT x EXTENT quad,
-    // The UV co-ordinates for the overlay texture can be calculated using that knowledge
+    // The UV coordinates for the overlay texture can be calculated using that knowledge
     frag_uv = in_position / 8192.0;
 }
 )";

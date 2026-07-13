@@ -1,9 +1,7 @@
 plugins {
+    id("com.android.library")
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.dokka)
-    id("com.android.library")
-    id("com.jaredsburrows.license")
-    kotlin("android")
     id("maplibre.download-vulkan-validation")
     id("maplibre.gradle-checkstyle")
     id("maplibre.gradle-dependencies-graph")
@@ -38,13 +36,15 @@ dependencies {
 
 dokka {
     moduleName.set("MapLibre Native Android")
+    val dokkaVariantName = "openglRelease"
 
     dokkaSourceSets {
-        main {
+        configureEach {
+            suppress.set(name != dokkaVariantName)
             includes.from("Module.md")
 
             sourceLink {
-                remoteUrl("https://github.com/maplibre/maplibre-native/tree/main/platform/android/")
+                remoteUrl.set(uri("https://github.com/maplibre/maplibre-native/tree/main/platform/android/"))
                 localDirectory.set(rootDir)
             }
 
@@ -61,7 +61,6 @@ android {
     defaultConfig {
         compileSdk = 34
         minSdk = 23
-        targetSdk = 33
         buildConfigField("String", "GIT_REVISION_SHORT", "\"${getGitRevision()}\"")
         buildConfigField("String", "GIT_REVISION", "\"${getGitRevision(false)}\"")
         buildConfigField(
@@ -134,7 +133,7 @@ android {
     nativeBuild(nativeTargets)
 
     // Avoid naming conflicts, force usage of prefix
-    resourcePrefix("maplibre_")
+    resourcePrefix = "maplibre_"
 
     sourceSets {
         getByName("main") {
@@ -150,12 +149,14 @@ android {
             // http://robolectric.org/migrating/#migrating-to-40
             isIncludeAndroidResources = true
         }
+        targetSdk = 33
     }
 
     buildTypes {
         debug {
-            isTestCoverageEnabled = false
             isJniDebuggable = true
+            enableUnitTestCoverage = false
+            enableAndroidTestCoverage = false
         }
     }
 
@@ -171,10 +172,19 @@ android {
             "WrongThreadInterprocedural"
         )
         warningsAsErrors = false
+        targetSdk = 33
     }
 
     buildFeatures {
         buildConfig = true
+        prefabPublishing = project.findProperty("maplibre.abis") != "none"
+    }
+
+    prefab {
+        create("maplibre") {
+            headers = "../prefab-headers"
+            libraryName = "libmaplibre"
+        }
     }
 
     compileOptions {
@@ -182,22 +192,31 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
-
-licenseReport {
-    generateHtmlReport = false
-    generateJsonReport = true
-    copyHtmlReportToAssets = false
-    copyJsonReportToAssets = false
 }
 
 fun getGitRevision(shortRev: Boolean = true): String {
     val cmd = if (shortRev) "git rev-parse --short HEAD" else "git rev-parse HEAD"
     val proc = Runtime.getRuntime().exec(cmd)
     return proc.inputStream.bufferedReader().readText().trim()
+}
+
+val syncPrefabHeaders by tasks.registering(Sync::class) {
+    val nativeRoot = rootProject.rootDir.resolve("../..")
+    from(nativeRoot.resolve("include")) {
+        include("mbgl/style/layers/custom_layer_host.hpp")
+        include("mbgl/style/layers/custom_layer_init_parameters.hpp")
+        include("mbgl/style/layers/custom_layer_render_parameters.hpp")
+        include("mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp")
+        include("mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp")
+    }
+    into(project.rootDir.resolve("prefab-headers"))
+}
+
+tasks.configureEach {
+    if (name == "syncPrefabHeaders") return@configureEach
+    if (name.contains("Prefab", ignoreCase = true) || name.contains("bundleLibRuntimeTo", ignoreCase = true)) {
+        dependsOn(syncPrefabHeaders)
+    }
 }
 
 configurations {

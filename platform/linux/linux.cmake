@@ -208,6 +208,13 @@ if(MLN_CREATE_AMALGAMATION)
         find_static_library(STATIC_LIBS NAMES GenericCodeGen)
     endif()
 
+    if(MLN_WITH_WEBGPU AND MLN_WEBGPU_IMPL_WGPU)
+        if(NOT WGPU_STATIC_LIBRARY)
+            message(FATAL_ERROR "Linux WebGPU amalgamation requires WGPU_STATIC_LIBRARY")
+        endif()
+        list(APPEND STATIC_LIBS "${WGPU_STATIC_LIBRARY}")
+    endif()
+
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD

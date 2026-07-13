@@ -86,7 +86,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// in the parameter pack and register it with the shader registry.
 
     /// Registration calls are wrapped in a lambda that throws on registration
-    /// failure, we shouldn't expect registration to faill unless the shader
+    /// failure, we shouldn't expect registration to fail unless the shader
     /// registry instance provided already has conflicting programs present.
     (
         [&]() {
@@ -117,7 +117,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
+                  shaders::BuiltIn::FillExtrusionInstancedShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::FillExtrusionPatternInstancedShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,

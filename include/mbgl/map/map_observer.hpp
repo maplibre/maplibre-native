@@ -46,7 +46,7 @@ public:
 
     struct RenderFrameStatus {
         RenderMode mode;
-        bool needsRepaint; // In continous mode, shows that there are ongoig transitions.
+        bool needsRepaint; // In continuous mode, shows that there are ongoig transitions.
         bool placementChanged;
         gfx::RenderingStats renderingStats;
     };
@@ -89,6 +89,9 @@ public:
     virtual void onSpriteLoaded(const std::optional<style::Sprite>&) {}
     virtual void onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr) {}
     virtual void onSpriteRequested(const std::optional<style::Sprite>&) {}
+
+    // Renderer
+    virtual void onRenderError(std::exception_ptr) {}
 };
 
 } // namespace mbgl
