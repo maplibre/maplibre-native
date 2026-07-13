@@ -73,6 +73,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)spriteWillLoad:(nullable NSString *)id url:(nullable NSString *)url;
 - (void)spriteDidLoad:(nullable NSString *)id url:(nullable NSString *)url;
 - (void)spriteDidError:(nullable NSString *)id url:(nullable NSString *)url;
+- (void)rendererDidError;
 
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude
                                      zoomLevel:(double)zoomLevel;

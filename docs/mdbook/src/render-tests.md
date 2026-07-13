@@ -1,7 +1,7 @@
 # Render Tests
 
 > [!NOTE]
-> See also [Android Tests](./android/android-tests.md#render-tests) and [iOS Tests](./ios/ios-tests.md#render-tests) for some platform-specific information on the render tests.
+> See also [Android Tests](./platforms/android/android-tests.md#render-tests) and [iOS Tests](./platforms/ios/ios-tests.md#render-tests) for some platform-specific information on the render tests.
 
 Render tests verify the correctness and consistency of MapLibre Native's rendering. Note that 'render test' is a bit of a misnomer, because there are various types of tests that do not really test rendering behavior that we sometimes call render tests. Examples are [expression tests and query tests](#metricsintergration). In addition, these 'render tests' allow a wide variety of operations and probes (which write out metrics) for things like GPU memory allocations, memory usage, network requests, FPS, so these tests are really quite a bit more versatile than just verifying rendering behavior.
 

@@ -9,7 +9,7 @@ import org.maplibre.android.maps.MapLibreMap;
 /**
  * Polyline is a geometry feature with an unclosed list of coordinates drawn as a line
  * @deprecated As of 7.0.0,
- * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+ * use <a href="https://github.com/maplibre/maplibre-plugins-android">
  *   MapLibre Annotation Plugin</a> instead
  */
 @Deprecated

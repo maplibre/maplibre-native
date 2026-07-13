@@ -11,7 +11,11 @@ SurfaceRenderableResource::~SurfaceRenderableResource() {
         return;
     }
 
-    backend.getDevice()->waitIdle(backend.getDispatcher());
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mbgl::Event::Render, "Vulkan device lost during surface shutdown");
+    }
 
     // specific order
     swapchainFramebuffers.clear();
@@ -23,6 +27,8 @@ SurfaceRenderableResource::~SurfaceRenderableResource() {
 
     depthAllocation.reset();
     colorAllocations.clear();
+
+    readTexture.reset();
 }
 
 void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
@@ -31,7 +37,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     colorAllocations.reserve(imageCount);
     swapchainImages.reserve(imageCount);
 
-    colorFormat = vk::Format::eR8G8B8A8Unorm;
+    setColorFormat(vk::Format::eR8G8B8A8Unorm);
     extent = vk::Extent2D(w, h);
 
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
@@ -92,9 +98,17 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         }
     }
 
-    // pick surface size
+    vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+
     capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), dispatcher);
 
+    // when reading from the swapchain disable pre-rotation and enable source transfer usage
+    if (surfaceRead) {
+        capabilities.currentTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
+        imageUsage |= vk::ImageUsageFlagBits::eTransferSrc;
+    }
+
+    // pick surface size
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         extent = capabilities.currentExtent;
     } else {
@@ -124,7 +138,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
                                    .setPresentMode(presentMode)
                                    .setImageExtent(extent)
                                    .setImageArrayLayers(1)
-                                   .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
+                                   .setImageUsage(imageUsage);
 
     int32_t graphicsQueueIndex = backend.getGraphicsQueueIndex();
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
@@ -156,7 +170,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo, nullptr, dispatcher);
     swapchainImages = device->getSwapchainImagesKHR(swapchain.get(), dispatcher);
 
-    colorFormat = swapchainCreateInfo.imageFormat;
+    setColorFormat(swapchainCreateInfo.imageFormat);
     extent = swapchainCreateInfo.imageExtent;
 
     acquireSemaphores.reserve(swapchainImages.size());
@@ -193,7 +207,7 @@ void SurfaceRenderableResource::initDepthStencil() {
         return;
     }
 
-    depthFormat = *formatIt;
+    setDepthFormat(*formatIt);
 
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eDepthStencilAttachment |
                             vk::ImageUsageFlagBits::eTransientAttachment;
@@ -242,9 +256,109 @@ void SurfaceRenderableResource::initDepthStencil() {
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
+void SurfaceRenderableResource::initRenderPass() {
+    // The current render pass should be invalidated if:
+    // - color/depth format changes (use setColorFormat/setDepthFormat)
+    // - renderable resource type changes
+    // - this is done currently only by inheritance and it can't change during runtime
+
+    if (renderPass) {
+        return;
+    }
+
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+    const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
+
+    const std::array<vk::AttachmentDescription, 2> attachments = {
+        vk::AttachmentDescription()
+            .setFormat(colorFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eStore)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(colorLayout),
+
+        vk::AttachmentDescription()
+            .setFormat(depthFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
+
+    const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
+    const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+    const auto subpass = vk::SubpassDescription()
+                             .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+                             .setColorAttachmentCount(1)
+                             .setColorAttachments(colorAttachmentRef)
+                             .setPDepthStencilAttachment(&depthAttachmentRef);
+
+    const std::array<vk::SubpassDependency, 2> dependencies = {
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+            .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
+
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setSrcAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+            .setDependencyFlags(vk::DependencyFlagBits::eByRegion),
+    };
+
+    const auto renderPassCreateInfo =
+        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
+
+    renderPass = device->createRenderPassUnique(renderPassCreateInfo, nullptr, dispatcher);
+}
+
+void SurfaceRenderableResource::setColorFormat(vk::Format format) {
+    if (colorFormat == format) {
+        return;
+    }
+
+    renderPass.reset();
+    colorFormat = format;
+}
+
+void SurfaceRenderableResource::setDepthFormat(vk::Format format) {
+    if (depthFormat == format) {
+        return;
+    }
+
+    renderPass.reset();
+    depthFormat = format;
+}
+
 void SurfaceRenderableResource::swap() {
     auto& context = static_cast<Context&>(backend.getContext());
+
+    if (surfaceRead) {
+        copySurfaceToReadTexture();
+    }
+
     context.submitFrame();
+
+    if (surfaceRead) {
+        context.waitFrame();
+        surfaceRead = false;
+    }
 }
 
 const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
@@ -265,11 +379,7 @@ const vk::Semaphore& SurfaceRenderableResource::getPresentSemaphore() const {
 }
 
 bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
-#ifdef __ANDROID__
     return surface && capabilities.supportedTransforms != vk::SurfaceTransformFlagBitsKHR::eIdentity;
-#else
-    return false;
-#endif
 }
 
 bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
@@ -279,7 +389,7 @@ bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
     return capabilities.currentTransform != updatedCapabilities.currentTransform;
 }
 
-float SurfaceRenderableResource::getRotation() {
+float SurfaceRenderableResource::getRotation() const {
     switch (capabilities.currentTransform) {
         default:
         case vk::SurfaceTransformFlagBitsKHR::eIdentity:
@@ -331,62 +441,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     initDepthStencil();
 
     // create render pass
-    const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
-
-    const std::array<vk::AttachmentDescription, 2> attachments = {
-        vk::AttachmentDescription()
-            .setFormat(colorFormat)
-            .setSamples(vk::SampleCountFlagBits::e1)
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eStore)
-            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setFinalLayout(colorLayout),
-
-        vk::AttachmentDescription()
-            .setFormat(depthFormat)
-            .setSamples(vk::SampleCountFlagBits::e1)
-            .setLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
-            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-            .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
-
-    const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
-    const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-    const auto subpass = vk::SubpassDescription()
-                             .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-                             .setColorAttachmentCount(1)
-                             .setColorAttachments(colorAttachmentRef)
-                             .setPDepthStencilAttachment(&depthAttachmentRef);
-
-    const std::array<vk::SubpassDependency, 2> dependencies = {
-        vk::SubpassDependency()
-            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-            .setDstSubpass(0)
-            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
-
-        vk::SubpassDependency()
-            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-            .setDstSubpass(0)
-            .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
-                             vk::PipelineStageFlagBits::eLateFragmentTests)
-            .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
-                             vk::PipelineStageFlagBits::eLateFragmentTests)
-            .setSrcAccessMask({})
-            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
-    };
-
-    const auto renderPassCreateInfo =
-        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
-
-    renderPass = device->createRenderPassUnique(renderPassCreateInfo, nullptr, dispatcher);
+    initRenderPass();
 
     // create swapchain framebuffers
     swapchainFramebuffers.reserve(swapchainImageViews.size());
@@ -412,17 +467,120 @@ void SurfaceRenderableResource::recreateSwapchain() {
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
     swapchainFramebuffers.clear();
-    renderPass.reset();
     swapchainImageViews.clear();
     swapchainImages.clear();
     acquireSemaphores.clear();
     presentSemaphores.clear();
 
+    readTexture.reset();
+
     init(extent.width, extent.height);
 }
 
-const vk::UniqueFramebuffer& SurfaceRenderableResource::getFramebuffer() const {
-    return swapchainFramebuffers[acquiredImageIndex];
+void SurfaceRenderableResource::queueSurfaceRead() {
+    if (surfaceRead) {
+        return;
+    }
+
+    surfaceRead = true;
+    backend.getContext<Context>().requestSurfaceUpdate(false);
+}
+
+void SurfaceRenderableResource::copySurfaceToReadTexture() {
+    auto& contextImpl = backend.getContext<Context>();
+    const auto& dispatcher = backend.getDispatcher();
+    const auto& physicalDevice = backend.getPhysicalDevice();
+
+    if (!readTexture) {
+        readTexture = std::make_unique<Texture2D>(contextImpl);
+        readTexture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
+        readTexture->setUsage(Texture2DUsage::Read);
+    }
+
+    readTexture->setSize({extent.width, extent.height});
+
+    const auto swapchainImage = getAcquiredImage();
+    auto& commandBuffer = contextImpl.getCommandBuffer();
+
+    if (surface) {
+        const auto barrier = vk::ImageMemoryBarrier()
+                                 .setImage(swapchainImage)
+                                 .setOldLayout(vk::ImageLayout::ePresentSrcKHR)
+                                 .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                 .setSrcAccessMask({})
+                                 .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+        commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                                       vk::PipelineStageFlagBits::eTransfer,
+                                       {},
+                                       nullptr,
+                                       nullptr,
+                                       barrier,
+                                       dispatcher);
+    }
+
+    bool useBlit =
+        surface &&
+        (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitSrc &&
+         physicalDevice.getFormatProperties(readTexture->getVulkanFormat(), dispatcher).linearTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitDst);
+
+    if (useBlit) {
+        readTexture->blitImage(swapchainImage, readTexture->getSize(), 0, 0, commandBuffer);
+    } else {
+        readTexture->copyImage(swapchainImage, readTexture->getSize(), 0, 0, commandBuffer);
+    }
+
+    if (surface) {
+        const auto barrier = vk::ImageMemoryBarrier()
+                                 .setImage(swapchainImage)
+                                 .setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                 .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
+                                 .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)
+                                 .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                 .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+        commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                                       vk::PipelineStageFlagBits::eTransfer,
+                                       {},
+                                       nullptr,
+                                       nullptr,
+                                       barrier,
+                                       dispatcher);
+    }
+}
+
+std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
+    if (!readTexture) {
+        return nullptr;
+    }
+
+    const auto& dispatcher = backend.getDispatcher();
+    const auto& physicalDevice = backend.getPhysicalDevice();
+
+    bool useBlit =
+        surface &&
+        (physicalDevice.getFormatProperties(colorFormat, dispatcher).optimalTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitSrc &&
+         physicalDevice.getFormatProperties(readTexture->getVulkanFormat(), dispatcher).linearTilingFeatures &
+             vk::FormatFeatureFlagBits::eBlitDst);
+
+    const auto image = readTexture->readImage();
+
+    // swizzle pixels to RGBA
+    if (!useBlit && colorFormat == vk::Format::eB8G8R8A8Unorm) {
+        for (size_t i = 0, size = image->size.area(); i < size; ++i) {
+            std::swap(image->data[i * image->channels + 0], image->data[i * image->channels + 2]);
+        }
+    }
+
+    return image;
 }
 
 } // namespace vulkan

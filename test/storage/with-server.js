@@ -1,6 +1,6 @@
 // This script runs a Node.js server passed to it while running another program.
 
-const { spawn } = require('child_process')
+import { spawn } from 'child_process';
 
 if (process.argv.length < 4) {
 	console.error("Usage: node with-server.js <path-to-server-js> <command-to-run> [arg]...");

@@ -8,8 +8,8 @@ namespace shaders {
 
 constexpr auto hillshadePrepareShaderPrelude = R"(
 
-#define idHillshadePrepareDrawableUBO       idDrawableReservedVertexOnlyUBO
-#define idHillshadePrepareTilePropsUBO      drawableReservedUBOCount
+#define idHillshadePrepareDrawableUBO       drawableUBOStartId
+#define idHillshadePrepareTilePropsUBO      drawableUBOStartId + 1
 
 )";
 

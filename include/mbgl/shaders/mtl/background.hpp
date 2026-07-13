@@ -87,7 +87,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(backgroundUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 };
 
 struct FragmentStage {
@@ -130,7 +130,7 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(backgroundUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 };
 
 struct FragmentStage {

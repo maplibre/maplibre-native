@@ -43,11 +43,11 @@ public:
     std::unique_ptr<RenderLayer> createRenderLayer(Immutable<style::Layer::Impl>) noexcept;
     /// Returns a new Bucket instance on success call; returns `nullptr` otherwise.
     std::unique_ptr<Bucket> createBucket(const BucketParameters&,
-                                         const std::vector<Immutable<style::LayerProperties>>&) noexcept;
+                                         const std::vector<Immutable<style::LayerProperties>>&);
     /// Returns a new Layout instance on success call; returns `nullptr` otherwise.
     std::unique_ptr<Layout> createLayout(const LayoutParameters&,
                                          std::unique_ptr<GeometryTileLayer>,
-                                         const std::vector<Immutable<style::LayerProperties>>&) noexcept;
+                                         const std::vector<Immutable<style::LayerProperties>>&);
 
     /**
      * @brief a build-time flag to enable/disable annotations in
@@ -62,7 +62,7 @@ public:
      *
      * Note: in future, annotations implementation will be moved from the core
      * to platform SDK (see
-     * https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation)
+     * https://github.com/maplibre/maplibre-plugins-android)
      * and this flag won't be needed any more.
      */
     static const bool annotationsEnabled;

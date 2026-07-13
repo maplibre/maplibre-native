@@ -466,7 +466,7 @@ public:
                 textureInfo.assign(*sharedImage);
                 updated = true;
             }
-        } else if (textureInfo.image) {
+        } else if (textureInfo.image || textureInfo.texture) {
             textureInfo.reset();
             updated = true;
         }
@@ -706,7 +706,7 @@ protected:
         Point<double> verticalShift = hatShadowShiftVector(params.puckPosition, params);
         const float horizontalScaleFactor =
             (1.0f - params.perspectiveCompensation) +
-            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 100.1f) *
+            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
                 params.perspectiveCompensation; // Compensation factor for the perspective deformation
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 

@@ -31,6 +31,11 @@ class ProgramParameters;
 
 namespace vulkan {
 
+using DynamicLoader = vk::detail::DynamicLoader;
+using DispatchLoaderDynamic = VULKAN_HPP_DISPATCH_LOADER_DYNAMIC_TYPE;
+template <typename OwnerType>
+using ObjectDestroy = vk::detail::ObjectDestroy<OwnerType, DispatchLoaderDynamic>;
+
 class RendererBackend : public gfx::RendererBackend {
 public:
     RendererBackend(gfx::ContextMode);
@@ -40,7 +45,7 @@ public:
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
     void init();
 
-    const vk::DispatchLoaderDynamic& getDispatcher() const { return dispatcher; }
+    const DispatchLoaderDynamic& getDispatcher() const { return dispatcher; }
     const vk::UniqueInstance& getInstance() const { return instance; }
     const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; }
     const vk::UniqueDevice& getDevice() const { return device; }
@@ -97,8 +102,8 @@ protected:
     void destroyResources();
 
 protected:
-    vk::DynamicLoader dynamicLoader;
-    vk::DispatchLoaderDynamic dispatcher;
+    DynamicLoader dynamicLoader;
+    DispatchLoaderDynamic dispatcher;
 
     vk::UniqueInstance instance;
     vk::UniqueDebugUtilsMessengerEXT debugUtilsCallback;

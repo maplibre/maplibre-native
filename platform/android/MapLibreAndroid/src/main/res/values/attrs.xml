@@ -18,6 +18,8 @@
         <attr name="maplibre_actionJournalLogFileCount" format="integer"/>
         <attr name="maplibre_actionJournalRenderingReportInterval" format="integer"/>
 
+        <attr name="maplibre_asyncRendererCleanup" format="boolean"/>
+
         <!--Camera-->
         <attr name="maplibre_cameraTargetLat" format="float"/>
         <attr name="maplibre_cameraTargetLng" format="float"/>

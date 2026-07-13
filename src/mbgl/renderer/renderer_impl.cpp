@@ -81,6 +81,10 @@ void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
     observer->onShaderCompileFailed(shaderID, type, additionalDefines);
 }
 
+void Renderer::Impl::onRenderError(std::exception_ptr error) {
+    observer->onRenderError(error);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }

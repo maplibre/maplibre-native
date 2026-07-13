@@ -55,4 +55,4 @@ $ ./gradlew formatKotlin
 
 ## Profiling
 
-See [Tracy Profiling](/profiling/tracy-profiling.md) to understand how Tracy can be used for profiling.
+See [Tracy Profiling](../../profiling/tracy-profiling.md) to understand how Tracy can be used for profiling.

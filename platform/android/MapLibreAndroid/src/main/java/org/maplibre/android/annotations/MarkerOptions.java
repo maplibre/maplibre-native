@@ -22,7 +22,7 @@ import org.maplibre.android.geometry.LatLng;
  *   .position(new LatLng(38.9002073, -77.03364419)));
  * </pre>
  * @deprecated As of 7.0.0,
- * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+ * use <a href="https://github.com/maplibre/maplibre-plugins-android">
  *   MapLibre Annotation Plugin</a> instead
  */
 @Deprecated
