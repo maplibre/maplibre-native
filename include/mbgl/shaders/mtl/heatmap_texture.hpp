@@ -40,7 +40,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(heatmapTextureUBOCount + 0)]];
+    short2 pos [[attribute(0)]];
 };
 
 struct FragmentStage {
