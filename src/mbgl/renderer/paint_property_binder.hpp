@@ -134,7 +134,7 @@ std::array<float, N * 2> zoomInterpolatedAttributeValue(const std::array<float, 
 
    Note that the shader source varies depending on whether we're using a uniform
    or attribute. Like GL JS, we dynamically compile shaders at runtime to
-   accomodate this.
+   accommodate this.
 */
 
 template <class T, class UniformValueType, class PossiblyEvaluatedType, class... As>
@@ -522,7 +522,7 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {
         if (!patternDependencies || patternDependencies->mid.empty()) {
-            // Unlike other propperties with expressions that evaluate to null,
+            // Unlike other properties with expressions that evaluate to null,
             // the default value for `*-pattern` properties is an empty string
             // and will not have a valid entry in patternPositions. We still
             // need to populate the attribute buffers to avoid crashes when we
