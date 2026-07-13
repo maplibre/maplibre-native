@@ -505,11 +505,9 @@ void SurfaceRenderableResource::copySurfaceToReadTexture() {
     auto& commandBuffer = contextImpl.getCommandBuffer();
 
     const auto oldLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
-    const auto srcStage = surface ? vk::PipelineStageFlagBits::eTopOfPipe
-                                  : vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    const vk::AccessFlags srcAccess = surface ? vk::AccessFlags{}
-                                              : vk::AccessFlags{vk::AccessFlagBits::eColorAttachmentWrite};
-    const vk::AccessFlags dstAccess = surface ? vk::AccessFlagBits::eTransferWrite : vk::AccessFlagBits::eTransferRead;
+    const auto srcStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    const vk::AccessFlags srcAccess = vk::AccessFlagBits::eColorAttachmentWrite;
+    const vk::AccessFlags dstAccess = vk::AccessFlagBits::eTransferRead;
 
     const auto readBarrier = vk::ImageMemoryBarrier()
                                  .setImage(swapchainImage)
