@@ -28,16 +28,7 @@ public:
         assert(!size.isEmpty());
 
         // Create color texture
-        colorTexture = context.createTexture2D();
-        colorTexture->setSize(size);
-        colorTexture->setFormat(gfx::TexturePixelType::RGBA, type);
-        if (auto* webgpuTexture = static_cast<Texture2D*>(colorTexture.get())) {
-            webgpuTexture->setUsage(WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst |
-                                    WGPUTextureUsage_CopySrc | WGPUTextureUsage_RenderAttachment);
-            webgpuTexture->setSizeChangedCallback([this](const Size& newSize) { handleResize(newSize); });
-        }
-        colorTexture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        colorTexture = createColorTexture();
 
         // Create depth/stencil texture if needed
         // WebGPU requires a combined depth-stencil texture when both are needed
@@ -304,9 +295,33 @@ public:
         return colorTexture;
     }
 
+    gfx::Texture2DPtr takeTexture() {
+        if (!colorTexture) {
+            return nullptr;
+        }
+
+        auto taken = std::move(colorTexture);
+        colorTexture = createColorTexture();
+        return taken;
+    }
+
     void setSizeListener(std::function<void(const Size&)> listener) { sizeListener = std::move(listener); }
 
 private:
+    gfx::Texture2DPtr createColorTexture() {
+        auto texture = context.createTexture2D();
+        texture->setSize(size);
+        texture->setFormat(gfx::TexturePixelType::RGBA, type);
+        if (auto* webgpuTexture = static_cast<Texture2D*>(texture.get())) {
+            webgpuTexture->setUsage(WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst |
+                                    WGPUTextureUsage_CopySrc | WGPUTextureUsage_RenderAttachment);
+            webgpuTexture->setSizeChangedCallback([this](const Size& newSize) { handleResize(newSize); });
+        }
+        texture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        return texture;
+    }
+
     void handleResize(const Size& newSize) {
         if (newSize == size || newSize.isEmpty()) {
             return;
@@ -358,6 +373,10 @@ PremultipliedImage OffscreenTexture::readStillImage() {
 
 const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
     return getResource<OffscreenTextureResource>().getTexture();
+}
+
+gfx::Texture2DPtr OffscreenTexture::takeTexture() {
+    return getResource<OffscreenTextureResource>().takeTexture();
 }
 
 } // namespace webgpu
