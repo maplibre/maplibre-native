@@ -242,20 +242,21 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 
 void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textureHandles,
                                          const DynamicTexturePtr& dynamicTexture) {
-    std::scoped_lock lock(mutex);
     if (!dynamicTexture) {
         return;
     }
 
+    std::scoped_lock lock(mutex);
+
     for (const auto& texHandle : textureHandles) {
         dynamicTexture->removeTexture(texHandle);
     }
-    if (dynamicTexture->isEmpty()) {
-        auto iterator = std::ranges::find(dynamicTextures, dynamicTexture);
-        if (iterator != dynamicTextures.end()) {
-            dynamicTextures.erase(iterator);
-        }
-    }
+}
+
+void DynamicTextureAtlas::removeUnusedDynamicTextures() {
+    std::scoped_lock lock(mutex);
+
+    std::erase_if(dynamicTextures, [](auto& dynamicTexture) { return dynamicTexture->isEmpty(); });
 }
 
 } // namespace gfx

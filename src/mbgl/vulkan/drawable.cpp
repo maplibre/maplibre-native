@@ -129,6 +129,47 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
     impl->segments = std::move(drawSegs);
 }
 
+void Drawable::setTextures(const Textures& textures_) noexcept {
+    if (textures_ == textures) {
+        return;
+    }
+
+    gfx::Drawable::setTextures(textures_);
+
+    if (impl->imageDescriptorSet) {
+        impl->imageDescriptorSet->markDirty();
+    }
+}
+
+void Drawable::setTextures(Textures&& textures_) noexcept {
+    if (textures_ == textures) {
+        return;
+    }
+
+    gfx::Drawable::setTextures(textures_);
+
+    if (impl->imageDescriptorSet) {
+        impl->imageDescriptorSet->markDirty();
+    }
+}
+
+void Drawable::setTexture(gfx::Texture2DPtr texture, size_t id) {
+    assert(id < textures.size());
+    if (id >= textures.size()) {
+        return;
+    }
+
+    if (textures[id] == texture) {
+        return;
+    }
+
+    textures[id] = std::move(texture);
+
+    if (impl->imageDescriptorSet) {
+        impl->imageDescriptorSet->markDirty();
+    }
+}
+
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
     MLN_TRACE_FUNC();
 
@@ -194,6 +235,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
+
+            const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+            setSharedBuffers(shaderImpl.getVertexAttributes(), impl->attributeBindings);
         }
     }
 
@@ -204,7 +248,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
-        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
+        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMinCount(),
                                                                    /*vertexType*/ gfx::AttributeDataType::Byte,
                                                                    /*vertexAttributeIndex=*/-1,
                                                                    /*vertexData=*/{},
@@ -219,6 +263,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
+
+            const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+            setSharedBuffers(shaderImpl.getInstanceAttributes(), impl->instanceBindings);
         }
     }
 
@@ -290,7 +337,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
-    const auto instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+    const auto instances = instanceAttributes ? instanceAttributes->getMinCount() : 1;
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();
@@ -358,7 +405,27 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::buildVulkanInputBindings() noexcept {
+void Drawable::setSharedBuffers(const gfx::VertexAttributeArray& attribs, const gfx::AttributeBindingArray& bindings) {
+    // set shared vertex/uniform buffers
+    attribs.visitAttributes([&](const gfx::VertexAttribute& attrib) {
+        const auto& vkAttrib = static_cast<const VertexAttribute&>(attrib);
+        int ubo = vkAttrib.getUBO();
+
+        if (ubo == -1 || impl->uniformBuffers.get(ubo) != nullptr) {
+            return;
+        }
+
+        const auto& binding = bindings[vkAttrib.getIndex()];
+        if (!binding) {
+            return;
+        }
+
+        const auto buffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
+        impl->uniformBuffers.set(ubo, std::make_shared<UniformBuffer>(buffer->get().shared()));
+    });
+}
+
+void Drawable::buildVulkanInputBindings() {
     MLN_TRACE_FUNC();
 
     impl->vulkanVertexBuffers.clear();
@@ -412,7 +479,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
     impl->pipelineInfo.updateVertexInputHash();
 }
 
-bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindAttributes(CommandEncoder& encoder) const {
     MLN_TRACE_FUNC();
 
     if (impl->vulkanVertexBuffers.empty()) return false;
@@ -433,7 +500,7 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
     return true;
 }
 
-bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindDescriptors(CommandEncoder& encoder) const {
     MLN_TRACE_FUNC();
 
     if (!shader) return false;
@@ -448,8 +515,12 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
             impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
         }
 
+        // check if textures were updated via external pointers (after setTexture call)
         for (const auto& texture : textures) {
-            if (!texture) continue;
+            if (!texture) {
+                continue;
+            }
+
             const auto textureImpl = static_cast<const Texture2D*>(texture.get());
             if (textureImpl->isModifiedAfter(impl->imageDescriptorSet->getLastModified())) {
                 impl->imageDescriptorSet->markDirty();
@@ -464,7 +535,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     return true;
 }
 
-void Drawable::uploadTextures(UploadPass&) const noexcept {
+void Drawable::uploadTextures(UploadPass&) const {
     MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {

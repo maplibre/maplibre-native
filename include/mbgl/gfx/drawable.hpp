@@ -111,13 +111,13 @@ public:
 
     /// @brief Set the collection of textures bound to this drawable
     /// @param textures_ A Textures collection to set
-    void setTextures(const Textures& textures_) noexcept { textures = textures_; }
-    void setTextures(Textures&& textures_) noexcept { textures = std::move(textures_); }
+    virtual void setTextures(const Textures& textures_) noexcept { textures = textures_; }
+    virtual void setTextures(Textures&& textures_) noexcept { textures = std::move(textures_); }
 
     /// @brief Attach the given texture to this drawable at the given internal ID.
     /// @param texture Texture2D instance
     /// @param id Internal ID of the texture.
-    void setTexture(gfx::Texture2DPtr texture, size_t id);
+    virtual void setTexture(gfx::Texture2DPtr texture, size_t id);
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
