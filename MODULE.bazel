@@ -17,7 +17,7 @@ bazel_dep(name = "maplibre-tile-spec", version = "0.0.0", repo_name = "maplibre_
 
 git_override(
     module_name = "maplibre-tile-spec",
-    commit = "40de5e709014dbc278917d1e1baa67610c811d48",
+    commit = "d457bf2b0135ecf718b9d8a1bea7e6fa5be2713e",
     remote = "https://github.com/maplibre/maplibre-tile-spec.git",
 )
 
