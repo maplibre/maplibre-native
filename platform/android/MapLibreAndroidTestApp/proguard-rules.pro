@@ -3,6 +3,9 @@
 
 # Kotlin
 -dontnote kotlin.**
+-keep class kotlin.LazyKt { *; }
+-keep class kotlin.LazyKt__LazyJVMKt { *; }
+-keep class kotlin.LazyKt__LazyKt { *; }
 
 # LeakCanary
 -dontnote com.squareup.leakcanary.internal.**
@@ -15,6 +18,7 @@
 
 -keep class org.maplibre.android.testapp.model.customlayer.ExampleCustomLayer { *; }
 
+-keep class androidx.tracing.** { *; }
 
  # okhttp
 -dontwarn org.bouncycastle.jsse.BCSSLSocket

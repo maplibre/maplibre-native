@@ -100,7 +100,7 @@ jobs:
         run: git config --global core.longpaths true
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
@@ -141,7 +141,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Use Node.js from nvmrc
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: 'platform/node/.nvmrc'
 
@@ -151,11 +151,11 @@ jobs:
 
       - name: Set up msvc dev cmd (Windows x64)
         if: runner.os == 'Windows' && matrix.arch == 'x86_64'
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Set up msvc dev cmd (Windows ARM64)
         if: runner.os == 'Windows' && matrix.arch == 'arm64'
-        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: amd64_arm64
 
@@ -171,7 +171,7 @@ jobs:
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: hendrikmuhs/ccache-action@33522472633dbd32578e909b315f5ee43ba878ce # v1.2.22
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
         with:
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
@@ -182,7 +182,7 @@ jobs:
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@33522472633dbd32578e909b315f5ee43ba878ce # v1.2.22
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
         with:
           variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
@@ -193,11 +193,11 @@ jobs:
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
-          key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
+          key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps-${{ hashFiles('platform/node/.nvmrc') }}
 
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'macOS'
@@ -218,7 +218,7 @@ jobs:
 
       - name: Restore vcpkg binary cache
         if: runner.os == 'Windows'
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
@@ -259,7 +259,7 @@ jobs:
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
@@ -289,7 +289,7 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
         run: |
           (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v137 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v147 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
           npm test
 
       - name: Test (Windows ARM64)
@@ -301,7 +301,7 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
         run: |
           (Invoke-WebRequest https://api.github.com/repos/mmozeiko/build-mesa/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa-llvmpipe-arm64-.+\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v137 .\mesa3d.7z opengl32.dll libGLESv2.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v147 .\mesa3d.7z opengl32.dll libGLESv2.dll
           npm test
       # On PRs make sure that the npm package can be packaged.
       - name: Pack

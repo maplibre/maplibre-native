@@ -71,7 +71,7 @@ It is also possible to build and run the test application in a simulator from th
 bazel run //platform/ios:App --//:renderer=metal
 ```
 
-You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
+You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml).
 
 ## CMake
 
