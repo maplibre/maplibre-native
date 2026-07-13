@@ -16,7 +16,8 @@ bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 
 # rules_xcodeproj accidentally includes a trailing comma in the generated
 # Testing.framework rsync exclusion, causing intermittent test-host build races.
-# https://github.com/MobileNativeFoundation/rules_xcodeproj/pull/3211
+# TODO: Remove this override once the upstream fix is released:
+# https://github.com/MobileNativeFoundation/rules_xcodeproj/pull/3321
 single_version_override(
     module_name = "rules_xcodeproj",
     patch_strip = 1,
