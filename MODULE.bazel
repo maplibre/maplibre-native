@@ -15,10 +15,9 @@ bazel_dep(name = "rules_swift_package_manager", version = "1.3.0")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 bazel_dep(name = "maplibre-tile-spec", version = "0.0.0", repo_name = "maplibre_tile_spec")
 
-git_override(
+local_path_override(
     module_name = "maplibre-tile-spec",
-    commit = "d457bf2b0135ecf718b9d8a1bea7e6fa5be2713e",
-    remote = "https://github.com/maplibre/maplibre-tile-spec.git",
+    path = "vendor/maplibre-tile-spec",
 )
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
