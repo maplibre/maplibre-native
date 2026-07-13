@@ -64,7 +64,7 @@ protected:
     ///   1. When releasing GL resources during Renderer destruction
     ///      (Including calling CustomLayerHost::deinitialize during
     ///      RenderCustomLayer destruction)
-    ///   2. When renderering through Renderer::render()
+    ///   2. When rendering through Renderer::render()
     ///      (Including calling CustomLayerHost::initialize for newly added
     ///      custom layers and
     ///       CustomLayerHost::deinitialize on layer removal)

@@ -14,7 +14,7 @@
         MapLibre Style Spec specifies locales with BCP 47
         Android and Intl.Collator implementations speak BCP 47 out of the box
         Darwin implementation requires translation to "Language Identifier"
-        We're OK with not supporting extensions, but we want to succesfully
+        We're OK with not supporting extensions, but we want to successfully
          parse any valid BCP 47 tag and get out the base language/script/region.
 
     Mozilla's version:
