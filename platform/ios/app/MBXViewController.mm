@@ -33,6 +33,11 @@
 #endif
 #endif
 
+#include <mbgl/plugin/plugin_manager.hpp>
+#include <memory>
+#include "PluginLayerExampleMetalRenderingCPP.hpp"
+#import "StyleFilterExample.h"
+
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     {.latitude = 38.8999418, .longitude = -77.033996},
     {.latitude = 37.7884307, .longitude = -122.3998631},
@@ -285,6 +290,13 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
 #endif
 #endif
+
+  [self.mapView addStyleFilter:[[StyleFilterExample alloc] init]];
+
+  // Register the CPP plugin layer types
+  auto cppMetalMapLayerType = std::make_shared<app::MetalPluginLayerType>();
+  auto *pm = mbgl::plugin::PluginManager::get();
+  pm->addMapLayerType(cppMetalMapLayerType);
 }
 
 - (void)viewDidLoad {

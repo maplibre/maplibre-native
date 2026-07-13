@@ -136,7 +136,7 @@ void LayerManagerAndroid::registerCoreFactory(mbgl::LayerFactory* factory) {
 JavaLayerPeerFactory* LayerManagerAndroid::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
     assert(typeInfo);
     for (const auto& factory : peerFactories) {
-        if (factory->getLayerFactory()->getTypeInfo() == typeInfo) {
+        if (layerTypeInfoEquals(factory->getLayerFactory()->getTypeInfo(), typeInfo)) {
             return factory.get();
         }
     }
@@ -154,7 +154,7 @@ LayerFactory* LayerManagerAndroid::getFactory(const mbgl::style::LayerTypeInfo* 
     }
 
     for (const auto& factory : coreFactories) {
-        if (factory->getTypeInfo() == info) {
+        if (layerTypeInfoEquals(factory->getTypeInfo(), info)) {
             return factory.get();
         }
     }

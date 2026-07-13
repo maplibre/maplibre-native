@@ -1,0 +1,20 @@
+cc_library(
+    name = "plugin_headers",
+    hdrs = [
+        "//:src/mbgl/plugin/plugin_manager.hpp",
+    ],
+    srcs = [
+    ],
+    includes = ["src"],   # public include prefix
+    visibility = ["//visibility:public"],
+)
+
+
+objc_library(
+    name = "cpp_headers_export",
+    hdrs = [
+        "//:src/mbgl/plugin/plugin_manager.hpp",
+    ],
+    includes = ["include"],  # for #include "<foo/bar.hpp>" to work
+    visibility = ["//visibility:public"],
+)

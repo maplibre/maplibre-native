@@ -8,14 +8,18 @@
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/math/wrap.hpp>
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
-#endif
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#endif
+
+#include <mbgl/plugin/plugin_map_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/resource_options.hpp>
@@ -23,6 +27,7 @@
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/transition_options.hpp>
+
 #include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/client_options.hpp>
@@ -63,6 +68,7 @@
 #import "MLNAnnotationImage_Private.h"
 #import "MLNAnnotationView_Private.h"
 #import "MLNAttributionInfo_Private.h"
+#import "MLNCPPPlugins.h"
 #import "MLNCompactCalloutView.h"
 #import "MLNCompassButton_Private.h"
 #import "MLNFaux3DUserLocationAnnotationView.h"
@@ -77,6 +83,8 @@
 #import "MLNRenderingStats_Private.h"
 #import "MLNScaleBar.h"
 #import "MLNSettings_Private.h"
+#include "MLNStyleFilter.h"
+#include "MLNStyleFilter_Private.h"
 #import "MLNStyleLayerManager.h"
 #import "MLNStyleLayer_Private.h"
 #import "MLNStyle_Private.h"
@@ -238,6 +246,18 @@ int processIsTranslated() {
 }
 
 #endif
+
+//
+
+extern "C" {
+__attribute__((used)) __attribute__((visibility("default"))) void _force_link_MapLayerTypeObjC() {
+  (void)sizeof(mbgl::plugin::LayerProperty);
+  (void)sizeof(mbgl::plugin::MapLayerType);
+  (void)sizeof(mbgl::plugin::DrawingContext);
+  (void)sizeof(mbgl::plugin::RenderingContext);
+  (void)sizeof(mbgl::plugin::MapLayer);
+}
+}
 
 class MLNAnnotationContext;
 
@@ -451,6 +471,9 @@ public:
 
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
+
+// Style Filters
+@property NSMutableArray *styleFilters;
 
 @end
 
@@ -7577,7 +7600,6 @@ static void *windowScreenContext = &windowScreenContext;
   Class layerClass = pluginLayerClass;
   factory->setOnLayerCreatedEvent([layerClass, weakMapView,
                                    pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
-    // NSLog(@"Creating Plugin Layer: %@", layerClass);
     MLNPluginLayer *layer = [[layerClass alloc] init];
     if (!weakMapView.pluginLayers) {
       weakMapView.pluginLayers = [NSMutableArray array];
@@ -7648,8 +7670,6 @@ static void *windowScreenContext = &windowScreenContext;
       [weakPlugInLayer onRenderLayer:strongMapView renderEncoder:encoder];
     };
 
-    // Set the lambdas
-    // auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
     pluginLayerImpl->setRenderFunction(renderFunction);
 
     // Set the update properties function
@@ -7665,18 +7685,42 @@ static void *windowScreenContext = &windowScreenContext;
             NSDictionary *properties = [NSJSONSerialization JSONObjectWithData:d
                                                                        options:0
                                                                          error:&error];
-            if (error) {
-              // TODO: What should we do here?
-            }
             [weakPlugInLayer onUpdateLayerProperties:properties];
           }
         });
   });
 
-  // TODO: Same question as above.  Do we ever want to have a core only layer type?
-  //       This could actually be something that we could set in the layer capabilities class
   darwinLayerManager->addLayerType(std::move(factory));
-  // darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
+}
+
+/**
+ Adds a style filter to the map view
+ */
+- (void)addStyleFilter:(MLNStyleFilter *)styleFilter {
+  if (!self.styleFilters) {
+    self.styleFilters = [NSMutableArray array];
+  }
+  [self.styleFilters addObject:styleFilter];
+
+  auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
+  coreStyleFilter->_filterStyleFunction =
+      [styleFilter](const std::string &filterData) -> const std::string {
+    std::string tempResult;
+
+    @autoreleasepool {
+      NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)filterData.data()
+                                                length:filterData.size()
+                                          freeWhenDone:NO];
+      NSData *filteredData = [styleFilter filterData:sourceData];
+      tempResult = std::string((const char *)[filteredData bytes], [filteredData length]);
+    }
+    return tempResult;
+  };
+
+  // Set the ivar
+  [styleFilter setFilter:coreStyleFilter];
+
+  _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
 }
 
 - (NSArray<NSString *> *)getActionJournalLogFiles {
