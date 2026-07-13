@@ -13,7 +13,7 @@
     _styleJSON = nil;
     _pluginLayers = nil;
     _actionJournalOptions = [[MLNActionJournalOptions alloc] init];
-    _enableFastPFOR = NO;
+    _fastPFOREnabled = NO;
   }
 
   return self;

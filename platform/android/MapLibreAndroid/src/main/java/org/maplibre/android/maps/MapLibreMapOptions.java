@@ -102,7 +102,7 @@ public class MapLibreMapOptions implements Parcelable {
 
   private boolean asyncRendererCleanup = false;
 
-  private boolean enableFastPFOR = false;
+  private boolean fastPFOREnabled = false;
 
   /**
    * Creates a new MapLibreMapOptions object.
@@ -170,7 +170,7 @@ public class MapLibreMapOptions implements Parcelable {
 
     asyncRendererCleanup = in.readByte() != 0;
 
-    enableFastPFOR = in.readByte() != 0;
+    fastPFOREnabled = in.readByte() != 0;
   }
 
   /**
@@ -345,8 +345,8 @@ public class MapLibreMapOptions implements Parcelable {
               typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_asyncRendererCleanup, false)
       );
 
-      maplibreMapOptions.enableFastPFOR(
-              typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_enableFastPFOR, false)
+      maplibreMapOptions.fastPFOREnabled(
+              typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_fastPFOREnabled, false)
       );
     } finally {
       typedArray.recycle();
@@ -861,12 +861,12 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
-   * Enable FastPFOR compression for vector tiles, defaults to false.
-   * @param enableFastPFOR true to enable, false to disable
+   * Enable FastPFOR decompression for vector tiles, defaults to false.
+   * @param enable true to enable, false to disable
    * @return This
    */
-  @NonNull public MapLibreMapOptions enableFastPFOR(boolean enableFastPFOR) {
-    this.enableFastPFOR = enableFastPFOR;
+  @NonNull public MapLibreMapOptions fastPFOREnabled(boolean enable) {
+    this.fastPFOREnabled = enable;
     return this;
   }
 
@@ -1018,12 +1018,12 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
-   * Check whether FastPFOR compression is enabled for vector tiles.
+   * Check whether FastPFOR decompression is enabled for vector tiles.
    *
    * @return true if enabled
    */
-  public boolean getEnableFastPFOR() {
-    return enableFastPFOR;
+  public boolean getFastPFOREnabled() {
+    return fastPFOREnabled;
   }
 
   /**
@@ -1419,7 +1419,7 @@ public class MapLibreMapOptions implements Parcelable {
 
     dest.writeByte((byte) (asyncRendererCleanup ? 1 : 0));
 
-    dest.writeByte((byte) (enableFastPFOR ? 1 : 0));
+    dest.writeByte((byte) (fastPFOREnabled ? 1 : 0));
   }
 
   @Override
@@ -1564,7 +1564,7 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
-    if (enableFastPFOR != options.enableFastPFOR) {
+    if (fastPFOREnabled != options.fastPFOREnabled) {
       return false;
     }
 
@@ -1621,7 +1621,7 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + (int) actionJournalLogFileCount;
     result = 31 * result + (int) actionJournalRenderingReportInterval;
     result = 31 * result + (asyncRendererCleanup ? 1 : 0);
-    result = 31 * result + (enableFastPFOR ? 1 : 0);
+    result = 31 * result + (fastPFOREnabled ? 1 : 0);
     return result;
   }
 }

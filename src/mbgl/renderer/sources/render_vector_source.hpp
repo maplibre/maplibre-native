@@ -12,19 +12,20 @@ public:
 
     /// Enable the decoding of MLT tiles with FastPFOR integer encodings.
     /// Default is false.  Such tiles will fail if not explicitly enabled.
-    void setEnableFastPFOR(bool enable) override { enableFastPFOR = enable; }
+    void setFastPFOREnabled(bool enable) override { fastPFOREnabled = enable; }
 
-private:
+protected:
     void updateInternal(const Tileset&,
                         const std::vector<Immutable<style::LayerProperties>>&,
                         bool needsRendering,
                         bool needsRelayout,
                         const TileParameters&) override;
+
     const std::optional<Tileset>& getTileset() const override;
 
 private:
     std::optional<bool> isMLT;
-    bool enableFastPFOR = false;
+    bool fastPFOREnabled = false;
 };
 
 } // namespace mbgl

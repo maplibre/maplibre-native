@@ -16,14 +16,14 @@ public:
                   const TileParameters&,
                   const Tileset&,
                   TileObserver* observer,
-                  bool enableFastPFOR);
+                  bool fastPFOREnabled);
 
     ~VectorMLTTile() override;
 
     void setData(const std::shared_ptr<const std::string>& data) override;
 
 private:
-    bool enableFastPFOR;
+    bool fastPFOREnabled;
 };
 
 } // namespace mbgl

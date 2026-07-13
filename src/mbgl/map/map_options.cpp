@@ -11,7 +11,7 @@ public:
     bool crossSourceCollisions = true;
     Size size = {64, 64};
     float pixelRatio = 1.0;
-    bool enableFastPFOR = false;
+    bool fastPFOREnabled = false;
 };
 
 // These requires the complete type of Impl.
@@ -83,13 +83,13 @@ float MapOptions::pixelRatio() const {
     return impl_->pixelRatio;
 }
 
-MapOptions& MapOptions::withEnableFastPFOR(bool enable) {
-    impl_->enableFastPFOR = enable;
+MapOptions& MapOptions::withFastPFOREnabled(bool enable) {
+    impl_->fastPFOREnabled = enable;
     return *this;
 }
 
-bool MapOptions::enableFastPFOR() const {
-    return impl_->enableFastPFOR;
+bool MapOptions::fastPFOREnabled() const {
+    return impl_->fastPFOREnabled;
 }
 
 } // namespace mbgl

@@ -106,7 +106,7 @@ public:
 
     virtual void setCacheEnabled(bool) {}
 
-    virtual void setEnableFastPFOR(bool) {}
+    virtual void setFastPFOREnabled(bool) {}
 
     virtual void reduceMemoryUse() = 0;
 

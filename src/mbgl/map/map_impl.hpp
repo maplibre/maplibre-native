@@ -91,7 +91,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const bool crossSourceCollisions;
-    const bool enableFastPFOR;
+    const bool fastPFOREnabled;
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
     std::unique_ptr<gfx::RenderingStatsView> renderingStatsView;

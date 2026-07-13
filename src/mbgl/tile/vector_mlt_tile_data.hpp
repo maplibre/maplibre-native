@@ -68,7 +68,7 @@ private:
 
 class VectorMLTTileData : public GeometryTileData {
 public:
-    VectorMLTTileData(std::shared_ptr<const std::string> data, bool enableFastPFOR);
+    VectorMLTTileData(std::shared_ptr<const std::string> data, bool fastPFOREnabled);
     VectorMLTTileData(const VectorMLTTileData&);
     VectorMLTTileData(VectorMLTTileData&&) = default;
 
@@ -80,7 +80,7 @@ public:
 private:
     mutable std::shared_ptr<const std::string> data;
     mutable std::shared_ptr<const MapLibreTile> tile;
-    bool enableFastPFOR;
+    bool fastPFOREnabled;
 };
 
 } // namespace mbgl

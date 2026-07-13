@@ -711,7 +711,7 @@ public:
       .withConstrainMode(mbgl::ConstrainMode::None)
       .withViewportMode(mbgl::ViewportMode::Default)
       .withCrossSourceCollisions(enableCrossSourceCollisions)
-      .withEnableFastPFOR(mlnMapoptions.enableFastPFOR);
+      .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled);
 
   mbgl::TileServerOptions *tileServerOptions =
       [[MLNSettings sharedSettings] tileServerOptionsInternal];

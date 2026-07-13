@@ -83,21 +83,21 @@ TEST(VectorTileData, ParseResults) {
 TEST(VectorTileData, MLTParseResults) {
     struct SubCase {
         bool useFastPFOR;
-        bool enableFastPFOR;
+        bool fastPFOREnabled;
     };
     for (const auto& testCase : std::vector{
-             SubCase{.useFastPFOR = false, .enableFastPFOR = false},
-             SubCase{.useFastPFOR = false, .enableFastPFOR = true},
-             SubCase{.useFastPFOR = true, .enableFastPFOR = true},
-             SubCase{.useFastPFOR = true, .enableFastPFOR = false},
+             SubCase{.useFastPFOR = false, .fastPFOREnabled = false},
+             SubCase{.useFastPFOR = false, .fastPFOREnabled = true},
+             SubCase{.useFastPFOR = true, .fastPFOREnabled = true},
+             SubCase{.useFastPFOR = true, .fastPFOREnabled = false},
          }) {
         const auto path = "test/fixtures/map/issue12432/0-0-0" +
                           std::string(testCase.useFastPFOR ? "-fastpfor.mlt" : ".mlt");
-        VectorMLTTileData data(std::make_shared<std::string>(util::read_file(path)), testCase.enableFastPFOR);
+        VectorMLTTileData data(std::make_shared<std::string>(util::read_file(path)), testCase.fastPFOREnabled);
 
         std::vector<std::string> layerNames = data.layerNames();
 
-        if (!testCase.enableFastPFOR && testCase.useFastPFOR) {
+        if (!testCase.fastPFOREnabled && testCase.useFastPFOR) {
             // If fast PFOR is not enabled, the fast PFOR tile should fail to parse
             ASSERT_EQ(layerNames.size(), 0u);
             continue;
