@@ -1,5 +1,7 @@
 package org.maplibre.android.testapp.style;
 
+import com.google.gson.JsonObject;
+
 import org.junit.Ignore;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.GeoJsonOptions;
@@ -7,6 +9,7 @@ import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.Point;
 import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.sources.GeoJsonSource;
@@ -110,6 +113,77 @@ public class GeoJsonSourceTests extends EspressoTest {
               maplibreMap.getProjection().toScreenLocation(
                       new LatLng(55, 20)), "layer").size());
     });
+  }
+
+  @Test
+  public void testFeatureStateUpdatesStyleOwnedSourceImmediately() {
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      boolean[] styleLoaded = {false};
+      String styleJson = ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_state_style);
+      maplibreMap.setStyle(new Style.Builder().fromJson(styleJson), style -> styleLoaded[0] = true);
+
+      while (!styleLoaded[0]) {
+        uiController.loopMainThreadForAtLeast(100);
+      }
+
+      TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
+
+      GeoJsonSource source = maplibreMap.getStyle().getSourceAs("style-source");
+      assertEquals(0, queryFeatureCount(maplibreMap));
+
+      JsonObject state = new JsonObject();
+      state.addProperty("selected", true);
+      source.setFeatureState("feature-1", state);
+
+      // The feature-state update is applied on a subsequent render pass, so
+      // poll until the filter re-evaluates rather than relying on a single
+      // didBecomeIdle callback (which can be missed if the repaint completes
+      // before the listener is attached).
+      assertEquals(1, pollFeatureCount(uiController, maplibreMap, 1));
+    });
+  }
+
+  @Test
+  public void testFeatureStateKeyRemovalAcrossSource() {
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      boolean[] styleLoaded = {false};
+      String styleJson = ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_state_style);
+      maplibreMap.setStyle(new Style.Builder().fromJson(styleJson), style -> styleLoaded[0] = true);
+
+      while (!styleLoaded[0]) {
+        uiController.loopMainThreadForAtLeast(100);
+      }
+
+      TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
+
+      GeoJsonSource source = maplibreMap.getStyle().getSourceAs("style-source");
+      JsonObject state = new JsonObject();
+      state.addProperty("selected", true);
+      source.setFeatureState("feature-1", state);
+      assertEquals(1, pollFeatureCount(uiController, maplibreMap, 1));
+
+      source.removeFeatureState(null, "selected");
+      assertEquals(0, pollFeatureCount(uiController, maplibreMap, 0));
+    });
+  }
+
+  private int queryFeatureCount(org.maplibre.android.maps.MapLibreMap maplibreMap) {
+    return maplibreMap.queryRenderedFeatures(
+            maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size();
+  }
+
+  private int pollFeatureCount(androidx.test.espresso.UiController uiController,
+                               org.maplibre.android.maps.MapLibreMap maplibreMap,
+                               int expected) {
+    long deadline = System.nanoTime() / 1_000_000L + 5_000L;
+    int count = queryFeatureCount(maplibreMap);
+    while (count != expected && System.nanoTime() / 1_000_000L < deadline) {
+      uiController.loopMainThreadForAtLeast(100);
+      count = queryFeatureCount(maplibreMap);
+    }
+    return count;
   }
 
   @Test
