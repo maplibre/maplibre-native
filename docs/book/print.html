@@ -53,8 +53,8 @@
         <link rel="icon" href="favicon-735396af.svg">
         <link rel="shortcut icon" href="favicon-e797cf1c.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-0392ca55.css">
-        <link rel="stylesheet" href="css/chrome-fc474251.css">
+        <link rel="stylesheet" href="css/general-e96d0476.css">
+        <link rel="stylesheet" href="css/chrome-d279d366.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-62c975f3.js";
+            window.path_to_searchindex_js = "searchindex-4a75adb5.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-24c1b73c.js"></script>
@@ -316,7 +316,7 @@ cd platform/android
 <h2 id="kotlin"><a class="header" href="#kotlin">Kotlin</a></h2>
 <p>All new code should be written in <a href="https://kotlinlang.org/">Kotlin</a>.</p>
 <h2 id="style-checking"><a class="header" href="#style-checking">Style Checking</a></h2>
-<p>To check Kotlin style, we use <a href="https://pinterest.github.io/ktlint/">ktlint</a>. This linter is based on the <a href="https://kotlinlang.org/docs/coding-conventions.html">official Kotlin coding conventions</a>. We intergrate with it using the <a href="https://github.com/jeremymailen/kotlinter-gradle">kotlinder</a> Gradle plugin.</p>
+<p>To check Kotlin style, we use <a href="https://pinterest.github.io/ktlint/">ktlint</a>. This linter is based on the <a href="https://kotlinlang.org/docs/coding-conventions.html">official Kotlin coding conventions</a>. We integrate with it using the <a href="https://github.com/jeremymailen/kotlinter-gradle">kotlinder</a> Gradle plugin.</p>
 <p>To check the style of all Kotlin source files, use:</p>
 <pre><code>$ ./gradlew checkStyle
 </code></pre>
@@ -620,7 +620,7 @@ cargo build --release --target aarch64-linux-android
 <h1 id="maplibre-ios-developer-guide"><a class="header" href="#maplibre-ios-developer-guide">MapLibre iOS Developer Guide</a></h1>
 <h2 id="bazel"><a class="header" href="#bazel">Bazel</a></h2>
 <p><a href="https://bazel.build/">Bazel</a> is used for building on iOS.</p>
-<p>You can generate an Xcode project thanks to <a href="https://github.com/MobileNativeFoundation/rules_xcodeproj">rules_xcodeproj</a> intergration.</p>
+<p>You can generate an Xcode project thanks to <a href="https://github.com/MobileNativeFoundation/rules_xcodeproj">rules_xcodeproj</a> integration.</p>
 <p>You need to install <a href="https://github.com/bazelbuild/bazelisk">bazelisk</a>, which is a wrapper around Bazel which ensures that the version specified in <code>.bazelversion</code> is used.</p>
 <pre><code>brew install bazelisk
 </code></pre>
@@ -939,7 +939,7 @@ cmake --build build-linux-opengl --target mbgl-render
 </code></pre>
 <h2 id="running-mbgl-render"><a class="header" href="#running-mbgl-render">Running <code>mbgl-render</code></a></h2>
 <p>Running <code>mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json</code> should produce a map tile image with the default MapLibre styling from <a href="https://maplibre.org/">the MapLibre demo</a>.</p>
-<p><img src="platforms/linux/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="platforms/linux/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"><span class="img-wrapper"><img src="platforms/linux/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></span></label></p>
 <pre><code class="language-bash">./build-linux-opengl/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 xdg-open out.png
 </code></pre>
@@ -964,7 +964,7 @@ wget https://gist.githubusercontent.com/louwers/d7607270cbd6e3faa05222a09bcb8f7d
 <pre><code class="language-bash">./build-linux-opengl/bin/mbgl-render --style style.json --output out.png
 </code></pre>
 <p>This should produce an <code>out.png</code> image in your current directory with a barebones image of the world.</p>
-<p><img src="platforms/linux/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="platforms/linux/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"><span class="img-wrapper"><img src="platforms/linux/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></span></label></p>
 <h3 id="running-the-render-tests"><a class="header" href="#running-the-render-tests">Running the render tests</a></h3>
 <blockquote class="blockquote-tag blockquote-tag-tip">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p>
@@ -1060,7 +1060,7 @@ cd maplibre-native
 <pre><code class="language-cmd">.\build-windows-&lt;preset&gt;\bin\mbgl-render.exe --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 </code></pre>
 <p>This should produce an <code>out.png</code> map tile image with the default MapLibre styling from <a href="https://maplibre.org/maplibre-gl-js/docs/examples/display-a-map/">the MapLibre demo</a>.</p>
-<p><img src="platforms/windows/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="platforms/windows/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"><span class="img-wrapper"><img src="platforms/windows/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></span></label></p>
 <h3 id="using-your-own-styletiles-1"><a class="header" href="#using-your-own-styletiles-1">Using your own style/tiles</a></h3>
 <p>You can also use the <code>mbgl-render</code> command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.</p>
 <p>For the purposes of this exercise, you can use the <code>zurich_switzerland.mbtiles</code> from <a href="https://github.com/acalcutt/tileserver-gl/releases/download/test_data/zurich_switzerland.mbtiles">here</a>, and the following <code>style.json</code> file.</p>
@@ -1146,7 +1146,7 @@ cd maplibre-native
 <pre><code class="language-cmd">.\build-windows-&lt;preset&gt;\bin\mbgl-render.exe --style path\to\style.json --output out.png
 </code></pre>
 <p>This should produce an <code>out.png</code> image in your current directory with a barebones image of the world.</p>
-<p><img src="platforms/windows/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="platforms/windows/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"><span class="img-wrapper"><img src="platforms/windows/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></span></label></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="building-with-msys2"><a class="header" href="#building-with-msys2">Building with MSYS2</a></h1>
 <h2 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h2>
@@ -1185,7 +1185,7 @@ cd maplibre-native
 <pre><code class="language-sh">./build-windows-&lt;preset&gt;/bin/mbgl-render.exe --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 </code></pre>
 <p>This should produce an <code>out.png</code> map tile image with the default MapLibre styling from <a href="https://maplibre.org/maplibre-gl-js/docs/examples/display-a-map/">the MapLibre demo</a>.</p>
-<p><img src="platforms/windows/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="platforms/windows/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"><span class="img-wrapper"><img src="platforms/windows/images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></span></label></p>
 <h3 id="using-your-own-styletiles-2"><a class="header" href="#using-your-own-styletiles-2">Using your own style/tiles</a></h3>
 <p>You can also use the <code>mbgl-render</code> command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.</p>
 <p>For the purposes of this exercise, you can use the <code>zurich_switzerland.mbtiles</code> from <a href="https://github.com/acalcutt/tileserver-gl/releases/download/test_data/zurich_switzerland.mbtiles">here</a>, and the following <code>style.json</code> file.</p>
@@ -1271,12 +1271,12 @@ cd maplibre-native
 <pre><code class="language-sh">./build-windows-&lt;preset&gt;/bin/mbgl-render.exe --style path/to/style.json --output out.png
 </code></pre>
 <p>This should produce an <code>out.png</code> image in your current directory with a barebones image of the world.</p>
-<p><img src="platforms/windows/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="platforms/windows/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"><span class="img-wrapper"><img src="platforms/windows/images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command"></span></label></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="release-policy"><a class="header" href="#release-policy">Release Policy</a></h1>
 <blockquote class="blockquote-tag blockquote-tag-note">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
-<p>The following release policiy applies specifically to MapLibre <strong>Android</strong> and MapLibre <strong>iOS</strong>.</p>
+<p>The following release policy applies specifically to MapLibre <strong>Android</strong> and MapLibre <strong>iOS</strong>.</p>
 </blockquote>
 <ul>
 <li>We use <a href="https://semver.org/">semantic versioning</a>. Breaking changes will always result in a major release.</li>
@@ -1332,7 +1332,7 @@ property: <code>background-color</code>, <code>line-width</code>, etc., with a s
 <h3 id="metrics"><a class="header" href="#metrics"><code>metrics</code></a></h3>
 <p>The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:</p>
 <ul>
-<li><code>cache-style.db</code>, <code>cache-metrics.db</code>: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.</li>
+<li><code>cache-style.db</code>, <code>cache-metrics.db</code>: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test execution.</li>
 <li><code>binary-size</code>: binary-size checks. Not used right now, see <a href="https://github.com/maplibre/maplibre-native/issues/3379">#3379</a>.</li>
 <li><code>expectations</code>: expectations for various platforms. E.g. <code>expectations/platform-android</code> is referenced by the <code>android-render-test-runner-metrics.json</code> manifest under its <code>expectation_paths</code> key.</li>
 <li><code>ignores</code>: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
@@ -1353,7 +1353,7 @@ Manifests can have a key <code>ignore_paths</code> with an array of ignore files
 </code></pre>
 </li>
 </ul>
-<h4 id="metricsintergration"><a class="header" href="#metricsintergration"><code>metrics/intergration</code></a></h4>
+<h4 id="metricsintegration"><a class="header" href="#metricsintegration"><code>metrics/integration</code></a></h4>
 <ul>
 <li><code>data</code>, <code>geojson</code>, <code>glyphs</code>, <code>image</code>, <code>sprites</code>, <code>styles</code>, <code>tiles</code>, <code>tilesets</code>, <code>video</code>: various data used by the render tests.</li>
 <li><code>expression-tests</code>: tests that verify the behavior of <a href="https://maplibre.org/maplibre-style-spec/expressions/">expressions</a> of the MapLibre Style Spec.</li>
@@ -1735,7 +1735,7 @@ measured in degree angles instead of meters. Because angular distance
 stays the same if we move the angle across the axis of earth.</p>
 <p>Figure 2 shows rendering map tile through the rendering spaces and
 transformations below:</p>
-<p><img src="design/media/rendering-spaces-and-transformations-for-map-tiles.png" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/rendering-spaces-and-transformations-for-map-tiles.png" alt=""><span class="img-wrapper"><img src="design/media/rendering-spaces-and-transformations-for-map-tiles.png" alt=""></span></label>
 <em>Figure 2: Rendering Spaces and Transformations for Map Tiles</em></p>
 <h2 id="world-coordinates"><a class="header" href="#world-coordinates">World Coordinates</a></h2>
 <p>World Coordinates for maps start with <em>Geographic Coordinate Systems</em>.
@@ -1862,7 +1862,7 @@ requires map center, bearing, and pitch.</p>
 move the 3D plane with tiles, rather moves the camera atop the defined
 position named center. In the rendering world, this is not the center of
 the 3D plane we render tiles on, rather the position of the camera.</em></p>
-<p><img src="design/media/perspective-frustum.png" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/perspective-frustum.png" alt=""><span class="img-wrapper"><img src="design/media/perspective-frustum.png" alt=""></span></label>
 <em>Figure 3: Perspective Frustum (Sourced from learnopengl.com)</em></p>
 <p>The benefit of tile coordinates continues here. The camera representation
 we use here, to be specific the view matrix, can directly take the tile
@@ -2215,7 +2215,7 @@ for future improvement. This document intends to address the first.</p>
 <h2 id="recommendations"><a class="header" href="#recommendations">Recommendations</a></h2>
 <p>This document proposes the following component architecture for MapLibre
 Native to address the architectural shortcomings.</p>
-<p><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt=""><span class="img-wrapper"><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt=""></span></label>
 <em>Figure 4: Proposed Architecture of MapLibre Native</em></p>
 <p>Proposed architecture of MapLibre Native in Figure 4 addresses the
 aforementioned problems by:</p>
@@ -2300,7 +2300,7 @@ languages. <a href="#fr-19-1">↩</a></p>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="android-map-rendering-data-flow"><a class="header" href="#android-map-rendering-data-flow">Android Map Rendering Data Flow</a></h1>
-<p><img src="design/media/android-data-flow.jpg" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/android-data-flow.jpg" alt=""><span class="img-wrapper"><img src="design/media/android-data-flow.jpg" alt=""></span></label>
 <em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
 <p>Figure 5 shows a simplified data flow diagram of initializing a map. The
 device section of this data flow diagram is based on Android platform.</p>
@@ -2322,7 +2322,7 @@ contract established from the Java runtime. The render thread this
 document talked about before is seen in the form of <em>MapRenderer</em>. This
 is an Actor that passes the rendering events from the device runtime to
 <em>MapLibre Native</em> renderer.</p>
-<p><img src="design/media/workflow-of-rendering-tiles.jpg" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/workflow-of-rendering-tiles.jpg" alt=""><span class="img-wrapper"><img src="design/media/workflow-of-rendering-tiles.jpg" alt=""></span></label>
 <em>Figure 6: Workflow of rendering tiles</em></p>
 <p>Before the frame-by-frame map rendering
 starts with <em>MapLibre Native</em> renderer, the generic map component
@@ -2389,7 +2389,7 @@ function uses a glyph manager for fetching glyphs and font stacks that
 contains said glyphs. Sources and Layers are translated to
 <em>RenderSource</em> and <em>RenderLayer</em> objects.</p>
 <p><em>For the sake of restating, a layer is composed of a set of sources.</em></p>
-<p><img src="design/media/android-rendering-map-tiles.jpg" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/android-rendering-map-tiles.jpg" alt=""><span class="img-wrapper"><img src="design/media/android-rendering-map-tiles.jpg" alt=""></span></label>
 <em>Figure 7: Simplified data flow diagram of rendering map tiles</em></p>
 <p>A <em>RenderSource</em> is produced from a single
 source that has an internal <em>update</em> method. This method produces the
@@ -2410,7 +2410,7 @@ see more about that in Coordinate System section. <a href="#fr-20-1">↩</a></p>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="geometry-tile-worker"><a class="header" href="#geometry-tile-worker">Geometry Tile Worker</a></h1>
-<p><img src="design/media/geometry-tile-worker-state-machine.jpg" alt="">
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="design/media/geometry-tile-worker-state-machine.jpg" alt=""><span class="img-wrapper"><img src="design/media/geometry-tile-worker-state-machine.jpg" alt=""></span></label>
 <em>Figure 8: Simplified Geometry Tile Worker State Machine</em></p>
 <p>Going back to Geometry Tile Worker, it is
 a state machine. The main principle is that Geometry Tile Worker should
@@ -2686,7 +2686,7 @@ And here for Bazel:
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-abc7f01d.js"></script>
-        <script src="book-c22b7243.js"></script>
+        <script src="book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
 
