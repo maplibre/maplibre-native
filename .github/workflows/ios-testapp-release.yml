@@ -5,7 +5,7 @@ jobs:
   ios-testapp-release:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
 
@@ -21,7 +21,7 @@ jobs:
         run: bazel build //platform/ios/app-swift:MapLibreApp -c opt  --ios_multi_cpus=arm64 --//:renderer=metal --action_env=SENTRY_DSN=${{ vars.SENTRY_DSN_IOS }} --embed_label=maplibre_app_1.0_build_"$(date +%s)"
 
       - name: 'Upload app to TestFlight'
-        uses: apple-actions/upload-testflight-build@v4
+        uses: apple-actions/upload-testflight-build@1ad58030672057aa084b4e96beb6f7a8c627f9e6 # v5.2.1
         with:
           app-path: 'bazel-bin/platform/ios/app-swift/MapLibreApp.ipa'
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}

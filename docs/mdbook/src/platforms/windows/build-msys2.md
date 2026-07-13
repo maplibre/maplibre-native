@@ -14,7 +14,6 @@ pacman -S --needed \
     ${MINGW_PACKAGE_PREFIX}-cmake \
     ${MINGW_PACKAGE_PREFIX}-angleproject \
     ${MINGW_PACKAGE_PREFIX}-curl-winssl \
-    ${MINGW_PACKAGE_PREFIX}-dlfcn \
     ${MINGW_PACKAGE_PREFIX}-glfw \
     ${MINGW_PACKAGE_PREFIX}-icu \
     ${MINGW_PACKAGE_PREFIX}-libjpeg-turbo \
