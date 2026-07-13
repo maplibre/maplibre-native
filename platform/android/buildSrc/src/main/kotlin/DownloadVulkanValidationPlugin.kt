@@ -1,7 +1,7 @@
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.getByType
 
 
 open class DownloadVulkanValidationPlugin : Plugin<Project> {
@@ -10,10 +10,23 @@ open class DownloadVulkanValidationPlugin : Plugin<Project> {
     }
 }
 
-internal fun Project.configureVulkanJniLibs() = this.extensions.getByType<BaseExtension>().run {
-    sourceSets {
-        getByName("vulkan") {
-            jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
+internal fun Project.configureVulkanJniLibs() {
+    val appExtension = extensions.findByType(ApplicationExtension::class.java)
+    if (appExtension != null) {
+        appExtension.sourceSets {
+            getByName("vulkan") {
+                jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
+            }
+        }
+        return
+    }
+
+    val libraryExtension = extensions.findByType(LibraryExtension::class.java)
+    if (libraryExtension != null) {
+        libraryExtension.sourceSets {
+            getByName("vulkan") {
+                jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
+            }
         }
     }
 }

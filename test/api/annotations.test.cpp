@@ -476,7 +476,7 @@ TEST(Annotations, ViewFrustumCulling) {
 
     // Important premise of this test is "static const float viewportPadding =
     // 100;" as defined in collision_index.cpp: tests using edge insets are
-    // writen so that padding is 128 (half of viewSize width). If increasing
+    // written so that padding is 128 (half of viewSize width). If increasing
     // viewportPadding, increase the padding in test cases below.
     AnnotationTest test;
 

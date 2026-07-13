@@ -127,4 +127,5 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
     func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {}
     func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {}
     func mapView(_: MLNMapView, spriteDidError _: String, url _: String) {}
+    func mapViewRendererDidError(_: MLNMapView) {}
 }

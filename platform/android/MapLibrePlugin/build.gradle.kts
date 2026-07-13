@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-  implementation("com.android.tools.build:gradle:8.6.1")
+  implementation("com.android.tools.build:gradle:9.1.1")
 }
 
 group = "org.maplibre"

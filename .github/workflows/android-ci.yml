@@ -26,7 +26,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
@@ -34,7 +34,7 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -57,14 +57,14 @@ jobs:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN_ANDROID }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: ".nvmrc"
 
@@ -101,27 +101,14 @@ jobs:
           echo "SENTRY_ORG=maplibre" >> "$GITHUB_ENV"
           echo "SENTRY_PROJECT=maplibre-android" >> "$GITHUB_ENV"
 
-      - uses: infotroph/tree-is-clean@69d598a958e8cb8f3d0e3d52b5ebcd8684f2adc2 # v1.0.6
+      - uses: ./.github/actions/tree-is-clean
         with:
           check_untracked: true
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
-
       - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Check code style
         if: matrix.renderer == 'opengl'
@@ -165,7 +152,7 @@ jobs:
 
       - name: Create artifact for benchmark APKs
         if: matrix.renderer == 'opengl'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           if-no-files-found: error
           name: benchmarkAPKs
@@ -200,7 +187,7 @@ jobs:
         run: sentry-cli debug-files upload MapLibreAndroidTestApp
 
       - name: Upload android-ui-test-${{ matrix.renderer }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           if-no-files-found: error
           name: android-ui-test-${{ matrix.renderer }}
@@ -223,7 +210,7 @@ jobs:
         working-directory: test/android
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
@@ -234,23 +221,10 @@ jobs:
         run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
         working-directory: .
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
-
       - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build C++ Unit Tests App
         run: |
@@ -259,7 +233,7 @@ jobs:
           cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
 
       - name: Store C++ Unit Tests .apk files
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: android-cpp-tests
           if-no-files-found: error
@@ -281,30 +255,17 @@ jobs:
     if: needs.pre_job.outputs.should_skip != 'true'
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
-
       - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
         uses: ./.github/actions/android-build-and-upload-render-test
@@ -322,30 +283,17 @@ jobs:
     env:
       IS_LOCAL_DEVELOPMENT: false
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
 
       - uses: ./.github/actions/setup-android-ci
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
-
       - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build WebGPU Dawn library for arm64-v8a
         run: ./gradlew :MapLibreAndroid:assembleWebgpuDawnDebug -Pmaplibre.abis=arm64-v8a
@@ -368,7 +316,7 @@ jobs:
       C_COMPILER: aarch64-linux-android26-clang
       BINDGEN_TARGET: aarch64-linux-android26
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           persist-credentials: false
@@ -376,12 +324,9 @@ jobs:
       - uses: ./.github/actions/setup-android-ci
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # stable
+        uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
         with:
           toolchain: stable
-
-      - name: Add Android Rust target
-        run: rustup target add ${{ env.RUST_TARGET }}
 
       - name: Configure cargo for Android NDK linker
         run: |
@@ -396,6 +341,11 @@ jobs:
       - name: Pre-build wgpu-native for Android
         working-directory: vendor/wgpu-native
         run: |
+          # vendor/wgpu-native pins its own rust toolchain; install targets for that active toolchain
+          ACTIVE_TOOLCHAIN=$(rustup show active-toolchain | awk '{print $1}')
+          rustup target add ${{ env.RUST_TARGET }} --toolchain "$ACTIVE_TOOLCHAIN"
+          rustup target list --toolchain "$ACTIVE_TOOLCHAIN" --installed | grep -x '${{ env.RUST_TARGET }}'
+
           LATEST_NDK=$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
           NDK_PREBUILT="$LATEST_NDK/toolchains/llvm/prebuilt/linux-x86_64"
           RESOURCE_DIR=$("$NDK_PREBUILT/bin/clang" --print-resource-dir)
@@ -405,23 +355,10 @@ jobs:
           export "${ENV_VAR}=--sysroot=$NDK_PREBUILT/sysroot --target=${{ env.BINDGEN_TARGET }} -isystem $RESOURCE_DIR/include"
           cargo build --release --target ${{ env.RUST_TARGET }} --no-default-features --features vulkan,wgsl,spirv,glsl
 
-      - name: Configure AWS Credentials
-        if: vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
-
       - name: Configure sccache
-        run: |
-          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
-          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
-
-          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
-            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
-          fi
+        uses: ./.github/actions/configure-sccache-s3
+        with:
+          vars: ${{ toJSON(vars) }}
 
       - name: Build WebGPU wgpu-native library for Android
         run: ./gradlew :MapLibreAndroid:assembleWebgpuWgpuDebug -Pmaplibre.abis=${{ env.ANDROID_ARCH }}
@@ -453,13 +390,13 @@ jobs:
 
       # automatically trigger android-release when code is pushed to main
       # and the platform/android/VERSION file has changed
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
       - name: VERSION file changed
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: version-file-android-changed
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files: platform/android/VERSION
 

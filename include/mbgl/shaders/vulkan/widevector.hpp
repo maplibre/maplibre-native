@@ -8,8 +8,8 @@ namespace shaders {
 
 constexpr auto wideVectorShaderPrelude = R"(
 
-#define idWideVectorUniformsUBO         idDrawableReservedVertexOnlyUBO
-#define idWideVectorUniformWideVecUBO   drawableReservedUBOCount
+#define idWideVectorUniformsUBO         drawableUBOStartId
+#define idWideVectorUniformWideVecUBO   drawableUBOStartId + 1
 
 )";
 

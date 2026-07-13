@@ -60,7 +60,7 @@ struct Bound {
 };
 
 // Implements a modified scan-line algorithm to provide a streaming interface
-// for tile cover on arbitrary shapes. A `BoundsMap` is genereted from the input
+// for tile cover on arbitrary shapes. A `BoundsMap` is generated from the input
 // geometry where each tuple indicates the set of Bounds that start at a y tile
 // coordinate. Each bound represents a chain of edges from a local y-minima to a
 // local y-maxima. For each row, the activeBounds list aggregates all bounds

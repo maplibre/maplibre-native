@@ -63,7 +63,7 @@ public:
     Transform transform;
     TransformState transformState;
     AnnotationManager annotationManager{style};
-    std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
@@ -1001,7 +1001,7 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
 
     source.setGeoJSONData(nullptr);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
-    EXPECT_FALSE(renderSource.isLoaded()); // Tiles remain in continous mode.
+    EXPECT_FALSE(renderSource.isLoaded()); // Tiles remain in continuous mode.
 
     source.setGeoJSONData(geoJSONData);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());

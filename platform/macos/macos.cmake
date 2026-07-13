@@ -167,6 +167,8 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
             $<TARGET_FILE:mbgl-harfbuzz>
             $<TARGET_FILE:mbgl-vendor-parsedate>
+            $<TARGET_FILE:mbgl-vendor-icu>
+            $<TARGET_FILE:mlt-cpp>
             ${STATIC_LIBS}
     )
 
