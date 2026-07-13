@@ -41,166 +41,280 @@ CircleLayer::~CircleLayer() = default;
 
 jni::Local<jni::Object<>> CircleLayer::getCircleSortKey(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleSortKey()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleSortKey()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleSortKey()));
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleRadius(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleRadius()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleRadius()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleRadius()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleRadiusTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleRadiusTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleRadiusTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleRadiusTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleRadiusTransition(options);
+    toCircleLayer(*layer).setCircleRadiusTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleColor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleColor()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleColor()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleColor()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleColorTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleColorTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleColorTransition(options);
+    toCircleLayer(*layer).setCircleColorTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleBlur(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleBlur()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleBlur()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleBlur()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleBlurTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleBlurTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleBlurTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleBlurTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleBlurTransition(options);
+    toCircleLayer(*layer).setCircleBlurTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleOpacity(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleOpacity()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleOpacity()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleOpacity()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleOpacityTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleOpacityTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleOpacityTransition(options);
+    toCircleLayer(*layer).setCircleOpacityTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleTranslate(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleTranslate()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleTranslate()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleTranslate()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleTranslateTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleTranslateTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleTranslateTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleTranslateTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleTranslateTransition(options);
+    toCircleLayer(*layer).setCircleTranslateTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleTranslateAnchor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleTranslateAnchor()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleTranslateAnchor()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleTranslateAnchor()));
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCirclePitchScale(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCirclePitchScale()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCirclePitchScale()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCirclePitchScale()));
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCirclePitchAlignment(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCirclePitchAlignment()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCirclePitchAlignment()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCirclePitchAlignment()));
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleStrokeWidth(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleStrokeWidth()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleStrokeWidth()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleStrokeWidth()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleStrokeWidthTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleStrokeWidthTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleStrokeWidthTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleStrokeWidthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleStrokeWidthTransition(options);
+    toCircleLayer(*layer).setCircleStrokeWidthTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleStrokeColor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleStrokeColor()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleStrokeColor()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleStrokeColor()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleStrokeColorTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleStrokeColorTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleStrokeColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleStrokeColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleStrokeColorTransition(options);
+    toCircleLayer(*layer).setCircleStrokeColorTransition(options);
 }
 
 jni::Local<jni::Object<>> CircleLayer::getCircleStrokeOpacity(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(layer).getCircleStrokeOpacity()));
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, style::CircleLayer::getDefaultCircleStrokeOpacity()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toCircleLayer(*layer).getCircleStrokeOpacity()));
 }
 
 jni::Local<jni::Object<TransitionOptions>> CircleLayer::getCircleStrokeOpacityTransition(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = toCircleLayer(layer).getCircleStrokeOpacityTransition();
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+    }
+    mbgl::style::TransitionOptions options = toCircleLayer(*layer).getCircleStrokeOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void CircleLayer::setCircleStrokeOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
     mbgl::style::TransitionOptions options;
     options.duration.emplace(mbgl::Milliseconds(duration));
     options.delay.emplace(mbgl::Milliseconds(delay));
-    toCircleLayer(layer).setCircleStrokeOpacityTransition(options);
+    toCircleLayer(*layer).setCircleStrokeOpacityTransition(options);
 }
 
 // CircleJavaLayerPeerFactory

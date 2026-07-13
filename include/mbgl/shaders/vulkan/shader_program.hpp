@@ -11,27 +11,17 @@
 
 namespace mbgl {
 namespace shaders {
-struct UniformBlockInfo {
-    constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
-        : index(id_),
-          vertex(vertex_),
-          fragment(fragment_),
-          size(size_),
-          id(id_) {}
-    std::size_t index;
-    bool vertex;
-    bool fragment;
-    std::size_t size;
-    std::size_t id;
-};
+
 struct AttributeInfo {
-    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_, int ubo_ = -1)
         : index(index_),
           dataType(dataType_),
-          id(id_) {}
+          id(id_),
+          ubo(ubo_) {}
     std::size_t index;
     gfx::AttributeDataType dataType;
     std::size_t id;
+    int ubo;
 };
 struct TextureInfo {
     constexpr TextureInfo(std::size_t index_, std::size_t id_)
@@ -45,6 +35,7 @@ struct TextureInfo {
 namespace vulkan {
 class RenderableResource;
 class RendererBackend;
+class Context;
 class ShaderProgram;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
@@ -71,17 +62,18 @@ public:
 
     bool hasTextures() const;
 
-    void initAttribute(const shaders::AttributeInfo&);
+    void initVertexAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
     void initTexture(const shaders::TextureInfo&);
 
 protected:
     std::string shaderName;
     RendererBackend& backend;
+    Context& context;
 
     vk::UniqueShaderModule vertexShader;
     vk::UniqueShaderModule fragmentShader;
-    std::unordered_map<std::size_t, vk::UniquePipeline> pipelines;
+    std::shared_ptr<std::unordered_map<std::size_t, vk::UniquePipeline>> pipelines;
 
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;

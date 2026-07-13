@@ -14,7 +14,7 @@ class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
         return options
     }
 
-    override public func setUp() {
+    override func setUp() {
         super.setUp()
         MLNSettings.use(MLNWellKnownTileServer.mapTiler)
     }
@@ -38,7 +38,6 @@ class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
                 let snapshotter = MLNMapSnapshotter(options: options)
 
                 snapshotter.start(completionHandler: { snapshot, error in
-
 //                    // Without capturing snapshotter:
 //                    XCTAssertNil(snapshot)
 //                    XCTAssertNotNil(error)

@@ -1,11 +1,9 @@
 #pragma once
 
-#if MLN_DRAWABLE_RENDERER
-#include <mbgl/gfx/drawable.hpp>
-#endif
-
-#include <mbgl/actor/scheduler.hpp>
 #include <memory>
+
+#include <mbgl/gfx/drawable.hpp>
+#include <mbgl/actor/scheduler.hpp>
 
 namespace mbgl {
 

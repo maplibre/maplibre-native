@@ -15,6 +15,7 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/collision.hpp>
+#include <mbgl/shaders/mtl/color_relief.hpp>
 #include <mbgl/shaders/mtl/custom_geometry.hpp>
 #include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
@@ -116,11 +117,14 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
+                  shaders::BuiltIn::FillExtrusionInstancedShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::FillExtrusionPatternInstancedShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,
                   shaders::BuiltIn::HillshadePrepareShader,
+                  shaders::BuiltIn::ColorReliefShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
@@ -129,7 +133,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }

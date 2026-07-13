@@ -27,6 +27,10 @@ bool allowsIdeographicBreaking(char16_t chr);
     advances */
 bool allowsFixedWidthGlyphGeneration(char16_t chr);
 
+/** Returns whether the whole 256-codepoint glyph range can be generated
+    locally. Use this for range-level decisions because some ranges are mixed. */
+bool glyphRangeIsEntirelyLocallyGenerated(char16_t rangeStart);
+
 /** Returns whether any substring of the given string can be drawn as vertical
     text with upright glyphs. */
 bool allowsVerticalWritingMode(const std::u16string& string);
@@ -78,6 +82,8 @@ bool isStringInSupportedScript(const std::string& input);
 bool isCharInComplexShapingScript(char16_t chr);
 
 bool isWhitespace(char16_t chr);
+
+bool isVariationSelector1(char16_t chr);
 
 } // namespace i18n
 } // namespace util

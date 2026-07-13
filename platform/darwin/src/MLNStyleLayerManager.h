@@ -18,12 +18,7 @@ public:
 
     MLNStyleLayer* createPeer(style::Layer*);
 
-private:
-    LayerManagerDarwin();
-    /**
-     * Enables a layer type for both JSON style and runtime API.
-     */
-    void addLayerType(std::unique_ptr<LayerPeerFactory>);
+public:
     /**
      * Enables a layer type for JSON style only.
      *
@@ -31,7 +26,15 @@ private:
      * in order to save binary size (the corresponding SDK layer wrappers
      * should be excluded from the project build).
      */
-    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>);
+    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) override;
+
+    /**
+     * Enables a layer type for both JSON style and runtime API.
+     */
+    void addLayerType(std::unique_ptr<LayerPeerFactory>);
+
+private:
+    LayerManagerDarwin();
 
     void registerCoreFactory(LayerFactory*);
     LayerPeerFactory* getPeerFactory(const style::LayerTypeInfo* typeInfo);

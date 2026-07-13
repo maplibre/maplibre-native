@@ -5,11 +5,9 @@ import org.maplibre.android.maps.Style
 object TestStyles {
     const val DEMOTILES = "https://demotiles.maplibre.org/style.json"
 
-    const val VERSATILES = "https://tiles.versatiles.org/assets/styles/colorful.json"
-
     const val AMERICANA = "https://americanamap.org/style.json"
 
-    const val OPENFREEMAP_LIBERY = "https://tiles.openfreemap.org/styles/liberty"
+    const val OPENFREEMAP_LIBERTY = "https://tiles.openfreemap.org/styles/liberty"
 
     const val OPENFREEMAP_BRIGHT = "https://tiles.openfreemap.org/styles/bright"
 
@@ -33,7 +31,7 @@ object TestStyles {
             val style = Style.getPredefinedStyle(name)
             return style
         } catch (e: Exception) {
-            return VERSATILES
+            return OPENFREEMAP_LIBERTY
         }
     }
 }

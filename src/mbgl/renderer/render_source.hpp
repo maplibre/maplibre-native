@@ -11,10 +11,10 @@
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/layer_properties.hpp>
 
-#include <unordered_map>
-#include <vector>
 #include <map>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace mbgl {
 
@@ -43,6 +43,7 @@ public:
     const TransformParameters& transform;
     const MapDebugOptions& debugOptions;
     const ImageManager& imageManager;
+    const std::string sourceName;
 };
 
 using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;

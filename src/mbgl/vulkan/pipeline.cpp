@@ -108,6 +108,10 @@ vk::CullModeFlagBits PipelineInfo::vulkanCullMode(const gfx::CullFaceSideType& v
     }
 }
 
+vk::Rect2D PipelineInfo::vulkanScissorRect(const gfx::ScissorRect& value) {
+    return {{value.x, value.y}, {value.width, value.height}};
+}
+
 vk::FrontFace PipelineInfo::vulkanFrontFace(const gfx::CullFaceWindingType& value) {
     switch (value) {
         default:
@@ -241,6 +245,10 @@ vk::StencilOp PipelineInfo::vulkanStencilOp(const gfx::StencilOpType& value) {
 void PipelineInfo::setCullMode(const gfx::CullFaceMode& value) {
     cullMode = value.enabled ? vulkanCullMode(value.side) : vk::CullModeFlagBits::eNone;
     frontFace = vulkanFrontFace(value.winding);
+}
+
+void PipelineInfo::setScissorRect(const gfx::ScissorRect& value) {
+    scissorRect = vulkanScissorRect(value);
 }
 
 void PipelineInfo::setDrawMode(const gfx::DrawModeType& value) {
@@ -402,19 +410,26 @@ std::size_t PipelineInfo::hash() const {
 }
 
 void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::UniqueCommandBuffer& buffer) const {
+    const auto& dispatcher = backend.getDispatcher();
     if (dynamicValues.blendConstants.has_value()) {
-        buffer->setBlendConstants(dynamicValues.blendConstants.value().data());
+        buffer->setBlendConstants(dynamicValues.blendConstants.value().data(), dispatcher);
     }
 
     if (stencilTest) {
-        buffer->setStencilWriteMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilWriteMask);
-        buffer->setStencilCompareMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilCompareMask);
-        buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef);
+        buffer->setStencilWriteMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilWriteMask, dispatcher);
+        buffer->setStencilCompareMask(
+            vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilCompareMask, dispatcher);
+        buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef, dispatcher);
     }
 
     if (backend.getDeviceFeatures().wideLines && wideLines) {
-        buffer->setLineWidth(dynamicValues.lineWidth);
+        buffer->setLineWidth(dynamicValues.lineWidth, dispatcher);
     }
+
+    const vk::Viewport viewport(0.0f, 0.0f, viewExtent.width, viewExtent.height, 0.0f, 1.0f);
+
+    buffer->setViewport(0, viewport, dispatcher);
+    buffer->setScissor(0, scissorRect, dispatcher);
 }
 
 std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
@@ -433,6 +448,9 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
     if (backend.getDeviceFeatures().wideLines && wideLines) {
         dynamicStates.push_back(vk::DynamicState::eLineWidth);
     }
+
+    dynamicStates.push_back(vk::DynamicState::eViewport);
+    dynamicStates.push_back(vk::DynamicState::eScissor);
 
     return dynamicStates;
 }

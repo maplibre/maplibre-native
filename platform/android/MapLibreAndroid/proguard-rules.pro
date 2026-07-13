@@ -10,12 +10,13 @@
 -keep class com.google.gson.JsonPrimitive { *; }
 -dontnote com.google.gson.**
 -keep enum org.maplibre.android.tile.TileOperation
--keepclassmembers class * extends java.lang.Enum {
+-keep class org.maplibre.android.maps.RenderingStats { *; }
+-keep class org.maplibre.android.maps.NativeMapOptions { *; }
+-keepclassmembers class org.maplibre.android.** extends java.lang.Enum {
     <fields>;
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
-
 # dontnote for keeps the entry point x but not the descriptor class y
 -dontnote org.maplibre.android.maps.MapLibreMap$OnFpsChangedListener
 -dontnote org.maplibre.android.style.layers.PropertyValue

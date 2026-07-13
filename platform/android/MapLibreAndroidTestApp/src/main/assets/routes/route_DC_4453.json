@@ -1,0 +1,2438 @@
+{
+    "routes" : [ {
+        "voiceLocale" : "en",
+        "weight_name" : "auto",
+        "weight" : 1179.039,
+        "duration" : 582.04,
+        "distance" : 4453.001,
+        "legs" : [ {
+            "via_waypoints" : [ ],
+            "admins" : [ {
+                "iso_3166_1_alpha3" : "USA",
+                "iso_3166_1" : "US"
+            } ],
+            "weight" : 1179.039,
+            "duration" : 582.04,
+            "steps" : [ {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "4th Street Northeast",
+                        "components" : [ {
+                            "text" : "4th Street Northeast",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 9.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Drive east on L Street Northeast. Then Turn right onto 4th Street Northeast.</speak>",
+                    "announcement" : "Drive east on L Street Northeast. Then Turn right onto 4th Street Northeast.",
+                    "distanceAlongGeometry" : 9.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto 4th Street Northeast.</speak>",
+                    "announcement" : "Turn right onto 4th Street Northeast.",
+                    "distanceAlongGeometry" : 2.3
+                } ],
+                "intersections" : [ {
+                    "bearings" : [ 90 ],
+                    "entry" : [ true ],
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 0,
+                    "location" : [ -77.000668, 38.903727 ]
+                } ],
+                "maneuver" : {
+                    "instruction" : "Drive east on L Street Northeast.",
+                    "type" : "depart",
+                    "bearing_after" : 90,
+                    "bearing_before" : 0,
+                    "location" : [ -77.000668, 38.903727 ]
+                },
+                "name" : "L Street Northeast",
+                "duration" : 1.906,
+                "distance" : 9.0,
+                "driving_side" : "right",
+                "weight" : 2.335,
+                "mode" : "driving",
+                "geometry" : "}yneiAv|vzqC?iE"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "K Street Northeast",
+                        "components" : [ {
+                            "text" : "K Street Northeast",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 135.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn right onto K Street Northeast.</speak>",
+                    "announcement" : "Turn right onto K Street Northeast.",
+                    "distanceAlongGeometry" : 58.2
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 0, 90, 181, 270 ],
+                    "duration" : 3.343,
+                    "turn_weight" : 19.0,
+                    "turn_duration" : 2.315,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 20.26,
+                    "geometry_index" : 1,
+                    "location" : [ -77.000567, 38.903727 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 1, 92, 180, 270 ],
+                    "duration" : 12.876,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 29.75,
+                    "geometry_index" : 2,
+                    "location" : [ -77.000568, 38.90367 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180 ],
+                    "duration" : 7.55,
+                    "turn_weight" : 3.5,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 12.74,
+                    "geometry_index" : 3,
+                    "location" : [ -77.000572, 38.902996 ]
+                }, {
+                    "bearings" : [ 0, 92, 179, 270 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 4,
+                    "location" : [ -77.000571, 38.902604 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto 4th Street Northeast.",
+                    "type" : "turn",
+                    "bearing_after" : 181,
+                    "bearing_before" : 90,
+                    "location" : [ -77.000567, 38.903727 ]
+                },
+                "name" : "4th Street Northeast",
+                "duration" : 25.503,
+                "distance" : 135.0,
+                "driving_side" : "right",
+                "weight" : 78.85,
+                "mode" : "driving",
+                "geometry" : "}yneiAlvvzqCpB@bi@FnWAnBA`A?"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "North Capitol Street Northeast",
+                        "components" : [ {
+                            "text" : "North Capitol Street Northeast",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 731.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 700 meters.</speak>",
+                    "announcement" : "Continue for 700 meters.",
+                    "distanceAlongGeometry" : 721.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 200 meters, Turn right onto North Capitol Street Northeast.</speak>",
+                    "announcement" : "In 200 meters, Turn right onto North Capitol Street Northeast.",
+                    "distanceAlongGeometry" : 242.6
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto North Capitol Street Northeast.</speak>",
+                    "announcement" : "Turn right onto North Capitol Street Northeast.",
+                    "distanceAlongGeometry" : 69.3
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 90, 180, 270, 359 ],
+                    "duration" : 5.36,
+                    "turn_weight" : 19.0,
+                    "turn_duration" : 4.208,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 20.411,
+                    "geometry_index" : 6,
+                    "location" : [ -77.00057, 38.902515 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 3, 90, 183, 270 ],
+                    "duration" : 4.903,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 12.998,
+                    "geometry_index" : 7,
+                    "location" : [ -77.000661, 38.902515 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 270 ],
+                    "duration" : 3.175,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.631,
+                    "geometry_index" : 8,
+                    "location" : [ -77.001057, 38.902513 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 180, 270 ],
+                    "duration" : 3.031,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.454,
+                    "geometry_index" : 9,
+                    "location" : [ -77.001308, 38.902514 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 270 ],
+                    "duration" : 4.903,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 7.748,
+                    "geometry_index" : 10,
+                    "location" : [ -77.001547, 38.902514 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 179, 271, 359 ],
+                    "duration" : 1.159,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.411,
+                    "geometry_index" : 11,
+                    "location" : [ -77.001944, 38.902513 ]
+                }, {
+                    "entry" : [ true, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 91, 180, 270 ],
+                    "duration" : 1.461,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 8.764,
+                    "geometry_index" : 12,
+                    "location" : [ -77.002037, 38.902514 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 179, 270, 359 ],
+                    "duration" : 16.567,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 27.286,
+                    "geometry_index" : 13,
+                    "location" : [ -77.00215, 38.902514 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 182, 270, 359 ],
+                    "duration" : 1.015,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.235,
+                    "geometry_index" : 14,
+                    "location" : [ -77.003474, 38.902515 ]
+                }, {
+                    "entry" : [ false, true, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 179, 270, 315, 359 ],
+                    "duration" : 2.871,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 15.058,
+                    "geometry_index" : 15,
+                    "location" : [ -77.003558, 38.902515 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 180, 270 ],
+                    "duration" : 0.583,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 7.706,
+                    "geometry_index" : 17,
+                    "location" : [ -77.00363, 38.902515 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270 ],
+                    "duration" : 18.72,
+                    "turn_weight" : 1.75,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 24.682,
+                    "geometry_index" : 18,
+                    "location" : [ -77.003678, 38.902515 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270 ],
+                    "duration" : 6.336,
+                    "turn_weight" : 1.75,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 9.512,
+                    "geometry_index" : 21,
+                    "location" : [ -77.005176, 38.902517 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 82, 90, 101, 270 ],
+                    "duration" : 1.015,
+                    "turn_weight" : 21.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 22.235,
+                    "geometry_index" : 22,
+                    "location" : [ -77.005685, 38.902517 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 182, 270 ],
+                    "duration" : 0.871,
+                    "turn_weight" : 7.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 8.058,
+                    "geometry_index" : 23,
+                    "location" : [ -77.005768, 38.902517 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 1, 90, 182, 270 ],
+                    "duration" : 0.583,
+                    "turn_weight" : 7.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 7.706,
+                    "geometry_index" : 24,
+                    "location" : [ -77.005839, 38.902517 ]
+                }, {
+                    "entry" : [ true, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 182, 269 ],
+                    "duration" : 3.603,
+                    "turn_weight" : 14.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 15.94,
+                    "geometry_index" : 25,
+                    "location" : [ -77.005887, 38.902517 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 1, 89, 182, 270 ],
+                    "duration" : 4.183,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 12.116,
+                    "geometry_index" : 26,
+                    "location" : [ -77.006019, 38.902516 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270 ],
+                    "duration" : 5.472,
+                    "turn_weight" : 1.75,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.453,
+                    "geometry_index" : 27,
+                    "location" : [ -77.006358, 38.902516 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 179, 270 ],
+                    "duration" : 2.311,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.572,
+                    "geometry_index" : 28,
+                    "location" : [ -77.006796, 38.902516 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 270 ],
+                    "duration" : 3.175,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.631,
+                    "geometry_index" : 29,
+                    "location" : [ -77.006976, 38.902516 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 180, 270 ],
+                    "duration" : 4.471,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 7.218,
+                    "geometry_index" : 30,
+                    "location" : [ -77.007229, 38.902516 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 180, 270 ],
+                    "duration" : 3.607,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.16,
+                    "geometry_index" : 31,
+                    "location" : [ -77.00759, 38.902516 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270, 359 ],
+                    "duration" : 1.735,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.867,
+                    "geometry_index" : 32,
+                    "location" : [ -77.007884, 38.902515 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 270 ],
+                    "duration" : 0.727,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.632,
+                    "geometry_index" : 33,
+                    "location" : [ -77.008018, 38.902515 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 179, 270 ],
+                    "duration" : 3.895,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.513,
+                    "geometry_index" : 34,
+                    "location" : [ -77.008076, 38.902515 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 270 ],
+                    "duration" : 1.735,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.867,
+                    "geometry_index" : 35,
+                    "location" : [ -77.008385, 38.902515 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270 ],
+                    "duration" : 4.752,
+                    "turn_weight" : 1.75,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.571,
+                    "geometry_index" : 36,
+                    "location" : [ -77.00852, 38.902515 ]
+                }, {
+                    "bearings" : [ 90, 177, 270, 358 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_weight" : 7.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 37,
+                    "location" : [ -77.008898, 38.902515 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto K Street Northeast.",
+                    "type" : "turn",
+                    "bearing_after" : 270,
+                    "bearing_before" : 179,
+                    "location" : [ -77.00057, 38.902515 ]
+                },
+                "name" : "K Street Northeast",
+                "duration" : 113.665,
+                "distance" : 731.0,
+                "driving_side" : "right",
+                "weight" : 293.198,
+                "mode" : "driving",
+                "geometry" : "enleiArvvzqC?tDBvWAtN?|M@xWAxD?`FAvqA?fD?jB?b@?~A?~A?XCxxA?x^?dD?lC?~A@fG?dT?jZ?fJ?xN?pU@jQ?jG?rB?hR?lG?rV?nF"
+            }, {
+                "bannerInstructions" : [ {
+                    "secondary" : {
+                        "text" : "New York Avenue",
+                        "components" : [ {
+                            "text" : "New York Avenue",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "fork",
+                        "modifier" : "slight right",
+                        "text" : "North Capitol Street Northeast",
+                        "components" : [ {
+                            "text" : "North Capitol Street Northeast",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 307.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, Keep right to stay on North Capitol Street Northeast.</speak>",
+                    "announcement" : "In 300 meters, Keep right to stay on North Capitol Street Northeast.",
+                    "distanceAlongGeometry" : 281.3
+                }, {
+                    "ssmlAnnouncement" : "<speak>Keep right to stay on North Capitol Street Northeast toward New York Avenue.</speak>",
+                    "announcement" : "Keep right to stay on North Capitol Street Northeast toward New York Avenue.",
+                    "distanceAlongGeometry" : 80.3
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 180, 270 ],
+                    "duration" : 5.098,
+                    "turn_weight" : 19.0,
+                    "turn_duration" : 4.105,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 20.217,
+                    "geometry_index" : 38,
+                    "location" : [ -77.009018, 38.902515 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 89, 180, 270 ],
+                    "duration" : 0.628,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.76,
+                    "geometry_index" : 39,
+                    "location" : [ -77.009018, 38.902586 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 90, 180, 269 ],
+                    "duration" : 10.186,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 12.47,
+                    "geometry_index" : 40,
+                    "location" : [ -77.009018, 38.902634 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 0, 180 ],
+                    "duration" : 4.097,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.018,
+                    "geometry_index" : 41,
+                    "location" : [ -77.009016, 38.903367 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 1, 90, 180, 270 ],
+                    "duration" : 1.001,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.217,
+                    "geometry_index" : 42,
+                    "location" : [ -77.009016, 38.903662 ]
+                }, {
+                    "entry" : [ true, true, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 0, 89, 181, 277 ],
+                    "duration" : 1.138,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.369,
+                    "geometry_index" : 43,
+                    "location" : [ -77.009015, 38.903733 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 90, 180, 270 ],
+                    "duration" : 11.055,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 13.534,
+                    "geometry_index" : 44,
+                    "location" : [ -77.009015, 38.903816 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 1, 92, 180, 272 ],
+                    "duration" : 1.001,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.217,
+                    "geometry_index" : 45,
+                    "location" : [ -77.009014, 38.904618 ]
+                }, {
+                    "entry" : [ true, true, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 0, 90, 181, 270 ],
+                    "duration" : 5.979,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.299,
+                    "geometry_index" : 46,
+                    "location" : [ -77.009013, 38.904686 ]
+                }, {
+                    "bearings" : [ 0, 180, 270 ],
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "turn_weight" : 5.25,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 47,
+                    "location" : [ -77.009013, 38.905113 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto North Capitol Street Northeast.",
+                    "type" : "turn",
+                    "bearing_after" : 0,
+                    "bearing_before" : 270,
+                    "location" : [ -77.009018, 38.902515 ]
+                },
+                "name" : "North Capitol Street Northeast",
+                "duration" : 42.299,
+                "distance" : 307.0,
+                "driving_side" : "right",
+                "weight" : 70.935,
+                "mode" : "driving",
+                "geometry" : "enleiArfg{qCmC?_B?yl@CmQ?mCAeD?cq@AgCAuY?qHA"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto U.S. 50, U.S. 1 Alternate.</speak>",
+                    "announcement" : "Turn left onto U.S. 50, U.S. 1 Alternate.",
+                    "distanceAlongGeometry" : 64.3
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 1, 16, 180 ],
+                    "duration" : 4.24,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.17,
+                    "geometry_index" : 48,
+                    "location" : [ -77.009012, 38.905266 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 5, 92, 185, 272 ],
+                    "duration" : 1.125,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.369,
+                    "geometry_index" : 50,
+                    "location" : [ -77.008931, 38.905563 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 90, 185, 270 ],
+                    "duration" : 3.39,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 2.024,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 15.673,
+                    "geometry_index" : 51,
+                    "location" : [ -77.008921, 38.905646 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 92, 180, 273 ],
+                    "duration" : 9.69,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 11.861,
+                    "geometry_index" : 52,
+                    "location" : [ -77.008921, 38.905744 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 90, 180 ],
+                    "duration" : 6.214,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.603,
+                    "geometry_index" : 53,
+                    "location" : [ -77.008921, 38.906444 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 180, 360 ],
+                    "duration" : 4.097,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.018,
+                    "geometry_index" : 54,
+                    "location" : [ -77.008921, 38.906889 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 106, 180, 286 ],
+                    "duration" : 0.628,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.76,
+                    "geometry_index" : 55,
+                    "location" : [ -77.008922, 38.907185 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 0, 90, 180, 275 ],
+                    "duration" : 1.497,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.825,
+                    "geometry_index" : 56,
+                    "location" : [ -77.008922, 38.90723 ]
+                }, {
+                    "bearings" : [ 1, 68, 180, 246 ],
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "turn_weight" : 28.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 57,
+                    "location" : [ -77.008922, 38.907341 ]
+                } ],
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "New York Avenue Northwest",
+                        "components" : [ {
+                            "text" : "New York Avenue Northwest",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "US 50; US 1 Alternate",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 244.0
+                } ],
+                "destinations" : "New York Avenue",
+                "maneuver" : {
+                    "modifier" : "slight right",
+                    "instruction" : "Keep right to stay on North Capitol Street Northeast toward New York Avenue.",
+                    "type" : "fork",
+                    "bearing_after" : 16,
+                    "bearing_before" : 0,
+                    "location" : [ -77.009012, 38.905266 ]
+                },
+                "name" : "North Capitol Street Northeast",
+                "duration" : 34.376,
+                "distance" : 244.0,
+                "driving_side" : "right",
+                "weight" : 79.105,
+                "mode" : "driving",
+                "geometry" : "czqeiAffg{qCoEsBaKm@eDScE?wj@?yZ?oQ@yA?}E?yEC"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "6th Street Northwest",
+                        "components" : [ {
+                            "text" : "6th Street Northwest",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "US 1; US 50; I 395 Alt",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 1044.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue on U.S. 50, New York Avenue Northwest for 1 kilometer.</speak>",
+                    "announcement" : "Continue on U.S. 50, New York Avenue Northwest for 1 kilometer.",
+                    "distanceAlongGeometry" : 1034.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 400 meters, Turn left onto U.S. 1.</speak>",
+                    "announcement" : "In 400 meters, Turn left onto U.S. 1.",
+                    "distanceAlongGeometry" : 358.3
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn left onto U.S. 1, U.S. 50.</speak>",
+                    "announcement" : "Turn left onto U.S. 1, U.S. 50.",
+                    "distanceAlongGeometry" : 91.4
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 1, 66, 181, 246 ],
+                    "duration" : 11.359,
+                    "turn_weight" : 57.5,
+                    "turn_duration" : 9.13,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 60.23,
+                    "geometry_index" : 58,
+                    "location" : [ -77.00892, 38.90745 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 66, 182, 250 ],
+                    "duration" : 2.61,
+                    "turn_weight" : 14.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 2.01,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 14.735,
+                    "geometry_index" : 59,
+                    "location" : [ -77.009191, 38.907358 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 70, 175, 248, 351 ],
+                    "duration" : 1.906,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.31,
+                    "geometry_index" : 60,
+                    "location" : [ -77.009268, 38.907336 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 68, 247, 270 ],
+                    "duration" : 5.249,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.405,
+                    "geometry_index" : 62,
+                    "location" : [ -77.009509, 38.907262 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 23, 67, 246 ],
+                    "duration" : 5.506,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.72,
+                    "geometry_index" : 63,
+                    "location" : [ -77.01015, 38.907046 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 66, 246, 334 ],
+                    "duration" : 10.121,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 12.39,
+                    "geometry_index" : 64,
+                    "location" : [ -77.01082, 38.906811 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 66, 172, 244, 351 ],
+                    "duration" : 0.878,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.05,
+                    "geometry_index" : 65,
+                    "location" : [ -77.012061, 38.906378 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 64, 180, 248, 359 ],
+                    "duration" : 3.038,
+                    "turn_duration" : 2.01,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.26,
+                    "geometry_index" : 66,
+                    "location" : [ -77.012164, 38.906339 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 68, 173, 245, 353 ],
+                    "duration" : 11.079,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 13.545,
+                    "geometry_index" : 67,
+                    "location" : [ -77.012295, 38.906297 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 65, 247 ],
+                    "duration" : 3.779,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.62,
+                    "geometry_index" : 68,
+                    "location" : [ -77.01365, 38.905814 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 67, 247, 270 ],
+                    "duration" : 2.935,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.57,
+                    "geometry_index" : 69,
+                    "location" : [ -77.014119, 38.905662 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 67, 247 ],
+                    "duration" : 1.371,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.68,
+                    "geometry_index" : 70,
+                    "location" : [ -77.014479, 38.905542 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 67, 159, 247, 339 ],
+                    "duration" : 0.621,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.735,
+                    "geometry_index" : 71,
+                    "location" : [ -77.014651, 38.905485 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 67, 151, 247, 334 ],
+                    "duration" : 0.706,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.84,
+                    "geometry_index" : 72,
+                    "location" : [ -77.014725, 38.905461 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 67, 160, 247, 341 ],
+                    "duration" : 2.964,
+                    "turn_weight" : 7.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 2.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.155,
+                    "geometry_index" : 73,
+                    "location" : [ -77.014808, 38.905433 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 67, 153, 247, 336 ],
+                    "duration" : 0.449,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.525,
+                    "geometry_index" : 74,
+                    "location" : [ -77.014922, 38.905396 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 67, 160, 247, 341 ],
+                    "duration" : 1.992,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.415,
+                    "geometry_index" : 75,
+                    "location" : [ -77.014974, 38.905379 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 67, 246 ],
+                    "duration" : 1.286,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.575,
+                    "geometry_index" : 76,
+                    "location" : [ -77.015217, 38.9053 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 66, 246 ],
+                    "duration" : 6.6,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.085,
+                    "geometry_index" : 77,
+                    "location" : [ -77.01537, 38.905247 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 65, 182, 248 ],
+                    "duration" : 3.037,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left", "slight left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.008,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 1.26,
+                    "geometry_index" : 80,
+                    "location" : [ -77.016182, 38.904961 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 68, 177, 241, 356 ],
+                    "duration" : 3.888,
+                    "turn_duration" : 0.03,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.725,
+                    "geometry_index" : 81,
+                    "location" : [ -77.01631, 38.90492 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 62, 246 ],
+                    "duration" : 4.971,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.09,
+                    "geometry_index" : 84,
+                    "location" : [ -77.016772, 38.904727 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 66, 246, 336 ],
+                    "duration" : 3.864,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.725,
+                    "geometry_index" : 85,
+                    "location" : [ -77.017386, 38.90451 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 66, 245 ],
+                    "duration" : 2.657,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.255,
+                    "geometry_index" : 86,
+                    "location" : [ -77.017859, 38.904343 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 65, 237, 267 ],
+                    "duration" : 2.347,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.033,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.835,
+                    "geometry_index" : 87,
+                    "location" : [ -77.018188, 38.904226 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 53, 76, 247 ],
+                    "duration" : 3.017,
+                    "turn_duration" : 0.017,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.675,
+                    "geometry_index" : 89,
+                    "location" : [ -77.018436, 38.904086 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 67, 176, 245, 355 ],
+                    "duration" : 0.965,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.155,
+                    "geometry_index" : 91,
+                    "location" : [ -77.018813, 38.903964 ]
+                }, {
+                    "entry" : [ true, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 65, 179, 246 ],
+                    "duration" : 3.036,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 1.26,
+                    "geometry_index" : 92,
+                    "location" : [ -77.018931, 38.903921 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 4, 66, 184, 247 ],
+                    "duration" : 2.236,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 2.73,
+                    "geometry_index" : 93,
+                    "location" : [ -77.019062, 38.903876 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 67, 246, 351 ],
+                    "duration" : 2.249,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.73,
+                    "geometry_index" : 95,
+                    "location" : [ -77.01934, 38.903783 ]
+                }, {
+                    "entry" : [ false, true, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 66, 160, 224, 268 ],
+                    "duration" : 1.228,
+                    "turn_weight" : 7.875,
+                    "turn_duration" : 0.028,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 9.345,
+                    "geometry_index" : 96,
+                    "location" : [ -77.019612, 38.90369 ]
+                }, {
+                    "bearings" : [ 88, 177, 246, 358 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_duration" : 0.104,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 97,
+                    "location" : [ -77.01977, 38.903685 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto US 50/US 1 Alternate/New York Avenue Northwest. Continue on US 50/New York Avenue Northwest.",
+                    "type" : "turn",
+                    "bearing_after" : 250,
+                    "bearing_before" : 1,
+                    "location" : [ -77.00892, 38.90745 ]
+                },
+                "name" : "New York Avenue Northwest",
+                "duration" : 109.164,
+                "distance" : 1044.0,
+                "driving_side" : "right",
+                "weight" : 195.995,
+                "mode" : "driving",
+                "ref" : "US 50; US 1 Alternate",
+                "geometry" : "sbveiAn`g{qCvD|Oj@xC^fBrBxJnL`g@tMzh@`ZplAlAlErAdGd]tsAnHh\\nFnUpBvIn@rCv@dDhAbF`@fB|CdNhBpHjBrHrJb`@zA~FpA~F`DxJrCbJjA|DpLje@lIp\\hFpSpCzJdCrBpEdS`@jBtAjFxAdGv@zC`CnKxD~OHzH|AhG"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "end of road",
+                        "modifier" : "right",
+                        "text" : "Constitution Avenue Northwest",
+                        "components" : [ {
+                            "text" : "Constitution Avenue Northwest",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "US 1; US 50",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 1288.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue on U.S. 1, U.S. 50 for 1.5 kilometers.</speak>",
+                    "announcement" : "Continue on U.S. 1, U.S. 50 for 1.5 kilometers.",
+                    "distanceAlongGeometry" : 1278.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, Turn right onto U.S. 1.</speak>",
+                    "announcement" : "In 300 meters, Turn right onto U.S. 1.",
+                    "distanceAlongGeometry" : 290.2
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto U.S. 1, U.S. 50.</speak>",
+                    "announcement" : "Turn right onto U.S. 1, U.S. 50.",
+                    "distanceAlongGeometry" : 74.1
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 66, 180, 246, 359 ],
+                    "duration" : 5.248,
+                    "turn_weight" : 26.25,
+                    "turn_duration" : 4.134,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 27.615,
+                    "geometry_index" : 98,
+                    "location" : [ -77.019903, 38.903638 ]
+                }, {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 68, 179, 246 ],
+                    "duration" : 2.791,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 14.945,
+                    "geometry_index" : 99,
+                    "location" : [ -77.019904, 38.903521 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 69, 180, 251, 359 ],
+                    "duration" : 1.722,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.1,
+                    "geometry_index" : 100,
+                    "location" : [ -77.019903, 38.90344 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 180, 270 ],
+                    "duration" : 5.835,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.14,
+                    "geometry_index" : 101,
+                    "location" : [ -77.019902, 38.903262 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 90, 181, 270 ],
+                    "duration" : 0.608,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.735,
+                    "geometry_index" : 103,
+                    "location" : [ -77.019906, 38.902655 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 1, 90, 180, 270 ],
+                    "duration" : 0.705,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.84,
+                    "geometry_index" : 104,
+                    "location" : [ -77.019907, 38.902589 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 90, 180, 277 ],
+                    "duration" : 2.521,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 7.63,
+                    "geometry_index" : 105,
+                    "location" : [ -77.019907, 38.902521 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 90, 181, 270 ],
+                    "duration" : 0.436,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.525,
+                    "geometry_index" : 106,
+                    "location" : [ -77.019907, 38.90247 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 1, 92, 180, 270 ],
+                    "duration" : 7.733,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.45,
+                    "geometry_index" : 107,
+                    "location" : [ -77.019908, 38.902424 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 110, 180, 289 ],
+                    "duration" : 1.378,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.68,
+                    "geometry_index" : 109,
+                    "location" : [ -77.019905, 38.901619 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 114, 180, 294 ],
+                    "duration" : 3.293,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 15.575,
+                    "geometry_index" : 110,
+                    "location" : [ -77.019906, 38.901472 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 130, 180, 308 ],
+                    "duration" : 1.978,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.415,
+                    "geometry_index" : 111,
+                    "location" : [ -77.019906, 38.901335 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 180, 279 ],
+                    "duration" : 1.55,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.89,
+                    "geometry_index" : 112,
+                    "location" : [ -77.019907, 38.901127 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 269 ],
+                    "duration" : 0.864,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.05,
+                    "geometry_index" : 113,
+                    "location" : [ -77.019907, 38.900967 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 180, 270 ],
+                    "duration" : 2.95,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.155,
+                    "geometry_index" : 114,
+                    "location" : [ -77.019908, 38.900876 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 269 ],
+                    "duration" : 5.15,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.3,
+                    "geometry_index" : 115,
+                    "location" : [ -77.019908, 38.90078 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 180 ],
+                    "duration" : 0.771,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 0.945,
+                    "geometry_index" : 116,
+                    "location" : [ -77.01991, 38.90024 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 180 ],
+                    "duration" : 2.321,
+                    "lanes" : [ {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.835,
+                    "geometry_index" : 117,
+                    "location" : [ -77.01991, 38.900161 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 269 ],
+                    "duration" : 1.035,
+                    "lanes" : [ {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.26,
+                    "geometry_index" : 118,
+                    "location" : [ -77.019911, 38.899922 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 270 ],
+                    "duration" : 3.121,
+                    "turn_weight" : 7.0,
+                    "lanes" : [ {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.365,
+                    "geometry_index" : 119,
+                    "location" : [ -77.019911, 38.899818 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 93, 180, 272 ],
+                    "duration" : 9.693,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 11.865,
+                    "geometry_index" : 120,
+                    "location" : [ -77.01991, 38.899702 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 180, 270 ],
+                    "duration" : 2.407,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.94,
+                    "geometry_index" : 121,
+                    "location" : [ -77.019908, 38.898683 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 180, 270 ],
+                    "duration" : 1.121,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.365,
+                    "geometry_index" : 122,
+                    "location" : [ -77.019908, 38.898434 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 90, 180 ],
+                    "duration" : 3.035,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.26,
+                    "geometry_index" : 123,
+                    "location" : [ -77.019908, 38.898319 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 180, 270 ],
+                    "duration" : 7.207,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.82,
+                    "geometry_index" : 124,
+                    "location" : [ -77.019908, 38.898211 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 180, 270 ],
+                    "duration" : 1.035,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.26,
+                    "geometry_index" : 125,
+                    "location" : [ -77.019906, 38.897454 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 270 ],
+                    "duration" : 3.035,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.26,
+                    "geometry_index" : 126,
+                    "location" : [ -77.019907, 38.897347 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 180, 270 ],
+                    "duration" : 9.435,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 11.55,
+                    "geometry_index" : 127,
+                    "location" : [ -77.019908, 38.897243 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 97, 180, 277 ],
+                    "duration" : 1.121,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.365,
+                    "geometry_index" : 128,
+                    "location" : [ -77.019905, 38.896253 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 90, 180, 273 ],
+                    "duration" : 2.95,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.155,
+                    "geometry_index" : 129,
+                    "location" : [ -77.019905, 38.896132 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 180, 270 ],
+                    "duration" : 11.064,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 13.545,
+                    "geometry_index" : 130,
+                    "location" : [ -77.019904, 38.896031 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 92, 181, 270 ],
+                    "duration" : 0.694,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.84,
+                    "geometry_index" : 131,
+                    "location" : [ -77.019913, 38.894873 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 1, 89, 180, 270 ],
+                    "duration" : 2.791,
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.945,
+                    "geometry_index" : 132,
+                    "location" : [ -77.019914, 38.894802 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 86, 180, 267 ],
+                    "duration" : 1.635,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.995,
+                    "geometry_index" : 133,
+                    "location" : [ -77.019914, 38.894718 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 63, 180, 241 ],
+                    "duration" : 1.121,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.365,
+                    "geometry_index" : 134,
+                    "location" : [ -77.019915, 38.894546 ]
+                }, {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 68, 180, 246 ],
+                    "duration" : 3.293,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.575,
+                    "geometry_index" : 135,
+                    "location" : [ -77.019916, 38.894426 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 70, 180, 252 ],
+                    "duration" : 5.835,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 7.14,
+                    "geometry_index" : 136,
+                    "location" : [ -77.019917, 38.894293 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 77, 181, 258 ],
+                    "duration" : 0.779,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.945,
+                    "geometry_index" : 137,
+                    "location" : [ -77.01992, 38.893681 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 1, 90, 179 ],
+                    "duration" : 3.049,
+                    "turn_duration" : 2.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.26,
+                    "geometry_index" : 138,
+                    "location" : [ -77.019921, 38.893604 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 100, 180, 282, 359 ],
+                    "duration" : 4.893,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.985,
+                    "geometry_index" : 139,
+                    "location" : [ -77.019918, 38.893498 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 110, 180, 291 ],
+                    "duration" : 1.378,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.68,
+                    "geometry_index" : 140,
+                    "location" : [ -77.019914, 38.892987 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 108, 179, 290 ],
+                    "duration" : 2.791,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 14.945,
+                    "geometry_index" : 141,
+                    "location" : [ -77.019914, 38.892844 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 110, 179, 289, 359 ],
+                    "duration" : 2.864,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.05,
+                    "geometry_index" : 142,
+                    "location" : [ -77.019913, 38.892762 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 108, 180, 290, 359 ],
+                    "duration" : 3.036,
+                    "turn_weight" : 14.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 15.26,
+                    "geometry_index" : 144,
+                    "location" : [ -77.019912, 38.892676 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 108, 180, 289 ],
+                    "duration" : 3.093,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.78,
+                    "geometry_index" : 145,
+                    "location" : [ -77.019911, 38.892568 ]
+                }, {
+                    "bearings" : [ 0, 92, 179, 272 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 146,
+                    "location" : [ -77.019908, 38.892244 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto US 1/US 50/I 395 Alt/6th Street Northwest. Continue on US 1/US 50/6th Street Northwest.",
+                    "type" : "turn",
+                    "bearing_after" : 179,
+                    "bearing_before" : 246,
+                    "location" : [ -77.019903, 38.903638 ]
+                },
+                "name" : "6th Street Northwest",
+                "duration" : 142.931,
+                "distance" : 1288.0,
+                "driving_side" : "right",
+                "weight" : 238.49,
+                "mode" : "driving",
+                "ref" : "US 1; US 50; I 395 Alt",
+                "geometry" : "ktneiA|n|{qChF@`DAbJA|a@F~A?bC@fC?dB?zA@rH?tg@EdH@pG?~K@~H?tD@~D?v`@B|C?|M@nE?fFAt~@CpN?dF?vE?hn@CtE@nE@z|@EpF?hEAjgAPlC@fD?vI@nF@hG@fe@DxC@rEE|^G|G?bDAb@?fCAvEAfSEhIC"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "7th Street Northwest",
+                        "components" : [ {
+                            "text" : "7th Street Northwest",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 175.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto 7th Street Northwest.</speak>",
+                    "announcement" : "Turn left onto 7th Street Northwest.",
+                    "distanceAlongGeometry" : 116.5
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 90, 270, 359 ],
+                    "duration" : 7.123,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 4.208,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 10.57,
+                    "geometry_index" : 147,
+                    "location" : [ -77.019906, 38.892079 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 180, 270 ],
+                    "duration" : 5.407,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.615,
+                    "geometry_index" : 148,
+                    "location" : [ -77.020299, 38.89208 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270 ],
+                    "duration" : 5.4,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.48,
+                    "geometry_index" : 149,
+                    "location" : [ -77.021022, 38.892081 ]
+                }, {
+                    "bearings" : [ 90, 175, 270, 353 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 150,
+                    "location" : [ -77.021745, 38.892081 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto US 1/US 50/Constitution Avenue Northwest.",
+                    "type" : "end of road",
+                    "bearing_after" : 270,
+                    "bearing_before" : 179,
+                    "location" : [ -77.019906, 38.892079 ]
+                },
+                "name" : "Constitution Avenue Northwest",
+                "duration" : 19.222,
+                "distance" : 175.0,
+                "driving_side" : "right",
+                "weight" : 25.208,
+                "mode" : "driving",
+                "ref" : "US 1; US 50",
+                "geometry" : "}axdiAbo|{qCApWAdl@?dl@ArI"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Madison Drive Northwest",
+                        "components" : [ {
+                            "text" : "Madison Drive Northwest",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 171.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Madison Drive Northwest.</speak>",
+                    "announcement" : "Turn right onto Madison Drive Northwest.",
+                    "distanceAlongGeometry" : 80.4
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 0, 90, 178, 270 ],
+                    "duration" : 9.839,
+                    "turn_weight" : 43.75,
+                    "turn_duration" : 7.729,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 46.282,
+                    "geometry_index" : 151,
+                    "location" : [ -77.021915, 38.892082 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 92, 181, 270, 358 ],
+                    "duration" : 5.471,
+                    "turn_duration" : 0.009,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.554,
+                    "geometry_index" : 152,
+                    "location" : [ -77.021909, 38.891926 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 1, 90, 180 ],
+                    "duration" : 6.723,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.044,
+                    "geometry_index" : 153,
+                    "location" : [ -77.021916, 38.891528 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 90, 180 ],
+                    "duration" : 5.593,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.703,
+                    "geometry_index" : 154,
+                    "location" : [ -77.021915, 38.891046 ]
+                }, {
+                    "bearings" : [ 0, 92, 180, 270 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 155,
+                    "location" : [ -77.021914, 38.890644 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto 7th Street Northwest.",
+                    "type" : "turn",
+                    "bearing_after" : 178,
+                    "bearing_before" : 270,
+                    "location" : [ -77.021915, 38.892082 ]
+                },
+                "name" : "7th Street Northwest",
+                "duration" : 28.998,
+                "distance" : 171.0,
+                "driving_side" : "right",
+                "weight" : 69.223,
+                "mode" : "driving",
+                "geometry" : "cbxdiAtl`|qCvHKzWLb]AbXAfE@"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "arrive",
+                        "text" : "You have arrived at your destination.",
+                        "components" : [ {
+                            "text" : "You have arrived at your destination.",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 349.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 300 meters.</speak>",
+                    "announcement" : "Continue for 300 meters.",
+                    "distanceAlongGeometry" : 339.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 200 meters, You will arrive at your destination.</speak>",
+                    "announcement" : "In 200 meters, You will arrive at your destination.",
+                    "distanceAlongGeometry" : 204.1
+                }, {
+                    "ssmlAnnouncement" : "<speak>You have arrived at your destination.</speak>",
+                    "announcement" : "You have arrived at your destination.",
+                    "distanceAlongGeometry" : 58.3
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 270 ],
+                    "duration" : 6.334,
+                    "turn_weight" : 14.3,
+                    "turn_duration" : 4.105,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 16.974,
+                    "geometry_index" : 156,
+                    "location" : [ -77.021915, 38.890544 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 180, 269, 359 ],
+                    "duration" : 13.048,
+                    "turn_weight" : 12.4,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 28.034,
+                    "geometry_index" : 157,
+                    "location" : [ -77.02207, 38.890544 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 1, 89, 182, 269 ],
+                    "duration" : 12.521,
+                    "turn_weight" : 12.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 27.417,
+                    "geometry_index" : 158,
+                    "location" : [ -77.02295, 38.89053 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 89, 270, 359 ],
+                    "duration" : 4.293,
+                    "turn_weight" : 3.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.243,
+                    "geometry_index" : 159,
+                    "location" : [ -77.023796, 38.890519 ]
+                }, {
+                    "bearings" : [ 1, 90, 179, 273 ],
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "turn_weight" : 12.4,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "geometry_index" : 161,
+                    "location" : [ -77.024086, 38.89052 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Madison Drive Northwest.",
+                    "type" : "turn",
+                    "bearing_after" : 270,
+                    "bearing_before" : 180,
+                    "location" : [ -77.021915, 38.890544 ]
+                },
+                "name" : "Madison Drive Northwest",
+                "duration" : 63.976,
+                "distance" : 349.0,
+                "driving_side" : "right",
+                "weight" : 125.7,
+                "mode" : "driving",
+                "geometry" : "_budiAtl`|qC?tHZ~u@Tzs@BrMEnB[`Rp@|`B"
+            }, {
+                "intersections" : [ {
+                    "bearings" : [ 89 ],
+                    "entry" : [ true ],
+                    "in" : 0,
+                    "admin_index" : 0,
+                    "geometry_index" : 163,
+                    "location" : [ -77.025958, 38.890509 ]
+                } ],
+                "voiceInstructions" : [ ],
+                "bannerInstructions" : [ ],
+                "maneuver" : {
+                    "instruction" : "You have arrived at your destination.",
+                    "type" : "arrive",
+                    "bearing_after" : 0,
+                    "bearing_before" : 269,
+                    "location" : [ -77.025958, 38.890509 ]
+                },
+                "name" : "Madison Drive Northwest",
+                "duration" : 0.0,
+                "distance" : 0.0,
+                "driving_side" : "right",
+                "weight" : 0.0,
+                "mode" : "driving",
+                "geometry" : "y_udiAjih|qC??"
+            } ],
+            "distance" : 4453.001,
+            "summary" : "US 50, US 1"
+        } ],
+        "geometry" : "}yneiAv|vzqC?iEpB@bi@FnWAnBA`A??tDBvWAtN?|M@xWAxD?`FAvqA?fD?jB?b@?~A?~A?XCxxA?x^?dD?lC?~A@fG?dT?jZ?fJ?xN?pU@jQ?jG?rB?hR?lG?rV?nFmC?_B?yl@CmQ?mCAeD?cq@AgCAuY?qHAoEsBaKm@eDScE?wj@?yZ?oQ@yA?}E?yECvD|Oj@xC^fBrBxJnL`g@tMzh@`ZplAlAlErAdGd]tsAnHh\\nFnUpBvIn@rCv@dDhAbF`@fB|CdNhBpHjBrHrJb`@zA~FpA~F`DxJrCbJjA|DpLje@lIp\\hFpSpCzJdCrBpEdS`@jBtAjFxAdGv@zC`CnKxD~OHzH|AhGhF@`DAbJA|a@F~A?bC@fC?dB?zA@rH?tg@EdH@pG?~K@~H?tD@~D?v`@B|C?|M@nE?fFAt~@CpN?dF?vE?hn@CtE@nE@z|@EpF?hEAjgAPlC@fD?vI@nF@hG@fe@DxC@rEE|^G|G?bDAb@?fCAvEAfSEhICApWAdl@?dl@ArIvHKzWLb]AbXAfE@?tHZ~u@Tzs@BrMEnB[`Rp@|`B"
+    } ],
+    "waypoints" : [ {
+        "distance" : 3.533,
+        "name" : "L Street Northeast",
+        "location" : [ -77.000668, 38.903727 ]
+    }, {
+        "distance" : 0.403,
+        "name" : "Madison Drive Northwest",
+        "location" : [ -77.025958, 38.890509 ]
+    } ],
+    "code" : "Ok"
+}

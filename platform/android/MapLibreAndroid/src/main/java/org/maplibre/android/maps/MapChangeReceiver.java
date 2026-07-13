@@ -23,6 +23,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnDidFinishRenderingFrameListener> onDidFinishRenderingFrameList
     = new CopyOnWriteArrayList<>();
+  private final List<MapView.OnDidFinishRenderingFrameWithStatsListener> onDidFinishRenderingFrameWithStatsList
+          = new CopyOnWriteArrayList<>();
   private final List<MapView.OnWillStartRenderingMapListener> onWillStartRenderingMapListenerList
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnDidFinishRenderingMapListener> onDidFinishRenderingMapListenerList
@@ -55,6 +57,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   private final List<MapView.OnSpriteErrorListener> onSpriteErrorList
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnSpriteRequestedListener> onSpriteRequestedList
+    = new CopyOnWriteArrayList<>();
+  private final List<MapView.OnRenderErrorListener> onRenderErrorList
     = new CopyOnWriteArrayList<>();
 
   @Override
@@ -156,11 +160,17 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+  public void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
     try {
       if (!onDidFinishRenderingFrameList.isEmpty()) {
         for (MapView.OnDidFinishRenderingFrameListener listener : onDidFinishRenderingFrameList) {
-          listener.onDidFinishRenderingFrame(fully, frameEncodingTime, frameRenderingTime);
+          listener.onDidFinishRenderingFrame(fully, stats.encodingTime, stats.renderingTime);
+        }
+      }
+
+      if (!onDidFinishRenderingFrameWithStatsList.isEmpty()) {
+        for (MapView.OnDidFinishRenderingFrameWithStatsListener listener : onDidFinishRenderingFrameWithStatsList) {
+          listener.onDidFinishRenderingFrame(fully, stats);
         }
       }
     } catch (Throwable err) {
@@ -416,6 +426,20 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     }
   }
 
+  @Override
+  public void onRenderError() {
+    try {
+      if (!onRenderErrorList.isEmpty()) {
+        for (MapView.OnRenderErrorListener listener : onRenderErrorList) {
+          listener.onRenderError();
+        }
+      }
+    } catch (Throwable err) {
+      Logger.e(TAG, "Exception in onRenderError", err);
+      throw err;
+    }
+  }
+
   void addOnCameraWillChangeListener(MapView.OnCameraWillChangeListener listener) {
     onCameraWillChangeListenerList.add(listener);
   }
@@ -478,6 +502,14 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
 
   void removeOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameListener listener) {
     onDidFinishRenderingFrameList.remove(listener);
+  }
+
+  void addOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameWithStatsListener listener) {
+    onDidFinishRenderingFrameWithStatsList.add(listener);
+  }
+
+  void removeOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameWithStatsListener listener) {
+    onDidFinishRenderingFrameWithStatsList.remove(listener);
   }
 
   void addOnWillStartRenderingMapListener(MapView.OnWillStartRenderingMapListener listener) {
@@ -576,6 +608,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteRequestedList.add(callback);
   }
 
+  public void addOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
+    onRenderErrorList.add(callback);
+  }
+
   public void removeOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     onPreCompileShaderList.remove(callback);
   }
@@ -616,6 +652,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteRequestedList.remove(callback);
   }
 
+  public void removeOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
+    onRenderErrorList.remove(callback);
+  }
+
   void clear() {
     onCameraWillChangeListenerList.clear();
     onCameraIsChangingListenerList.clear();
@@ -642,5 +682,6 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onSpriteLoadedList.clear();
     onSpriteErrorList.clear();
     onSpriteRequestedList.clear();
+    onRenderErrorList.clear();
   }
 }

@@ -13,6 +13,7 @@ enum CompressionFormat {
     DETECT = 15 + 32
 };
 
+bool is_compressed(const std::string&);
 std::string compress(const std::string& raw, int windowBits = CompressionFormat::ZLIB);
 std::string decompress(const std::string& raw, int windowBits = CompressionFormat::DETECT);
 

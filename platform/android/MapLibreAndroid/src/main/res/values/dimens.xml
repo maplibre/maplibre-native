@@ -24,6 +24,10 @@
     <!--Screen density constant to adjust gesture's velocityXY thresholds-->
     <dimen name="maplibre_density_constant">0.29dp</dimen>
 
+    <!--Threshold until a move is detected as such-->
+    <dimen name="maplibre_minimum_move_threshold">4dp</dimen>
+
+    <!--Threshold until a move is detected as such during camera location tracking -->
     <dimen name="maplibre_locationComponentTrackingInitialMoveThreshold">25dp</dimen>
     <dimen name="maplibre_locationComponentTrackingMultiFingerMoveThreshold">400dp</dimen>
 </resources>

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/storage/http_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource.hpp>
@@ -14,25 +15,25 @@
 
 #include <curl/curl.h>
 
-#include <dlfcn.h>
 #include <queue>
-#include <map>
 #include <cassert>
 #include <cstring>
 #include <cstdio>
 #include <optional>
 
-static void handleError(CURLMcode code) {
+namespace {
+void handleError(CURLMcode code) {
     if (code != CURLM_OK) {
         throw std::runtime_error(std::string("CURL multi error: ") + curl_multi_strerror(code));
     }
 }
 
-static void handleError(CURLcode code) {
+void handleError(CURLcode code) {
     if (code != CURLE_OK) {
         throw std::runtime_error(std::string("CURL easy error: ") + curl_easy_strerror(code));
     }
 }
+} // namespace
 
 namespace mbgl {
 
@@ -79,7 +80,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl *, Resource, std::function<void(Response)>);
+    HTTPRequest(HTTPFileSource::Impl *, Resource, FileSource::Callback);
     ~HTTPRequest() override;
 
     void handleResult(CURLcode code);
@@ -90,7 +91,7 @@ private:
 
     HTTPFileSource::Impl *context = nullptr;
     Resource resource;
-    std::function<void(Response)> callback;
+    FileSource::Callback callback;
 
     // Will store the current response.
     std::shared_ptr<std::string> data;
@@ -233,10 +234,8 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
     assert(userp);
     auto context = reinterpret_cast<Impl *>(userp);
 
-    if (timeout_ms < 0) {
-        // A timeout of 0 ms means that the timer will invoked in the next loop iteration.
-        timeout_ms = 0;
-    }
+    // A timeout of 0 ms means that the timer will invoked in the next loop iteration.
+    timeout_ms = std::max<long>(timeout_ms, 0);
 
     context->timeout.stop();
     context->timeout.start(mbgl::Milliseconds(timeout_ms), Duration::zero(), std::bind(&Impl::onTimeout, context));
@@ -245,26 +244,26 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
 }
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
-    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    std::scoped_lock lock(resourceOptionsMutex);
     resourceOptions = options;
 }
 
 ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
-    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    std::scoped_lock lock(resourceOptionsMutex);
     return resourceOptions.clone();
 }
 
 void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
-    std::lock_guard<std::mutex> lock(clientOptionsMutex);
+    std::scoped_lock lock(clientOptionsMutex);
     clientOptions = options;
 }
 
 ClientOptions HTTPFileSource::Impl::getClientOptions() {
-    std::lock_guard<std::mutex> lock(clientOptionsMutex);
+    std::scoped_lock lock(clientOptionsMutex);
     return clientOptions.clone();
 }
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, std::function<void(Response)> callback_)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, FileSource::Callback callback_)
     : context(context_),
       resource(std::move(resource_)),
       callback(std::move(callback_)),
@@ -338,6 +337,7 @@ size_t HTTPRequest::writeCallback(void *const contents, const size_t size, const
     return size * nmemb;
 }
 
+namespace {
 // Compares the beginning of the (non-zero-terminated!) data buffer with the
 // (zero-terminated!) header string. If the data buffer contains the header
 // string at the beginning, it returns the length of the header string == begin
@@ -354,6 +354,7 @@ size_t headerMatches(const char *const header, const char *const buffer, const s
     }
     return i == headerLength ? i : std::string::npos;
 }
+} // namespace
 
 size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const size_t nmemb, void *userp) {
     assert(userp);
@@ -458,9 +459,8 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions &resourceOptions, const Cli
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource,
-                                                      std::function<void(Response)> callback) {
-    return std::make_unique<HTTPRequest>(impl.get(), resource, std::move(callback));
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource, Callback callback) {
+    return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 
 void HTTPFileSource::setResourceOptions(ResourceOptions options) {

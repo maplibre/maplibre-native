@@ -35,6 +35,8 @@ struct Watch {
             case UV_READABLE | UV_WRITABLE:
                 watchEvent = RunLoop::Event::ReadWrite;
                 break;
+            default:
+                break;
         }
 
         watch->eventCallback(watch->fd, watchEvent);
@@ -48,8 +50,8 @@ struct Watch {
     uv_poll_t poll;
     int fd;
 
-    std23::move_only_function<void(int, RunLoop::Event)> eventCallback;
-    std23::move_only_function<void()> closeCallback;
+    std::function<void(int, RunLoop::Event)> eventCallback;
+    std::function<void()> closeCallback;
 };
 
 RunLoop* RunLoop::Get() {
@@ -159,7 +161,7 @@ void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag
     while (true) {
         std::size_t remaining;
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            std::scoped_lock lock(mutex);
             remaining = defaultQueue.size() + highPriorityQueue.size();
         }
 
@@ -171,7 +173,7 @@ void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag
     }
 }
 
-void RunLoop::addWatch(int fd, Event event, std23::move_only_function<void(int, Event)>&& callback) {
+void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& callback) {
     MBGL_VERIFY_THREAD(tid);
 
     Watch* watch = nullptr;

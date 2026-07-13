@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/containers.hpp>
@@ -77,11 +77,13 @@ public:
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
             for (const auto& attrib : ShaderClass::attributes) {
                 if (!propertiesAsUniforms.second.count(attrib.id)) {
-                    shader->initAttribute(attrib);
+                    shader->initVertexAttribute(attrib);
                 }
             }
             for (const auto& attrib : ShaderClass::instanceAttributes) {
-                shader->initInstanceAttribute(attrib);
+                if (!propertiesAsUniforms.second.count(attrib.id)) {
+                    shader->initInstanceAttribute(attrib);
+                }
             }
             for (const auto& texture : ShaderClass::textures) {
                 shader->initTexture(texture);

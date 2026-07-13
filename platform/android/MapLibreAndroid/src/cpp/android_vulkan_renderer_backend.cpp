@@ -24,7 +24,8 @@ public:
     void createPlatformSurface() override {
         auto& backendImpl = static_cast<AndroidVulkanRendererBackend&>(backend);
         const vk::AndroidSurfaceCreateInfoKHR createInfo({}, backendImpl.getWindow());
-        surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(createInfo);
+        surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(
+            createInfo, nullptr, backendImpl.getDispatcher());
 
         const int apiLevel = android_get_device_api_level();
         if (apiLevel < __ANDROID_API_Q__) {
@@ -54,6 +55,21 @@ AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window
 
 AndroidVulkanRendererBackend::~AndroidVulkanRendererBackend() = default;
 
+bool AndroidVulkanRendererBackend::createSurface(ANativeWindow* window_) {
+    window = window_;
+    setResource(std::make_unique<AndroidVulkanRenderableResource>(*this));
+
+    initSurface();
+    initSwapchain();
+
+    return true;
+}
+
+void AndroidVulkanRendererBackend::destroySurface() {
+    window = nullptr;
+    setResource(nullptr);
+}
+
 std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
     auto extensions = mbgl::vulkan::RendererBackend::getInstanceExtensions();
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -61,11 +77,30 @@ std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
     return extensions;
 }
 
-void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
-    size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+void AndroidVulkanRendererBackend::resizeFramebuffer(int, int) {
     if (context) {
         static_cast<vulkan::Context&>(*context).requestSurfaceUpdate();
     }
+}
+
+void AndroidVulkanRendererBackend::enableFramebufferRead(bool) {
+    MBGL_VERIFY_THREAD(tid);
+
+    if (!hasResource()) {
+        return;
+    }
+
+    getResource<AndroidVulkanRenderableResource>().queueSurfaceRead();
+}
+
+PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
+    MBGL_VERIFY_THREAD(tid);
+
+    if (!hasResource()) {
+        return PremultipliedImage();
+    }
+
+    return std::move(*getResource<AndroidVulkanRenderableResource>().readImage());
 }
 
 } // namespace android

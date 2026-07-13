@@ -44,7 +44,7 @@ fi
 
 if ! command -v cxxbridge > /dev/null; then
     echo "Installing cxxbridge..."
-    cargo install cxxbridge-cmd
+    cargo install cxxbridge-cmd@1.0.157 --locked
 fi
 
 

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <mbgl/text/quads.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/collision_feature.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
+#include <mbgl/util/source_location.hpp>
 
-#include <source_location>
+#include <cstdint>
 
-#if !defined(MLN_SYMBOL_GUARDS)
+#ifndef MLN_SYMBOL_GUARDS
 #define MLN_SYMBOL_GUARDS 1
 #endif
 
@@ -18,32 +18,8 @@
 #define SYM_GUARD_VALUE(N)
 #endif
 
-// A temporary shim for partial C++20 support
 #if MLN_SYMBOL_GUARDS
-#if defined(__clang__)
-#if __cplusplus <= 201703L || !__has_builtin(__builtin_source_location)
-namespace std {
-struct source_location {
-    const char* fileName_;
-    const char* functionName_;
-    unsigned line_;
-
-    constexpr uint_least32_t line() const noexcept { return line_; }
-    constexpr uint_least32_t column() const noexcept { return 0; }
-    constexpr const char* file_name() const noexcept { return fileName_; }
-    constexpr const char* function_name() const noexcept { return functionName_; }
-};
-} // namespace std
-#define SYM_GUARD_LOC                    \
-    std::source_location {               \
-        __FILE__, __FUNCTION__, __LINE__ \
-    }
-#else
-#define SYM_GUARD_LOC std::source_location::current()
-#endif
-#else
-#define SYM_GUARD_LOC std::source_location::current()
-#endif
+#define SYM_GUARD_LOC MLN_CURRENT_SOURCE_LOCATION
 #else
 #define SYM_GUARD_LOC \
     {                 \
@@ -140,14 +116,11 @@ public:
 
 #if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
-    bool check(const std::source_location&) const;
+    bool check(const source_location&) const;
     /// Check that an index is in the valid range
-    bool checkIndex(const std::optional<std::size_t>& index, std::size_t size, const std::source_location&) const;
+    bool checkIndex(const std::optional<std::size_t>& index, std::size_t size, const source_location&) const;
     /// Check all indexes
-    bool checkIndexes(std::size_t textCount,
-                      std::size_t iconSize,
-                      std::size_t sdfSize,
-                      const std::source_location&) const;
+    bool checkIndexes(std::size_t textCount, std::size_t iconSize, std::size_t sdfSize, const source_location&) const;
     /// Mark this item as failed (due to some external check) so that it cannot be used later
     void forceFail() const;
 #else
@@ -207,8 +180,8 @@ public:
 
 protected:
 #if MLN_SYMBOL_GUARDS
-    bool check(std::uint64_t v, int n, const std::source_location&) const;
-    bool checkKey(const std::source_location&) const;
+    bool check(std::uint64_t v, int n, const source_location&) const;
+    bool checkKey(const source_location&) const;
     void forceFailInternal(); // this is just to avoid warnings about the values never being set
 #else
     bool checkKey(std::string_view) const { return true; }

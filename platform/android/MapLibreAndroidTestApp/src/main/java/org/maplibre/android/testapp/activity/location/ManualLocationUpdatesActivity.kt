@@ -30,6 +30,7 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_manual_update)
+        mapView = findViewById(R.id.mapView)
         locationEngine = LocationEngineDefault.getDefaultLocationEngine(mapView.context)
         val fabManualUpdate = findViewById<FloatingActionButton>(R.id.fabManualLocationChange)
         fabManualUpdate.setOnClickListener { v: View? ->
@@ -66,7 +67,6 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-        mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)

@@ -36,8 +36,7 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/texture.hpp>
-#include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/gl/uniform.hpp>
 #include <mbgl/gl/types.hpp>
 
 #endif
@@ -467,7 +466,7 @@ public:
                 textureInfo.assign(*sharedImage);
                 updated = true;
             }
-        } else if (textureInfo.image) {
+        } else if (textureInfo.image || textureInfo.texture) {
             textureInfo.reset();
             updated = true;
         }
@@ -707,7 +706,7 @@ protected:
         Point<double> verticalShift = hatShadowShiftVector(params.puckPosition, params);
         const float horizontalScaleFactor =
             (1.0f - params.perspectiveCompensation) +
-            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 100.1f) *
+            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
                 params.perspectiveCompensation; // Compensation factor for the perspective deformation
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
@@ -944,6 +943,7 @@ RenderLocationIndicatorLayer::~RenderLocationIndicatorLayer() {
 
 void RenderLocationIndicatorLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& parameters) {
@@ -1277,11 +1277,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             if (info.textureInfo.image) {
                 if (!info.textureInfo.texture) {
                     info.textureInfo.texture = context.createTexture2D();
-                    info.textureInfo.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear,
-                                                                       gfx::TextureWrapType::Clamp,
-                                                                       gfx::TextureWrapType::Clamp,
-                                                                       16,
-                                                                       true});
+                    info.textureInfo.texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                                       .wrapU = gfx::TextureWrapType::Clamp,
+                                                                       .wrapV = gfx::TextureWrapType::Clamp,
+                                                                       .maxAnisotropy = 16,
+                                                                       .mipmapped = true});
                 }
 
                 info.textureInfo.texture->upload(info.textureInfo.image->get()->image);

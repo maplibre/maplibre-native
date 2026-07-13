@@ -10,8 +10,8 @@
 #include <mbgl/style/layout_property.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/style/properties.hpp>
-#include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/uniforms.hpp>
+#include <mbgl/shaders/attributes.hpp>
+#include <mbgl/shaders/uniforms.hpp>
 
 namespace mbgl {
 namespace style {
@@ -94,6 +94,11 @@ struct SymbolAvoidEdges : LayoutProperty<bool> {
 struct SymbolPlacement : LayoutProperty<SymbolPlacementType> {
     static constexpr const char *name() { return "symbol-placement"; }
     static SymbolPlacementType defaultValue() { return SymbolPlacementType::Point; }
+};
+
+struct SymbolScreenSpace : LayoutProperty<bool> {
+    static constexpr const char *name() { return "symbol-screen-space"; }
+    static bool defaultValue() { return false; }
 };
 
 struct SymbolSortKey : DataDrivenLayoutProperty<float> {
@@ -302,6 +307,7 @@ class SymbolLayoutProperties : public Properties<
     IconTextFitPadding,
     SymbolAvoidEdges,
     SymbolPlacement,
+    SymbolScreenSpace,
     SymbolSortKey,
     SymbolSpacing,
     SymbolZOrder,

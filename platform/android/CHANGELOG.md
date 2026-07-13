@@ -1,10 +1,360 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 13.3.1
 
 ### ✨ Features and improvements
 
+- Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
+
 ### 🐞 Bug fixes
+
+- fix(core): Update image descriptor sets when removing textures ([#4351](https://github.com/maplibre/maplibre-native/pull/4351)).
+- Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
+- core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
+
+## 13.3.0
+
+### ✨ Features and improvements
+
+- core: Enable Vulkan surface transforms by capability ([#4320](https://github.com/maplibre/maplibre-native/pull/4320)).
+- core: Update Vulkan headers ([#4319](https://github.com/maplibre/maplibre-native/pull/4319)).
+- Improve Vulkan Android surface lifecycle ([#4323](https://github.com/maplibre/maplibre-native/pull/4323)).
+- Implement Vulkan surface snapshot ([#4314](https://github.com/maplibre/maplibre-native/pull/4314)).
+- Vulkan fill extrusion instancing [Core optimization] ([#4310](https://github.com/maplibre/maplibre-native/pull/4310)).
+- Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
+
+### 🐞 Bug fixes
+
+- fix(android): guard stale layer remove path ([#4300](https://github.com/maplibre/maplibre-native/pull/4300)).
+- core: Fix specialized location indicator puck scaling ([#4327](https://github.com/maplibre/maplibre-native/pull/4327)).
+- Fix resize desync between Android surface and renderable ([#4328](https://github.com/maplibre/maplibre-native/pull/4328)).
+
+## 13.2.0
+
+### ✨ Features and improvements
+
+- Optimize fill extrusion memory by using instancing [Core optimization] ([#4256](https://github.com/maplibre/maplibre-native/pull/4256)).
+- Add asynchronous deletion option for Android renderer backend ([#4287](https://github.com/maplibre/maplibre-native/pull/4287)).
+
+### 🐞 Bug fixes
+
+- fix(renderer): guard ImageManager callback against use-after-free ([#4233](https://github.com/maplibre/maplibre-native/pull/4233)).
+- core: clear vulkan allocator handle after destruction ([#4302](https://github.com/maplibre/maplibre-native/pull/4302)).
+- [core] Keep `BackendScope` and context valid when closing the thread pool ([#4307](https://github.com/maplibre/maplibre-native/pull/4307)).
+- [core] Fix buffer versioning ([#4291](https://github.com/maplibre/maplibre-native/pull/4291)).
+
+## 13.1.0
+
+Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
+
+### ✨ Features and improvements
+
+- Update Boost to 1.90 ([#4210](https://github.com/maplibre/maplibre-native/pull/4210)).
+- android: update AGP and Gradle dependencies ([#4245](https://github.com/maplibre/maplibre-native/pull/4245)).
+- Handle allocation failure [Core feature] ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
+-  (android): apply size optimization flags to RelWithDebInfo build config ([#4247](https://github.com/maplibre/maplibre-native/pull/4247)).
+- Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
+- Add attribute buffer index to support multiple attributes interleaved in single buffer bind [Core optimization] ([#4241](https://github.com/maplibre/maplibre-native/pull/4241)).
+
+### 🐞 Bug fixes
+
+- Fix infinite recursion causing Stack Overflow in TileSet.kt setBounds() ([#4252](https://github.com/maplibre/maplibre-native/pull/4252)).
+- core: Fix crash in RenderLayer::updateTile when layerGroup is not a TileLayerGroup ([#4217](https://github.com/maplibre/maplibre-native/pull/4217)).
+
+## 13.0.2
+
+### ✨ Features and improvements
+
+- core: Skip empty dynamic texture submissions ([#4177](https://github.com/maplibre/maplibre-native/pull/4177)).
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)).
+- core: Use interleaved buffer for paint property binders ([#4124](https://github.com/maplibre/maplibre-native/pull/4124)).
+
+### 🐞 Bug fixes
+
+- core: Fix vulkan surface rotation ([#4182](https://github.com/maplibre/maplibre-native/pull/4182)).
+- core: Fix crash during exception stack unwind ([#4188](https://github.com/maplibre/maplibre-native/pull/4188)).
+
+## 13.0.1
+
+### 🐞 Bug fixes
+
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+- core: fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166))
+
+## 13.0.0
+
+### ✨ Features and improvements
+
+- 💥 **Breaking:** Use Vulkan as rendering backend for the `org.maplibre.gl:android-sdk` package. You can still use OpenGL ES with the `org.maplibre.gl:android-sdk-opengl` package.
+
+- core, android: add support for camera roll ([#3011](https://github.com/maplibre/maplibre-native/pull/3011)).
+- Add multithreaded upload to dynamic texture on Vulkan [Core feature] ([#4028](https://github.com/maplibre/maplibre-native/pull/4028)).
+- core: Avoid unnecessary raster buffer updates ([#4085](https://github.com/maplibre/maplibre-native/pull/4085)).
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965))
+
+### 🐞 Bug fixes
+
+- Fix laggy map when using synchronous GeoJSON source [#4092](https://github.com/maplibre/maplibre-native/pull/4092).
+  This replaces the synchronous methods on `GeoJsonSource` introduced in [#3560](https://github.com/maplibre/maplibre-native/pull/3560). To migrate, pass `GeoJsonOptions` with `options.withSynchronousUpdate(true)` when constructing a `GeoJsonSource`.
+- Do not capture this in Android GeoJSONSource ([#3976](https://github.com/maplibre/maplibre-native/pull/3976)).
+- Fix Vulkan headless backend resize ([#4030](https://github.com/maplibre/maplibre-native/pull/4030)).
+- Disable scissor test when clearing on OpenGL ([#4029](https://github.com/maplibre/maplibre-native/pull/4029)).
+
+## 12.3.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
+## 12.3.0
+
+### ✨ Features and improvements
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+
+### 🐞 Bug fixes
+
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+
+## 12.2.2
+
+### 🐞 Bug fixes
+
+- Fix crash due to pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
+
+## 12.2.1
+
+### 🐞 Bug fixes
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
+## 12.2.0
+
+### ✨ Features and improvements
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+
+### 🐞 Bug fixes
+
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+- Use deprecated readParcelable on Tiramisu to avoid crash ([#3950](https://github.com/maplibre/maplibre-native/pull/3950)).
+- Handle `BufferResource::version` overflow ([#3962](https://github.com/maplibre/maplibre-native/pull/3962)).
+
+## 12.1.3
+
+- Disable `UnsatisfiedLinkError` during local tests ([#3942](https://github.com/maplibre/maplibre-native/pull/3942)
+
+## 12.1.2
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+
+## 12.1.0
+
+### ✨ Features and improvements
+
+- Add support for parsing MLT-format vector tile sources ([#3246](https://github.com/maplibre/maplibre-native/pull/3246)).
+- Throw exception on `System.loadLibrary` fail ([#3916](https://github.com/maplibre/maplibre-native/pull/3916)).
+- Release allocated compass Bitmap as soon as possible ([#3889](https://github.com/maplibre/maplibre-native/pull/3889)).
+- Apply symbol shader changes from JS  for Metal, Vulkan, and OpenGL ([#3873](https://github.com/maplibre/maplibre-native/pull/3873)).
+- Improve CMake build setup Harfbuzz and Freetype deps ([#3879](https://github.com/maplibre/maplibre-native/pull/3879)).
+
+### 🐞 Bug fixes
+
+- [vulkan] Prevent member variable shadowing in `mbgl::vulkan::ShaderProgram` ([#3886](https://github.com/maplibre/maplibre-native/pull/3886)).
+- Add padding support to MapSnapshotter Android ([#3882](https://github.com/maplibre/maplibre-native/pull/3882)).
+- Fix `requestRenderAndNotify` continuous callback ([#3913](https://github.com/maplibre/maplibre-native/pull/3913)).
+- Add null check to Projection.getContentPadding() ([#3937](https://github.com/maplibre/maplibre-native/pull/3937)).
+- Assume CustomGeometrySource is cancelled when peer is null ([#3933](https://github.com/maplibre/maplibre-native/pull/3933)).
+- Use weak pointer for core layer ([#3931](https://github.com/maplibre/maplibre-native/pull/3931)).
+
+## 12.0.1
+
+### ✨ Features and improvements
+
+- Make Android snapshotter support hiding the attribution ([#3878](https://github.com/maplibre/maplibre-native/pull/3878)).
+
+### 🐞 Bug fixes
+
+- Handle style builder exceptions ([#3855](https://github.com/maplibre/maplibre-native/pull/3855)).
+- Add query annotation timeout ([#3874](https://github.com/maplibre/maplibre-native/pull/3874)).
+
+## 12.0.0
+
+### ✨ Features and improvements
+
+- 💥 Breaking: Bump minimum Android SDK version from 21 to 23 ([#3849](https://github.com/maplibre/maplibre-native/pull/3849)).
+
+### 🐞 Bug fixes
+
+- Manually free bound resources ([#3831](https://github.com/maplibre/maplibre-native/pull/3831)).
+- Fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+- Fix crash in camera position ([#3847](https://github.com/maplibre/maplibre-native/pull/3847)).
+
+## 11.13.5
+
+### ✨ Features and improvements
+
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+
+### 🐞 Bug fixes
+
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+
+- Fix onSprite call on bad references ([#3805](https://github.com/maplibre/maplibre-native/pull/3805)).
+
+## 11.13.1
+
+### ✨ Features and improvements
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+
+### 🐞 Bug fixes
+
+- Fix Android backend cleanup ([#3681](https://github.com/maplibre/maplibre-native/pull/3681)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
+## 11.13.0
+
+### ✨ Features and improvements
+
+- Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
+
+## 11.12.1
+
+### ✨ Features and improvements
+
+- texture2d - getVulkanImage and support for Texture2DUsage::Attachment ([#3632](https://github.com/maplibre/maplibre-native/pull/3632)).
+
+### 🐞 Bug fixes
+
+- Fix dashed line issue when style change ([#3675](https://github.com/maplibre/maplibre-native/pull/3675)).
+
+## 11.12.1
+
+### 🐞 Bug fixes
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
+## 11.12.0
+
+### ✨ Features and improvements
+
+- feat: add clusterMinPoints option Android and iOS ([#3601](https://github.com/maplibre/maplibre-native/pull/3601)).
+
+## 11.11.0
+
+### ✨ Features and improvements
+
+- Improve the logic to let source peers be consistent with C++ peers ([#3561](https://github.com/maplibre/maplibre-native/pull/3561)).
+- set default move gesture threshold to a small non-zero value ([#3573](https://github.com/maplibre/maplibre-native/pull/3573)).
+- Bump version of MapLibre Gestures Android to 0.0.4 ([#3583](https://github.com/maplibre/maplibre-native/pull/3583)).
+- Expose sync methods in GeoJsonSource  ([#3560](https://github.com/maplibre/maplibre-native/pull/3560)).
+
+### 🐞 Bug fixes
+
+- Prevent `Style.validateState()` exception on location state updates ([#3574](https://github.com/maplibre/maplibre-native/pull/3574)).
+- Fix the symbol blink issue by only placing the symbol in current level ([#3534](https://github.com/maplibre/maplibre-native/pull/3534)).
+
+## 11.10.3
+
+### 🐞 Bug fixes
+
+- Revert fix [#3536](https://github.com/maplibre/maplibre-native/pull/3536) due to `getSource` crashes.
+
+## 11.10.2
+
+### 🐞 Bug fixes
+
+- Fix segfault this-capture GeoJsonSource which may be deleted ([#3536](https://github.com/maplibre/maplibre-native/pull/3536)).
+- Add `MapRenderer` dangling reference check ([#3541](https://github.com/maplibre/maplibre-native/pull/3541)).
+- Fix incomplete feature state updates in GeometryTile and SourceFeatureState [Vector Tile Layer]. ([#3406](https://github.com/maplibre/maplibre-native/pull/3406)).
+
+### ✨ Features and improvements
+
+- Fix recycler view test ([#3537](https://github.com/maplibre/maplibre-native/pull/3537)).
+
+## 11.10.1
+
+### 🐞 Bug fixes
+
+- Add missing proguard rules ([#3529](https://github.com/maplibre/maplibre-native/pull/3529)).
+
+## 11.10.0
+
+### ✨ Features and improvements
+
+- Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/android/examples/observability/action-journal/
+- Pattern layout performance improvement ([#3495](https://github.com/maplibre/maplibre-native/pull/3495)).
+- Add Tile LOD controls ([#2958](https://github.com/maplibre/maplibre-native/pull/2958)).
+
+### 🐞 Bug fixes
+
+- Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
+- Make sure AndroidRendererFrontend exists when accessing it ([#3522](https://github.com/maplibre/maplibre-native/pull/3522))
+## 11.9.0
+
+### ✨ Features and improvements
+
+- Add dynamic texture atlas ([#3198](https://github.com/maplibre/maplibre-native/pull/3198)).
+- Remove some of unused legacy uniforms ([#3481](https://github.com/maplibre/maplibre-native/pull/3481)).
+
+### 🐞 Bug fixes
+
+- Fix vulkan scaling issue ([#3489](https://github.com/maplibre/maplibre-native/pull/3489)).
+- Fix swapchain out of bounds ([#3486](https://github.com/maplibre/maplibre-native/pull/3486)).
+- Fix validation error reported by VulkanSDK 1.4.313.0 ([#3471](https://github.com/maplibre/maplibre-native/pull/3471)).P
+
+## 11.9.0-pre0
+
+Pre-release to test out the new [dynamic texture atlas](https://github.com/maplibre/maplibre-native/pull/3198). This should result in a memory reduction. Please [open an issue](https://github.com/maplibre/maplibre-native/issues) if you encounter any problems.
+
+## 11.8.8
+
+### ✨ Features and improvements
+
+- Update NDK to 28.1.13356709 ([#3450](https://github.com/maplibre/maplibre-native/pull/3450)).
+- Add support to range requests in AssetFileSource ([#3461](https://github.com/maplibre/maplibre-native/pull/3404)).
+- Force PMTiles metadata to always have XYZ tile scheme ([#3403](https://github.com/maplibre/maplibre-native/pull/3403)).
+
+### 🐞 Bug fixes
+
+- Make sure renderThread is alive before calling requestExitAndWait() ([#3461](https://github.com/maplibre/maplibre-native/pull/3461)).
+
+## 11.8.7
+
+We now make releases with debug builds to make it easier to report issues with relevant logs.
+
+They are available with a `-debug` postfix on Maven Central, for example `org.maplibre.gl:android-sdk-vulkan-debug`.
+
+## 11.8.6
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
+### 🐞 Bug fixes
+
+- Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
+- Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
+- Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
+
+## 11.8.5
+
+### 🐞 Bug fixes
+
+- Add regression test for [#3323](https://github.com/maplibre/maplibre-native/pull/3323), bug in layer dependency tracking ([#3326](https://github.com/maplibre/maplibre-native/pull/3326))
+- Fix `ErrorSurfaceLostKHR` exception ([#3337](https://github.com/maplibre/maplibre-native/pull/3337)).
+
+## 11.8.4
+
+### 🐞 Bug fixes
+
+-  Add workaround for android emulator as crash on Android emulation is still presented ([#3310](https://github.com/maplibre/maplibre-native/pull/3310))
+
+## 11.8.3
+
+### 🐞 Bug fixes
+
+- Revert "Eliminate copies in deferred cleanup" ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)) which was causing a memory growth issue.
 
 ## 11.8.2
 

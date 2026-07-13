@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -9,10 +8,12 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/vulkan/dynamic_texture.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/vulkan/descriptor_set.hpp>
+#include <mbgl/util/util.hpp>
 
 #include <memory>
 #include <optional>
@@ -36,7 +37,6 @@ struct ClipUBO;
 namespace vulkan {
 
 class RenderPass;
-class RendererBackend;
 class ShaderProgram;
 class VertexBufferResource;
 class Texture2D;
@@ -44,6 +44,9 @@ class Texture2D;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 using UniqueUniformBufferArray = std::unique_ptr<gfx::UniformBufferArray>;
+
+using DeletionTask = std::function<void(Context&)>;
+using DeletionQueue = std::vector<DeletionTask>;
 
 class Context final : public gfx::Context {
 public:
@@ -71,7 +74,7 @@ public:
                                       const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     /// Called at the end of a frame.
-    void performCleanup() override {}
+    void performCleanup() override;
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
@@ -90,6 +93,8 @@ public:
 
     gfx::Texture2DPtr createTexture2D() override;
 
+    gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
+
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     void resetState(gfx::DepthMode, gfx::ColorMode) override {}
@@ -104,10 +109,6 @@ public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
-
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
 
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;
@@ -148,28 +149,24 @@ public:
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    void enqueueDeletion(std::function<void(Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
+    vk::UniqueCommandBuffer& getCommandBuffer() { return frameResources[frameResourceIndex].commandBuffer; }
+    void enqueueDeletion(DeletionTask&& function);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
+    void submitOneTimeCommand(const vk::UniqueCommandBuffer& buffer);
+    void submitOneTimeCommand(const vk::UniqueCommandPool& pool,
+                              const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
     void requestSurfaceUpdate(bool useDelay = true);
 
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
-
-        vk::UniqueSemaphore surfaceSemaphore;
-        vk::UniqueSemaphore frameSemaphore;
         vk::UniqueFence flightFrameFence;
 
-        std::vector<std::function<void(Context&)>> deletionQueue;
+        DeletionQueue deletionQueue;
 
-        FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueSemaphore&& surf,
-                       vk::UniqueSemaphore&& frame,
-                       vk::UniqueFence&& flight)
+        FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              surfaceSemaphore(std::move(surf)),
-              frameSemaphore(std::move(frame)),
               flightFrameFence(std::move(flight)) {}
 
         void runDeletionQueue(Context&);
@@ -214,6 +211,12 @@ private:
 
         PipelineInfo pipelineInfo;
     } clipping;
+
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::mutex graphicsQueueSubmitMutex;
+#endif
+
+    MBGL_STORE_THREAD(tid);
 };
 
 } // namespace vulkan

@@ -16,11 +16,16 @@ public:
     ~AndroidVulkanRendererBackend() override;
 
     ANativeWindow* getWindow() { return window; }
+    bool createSurface(ANativeWindow* window) override;
+    void destroySurface() override;
+
     mbgl::gfx::RendererBackend& getImpl() override { return *this; }
 
     std::vector<const char*> getInstanceExtensions() override;
 
     void resizeFramebuffer(int width, int height) override;
+    void enableFramebufferRead(bool value) override;
+    PremultipliedImage readFramebuffer() override;
 
     // mbgl::gfx::RendererBackend implementation
 public:
@@ -36,6 +41,8 @@ protected:
 
 protected:
     ANativeWindow* window;
+
+    MBGL_STORE_THREAD(tid);
 };
 
 } // namespace android

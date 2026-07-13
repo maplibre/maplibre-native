@@ -47,6 +47,8 @@ public:
     BufferResource& operator=(BufferResource&&) noexcept;
 
     BufferResource clone() const;
+    BufferResource shared() const;
+    void destroy(bool deferred = true);
 
     void update(const void* data, std::size_t size, std::size_t offset) noexcept;
 
@@ -70,6 +72,9 @@ public:
 
     /// Used to detect whether buffer contents have changed
     VersionType getVersion() const noexcept { return version; }
+
+protected:
+    BufferResource(const BufferResource&) noexcept;
 
 protected:
     Context& context;

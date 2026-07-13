@@ -16,6 +16,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -38,3 +39,9 @@ includeBuild(cppTestProjectDir) {
 }
 
 includeBuild("./MapLibrePlugin")
+
+buildCache {
+    local {
+        isEnabled = true
+    }
+}

@@ -103,6 +103,32 @@ public final class MapLibreMap {
     nativeMapView.triggerRepaint();
   }
 
+  /**
+   * Query rendering statistics overlay status.
+   */
+  public boolean isRenderingStatsViewEnabled() {
+    return nativeMapView.isRenderingStatsViewEnabled();
+  }
+
+  /**
+   * Enable rendering statistics overlay with {@link RenderingStats} values.
+   */
+  public void enableRenderingStatsView(boolean value) {
+    nativeMapView.enableRenderingStatsView(value);
+  }
+
+  /**
+   * Frustum offset used to disable rendering of elements at the edge of the screen
+   *
+   * Offset applied to camera frustum and scissor rectangle. The camrea frustum is modified
+   * to avoid loading geometry that's behind UI elements at the top of the screen. The scissor
+   * rectangle is used to avoid shading fragments that are behind UI elements at the edges of
+   * the screen. All values are in logical pixels.
+   */
+  public void setFrustumOffset(@NonNull RectF offset) {
+    nativeMapView.setFrustumOffset(offset);
+  }
+
   public void setSwapBehaviorFlush(boolean flush) {
     nativeMapView.setSwapBehaviorFlush(flush);
   }
@@ -342,6 +368,101 @@ public final class MapLibreMap {
    */
   public boolean getTileCacheEnabled() {
     return nativeMapView.getTileCacheEnabled();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param radius minimum radius around the view point in unit of tiles in which the fine
+   * grained zoom level tiles are always used when performing LOD
+   * radius must be greater than 1 (At least 1 fine detailed tile is present)
+   * A smaller radius value may improve performance at the cost of quality (tiles away from
+   * camera use lower Zoom levels)
+   */
+  public void setTileLodMinRadius(@FloatRange(from = 1, fromInclusive = true) double radius) {
+    nativeMapView.setTileLodMinRadius(radius);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return minimum radius around the view point in unit of tiles in which the fine grained
+   * zoom level tiles are always used when performing LOD
+   * @see MapLibreMap#setTileLodMinRadius(double)
+   */
+  public double getTileLodMinRadius() {
+    return nativeMapView.getTileLodMinRadius();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param scale factor for the distance to the camera view point
+   * A value larger than 1 increases the distance to the camera view point reducing LOD
+   * Larger values may improve performance at the cost of quality (tiles away from camera
+   * use lower Zoom levels)
+   */
+  public void setTileLodScale(@FloatRange(from = 0, fromInclusive = false) double scale) {
+    nativeMapView.setTileLodScale(scale);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return scale factor for the distance to the camera view point
+   * @see MapLibreMap#setTileLodScale(double)
+   */
+  public double getTileLodScale() {
+    return nativeMapView.getTileLodScale();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param threshold pitch angle in radians above which LOD calculation is performed
+   * A smaller radius value may improve performance at the cost of quality
+   */
+  public void setTileLodPitchThreshold(@FloatRange(from = 0, to = Math.PI) double threshold) {
+    nativeMapView.setTileLodPitchThreshold(threshold);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return pitch angle threshold in radians above which LOD calculation is performed
+   * @see MapLibreMap#setTileLodPitchThreshold(double)
+   */
+  public double getTileLodPitchThreshold() {
+    return nativeMapView.getTileLodPitchThreshold();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param shift shift applied to the Zoom level during LOD calculation
+   * A negative value shifts the Zoom level to a coarser level reducing quality but
+   * improving performance
+   * A positive value shifts the Zoom level to a finer level increasing details but
+   * negatively affecting performance
+   * A value of zero (default) does not apply any shift to the Zoom level
+   * It is not recommended to change the default value unless performance is critical
+   * and the loss of quality is acceptable. A value of -1 reduces the number of
+   * displayed tiles by a factor of 4 on average
+   * It is recommended to first configure the pixelRatio before adjusting
+   * TileLodZoomShift. {@link MapLibreMapOptions#pixelRatio(float)}
+   */
+  public void setTileLodZoomShift(double shift) {
+    nativeMapView.setTileLodZoomShift(shift);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return shift applied to the Zoom level during LOD calculation
+   * @see MapLibreMap#setTileLodZoomShift(double)
+   */
+  public double getTileLodZoomShift() {
+    return nativeMapView.getTileLodZoomShift();
   }
 
   //
@@ -897,6 +1018,49 @@ public final class MapLibreMap {
     nativeMapView.setDebug(debugActive);
   }
 
+  /**
+   * <p>
+   * Get the list of action journal log files from oldest to newest.
+   * </p>
+   */
+  public String[] getActionJournalLogFiles() {
+    return nativeMapView.getActionJournalLogFiles();
+  }
+
+  /**
+   * <p>
+   * Get the action journal events from oldest to newest.
+   * </p>
+   * Each element contains a serialized json object with the event data.
+   * Example
+   * `{
+   *   "name" : "onTileAction",
+   *   "time" : "2025-04-17T13:13:13.974Z",
+   *   "styleName" : "Streets",
+   *   "styleURL" : "maptiler://maps/streets",
+   *   "event" : {
+   *     "action" : "RequestedFromNetwork",
+   *     "tileX" : 0,
+   *     "tileY" : 0,
+   *     "tileZ" : 0,
+   *     "overscaledZ" : 0,
+   *     "sourceID" : "openmaptiles"
+   *   }
+   * }`
+   */
+  public String[] getActionJournalLog() {
+    return nativeMapView.getActionJournalLog();
+  }
+
+  /**
+   * <p>
+   * Clear stored action journal events.
+   * </p>
+   */
+  public void clearActionJournalLog() {
+    nativeMapView.clearActionJournalLog();
+  }
+
   //
   // API endpoint config
   //
@@ -1030,7 +1194,7 @@ public final class MapLibreMap {
    * @param markerOptions A marker options object that defines how to render the marker
    * @return The {@code Marker} that was added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1049,7 +1213,7 @@ public final class MapLibreMap {
    * @param markerOptions A marker options object that defines how to render the marker
    * @return The {@code Marker} that was added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1068,7 +1232,7 @@ public final class MapLibreMap {
    * @param markerOptionsList A list of marker options objects that defines how to render the markers
    * @return A list of the {@code Marker}s that were added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1085,7 +1249,7 @@ public final class MapLibreMap {
    *
    * @param updatedMarker An updated marker object
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1099,7 +1263,7 @@ public final class MapLibreMap {
    * @param polylineOptions A polyline options object that defines how to render the polyline
    * @return The {@code Polyine} that was added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1114,7 +1278,7 @@ public final class MapLibreMap {
    * @param polylineOptionsList A list of polyline options objects that defines how to render the polylines.
    * @return A list of the {@code Polyline}s that were added to the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1128,7 +1292,7 @@ public final class MapLibreMap {
    *
    * @param polyline An updated polyline object.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1142,7 +1306,7 @@ public final class MapLibreMap {
    * @param polygonOptions A polygon options object that defines how to render the polygon.
    * @return The {@code Polygon} that was added to the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1157,7 +1321,7 @@ public final class MapLibreMap {
    * @param polygonOptionsList A list of polygon options objects that defines how to render the polygons
    * @return A list of the {@code Polygon}s that were added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1171,7 +1335,7 @@ public final class MapLibreMap {
    *
    * @param polygon An updated polygon object
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1187,7 +1351,7 @@ public final class MapLibreMap {
    *
    * @param marker Marker to remove
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1203,7 +1367,7 @@ public final class MapLibreMap {
    *
    * @param polyline Polyline to remove
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1219,7 +1383,7 @@ public final class MapLibreMap {
    *
    * @param polygon Polygon to remove
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1232,7 +1396,7 @@ public final class MapLibreMap {
    *
    * @param annotation The annotation object to remove.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1245,7 +1409,7 @@ public final class MapLibreMap {
    *
    * @param id The identifier associated to the annotation to be removed
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1258,7 +1422,7 @@ public final class MapLibreMap {
    *
    * @param annotationList A list of annotation objects to remove.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1270,7 +1434,7 @@ public final class MapLibreMap {
    * Removes all annotations from the map.
    *
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1282,7 +1446,7 @@ public final class MapLibreMap {
    * Removes all markers, polylines, polygons, overlays, etc from the map.
    *
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1296,7 +1460,7 @@ public final class MapLibreMap {
    * @param id the id used to look up an annotation
    * @return An annotation with a matched id, null is returned if no match was found
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1311,7 +1475,7 @@ public final class MapLibreMap {
    * @return A list of all the annotation objects. The returned object is a copy so modifying this
    * list will not update the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1326,7 +1490,7 @@ public final class MapLibreMap {
    * @return A list of all the markers objects. The returned object is a copy so modifying this
    * list will not update the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1341,7 +1505,7 @@ public final class MapLibreMap {
    * @return A list of all the polygon objects. The returned object is a copy so modifying this
    * list will not update the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1356,7 +1520,7 @@ public final class MapLibreMap {
    * @return A list of all the polylines objects. The returned object is a copy so modifying this
    * list will not update the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1371,7 +1535,7 @@ public final class MapLibreMap {
    * @param listener The callback that's invoked when the user clicks on a marker.
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1385,7 +1549,7 @@ public final class MapLibreMap {
    * @param listener The callback that's invoked when the user clicks on a polygon.
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1399,7 +1563,7 @@ public final class MapLibreMap {
    * @param listener The callback that's invoked when the user clicks on a polyline.
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1417,7 +1581,7 @@ public final class MapLibreMap {
    *
    * @param marker The marker to select.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1433,7 +1597,7 @@ public final class MapLibreMap {
    * Deselects any currently selected marker. All markers will have it's info window closed.
    *
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1446,7 +1610,7 @@ public final class MapLibreMap {
    *
    * @param marker the marker to deselect
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1459,7 +1623,7 @@ public final class MapLibreMap {
    *
    * @return The currently selected marker.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1482,7 +1646,7 @@ public final class MapLibreMap {
    * @param infoWindowAdapter The callback to be invoked when an info window will be shown.
    *                          To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1495,7 +1659,7 @@ public final class MapLibreMap {
    *
    * @return The callback to be invoked when an info window will be shown.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1509,7 +1673,7 @@ public final class MapLibreMap {
    *
    * @param allow If true, map allows concurrent multiple infowindows to be shown.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1522,7 +1686,7 @@ public final class MapLibreMap {
    *
    * @return If true, map allows concurrent multiple infowindows to be shown.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2375,7 +2539,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setOnMarkerClickListener(OnMarkerClickListener)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2394,7 +2558,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setOnPolygonClickListener(OnPolygonClickListener)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2412,7 +2576,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setOnPolylineClickListener(OnPolylineClickListener)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2475,7 +2639,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setInfoWindowAdapter(InfoWindowAdapter)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated

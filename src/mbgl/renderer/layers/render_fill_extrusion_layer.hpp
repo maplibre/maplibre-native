@@ -1,16 +1,11 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
-#include <mbgl/gfx/offscreen_texture.hpp>
 
 namespace mbgl {
-
-#if MLN_LEGACY_RENDERER
-class FillExtrusionProgram;
-class FillExtrusionPatternProgram;
-#endif // MLN_LEGACY_RENDERER
 
 class RenderFillExtrusionLayer final : public RenderLayer {
 public:
@@ -24,11 +19,6 @@ private:
     bool hasCrossfade() const override;
     bool is3D() const override;
 
-#if MLN_LEGACY_RENDERER
-    void render(PaintParameters&) override;
-#endif
-
-#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -36,7 +26,6 @@ private:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-#endif // MLN_DRAWABLE_RENDERER
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -49,18 +38,20 @@ private:
     // Paint properties
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
 
-#if MLN_LEGACY_RENDERER
-    // Programs
-    std::shared_ptr<FillExtrusionProgram> fillExtrusionProgram;
-    std::shared_ptr<FillExtrusionPatternProgram> fillExtrusionPatternProgram;
-#endif
-
-#if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr fillExtrusionGroup;
     gfx::ShaderGroupPtr fillExtrusionPatternGroup;
-#endif // MLN_DRAWABLE_RENDERER
 
-    std::unique_ptr<gfx::OffscreenTexture> renderTexture;
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+    gfx::ShaderGroupPtr fillExtrusionInstancedGroup;
+    gfx::ShaderGroupPtr fillExtrusionPatternInstancedGroup;
+
+    using FillExtrusionVertexVector = gfx::VertexVector<FillExtrusionStaticVertex>;
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+
+    std::shared_ptr<FillExtrusionVertexVector> staticDataVertices;
+    std::shared_ptr<TriangleIndexVector> staticDataIndices;
+    std::shared_ptr<SegmentVector> staticDataSegments;
+#endif
 };
 
 } // namespace mbgl

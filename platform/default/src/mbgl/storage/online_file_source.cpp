@@ -37,7 +37,9 @@ constexpr const char* ONLINE_STATUS_KEY = "online-status";
 class OnlineFileSourceThread;
 
 struct OnlineFileRequest {
-    OnlineFileRequest(Resource resource_, std::function<void(Response)>&& callback_, OnlineFileSourceThread& impl_);
+    using Callback = std::function<void(Response)>;
+
+    OnlineFileRequest(Resource resource_, Callback callback_, OnlineFileSourceThread& impl_);
     ~OnlineFileRequest();
 
     void networkIsReachableAgain();
@@ -54,7 +56,7 @@ struct OnlineFileRequest {
     Resource resource;
     std::unique_ptr<AsyncRequest> request;
     util::Timer timer;
-    std::function<void(Response)> callback;
+    Callback callback;
 
     std::function<void()> cancelCallback = nullptr;
     std::shared_ptr<Mailbox> mailbox;
@@ -122,8 +124,8 @@ public:
     }
 
     void activateOrQueueRequest(OnlineFileRequest* req) {
-        assert(allRequests.find(req) != allRequests.end());
-        assert(activeRequests.find(req) == activeRequests.end());
+        assert(allRequests.contains(req));
+        assert(!activeRequests.contains(req));
         assert(!req->request);
 
         if (activeRequests.size() >= getMaximumConcurrentRequests()) {
@@ -165,7 +167,7 @@ public:
 
     bool isPending(OnlineFileRequest* req) { return pendingRequests.contains(req); }
 
-    bool isActive(OnlineFileRequest* req) { return activeRequests.find(req) != activeRequests.end(); }
+    bool isActive(OnlineFileRequest* req) { return activeRequests.contains(req); }
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 
@@ -301,7 +303,7 @@ private:
     std::set<OnlineFileRequest*> activeRequests;
 
     bool online = true;
-    uint32_t maximumConcurrentRequests = util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS;
+    uint32_t maximumConcurrentRequests;
     HTTPFileSource httpFileSource;
     util::AsyncTask reachability{std::bind(&OnlineFileSourceThread::networkIsReachableAgain, this)};
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
@@ -318,7 +320,7 @@ public:
               resourceOptions.clone(),
               clientOptions.clone())) {}
 
-    std::unique_ptr<AsyncRequest> request(std::function<void(Response)> callback, Resource res) {
+    std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
         req->onCancel(
             [actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&OnlineFileSourceThread::cancel, req); });
@@ -337,26 +339,26 @@ public:
     void setResourceOptions(ResourceOptions options) {
         thread->actor().invoke(&OnlineFileSourceThread::setResourceOptions, options.clone());
         {
-            std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+            std::scoped_lock lock(resourceOptionsMutex);
             cachedResourceOptions = options;
         }
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return cachedResourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
         thread->actor().invoke(&OnlineFileSourceThread::setClientOptions, options.clone());
         {
-            std::lock_guard<std::mutex> lock(clientOptionsMutex);
+            std::scoped_lock lock(clientOptionsMutex);
             cachedClientOptions = options;
         }
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return cachedClientOptions.clone();
     }
 
@@ -368,7 +370,7 @@ public:
             const auto maxConcurrentRequests = static_cast<uint32_t>(*maximumConcurrentRequests);
             thread->actor().invoke(&OnlineFileSourceThread::setMaximumConcurrentRequests, maxConcurrentRequests);
             {
-                std::lock_guard<std::mutex> lock(maximumConcurrentRequestsMutex);
+                std::scoped_lock lock(maximumConcurrentRequestsMutex);
                 cachedMaximumConcurrentRequests = maxConcurrentRequests;
             }
         } else {
@@ -377,7 +379,7 @@ public:
     }
 
     uint32_t getMaximumConcurrentRequests() const {
-        std::lock_guard<std::mutex> lock(maximumConcurrentRequestsMutex);
+        std::scoped_lock lock(maximumConcurrentRequestsMutex);
         return cachedMaximumConcurrentRequests;
     }
 
@@ -385,7 +387,7 @@ public:
         if (auto* apiKey = value.getString()) {
             thread->actor().invoke(&OnlineFileSourceThread::setApiKey, *apiKey);
             {
-                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                std::scoped_lock lock(resourceOptionsMutex);
                 cachedResourceOptions.withApiKey(*apiKey);
             }
         } else {
@@ -394,7 +396,7 @@ public:
     }
 
     std::string getApiKey() const {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return cachedResourceOptions.apiKey();
     }
 
@@ -402,7 +404,7 @@ public:
         if (auto* baseURL = value.getString()) {
             thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
             {
-                std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+                std::scoped_lock lock(resourceOptionsMutex);
                 cachedResourceOptions.withTileServerOptions(
                     cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
             }
@@ -412,7 +414,7 @@ public:
     }
 
     std::string getAPIBaseURL() const {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return cachedResourceOptions.tileServerOptions().baseURL();
     }
 
@@ -427,9 +429,7 @@ private:
     const std::unique_ptr<util::Thread<OnlineFileSourceThread>> thread;
 };
 
-OnlineFileRequest::OnlineFileRequest(Resource resource_,
-                                     std::function<void(Response)>&& callback_,
-                                     OnlineFileSourceThread& impl_)
+OnlineFileRequest::OnlineFileRequest(Resource resource_, Callback callback_, OnlineFileSourceThread& impl_)
     : impl(impl_),
       resource(std::move(resource_)),
       callback(std::move(callback_)) {
@@ -616,8 +616,7 @@ OnlineFileSource::OnlineFileSource(const ResourceOptions& resourceOptions, const
 
 OnlineFileSource::~OnlineFileSource() = default;
 
-std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource,
-                                                        std::function<void(Response)> callback) {
+std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource, Callback callback) {
     Resource res = resource;
     const TileServerOptions options = impl->getResourceOptions().tileServerOptions();
 

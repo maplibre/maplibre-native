@@ -7,8 +7,8 @@
 namespace mbgl {
 namespace style {
 namespace expression {
-
-static bool isComparableType(const std::string& op, const type::Type& type) noexcept {
+namespace {
+bool isComparableType(const std::string& op, const type::Type& type) noexcept {
     if (op == "==" || op == "!=") {
         return type == type::String || type == type::Number || type == type::Boolean || type == type::Null ||
                type == type::Value;
@@ -75,7 +75,7 @@ bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) 
     return c.compare(a, b) >= 0;
 }
 
-static BasicComparison::CompareFunctionType getBasicCompareFunction(const std::string& op) noexcept {
+BasicComparison::CompareFunctionType getBasicCompareFunction(const std::string& op) noexcept {
     if (op == "==")
         return eq;
     else if (op == "!=")
@@ -92,7 +92,7 @@ static BasicComparison::CompareFunctionType getBasicCompareFunction(const std::s
     return nullptr;
 }
 
-static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(const std::string& op) noexcept {
+CollatorComparison::CompareFunctionType getCollatorComparisonFunction(const std::string& op) noexcept {
     if (op == "==")
         return eqCollate;
     else if (op == "!=")
@@ -108,6 +108,7 @@ static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(con
     assert(false);
     return nullptr;
 }
+} // namespace
 
 BasicComparison::BasicComparison(std::string op_, std::unique_ptr<Expression> lhs_, std::unique_ptr<Expression> rhs_)
     : Expression(Kind::Comparison, type::Boolean, depsOf(lhs_) | depsOf(rhs_)),

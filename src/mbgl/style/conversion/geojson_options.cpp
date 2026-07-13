@@ -81,12 +81,32 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
         }
     }
 
+    const auto clusterMinPointsValue = objectMember(value, "clusterMinPoints");
+    if (clusterMinPointsValue) {
+        if (toNumber(*clusterMinPointsValue)) {
+            options.clusterMinPoints = static_cast<size_t>(*toNumber(*clusterMinPointsValue));
+        } else {
+            error.message = "GeoJSON source clusterMinPoints value must be a number";
+            return std::nullopt;
+        }
+    }
+
     const auto lineMetricsValue = objectMember(value, "lineMetrics");
     if (lineMetricsValue) {
         if (toBool(*lineMetricsValue)) {
             options.lineMetrics = *toBool(*lineMetricsValue);
         } else {
             error.message = "GeoJSON source lineMetrics value must be a boolean";
+            return std::nullopt;
+        }
+    }
+
+    const auto synchronousUpdateValue = objectMember(value, "synchronousUpdate");
+    if (synchronousUpdateValue) {
+        if (toBool(*synchronousUpdateValue)) {
+            options.synchronousUpdate = *toBool(*synchronousUpdateValue);
+        } else {
+            error.message = "GeoJSON source synchronousUpdate value must be a boolean";
             return std::nullopt;
         }
     }

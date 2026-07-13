@@ -1,5 +1,3 @@
-#pragma once
-
 #include <mbgl/platform/gl_functions.hpp>
 
 #ifndef GL_GLEXT_PROTOTYPES

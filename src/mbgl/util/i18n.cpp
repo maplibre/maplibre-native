@@ -1,5 +1,6 @@
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/utf.hpp>
+#include <mbgl/text/glyph.hpp>
 
 #include <algorithm>
 #include <map>
@@ -16,6 +17,10 @@ namespace {
     inline bool isIn##name(char16_t codepoint) {            \
         return codepoint >= (first) && codepoint <= (last); \
     }
+
+inline bool isInRange(char16_t codepoint, char16_t first, char16_t last) {
+    return codepoint >= first && codepoint <= last;
+}
 
 // The following table comes from <http://www.unicode.org/Public/12.0.0/ucd/Blocks.txt>.
 // Keep it synchronized with <http://www.unicode.org/Public/UCD/latest/ucd/Blocks.txt>.
@@ -42,21 +47,22 @@ DEFINE_IS_IN_UNICODE_BLOCK(ArabicSupplement, 0x0750, 0x077F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Syriac Supplement, 0x0860, 0x086F)
 DEFINE_IS_IN_UNICODE_BLOCK(ArabicExtendedA, 0x08A0, 0x08FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Devanagari, 0x0900, 0x097F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Bengali, 0x0980, 0x09FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Gurmukhi, 0x0A00, 0x0A7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Gujarati, 0x0A80, 0x0AFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Oriya, 0x0B00, 0x0B7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tamil, 0x0B80, 0x0BFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Telugu, 0x0C00, 0x0C7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Kannada, 0x0C80, 0x0CFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Malayalam, 0x0D00, 0x0D7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Sinhala, 0x0D80, 0x0DFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Thai, 0x0E00, 0x0E7F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Lao, 0x0E80, 0x0EFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tibetan, 0x0F00, 0x0FFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Bengali, 0x0980, 0x09FF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Gurmukhi, 0x0A00, 0x0A7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Gujarati, 0x0A80, 0x0AFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Oriya, 0x0B00, 0x0B7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Tamil, 0x0B80, 0x0BFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Telugu, 0x0C00, 0x0C7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Kannada, 0x0C80, 0x0CFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Malayalam, 0x0D00, 0x0D7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Sinhala, 0x0D80, 0x0DFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Thai, 0x0E00, 0x0E7F)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Lao, 0x0E80, 0x0EFF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Tibetan, 0x0F00, 0x0FFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Myanmar, 0x1000, 0x109F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Georgian, 0x10A0, 0x10FF)
+//  DEFINE_IS_IN_UNICODE_BLOCK(Georgian, 0x10A0, 0x10FF)
 DEFINE_IS_IN_UNICODE_BLOCK(HangulJamo, 0x1100, 0x11FF)
+
 // DEFINE_IS_IN_UNICODE_BLOCK(Ethiopic, 0x1200, 0x137F)
 // DEFINE_IS_IN_UNICODE_BLOCK(EthiopicSupplement, 0x1380, 0x139F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Cherokee, 0x13A0, 0x13FF)
@@ -409,8 +415,59 @@ bool allowsIdeographicBreaking(char16_t chr) {
 }
 
 bool allowsFixedWidthGlyphGeneration(char16_t chr) {
-    // Mirrors conservative set of characters used in glyph_manager.js/_tinySDF
-    return isInCJKUnifiedIdeographs(chr) || isInHangulSyllables(chr) || isInKatakana(chr) || isInHiragana(chr);
+    // Mirrors the BMP ranges in GL JS's codePointUsesLocalIdeographFontFamily.
+    // Astral-plane ranges are not included because GlyphID only carries BMP
+    // codepoints for local glyph generation.
+    return
+        // Bopomofo tone marks.
+        isInRange(chr, 0x02EA, 0x02EB) ||
+        // Hangul Jamo.
+        isInHangulJamo(chr) ||
+        // CJK Radicals Supplement, Kangxi Radicals.
+        isInCJKRadicalsSupplement(chr) || isInKangxiRadicals(chr) ||
+        // CJK Symbols and Punctuation, Hiragana, Katakana.
+        isInCJKSymbolsandPunctuation(chr) || isInHiragana(chr) || isInKatakana(chr) ||
+        // Bopomofo.
+        isInRange(chr, 0x3105, 0x312F) ||
+        // Hangul Compatibility Jamo.
+        isInRange(chr, 0x3131, 0x318E) ||
+        // Bopomofo Extended through CJK Unified Ideographs Extension A.
+        isInBopomofoExtended(chr) || isInCJKStrokes(chr) || isInKatakanaPhoneticExtensions(chr) ||
+        isInEnclosedCJKLettersandMonths(chr) || isInCJKCompatibility(chr) || isInCJKUnifiedIdeographsExtensionA(chr) ||
+        // CJK Unified Ideographs and Yi Syllables.
+        isInCJKUnifiedIdeographs(chr) || isInRange(chr, 0xA000, 0xA48C) ||
+        // Yi Radicals.
+        isInRange(chr, 0xA490, 0xA4C6) ||
+        // Hangul Jamo Extended-A.
+        isInRange(chr, 0xA960, 0xA97C) ||
+        // Hangul Syllables and Hangul Jamo Extended-B.
+        isInHangulSyllables(chr) || isInRange(chr, 0xD7B0, 0xD7C6) ||
+        // Hangul Jamo Extended-B.
+        isInRange(chr, 0xD7CB, 0xD7FB) ||
+        // CJK Compatibility Ideographs.
+        isInRange(chr, 0xF900, 0xFA6D) ||
+        // CJK Compatibility Ideographs.
+        isInRange(chr, 0xFA70, 0xFAD9) ||
+        // Vertical Forms.
+        isInVerticalForms(chr) ||
+        // CJK Compatibility Forms.
+        isInCJKCompatibilityForms(chr) ||
+        // Halfwidth and Fullwidth Forms.
+        isInHalfwidthandFullwidthForms(chr);
+}
+
+bool glyphRangeIsEntirelyLocallyGenerated(char16_t rangeStart) {
+    // Some ranges (notably 0xFF00, where Halfwidth/Fullwidth Forms ends at
+    // 0xFFEF and the Specials block continues to 0xFFFD) mix locally-rendered
+    // and non-local codepoints, so it is not safe to infer the whole range
+    // from the first codepoint alone.
+    constexpr uint32_t glyphsPerRange = 256;
+    for (uint32_t offset = 0; offset < glyphsPerRange; ++offset) {
+        if (!allowsFixedWidthGlyphGeneration(static_cast<char16_t>(rangeStart + offset))) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool allowsVerticalWritingMode(const std::u16string& string) {
@@ -625,6 +682,11 @@ bool isWhitespace(char16_t chr) {
     return chr == u' ' || chr == u'\t' || chr == u'\n' || chr == u'\v' || chr == u'\f' || chr == u'\r';
 }
 
+bool isVariationSelector1(char16_t chr) {
+    return chr == 0xFE00;
+}
+
 } // namespace i18n
 } // namespace util
+
 } // namespace mbgl

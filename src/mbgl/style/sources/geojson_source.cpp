@@ -30,6 +30,11 @@ const GeoJSONSource::Impl& GeoJSONSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
+/*!
+ * \brief GeoJSONSource::setURL
+ * Set the url to a geojson file which can be fetched
+ * \param url_
+ */
 void GeoJSONSource::setURL(const std::string& url_) {
     url = url_;
 
@@ -99,14 +104,17 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
                     return makeMutable<Impl>(current, std::move(geoJSONData));
                 },
                 /* onImplReady */
-                [this, self = makeWeakPtr(), capturedReq = req.get()](Immutable<Source::Impl> newImpl) {
-                    assert(capturedReq);
-                    if (!self) return;                    // This source has been deleted.
-                    if (capturedReq != req.get()) return; // A new request is being processed, ignore this impl.
-
-                    baseImpl = std::move(newImpl);
-                    loaded = true;
-                    observer->onSourceLoaded(*this);
+                [this, self = makeWeakPtr(), capturedReqGeneration = ++requestGeneration](
+                    Immutable<Source::Impl> newImpl) {
+                    assert(capturedReqGeneration);
+                    if (auto guard = self.lock(); self) {
+                        if (capturedReqGeneration ==
+                            requestGeneration) { // If a new request is being processed, ignore this impl.
+                            baseImpl = std::move(newImpl);
+                            loaded = true;
+                            observer->onSourceLoaded(*this);
+                        }
+                    }
                 });
         }
     });
@@ -118,6 +126,10 @@ bool GeoJSONSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) co
 
 Mutable<Source::Impl> GeoJSONSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+bool GeoJSONSource::isUpdateSynchronous() const noexcept {
+    return baseImpl->isUpdateSynchronous();
 }
 
 } // namespace style

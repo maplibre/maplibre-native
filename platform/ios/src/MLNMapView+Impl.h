@@ -11,7 +11,7 @@
 @class MLNMapView;
 
 class MLNMapViewImpl : public mbgl::MapObserver {
- public:
+public:
   static std::unique_ptr<MLNMapViewImpl> Create(MLNMapView*);
 
   MLNMapViewImpl(MLNMapView*);
@@ -64,7 +64,7 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   void onDidFinishLoadingMap() override;
   void onDidFailLoadingMap(mbgl::MapLoadError mapError, const std::string& what) override;
   void onWillStartRenderingFrame() override;
-  void onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus) override;
+  void onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus&) override;
   void onWillStartRenderingMap() override;
   void onDidFinishRenderingMap(mbgl::MapObserver::RenderMode) override;
   void onDidFinishLoadingStyle() override;
@@ -87,8 +87,9 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
   void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
   void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
+  void onRenderError(std::exception_ptr) override;
 
- protected:
+protected:
   /// Cocoa map view that this adapter bridges to.
   __weak MLNMapView* mapView = nullptr;
 };

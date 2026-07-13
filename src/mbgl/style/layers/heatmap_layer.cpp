@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* HeatmapLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"heatmap",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::Required,
-                                        LayerTypeInfo::Layout::NotRequired,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::Geometry};
+    const static LayerTypeInfo typeInfo{.type="heatmap",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::Required,
+                                        .layout=LayerTypeInfo::Layout::NotRequired,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::Geometry};
     return &typeInfo;
 }
-
 
 HeatmapLayer::HeatmapLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {
@@ -40,7 +39,9 @@ HeatmapLayer::HeatmapLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-HeatmapLayer::~HeatmapLayer() = default;
+HeatmapLayer::~HeatmapLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const HeatmapLayer::Impl& HeatmapLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

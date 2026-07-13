@@ -3,10 +3,11 @@ package org.maplibre.android.location.engine
 import org.assertj.core.api.Assertions.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
-class LocationEngineRequestTest {
+class LocationEngineRequestTest : BaseTest() {
     @Test
     fun checkDefaultValues() {
         val request = LocationEngineRequest.Builder(1000L).build()

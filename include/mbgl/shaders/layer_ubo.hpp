@@ -65,17 +65,14 @@ enum {
     idGlobalUBOIndex,
 #elif MLN_RENDER_BACKEND_VULKAN
     idGlobalPlatformParamsUBO,
+#elif MLN_RENDER_BACKEND_WEBGPU
+    idGlobalUBOIndex,
 #endif
     globalUBOCount
 };
 
-enum {
-    idDrawableReservedVertexOnlyUBO = globalUBOCount,
-    idDrawableReservedFragmentOnlyUBO,
-    drawableReservedUBOCount
-};
-
-#define MLN_UBO_CONSOLIDATION (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
+#define MLN_UBO_CONSOLIDATION (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_WEBGPU)
+#define MLN_USE_FILL_EXTRUSION_INSTANCING (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
 
 } // namespace shaders
 } // namespace mbgl

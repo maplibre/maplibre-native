@@ -1,0 +1,2380 @@
+{
+    "routes" : [ {
+        "voiceLocale" : "en",
+        "weight_name" : "auto",
+        "weight" : 1053.727,
+        "duration" : 569.334,
+        "distance" : 3507.272,
+        "legs" : [ {
+            "via_waypoints" : [ ],
+            "admins" : [ {
+                "iso_3166_1_alpha3" : "DEU",
+                "iso_3166_1" : "DE"
+            } ],
+            "weight" : 1053.727,
+            "duration" : 569.334,
+            "steps" : [ {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "end of road",
+                        "modifier" : "right",
+                        "text" : "Karl-Liebknecht-Straße",
+                        "components" : [ {
+                            "text" : "Karl-Liebknecht-Straße",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "B 2; B 5",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 119.656
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Drive northeast on Panoramastraße.</speak>",
+                    "announcement" : "Drive northeast on Panoramastraße.",
+                    "distanceAlongGeometry" : 119.7
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 100 meters, Turn right onto Karl-Liebknecht-Straße.</speak>",
+                    "announcement" : "In 100 meters, Turn right onto Karl-Liebknecht-Straße.",
+                    "distanceAlongGeometry" : 107.6
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Karl-Liebknecht-Straße, B 2.</speak>",
+                    "announcement" : "Turn right onto Karl-Liebknecht-Straße, B 2.",
+                    "distanceAlongGeometry" : 41.1
+                } ],
+                "intersections" : [ {
+                    "classes" : [ "restricted" ],
+                    "entry" : [ true ],
+                    "bearings" : [ 39 ],
+                    "duration" : 17.753,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 19.528,
+                    "geometry_index" : 0,
+                    "location" : [ 13.409961, 52.521487 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 38, 137, 219, 315 ],
+                    "duration" : 2.721,
+                    "turn_weight" : 16.4,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 19.37,
+                    "geometry_index" : 1,
+                    "location" : [ 13.410189, 52.521661 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 30, 135, 218, 315 ],
+                    "duration" : 15.736,
+                    "turn_weight" : 14.25,
+                    "turn_duration" : 4.486,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 26.625,
+                    "geometry_index" : 5,
+                    "location" : [ 13.4103, 52.521748 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 136, 228, 319 ],
+                    "duration" : 4.958,
+                    "turn_weight" : 2.85,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.295,
+                    "geometry_index" : 7,
+                    "location" : [ 13.409782, 52.522068 ]
+                }, {
+                    "bearings" : [ 70, 143, 253, 331 ],
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "turn_weight" : 11.4,
+                    "turn_duration" : 0.011,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "geometry_index" : 9,
+                    "location" : [ 13.409579, 52.522225 ]
+                } ],
+                "maneuver" : {
+                    "instruction" : "Drive northeast on Panoramastraße.",
+                    "type" : "depart",
+                    "bearing_after" : 39,
+                    "bearing_before" : 0,
+                    "location" : [ 13.409961, 52.521487 ]
+                },
+                "name" : "Panoramastraße",
+                "duration" : 43.653,
+                "distance" : 119.656,
+                "driving_side" : "right",
+                "weight" : 87.94,
+                "mode" : "driving",
+                "geometry" : "}_tdcBqinqX{IgMe@m@_@i@m@y@y@kA}Pj\\aA~AsF`JeAr@gDtC"
+            }, {
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "straight", "right" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Alexanderstraße",
+                        "components" : [ {
+                            "text" : "Alexanderstraße",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "B 2; B 5",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 253.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>In 200 meters, Turn right onto Alexanderstraße.</speak>",
+                    "announcement" : "In 200 meters, Turn right onto Alexanderstraße.",
+                    "distanceAlongGeometry" : 236.1
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Alexanderstraße, B 2.</speak>",
+                    "announcement" : "Turn right onto Alexanderstraße, B 2.",
+                    "distanceAlongGeometry" : 70.0
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, false ],
+                    "in" : 1,
+                    "bearings" : [ 53, 151, 229 ],
+                    "duration" : 4.992,
+                    "turn_weight" : 16.4,
+                    "turn_duration" : 1.392,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 20.36,
+                    "geometry_index" : 10,
+                    "location" : [ 13.409504, 52.522309 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 50, 233 ],
+                    "duration" : 2.077,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.285,
+                    "geometry_index" : 11,
+                    "location" : [ 13.409814, 52.522449 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 48, 146, 230, 327 ],
+                    "duration" : 2.788,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.046,
+                    "geometry_index" : 13,
+                    "location" : [ 13.409981, 52.522533 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 38, 169, 228 ],
+                    "duration" : 2.115,
+                    "turn_duration" : 0.038,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.285,
+                    "geometry_index" : 15,
+                    "location" : [ 13.410198, 52.52265 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 44, 218 ],
+                    "duration" : 8.723,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 9.595,
+                    "geometry_index" : 17,
+                    "location" : [ 13.410338, 52.522758 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 43, 224 ],
+                    "duration" : 1.029,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.157,
+                    "geometry_index" : 18,
+                    "location" : [ 13.41098, 52.523164 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 48, 132, 223, 313 ],
+                    "duration" : 4.982,
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.593,
+                    "geometry_index" : 19,
+                    "location" : [ 13.411036, 52.523201 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 45, 230 ],
+                    "duration" : 2.914,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.206,
+                    "geometry_index" : 21,
+                    "location" : [ 13.411357, 52.52337 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 44, 225 ],
+                    "duration" : 5.677,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.245,
+                    "geometry_index" : 22,
+                    "location" : [ 13.411535, 52.52348 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 39, 99, 224, 282 ],
+                    "duration" : 2.241,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.026,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.437,
+                    "geometry_index" : 24,
+                    "location" : [ 13.411954, 52.523747 ]
+                }, {
+                    "bearings" : [ 40, 219, 322 ],
+                    "entry" : [ true, false, false ],
+                    "in" : 1,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 25,
+                    "location" : [ 13.412106, 52.52386 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Karl-Liebknecht-Straße/B 2/B 5.",
+                    "type" : "end of road",
+                    "bearing_after" : 53,
+                    "bearing_before" : 331,
+                    "location" : [ 13.409504, 52.522309 ]
+                },
+                "name" : "Karl-Liebknecht-Straße",
+                "duration" : 38.251,
+                "distance" : 253.0,
+                "driving_side" : "right",
+                "weight" : 56.97,
+                "mode" : "driving",
+                "ref" : "B 2; B 5",
+                "geometry" : "isudcB_mmqXwGkRaC}Fe@oAiE{J_@u@Ym@}DiFkXcg@iAoBcD_HmDaJ{EcJsMyUaAkBaFoHaAyA"
+            }, {
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "right" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Alexanderstraße",
+                        "components" : [ {
+                            "text" : "Alexanderstraße",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "B 1",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 351.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, Turn right onto Alexanderstraße.</speak>",
+                    "announcement" : "In 300 meters, Turn right onto Alexanderstraße.",
+                    "distanceAlongGeometry" : 252.3
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Alexanderstraße, B 1.</speak>",
+                    "announcement" : "Turn right onto Alexanderstraße, B 1.",
+                    "distanceAlongGeometry" : 72.2
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 37, 105, 220, 270, 311 ],
+                    "duration" : 2.341,
+                    "turn_weight" : 5.7,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.541,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.68,
+                    "geometry_index" : 26,
+                    "location" : [ 13.412151, 52.523893 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 37, 128, 217, 285 ],
+                    "duration" : 4.188,
+                    "turn_duration" : 0.035,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.569,
+                    "geometry_index" : 27,
+                    "location" : [ 13.412333, 52.523864 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 127, 215, 308 ],
+                    "duration" : 5.004,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.483,
+                    "geometry_index" : 29,
+                    "location" : [ 13.412682, 52.5237 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 127, 218, 307 ],
+                    "duration" : 4.992,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.483,
+                    "geometry_index" : 30,
+                    "location" : [ 13.413107, 52.523506 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 1,
+                    "bearings" : [ 127, 307, 348 ],
+                    "duration" : 1.807,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.98,
+                    "geometry_index" : 31,
+                    "location" : [ 13.413528, 52.52331 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 38, 128, 217, 307 ],
+                    "duration" : 1.807,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.98,
+                    "geometry_index" : 33,
+                    "location" : [ 13.413678, 52.52324 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 90, 127, 308 ],
+                    "duration" : 1.681,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.828,
+                    "geometry_index" : 34,
+                    "location" : [ 13.41383, 52.523169 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 128, 220, 307 ],
+                    "duration" : 6.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.702,
+                    "geometry_index" : 35,
+                    "location" : [ 13.413966, 52.523106 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 127, 308 ],
+                    "duration" : 3.738,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.112,
+                    "geometry_index" : 36,
+                    "location" : [ 13.414481, 52.522865 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 128, 307 ],
+                    "duration" : 3.462,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.808,
+                    "geometry_index" : 37,
+                    "location" : [ 13.414797, 52.522721 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 129, 308 ],
+                    "duration" : 1.662,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.828,
+                    "geometry_index" : 40,
+                    "location" : [ 13.415088, 52.522584 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 37, 129, 217, 309 ],
+                    "duration" : 0.423,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 0.457,
+                    "geometry_index" : 43,
+                    "location" : [ 13.415226, 52.522516 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 127, 309 ],
+                    "duration" : 0.138,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.152,
+                    "geometry_index" : 44,
+                    "location" : [ 13.415258, 52.5225 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 37, 127, 218, 307 ],
+                    "duration" : 1.53,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.675,
+                    "geometry_index" : 45,
+                    "location" : [ 13.415271, 52.522494 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 127, 307 ],
+                    "duration" : 4.846,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.331,
+                    "geometry_index" : 46,
+                    "location" : [ 13.415398, 52.522436 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 128, 307 ],
+                    "duration" : 3.738,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.112,
+                    "geometry_index" : 47,
+                    "location" : [ 13.415814, 52.522245 ]
+                }, {
+                    "bearings" : [ 34, 129, 214, 308 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 49,
+                    "location" : [ 13.416124, 52.5221 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Alexanderstraße/B 2/B 5.",
+                    "type" : "turn",
+                    "bearing_after" : 105,
+                    "bearing_before" : 40,
+                    "location" : [ 13.412151, 52.523893 ]
+                },
+                "name" : "Alexanderstraße",
+                "duration" : 49.266,
+                "distance" : 351.0,
+                "driving_side" : "right",
+                "weight" : 59.16,
+                "mode" : "driving",
+                "ref" : "B 2; B 5",
+                "geometry" : "ivxdcBmrrqXx@kJXw@lHaSbKqYfKiYxA_Ep@kBlCoH|BoG`Ne_@~GwRvCeIpAiDf@uAx@uBl@{A^aA^_AJYrB}F|J_YpFeOn@eBrA{Dz@gB"
+            }, {
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "continue",
+                        "modifier" : "left",
+                        "text" : "Alexanderstraße",
+                        "components" : [ {
+                            "text" : "Alexanderstraße",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 154.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left to stay on Alexanderstraße.</speak>",
+                    "announcement" : "Turn left to stay on Alexanderstraße.",
+                    "distanceAlongGeometry" : 57.6
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 32, 130, 213, 309 ],
+                    "duration" : 3.989,
+                    "turn_weight" : 5.7,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 1.636,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.289,
+                    "geometry_index" : 51,
+                    "location" : [ 13.41627, 52.522028 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 33, 122, 214, 304 ],
+                    "duration" : 0.285,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.305,
+                    "geometry_index" : 52,
+                    "location" : [ 13.416138, 52.521902 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 34, 214 ],
+                    "duration" : 2.077,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.285,
+                    "geometry_index" : 53,
+                    "location" : [ 13.416118, 52.521884 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 34, 124, 214 ],
+                    "duration" : 6.515,
+                    "turn_weight" : 2.85,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 10.008,
+                    "geometry_index" : 54,
+                    "location" : [ 13.415996, 52.521772 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 33, 213 ],
+                    "duration" : 5.538,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.092,
+                    "geometry_index" : 56,
+                    "location" : [ 13.415613, 52.521419 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 33, 213 ],
+                    "duration" : 2.692,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.0,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 0.762,
+                    "geometry_index" : 57,
+                    "location" : [ 13.415289, 52.52112 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 33, 145, 213, 325 ],
+                    "duration" : 0.838,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 0.914,
+                    "geometry_index" : 58,
+                    "location" : [ 13.415249, 52.521083 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 33, 146, 213 ],
+                    "duration" : 1.254,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.371,
+                    "geometry_index" : 59,
+                    "location" : [ 13.415203, 52.52104 ]
+                }, {
+                    "bearings" : [ 33, 144, 213 ],
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "turn_weight" : 1.9,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 60,
+                    "location" : [ 13.415133, 52.520975 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Alexanderstraße/B 1.",
+                    "type" : "turn",
+                    "bearing_after" : 213,
+                    "bearing_before" : 129,
+                    "location" : [ 13.41627, 52.522028 ]
+                },
+                "name" : "Alexanderstraße",
+                "duration" : 24.996,
+                "distance" : 154.0,
+                "driving_side" : "right",
+                "weight" : 33.905,
+                "mode" : "driving",
+                "ref" : "B 1",
+                "geometry" : "waudcB{szqXzFfGb@f@~ErFvCfDhPtQtQfShAnAtAzA`CjC~DnE"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "Annenstraße",
+                        "components" : [ {
+                            "text" : "Annenstraße",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 1539.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 1.5 kilometers.</speak>",
+                    "announcement" : "Continue for 1.5 kilometers.",
+                    "distanceAlongGeometry" : 1529.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 200 meters, Turn left onto Annenstraße.</speak>",
+                    "announcement" : "In 200 meters, Turn left onto Annenstraße.",
+                    "distanceAlongGeometry" : 233.2
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn left onto Annenstraße.</speak>",
+                    "announcement" : "Turn left onto Annenstraße.",
+                    "distanceAlongGeometry" : 70.3
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 33, 144, 214 ],
+                    "duration" : 5.978,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.378,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.96,
+                    "geometry_index" : 61,
+                    "location" : [ 13.415029, 52.520879 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 31, 144, 211, 324 ],
+                    "duration" : 1.668,
+                    "turn_weight" : 15.2,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 17.028,
+                    "geometry_index" : 62,
+                    "location" : [ 13.415258, 52.520688 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 30, 144, 208, 324 ],
+                    "duration" : 0.561,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.409,
+                    "geometry_index" : 63,
+                    "location" : [ 13.415361, 52.520601 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 144, 324 ],
+                    "duration" : 9.138,
+                    "turn_weight" : 0.95,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 11.002,
+                    "geometry_index" : 64,
+                    "location" : [ 13.415395, 52.520573 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 145, 319 ],
+                    "duration" : 2.631,
+                    "turn_weight" : 0.95,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.844,
+                    "geometry_index" : 66,
+                    "location" : [ 13.41598, 52.520104 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 145, 325 ],
+                    "duration" : 4.846,
+                    "turn_weight" : 0.95,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.281,
+                    "geometry_index" : 67,
+                    "location" : [ 13.416143, 52.519964 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 145, 325 ],
+                    "duration" : 1.662,
+                    "turn_weight" : 0.95,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.778,
+                    "geometry_index" : 68,
+                    "location" : [ 13.416443, 52.519706 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 52, 146, 325 ],
+                    "duration" : 1.946,
+                    "turn_weight" : 0.95,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.082,
+                    "geometry_index" : 69,
+                    "location" : [ 13.416546, 52.519617 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 56, 151, 326 ],
+                    "duration" : 1.948,
+                    "turn_weight" : 0.95,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.009,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.082,
+                    "geometry_index" : 71,
+                    "location" : [ 13.416657, 52.519515 ]
+                }, {
+                    "entry" : [ true, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 58, 151, 237, 331 ],
+                    "duration" : 4.715,
+                    "turn_weight" : 3.8,
+                    "lanes" : [ {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.978,
+                    "geometry_index" : 73,
+                    "location" : [ 13.416757, 52.519405 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 56, 151, 331 ],
+                    "duration" : 11.499,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 13.592,
+                    "geometry_index" : 75,
+                    "location" : [ 13.416998, 52.519139 ]
+                }, {
+                    "entry" : [ true, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 69, 157, 258, 336 ],
+                    "duration" : 1.116,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.018,
+                    "geometry_index" : 79,
+                    "location" : [ 13.417541, 52.518468 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 159, 244, 337 ],
+                    "duration" : 4.578,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.976,
+                    "geometry_index" : 81,
+                    "location" : [ 13.417588, 52.518401 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 61, 163, 239, 340 ],
+                    "duration" : 1.946,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.932,
+                    "geometry_index" : 83,
+                    "location" : [ 13.417755, 52.518124 ]
+                }, {
+                    "entry" : [ true, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 58, 166, 239, 343 ],
+                    "duration" : 1.669,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.628,
+                    "geometry_index" : 84,
+                    "location" : [ 13.417813, 52.518005 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 61, 167, 241, 346 ],
+                    "duration" : 10.531,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 15.375,
+                    "geometry_index" : 85,
+                    "location" : [ 13.417854, 52.517902 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 171, 258, 349 ],
+                    "duration" : 1.115,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.168,
+                    "geometry_index" : 89,
+                    "location" : [ 13.418084, 52.517238 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 176, 351 ],
+                    "duration" : 8.446,
+                    "turn_weight" : 0.95,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 10.241,
+                    "geometry_index" : 90,
+                    "location" : [ 13.418103, 52.517165 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 1, 90, 181, 270 ],
+                    "duration" : 1.807,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.78,
+                    "geometry_index" : 95,
+                    "location" : [ 13.418122, 52.516614 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 1, 92, 182, 266 ],
+                    "duration" : 1.669,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.628,
+                    "geometry_index" : 96,
+                    "location" : [ 13.41812, 52.516497 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 2, 92, 182 ],
+                    "duration" : 9.146,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 11.002,
+                    "geometry_index" : 97,
+                    "location" : [ 13.418113, 52.516391 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 2, 184 ],
+                    "duration" : 2.554,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 2.0,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.559,
+                    "geometry_index" : 98,
+                    "location" : [ 13.418075, 52.515799 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 4, 110, 186, 291 ],
+                    "duration" : 1.946,
+                    "turn_weight" : 3.8,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.932,
+                    "geometry_index" : 100,
+                    "location" : [ 13.41807, 52.51576 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 6, 118, 191, 294 ],
+                    "duration" : 2.64,
+                    "turn_weight" : 11.4,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 14.294,
+                    "geometry_index" : 101,
+                    "location" : [ 13.418048, 52.515634 ]
+                }, {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 11, 110, 190, 289 ],
+                    "duration" : 1.681,
+                    "turn_weight" : 11.4,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 13.228,
+                    "geometry_index" : 102,
+                    "location" : [ 13.417996, 52.515468 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 10, 106, 191, 284 ],
+                    "duration" : 0.423,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.257,
+                    "geometry_index" : 103,
+                    "location" : [ 13.417966, 52.515359 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 11, 189 ],
+                    "duration" : 9.692,
+                    "turn_weight" : 0.95,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 11.612,
+                    "geometry_index" : 104,
+                    "location" : [ 13.417958, 52.515335 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 6, 186, 322 ],
+                    "duration" : 0.476,
+                    "turn_weight" : 1.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.628,
+                    "geometry_index" : 107,
+                    "location" : [ 13.417828, 52.514713 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 6, 96, 187 ],
+                    "duration" : 1.573,
+                    "turn_weight" : 1.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.861,
+                    "geometry_index" : 108,
+                    "location" : [ 13.417823, 52.514685 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 7, 188 ],
+                    "duration" : 11.426,
+                    "turn_weight" : 6.1,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 18.669,
+                    "geometry_index" : 109,
+                    "location" : [ 13.417805, 52.514598 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 7, 182 ],
+                    "duration" : 1.8,
+                    "turn_weight" : 5.95,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.93,
+                    "geometry_index" : 112,
+                    "location" : [ 13.41766, 52.513944 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 2, 99, 182, 280 ],
+                    "duration" : 0.838,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.714,
+                    "geometry_index" : 113,
+                    "location" : [ 13.417652, 52.513823 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 2, 99, 175 ],
+                    "duration" : 3.628,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.028,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.91,
+                    "geometry_index" : 114,
+                    "location" : [ 13.417649, 52.513767 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 13, 192, 355 ],
+                    "duration" : 17.466,
+                    "turn_weight" : 1.425,
+                    "turn_duration" : 0.02,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 20.616,
+                    "geometry_index" : 115,
+                    "location" : [ 13.417684, 52.51353 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 17, 92, 195, 275 ],
+                    "duration" : 1.404,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.323,
+                    "geometry_index" : 121,
+                    "location" : [ 13.417183, 52.512441 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 15, 94, 197 ],
+                    "duration" : 8.177,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.936,
+                    "geometry_index" : 122,
+                    "location" : [ 13.417143, 52.512352 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 17, 197, 289 ],
+                    "duration" : 9.284,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 11.155,
+                    "geometry_index" : 123,
+                    "location" : [ 13.416886, 52.511842 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 17, 108, 198, 289 ],
+                    "duration" : 6.162,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 2.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.369,
+                    "geometry_index" : 124,
+                    "location" : [ 13.416593, 52.511266 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 18, 113, 203, 291 ],
+                    "duration" : 2.087,
+                    "turn_weight" : 16.4,
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 18.685,
+                    "geometry_index" : 125,
+                    "location" : [ 13.416455, 52.511006 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 23, 115, 204, 294 ],
+                    "duration" : 7.269,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.588,
+                    "geometry_index" : 127,
+                    "location" : [ 13.416371, 52.510886 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 25, 205, 297 ],
+                    "duration" : 3.746,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.062,
+                    "geometry_index" : 130,
+                    "location" : [ 13.416142, 52.510579 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 25, 114, 206 ],
+                    "duration" : 12.192,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 14.353,
+                    "geometry_index" : 131,
+                    "location" : [ 13.415974, 52.510361 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 25, 114, 206 ],
+                    "duration" : 1.416,
+                    "turn_weight" : 1.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.685,
+                    "geometry_index" : 133,
+                    "location" : [ 13.415419, 52.509649 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 26, 120, 205 ],
+                    "duration" : 5.016,
+                    "turn_weight" : 1.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.735,
+                    "geometry_index" : 134,
+                    "location" : [ 13.415363, 52.509578 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 26, 115, 205 ],
+                    "duration" : 16.755,
+                    "turn_weight" : 1.1,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 19.523,
+                    "geometry_index" : 137,
+                    "location" : [ 13.415163, 52.509321 ]
+                }, {
+                    "bearings" : [ 25, 113, 205 ],
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "turn_weight" : 0.95,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 138,
+                    "location" : [ 13.414485, 52.508448 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left to stay on Alexanderstraße.",
+                    "type" : "continue",
+                    "bearing_after" : 144,
+                    "bearing_before" : 213,
+                    "location" : [ 13.415029, 52.520879 ]
+                },
+                "name" : "Alexanderstraße",
+                "duration" : 226.028,
+                "distance" : 1539.0,
+                "driving_side" : "right",
+                "weight" : 383.887,
+                "mode" : "driving",
+                "geometry" : "}yrdcBifxqX|JiMlDmEv@cA`TyWfGwJvGeIbOwQpDmE~BiCjAsAr@y@fDmCbFkEnHuGjJmInHyFdKiHzGkEzBwAHEpNqHv@[lFsBlEqAvNeE~EeAbIkBrGsApCe@jHk@pHAlAAhC?vGHhFBrEL~c@jA\\Bn@DzFj@jIfBxEz@n@N`E~@bWnCtGr@v@HlDb@`d@jGlALj@FpFNnBDxMeAxEdAbHxBrPpF|TfJhFvBfDvApDnAz^`O~b@hQfOrGrC`BzAdAlDxBdDxBpGtErLnIjE`Dbe@r\\lCnBpClB`D~BlE`Dpu@ji@|QpMxA`AxEhD"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Leuschnerdamm",
+                        "components" : [ {
+                            "text" : "Leuschnerdamm",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 429.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 400 meters.</speak>",
+                    "announcement" : "Continue for 400 meters.",
+                    "distanceAlongGeometry" : 419.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, Turn right onto Leuschnerdamm.</speak>",
+                    "announcement" : "In 300 meters, Turn right onto Leuschnerdamm.",
+                    "distanceAlongGeometry" : 252.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Leuschnerdamm. Then Turn left onto Bethaniendamm.</speak>",
+                    "announcement" : "Turn right onto Leuschnerdamm. Then Turn left onto Bethaniendamm.",
+                    "distanceAlongGeometry" : 72.1
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 25, 133, 206, 313 ],
+                    "duration" : 5.125,
+                    "turn_weight" : 19.25,
+                    "turn_duration" : 3.048,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 21.535,
+                    "geometry_index" : 141,
+                    "location" : [ 13.414134, 52.507991 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 32, 130, 313 ],
+                    "duration" : 6.668,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 9.211,
+                    "geometry_index" : 142,
+                    "location" : [ 13.414293, 52.507902 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 131, 310 ],
+                    "duration" : 7.615,
+                    "turn_weight" : 1.9,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 10.277,
+                    "geometry_index" : 144,
+                    "location" : [ 13.414832, 52.507626 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 120, 215, 303 ],
+                    "duration" : 0.992,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.966,
+                    "geometry_index" : 146,
+                    "location" : [ 13.415477, 52.50733 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 27, 121, 300 ],
+                    "duration" : 3.607,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.86,
+                    "geometry_index" : 147,
+                    "location" : [ 13.415572, 52.507296 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 27, 117, 301 ],
+                    "duration" : 1.824,
+                    "turn_weight" : 6.9,
+                    "turn_duration" : 0.024,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.88,
+                    "geometry_index" : 148,
+                    "location" : [ 13.415899, 52.507178 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 117, 207, 297 ],
+                    "duration" : 1.668,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.728,
+                    "geometry_index" : 149,
+                    "location" : [ 13.41607, 52.507124 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 25, 117, 297 ],
+                    "duration" : 2.222,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.337,
+                    "geometry_index" : 150,
+                    "location" : [ 13.416225, 52.507075 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 118, 208, 297 ],
+                    "duration" : 0.284,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.205,
+                    "geometry_index" : 151,
+                    "location" : [ 13.416439, 52.507008 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 117, 298 ],
+                    "duration" : 3.6,
+                    "turn_weight" : 1.9,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.86,
+                    "geometry_index" : 152,
+                    "location" : [ 13.416461, 52.507001 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 117, 213, 297 ],
+                    "duration" : 4.438,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.774,
+                    "geometry_index" : 153,
+                    "location" : [ 13.416808, 52.506892 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 118, 297 ],
+                    "duration" : 1.523,
+                    "turn_weight" : 1.9,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.575,
+                    "geometry_index" : 154,
+                    "location" : [ 13.417229, 52.50676 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 116, 207, 298 ],
+                    "duration" : 3.345,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.555,
+                    "geometry_index" : 155,
+                    "location" : [ 13.41737, 52.506715 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 105, 201, 296 ],
+                    "duration" : 1.285,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.038,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.271,
+                    "geometry_index" : 158,
+                    "location" : [ 13.417686, 52.50662 ]
+                }, {
+                    "entry" : [ true, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 24, 105, 179, 285 ],
+                    "duration" : 1.808,
+                    "turn_weight" : 12.6,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 14.58,
+                    "geometry_index" : 159,
+                    "location" : [ 13.41781, 52.5066 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 23, 114, 203, 285 ],
+                    "duration" : 14.829,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.014,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 23.897,
+                    "geometry_index" : 160,
+                    "location" : [ 13.41799, 52.506571 ]
+                }, {
+                    "bearings" : [ 24, 120, 206, 294 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 161,
+                    "location" : [ 13.419427, 52.506174 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto Annenstraße.",
+                    "type" : "turn",
+                    "bearing_after" : 133,
+                    "bearing_before" : 205,
+                    "location" : [ 13.414134, 52.507991 ]
+                },
+                "name" : "Annenstraße",
+                "duration" : 62.645,
+                "distance" : 429.0,
+                "driving_side" : "right",
+                "weight" : 142.09,
+                "mode" : "driving",
+                "geometry" : "mtyccBknvqXpD}Hj@mAzNg^|H_RpGiTbA}DjFmSjBuI`BuHdCkLLk@xEuTfGiYxAyGz@gEtAwGj@wCf@wFx@gJxWyxAnBcI"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "Bethaniendamm",
+                        "components" : [ {
+                            "text" : "Bethaniendamm",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 44.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto Bethaniendamm.</speak>",
+                    "announcement" : "Turn left onto Bethaniendamm.",
+                    "distanceAlongGeometry" : 44.0
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 28, 113, 203, 300 ],
+                    "duration" : 2.301,
+                    "turn_weight" : 10.7,
+                    "turn_duration" : 1.47,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 11.614,
+                    "geometry_index" : 162,
+                    "location" : [ 13.419589, 52.506118 ]
+                }, {
+                    "bearings" : [ 23, 202, 296 ],
+                    "entry" : [ false, true, false ],
+                    "in" : 0,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 164,
+                    "location" : [ 13.419552, 52.506066 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Leuschnerdamm.",
+                    "type" : "turn",
+                    "bearing_after" : 203,
+                    "bearing_before" : 120,
+                    "location" : [ 13.419589, 52.506118 ]
+                },
+                "name" : "Leuschnerdamm",
+                "duration" : 7.583,
+                "distance" : 44.0,
+                "driving_side" : "right",
+                "weight" : 19.302,
+                "mode" : "driving",
+                "geometry" : "k_vccBicarX|@j@h@\\dPrJtA?"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Adalbertstraße",
+                        "components" : [ {
+                            "text" : "Adalbertstraße",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 192.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Adalbertstraße.</speak>",
+                    "announcement" : "Turn right onto Adalbertstraße.",
+                    "distanceAlongGeometry" : 71.7
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 17, 114, 204 ],
+                    "duration" : 5.455,
+                    "turn_weight" : 14.5,
+                    "turn_duration" : 4.486,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 15.566,
+                    "geometry_index" : 166,
+                    "location" : [ 13.419366, 52.505748 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 23, 113, 294 ],
+                    "duration" : 3.342,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.555,
+                    "geometry_index" : 167,
+                    "location" : [ 13.419456, 52.505724 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 115, 204, 293 ],
+                    "duration" : 1.531,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.575,
+                    "geometry_index" : 168,
+                    "location" : [ 13.419785, 52.505641 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 115, 204, 295 ],
+                    "duration" : 4.865,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.231,
+                    "geometry_index" : 169,
+                    "location" : [ 13.419933, 52.505599 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 115, 204, 295 ],
+                    "duration" : 2.235,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.337,
+                    "geometry_index" : 170,
+                    "location" : [ 13.420401, 52.505468 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 115, 206, 295 ],
+                    "duration" : 6.25,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 8.754,
+                    "geometry_index" : 171,
+                    "location" : [ 13.420622, 52.505406 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 110, 295 ],
+                    "duration" : 3.738,
+                    "turn_weight" : 1.9,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.012,
+                    "geometry_index" : 172,
+                    "location" : [ 13.421225, 52.505235 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 18, 101, 290 ],
+                    "duration" : 2.805,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.036,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.946,
+                    "geometry_index" : 174,
+                    "location" : [ 13.421602, 52.50515 ]
+                }, {
+                    "bearings" : [ 25, 97, 201, 281 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.026,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 175,
+                    "location" : [ 13.421887, 52.505117 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto Bethaniendamm.",
+                    "type" : "turn",
+                    "bearing_after" : 114,
+                    "bearing_before" : 197,
+                    "location" : [ 13.419366, 52.505748 ]
+                },
+                "name" : "Bethaniendamm",
+                "duration" : 31.216,
+                "distance" : 192.0,
+                "driving_side" : "right",
+                "weight" : 64.643,
+                "mode" : "driving",
+                "geometry" : "ghuccBku`rXn@sDdDqSrAgHdGg\\zByLtIud@`@gCfCiR`AyPNgE"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "Waldemarstraße",
+                        "components" : [ {
+                            "text" : "Waldemarstraße",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 227.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto Waldemarstraße.</speak>",
+                    "announcement" : "Turn left onto Waldemarstraße.",
+                    "distanceAlongGeometry" : 71.9
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 24, 99, 204, 277 ],
+                    "duration" : 5.095,
+                    "turn_weight" : 10.7,
+                    "turn_duration" : 4.126,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 11.766,
+                    "geometry_index" : 176,
+                    "location" : [ 13.421987, 52.505109 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 24, 99, 203, 277 ],
+                    "duration" : 3.481,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 11.408,
+                    "geometry_index" : 178,
+                    "location" : [ 13.421943, 52.505049 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 113, 204 ],
+                    "duration" : 4.438,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.774,
+                    "geometry_index" : 179,
+                    "location" : [ 13.421799, 52.504843 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 24, 114, 204, 294 ],
+                    "duration" : 2.084,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.885,
+                    "geometry_index" : 180,
+                    "location" : [ 13.421605, 52.504577 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 24, 203, 293 ],
+                    "duration" : 4.173,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.469,
+                    "geometry_index" : 181,
+                    "location" : [ 13.421517, 52.504458 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 203, 294 ],
+                    "duration" : 1.115,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.118,
+                    "geometry_index" : 182,
+                    "location" : [ 13.421344, 52.504214 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 203 ],
+                    "duration" : 1.523,
+                    "turn_weight" : 1.9,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.575,
+                    "geometry_index" : 183,
+                    "location" : [ 13.421299, 52.50415 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 113, 203 ],
+                    "duration" : 1.253,
+                    "turn_weight" : 1.9,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.271,
+                    "geometry_index" : 184,
+                    "location" : [ 13.421234, 52.504058 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 203 ],
+                    "duration" : 5.538,
+                    "turn_weight" : 1.9,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.992,
+                    "geometry_index" : 185,
+                    "location" : [ 13.421184, 52.503988 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 113, 200, 294 ],
+                    "duration" : 5.976,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 14.149,
+                    "geometry_index" : 186,
+                    "location" : [ 13.420948, 52.503655 ]
+                }, {
+                    "bearings" : [ 24, 113, 203, 291 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_weight" : 7.6,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 189,
+                    "location" : [ 13.420714, 52.503301 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Adalbertstraße.",
+                    "type" : "turn",
+                    "bearing_after" : 204,
+                    "bearing_before" : 97,
+                    "location" : [ 13.421987, 52.505109 ]
+                },
+                "name" : "Adalbertstraße",
+                "duration" : 35.665,
+                "distance" : 227.0,
+                "driving_side" : "right",
+                "weight" : 87.074,
+                "mode" : "driving",
+                "geometry" : "i`tccBeyerXvA`A^TzK~GrObKlFnDfNxI~BxAvD`CjCbBxSvMnEfBjJjGfC~AxBrA"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "arrive",
+                        "modifier" : "right",
+                        "text" : "Your destination is on the right.",
+                        "components" : [ {
+                            "text" : "Your destination is on the right.",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 198.614
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>In 200 meters, Your destination will be on the right.</speak>",
+                    "announcement" : "In 200 meters, Your destination will be on the right.",
+                    "distanceAlongGeometry" : 155.3
+                }, {
+                    "ssmlAnnouncement" : "<speak>Your destination is on the right.</speak>",
+                    "announcement" : "Your destination is on the right.",
+                    "distanceAlongGeometry" : 44.4
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 23, 114, 203, 294 ],
+                    "duration" : 7.3,
+                    "turn_weight" : 24.0,
+                    "turn_duration" : 5.275,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 26.227,
+                    "geometry_index" : 190,
+                    "location" : [ 13.420672, 52.50324 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 24, 114, 201, 294 ],
+                    "duration" : 6.082,
+                    "turn_weight" : 11.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 18.083,
+                    "geometry_index" : 191,
+                    "location" : [ 13.420799, 52.503205 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 23, 115, 294 ],
+                    "duration" : 1.132,
+                    "turn_weight" : 2.85,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.088,
+                    "geometry_index" : 195,
+                    "location" : [ 13.421166, 52.503104 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 115, 295 ],
+                    "duration" : 7.425,
+                    "turn_weight" : 2.85,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 11.018,
+                    "geometry_index" : 196,
+                    "location" : [ 13.421226, 52.503087 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 24, 115, 204, 295 ],
+                    "duration" : 9.919,
+                    "turn_weight" : 11.4,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 22.29,
+                    "geometry_index" : 197,
+                    "location" : [ 13.421663, 52.502965 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 114, 206, 295 ],
+                    "duration" : 0.921,
+                    "turn_weight" : 2.85,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.84,
+                    "geometry_index" : 198,
+                    "location" : [ 13.422258, 52.502798 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 24, 114, 294 ],
+                    "duration" : 12.157,
+                    "turn_weight" : 2.85,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 16.215,
+                    "geometry_index" : 199,
+                    "location" : [ 13.422305, 52.502785 ]
+                }, {
+                    "bearings" : [ 24, 115, 206, 294 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "turn_weight" : 11.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 200,
+                    "location" : [ 13.423039, 52.502587 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto Waldemarstraße.",
+                    "type" : "turn",
+                    "bearing_after" : 114,
+                    "bearing_before" : 203,
+                    "location" : [ 13.420672, 52.50324 ]
+                },
+                "name" : "Waldemarstraße",
+                "duration" : 50.032,
+                "distance" : 198.614,
+                "driving_side" : "right",
+                "weight" : 118.757,
+                "mode" : "driving",
+                "geometry" : "okpccB_gcrXdA}FTqAt@aE|AsI^uB`@wBrFiZlIed@X}AjK{l@jD}Q"
+            }, {
+                "intersections" : [ {
+                    "bearings" : [ 295 ],
+                    "entry" : [ true ],
+                    "in" : 0,
+                    "admin_index" : 0,
+                    "geometry_index" : 201,
+                    "location" : [ 13.423342, 52.502501 ]
+                } ],
+                "voiceInstructions" : [ ],
+                "bannerInstructions" : [ ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Your destination is on the right.",
+                    "type" : "arrive",
+                    "bearing_after" : 0,
+                    "bearing_before" : 115,
+                    "location" : [ 13.423342, 52.502501 ]
+                },
+                "name" : "Waldemarstraße",
+                "duration" : 0.0,
+                "distance" : 0.0,
+                "driving_side" : "right",
+                "weight" : 0.0,
+                "mode" : "driving",
+                "geometry" : "i}nccB{mhrX??"
+            } ],
+            "distance" : 3507.272,
+            "summary" : "Alexanderstraße, Annenstraße"
+        } ],
+        "geometry" : "}_tdcBqinqX{IgMe@m@_@i@m@y@y@kA}Pj\\aA~AsF`JeAr@gDtCwGkRaC}Fe@oAiE{J_@u@Ym@}DiFkXcg@iAoBcD_HmDaJ{EcJsMyUaAkBaFoHaAyAx@kJXw@lHaSbKqYfKiYxA_Ep@kBlCoH|BoG`Ne_@~GwRvCeIpAiDf@uAx@uBl@{A^aA^_AJYrB}F|J_YpFeOn@eBrA{Dz@gBzFfGb@f@~ErFvCfDhPtQtQfShAnAtAzA`CjC~DnE|JiMlDmEv@cA`TyWfGwJvGeIbOwQpDmE~BiCjAsAr@y@fDmCbFkEnHuGjJmInHyFdKiHzGkEzBwAHEpNqHv@[lFsBlEqAvNeE~EeAbIkBrGsApCe@jHk@pHAlAAhC?vGHhFBrEL~c@jA\\Bn@DzFj@jIfBxEz@n@N`E~@bWnCtGr@v@HlDb@`d@jGlALj@FpFNnBDxMeAxEdAbHxBrPpF|TfJhFvBfDvApDnAz^`O~b@hQfOrGrC`BzAdAlDxBdDxBpGtErLnIjE`Dbe@r\\lCnBpClB`D~BlE`Dpu@ji@|QpMxA`AxEhDpD}Hj@mAzNg^|H_RpGiTbA}DjFmSjBuI`BuHdCkLLk@xEuTfGiYxAyGz@gEtAwGj@wCf@wFx@gJxWyxAnBcI|@j@h@\\dPrJtA?n@sDdDqSrAgHdGg\\zByLtIud@`@gCfCiR`AyPNgEvA`A^TzK~GrObKlFnDfNxI~BxAvD`CjCbBxSvMnEfBjJjGfC~AxBrAdA}FTqAt@aE|AsI^uB`@wBrFiZlIed@X}AjK{l@jD}Q"
+    } ],
+    "waypoints" : [ {
+        "distance" : 8.632,
+        "name" : "Panoramastraße",
+        "location" : [ 13.409961, 52.521487 ]
+    }, {
+        "distance" : 5.072,
+        "name" : "Waldemarstraße",
+        "location" : [ 13.423342, 52.502501 ]
+    } ],
+    "code" : "Ok"
+}

@@ -207,49 +207,26 @@ DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
 }
 
 void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
-#if MLN_DRAWABLE_RENDERER
     if (std::holds_alternative<AlphaImage>(texture)) {
         auto tempTexture = uploadPass.getContext().createTexture2D();
         tempTexture->upload(std::get<AlphaImage>(texture));
-        tempTexture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Repeat, gfx::TextureWrapType::Clamp});
+        tempTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                              .wrapU = gfx::TextureWrapType::Repeat,
+                                              .wrapV = gfx::TextureWrapType::Clamp});
         texture = std::move(tempTexture);
     }
-#else
-    if (texture.is<AlphaImage>()) {
-        texture = uploadPass.createTexture(texture.get<AlphaImage>());
-    }
-#endif
 }
 
-#if MLN_LEGACY_RENDERER
-gfx::TextureBinding DashPatternTexture::textureBinding() const {
-    // The texture needs to have been uploaded already.
-    assert(texture.is<gfx::Texture>());
-    return {texture.get<gfx::Texture>().getResource(),
-            gfx::TextureFilterType::Linear,
-            gfx::TextureMipMapType::No,
-            gfx::TextureWrapType::Repeat,
-            gfx::TextureWrapType::Clamp};
-}
-#endif
-
-#if MLN_DRAWABLE_RENDERER
 static const gfx::Texture2DPtr noTexture;
 const std::shared_ptr<gfx::Texture2D>& DashPatternTexture::getTexture() const {
     return (std::holds_alternative<gfx::Texture2DPtr>(texture)) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
 }
-#endif
 
 Size DashPatternTexture::getSize() const {
-#if MLN_DRAWABLE_RENDERER
     if (std::holds_alternative<AlphaImage>(texture)) {
         return std::get<AlphaImage>(texture).size;
     }
     return std::get<gfx::Texture2DPtr>(texture)->getSize();
-#else
-    return texture.match([](const auto& obj) { return obj.size; });
-#endif
 }
 
 LineAtlas::LineAtlas() = default;

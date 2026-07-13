@@ -51,7 +51,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   @Override
   protected void finalize() throws Throwable {
     try {
-      if (renderThread != null) {
+      if (renderThread != null && renderThread.isAlive()) {
         // thread may still be running if this view was never
         // attached to a window.
         renderThread.requestExitAndWait();
@@ -249,7 +249,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     if (detachedListener != null) {
       detachedListener.onSurfaceViewDetached();
     }
-    if (renderThread != null) {
+    if (renderThread != null && renderThread.isAlive()) {
       renderThread.requestExitAndWait();
     }
     detached = true;
@@ -334,7 +334,15 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
         wantRenderNotification = true;
         requestRender = true;
         renderComplete = false;
-        finishDrawingRunnable = finishDrawing;
+        final Runnable oldCallback = finishDrawingRunnable;
+        finishDrawingRunnable = () -> {
+          if (oldCallback != null) {
+            oldCallback.run();
+          }
+          if (finishDrawing != null) {
+            finishDrawing.run();
+          }
+        };
 
         renderThreadManager.notifyAll();
       }
@@ -435,9 +443,9 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       synchronized (renderThreadManager) {
         shouldExit = true;
         renderThreadManager.notifyAll();
-        while (!exited) {
+        while (!exited && this.isAlive()) {
           try {
-            renderThreadManager.wait();
+            renderThreadManager.wait(100);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
           }
@@ -490,7 +498,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected ArrayList<Runnable> eventQueue = new ArrayList<>();
     protected boolean sizeChanged = true;
     protected Runnable finishDrawingRunnable = null;
-    protected RenderThreadManager renderThreadManager = null;
+    protected final RenderThreadManager renderThreadManager;
     // End of member variables protected by the sRenderThreadManager monitor.
 
   }

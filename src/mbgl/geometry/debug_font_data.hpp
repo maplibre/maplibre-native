@@ -154,7 +154,7 @@ struct glyph {
 
 // Font data From Hershey Simplex Font
 // http://paulbourke.net/dataformats/hershey/
-
+// NOLINTBEGIN(modernize-use-designated-initializers)
 const glyph simplex[] = {
     /* 32	  */ {16, 0, nullptr},
     /* 33	! */
@@ -346,3 +346,4 @@ const glyph simplex[] = {
     /* 126	~ */
     {24, sizeof(simplex_94), simplex_94},
 };
+// NOLINTEND(modernize-use-designated-initializers)

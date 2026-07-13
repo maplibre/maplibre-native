@@ -5,8 +5,20 @@ struct MapLibreNavigationView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    NavigationLink("Start Long Running Test") {
+                        LongRunningMapView()
+                    }
+                    .listRowBackground(MapLibreColors.primary)
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
+                }
+
                 NavigationLink("SimpleMap") {
                     SimpleMap().edgesIgnoringSafeArea(.all)
+                }
+                NavigationLink("Change Camera Pitch & Roll") {
+                    CameraSliderExample()
                 }
                 #if MLN_RENDER_BACKEND_METAL
                     NavigationLink("CustomStyleLayer (Metal)") {
@@ -34,8 +46,11 @@ struct MapLibreNavigationView: View {
                 NavigationLink("AddMarkerExample") {
                     AddMarkerSymbolExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("ClusteringExample") {
+                    ClusteringExampleUIViewControllerRepresentable()
+                }
                 NavigationLink("ObserverExample") {
-                    ObserverExampleViewExampleUIViewControllerRepresentable()
+                    ObserverExampleViewUIViewControllerRepresentable()
                 }
                 Group {
                     NavigationLink("AnimatedLineExample") {

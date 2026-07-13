@@ -9,10 +9,42 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform mediump float u_ratio;
-uniform vec2 u_units_to_pixels;
-uniform lowp float u_device_pixel_ratio;
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+};
+
+layout (std140) uniform LineDrawableUBO {
+    highp mat4 u_matrix;
+    mediump float u_ratio;
+    // Interpolations
+    lowp float u_color_t;
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+    lowp float drawable_pad1;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -36,7 +68,7 @@ void main() {
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
+    float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     vec2 a_extrude = a_data.xy - 128.0;
     float a_direction = mod(a_data.z, 4.0) - 1.0;

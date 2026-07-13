@@ -20,8 +20,6 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>15256</string>
-	<key>MLNCommitHash</key>
-	<string>$(CURRENT_COMMIT_HASH)</string>
 	<key>MLNSemanticVersionString</key>
 	<string>$(CURRENT_SEMANTIC_VERSION)</string>
 </dict>

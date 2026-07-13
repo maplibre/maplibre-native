@@ -10,8 +10,8 @@
 #include <mbgl/style/layout_property.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/style/properties.hpp>
-#include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/uniforms.hpp>
+#include <mbgl/shaders/attributes.hpp>
+#include <mbgl/shaders/uniforms.hpp>
 
 namespace mbgl {
 namespace style {
@@ -44,7 +44,7 @@ struct AccuracyRadiusColor : PaintProperty<Color> {
 };
 
 struct Bearing : PaintProperty<Rotation> {
-    static Rotation defaultValue() { return 0; }
+    static Rotation defaultValue() { return 0.f; }
 };
 
 struct BearingImageSize : PaintProperty<float> {

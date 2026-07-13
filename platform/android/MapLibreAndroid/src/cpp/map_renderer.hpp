@@ -37,8 +37,10 @@ public:
  * performed on the GL Thread.
  *
  * The public methods are safe to call from the main thread, others are not.
+ *
+ * NOTE: Any derived class must invalidate `weakFactory` in the destructor
  */
-class MapRenderer : public Scheduler {
+class MapRenderer final : public Scheduler {
 public:
     static constexpr auto Name() { return "org/maplibre/android/maps/renderer/MapRenderer"; };
 
@@ -72,8 +74,8 @@ public:
 
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
-    void schedule(Task&& scheduled) override;
-    void schedule(const util::SimpleIdentity, Task&& fn) override { schedule(std::move(fn)); };
+    void schedule(std::function<void()>&& scheduled) override;
+    void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override { schedule(std::move(fn)); };
 
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
@@ -81,6 +83,7 @@ public:
     void waitForEmpty(const util::SimpleIdentity tag) override;
 
     void requestRender();
+    void requestRender(JNIEnv&, jni::Local<jni::Object<MapRenderer>>&);
 
     // Snapshot - requires a RunLoop on the calling thread
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
@@ -89,10 +92,16 @@ public:
     AndroidRendererBackend& getRendererBackend() const { return *backend; }
     const TaggedScheduler& getThreadPool() const { return threadPool; }
 
+    void SetAsyncRendererCleanup(bool value) { asyncRendererCleanup = value; }
+
 protected:
     // Called from the GL Thread //
 
     void scheduleSnapshot(std::unique_ptr<SnapshotCallback>);
+
+    // Allows derived classes to invalidate weak pointers in
+    // their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     struct MailboxData {
@@ -138,7 +147,9 @@ private:
     std::unique_ptr<AndroidRendererBackend> backend;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<ActorRef<Renderer>> rendererRef;
-    std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>> window;
+
+    using UniqueANativeWindow = std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>>;
+    UniqueANativeWindow window;
 
     std::shared_ptr<UpdateParameters> updateParameters;
     std::mutex updateMutex;
@@ -149,6 +160,7 @@ private:
 
     bool framebufferSizeChanged = false;
     bool swapBehaviorFlush = false;
+    bool asyncRendererCleanup = false;
 
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`

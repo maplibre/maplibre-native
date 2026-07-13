@@ -50,10 +50,8 @@ public:
     /// Returns a reference to the default surface that should be rendered on.
     virtual Renderable& getDefaultRenderable() = 0;
 
-#if MLN_DRAWABLE_RENDERER
     /// One-time shader initialization
     virtual void initShaders(gfx::ShaderRegistry&, const ProgramParameters&) = 0;
-#endif
     const mbgl::util::SimpleIdentity uniqueID;
 
 protected:

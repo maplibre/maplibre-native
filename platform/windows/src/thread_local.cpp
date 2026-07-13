@@ -1,5 +1,3 @@
-#pragma once
-
 #include <mbgl/util/thread_local.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/platform/thread.hpp>

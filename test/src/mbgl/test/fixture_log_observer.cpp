@@ -26,7 +26,7 @@ FixtureLog::Observer::~Observer() {
 }
 
 bool FixtureLog::Observer::onRecord(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
-    std::lock_guard<std::mutex> lock(messagesMutex);
+    std::scoped_lock lock(messagesMutex);
 
     if (severity != EventSeverity::Debug) {
         messages.emplace_back(severity, event, code, msg);
@@ -36,13 +36,13 @@ bool FixtureLog::Observer::onRecord(EventSeverity severity, Event event, int64_t
 }
 
 bool FixtureLog::Observer::empty() const {
-    std::lock_guard<std::mutex> lock(messagesMutex);
+    std::scoped_lock lock(messagesMutex);
 
     return messages.empty();
 }
 
 size_t FixtureLog::Observer::count(const Message& message, bool substring) const {
-    std::lock_guard<std::mutex> lock(messagesMutex);
+    std::scoped_lock lock(messagesMutex);
 
     size_t message_count = 0;
     for (const auto& msg : messages) {
@@ -84,7 +84,7 @@ FixtureLog::~FixtureLog() {
 }
 
 std::vector<FixtureLog::Message> FixtureLogObserver::unchecked() const {
-    std::lock_guard<std::mutex> lock(messagesMutex);
+    std::scoped_lock lock(messagesMutex);
 
     std::vector<Message> unchecked_messages;
     for (const auto& msg : messages) {
@@ -97,7 +97,7 @@ std::vector<FixtureLog::Message> FixtureLogObserver::unchecked() const {
 }
 
 size_t FixtureLogObserver::uncheckedCount() const {
-    std::lock_guard<std::mutex> lock(messagesMutex);
+    std::scoped_lock lock(messagesMutex);
 
     size_t result = 0;
     for (const auto& msg : messages) {

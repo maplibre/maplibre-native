@@ -16,16 +16,19 @@ class StubFileSource : public FileSource {
 public:
     enum class ResponseType {
         Asynchronous = 0,
-        Synchronous
+        Synchronous,
+        Manual
     };
 
     StubFileSource(const ResourceOptions&, const ClientOptions&, ResponseType = ResponseType::Asynchronous);
     StubFileSource(ResponseType = ResponseType::Asynchronous);
     ~StubFileSource() override;
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
-    bool canRequest(const Resource&) const noexcept override { return true; }
+    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
+    bool canRequest(const Resource&) const override { return true; }
     void remove(AsyncRequest*);
+    void respondToAll();
+
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     mapbox::base::Value getProperty(const std::string&) const override;
 
@@ -57,7 +60,7 @@ private:
     // The default behavior is to throw if no per-kind callback has been set.
     std::optional<Response> defaultResponse(const Resource&);
 
-    std::unordered_map<AsyncRequest*, std::tuple<Resource, ResponseFunction, std::function<void(Response)>>> pending;
+    std::unordered_map<AsyncRequest*, std::tuple<Resource, ResponseFunction, Callback>> pending;
     ResponseType type;
     util::Timer timer;
     std::map<std::string, mapbox::base::Value> properties;

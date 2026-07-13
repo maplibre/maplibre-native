@@ -6,7 +6,7 @@ namespace gfx {
 
 bool ShaderGroup::isShader(const std::string& shaderName) const noexcept {
     std::shared_lock<std::shared_mutex> readerLock(programLock);
-    return programs.find(shaderName) != programs.end();
+    return programs.contains(shaderName);
 }
 
 const std::shared_ptr<gfx::Shader> ShaderGroup::getShader(const std::string& shaderName) const noexcept {
@@ -25,7 +25,7 @@ bool ShaderGroup::replaceShader(std::shared_ptr<gfx::Shader>&& shader) noexcept 
 
 bool ShaderGroup::replaceShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(programLock);
-    if (programs.find(shaderName) == programs.end()) {
+    if (!programs.contains(shaderName)) {
         return false;
     }
 
@@ -39,7 +39,7 @@ bool ShaderGroup::registerShader(std::shared_ptr<gfx::Shader>&& shader) noexcept
 
 bool ShaderGroup::registerShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(programLock);
-    if (programs.find(shaderName) != programs.end()) {
+    if (programs.contains(shaderName)) {
         return false;
     }
 

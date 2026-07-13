@@ -59,7 +59,7 @@ void android_main(struct android_app* app) {
     struct android_poll_source* source = nullptr;
 
     while (true) {
-        ALooper_pollAll(-1, &outFd, &outEvents, reinterpret_cast<void**>(&source));
+        ALooper_pollOnce(-1, &outFd, &outEvents, reinterpret_cast<void**>(&source));
         if (source != nullptr) {
             source->process(app, source);
         }

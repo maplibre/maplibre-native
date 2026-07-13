@@ -47,9 +47,8 @@ TileLoader<T>::TileLoader(T& tile_,
         // initial std::optional part of the request.
         loadFromCache();
     } else if (necessity == TileNecessity::Required) {
-        // When the file source doesn't support cache-only requests, and we
-        // definiitely need this data, we can start out with a network request
-        // immediately.
+        // When the file source doesn't support cache-only requests, and we definitely
+        // need this data, we can start out with a network request immediately.
         loadFromNetwork();
     } else {
         // When the FileSource doesn't support cache-only requests, we do

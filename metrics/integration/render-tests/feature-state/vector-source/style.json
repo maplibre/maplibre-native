@@ -44,7 +44,7 @@
       }
     },
     {
-      "id": "poi_label",
+      "id": "poi_layer",
       "type": "circle",
       "source": "maplibre",
       "source-layer": "poi_label",

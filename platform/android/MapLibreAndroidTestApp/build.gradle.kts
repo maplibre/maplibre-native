@@ -1,14 +1,12 @@
 plugins {
     alias(libs.plugins.kotlinter)
     id("com.android.application")
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinPluginSerialization)
     id("maplibre.gradle-make")
     id("maplibre.gradle-config")
     id("maplibre.gradle-checkstyle")
     id("maplibre.gradle-lint")
 }
-
 
 fun obtainTestBuildType(): String {
     return if (project.hasProperty("testBuildType")) {
@@ -25,15 +23,18 @@ android {
 
     defaultConfig {
         applicationId = "org.maplibre.android.testapp"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 14
-        versionName = "6.0.1"
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
+        versionName = file("../VERSION").readText().trim()
+
+        manifestPlaceholders["SENTRY_DSN"] = ""
+        manifestPlaceholders["SENTRY_ENV"] = ""
     }
 
-    nativeBuild(listOf("example-custom-layer"))
+    nativeBuild(emptyList())
 
     packaging {
         resources.excludes += listOf("META-INF/LICENSE.txt", "META-INF/NOTICE.txt", "LICENSE.txt")
@@ -41,19 +42,34 @@ android {
 
     buildTypes {
         getByName("debug") {
+            manifestPlaceholders += mapOf()
             isJniDebuggable = true
             isDebuggable = true
-            isTestCoverageEnabled = true
             isMinifyEnabled = false
             isShrinkResources = false
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+            packaging {
+                jniLibs {
+                    keepDebugSymbols += "**/*.so"
+                }
+            }
+
+            buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+            manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
+
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             testProguardFiles("test-proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
+
+            buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
     }
 
@@ -62,14 +78,42 @@ android {
     flavorDimensions += "renderer"
 
     productFlavors {
-        create("legacy") {
+        create("opengl") {
             dimension = "renderer"
-        }
-        create("drawable") {
-            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments += "-DMLN_WITH_OPENGL=ON"
+                    targets += "example-custom-layer"
+                }
+            }
         }
         create("vulkan") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments += "-DMLN_WITH_VULKAN=ON"
+                    targets += "example-vulkan-custom-layer"
+                }
+            }
+        }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
+                }
+            }
         }
     }
 
@@ -95,9 +139,15 @@ kotlin {
 
 dependencies {
     implementation(project(":MapLibreAndroid"))
+
+    implementation(libs.maplibreNavigation) {
+        exclude(group = "org.maplibre.gl", module = "android-sdk")
+    }
+
     implementation(libs.maplibreJavaTurf)
 
     implementation(libs.supportRecyclerView)
+    implementation(libs.supportPrint)
     implementation(libs.supportDesign)
     implementation(libs.supportConstraintLayout)
     implementation(libs.kotlinxSerializationJson)
@@ -121,4 +171,9 @@ dependencies {
     androidTestImplementation(libs.androidxTestExtJUnit)
     androidTestImplementation(libs.androidxTestCoreKtx)
     androidTestImplementation(libs.kotlinxCoroutinesTest)
+
+    // version conflict when using androidTestImplementation
+    implementation(libs.androidxTracing)
 }
+
+apply<SentryConditionalPlugin>()

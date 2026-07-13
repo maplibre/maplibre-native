@@ -22,7 +22,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun newCameraPosition(cameraPosition: CameraPosition): CameraUpdate {
-        return CameraPositionUpdate(cameraPosition.bearing, cameraPosition.target, cameraPosition.tilt, cameraPosition.zoom, cameraPosition.padding)
+        return CameraPositionUpdate(cameraPosition.bearing, cameraPosition.target, cameraPosition.centerAltitude, cameraPosition.tilt, cameraPosition.roll, cameraPosition.fov, cameraPosition.zoom, cameraPosition.padding)
     }
 
     /**
@@ -34,7 +34,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun newLatLng(latLng: LatLng): CameraUpdate {
-        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, null)
+        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, -1.0, null)
     }
 
     /**
@@ -133,7 +133,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun newLatLngZoom(latLng: LatLng, zoom: Double): CameraUpdate {
-        return CameraPositionUpdate(-1.0, latLng, -1.0, zoom, null)
+        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, zoom, null)
     }
 
     /**
@@ -150,7 +150,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun newLatLngPadding(latLng: LatLng, left: Double, top: Double, right: Double, bottom: Double): CameraUpdate {
-        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, doubleArrayOf(left, top, right, bottom))
+        return CameraPositionUpdate(-1.0, latLng, -1.0, -1.0, -1.0, -1.0, -1.0, doubleArrayOf(left, top, right, bottom))
     }
 
     /**
@@ -217,7 +217,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun bearingTo(bearing: Double): CameraUpdate {
-        return CameraPositionUpdate(bearing, null, -1.0, -1.0, null)
+        return CameraPositionUpdate(bearing, null, -1.0, -1.0, -1.0, -1.0, -1.0, null)
     }
 
     /**
@@ -228,7 +228,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun tiltTo(tilt: Double): CameraUpdate {
-        return CameraPositionUpdate(-1.0, null, tilt, -1.0, null)
+        return CameraPositionUpdate(-1.0, null, -1.0, tilt, -1.0, -1.0, -1.0, null)
     }
 
     /**
@@ -244,7 +244,7 @@ object CameraUpdateFactory {
      */
     @JvmStatic
     fun paddingTo(padding: DoubleArray?): CameraUpdate {
-        return CameraPositionUpdate(-1.0, null, -1.0, -1.0, padding)
+        return CameraPositionUpdate(-1.0, null, -1.0, -1.0, -1.0, -1.0, -1.0, padding)
     }
 
     /**
@@ -265,7 +265,7 @@ object CameraUpdateFactory {
     //
     // CameraUpdate types
     //
-    class CameraPositionUpdate(val bearing: Double, val target: LatLng?, val tilt: Double, val zoom: Double, val padding: DoubleArray?) : CameraUpdate {
+    class CameraPositionUpdate(val bearing: Double, val target: LatLng?, val centerAltitude: Double, val tilt: Double, val roll: Double, val fov: Double, val zoom: Double, val padding: DoubleArray?) : CameraUpdate {
 
         override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition {
             if (target == null) {
@@ -289,7 +289,16 @@ object CameraUpdateFactory {
             if (java.lang.Double.compare(that.tilt, tilt) != 0) {
                 return false
             }
+            if (java.lang.Double.compare(that.roll, roll) != 0) {
+                return false
+            }
+            if (java.lang.Double.compare(that.fov, fov) != 0) {
+                return false
+            }
             if (java.lang.Double.compare(that.zoom, zoom) != 0) {
+                return false
+            }
+            if (java.lang.Double.compare(that.centerAltitude, centerAltitude) != 0) {
                 return false
             }
             return if (if (target != null) target != that.target else that.target != null) {
@@ -305,7 +314,13 @@ object CameraUpdateFactory {
             temp = java.lang.Double.doubleToLongBits(bearing)
             result = (temp xor (temp ushr 32)).toInt()
             result = 31 * result + (target?.hashCode() ?: 0)
+            temp = java.lang.Double.doubleToLongBits(centerAltitude)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
             temp = java.lang.Double.doubleToLongBits(tilt)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(roll)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(fov)
             result = 31 * result + (temp xor (temp ushr 32)).toInt()
             temp = java.lang.Double.doubleToLongBits(zoom)
             result = 31 * result + (temp xor (temp ushr 32)).toInt()
@@ -314,7 +329,7 @@ object CameraUpdateFactory {
         }
 
         override fun toString(): String {
-            return ("CameraPositionUpdate{" + "bearing=" + bearing + ", target=" + target + ", tilt=" + tilt + ", zoom=" + zoom + ", padding=" + Arrays.toString(padding) + '}')
+            return ("CameraPositionUpdate{" + "bearing=" + bearing + ", target=" + target + ", centerAltitude=" + centerAltitude + ", tilt=" + tilt + ", roll=" + roll + ", fov=" + fov + ", zoom=" + zoom + ", padding=" + Arrays.toString(padding) + '}')
         }
     }
 

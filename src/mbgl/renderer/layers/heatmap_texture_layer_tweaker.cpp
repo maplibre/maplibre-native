@@ -22,7 +22,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
@@ -33,11 +33,11 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     const auto& size = parameters.staticData.backendSize;
     matrix::ortho(matrix, 0, size.width, size.height, 0, -1, 1);
 
-    const HeatmapTexturePropsUBO propsUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                             /* .opacity = */ evaluated.get<HeatmapOpacity>(),
-                                             /* .pad1 = */ 0,
-                                             /* .pad2 = */ 0,
-                                             /* .pad3 = */ 0};
+    const HeatmapTexturePropsUBO propsUBO = {.matrix = util::cast<float>(matrix),
+                                             .opacity = evaluated.get<HeatmapOpacity>(),
+                                             .pad1 = 0,
+                                             .pad2 = 0,
+                                             .pad3 = 0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idHeatmapTexturePropsUBO, &propsUBO, parameters.context);
 }

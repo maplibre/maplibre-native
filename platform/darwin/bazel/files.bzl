@@ -2,6 +2,7 @@ MLN_GENERATED_DARWIN_STYLE_SOURCE = [
     "src/MLNLight.mm",
     "src/MLNBackgroundStyleLayer.mm",
     "src/MLNCircleStyleLayer.mm",
+    "src/MLNColorReliefStyleLayer.mm",
     "src/MLNFillExtrusionStyleLayer.mm",
     "src/MLNFillStyleLayer.mm",
     "src/MLNHeatmapStyleLayer.mm",
@@ -13,6 +14,7 @@ MLN_GENERATED_DARWIN_STYLE_SOURCE = [
 
 MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
     "src/MLNBackgroundStyleLayer.h",
+    "src/MLNColorReliefStyleLayer.h",
     "src/MLNFillExtrusionStyleLayer.h",
     "src/MLNHeatmapStyleLayer.h",
     "src/MLNLight.h",
@@ -27,6 +29,7 @@ MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
 MLN_GENERATED_DARWIN_STYLE_HEADERS = [
     "src/MLNRasterStyleLayer_Private.h",
     "src/MLNBackgroundStyleLayer_Private.h",
+    "src/MLNColorReliefStyleLayer_Private.h",
     "src/MLNFillExtrusionStyleLayer_Private.h",
     "src/MLNHeatmapStyleLayer_Private.h",
     "src/MLNLineStyleLayer_Private.h",
@@ -38,6 +41,7 @@ MLN_GENERATED_DARWIN_STYLE_HEADERS = [
 
 MLN_GENERATED_DARWIN_TEST_CODE = [
     "test/MLNBackgroundStyleLayerTests.mm",
+    "test/MLNColorReliefStyleLayerTests.mm",
     "test/MLNFillExtrusionStyleLayerTests.mm",
     "test/MLNHeatmapStyleLayerTests.mm",
     "test/MLNLightTest.mm",
@@ -50,6 +54,7 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [
+    "src/MLNActionJournalOptions.h",
     "src/MLNAnnotation.h",
     "src/MLNAttributedExpression.h",
     "src/MLNAttributionInfo.h",
@@ -62,6 +67,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNCustomStyleLayer.h",
     "src/MLNCustomDrawableStyleLayer.h",
     "src/MLNDefaultStyle.h",
+    "src/MLNDisplayUtils.h",
     "src/MLNDistanceFormatter.h",
     "src/MLNFeature.h",
     "src/MLNForegroundStyleLayer.h",
@@ -71,6 +77,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNLocationManager.h",
     "src/MLNLoggingConfiguration.h",
     "src/MLNMapCamera.h",
+    "src/MLNMapOptions.h",
     "src/MLNMapSnapshotter.h",
     "src/MLNMultiPoint.h",
     "src/MLNNetworkConfiguration.h",
@@ -84,6 +91,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNPolyline.h",
     "src/MLNRasterDEMSource.h",
     "src/MLNRasterTileSource.h",
+    "src/MLNRenderingStats.h",
     "src/MLNSettings.h",
     "src/MLNShape.h",
     "src/MLNShapeCollection.h",
@@ -103,6 +111,9 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSExpression+MLNAdditions.h",
     "src/NSPredicate+MLNAdditions.h",
     "src/NSValue+MLNAdditions.h",
+    "src/MLNPluginLayer.h",
+    "src/MLNPluginStyleLayer.h",
+    "src/MLNNetworkResponse.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -126,6 +137,7 @@ MLN_DARWIN_OBJCPP_HEADERS = [
 ]
 
 MLN_DARWIN_PRIVATE_HEADERS = [
+    "src/MLNActionJournalOptions_Private.h",
     "src/MLNAttributionInfo_Private.h",
     "src/MLNComputedShapeSource_Private.h",
     "src/MLNCustomStyleLayer_Private.h",
@@ -145,6 +157,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNPolygon_Private.h",
     "src/MLNPolyline_Private.h",
     "src/MLNRasterTileSource_Private.h",
+    "src/MLNRenderingStats_Private.h",
     "src/MLNSettings_Private.h",
     "src/MLNShapeOfflineRegion_Private.h",
     "src/MLNShapeSource_Private.h",
@@ -158,14 +171,17 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNVectorTileSource_Private.h",
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
+    "src/MLNPluginStyleLayer_Private.h",
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
+    "src/MLNActionJournalOptions.mm",
     "src/MLNAttributionInfo.mm",
     "src/MLNBackendResource.mm",
     "src/MLNComputedShapeSource.mm",
     "src/MLNCustomStyleLayer.mm",
     "src/MLNDefaultStyle.mm",
+    "src/MLNDisplayUtils.mm",
     "src/MLNFeature.mm",
     "src/MLNForegroundStyleLayer.mm",
     "src/MLNFoundation.mm",
@@ -173,6 +189,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNImageSource.mm",
     "src/MLNLoggingConfiguration.mm",
     "src/MLNMapCamera.mm",
+    "src/MLNMapOptions.mm",
     "src/MLNMapSnapshotter.mm",
     "src/MLNMultiPoint.mm",
     "src/MLNNetworkConfiguration.mm",
@@ -184,6 +201,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNPolyline.mm",
     "src/MLNRasterDEMSource.mm",
     "src/MLNRasterTileSource.mm",
+    "src/MLNRenderingStats.mm",
     "src/MLNSettings.mm",
     "src/MLNShape.mm",
     "src/MLNShapeCollection.mm",
@@ -209,6 +227,9 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSExpression+MLNAdditions.mm",
     "src/NSPredicate+MLNAdditions.mm",
     "src/NSValue+MLNStyleAttributeAdditions.mm",
+    "src/MLNPluginLayer.mm",
+    "src/MLNPluginStyleLayer.mm",
+    "src/MLNNetworkResponse.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",

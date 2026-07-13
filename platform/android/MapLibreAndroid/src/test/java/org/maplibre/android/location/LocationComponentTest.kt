@@ -17,6 +17,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.*
@@ -24,7 +25,7 @@ import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class LocationComponentTest {
+class LocationComponentTest : BaseTest() {
     private lateinit var locationComponent: LocationComponent
 
     @Mock

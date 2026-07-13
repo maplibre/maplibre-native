@@ -70,8 +70,7 @@ AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
 
 AssetManagerFileSource::~AssetManagerFileSource() = default;
 
-std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& resource,
-                                                              std::function<void(Response)> callback) {
+std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     impl->actor().invoke(&Impl::request, resource.url, req->actor());
@@ -80,7 +79,7 @@ std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& re
 }
 
 bool AssetManagerFileSource::canRequest(const Resource& resource) const {
-    return resource.url.starts_with(mbgl::util::ASSET_PROTOCOL);
+    return 0 == resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
 }
 
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {

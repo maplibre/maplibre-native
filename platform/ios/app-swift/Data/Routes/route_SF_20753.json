@@ -1,0 +1,4318 @@
+{
+    "routes" : [ {
+        "voiceLocale" : "en",
+        "weight_name" : "auto",
+        "weight" : 1754.394,
+        "duration" : 1181.215,
+        "distance" : 20753.215,
+        "legs" : [ {
+            "via_waypoints" : [ ],
+            "admins" : [ {
+                "iso_3166_1_alpha3" : "USA",
+                "iso_3166_1" : "US"
+            } ],
+            "weight" : 1754.394,
+            "duration" : 1181.215,
+            "steps" : [ {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "end of road",
+                        "modifier" : "right",
+                        "text" : "Sloat Boulevard",
+                        "components" : [ {
+                            "text" : "Sloat Boulevard",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 97.216
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Drive south on 46th Avenue. Then Turn right onto Sloat Boulevard.</speak>",
+                    "announcement" : "Drive south on 46th Avenue. Then Turn right onto Sloat Boulevard.",
+                    "distanceAlongGeometry" : 97.2
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Sloat Boulevard.</speak>",
+                    "announcement" : "Turn right onto Sloat Boulevard.",
+                    "distanceAlongGeometry" : 24.3
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true ],
+                    "bearings" : [ 177 ],
+                    "duration" : 3.443,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.443,
+                    "geometry_index" : 0,
+                    "location" : [ -122.504263, 37.736431 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 86, 177, 267, 357 ],
+                    "duration" : 2.019,
+                    "turn_weight" : 7.2,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 9.2,
+                    "geometry_index" : 2,
+                    "location" : [ -122.504253, 37.736276 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 89, 177, 267, 357 ],
+                    "duration" : 1.819,
+                    "turn_weight" : 7.2,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 9.0,
+                    "geometry_index" : 3,
+                    "location" : [ -122.504246, 37.736184 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 86, 177, 266, 357 ],
+                    "duration" : 6.019,
+                    "turn_weight" : 7.2,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 13.2,
+                    "geometry_index" : 4,
+                    "location" : [ -122.50424, 37.736101 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 86, 177, 357 ],
+                    "duration" : 4.219,
+                    "turn_weight" : 1.8,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.0,
+                    "geometry_index" : 6,
+                    "location" : [ -122.504222, 37.735835 ]
+                }, {
+                    "bearings" : [ 89, 177, 270, 357 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "turn_weight" : 7.2,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 8,
+                    "location" : [ -122.504209, 37.735649 ]
+                } ],
+                "maneuver" : {
+                    "instruction" : "Drive south on 46th Avenue.",
+                    "type" : "depart",
+                    "bearing_after" : 177,
+                    "bearing_before" : 0,
+                    "location" : [ -122.504263, 37.736431 ]
+                },
+                "name" : "46th Avenue",
+                "duration" : 19.539,
+                "distance" : 97.216,
+                "driving_side" : "right",
+                "weight" : 50.043,
+                "mode" : "driving",
+                "geometry" : "}}f~fAlcathFdGQn@AvDMdDKd@AlNa@`IWp@AlDK"
+            }, {
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left", "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "right" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "Great Highway Extension",
+                        "components" : [ {
+                            "text" : "Great Highway Extension",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 231.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto Great Highway Extension.</speak>",
+                    "announcement" : "Turn left onto Great Highway Extension.",
+                    "distanceAlongGeometry" : 121.7
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 90, 270, 357 ],
+                    "duration" : 9.195,
+                    "turn_weight" : 11.0,
+                    "turn_duration" : 2.315,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 17.88,
+                    "geometry_index" : 9,
+                    "location" : [ -122.504203, 37.735562 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 177, 270, 358 ],
+                    "duration" : 0.647,
+                    "turn_weight" : 2.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.04,
+                    "geometry_index" : 11,
+                    "location" : [ -122.505185, 37.735561 ]
+                }, {
+                    "entry" : [ false, true, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 176, 270, 358 ],
+                    "duration" : 2.727,
+                    "turn_weight" : 4.8,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.52,
+                    "geometry_index" : 12,
+                    "location" : [ -122.505277, 37.735561 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 177, 270, 358 ],
+                    "duration" : 2.807,
+                    "turn_weight" : 2.4,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 5.13,
+                    "geometry_index" : 13,
+                    "location" : [ -122.505375, 37.735561 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 275 ],
+                    "duration" : 2.014,
+                    "turn_weight" : 0.55,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.513,
+                    "geometry_index" : 16,
+                    "location" : [ -122.505773, 37.735561 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 90, 270, 355 ],
+                    "duration" : 2.265,
+                    "turn_weight" : 0.55,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.751,
+                    "geometry_index" : 18,
+                    "location" : [ -122.506148, 37.735577 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 90, 179, 272, 359 ],
+                    "duration" : 0.74,
+                    "turn_weight" : 2.2,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.914,
+                    "geometry_index" : 19,
+                    "location" : [ -122.506566, 37.735577 ]
+                }, {
+                    "bearings" : [ 6, 92, 187, 272 ],
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "turn_weight" : 6.6,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "geometry_index" : 20,
+                    "location" : [ -122.506705, 37.73558 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Sloat Boulevard.",
+                    "type" : "end of road",
+                    "bearing_after" : 270,
+                    "bearing_before" : 177,
+                    "location" : [ -122.504203, 37.735562 ]
+                },
+                "name" : "Sloat Boulevard",
+                "duration" : 23.072,
+                "distance" : 231.0,
+                "driving_side" : "right",
+                "weight" : 47.003,
+                "mode" : "driving",
+                "geometry" : "sge~fAt_athF?vW@rc@?vD?bE?jK?tH?xAa@rF@xN?bYEtGGxF"
+            }, {
+                "bannerInstructions" : [ {
+                    "secondary" : {
+                        "text" : "Skyline Boulevard",
+                        "components" : [ {
+                            "text" : "Skyline Boulevard",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Skyline Boulevard",
+                        "components" : [ {
+                            "text" : "Skyline Boulevard",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "CA 35",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 1230.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Skyline Boulevard",
+                        "components" : [ {
+                            "text" : "Skyline Boulevard",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "CA 35",
+                            "type" : "text"
+                        } ]
+                    },
+                    "secondary" : {
+                        "text" : "Skyline Boulevard",
+                        "components" : [ {
+                            "text" : "Skyline Boulevard",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "right" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 1 kilometer.</speak>",
+                    "announcement" : "Continue for 1 kilometer.",
+                    "distanceAlongGeometry" : 1220.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 600 meters, Turn right toward Skyline Boulevard.</speak>",
+                    "announcement" : "In 600 meters, Turn right toward Skyline Boulevard.",
+                    "distanceAlongGeometry" : 573.6
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right toward Skyline Boulevard.</speak>",
+                    "announcement" : "Turn right toward Skyline Boulevard.",
+                    "distanceAlongGeometry" : 163.9
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 92, 180, 272, 359 ],
+                    "duration" : 9.025,
+                    "turn_weight" : 7.75,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 7.622,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 9.118,
+                    "geometry_index" : 21,
+                    "location" : [ -122.50683, 37.735584 ]
+                }, {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 180, 265 ],
+                    "duration" : 2.495,
+                    "turn_weight" : 7.2,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 7.676,
+                    "geometry_index" : 22,
+                    "location" : [ -122.506829, 37.735373 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 0, 89, 181, 270 ],
+                    "duration" : 11.479,
+                    "turn_weight" : 2.2,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 13.384,
+                    "geometry_index" : 23,
+                    "location" : [ -122.506829, 37.735305 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 8, 188 ],
+                    "duration" : 8.298,
+                    "turn_weight" : 0.55,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.641,
+                    "geometry_index" : 32,
+                    "location" : [ -122.507121, 37.733633 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 172, 356 ],
+                    "duration" : 2.624,
+                    "turn_weight" : 0.55,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.108,
+                    "geometry_index" : 42,
+                    "location" : [ -122.507206, 37.732418 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 168, 349 ],
+                    "duration" : 44.176,
+                    "turn_weight" : 0.55,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 42.517,
+                    "geometry_index" : 45,
+                    "location" : [ -122.507127, 37.73204 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 126, 308 ],
+                    "duration" : 4.088,
+                    "turn_weight" : 0.5,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.384,
+                    "geometry_index" : 84,
+                    "location" : [ -122.504745, 37.72601 ]
+                }, {
+                    "bearings" : [ 126, 306 ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "turn_weight" : 0.5,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 86,
+                    "location" : [ -122.504125, 37.725656 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto Great Highway Extension.",
+                    "type" : "turn",
+                    "bearing_after" : 180,
+                    "bearing_before" : 272,
+                    "location" : [ -122.50683, 37.735584 ]
+                },
+                "name" : "Great Highway Extension",
+                "duration" : 84.687,
+                "distance" : 1230.0,
+                "driving_side" : "right",
+                "weight" : 91.705,
+                "mode" : "driving",
+                "geometry" : "_ie~fAzcfthFdLAfC?|EDxEBfFZhFn@rD\\tEj@dCb@`[pEr^pD~Fr@pFb@hFd@tEd@fFZfFR`GFzFEbGQxFYzFe@|Fw@xF_A~ZoFrLmBhJyAjIkAfFk@~Ec@|Gi@`Fi@vEm@lF{@dF_AtFmAnFkA`F}@pFw@zEg@hFa@rQoAfs@aFpL_AjGo@zF_AbGmAdFqA~FkBlG_ChEiBlAk@xFuC|FkDlFqDhF}DtE_ErEmEhEsEfEqFjE{GvD}GfGkL|CsGdPc]tLwV"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 3 kilometers.</speak>",
+                    "announcement" : "Continue for 3 kilometers.",
+                    "distanceAlongGeometry" : 3174.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 700 meters, Turn left onto John Daly Boulevard.</speak>",
+                    "announcement" : "In 700 meters, Turn left onto John Daly Boulevard.",
+                    "distanceAlongGeometry" : 718.4
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn left onto John Daly Boulevard.</speak>",
+                    "announcement" : "Turn left onto John Daly Boulevard.",
+                    "distanceAlongGeometry" : 205.2
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 122, 130, 306 ],
+                    "duration" : 10.721,
+                    "turn_weight" : 0.5,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid_indication" : "right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.009,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 10.677,
+                    "geometry_index" : 87,
+                    "location" : [ -122.503745, 37.725437 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 1,
+                    "bearings" : [ 173, 343, 356 ],
+                    "duration" : 25.65,
+                    "turn_weight" : 6.1,
+                    "turn_duration" : 0.013,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 30.456,
+                    "geometry_index" : 100,
+                    "location" : [ -122.503095, 37.724522 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 169, 345 ],
+                    "duration" : 3.892,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.697,
+                    "geometry_index" : 130,
+                    "location" : [ -122.500464, 37.720332 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 178, 357 ],
+                    "duration" : 4.968,
+                    "turn_duration" : 2.0,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.819,
+                    "geometry_index" : 134,
+                    "location" : [ -122.500363, 37.719621 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 99, 177, 279, 358 ],
+                    "duration" : 0.603,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 0.555,
+                    "geometry_index" : 135,
+                    "location" : [ -122.500335, 37.719073 ]
+                }, {
+                    "entry" : [ false, true, true, true, false ],
+                    "in" : 4,
+                    "bearings" : [ 70, 115, 178, 277, 357 ],
+                    "duration" : 4.889,
+                    "turn_weight" : 2.0,
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.727,
+                    "geometry_index" : 136,
+                    "location" : [ -122.500329, 37.718968 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 176, 357 ],
+                    "duration" : 17.514,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 16.638,
+                    "geometry_index" : 138,
+                    "location" : [ -122.500298, 37.718436 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 162, 338 ],
+                    "duration" : 7.686,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.302,
+                    "geometry_index" : 154,
+                    "location" : [ -122.498666, 37.715517 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 177, 191, 357 ],
+                    "duration" : 1.089,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.017,
+                    "geometry_index" : 163,
+                    "location" : [ -122.498403, 37.714123 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 177, 357 ],
+                    "duration" : 1.265,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.202,
+                    "geometry_index" : 164,
+                    "location" : [ -122.49839, 37.713927 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 177, 357 ],
+                    "duration" : 3.6,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.42,
+                    "geometry_index" : 165,
+                    "location" : [ -122.498375, 37.713697 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 177, 349, 357 ],
+                    "duration" : 13.787,
+                    "turn_weight" : 0.5,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 13.579,
+                    "geometry_index" : 166,
+                    "location" : [ -122.498332, 37.71303 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 180, 358 ],
+                    "duration" : 3.211,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.05,
+                    "geometry_index" : 172,
+                    "location" : [ -122.498192, 37.710489 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 1, 92, 181 ],
+                    "duration" : 10.321,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.798,
+                    "geometry_index" : 175,
+                    "location" : [ -122.498195, 37.709899 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 6, 186 ],
+                    "duration" : 2.578,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 2.449,
+                    "geometry_index" : 184,
+                    "location" : [ -122.49834, 37.708001 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 6, 186 ],
+                    "duration" : 27.827,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 26.436,
+                    "geometry_index" : 185,
+                    "location" : [ -122.4984, 37.707529 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 158, 168, 340 ],
+                    "duration" : 2.795,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.634,
+                    "geometry_index" : 208,
+                    "location" : [ -122.497078, 37.702569 ]
+                }, {
+                    "entry" : [ true, false, true, true, false ],
+                    "in" : 4,
+                    "bearings" : [ 32, 103, 158, 244, 338 ],
+                    "duration" : 2.196,
+                    "turn_weight" : 6.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.08,
+                    "geometry_index" : 209,
+                    "location" : [ -122.496832, 37.702094 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 158, 322, 338 ],
+                    "duration" : 12.753,
+                    "turn_weight" : 0.5,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 12.609,
+                    "geometry_index" : 210,
+                    "location" : [ -122.496641, 37.701715 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 159, 338 ],
+                    "duration" : 2.384,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.324,
+                    "geometry_index" : 219,
+                    "location" : [ -122.495517, 37.699536 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 162, 168, 342 ],
+                    "duration" : 3.558,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.463,
+                    "geometry_index" : 224,
+                    "location" : [ -122.495331, 37.699124 ]
+                }, {
+                    "bearings" : [ 73, 166, 253, 345 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 229,
+                    "location" : [ -122.495097, 37.698492 ]
+                } ],
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "John Daly Boulevard",
+                        "components" : [ {
+                            "text" : "John Daly Boulevard",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 3184.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "John Daly Boulevard",
+                        "components" : [ {
+                            "text" : "John Daly Boulevard",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "destinations" : "Skyline Boulevard",
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right toward Skyline Boulevard.",
+                    "type" : "turn",
+                    "bearing_after" : 173,
+                    "bearing_before" : 126,
+                    "location" : [ -122.503745, 37.725437 ]
+                },
+                "name" : "Skyline Boulevard",
+                "duration" : 163.831,
+                "distance" : 3184.0,
+                "driving_side" : "right",
+                "weight" : 167.452,
+                "mode" : "driving",
+                "ref" : "CA 35",
+                "geometry" : "ynq}fA`c`thFlIqNxAcCjAaBzA_BfBuAjBgAnBw@vBm@bCY~BOrDa@dDs@zDwAfF_@hFi@|Eq@hFgAdHcB~FeB~FmBxFqBlF}BpFmCzFyCdGuDlFuDzEsD|EaEtl@uh@zF_FbFcEtEuD`FsDnEcDlFoDfFcD|EyCjFyCbFgCjFyBbFkBrF_BpGyApF_A|Fw@lFa@nTo@fa@w@pEKpWg@tGU`HYtGa@rGq@pGgAdG_BbH_CvFyBvFkCtF_DdFmDd_A{o@|EcDxEwCbFkCnF_CfFqBfFeBbFuAhFiArF_AdGy@jGk@lI_@tK[bQe@fKYjM]th@uAzIU~o@}ArRe@bi@kAhKSzW]nKCnK?zJHhLJdJN~JRzKXjKVlK`@rJ^hKj@nSpAn\\vBpRlAlHb@hHZdGRjGDtFBpGG`HQ|Ga@vGs@pHkAnGsAtFyAjKiDza@eO`}@q[hGoB~F}AvFoAh[wF`FiApF}A`IuCt\\kNtV}J|kAwf@`GgCrF_CbGeCjFyBtF}BrF{BvF_C~CmAxAm@tBy@|By@bC{@dJuCjGoBbGaB|F}A|FyAbFiAxDy@"
+            }, {
+                "bannerInstructions" : [ {
+                    "secondary" : {
+                        "text" : "I 280 North: Downtown SF, Bay Bridge",
+                        "components" : [ {
+                            "text" : "I 280 North: Downtown SF, Bay Bridge",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "John F Foran Freeway",
+                        "components" : [ {
+                            "text" : "John F Foran Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "I 280 North",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 2266.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "John F Foran Freeway",
+                        "components" : [ {
+                            "text" : "John F Foran Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "I 280 North",
+                            "type" : "text"
+                        } ]
+                    },
+                    "secondary" : {
+                        "text" : "I 280 North: Downtown SF, Bay Bridge",
+                        "components" : [ {
+                            "text" : "I 280 North: Downtown SF, Bay Bridge",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left", "slight left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "slight left", "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "right" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 2.5 kilometers.</speak>",
+                    "announcement" : "Continue for 2.5 kilometers.",
+                    "distanceAlongGeometry" : 2256.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, Turn left to take the Interstate 2 80 North ramp.</speak>",
+                    "announcement" : "In 300 meters, Turn left to take the Interstate 2 80 North ramp.",
+                    "distanceAlongGeometry" : 321.5
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn left to take the Interstate 2 80 North ramp toward Downtown SF, Bay Bridge.</speak>",
+                    "announcement" : "Turn left to take the Interstate 2 80 North ramp toward Downtown SF, Bay Bridge.",
+                    "distanceAlongGeometry" : 88.7
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false, true, false ],
+                    "in" : 4,
+                    "bearings" : [ 73, 168, 229, 269, 346 ],
+                    "duration" : 8.653,
+                    "turn_weight" : 5.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 7.729,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.901,
+                    "geometry_index" : 230,
+                    "location" : [ -122.495068, 37.698399 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 70, 169, 253, 345 ],
+                    "duration" : 6.498,
+                    "turn_weight" : 6.6,
+                    "turn_duration" : 2.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 10.964,
+                    "geometry_index" : 231,
+                    "location" : [ -122.494861, 37.69845 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 71, 250, 258 ],
+                    "duration" : 5.565,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.407,
+                    "geometry_index" : 232,
+                    "location" : [ -122.493878, 37.698738 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 68, 128, 239, 251 ],
+                    "duration" : 9.542,
+                    "turn_weight" : 1.8,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 11.32,
+                    "geometry_index" : 233,
+                    "location" : [ -122.49266, 37.699078 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 61, 77, 248 ],
+                    "duration" : 7.133,
+                    "turn_weight" : 1.8,
+                    "turn_duration" : 0.013,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.92,
+                    "geometry_index" : 234,
+                    "location" : [ -122.491409, 37.699474 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 70, 251 ],
+                    "duration" : 2.56,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.56,
+                    "geometry_index" : 237,
+                    "location" : [ -122.490445, 37.699713 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 70, 160, 250, 341 ],
+                    "duration" : 0.579,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.574,
+                    "geometry_index" : 238,
+                    "location" : [ -122.490105, 37.699811 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 69, 158, 250, 336 ],
+                    "duration" : 2.741,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 2.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.738,
+                    "geometry_index" : 239,
+                    "location" : [ -122.490034, 37.699832 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 69, 160, 249, 341 ],
+                    "duration" : 2.487,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.492,
+                    "geometry_index" : 240,
+                    "location" : [ -122.489939, 37.699861 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 69, 160, 249, 341 ],
+                    "duration" : 28.887,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 29.602,
+                    "geometry_index" : 241,
+                    "location" : [ -122.489877, 37.69988 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 68, 191, 251, 341 ],
+                    "duration" : 3.702,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.864,
+                    "geometry_index" : 248,
+                    "location" : [ -122.486021, 37.70099 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 70, 248 ],
+                    "duration" : 1.28,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.376,
+                    "geometry_index" : 251,
+                    "location" : [ -122.485537, 37.701145 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 70, 250 ],
+                    "duration" : 2.56,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.752,
+                    "geometry_index" : 252,
+                    "location" : [ -122.485371, 37.701193 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 71, 153, 250, 334 ],
+                    "duration" : 0.179,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.172,
+                    "geometry_index" : 254,
+                    "location" : [ -122.48503, 37.701292 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 69, 251 ],
+                    "duration" : 0.72,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.774,
+                    "geometry_index" : 255,
+                    "location" : [ -122.485012, 37.701297 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 71, 158, 249, 334 ],
+                    "duration" : 2.967,
+                    "turn_weight" : 6.4,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.432,
+                    "geometry_index" : 256,
+                    "location" : [ -122.484911, 37.701327 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 70, 155, 251, 332 ],
+                    "duration" : 3.059,
+                    "turn_weight" : 3.2,
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.318,
+                    "geometry_index" : 257,
+                    "location" : [ -122.484777, 37.701364 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 71, 151, 250, 329 ],
+                    "duration" : 1.379,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.462,
+                    "geometry_index" : 258,
+                    "location" : [ -122.484642, 37.701402 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 69, 251 ],
+                    "duration" : 7.12,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.654,
+                    "geometry_index" : 260,
+                    "location" : [ -122.484459, 37.701452 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 70, 160, 253, 339 ],
+                    "duration" : 2.662,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 0.688,
+                    "geometry_index" : 263,
+                    "location" : [ -122.483504, 37.701723 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 69, 160, 250, 341 ],
+                    "duration" : 5.781,
+                    "turn_duration" : 2.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.042,
+                    "geometry_index" : 264,
+                    "location" : [ -122.483424, 37.701746 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 70, 249 ],
+                    "duration" : 1.52,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.672,
+                    "geometry_index" : 265,
+                    "location" : [ -122.482922, 37.701896 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 69, 250 ],
+                    "duration" : 2.72,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.992,
+                    "geometry_index" : 266,
+                    "location" : [ -122.48272, 37.701955 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 70, 135, 249, 329 ],
+                    "duration" : 0.967,
+                    "lanes" : [ {
+                        "indications" : [ "uturn", "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.056,
+                    "geometry_index" : 268,
+                    "location" : [ -122.482356, 37.702063 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 69, 159, 250, 335 ],
+                    "duration" : 2.821,
+                    "turn_weight" : 3.8,
+                    "lanes" : [ {
+                        "indications" : [ "uturn", "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.68,
+                    "geometry_index" : 269,
+                    "location" : [ -122.482233, 37.702099 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 70, 160, 249, 303 ],
+                    "duration" : 2.727,
+                    "turn_weight" : 3.8,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.592,
+                    "geometry_index" : 270,
+                    "location" : [ -122.482122, 37.702132 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 70, 146, 250, 327 ],
+                    "duration" : 5.219,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.72,
+                    "geometry_index" : 271,
+                    "location" : [ -122.482023, 37.702161 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 70, 250 ],
+                    "duration" : 2.24,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.464,
+                    "geometry_index" : 274,
+                    "location" : [ -122.481326, 37.702366 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 70, 107, 250 ],
+                    "duration" : 38.259,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 42.064,
+                    "geometry_index" : 275,
+                    "location" : [ -122.481024, 37.702451 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 70, 250 ],
+                    "duration" : 2.16,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.43,
+                    "geometry_index" : 277,
+                    "location" : [ -122.475944, 37.70395 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 69, 163, 250, 344 ],
+                    "duration" : 1.281,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.417,
+                    "geometry_index" : 278,
+                    "location" : [ -122.475686, 37.704023 ]
+                }, {
+                    "entry" : [ true, false, true, false, true ],
+                    "in" : 3,
+                    "bearings" : [ 67, 120, 200, 249, 341 ],
+                    "duration" : 10.749,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 9.821,
+                    "geometry_index" : 279,
+                    "location" : [ -122.475537, 37.704069 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 77, 256 ],
+                    "duration" : 5.13,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 5.899,
+                    "geometry_index" : 286,
+                    "location" : [ -122.474493, 37.704339 ]
+                }, {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 3,
+                    "bearings" : [ 37, 78, 162, 258 ],
+                    "duration" : 5.439,
+                    "turn_weight" : 15.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 18.933,
+                    "geometry_index" : 289,
+                    "location" : [ -122.473861, 37.704452 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 73, 220, 257 ],
+                    "duration" : 5.896,
+                    "turn_weight" : 3.75,
+                    "turn_duration" : 2.026,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 8.201,
+                    "geometry_index" : 291,
+                    "location" : [ -122.473445, 37.704524 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 73, 253 ],
+                    "duration" : 2.7,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.105,
+                    "geometry_index" : 292,
+                    "location" : [ -122.472976, 37.704634 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 73, 253 ],
+                    "duration" : 2.97,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 3.416,
+                    "geometry_index" : 293,
+                    "location" : [ -122.472648, 37.704711 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "slight left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 74, 253 ],
+                    "duration" : 10.89,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 12.523,
+                    "geometry_index" : 295,
+                    "location" : [ -122.472289, 37.704797 ]
+                }, {
+                    "bearings" : [ 0, 84, 182, 265 ],
+                    "entry" : [ false, true, true, false ],
+                    "in" : 3,
+                    "turn_weight" : 15.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "slight left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 312,
+                    "location" : [ -122.470939, 37.704978 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto John Daly Boulevard.",
+                    "type" : "turn",
+                    "bearing_after" : 70,
+                    "bearing_before" : 166,
+                    "location" : [ -122.495068, 37.698399 ]
+                },
+                "name" : "John Daly Boulevard",
+                "duration" : 213.113,
+                "distance" : 2266.0,
+                "driving_side" : "right",
+                "weight" : 258.55,
+                "mode" : "driving",
+                "geometry" : "}t|{fAvdoshFeB}K_Qm|@gTckAwWemAqAeMmAiI}Hwb@cEgTi@mCy@}De@{BuG}[cFqVyc@k}BuBeLwE_YwB}LqA_Hk@yCaE_QgAmF_BkI{DeSIc@Ic@{@iEiAkGkAmGIe@yAgIeDoPqHq_@eAsHm@_DkHk^uBsKaA}EuCyNgAuFaA}Ey@eEoG{[oAoGy@eEiD{Q_yA_pHuBoKqCcO{AiHeCiKsAyHoAuHqA_IgAmHm@uEi@iFs@qGsAuMyAgOmBkSa@sD{Ei\\yCoSaBwKiAuHgAyH_@sC]wC[_DW{CWkCUwCUgDSiDO}CMiCK_DIiCGyBGiCMkEEqA[qI"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 7 kilometers.</speak>",
+                    "announcement" : "Continue for 7 kilometers.",
+                    "distanceAlongGeometry" : 6724.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 900 meters, Keep left to take exit 54B.</speak>",
+                    "announcement" : "In 900 meters, Keep left to take exit 54B.",
+                    "distanceAlongGeometry" : 932.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>Keep left to take exit 54B onto U.S. 1 o1 North toward Civic Center, Bay Bridge.</speak>",
+                    "announcement" : "Keep left to take exit 54B onto U.S. 1 o1 North toward Civic Center, Bay Bridge.",
+                    "distanceAlongGeometry" : 265.5
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 87, 179, 264, 360 ],
+                    "duration" : 8.381,
+                    "turn_weight" : 17.5,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left", "slight left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 6.761,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 19.363,
+                    "geometry_index" : 313,
+                    "location" : [ -122.47077, 37.704992 ]
+                }, {
+                    "entry" : [ true, false, false, true, true ],
+                    "in" : 2,
+                    "bearings" : [ 25, 89, 180, 267, 355 ],
+                    "duration" : 12.932,
+                    "turn_weight" : 26.25,
+                    "turn_duration" : 2.037,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 38.779,
+                    "geometry_index" : 314,
+                    "location" : [ -122.470771, 37.705154 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 21, 200 ],
+                    "duration" : 31.091,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 35.755,
+                    "geometry_index" : 322,
+                    "location" : [ -122.47027, 37.706108 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 38, 217 ],
+                    "duration" : 18.873,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 21.704,
+                    "geometry_index" : 343,
+                    "location" : [ -122.468492, 37.708236 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 54, 223, 234 ],
+                    "duration" : 20.527,
+                    "turn_weight" : 42.8,
+                    "turn_duration" : 0.014,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 66.389,
+                    "geometry_index" : 355,
+                    "location" : [ -122.467206, 37.709406 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 89, 269 ],
+                    "duration" : 4.237,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.873,
+                    "geometry_index" : 381,
+                    "location" : [ -122.461271, 37.710403 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 89, 269 ],
+                    "duration" : 9.975,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 11.471,
+                    "geometry_index" : 382,
+                    "location" : [ -122.459988, 37.710412 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 77, 260 ],
+                    "duration" : 6.188,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.116,
+                    "geometry_index" : 391,
+                    "location" : [ -122.456974, 37.710529 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 60, 243 ],
+                    "duration" : 9.525,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 11.192,
+                    "geometry_index" : 403,
+                    "location" : [ -122.455223, 37.711037 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 43, 218, 223 ],
+                    "duration" : 4.395,
+                    "turn_weight" : 1.4,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.555,
+                    "geometry_index" : 417,
+                    "location" : [ -122.453042, 37.71251 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 43, 223 ],
+                    "duration" : 27.263,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 32.033,
+                    "geometry_index" : 418,
+                    "location" : [ -122.452137, 37.71328 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 5, 13, 185 ],
+                    "duration" : 31.245,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 37.485,
+                    "geometry_index" : 451,
+                    "location" : [ -122.448306, 37.718824 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 33, 203, 211 ],
+                    "duration" : 22.807,
+                    "turn_weight" : 1.55,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 28.91,
+                    "geometry_index" : 489,
+                    "location" : [ -122.446048, 37.725992 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 63, 242 ],
+                    "duration" : 5.963,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.155,
+                    "geometry_index" : 528,
+                    "location" : [ -122.440834, 37.72945 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 66, 86, 246 ],
+                    "duration" : 24.907,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 29.88,
+                    "geometry_index" : 540,
+                    "location" : [ -122.439204, 37.730067 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 79, 239, 257 ],
+                    "duration" : 2.032,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.43,
+                    "geometry_index" : 573,
+                    "location" : [ -122.432102, 37.732057 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 84, 262 ],
+                    "duration" : 1.8,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.16,
+                    "geometry_index" : 577,
+                    "location" : [ -122.431492, 37.732138 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 89, 267 ],
+                    "duration" : 22.875,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 27.45,
+                    "geometry_index" : 581,
+                    "location" : [ -122.430944, 37.732172 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 88, 269 ],
+                    "duration" : 1.5,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.8,
+                    "geometry_index" : 614,
+                    "location" : [ -122.424124, 37.731353 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 86, 99, 266 ],
+                    "duration" : 28.319,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 33.975,
+                    "geometry_index" : 617,
+                    "location" : [ -122.423671, 37.731371 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 73, 251, 256 ],
+                    "duration" : 2.085,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.277,
+                    "geometry_index" : 661,
+                    "location" : [ -122.415164, 37.732041 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 68, 251 ],
+                    "duration" : 1.35,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.654,
+                    "geometry_index" : 663,
+                    "location" : [ -122.41457, 37.732195 ]
+                }, {
+                    "bearings" : [ 65, 82, 246 ],
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 666,
+                    "location" : [ -122.414189, 37.732323 ]
+                } ],
+                "bannerInstructions" : [ {
+                    "secondary" : {
+                        "text" : "US 101 North: Civic Center, Bay Bridge",
+                        "components" : [ {
+                            "text" : "US 101 North: Civic Center, Bay Bridge",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "fork",
+                        "modifier" : "slight left",
+                        "text" : "James Lick Freeway",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "54B",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "James Lick Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "US 101 North",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 6734.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "fork",
+                        "modifier" : "slight left",
+                        "text" : "James Lick Freeway",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "54B",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "James Lick Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "US 101 North",
+                            "type" : "text"
+                        } ]
+                    },
+                    "secondary" : {
+                        "text" : "US 101 North: Civic Center, Bay Bridge",
+                        "components" : [ {
+                            "text" : "US 101 North: Civic Center, Bay Bridge",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "slight left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "slight left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "destinations" : "I 280 North: Downtown SF, Bay Bridge",
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left to take the I 280 North ramp toward Downtown SF/Bay Bridge.",
+                    "type" : "turn",
+                    "bearing_after" : 25,
+                    "bearing_before" : 84,
+                    "location" : [ -122.47077, 37.704992 ]
+                },
+                "name" : "John F Foran Freeway",
+                "duration" : 301.739,
+                "distance" : 6734.0,
+                "driving_side" : "right",
+                "weight" : 436.632,
+                "mode" : "driving",
+                "ref" : "I 280 North",
+                "geometry" : "_qi|fAbv_rhFcI@qGeDaBw@qBy@uCmAgQuHeCgA_E_BiJeDiDmA_Bo@yAm@{Aq@eCmAeCsAkC{AgCaBaCaBcCiBiCsBgCsBoC{BmFmEoGmFkGmFyGcGyGkGoHiHqQeQwIkIwHqHiHcHsCuC}BaCuBwBaBgBeBmB}BqCoCiDsCyDwD{EwO}R{CiGsCkGqCsGgCuGcC{G_CgHwBcHkBaHkBoHaBoH}AsHwAwHmAwHkA}H_A{Hy@cIu@gIi@yHe@mI]aIWqIQcIGkIAaICeIc@uaCQeoA[coBEeIKmIQuHYuIa@eIg@eIk@wHYcDs@{Hw@mGcAsHgAqHqAcIsAiH}AyHgB}HaByG}BgIqB{GaAyC}@kCcCcHeCuGqCwGsCmGsCaGaDkGcD_GmD_GkDqFuDmFoDaF_EgFy\\eb@co@qw@s\\_b@a]ib@yn@iw@}DyEcEwEkEuEmEiEgE}DwEaEaF{D}EoD_FgDyEyCmF}CiFqCoFkCoFaCmFuB{FsBuFiB{FcByFyAaGqA}FiAqF}@gGy@_Go@eGg@cG_@cG_@}F]yGc@{V{AmbDwR_G_@iG_@aGe@eGi@yFm@cGo@oGy@wFy@eGaAwF_AqGkAoFgAsFoAmGwA{FyA}F_BoF{AgGkBqFeBwFoBmFqByFwByF{BaFwB{FiCiFcCkFgCiFmCsFyCiFwCeFyCgF_DeF_DcFaD}EcDaFkDeFsD_FuDmEkD{E{DsE{DyEgEqEcEmEkEmEmEkEoEaEmEgEwEeE}E_E}E_EcFeEmFmD{EyDwFoDsFkDsFkD}FcD}FcDgGwC_G_DsGmCeGsCyGqC}GcCoGgC{GgC{GcCcH}ByGaC_HcCgH}B_H_CgHuBsG}BgHiMsa@{AiFuBeHwBsHqBeHmB}GqBgHsBuHiBaHqBoHoBoH_AwDu@{C{AyFkBuHgBiHgBqHeBmHcBiHcB{H}AeHaBuH}AmH_BsH_B{HyAaH_B{H{AuH{AoHyAyHwAqHwA{HsAkHwAyHsAsHqA}HiBiK_BcJsA_I_c@mhCqA}HoAcIgAwHcAeIw@yHUgCq@sHo@wIg@aIWuFGwA[}IQeIMkIEoIAeIDiILgIRsIVeI\\gIf@eIj@eIr@_Iv@aI~@gI~@wHjS{bB`AcI~@cIt@qHt@_Ir@oIl@mIh@}Hf@cI`@iI\\cIXeIXgJNmHN{HHuIDkI@_I?aICoIGmIMeIMuFMgEIqEWgI]cI_@cIc@cIg@iIm@cIo@iIo@}Hs@gIo@eIs@aIiEig@o@cIm@}Hi@gIg@oIa@oI[cIS_ISiIKeIGgICkI?kIDeIB{IBaIFu]Ryr@B}J@eHGsIKwHQgIYyH]}Hg@gIk@uHm@sHy@}H{@yH}@kHgAsHkFoZiBmI_BuGu@uCo@gCmBaHuB_HuB_H{B_H}BwGyB}G"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 4 kilometers.</speak>",
+                    "announcement" : "Continue for 4 kilometers.",
+                    "distanceAlongGeometry" : 4087.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 900 meters, Keep right to take exit 4 33B.</speak>",
+                    "announcement" : "In 900 meters, Keep right to take exit 4 33B.",
+                    "distanceAlongGeometry" : 932.8
+                }, {
+                    "ssmlAnnouncement" : "<speak>Keep right to take exit 4 33B onto Interstate 80 East, James Lick Freeway toward Bay Bridge, Oakland.</speak>",
+                    "announcement" : "Keep right to take exit 4 33B onto Interstate 80 East, James Lick Freeway toward Bay Bridge, Oakland.",
+                    "distanceAlongGeometry" : 266.5
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 59, 63, 241 ],
+                    "duration" : 10.221,
+                    "lanes" : [ {
+                        "indications" : [ "slight left" ],
+                        "valid_indication" : "slight left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight left" ],
+                        "valid_indication" : "slight left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 12.495,
+                    "geometry_index" : 673,
+                    "location" : [ -122.413261, 37.732706 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 62, 241 ],
+                    "duration" : 29.446,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 36.072,
+                    "geometry_index" : 681,
+                    "location" : [ -122.411253, 37.733613 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 69, 169, 253, 349 ],
+                    "duration" : 3.745,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 4.58,
+                    "geometry_index" : 710,
+                    "location" : [ -122.407588, 37.737927 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "bearings" : [ 169, 351 ],
+                    "duration" : 4.246,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.202,
+                    "geometry_index" : 711,
+                    "location" : [ -122.407768, 37.73864 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 3, 178 ],
+                    "duration" : 1.846,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.262,
+                    "geometry_index" : 717,
+                    "location" : [ -122.407874, 37.739458 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 6, 184 ],
+                    "duration" : 5.677,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.954,
+                    "geometry_index" : 720,
+                    "location" : [ -122.407847, 37.739817 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 16, 186, 196 ],
+                    "duration" : 18.65,
+                    "turn_weight" : 33.0,
+                    "turn_duration" : 0.013,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 55.831,
+                    "geometry_index" : 724,
+                    "location" : [ -122.407699, 37.740917 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 19, 28, 200 ],
+                    "duration" : 13.933,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 17.043,
+                    "geometry_index" : 754,
+                    "location" : [ -122.405094, 37.744858 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 14, 194 ],
+                    "duration" : 7.425,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 9.096,
+                    "geometry_index" : 764,
+                    "location" : [ -122.404044, 37.748088 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 14, 194 ],
+                    "duration" : 15.0,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 18.375,
+                    "geometry_index" : 765,
+                    "location" : [ -122.403496, 37.749811 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 169, 176, 356 ],
+                    "duration" : 3.869,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.482,
+                    "geometry_index" : 784,
+                    "location" : [ -122.402861, 37.753345 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "bearings" : [ 176, 356 ],
+                    "duration" : 37.162,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 45.524,
+                    "geometry_index" : 785,
+                    "location" : [ -122.402949, 37.754267 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 25, 51, 207 ],
+                    "duration" : 5.646,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 6.891,
+                    "geometry_index" : 839,
+                    "location" : [ -122.405602, 37.762238 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 10, 193 ],
+                    "duration" : 3.75,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.594,
+                    "geometry_index" : 849,
+                    "location" : [ -122.405024, 37.763501 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "slight left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "bearings" : [ 4, 185 ],
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 856,
+                    "location" : [ -122.404889, 37.764392 ]
+                } ],
+                "exits" : "54B",
+                "bannerInstructions" : [ {
+                    "secondary" : {
+                        "text" : "I 80 East: Bay Bridge, Oakland",
+                        "components" : [ {
+                            "text" : "I 80 East: Bay Bridge, Oakland",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "fork",
+                        "modifier" : "slight right",
+                        "text" : "James Lick Freeway",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "433B",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "James Lick Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "I 80 East",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 4097.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "fork",
+                        "modifier" : "slight right",
+                        "text" : "James Lick Freeway",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "433B",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "James Lick Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "I 80 East",
+                            "type" : "text"
+                        } ]
+                    },
+                    "secondary" : {
+                        "text" : "I 80 East: Bay Bridge, Oakland",
+                        "components" : [ {
+                            "text" : "I 80 East: Bay Bridge, Oakland",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "slight left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "straight",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight left", "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "straight",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "straight",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "destinations" : "US 101 North: Civic Center, Bay Bridge",
+                "maneuver" : {
+                    "modifier" : "slight left",
+                    "instruction" : "Keep left to take exit 54B onto US 101 North toward Civic Center/Bay Bridge.",
+                    "type" : "fork",
+                    "bearing_after" : 59,
+                    "bearing_before" : 61,
+                    "location" : [ -122.413261, 37.732706 ]
+                },
+                "name" : "James Lick Freeway",
+                "duration" : 164.705,
+                "distance" : 4097.0,
+                "driving_side" : "right",
+                "weight" : 236.405,
+                "mode" : "driving",
+                "ref" : "US 101 North",
+                "geometry" : "cu_~fAxkonhF{^icA}ByGyByGsBmGsBqG}BeHoB_GkAkDqg@__B_ImUkEiKyEmJ{DgGgEyFsEwFeEcFyEcFuFgF}EcEyFoEgFmDoFgDoFwCcFkCiGeCcKuCcHoAqG_AgH{@qF]wFOmGIqGFqFPwG^oGr@yPlCqk@fJeGt@_Hv@gGj@oG^uGRoGDqFKoGUkESc@CqGa@mGa@sq@_F{FyAsF_B_GgBmFiBwFuBsF}BkFaCiFgCoFyC}EsCqFkDyEcDaFwDwEqDuEoDeF_Eq`@i[aF{DsEsD{EsDaFuDgFmDiFiD}EyCoFwCsFsCqFeCoF}B{FyBaGwBsFkB{FcBaG}AiGsA{FmAyFkA_GmAaGoAa_AcSeiAuVujBga@e`A}SuFmAoGsA_GkA_GeA_G_AcGw@iGs@cGm@}Fc@kGa@mGY{FQyGM{FGqGAcGDeGNwOh@sx@nDuxApG_G\\kGd@_Gl@yG|@wF`AaGrAyF~AsFjBsF|BmFjCqF~CeFfDyErDyEdEoEnEyEpF{D|EyDfFuDlFsDvFmDrFoDxFkDpFuD|FqDjF{DnF_EdF}DtEcEhEsEdE}EzD}EhDgFxCaFfC{FbCqFlBwF~A}FnAyF~@_Gp@cG`@iGNeG@wFMkG[_Gm@{F}@iGqAuF{AuFkBqFyBsFaCqb@mUuGeDoFqCoFgCsFcCuFwBiGuBgF}AgG}A_GoAcGeAaG{@qAOwD_@eGi@gGc@sG]gMu@gG_@_Yc@kL@kLK"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 1.5 kilometers.</speak>",
+                    "announcement" : "Continue for 1.5 kilometers.",
+                    "distanceAlongGeometry" : 1589.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 900 meters, Take exit 2.</speak>",
+                    "announcement" : "In 900 meters, Take exit 2.",
+                    "distanceAlongGeometry" : 932.4
+                }, {
+                    "ssmlAnnouncement" : "<speak>Take exit 2 toward Fourth Street.</speak>",
+                    "announcement" : "Take exit 2 toward Fourth Street.",
+                    "distanceAlongGeometry" : 266.5
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "bearings" : [ 181, 336, 359 ],
+                    "duration" : 12.847,
+                    "lanes" : [ {
+                        "indications" : [ "slight left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 15.711,
+                    "geometry_index" : 860,
+                    "location" : [ -122.40485, 37.765368 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "bearings" : [ 176, 356 ],
+                    "duration" : 10.8,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 13.23,
+                    "geometry_index" : 871,
+                    "location" : [ -122.405099, 37.768434 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "bearings" : [ 154, 172, 329 ],
+                    "duration" : 3.549,
+                    "turn_weight" : 5.25,
+                    "turn_duration" : 0.024,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.568,
+                    "geometry_index" : 879,
+                    "location" : [ -122.405725, 37.77095 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "bearings" : [ 154, 340 ],
+                    "duration" : 6.0,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.35,
+                    "geometry_index" : 881,
+                    "location" : [ -122.406259, 37.771684 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 2,
+                    "bearings" : [ 4, 25, 179 ],
+                    "duration" : 15.947,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 19.523,
+                    "geometry_index" : 888,
+                    "location" : [ -122.406576, 37.773092 ]
+                }, {
+                    "entry" : [ true, false, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "bearings" : [ 50, 225, 229 ],
+                    "duration" : 2.26,
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.756,
+                    "geometry_index" : 905,
+                    "location" : [ -122.404336, 37.776381 ]
+                }, {
+                    "bearings" : [ 57, 235 ],
+                    "entry" : [ true, false ],
+                    "classes" : [ "motorway" ],
+                    "in" : 1,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 908,
+                    "location" : [ -122.403797, 37.776706 ]
+                } ],
+                "exits" : "433B",
+                "bannerInstructions" : [ {
+                    "secondary" : {
+                        "text" : "Fourth Street",
+                        "components" : [ {
+                            "text" : "Fourth Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "off ramp",
+                        "modifier" : "slight right",
+                        "text" : "Bryant Street",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "2",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "Bryant Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 1599.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "off ramp",
+                        "modifier" : "slight right",
+                        "text" : "Bryant Street",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "2",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "Bryant Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "secondary" : {
+                        "text" : "Fourth Street",
+                        "components" : [ {
+                            "text" : "Fourth Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "slight right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight right" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "slight right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight right" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "destinations" : "I 80 East: Bay Bridge, Oakland",
+                "maneuver" : {
+                    "modifier" : "slight right",
+                    "instruction" : "Keep right to take exit 433B onto I 80 East/James Lick Freeway toward Bay Bridge/Oakland.",
+                    "type" : "fork",
+                    "bearing_after" : 359,
+                    "bearing_before" : 1,
+                    "location" : [ -122.40485, 37.765368 ]
+                },
+                "name" : "James Lick Freeway",
+                "duration" : 60.029,
+                "distance" : 1599.0,
+                "driving_side" : "right",
+                "weight" : 78.704,
+                "mode" : "driving",
+                "ref" : "I 80 East",
+                "geometry" : "on_`gAb~~mhFeSNuFJuIJsDHiIZuQv@sHZwH\\uH^uH\\unArFsiA`FgJl@kM|AwLnCiJrC_IbDqJ~EkIlEmc@xZmHpDkHnC_HzBaHnBaI`BeL~AgRn@aQJcK[qIcAuKcBsJcCoJ{CaLkEaKoEeKeFeKeGuKmH_MaJcMkKyLsLcK}K}HaJyIgLaI{KgH{LkF}KuB{EyeAogC"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 600 meters.</speak>",
+                    "announcement" : "Continue for 600 meters.",
+                    "distanceAlongGeometry" : 638.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, Turn left onto 3rd Street.</speak>",
+                    "announcement" : "In 300 meters, Turn left onto 3rd Street.",
+                    "distanceAlongGeometry" : 318.4
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn left onto 3rd Street.</speak>",
+                    "announcement" : "Turn left onto 3rd Street.",
+                    "distanceAlongGeometry" : 108.1
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 56, 62, 237 ],
+                    "duration" : 23.01,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid_indication" : "slight right",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid_indication" : "slight right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 27.6,
+                    "geometry_index" : 909,
+                    "location" : [ -122.401613, 37.777839 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 49, 229 ],
+                    "duration" : 7.067,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 8.48,
+                    "geometry_index" : 914,
+                    "location" : [ -122.399541, 37.779082 ]
+                }, {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 58, 236 ],
+                    "duration" : 1.2,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 1.44,
+                    "geometry_index" : 917,
+                    "location" : [ -122.399063, 37.779372 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 68, 238 ],
+                    "duration" : 3.6,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.32,
+                    "geometry_index" : 918,
+                    "location" : [ -122.398978, 37.779414 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 79, 250 ],
+                    "duration" : 3.6,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.23,
+                    "geometry_index" : 920,
+                    "location" : [ -122.398697, 37.779499 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 84, 173, 260, 353 ],
+                    "duration" : 2.409,
+                    "turn_weight" : 5.6,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.009,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 8.42,
+                    "geometry_index" : 922,
+                    "location" : [ -122.398396, 37.779543 ]
+                }, {
+                    "entry" : [ true, true, false, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 66, 138, 200, 264, 318 ],
+                    "duration" : 3.554,
+                    "turn_weight" : 44.2,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.077,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 45.935,
+                    "geometry_index" : 924,
+                    "location" : [ -122.398188, 37.77956 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 49, 137, 246, 314 ],
+                    "duration" : 2.343,
+                    "turn_weight" : 16.8,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.066,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 17.125,
+                    "geometry_index" : 927,
+                    "location" : [ -122.398024, 37.779618 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 137, 229, 315 ],
+                    "duration" : 2.978,
+                    "turn_weight" : 5.6,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.024,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 9.071,
+                    "geometry_index" : 928,
+                    "location" : [ -122.397995, 37.779638 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 45, 225, 308 ],
+                    "duration" : 7.576,
+                    "turn_weight" : 1.4,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 10.294,
+                    "geometry_index" : 929,
+                    "location" : [ -122.397735, 37.779845 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 45, 225 ],
+                    "duration" : 2.4,
+                    "turn_weight" : 1.4,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 4.16,
+                    "geometry_index" : 930,
+                    "location" : [ -122.397073, 37.780367 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 135, 225 ],
+                    "duration" : 5.453,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.513,
+                    "geometry_index" : 931,
+                    "location" : [ -122.396864, 37.780531 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 137, 225 ],
+                    "duration" : 5.084,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 7.089,
+                    "geometry_index" : 932,
+                    "location" : [ -122.396391, 37.780906 ]
+                }, {
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "turn_weight" : 5.0,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 933,
+                    "location" : [ -122.395945, 37.781257 ]
+                } ],
+                "exits" : "2",
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "3rd Street",
+                        "components" : [ {
+                            "text" : "3rd Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 648.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "3rd Street",
+                        "components" : [ {
+                            "text" : "3rd Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "destinations" : "Fourth Street",
+                "maneuver" : {
+                    "modifier" : "slight right",
+                    "instruction" : "Take exit 2 toward Fourth Street.",
+                    "type" : "off ramp",
+                    "bearing_after" : 62,
+                    "bearing_before" : 57,
+                    "location" : [ -122.401613, 37.777839 ]
+                },
+                "name" : "Bryant Street",
+                "duration" : 71.295,
+                "distance" : 648.0,
+                "driving_side" : "right",
+                "weight" : 161.845,
+                "mode" : "driving",
+                "geometry" : "}yw`gAxsxmhFsJ{ZaEmK{E{JaJ{Oai@m{@oGmK}EaKuAkDsAiDcBoGeAaHy@kH]mHSeGMyC]_Cc@qAq@uBg@y@}KgOs_@kh@gIaLmVq\\}T{ZiCkD"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "arrive",
+                        "text" : "You have arrived at your destination.",
+                        "components" : [ {
+                            "text" : "You have arrived at your destination.",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 667.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 700 meters.</speak>",
+                    "announcement" : "Continue for 700 meters.",
+                    "distanceAlongGeometry" : 657.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 300 meters, You will arrive at your destination.</speak>",
+                    "announcement" : "In 300 meters, You will arrive at your destination.",
+                    "distanceAlongGeometry" : 313.2
+                }, {
+                    "ssmlAnnouncement" : "<speak>You have arrived at your destination.</speak>",
+                    "announcement" : "You have arrived at your destination.",
+                    "distanceAlongGeometry" : 89.2
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 2,
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "duration" : 13.672,
+                    "turn_weight" : 23.75,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 7.395,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 30.969,
+                    "geometry_index" : 934,
+                    "location" : [ -122.395859, 37.781326 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "duration" : 4.161,
+                    "turn_weight" : 5.0,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 9.777,
+                    "geometry_index" : 937,
+                    "location" : [ -122.396403, 37.78176 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 46, 135, 315 ],
+                    "duration" : 0.469,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.781,
+                    "geometry_index" : 938,
+                    "location" : [ -122.396762, 37.782047 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 46, 135, 315 ],
+                    "duration" : 0.376,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 1.675,
+                    "geometry_index" : 939,
+                    "location" : [ -122.396799, 37.782076 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 45, 135, 225, 316 ],
+                    "duration" : 0.469,
+                    "turn_weight" : 5.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 5.531,
+                    "geometry_index" : 940,
+                    "location" : [ -122.396832, 37.782102 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 46, 136, 224, 315 ],
+                    "duration" : 2.574,
+                    "turn_weight" : 5.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.021,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 5.637,
+                    "geometry_index" : 941,
+                    "location" : [ -122.396872, 37.782135 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 135, 315 ],
+                    "duration" : 2.031,
+                    "turn_weight" : 1.25,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.585,
+                    "geometry_index" : 942,
+                    "location" : [ -122.396919, 37.782172 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 135, 224, 317 ],
+                    "duration" : 1.3,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.736,
+                    "geometry_index" : 943,
+                    "location" : [ -122.397092, 37.782311 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 137, 227, 314 ],
+                    "duration" : 1.315,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.022,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.736,
+                    "geometry_index" : 944,
+                    "location" : [ -122.397204, 37.782405 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 46, 134, 227, 315 ],
+                    "duration" : 0.93,
+                    "turn_weight" : 5.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 6.062,
+                    "geometry_index" : 945,
+                    "location" : [ -122.397319, 37.782493 ]
+                }, {
+                    "entry" : [ true, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "duration" : 3.207,
+                    "turn_weight" : 15.0,
+                    "lanes" : [ {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 16.38,
+                    "geometry_index" : 946,
+                    "location" : [ -122.3974, 37.782556 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 46, 135, 225, 316 ],
+                    "duration" : 0.838,
+                    "turn_weight" : 5.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 5.955,
+                    "geometry_index" : 947,
+                    "location" : [ -122.397507, 37.78264 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 44, 136, 315 ],
+                    "duration" : 3.251,
+                    "turn_weight" : 1.25,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.965,
+                    "geometry_index" : 948,
+                    "location" : [ -122.397581, 37.7827 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 49, 135, 316 ],
+                    "duration" : 1.299,
+                    "turn_weight" : 1.4,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.918,
+                    "geometry_index" : 949,
+                    "location" : [ -122.397863, 37.782925 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 45, 136, 315 ],
+                    "duration" : 2.236,
+                    "turn_weight" : 1.4,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.003,
+                    "geometry_index" : 950,
+                    "location" : [ -122.397973, 37.783014 ]
+                }, {
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 135, 315 ],
+                    "duration" : 3.877,
+                    "turn_weight" : 1.4,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 5.955,
+                    "geometry_index" : 951,
+                    "location" : [ -122.39817, 37.78317 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 135, 225, 315 ],
+                    "duration" : 4.068,
+                    "turn_weight" : 1.4,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 6.172,
+                    "geometry_index" : 952,
+                    "location" : [ -122.398505, 37.783437 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 44, 135, 224, 317 ],
+                    "duration" : 1.208,
+                    "turn_weight" : 5.6,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 7.01,
+                    "geometry_index" : 953,
+                    "location" : [ -122.398861, 37.783719 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 49, 137, 229, 314 ],
+                    "duration" : 2.392,
+                    "turn_weight" : 16.8,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.022,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 17.234,
+                    "geometry_index" : 954,
+                    "location" : [ -122.398961, 37.783804 ]
+                }, {
+                    "entry" : [ true, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 38, 134, 213, 315 ],
+                    "duration" : 5.238,
+                    "turn_weight" : 16.8,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 20.596,
+                    "geometry_index" : 955,
+                    "location" : [ -122.398994, 37.783829 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 135, 222, 315 ],
+                    "duration" : 2.407,
+                    "turn_weight" : 1.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.22,
+                    "geometry_index" : 957,
+                    "location" : [ -122.399277, 37.784055 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 44, 135, 315 ],
+                    "duration" : 1.853,
+                    "turn_weight" : 1.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.569,
+                    "geometry_index" : 959,
+                    "location" : [ -122.399483, 37.784219 ]
+                }, {
+                    "entry" : [ true, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 44, 135, 315 ],
+                    "duration" : 2.407,
+                    "turn_weight" : 1.4,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.22,
+                    "geometry_index" : 960,
+                    "location" : [ -122.399646, 37.78435 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 135, 314 ],
+                    "duration" : 0.092,
+                    "turn_weight" : 1.4,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 1.508,
+                    "geometry_index" : 962,
+                    "location" : [ -122.399852, 37.784514 ]
+                }, {
+                    "entry" : [ false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 46, 134, 315 ],
+                    "duration" : 6.007,
+                    "turn_weight" : 1.4,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 8.45,
+                    "geometry_index" : 963,
+                    "location" : [ -122.399864, 37.784523 ]
+                }, {
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "bearings" : [ 42, 135, 225, 315 ],
+                    "duration" : 1.115,
+                    "turn_weight" : 6.2,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 7.529,
+                    "geometry_index" : 964,
+                    "location" : [ -122.400382, 37.784938 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 1,
+                    "bearings" : [ 45, 135, 229, 315 ],
+                    "duration" : 3.299,
+                    "turn_weight" : 18.6,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left", "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 20.151,
+                    "geometry_index" : 965,
+                    "location" : [ -122.400478, 37.785015 ]
+                }, {
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "entry" : [ false, false, false, true ],
+                    "in" : 1,
+                    "turn_weight" : 6.2,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "geometry_index" : 966,
+                    "location" : [ -122.400594, 37.785107 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto 3rd Street.",
+                    "type" : "turn",
+                    "bearing_after" : 315,
+                    "bearing_before" : 45,
+                    "location" : [ -122.395859, 37.781326 ]
+                },
+                "name" : "3rd Street",
+                "duration" : 79.205,
+                "distance" : 667.0,
+                "driving_side" : "right",
+                "weight" : 226.055,
+                "mode" : "driving",
+                "geometry" : "{s~`gAdlmmhFyC`EeN|QcF~G}PlUy@hAs@`AaAnAiA|AuGxI{D~EoDdF}B`DgDtEwBrCaMrPqDzEwHhKuO|SsPfUiDfEq@`AcAtA_K~M}CfEiDrEeGdIaDjEeDnEQV}Xj_@yC~DwDfFm]le@"
+            }, {
+                "intersections" : [ {
+                    "bearings" : [ 135 ],
+                    "entry" : [ true ],
+                    "in" : 0,
+                    "admin_index" : 0,
+                    "geometry_index" : 967,
+                    "location" : [ -122.401209, 37.785594 ]
+                } ],
+                "voiceInstructions" : [ ],
+                "bannerInstructions" : [ ],
+                "maneuver" : {
+                    "instruction" : "You have arrived at your destination.",
+                    "type" : "arrive",
+                    "bearing_after" : 0,
+                    "bearing_before" : 315,
+                    "location" : [ -122.401209, 37.785594 ]
+                },
+                "name" : "3rd Street",
+                "duration" : 0.0,
+                "distance" : 0.0,
+                "driving_side" : "right",
+                "weight" : 0.0,
+                "mode" : "driving",
+                "geometry" : "s~fagApzwmhF??"
+            } ],
+            "distance" : 20753.215,
+            "summary" : "I 280 North, US 101 North"
+        } ],
+        "geometry" : "}}f~fAlcathFdGQn@AvDMdDKd@AlNa@`IWp@AlDK?vW@rc@?vD?bE?jK?tH?xAa@rF@xN?bYEtGGxFdLAfC?|EDxEBfFZhFn@rD\\tEj@dCb@`[pEr^pD~Fr@pFb@hFd@tEd@fFZfFR`GFzFEbGQxFYzFe@|Fw@xF_A~ZoFrLmBhJyAjIkAfFk@~Ec@|Gi@`Fi@vEm@lF{@dF_AtFmAnFkA`F}@pFw@zEg@hFa@rQoAfs@aFpL_AjGo@zF_AbGmAdFqA~FkBlG_ChEiBlAk@xFuC|FkDlFqDhF}DtE_ErEmEhEsEfEqFjE{GvD}GfGkL|CsGdPc]tLwVlIqNxAcCjAaBzA_BfBuAjBgAnBw@vBm@bCY~BOrDa@dDs@zDwAfF_@hFi@|Eq@hFgAdHcB~FeB~FmBxFqBlF}BpFmCzFyCdGuDlFuDzEsD|EaEtl@uh@zF_FbFcEtEuD`FsDnEcDlFoDfFcD|EyCjFyCbFgCjFyBbFkBrF_BpGyApF_A|Fw@lFa@nTo@fa@w@pEKpWg@tGU`HYtGa@rGq@pGgAdG_BbH_CvFyBvFkCtF_DdFmDd_A{o@|EcDxEwCbFkCnF_CfFqBfFeBbFuAhFiArF_AdGy@jGk@lI_@tK[bQe@fKYjM]th@uAzIU~o@}ArRe@bi@kAhKSzW]nKCnK?zJHhLJdJN~JRzKXjKVlK`@rJ^hKj@nSpAn\\vBpRlAlHb@hHZdGRjGDtFBpGG`HQ|Ga@vGs@pHkAnGsAtFyAjKiDza@eO`}@q[hGoB~F}AvFoAh[wF`FiApF}A`IuCt\\kNtV}J|kAwf@`GgCrF_CbGeCjFyBtF}BrF{BvF_C~CmAxAm@tBy@|By@bC{@dJuCjGoBbGaB|F}A|FyAbFiAxDy@eB}K_Qm|@gTckAwWemAqAeMmAiI}Hwb@cEgTi@mCy@}De@{BuG}[cFqVyc@k}BuBeLwE_YwB}LqA_Hk@yCaE_QgAmF_BkI{DeSIc@Ic@{@iEiAkGkAmGIe@yAgIeDoPqHq_@eAsHm@_DkHk^uBsKaA}EuCyNgAuFaA}Ey@eEoG{[oAoGy@eEiD{Q_yA_pHuBoKqCcO{AiHeCiKsAyHoAuHqA_IgAmHm@uEi@iFs@qGsAuMyAgOmBkSa@sD{Ei\\yCoSaBwKiAuHgAyH_@sC]wC[_DW{CWkCUwCUgDSiDO}CMiCK_DIiCGyBGiCMkEEqA[qIcI@qGeDaBw@qBy@uCmAgQuHeCgA_E_BiJeDiDmA_Bo@yAm@{Aq@eCmAeCsAkC{AgCaBaCaBcCiBiCsBgCsBoC{BmFmEoGmFkGmFyGcGyGkGoHiHqQeQwIkIwHqHiHcHsCuC}BaCuBwBaBgBeBmB}BqCoCiDsCyDwD{EwO}R{CiGsCkGqCsGgCuGcC{G_CgHwBcHkBaHkBoHaBoH}AsHwAwHmAwHkA}H_A{Hy@cIu@gIi@yHe@mI]aIWqIQcIGkIAaICeIc@uaCQeoA[coBEeIKmIQuHYuIa@eIg@eIk@wHYcDs@{Hw@mGcAsHgAqHqAcIsAiH}AyHgB}HaByG}BgIqB{GaAyC}@kCcCcHeCuGqCwGsCmGsCaGaDkGcD_GmD_GkDqFuDmFoDaF_EgFy\\eb@co@qw@s\\_b@a]ib@yn@iw@}DyEcEwEkEuEmEiEgE}DwEaEaF{D}EoD_FgDyEyCmF}CiFqCoFkCoFaCmFuB{FsBuFiB{FcByFyAaGqA}FiAqF}@gGy@_Go@eGg@cG_@cG_@}F]yGc@{V{AmbDwR_G_@iG_@aGe@eGi@yFm@cGo@oGy@wFy@eGaAwF_AqGkAoFgAsFoAmGwA{FyA}F_BoF{AgGkBqFeBwFoBmFqByFwByF{BaFwB{FiCiFcCkFgCiFmCsFyCiFwCeFyCgF_DeF_DcFaD}EcDaFkDeFsD_FuDmEkD{E{DsE{DyEgEqEcEmEkEmEmEkEoEaEmEgEwEeE}E_E}E_EcFeEmFmD{EyDwFoDsFkDsFkD}FcD}FcDgGwC_G_DsGmCeGsCyGqC}GcCoGgC{GgC{GcCcH}ByGaC_HcCgH}B_H_CgHuBsG}BgHiMsa@{AiFuBeHwBsHqBeHmB}GqBgHsBuHiBaHqBoHoBoH_AwDu@{C{AyFkBuHgBiHgBqHeBmHcBiHcB{H}AeHaBuH}AmH_BsH_B{HyAaH_B{H{AuH{AoHyAyHwAqHwA{HsAkHwAyHsAsHqA}HiBiK_BcJsA_I_c@mhCqA}HoAcIgAwHcAeIw@yHUgCq@sHo@wIg@aIWuFGwA[}IQeIMkIEoIAeIDiILgIRsIVeI\\gIf@eIj@eIr@_Iv@aI~@gI~@wHjS{bB`AcI~@cIt@qHt@_Ir@oIl@mIh@}Hf@cI`@iI\\cIXeIXgJNmHN{HHuIDkI@_I?aICoIGmIMeIMuFMgEIqEWgI]cI_@cIc@cIg@iIm@cIo@iIo@}Hs@gIo@eIs@aIiEig@o@cIm@}Hi@gIg@oIa@oI[cIS_ISiIKeIGgICkI?kIDeIB{IBaIFu]Ryr@B}J@eHGsIKwHQgIYyH]}Hg@gIk@uHm@sHy@}H{@yH}@kHgAsHkFoZiBmI_BuGu@uCo@gCmBaHuB_HuB_H{B_H}BwGyB}G{^icA}ByGyByGsBmGsBqG}BeHoB_GkAkDqg@__B_ImUkEiKyEmJ{DgGgEyFsEwFeEcFyEcFuFgF}EcEyFoEgFmDoFgDoFwCcFkCiGeCcKuCcHoAqG_AgH{@qF]wFOmGIqGFqFPwG^oGr@yPlCqk@fJeGt@_Hv@gGj@oG^uGRoGDqFKoGUkESc@CqGa@mGa@sq@_F{FyAsF_B_GgBmFiBwFuBsF}BkFaCiFgCoFyC}EsCqFkDyEcDaFwDwEqDuEoDeF_Eq`@i[aF{DsEsD{EsDaFuDgFmDiFiD}EyCoFwCsFsCqFeCoF}B{FyBaGwBsFkB{FcBaG}AiGsA{FmAyFkA_GmAaGoAa_AcSeiAuVujBga@e`A}SuFmAoGsA_GkA_GeA_G_AcGw@iGs@cGm@}Fc@kGa@mGY{FQyGM{FGqGAcGDeGNwOh@sx@nDuxApG_G\\kGd@_Gl@yG|@wF`AaGrAyF~AsFjBsF|BmFjCqF~CeFfDyErDyEdEoEnEyEpF{D|EyDfFuDlFsDvFmDrFoDxFkDpFuD|FqDjF{DnF_EdF}DtEcEhEsEdE}EzD}EhDgFxCaFfC{FbCqFlBwF~A}FnAyF~@_Gp@cG`@iGNeG@wFMkG[_Gm@{F}@iGqAuF{AuFkBqFyBsFaCqb@mUuGeDoFqCoFgCsFcCuFwBiGuBgF}AgG}A_GoAcGeAaG{@qAOwD_@eGi@gGc@sG]gMu@gG_@_Yc@kL@kLKeSNuFJuIJsDHiIZuQv@sHZwH\\uH^uH\\unArFsiA`FgJl@kM|AwLnCiJrC_IbDqJ~EkIlEmc@xZmHpDkHnC_HzBaHnBaI`BeL~AgRn@aQJcK[qIcAuKcBsJcCoJ{CaLkEaKoEeKeFeKeGuKmH_MaJcMkKyLsLcK}K}HaJyIgLaI{KgH{LkF}KuB{EyeAogCsJ{ZaEmK{E{JaJ{Oai@m{@oGmK}EaKuAkDsAiDcBoGeAaHy@kH]mHSeGMyC]_Cc@qAq@uBg@y@}KgOs_@kh@gIaLmVq\\}T{ZiCkDyC`EeN|QcF~G}PlUy@hAs@`AaAnAiA|AuGxI{D~EoDdF}B`DgDtEwBrCaMrPqDzEwHhKuO|SsPfUiDfEq@`AcAtA_K~M}CfEiDrEeGdIaDjEeDnEQV}Xj_@yC~DwDfFm]le@"
+    } ],
+    "waypoints" : [ {
+        "distance" : 2.37,
+        "name" : "46th Avenue",
+        "location" : [ -122.504263, 37.736431 ]
+    }, {
+        "distance" : 0.685,
+        "name" : "3rd Street",
+        "location" : [ -122.401209, 37.785594 ]
+    } ],
+    "code" : "Ok"
+}

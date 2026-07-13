@@ -285,6 +285,44 @@ TEST(Layer, Observer) {
     };
     layer->setLineCap(lineCap);
     EXPECT_FALSE(layoutPropertyChanged);
+
+    // Notifies observer on source-layer change.
+    // This is required so that the render orchestrator re-evaluates already-loaded
+    // tiles when a layer's source-layer is changed at runtime (e.g. after addLayer).
+    bool sourceLayerChanged = false;
+    observer.layerChanged = [&](Layer& layer_) {
+        EXPECT_EQ(layer.get(), &layer_);
+        sourceLayerChanged = true;
+    };
+    layer->setSourceLayer("roads");
+    EXPECT_TRUE(sourceLayerChanged);
+
+    // Does not notify observer on no-op source-layer change.
+    sourceLayerChanged = false;
+    observer.layerChanged = [&](Layer& layer_) {
+        EXPECT_EQ(layer.get(), &layer_);
+        sourceLayerChanged = true;
+    };
+    layer->setSourceLayer("roads");
+    EXPECT_FALSE(sourceLayerChanged);
+
+    // Notifies observer on source ID change.
+    bool sourceIDChanged = false;
+    observer.layerChanged = [&](Layer& layer_) {
+        EXPECT_EQ(layer.get(), &layer_);
+        sourceIDChanged = true;
+    };
+    layer->setSourceID("other-source");
+    EXPECT_TRUE(sourceIDChanged);
+
+    // Does not notify observer on no-op source ID change.
+    sourceIDChanged = false;
+    observer.layerChanged = [&](Layer& layer_) {
+        EXPECT_EQ(layer.get(), &layer_);
+        sourceIDChanged = true;
+    };
+    layer->setSourceID("other-source");
+    EXPECT_FALSE(sourceIDChanged);
 }
 
 TEST(Layer, DuplicateLayer) {
@@ -384,11 +422,11 @@ TEST(Layer, SymbolLayerOverrides) {
 
         MockPaintProperties::Transitionable current;
         MockPaintProperties::Transitionable updated;
-        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{{Color::green()}, {}};
-        updated.get<TextColor>() = Transitionable<PropertyValue<Color>>{{Color::green()}, {}};
+        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{.value = {Color::green()}, .options = {}};
+        updated.get<TextColor>() = Transitionable<PropertyValue<Color>>{.value = {Color::green()}, .options = {}};
         EXPECT_FALSE(MockOverrides::hasPaintPropertyDifference(current, updated));
 
-        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{{Color::red()}, {}};
+        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{.value = {Color::red()}, .options = {}};
         EXPECT_TRUE(MockOverrides::hasPaintPropertyDifference(current, updated));
     }
 

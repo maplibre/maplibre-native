@@ -25,6 +25,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/compression.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/enum.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/run_loop.hpp>
@@ -510,6 +511,11 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
         }
     }
 
+    if (testValue.HasMember("maxPitch")) {
+        assert(testValue["maxPitch"].IsNumber());
+        metadata.maxPitch = testValue["maxPitch"].GetFloat();
+    }
+
     if (testValue.HasMember("pixelRatio")) {
         assert(testValue["pixelRatio"].IsNumber());
         metadata.pixelRatio = testValue["pixelRatio"].GetFloat();
@@ -607,6 +613,10 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     return metadata;
 }
 
+namespace mbgl {
+MBGL_DEFINE_ENUM(TileLodMode, {{TileLodMode::Default, "default"}, {TileLodMode::Distance, "distance"}});
+}
+
 namespace TestOperationNames {
 const std::string waitOp("wait");
 const std::string sleepOp("sleep");
@@ -618,6 +628,8 @@ const std::string setCenterOp("setCenter");
 const std::string setZoomOp("setZoom");
 const std::string setBearingOp("setBearing");
 const std::string setPitchOp("setPitch");
+const std::string setRollOp("setRoll");
+const std::string setCenterAltitudeOp("setCenterElevation");
 const std::string setFilterOp("setFilter");
 const std::string setLayerZoomRangeOp("setLayerZoomRange");
 const std::string setLightOp("setLight");
@@ -641,6 +653,11 @@ const std::string panGestureOp("panGesture");
 const std::string gfxProbeOp("probeGFX");
 const std::string gfxProbeStartOp("probeGFXStart");
 const std::string gfxProbeEndOp("probeGFXEnd");
+const std::string setTileLodMinRadiusOp("setTileLodMinRadius");
+const std::string setTileLodScaleOp("setTileLodScale");
+const std::string setTileLodPitchThresholdOp("setTileLodPitchThreshold");
+const std::string setTileLodZoomShiftOp("setTileLodZoomShift");
+const std::string setTileLodModeOp("setTileLodMode");
 } // namespace TestOperationNames
 
 using namespace TestOperationNames;
@@ -803,6 +820,24 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             double pitch = operationArray[1].GetDouble();
             result.emplace_back([pitch](TestContext& ctx) {
                 ctx.getMap().jumpTo(mbgl::CameraOptions().withPitch(pitch));
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setRollOp) {
+            // setRoll
+            assert(operationArray.Size() >= 2u);
+            assert(operationArray[1].IsNumber());
+            double roll = operationArray[1].GetDouble();
+            result.emplace_back([roll](TestContext& ctx) {
+                ctx.getMap().jumpTo(mbgl::CameraOptions().withRoll(roll));
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setCenterAltitudeOp) {
+            // setCenterAltitude
+            assert(operationArray.Size() >= 2u);
+            assert(operationArray[1].IsNumber());
+            double centerAltitude = operationArray[1].GetDouble();
+            result.emplace_back([centerAltitude](TestContext& ctx) {
+                ctx.getMap().jumpTo(mbgl::CameraOptions().withCenterAltitude(centerAltitude));
                 return true;
             });
         } else if (operationArray[0].GetString() == setFilterOp) {
@@ -1294,6 +1329,53 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 metricProbe.memVertexBuffers.peak -= ctx.baselineGfxProbe.memVertexBuffers.peak;
                 metricProbe.memTextures.peak -= ctx.baselineGfxProbe.memTextures.peak;
                 ctx.getMetadata().metrics.gfx.insert({mark, metricProbe});
+                return true;
+            });
+
+        } else if (operationArray[0].GetString() == setTileLodMinRadiusOp) {
+            // setTileLodMinRadius
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double minRadius = operationArray[1].GetDouble();
+            result.emplace_back([minRadius](TestContext& ctx) {
+                ctx.getMap().setTileLodMinRadius(minRadius);
+                return true;
+            });
+
+        } else if (operationArray[0].GetString() == setTileLodScaleOp) {
+            // setTileLodScale
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double scale = operationArray[1].GetDouble();
+            result.emplace_back([scale](TestContext& ctx) {
+                ctx.getMap().setTileLodScale(scale);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setTileLodPitchThresholdOp) {
+            // setTileLodPitchThreshold
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double pitchThreshold = operationArray[1].GetDouble();
+            result.emplace_back([pitchThreshold](TestContext& ctx) {
+                ctx.getMap().setTileLodPitchThreshold(pitchThreshold);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setTileLodZoomShiftOp) {
+            // setTileLodZoomShift
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsNumber());
+            double zoomShift = operationArray[1].GetDouble();
+            result.emplace_back([zoomShift](TestContext& ctx) {
+                ctx.getMap().setTileLodZoomShift(zoomShift);
+                return true;
+            });
+        } else if (operationArray[0].GetString() == setTileLodModeOp) {
+            // setTileLodMode
+            assert(operationArray.Size() == 2u);
+            assert(operationArray[1].IsString());
+            mbgl::TileLodMode mode = mbgl::Enum<mbgl::TileLodMode>::toEnum(operationArray[1].GetString()).value();
+            result.emplace_back([mode](TestContext& ctx) {
+                ctx.getMap().setTileLodMode(mode);
                 return true;
             });
         } else {

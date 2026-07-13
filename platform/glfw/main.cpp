@@ -7,6 +7,8 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/util/action_journal.hpp>
+#include <mbgl/util/action_journal_options.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
@@ -49,11 +51,17 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<std::string> apikeyValue(argumentParser, "key", "API key", {'t', "apikey"});
     args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
     args::ValueFlag<std::string> cacheDBValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
+    args::ValueFlag<std::string> actionJournalDirValue(
+        argumentParser, "directory", "Action journal log directory", {"actionJournalDir"});
     args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
     args::ValueFlag<double> latValue(argumentParser, "degrees", "Latitude", {'y', "lat"});
+    args::ValueFlag<double> altValue(argumentParser, "degrees", "Altitude", {'a', "alt"});
+    args::ValueFlag<double> fovValue(argumentParser, "degrees", "FOV", {'F', "fov"});
     args::ValueFlag<double> zoomValue(argumentParser, "number", "Zoom level", {'z', "zoom"});
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
+    args::ValueFlag<double> rollValue(argumentParser, "degrees", "Roll", {'r', "roll"});
+    args::ValueFlag<double> maxPitchValue(argumentParser, "degrees", "Max Pitch", {'P', "maxPitch"});
 
     try {
         argumentParser.ParseCLI(argc, argv);
@@ -75,9 +83,13 @@ int main(int argc, char* argv[]) {
     settings.online = !offlineFlag;
     if (lonValue) settings.longitude = args::get(lonValue);
     if (latValue) settings.latitude = args::get(latValue);
+    if (altValue) settings.altitude = args::get(altValue);
+    if (fovValue) settings.fov = args::get(fovValue);
+    if (maxPitchValue) settings.maxPitch = args::get(maxPitchValue);
     if (zoomValue) settings.zoom = args::get(zoomValue);
     if (bearingValue) settings.bearing = args::get(bearingValue);
     if (pitchValue) settings.pitch = args::get(pitchValue);
+    if (rollValue) settings.roll = args::get(rollValue);
 
     const bool fullscreen = fullscreenFlag ? args::get(fullscreenFlag) : false;
     const bool benchmark = benchmarkFlag ? args::get(benchmarkFlag) : false;
@@ -128,11 +140,22 @@ int main(int argc, char* argv[]) {
     GLFWRendererFrontend rendererFrontend{
         std::make_unique<mbgl::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view};
 
+    // Configure action journal options if directory is specified
+    mbgl::util::ActionJournalOptions actionJournalOptions;
+    if (actionJournalDirValue) {
+        const std::string actionJournalDir = args::get(actionJournalDirValue);
+        actionJournalOptions.enable(true).withPath(actionJournalDir);
+        mbgl::Log::Info(mbgl::Event::General, "Action journal enabled. Logs will be written to: " + actionJournalDir);
+    }
+
     mbgl::Map map(rendererFrontend,
                   *view,
                   mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
                   resourceOptions,
-                  clientOptions);
+                  clientOptions,
+                  actionJournalOptions);
+
+    map.setBounds(mbgl::BoundOptions().withMaxPitch(settings.maxPitch));
 
     backend.setMap(&map);
 
@@ -142,9 +165,12 @@ int main(int argc, char* argv[]) {
 
     map.jumpTo(mbgl::CameraOptions()
                    .withCenter(mbgl::LatLng{settings.latitude, settings.longitude})
+                   .withCenterAltitude(settings.altitude)
                    .withZoom(settings.zoom)
                    .withBearing(settings.bearing)
-                   .withPitch(settings.pitch));
+                   .withPitch(settings.pitch)
+                   .withRoll(settings.roll)
+                   .withFov(settings.fov));
     map.setDebug(mbgl::MapDebugOptions(settings.debug));
 
     if (testDirValue) view->setTestDirectory(args::get(testDirValue));
@@ -208,9 +234,8 @@ int main(int argc, char* argv[]) {
     if (style.empty()) {
         const char* url = getenv("MLN_STYLE_URL");
         if (url == nullptr) {
-            mbgl::util::DefaultStyle newStyle = orderedStyles[0];
-            style = newStyle.getUrl();
-            view->setWindowTitle(newStyle.getName());
+            style = "https://tiles.openfreemap.org/styles/liberty";
+            view->setWindowTitle("OpenFreeMap Liberty");
         } else {
             style = url;
             view->setWindowTitle(url);
@@ -225,15 +250,21 @@ int main(int argc, char* argv[]) {
     mbgl::CameraOptions camera = map.getCameraOptions();
     settings.latitude = camera.center->latitude();
     settings.longitude = camera.center->longitude();
+    settings.altitude = *camera.centerAltitude;
     settings.zoom = *camera.zoom;
     settings.bearing = *camera.bearing;
     settings.pitch = *camera.pitch;
+    settings.roll = *camera.roll;
+    settings.fov = *camera.fov;
     settings.debug = mbgl::EnumType(map.getDebug());
     settings.save();
     mbgl::Log::Info(mbgl::Event::General,
                     "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
-                        std::to_string(settings.longitude) + "\" --zoom=\"" + std::to_string(settings.zoom) +
-                        "\" --bearing=\"" + std::to_string(settings.bearing) + "\"");
+                        std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
+                        "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
+                        std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
+                        "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
+                        std::to_string(settings.maxPitch) + "\"");
 
     view = nullptr;
 

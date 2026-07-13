@@ -228,11 +228,13 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson with a single feature. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson with a single feature.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param feature the GeoJSON [Feature] to set
      */
+
     fun setGeoJson(feature: Feature?) {
         if (detached) {
             return
@@ -242,11 +244,13 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson with a single geometry. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson with a single geometry.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param geometry the GeoJSON [Geometry] to set
      */
+
     fun setGeoJson(geometry: Geometry?) {
         if (detached) {
             return
@@ -256,8 +260,9 @@ class GeoJsonSource : Source {
     }
 
     /**
-     * Updates the GeoJson. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param featureCollection the GeoJSON FeatureCollection
      */
@@ -266,18 +271,19 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
+        var featureCollection = featureCollection
         if (featureCollection != null && featureCollection.features() != null) {
             val features = featureCollection.features()
             val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
-        } else {
-            nativeSetFeatureCollection(featureCollection)
+            featureCollection = FeatureCollection.fromFeatures(featuresCopy)
         }
+        nativeSetFeatureCollection(featureCollection)
     }
 
     /**
-     * Updates the GeoJson. The update is performed asynchronously,
-     * so the data won't be immediately visible or available to query when this method returns.
+     * Updates the GeoJson.
+     * The update is performed synchronously or asynchronously, based on the source synchronous update flag.
+     * In the case of asynchronous updates, the data won't be immediately visible or available to query when this method returns.
      *
      * @param json the raw GeoJson FeatureCollection string
      */
@@ -491,6 +497,9 @@ class GeoJsonSource : Source {
 
     @Keep
     private external fun nativeGetClusterExpansionZoom(feature: Feature): Int
+
+    @Keep
+    private external fun nativeIsUpdateSynchronous(): Boolean
 
     @Keep
     @Throws(Throwable::class)

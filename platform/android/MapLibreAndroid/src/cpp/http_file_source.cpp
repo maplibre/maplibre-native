@@ -39,8 +39,8 @@ class HTTPRequest : public AsyncRequest {
 public:
     static constexpr auto Name() { return "org/maplibre/android/http/NativeHttpRequest"; };
 
-    HTTPRequest(jni::JNIEnv&, const Resource&, std::function<void(Response)>);
-    ~HTTPRequest() override;
+    HTTPRequest(jni::JNIEnv&, const Resource&, FileSource::Callback);
+    ~HTTPRequest();
 
     void onFailure(jni::JNIEnv&, int type, const jni::String& message);
     void onResponse(jni::JNIEnv&,
@@ -57,7 +57,7 @@ public:
 
 private:
     Resource resource;
-    std::function<void(Response)> callback;
+    FileSource::Callback callback;
     Response response;
 
     util::AsyncTask async{[this] {
@@ -88,9 +88,9 @@ void RegisterNativeHTTPRequest(jni::JNIEnv& env) {
 
 } // namespace android
 
-HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, std::function<void(Response)> callback_)
+HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, FileSource::Callback callback_)
     : resource(resource_),
-      callback(std::move(callback_)) {
+      callback(callback_) {
     std::string dataRangeStr;
     std::string etagStr;
     std::string modifiedStr;
@@ -152,7 +152,7 @@ void HTTPRequest::onResponse(jni::JNIEnv& env,
     }
 
     if (cacheControl) {
-        const auto cc = http::CacheControl::parse(jni::Make<std::string>(env, cacheControl));
+        const auto cc = http::CacheControl::parse(jni::Make<std::string>(env, cacheControl).c_str());
         response.expires = cc.toTimePoint();
         response.mustRevalidate = cc.mustRevalidate;
     }
@@ -164,7 +164,7 @@ void HTTPRequest::onResponse(jni::JNIEnv& env,
     if (code == 200 || code == 206) {
         if (body) {
             auto data = std::make_shared<std::string>(body.Length(env), char());
-            jni::GetArrayRegion(env, *body, 0, data->size(), reinterpret_cast<jbyte*>(data->data()));
+            jni::GetArrayRegion(env, *body, 0, data->size(), reinterpret_cast<jbyte*>(&(*data)[0]));
             response.data = data;
         } else {
             response.data = std::make_shared<std::string>();
@@ -221,9 +221,8 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const Cli
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource,
-                                                      std::function<void(Response)> callback) {
-    return std::make_unique<HTTPRequest>(*impl->env, resource, std::move(callback));
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
+    return std::make_unique<HTTPRequest>(*impl->env, resource, callback);
 }
 
 void HTTPFileSource::setResourceOptions(ResourceOptions options) {

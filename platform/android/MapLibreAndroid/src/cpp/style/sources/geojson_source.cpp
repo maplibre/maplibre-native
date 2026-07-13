@@ -49,21 +49,26 @@ GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, const jni::String& sourceId, cons
     : Source(env,
              std::make_unique<mbgl::style::GeoJSONSource>(jni::Make<std::string>(env, sourceId),
                                                           convertGeoJSONOptions(env, options))),
-      converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
-                                                          source.as<style::GeoJSONSource>()->impl().getOptions())) {}
+      converter(
+          std::make_unique<OptionalActor<FeatureConverter>>(source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
+                                                            Scheduler::GetBackground(),
+                                                            source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend),
-      converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
-                                                          source.as<style::GeoJSONSource>()->impl().getOptions())) {}
+      converter(
+          std::make_unique<OptionalActor<FeatureConverter>>(source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
+                                                            Scheduler::GetBackground(),
+                                                            source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
 
 void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jString) {
     std::shared_ptr<std::string> json = std::make_shared<std::string>(jni::Make<std::string>(env, jString));
 
-    Update::Converter converterFn = [this, json](ActorRef<GeoJSONDataCallback> _callback) {
-        converter->self().invoke(&FeatureConverter::convertJson, json, _callback);
+    OptionalActorRef<FeatureConverter> converterRef = converter->self();
+    Update::Converter converterFn = [converterRef, json](ActorRef<GeoJSONDataCallback> _callback) {
+        converterRef.invoke(&FeatureConverter::convertJson, json, _callback);
     };
 
     setAsync(converterFn);
@@ -170,8 +175,9 @@ void GeoJSONSource::setCollectionAsync(jni::JNIEnv& env, const jni::Object<JNITy
     auto global = jni::NewGlobal<jni::EnvAttachingDeleter>(env, jObject);
     auto object = std::make_shared<decltype(global)>(std::move(global));
 
-    Update::Converter converterFn = [this, object](ActorRef<GeoJSONDataCallback> _callback) {
-        converter->self().invoke(&FeatureConverter::convertObject<JNIType>, object, _callback);
+    OptionalActorRef<FeatureConverter> converterRef = converter->self();
+    Update::Converter converterFn = [converterRef, object](ActorRef<GeoJSONDataCallback> _callback) {
+        converterRef.invoke(&FeatureConverter::convertObject<JNIType>, object, _callback);
     };
 
     setAsync(converterFn);
@@ -207,6 +213,10 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
     update->converterFn(update->callback->self());
 }
 
+jboolean GeoJSONSource::isUpdateSynchronous(jni::JNIEnv&) {
+    return source.as<style::GeoJSONSource>()->isUpdateSynchronous();
+}
+
 void GeoJSONSource::registerNative(jni::JNIEnv& env) {
     // Lookup the class
     static auto& javaClass = jni::Class<GeoJSONSource>::Singleton(env);
@@ -230,7 +240,8 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::querySourceFeatures, "querySourceFeatures"),
         METHOD(&GeoJSONSource::getClusterChildren, "nativeGetClusterChildren"),
         METHOD(&GeoJSONSource::getClusterLeaves, "nativeGetClusterLeaves"),
-        METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom"));
+        METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom"),
+        METHOD(&GeoJSONSource::isUpdateSynchronous, "nativeIsUpdateSynchronous"));
 }
 
 void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<GeoJSONDataCallback> callback) {

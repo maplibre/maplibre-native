@@ -1,5 +1,15 @@
 {
   "version": 8,
+  "metadata": {
+    "test": {
+      "source-replace": [
+        {
+          "replace": "maplibre",
+          "with": "mlt"
+        }
+      ]
+    }
+  },
   "center": [
     -118.28162,
     33.86852
@@ -14,6 +24,14 @@
       "tiles": [
         "local://tiles/mapbox.mapbox-streets-v7/16-11235-26208.mvt"
       ]
+    },
+    "mlt": {
+      "type": "vector",
+      "maxzoom": 16,
+      "tiles": [
+        "local://tiles/mapbox.mapbox-streets-v7/16-11235-26208.mlt"
+      ],
+      "encoding": "mlt"
     }
   },
   "glyphs": "local://glyphs/{fontstack}/{range}.pbf",

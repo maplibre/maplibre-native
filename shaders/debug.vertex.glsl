@@ -1,8 +1,14 @@
 layout (location = 0) in vec2 a_pos;
 out vec2 v_uv;
 
-uniform mat4 u_matrix;
-uniform float u_overlay_scale;
+layout (std140) uniform DebugUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_color;
+    highp float u_overlay_scale;
+    lowp float pad1;
+    lowp float pad2;
+    lowp float pad3;
+};
 
 void main() {
     // This vertex shader expects a EXTENT x EXTENT quad,

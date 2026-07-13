@@ -7,11 +7,12 @@ using namespace mbgl;
 
 TEST(GlyphPBF, Parsing) {
     // The fake glyphs contain a number of invalid glyphs, which should be skipped by the parser.
-    auto sdfs = parseGlyphPBF(GlyphRange{0, 255}, util::read_file("test/fixtures/resources/fake_glyphs-0-255.pbf"));
+    auto sdfs = parseGlyphPBF(GlyphRange{0, 255, GlyphIDType::FontPBF},
+                              util::read_file("test/fixtures/resources/fake_glyphs-0-255.pbf"));
     EXPECT_TRUE(sdfs.size() == 1);
 
     auto& sdf = sdfs[0];
-    EXPECT_EQ(69u, sdf.id);
+    EXPECT_EQ(69u, sdf.id.complex.code);
     AlphaImage expected({7, 7});
     expected.fill('x');
     EXPECT_EQ(expected, sdf.bitmap);

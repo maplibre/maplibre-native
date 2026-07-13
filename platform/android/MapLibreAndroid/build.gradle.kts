@@ -1,9 +1,7 @@
 plugins {
+    id("com.android.library")
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.dokka)
-    id("com.android.library")
-    id("com.jaredsburrows.license")
-    kotlin("android")
     id("maplibre.download-vulkan-validation")
     id("maplibre.gradle-checkstyle")
     id("maplibre.gradle-dependencies-graph")
@@ -38,13 +36,15 @@ dependencies {
 
 dokka {
     moduleName.set("MapLibre Native Android")
+    val dokkaVariantName = "openglRelease"
 
     dokkaSourceSets {
-        main {
+        configureEach {
+            suppress.set(name != dokkaVariantName)
             includes.from("Module.md")
 
             sourceLink {
-                remoteUrl("https://github.com/maplibre/maplibre-native/tree/main/platform/android/")
+                remoteUrl.set(uri("https://github.com/maplibre/maplibre-native/tree/main/platform/android/"))
                 localDirectory.set(rootDir)
             }
 
@@ -60,39 +60,24 @@ android {
 
     defaultConfig {
         compileSdk = 34
-        minSdk = 21
-        targetSdk = 33
+        minSdk = 23
         buildConfigField("String", "GIT_REVISION_SHORT", "\"${getGitRevision()}\"")
         buildConfigField("String", "GIT_REVISION", "\"${getGitRevision(false)}\"")
         buildConfigField(
             "String",
             "MAPLIBRE_VERSION_STRING",
-            "\"MapLibre Native/${project.property("VERSION_NAME")}\""
+            "\"MapLibre Android/${project.extra["versionName"]}\""
         )
         consumerProguardFiles("proguard-rules.pro")
-
-        externalNativeBuild {
-            cmake {
-                arguments("-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF")
-            }
-        }
     }
 
     flavorDimensions += "renderer"
     productFlavors {
-        create("legacy") {
+        create("opengl") {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF")
-                }
-            }
-        }
-        create("drawable") {
-            dimension = "renderer"
-            externalNativeBuild {
-                cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
+                    arguments("-DMLN_WITH_OPENGL=ON")
                 }
             }
         }
@@ -100,19 +85,40 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
-                    arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
+                    arguments("-DMLN_WITH_VULKAN=ON")
+                }
+            }
+        }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
                 }
             }
         }
     }
 
     sourceSets {
-        getByName("legacy") {
+        getByName("opengl") {
             java.srcDirs("src/opengl/java/")
         }
-        getByName("drawable") {
-            java.srcDirs("src/opengl/java/")
+        listOf("webgpuDawn", "webgpuWgpu").forEach {
+            getByName(it) {
+                java.srcDirs("src/vulkan/java")
+                manifest.srcFile("src/vulkan/AndroidManifest.xml")
+            }
         }
     }
 
@@ -127,7 +133,7 @@ android {
     nativeBuild(nativeTargets)
 
     // Avoid naming conflicts, force usage of prefix
-    resourcePrefix("maplibre_")
+    resourcePrefix = "maplibre_"
 
     sourceSets {
         getByName("main") {
@@ -143,12 +149,14 @@ android {
             // http://robolectric.org/migrating/#migrating-to-40
             isIncludeAndroidResources = true
         }
+        targetSdk = 33
     }
 
     buildTypes {
         debug {
-            isTestCoverageEnabled = false
             isJniDebuggable = true
+            enableUnitTestCoverage = false
+            enableAndroidTestCoverage = false
         }
     }
 
@@ -164,10 +172,19 @@ android {
             "WrongThreadInterprocedural"
         )
         warningsAsErrors = false
+        targetSdk = 33
     }
 
     buildFeatures {
         buildConfig = true
+        prefabPublishing = project.findProperty("maplibre.abis") != "none"
+    }
+
+    prefab {
+        create("maplibre") {
+            headers = "../prefab-headers"
+            libraryName = "libmaplibre"
+        }
     }
 
     compileOptions {
@@ -175,22 +192,31 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
-
-licenseReport {
-    generateHtmlReport = false
-    generateJsonReport = true
-    copyHtmlReportToAssets = false
-    copyJsonReportToAssets = false
 }
 
 fun getGitRevision(shortRev: Boolean = true): String {
     val cmd = if (shortRev) "git rev-parse --short HEAD" else "git rev-parse HEAD"
     val proc = Runtime.getRuntime().exec(cmd)
     return proc.inputStream.bufferedReader().readText().trim()
+}
+
+val syncPrefabHeaders by tasks.registering(Sync::class) {
+    val nativeRoot = rootProject.rootDir.resolve("../..")
+    from(nativeRoot.resolve("include")) {
+        include("mbgl/style/layers/custom_layer_host.hpp")
+        include("mbgl/style/layers/custom_layer_init_parameters.hpp")
+        include("mbgl/style/layers/custom_layer_render_parameters.hpp")
+        include("mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp")
+        include("mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp")
+    }
+    into(project.rootDir.resolve("prefab-headers"))
+}
+
+tasks.configureEach {
+    if (name == "syncPrefabHeaders") return@configureEach
+    if (name.contains("Prefab", ignoreCase = true) || name.contains("bundleLibRuntimeTo", ignoreCase = true)) {
+        dependsOn(syncPrefabHeaders)
+    }
 }
 
 configurations {

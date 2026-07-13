@@ -16,6 +16,7 @@
 #include <mbgl/style/layers/fill_extrusion_layer.hpp>
 #include <mbgl/style/layers/heatmap_layer.hpp>
 #include <mbgl/style/layers/hillshade_layer.hpp>
+#include <mbgl/style/layers/color_relief_layer.hpp>
 #include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
@@ -1537,7 +1538,7 @@ NodeMap::~NodeMap() {
 }
 
 std::unique_ptr<mbgl::AsyncRequest> NodeFileSource::request(const mbgl::Resource& resource,
-                                                            std::function<void(mbgl::Response)> callback_) {
+                                                            mbgl::FileSource::Callback callback_) {
     assert(nodeMap);
 
     Nan::HandleScope scope;

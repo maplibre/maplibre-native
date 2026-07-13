@@ -4,7 +4,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/programs/fill_extrusion_program.hpp>
+#include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_tree.hpp>
@@ -42,26 +42,26 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionPropsUBO propsUBO = {
-        /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
-        /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
-        /* .pad1 = */ 0,
-        /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
-        /* .base = */ constOrDefault<FillExtrusionBase>(evaluated),
-        /* .height = */ constOrDefault<FillExtrusionHeight>(evaluated),
-        /* .light_intensity = */ FillExtrusionProgram::lightIntensity(parameters.evaluatedLight),
-        /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
-        /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
-        /* .fade = */ crossfade.t,
-        /* .from_scale = */ crossfade.fromScale,
-        /* .to_scale = */ crossfade.toScale,
-        /* .pad2 = */ 0};
+        .color = constOrDefault<FillExtrusionColor>(evaluated),
+        .light_color = FillExtrusionBucket::lightColor(parameters.evaluatedLight),
+        .pad1 = 0,
+        .light_position = FillExtrusionBucket::lightPosition(parameters.evaluatedLight, state),
+        .base = constOrDefault<FillExtrusionBase>(evaluated),
+        .height = constOrDefault<FillExtrusionHeight>(evaluated),
+        .light_intensity = FillExtrusionBucket::lightIntensity(parameters.evaluatedLight),
+        .vertical_gradient = evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
+        .opacity = evaluated.get<FillExtrusionOpacity>(),
+        .fade = crossfade.t,
+        .from_scale = crossfade.fromScale,
+        .to_scale = crossfade.toScale,
+        .pad2 = 0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 
     propertiesUpdated = false;
 
     const auto zoom = static_cast<float>(parameters.state.getZoom());
-    const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
+    const auto defPattern = mbgl::Faded<expression::Image>{.from = "", .to = ""};
     const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
 
 #if MLN_UBO_CONSOLIDATION
@@ -75,7 +75,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             return;
         }
 
-        auto* binders = static_cast<FillExtrusionProgram::Binders*>(drawable.getBinders());
+        auto* binders = static_cast<FillExtrusionBinders*>(drawable.getBinders());
         const auto* tile = drawable.getRenderTile();
         if (!binders || !tile) {
             assert(false);
@@ -117,18 +117,18 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 #else
         const FillExtrusionDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-            /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-            /* .height_factor = */ heightFactor,
-            /* .tile_ratio = */ tileRatio,
+            .matrix = util::cast<float>(matrix),
+            .pixel_coord_upper = {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+            .pixel_coord_lower = {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+            .height_factor = heightFactor,
+            .tile_ratio = tileRatio,
 
-            /* .base_t = */ std::get<0>(binders->get<FillExtrusionBase>()->interpolationFactor(zoom)),
-            /* .height_t = */ std::get<0>(binders->get<FillExtrusionHeight>()->interpolationFactor(zoom)),
-            /* .color_t = */ std::get<0>(binders->get<FillExtrusionColor>()->interpolationFactor(zoom)),
-            /* .pattern_from_t = */ std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pattern_to_t = */ std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pad1 = */ 0
+            .base_t = std::get<0>(binders->get<FillExtrusionBase>()->interpolationFactor(zoom)),
+            .height_t = std::get<0>(binders->get<FillExtrusionHeight>()->interpolationFactor(zoom)),
+            .color_t = std::get<0>(binders->get<FillExtrusionColor>()->interpolationFactor(zoom)),
+            .pattern_from_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
+            .pattern_to_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
+            .pad1 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -136,11 +136,11 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 #else
         const FillExtrusionTilePropsUBO tilePropsUBO = {
 #endif
-            /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-            /* .pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-            /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0
+            .pattern_from = patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+            .pattern_to = patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+            .texsize = {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+            .pad1 = 0,
+            .pad2 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION

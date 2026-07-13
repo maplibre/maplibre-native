@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/util/bounding_volumes.hpp>
 
 #include <gtest/gtest.h>
@@ -101,8 +102,8 @@ TEST(BoundingVolumes, CreateFrustumFromProjectionMatrix) {
     std::array<vec3, 8> actualPoints = frustum.getPoints();
     std::array<vec4, 6> actualPlanes = frustum.getPlanes();
 
-    std::for_each(actualPoints.begin(), actualPoints.end(), roundPoint);
-    std::for_each(actualPlanes.begin(), actualPlanes.end(), roundPlane);
+    std::ranges::for_each(actualPoints, roundPoint);
+    std::ranges::for_each(actualPlanes, roundPlane);
 
     EXPECT_EQ(actualPoints, expectedPoints);
     EXPECT_EQ(actualPlanes, expectedPlanes);

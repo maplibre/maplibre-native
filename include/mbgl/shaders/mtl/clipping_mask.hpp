@@ -49,7 +49,7 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(clippingMaskUBOCount + 0)]];
+    short2 position [[attribute(0)]];
 };
 
 struct FragmentStage {

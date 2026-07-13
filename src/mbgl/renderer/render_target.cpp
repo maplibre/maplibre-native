@@ -65,8 +65,15 @@ void RenderTarget::upload(gfx::UploadPass& uploadPass) {
 }
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
-    parameters.renderPass = parameters.encoder->createRenderPass(
-        "render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
+    parameters.renderPass = parameters.encoder->createRenderPass("render target",
+                                                                 {.renderable = *offscreenTexture,
+                                                                  .clearColor = Color{0.0f, 0.0f, 0.0f, 1.0f},
+                                                                  .clearDepth = {},
+                                                                  .clearStencil = {}});
+
+    const gfx::ScissorRect prevScissorRect = parameters.scissorRect;
+    const auto& size = getTexture()->getSize();
+    parameters.scissorRect = {.x = 0, .y = 0, .width = size.width, .height = size.height};
 
     // Run layer tweakers to update any dynamic elements
     parameters.currentLayer = 0;
@@ -101,6 +108,8 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
 
     parameters.renderPass.reset();
     parameters.encoder->present(*offscreenTexture);
+
+    parameters.scissorRect = prevScissorRect;
 }
 
 } // namespace mbgl

@@ -316,6 +316,24 @@ const std::vector<TextureInfo> HillshadeShaderInfo::textures = {
     TextureInfo{"u_image", idHillshadeImageTexture},
 };
 
+// Color Relief
+using ColorReliefShaderInfo = ShaderInfo<BuiltIn::ColorReliefShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> ColorReliefShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"ColorReliefDrawableUBO", idColorReliefDrawableUBO},
+    UniformBlockInfo{"ColorReliefTilePropsUBO", idColorReliefTilePropsUBO},
+    UniformBlockInfo{"ColorReliefEvaluatedPropsUBO", idColorReliefEvaluatedPropsUBO},
+};
+const std::vector<AttributeInfo> ColorReliefShaderInfo::attributes = {
+    AttributeInfo{"a_pos", idColorReliefPosVertexAttribute},
+    AttributeInfo{"a_texture_pos", idColorReliefTexturePosVertexAttribute},
+};
+const std::vector<TextureInfo> ColorReliefShaderInfo::textures = {
+    TextureInfo{"u_image", idColorReliefImageTexture},
+    TextureInfo{"u_elevation_stops", idColorReliefElevationStopsTexture},
+    TextureInfo{"u_color_stops", idColorReliefColorStopsTexture},
+};
+
 // Line
 using LineShaderInfo = ShaderInfo<BuiltIn::LineShader, gfx::Backend::Type::OpenGL>;
 
@@ -467,15 +485,15 @@ const std::vector<TextureInfo> SymbolIconShaderInfo::textures = {
 };
 
 // Symbol SDF
-using SymbolSDFIconShaderInfo = ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>;
+using SymbolSDFShaderInfo = ShaderInfo<BuiltIn::SymbolSDFShader, gfx::Backend::Type::OpenGL>;
 
-const std::vector<UniformBlockInfo> SymbolSDFIconShaderInfo::uniformBlocks = {
+const std::vector<UniformBlockInfo> SymbolSDFShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
     UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
     UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
 };
-const std::vector<AttributeInfo> SymbolSDFIconShaderInfo::attributes = {
+const std::vector<AttributeInfo> SymbolSDFShaderInfo::attributes = {
     AttributeInfo{"a_pos_offset", idSymbolPosOffsetVertexAttribute},
     AttributeInfo{"a_data", idSymbolDataVertexAttribute},
     AttributeInfo{"a_pixeloffset", idSymbolPixelOffsetVertexAttribute},
@@ -487,7 +505,7 @@ const std::vector<AttributeInfo> SymbolSDFIconShaderInfo::attributes = {
     AttributeInfo{"a_halo_width", idSymbolHaloWidthVertexAttribute},
     AttributeInfo{"a_halo_blur", idSymbolHaloBlurVertexAttribute},
 };
-const std::vector<TextureInfo> SymbolSDFIconShaderInfo::textures = {
+const std::vector<TextureInfo> SymbolSDFShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
 };
 

@@ -371,7 +371,8 @@ TEST(OfflineDatabase, PutTile) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
     Resource resource{Resource::Tile, "http://example.com/"};
-    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
+    resource.tileData = Resource::TileData{
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
@@ -393,6 +394,22 @@ TEST(OfflineDatabase, PutTile) {
     EXPECT_EQ("second", *updateGetResult->data);
 
     EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+// Cache-key encoding for byte-range sources (eg. PMTiles). The range is appended
+// to the URL so distinct ranges occupy distinct cache rows under the resources
+// table's UNIQUE(url) constraint.
+TEST(OfflineDatabase, CacheKey) {
+    Resource bare{Resource::Kind::Source, "https://example.com/x.pmtiles"};
+    EXPECT_EQ("https://example.com/x.pmtiles", OfflineDatabase::cacheKey(bare));
+
+    Resource ranged{Resource::Kind::Source, "https://example.com/x.pmtiles"};
+    ranged.dataRange = std::make_pair<uint64_t, uint64_t>(0, 126);
+    EXPECT_EQ("https://example.com/x.pmtiles?_mlnRange=0-126", OfflineDatabase::cacheKey(ranged));
+
+    Resource rangedWithQuery{Resource::Kind::Source, "https://example.com/x.pmtiles?token=abc"};
+    rangedWithQuery.dataRange = std::make_pair<uint64_t, uint64_t>(200, 399);
+    EXPECT_EQ("https://example.com/x.pmtiles?token=abc&_mlnRange=200-399", OfflineDatabase::cacheKey(rangedWithQuery));
 }
 
 TEST(OfflineDatabase, PutResourceNoContent) {
@@ -417,7 +434,8 @@ TEST(OfflineDatabase, PutTileNotFound) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
     Resource resource{Resource::Tile, "http://example.com/"};
-    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
+    resource.tileData = Resource::TileData{
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
     Response response;
     response.noContent = true;
 
@@ -1303,7 +1321,8 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     ASSERT_TRUE(region);
 
     Resource resource{Resource::Tile, "http://example.com/"};
-    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
+    resource.tileData = Resource::TileData{
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
     Response response;
 
     response.data = std::make_shared<std::string>("first");

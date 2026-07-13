@@ -7,14 +7,13 @@
 #include <args.hxx>
 #include <mapbox/io/io.hpp>
 
-#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 int main(int argc, char* argv[]) {
-    args::ArgumentParser p("Mapbox GL cache tool", "");
+    args::ArgumentParser p("MapLibre cache tool", "");
     args::HelpFlag helpFlag(p, "help", "Display this help menu", {'h'});
 
     args::ValueFlag<std::string> urlValue(p, "URL", "Resource URL (required)", {'u'}, args::Options::Required);
@@ -35,7 +34,7 @@ int main(int argc, char* argv[]) {
                                                                   {"tile", mbgl::Resource::Tile}};
 
     std::string typeHelp("One of the following (required):");
-    for (auto key : typeMap) {
+    for (const auto& key : typeMap) {
         typeHelp += " " + key.first;
     }
 
@@ -53,18 +52,18 @@ int main(int argc, char* argv[]) {
         std::cout << p;
         exit(0);
     } catch (const args::ParseError& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << '\n';
         std::cerr << p;
         exit(1);
     } catch (const args::ValidationError& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << '\n';
         std::cerr << p;
         exit(2);
     }
 
     auto file = mapbox::base::io::readFile(args::get(dataValue));
     if (!file) {
-        std::cerr << file.error() << std::endl;
+        std::cerr << file.error() << '\n';
         exit(3);
     }
 
@@ -78,15 +77,15 @@ int main(int argc, char* argv[]) {
 
     if (args::get(typeFlag) == mbgl::Resource::Tile) {
         if (!xValueFlag || !yValueFlag || !zValueFlag) {
-            std::cerr << "Error: -x, -y and -z must be provided for tiles" << std::endl;
+            std::cerr << "Error: -x, -y and -z must be provided for tiles" << '\n';
             exit(1);
         }
 
-        resource.tileData = {{args::get(urlValue),
-                              1,
-                              args::get(xValueFlag),
-                              args::get(yValueFlag),
-                              static_cast<int8_t>(args::get(zValueFlag))}};
+        resource.tileData = {{.urlTemplate = args::get(urlValue),
+                              .pixelRatio = 1,
+                              .x = args::get(xValueFlag),
+                              .y = args::get(yValueFlag),
+                              .z = static_cast<int8_t>(args::get(zValueFlag))}};
     }
 
     mbgl::util::RunLoop loop;

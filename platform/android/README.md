@@ -18,4 +18,4 @@ Visit [MapLibre Android Dokka Docs](https://maplibre.org/maplibre-native/android
 
 ## Contributing
 
-See the [MapLibre Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/android) for instructions on how to build the project or how to work on the documentation.
+See the [MapLibre Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/android) for instructions on how to build the project or how to work on the documentation.

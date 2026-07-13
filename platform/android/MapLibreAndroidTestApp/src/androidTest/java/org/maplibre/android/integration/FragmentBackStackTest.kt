@@ -20,7 +20,6 @@ class FragmentBackStackTest : BaseIntegrationTest() {
     var activityRule: ActivityTestRule<FragmentBackStackActivity> = ActivityTestRule(FragmentBackStackActivity::class.java)
 
     @Test
-    @Ignore("https://github.com/maplibre/maplibre-native/issues/2469")
     @LargeTest
     fun backPressedOnBackStackResumed() {
         device.waitForIdle()

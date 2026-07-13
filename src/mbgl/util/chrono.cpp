@@ -14,8 +14,10 @@
 namespace mbgl {
 namespace util {
 
-static const char *week[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-static const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+namespace {
+const char* week[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+} // namespace
 
 std::string rfc1123(Timestamp timestamp) {
     std::time_t time = std::chrono::system_clock::to_time_t(timestamp);
@@ -45,11 +47,29 @@ std::string iso8601(Timestamp timestamp) {
     std::tm info;
     _gmtime(&time, &info);
     char buffer[30];
-    std::strftime(buffer, sizeof(buffer), "%F %T", &info);
+    // %F and %T are not supported in MinGW (https://sourceforge.net/p/mingw-w64/bugs/793/)
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &info);
     return buffer;
 }
 
-Timestamp parseTimestamp(const char *timestamp) {
+std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseconds> timestamp) {
+    std::time_t time = std::chrono::system_clock::to_time_t(timestamp);
+    std::tm info;
+    _gmtime(&time, &info);
+
+    long long ms =
+        std::chrono::duration_cast<Milliseconds>(timestamp - std::chrono::system_clock::from_time_t(time)).count() %
+        1000;
+
+    char buffer[sizeof("yyyy-mm-ddThh:mm:ss.000Z")];
+    // %F and %T are not supported in MinGW (https://sourceforge.net/p/mingw-w64/bugs/793/)
+    const std::size_t offset = std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", &info);
+    snprintf(buffer + offset, sizeof(buffer) - offset, ".%03lldZ", ms);
+
+    return buffer;
+}
+
+Timestamp parseTimestamp(const char* timestamp) {
     return std::chrono::time_point_cast<Seconds>(std::chrono::system_clock::from_time_t(parse_date(timestamp)));
 }
 

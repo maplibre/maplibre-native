@@ -6,9 +6,10 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.maplibre.android.BaseTest
 import org.mockito.Mockito
 
-class LatLngTest {
+class LatLngTest : BaseTest() {
     @Test
     fun testSanity() {
         val latLng = LatLng(0.0, 0.0)

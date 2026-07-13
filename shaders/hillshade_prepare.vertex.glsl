@@ -1,8 +1,16 @@
-uniform mat4 u_matrix;
-uniform vec2 u_dimension;
-
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;
+
+layout (std140) uniform HillshadePrepareDrawableUBO {
+    highp mat4 u_matrix;
+};
+
+layout (std140) uniform HillshadePrepareTilePropsUBO {
+    highp vec4 u_unpack;
+    highp vec2 u_dimension;
+    highp float u_zoom;
+    highp float u_maxzoom;
+};
 
 out vec2 v_pos;
 

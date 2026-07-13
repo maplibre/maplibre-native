@@ -119,6 +119,13 @@ public:
     }
 };
 
+class KatakanaOnlyLocalGlyphRasterizer : public StubLocalGlyphRasterizer {
+public:
+    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override {
+        return static_cast<char16_t>(glyphID) == u'テ';
+    }
+};
+
 class StubGlyphManagerObserver : public GlyphManagerObserver {
 public:
     void onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& glyphRange) override {
@@ -135,7 +142,7 @@ public:
 
 class StubGlyphRequestor : public GlyphRequestor {
 public:
-    void onGlyphsAvailable(GlyphMap glyphs) override {
+    void onGlyphsAvailable(GlyphMap glyphs, HBShapeRequests) override {
         if (glyphsAvailable) glyphsAvailable(std::move(glyphs));
     }
 
@@ -148,7 +155,11 @@ public:
     StubFileSource fileSource;
     StubGlyphManagerObserver observer;
     StubGlyphRequestor requestor;
-    GlyphManager glyphManager{std::make_unique<StubLocalGlyphRasterizer>()};
+    GlyphManager glyphManager;
+
+    GlyphManagerTest(
+        std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer = std::make_unique<StubLocalGlyphRasterizer>())
+        : glyphManager(std::move(localGlyphRasterizer)) {}
 
     void run(const std::string& url, GlyphDependencies dependencies) {
         // Squelch logging.
@@ -181,7 +192,7 @@ TEST(GlyphManager, LoadingSuccess) {
 
     test.observer.glyphsLoaded = [&](const FontStack& fontStack, const GlyphRange& range) {
         ASSERT_EQ(fontStack, FontStack{{"Test Stack"}});
-        ASSERT_EQ(range, GlyphRange(0, 255));
+        ASSERT_EQ(range, GlyphRange(0, 255, GlyphIDType::FontPBF));
     };
 
     test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
@@ -196,7 +207,8 @@ TEST(GlyphManager, LoadingSuccess) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å', u' '}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes = {}});
 }
 
 TEST(GlyphManager, LoadingFail) {
@@ -211,7 +223,7 @@ TEST(GlyphManager, LoadingFail) {
     test.observer.glyphsError =
         [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
             EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
-            EXPECT_EQ(glyphRange, GlyphRange(0, 255));
+            EXPECT_EQ(glyphRange, GlyphRange(0, 255, GlyphIDType::FontPBF));
 
             EXPECT_TRUE(error != nullptr);
             EXPECT_EQ(util::toString(error), "Failed by the test case");
@@ -224,7 +236,8 @@ TEST(GlyphManager, LoadingFail) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å'}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes = {}});
 }
 
 TEST(GlyphManager, LoadingCorrupted) {
@@ -239,7 +252,7 @@ TEST(GlyphManager, LoadingCorrupted) {
     test.observer.glyphsError =
         [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
             EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
-            EXPECT_EQ(glyphRange, GlyphRange(0, 255));
+            EXPECT_EQ(glyphRange, GlyphRange(0, 255, GlyphIDType::FontPBF));
 
             EXPECT_TRUE(error != nullptr);
             EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
@@ -252,7 +265,8 @@ TEST(GlyphManager, LoadingCorrupted) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å'}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes = {}});
 }
 
 TEST(GlyphManager, LoadingCancel) {
@@ -267,7 +281,8 @@ TEST(GlyphManager, LoadingCancel) {
         FAIL() << "Should never be called";
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å'}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å'}}}, .shapes = {}});
 }
 
 TEST(GlyphManager, LoadLocalCJKGlyph) {
@@ -293,7 +308,7 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
         ASSERT_EQ(testPositions.count(u'中'), 1u);
 
         Immutable<Glyph> glyph = *testPositions.at(u'中');
-        EXPECT_EQ(glyph->id, u'中');
+        EXPECT_EQ(glyph->id.complex.code, u'中');
         EXPECT_EQ(glyph->metrics.width, 24ul);
         EXPECT_EQ(glyph->metrics.height, 24ul);
         EXPECT_EQ(glyph->metrics.left, 0);
@@ -309,11 +324,44 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'中'}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'中'}}}, .shapes = {}});
 }
 
-TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
+TEST(GlyphManager, LoadLocalCJKSymbols) {
     GlyphManagerTest test;
+    int glyphResponses = 0;
+
+    test.fileSource.glyphsResponse = [&](const Resource&) {
+        glyphResponses++;
+        return std::optional<Response>();
+    };
+
+    test.observer.glyphsLoaded = [&](const FontStack&, const GlyphRange&) {
+        glyphResponses++;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        EXPECT_EQ(glyphResponses, 0); // Local generation should prevent requesting any glyphs.
+
+        const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
+
+        ASSERT_EQ(testPositions.size(), 2u);
+        ASSERT_EQ(testPositions.count(u'〒'), 1u);
+        ASSERT_EQ(testPositions.count(u'！'), 1u);
+
+        test.end();
+    };
+
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'〒', u'！'}}}, .shapes = {}});
+}
+
+TEST(GlyphManager, LocalCJKGlyphPrefersLocalRasterizationOverRange) {
+    // Verifies that locally-rasterized glyphs (like テ) are produced by the
+    // local rasterizer instead of using a glyph from an already-loaded PBF
+    // range.
+    GlyphManagerTest test(std::make_unique<KatakanaOnlyLocalGlyphRasterizer>());
     bool firstGlyphResponse = false;
 
     test.fileSource.glyphsResponse = [&](const Resource&) {
@@ -332,20 +380,16 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
             ASSERT_EQ(testPositions.size(), 1u);
             ASSERT_EQ(testPositions.count(u'々'), 1u);
 
-            // Katakana letter te, should be locally rasterized
-            //  instead of using the glyph recieved from the range
-            //  for the ideagraphic mark
             test.glyphManager.getGlyphs(test.requestor,
-                                        GlyphDependencies{
-                                            {{{"Test Stack"}}, {u'テ'}} // 0x30c6
-                                        },
+                                        GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'テ'}}}, // 0x30c6
+                                                          .shapes = {}},
                                         test.fileSource);
         } else {
             ASSERT_EQ(testPositions.size(), 1u);
             ASSERT_EQ(testPositions.count(u'テ'), 1u);
 
             Immutable<Glyph> glyph = *testPositions.at(u'テ');
-            EXPECT_EQ(glyph->id, u'テ');
+            EXPECT_EQ(glyph->id.complex.code, u'テ');
             EXPECT_EQ(glyph->metrics.width, 24ul);
             EXPECT_EQ(glyph->metrics.height, 24ul);
             EXPECT_EQ(glyph->metrics.left, 0);
@@ -358,9 +402,8 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
     };
 
     test.run("test/fixtures/resources/glyphs-12244-12543.pbf",
-             GlyphDependencies{
-                 {{{"Test Stack"}}, {u'々'}} // 0x3005
-             });
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'々'}}}, // 0x3005
+                               .shapes = {}});
 }
 
 TEST(GlyphManager, LoadingInvalid) {
@@ -380,7 +423,7 @@ TEST(GlyphManager, LoadingInvalid) {
 
     test.observer.glyphsLoaded = [&](const FontStack& fontStack, const GlyphRange& range) {
         ASSERT_EQ(fontStack, FontStack{{"Test Stack"}});
-        ASSERT_EQ(range, GlyphRange(0, 255));
+        ASSERT_EQ(range, GlyphRange(0, 255, GlyphIDType::FontPBF));
     };
 
     test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
@@ -393,7 +436,8 @@ TEST(GlyphManager, LoadingInvalid) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'A', u'E'}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'A', u'E'}}}, .shapes = {}});
 }
 
 TEST(GlyphManager, ImmediateFileSource) {
@@ -436,5 +480,19 @@ TEST(GlyphManager, ImmediateFileSource) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å', u' '}}});
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes = {}});
+}
+
+// Guards against silent drift between allowsFixedWidthGlyphGeneration's range
+// coverage and the precomputed NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK used
+// for offline download progress estimation.
+TEST(i18n, GlyphRangeLocalGenerationCountMatchesConstant) {
+    uint32_t locallyGeneratedRanges = 0;
+    for (uint32_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; ++i) {
+        if (util::i18n::glyphRangeIsEntirelyLocallyGenerated(static_cast<char16_t>(i * GLYPHS_PER_GLYPH_RANGE))) {
+            ++locallyGeneratedRanges;
+        }
+    }
+    EXPECT_EQ(GLYPH_RANGES_PER_FONT_STACK - locallyGeneratedRanges, NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
 }

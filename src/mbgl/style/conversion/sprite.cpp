@@ -25,8 +25,7 @@ std::optional<Sprite> Converter<Sprite>::operator()(const Convertible& value, Er
     }
     spriteURL = toString(*urlValue);
 
-    const Sprite sprite(*id, *spriteURL);
-    return sprite;
+    return Sprite(*id, *spriteURL);
 }
 
 } // namespace conversion

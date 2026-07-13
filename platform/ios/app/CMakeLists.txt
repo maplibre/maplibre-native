@@ -48,10 +48,17 @@ add_custom_command(TARGET app POST_BUILD
     COMMAND ls "$<TARGET_BUNDLE_DIR:app>"
 )
 
-target_link_libraries(
-  app
-  custom-layer-examples  # ios-sdk-static transitive dependency
-)
+if(TARGET custom-layer-examples)
+    target_link_libraries(
+      app
+      custom-layer-examples  # ios-sdk-static transitive dependency
+    )
+else()
+    target_link_libraries(
+      app
+      ios-sdk-static
+    )
+endif()
 
 foreach(resource_file ${APP_RESOURCES})
     set_source_files_properties(

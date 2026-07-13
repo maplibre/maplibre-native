@@ -9,30 +9,6 @@ TileRenderData::TileRenderData(std::shared_ptr<TileAtlasTextures> atlasTextures_
 
 TileRenderData::~TileRenderData() = default;
 
-#if MLN_DRAWABLE_RENDERER
-static gfx::Texture2DPtr noTexture;
-
-const gfx::Texture2DPtr& TileRenderData::getGlyphAtlasTexture() const {
-    return atlasTextures ? atlasTextures->glyph : noTexture;
-}
-
-const gfx::Texture2DPtr& TileRenderData::getIconAtlasTexture() const {
-    return atlasTextures ? atlasTextures->icon : noTexture;
-}
-#else
-const gfx::Texture& TileRenderData::getGlyphAtlasTexture() const {
-    assert(atlasTextures);
-    assert(atlasTextures->glyph);
-    return *atlasTextures->glyph;
-}
-
-const gfx::Texture& TileRenderData::getIconAtlasTexture() const {
-    assert(atlasTextures);
-    assert(atlasTextures->icon);
-    return *atlasTextures->icon;
-}
-#endif
-
 std::optional<ImagePosition> TileRenderData::getPattern(const std::string&) const {
     assert(false);
     return std::nullopt;

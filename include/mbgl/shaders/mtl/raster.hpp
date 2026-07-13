@@ -55,8 +55,8 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(rasterUBOCount + 0)]];
-    short2 texture_pos [[attribute(rasterUBOCount + 1)]];
+    short2 pos [[attribute(0)]];
+    short2 texture_pos [[attribute(1)]];
 };
 
 struct FragmentStage {

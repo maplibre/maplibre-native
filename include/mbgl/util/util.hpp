@@ -17,7 +17,7 @@
 // will be defined as hidden by default.
 
 // clang-format off
-#if defined WIN32
+#ifdef WIN32
     #ifdef MBGL_BUILDING_LIB
         #ifdef __GNUC__
             #define MBGL_EXPORT __attribute__((dllexport))

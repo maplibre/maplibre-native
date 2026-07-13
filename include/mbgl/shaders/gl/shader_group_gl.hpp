@@ -3,7 +3,7 @@
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/containers.hpp>
 
 namespace mbgl {

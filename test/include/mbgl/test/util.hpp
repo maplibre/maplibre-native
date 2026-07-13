@@ -74,5 +74,12 @@ void checkImage(const std::string& base,
                 double imageThreshold = 0,
                 double pixelThreshold = 0);
 
+void checkImages(const std::vector<std::string>& possibleExpected,
+                 const PremultipliedImage& actual,
+                 double imageThreshold = 0,
+                 double pixelThreshold = 0);
+
+double getImageDiff(const std::string& base, const PremultipliedImage& actual, double pixelThreshold = 0);
+
 } // namespace test
 } // namespace mbgl

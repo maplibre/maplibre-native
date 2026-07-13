@@ -9,7 +9,7 @@
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <cstdint>
@@ -24,8 +24,10 @@ using namespace platform;
 class Drawable::Impl final {
 public:
     Impl()
-        : uniformBuffers(
-              DescriptorSetType::DrawableUniform, shaders::globalUBOCount, 0, shaders::maxUBOCountPerDrawable) {}
+        : uniformBuffers(DescriptorSetType::DrawableUniform,
+                         shaders::drawableSSBOStartId,
+                         shaders::maxSSBOCountPerDrawable,
+                         shaders::maxUBOCountPerDrawable) {}
 
     ~Impl() = default;
 

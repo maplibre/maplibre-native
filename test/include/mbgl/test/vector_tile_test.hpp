@@ -5,6 +5,7 @@
 #include <mbgl/test/fake_file_source.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 
@@ -22,28 +23,28 @@ public:
     util::RunLoop loop;
     AnnotationManager annotationManager{style};
 
-    const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    const std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     const std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
-
-    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
-
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
 
+    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
 
     VectorTileTest()
         : threadPool(Scheduler::GetBackground(), uniqueID),
-          tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         threadPool},
+          tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = threadPool,
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, threadPool} {}
 
     ~VectorTileTest() {

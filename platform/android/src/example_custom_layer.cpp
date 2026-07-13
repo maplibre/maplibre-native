@@ -106,11 +106,15 @@ void checkCompileStatus(GLuint shader) {
         GLint maxLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
-        __android_log_write(ANDROID_LOG_ERROR, LOG_TAG, errorLog.data());
-        throw Error(std::string(errorLog.begin(), errorLog.end()));
+        if (maxLength > 0) {
+            // The maxLength includes the NULL character
+            std::vector<GLchar> errorLog(maxLength + 1);
+            glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
+            __android_log_write(ANDROID_LOG_ERROR, LOG_TAG, errorLog.data());
+            throw Error(std::string(errorLog.begin(), errorLog.end()));
+        } else {
+            throw Error("checkCompileStatus failed to get error string");
+        }
     }
 }
 
@@ -127,7 +131,7 @@ class ExampleCustomLayer : mbgl::style::CustomLayerHost {
 public:
     ~ExampleCustomLayer() {}
 
-    void initialize() {
+    void initialize(const mbgl::style::CustomLayerInitParameters &) override {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "Initialize");
 
         // Debug info
@@ -159,7 +163,7 @@ public:
         GL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), background, GL_STATIC_DRAW));
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &) {
+    void render(const mbgl::style::CustomLayerRenderParameters &) override {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "Render");
         glUseProgram(program);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -179,12 +183,12 @@ public:
         GL_CHECK_ERROR(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
     }
 
-    void contextLost() {
+    void contextLost() override {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "ContextLost");
         program = 0;
     }
 
-    void deinitialize() {
+    void deinitialize() override {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "DeInitialize");
         if (program) {
             glDeleteBuffers(1, &buffer);

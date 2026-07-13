@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
     "@rules_swift//swift:swift.bzl",
     "swift_library",
@@ -111,6 +112,13 @@ js_run_binary(
     visibility = ["//visibility:public"],
 )
 
+# Production-only generated code without test files
+filegroup(
+    name = "generated_code_production",
+    srcs = MLN_GENERATED_DARWIN_STYLE_SOURCE + MLN_GENERATED_DARWIN_STYLE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
 objc_library(
     name = "test_utility",
     srcs = [
@@ -171,6 +179,7 @@ swift_library(
     testonly = True,
     srcs = glob(["test/*.swift"]),
     data = [
+        "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
         "test/one-liner.json",
     ],
@@ -188,7 +197,7 @@ cc_library(
         ":darwin_objc_hdrs",
         ":darwin_objcpp_hdrs",
         ":darwin_private_hdrs",
-        ":generated_code",
+        ":generated_code_production",
     ],
     hdrs = [
         ":generated_style_hdrs",
@@ -296,6 +305,11 @@ objc_library(
 
 exports_files(
     [
+        "app/PluginLayerTestStyle.json",
+        "app/PluginLayerExample.h",
+        "app/PluginLayerExample.mm",
+        "app/PluginLayerExampleMetalRendering.h",
+        "app/PluginLayerExampleMetalRendering.mm",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",
@@ -316,7 +330,6 @@ js_binary(
     data = [
         "scripts/style-spec-cocoa-conventions-v8.json",
         "scripts/style-spec-overrides-v8.json",
-        "//:node_modules/argparse",
         "//:node_modules/csscolorparser",
         "//:node_modules/lodash",
         "//:style-code",
@@ -333,11 +346,10 @@ js_library(
         ":darwin_objcpp_hdrs",
         ":darwin_objcpp_srcs",
         ":darwin_private_hdrs",
-        ":generated_code",
+        ":generated_code_production",
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({
-        "//:legacy_renderer": [],
         "//conditions:default": [
             ":darwin_objcpp_custom_drawable_srcs",
         ],

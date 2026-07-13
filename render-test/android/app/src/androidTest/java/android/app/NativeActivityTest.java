@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 public class NativeActivityTest {
 
     @Rule
-    public ActivityTestRule<NativeActivity> mActivityTestRule = new ActivityTestRule<>(NativeActivity.class, false, false);
+    public ActivityTestRule<RenderTestActivity> mActivityTestRule = new ActivityTestRule<>(RenderTestActivity.class, false, false);
 
     @Test(timeout = 600000L)
     public void runRenderTests() throws Exception {

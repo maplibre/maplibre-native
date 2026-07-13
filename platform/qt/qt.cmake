@@ -17,7 +17,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
             unset(CMAKE_FIND_ROOT_PATH)
         endif()
 
-        find_package(ICU COMPONENTS uc REQUIRED)
+        # Use PkgConfig to find ICU
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(ICU_UC REQUIRED icu-uc)
+        pkg_check_modules(ICU_I18N REQUIRED icu-i18n)
 
         if(MLN_QT_IGNORE_ICU)
             set(CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_ORIG})
@@ -59,16 +62,28 @@ if (MSVC)
     endforeach()
 endif()
 
+# Qt Vulkan renderer backend: only when MLN_WITH_VULKAN and qvulkaninstance.h present
+if(MLN_WITH_VULKAN)
+    find_path(QT_VULKAN_HEADER qvulkaninstance.h
+        PATHS ${Qt${QT_VERSION_MAJOR}Gui_INCLUDE_DIRS}
+        NO_DEFAULT_PATH)
+
+    if(NOT QT_VULKAN_HEADER)
+        message(FATAL_ERROR "Qt build has no Vulkan headers; can not build Qt Vulkan backend")
+    endif()
+endif()
+
 target_sources(
     mbgl-core
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<PLATFORM_ID:Linux>,default/src/mbgl/text/bidi.cpp,qt/src/mbgl/bidi.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gl/headless_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp>
+        $<$<BOOL:${MLN_WITH_METAL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp>
+        $<$<BOOL:${MLN_WITH_VULKAN}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
@@ -92,7 +107,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
+        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp>
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp
@@ -109,17 +124,15 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_observer.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.hpp
 )
 
 target_compile_definitions(
     mbgl-core
-    PRIVATE QT_IMAGE_DECODERS
-    PUBLIC __QT__
+    PRIVATE
+        QT_IMAGE_DECODERS
+        $<$<PLATFORM_ID:Windows>:NOMINMAX>
+    PUBLIC
+        __QT__
 )
 
 target_include_directories(
@@ -140,6 +153,7 @@ target_link_libraries(
         $<BUILD_INTERFACE:mbgl-vendor-parsedate>
         $<BUILD_INTERFACE:mbgl-vendor-nunicode>
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
+        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:mbgl-vendor-filesystem>>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
@@ -153,7 +167,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (MLN_QT_WITH_INTERNAL_ICU)
         target_link_libraries(mbgl-core PUBLIC $<BUILD_INTERFACE:mbgl-vendor-icu>)
     else()
-        target_link_libraries(mbgl-core PUBLIC ICU::uc)
+        target_link_libraries(mbgl-core PUBLIC ${ICU_UC_LIBRARIES} ${ICU_I18N_LIBRARIES})
+        target_include_directories(mbgl-core PRIVATE ${ICU_UC_INCLUDE_DIRS} ${ICU_I18N_INCLUDE_DIRS})
     endif()
 endif()
 
@@ -164,8 +179,9 @@ if(MLN_QT_HAS_PARENT)
         mbgl-vendor-parsedate
         mbgl-vendor-nunicode
         mbgl-vendor-csscolorparser
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
-        $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:$<BUILD_INTERFACE:mbgl-vendor-icu>>
+        $<$<PLATFORM_ID:iOS>:mbgl-vendor-filesystem>
+        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>
+        $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:mbgl-vendor-icu>
         PARENT_SCOPE
     )
 endif()
@@ -199,12 +215,14 @@ if(NOT MLN_QT_LIBRARY_ONLY)
     if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE -Wl,-force_load mbgl-test
+            PRIVATE
+                -Wl,-force_load mbgl-test
         )
     else()
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
+            PRIVATE
+                $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
         )
     endif()
 

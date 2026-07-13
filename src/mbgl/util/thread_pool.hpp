@@ -7,9 +7,7 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-#include <algorithm>
 #include <condition_variable>
-#include <map>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -22,12 +20,12 @@ public:
     /// @brief Schedule a generic task not assigned to any particular owner.
     /// The scheduler itself will own the task.
     /// @param fn Task to run
-    void schedule(Task&& fn) override;
+    void schedule(std::function<void()>&& fn) override;
 
     /// @brief Schedule a task assigned to the given owner `tag`.
     /// @param tag Identifier object to indicate ownership of `fn`
     /// @param fn Task to run
-    void schedule(const util::SimpleIdentity tag, Task&& fn) override;
+    void schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) override;
     const util::SimpleIdentity uniqueID;
 
 protected:
@@ -56,10 +54,10 @@ protected:
 
     // Task queues bucketed by tag address
     struct Queue {
-        std::atomic<std::size_t> runningCount; /* running tasks */
-        std::condition_variable cv;            /* queue empty condition */
-        std::mutex lock;                       /* lock */
-        std::queue<Task> queue;                /* pending task queue */
+        std::atomic<std::size_t> runningCount;   /* running tasks */
+        std::condition_variable cv;              /* queue empty condition */
+        std::mutex lock;                         /* lock */
+        std::queue<std::function<void()>> queue; /* pending task queue */
     };
     mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<Queue>> taggedQueue;
 };
@@ -90,10 +88,10 @@ public:
         }
     }
 
-    void runOnRenderThread(const util::SimpleIdentity tag, Task&& fn) override {
+    void runOnRenderThread(const util::SimpleIdentity tag, std::function<void()>&& fn) override {
         std::shared_ptr<RenderQueue> queue;
         {
-            std::lock_guard<std::mutex> lock(taggedRenderQueueLock);
+            std::scoped_lock lock(taggedRenderQueueLock);
             auto it = taggedRenderQueue.find(tag);
             if (it != taggedRenderQueue.end()) {
                 queue = it->second;
@@ -103,14 +101,14 @@ public:
             }
         }
 
-        std::lock_guard<std::mutex> lock(queue->mutex);
+        std::scoped_lock lock(queue->mutex);
         queue->queue.push(std::move(fn));
     }
 
     void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
         MLN_TRACE_FUNC();
         std::shared_ptr<RenderQueue> queue;
-        std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
+        std::unique_lock lock(taggedRenderQueueLock);
 
         {
             auto it = taggedRenderQueue.find(tag);
@@ -127,7 +125,7 @@ public:
             return;
         }
 
-        std::lock_guard<std::mutex> taskLock(queue->mutex);
+        std::scoped_lock taskLock(queue->mutex);
         while (queue->queue.size()) {
             auto fn = std::move(queue->queue.front());
             queue->queue.pop();
@@ -145,11 +143,16 @@ public:
 
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
+protected:
+    // Allows derived classes to invalidate weak pointers in
+    // their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
+
 private:
     std::vector<std::thread> threads;
 
     struct RenderQueue {
-        std::queue<Task> queue;
+        std::queue<std::function<void()>> queue;
         std::mutex mutex;
     };
     mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;
@@ -159,22 +162,25 @@ private:
     // Do not add members here, see `WeakPtrFactory`
 };
 
-class SequencedScheduler : public ThreadedScheduler {
+class SequencedScheduler final : public ThreadedScheduler {
 public:
     SequencedScheduler()
         : ThreadedScheduler(1) {}
+    ~SequencedScheduler() override { invalidateWeakPtrsEarly(); }
 };
 
 class ParallelScheduler : public ThreadedScheduler {
 public:
     ParallelScheduler(std::size_t extra)
         : ThreadedScheduler(1 + extra) {}
+    ~ParallelScheduler() override { invalidateWeakPtrsEarly(); }
 };
 
-class ThreadPool : public ParallelScheduler {
+class ThreadPool final : public ParallelScheduler {
 public:
     ThreadPool()
         : ParallelScheduler(3) {}
+    ~ThreadPool() override { invalidateWeakPtrsEarly(); }
 };
 
 } // namespace mbgl

@@ -8,24 +8,27 @@ target_compile_definitions(
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/nontype_functional.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
 # cmake-format: off
-target_compile_options(mbgl-vendor-csscolorparser PRIVATE $<$<CONFIG:Release>:-Oz> $<$<CONFIG:Release>:-Qunused-arguments> $<$<CONFIG:Release>:-flto>)
-target_compile_options(mbgl-vendor-icu PRIVATE $<$<CONFIG:Release>:-Oz> $<$<CONFIG:Release>:-Qunused-arguments> $<$<CONFIG:Release>:-flto>)
-target_compile_options(mbgl-vendor-parsedate PRIVATE $<$<CONFIG:Release>:-Oz> $<$<CONFIG:Release>:-Qunused-arguments> $<$<CONFIG:Release>:-flto>)
-target_compile_options(mbgl-vendor-sqlite PRIVATE $<$<CONFIG:Release>:-Oz> $<$<CONFIG:Release>:-Qunused-arguments> $<$<CONFIG:Release>:-flto>)
-target_compile_options(mbgl-compiler-options INTERFACE $<$<CONFIG:Release>:-Oz> $<$<CONFIG:Release>:-Qunused-arguments> $<$<CONFIG:Release>:-flto>)
+# Apply size optimizations for both Release and RelWithDebInfo configs.
+# Android AGP maps the release build variant to RelWithDebInfo (not Release), so we must
+# include RelWithDebInfo here to ensure these flags are actually applied.
+set(_OPT_CONFIGS "$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>")
+target_compile_options(mbgl-vendor-csscolorparser PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
+target_compile_options(mbgl-vendor-icu PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
+target_compile_options(mbgl-vendor-parsedate PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
+target_compile_options(mbgl-vendor-sqlite PRIVATE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
+target_compile_options(mbgl-compiler-options INTERFACE $<${_OPT_CONFIGS}:-Oz> $<${_OPT_CONFIGS}:-Qunused-arguments> $<${_OPT_CONFIGS}:-flto>)
 # cmake-format: on
 
 target_link_libraries(
     mbgl-compiler-options
     INTERFACE
-        $<$<CONFIG:Release>:-O2>
-        $<$<CONFIG:Release>:-Wl,--icf=all>
-        $<$<CONFIG:Release>:-flto>
-        $<$<CONFIG:Release>:-fuse-ld=gold>
+        $<${_OPT_CONFIGS}:-O2>
+        $<${_OPT_CONFIGS}:-Wl,--icf=all>
+        $<${_OPT_CONFIGS}:-flto>
+        $<${_OPT_CONFIGS}:-fuse-ld=lld>
 )
 
 target_sources(
@@ -92,6 +95,14 @@ if(MLN_WITH_VULKAN)
     )
 endif()
 
+if(MLN_WITH_WEBGPU)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp
+    )
+endif()
+
 target_include_directories(
     mbgl-core
     PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
@@ -102,13 +113,12 @@ target_link_libraries(
     PRIVATE
         EGL
         GLESv3
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         android
         atomic
         jnigraphics
         log
         mbgl-vendor-icu
-        mbgl-vendor-nontype_functional
         mbgl-vendor-sqlite
         z
 )
@@ -127,10 +137,31 @@ target_link_libraries(
     example-custom-layer
     PRIVATE
         GLESv3
-        Mapbox::Base
+        MapLibreNative::Base
         log
         mbgl-compiler-options
 )
+
+if(MLN_WITH_VULKAN)
+    add_library(
+        example-vulkan-custom-layer MODULE
+        ${PROJECT_SOURCE_DIR}/platform/android/src/example_vulkan_custom_layer.cpp
+    )
+
+    target_include_directories(
+        example-vulkan-custom-layer
+        PRIVATE ${PROJECT_SOURCE_DIR}/include
+    )
+
+    target_link_libraries(
+        example-vulkan-custom-layer
+        PRIVATE
+            MapLibreNative::Base
+            log
+            mbgl-compiler-options
+            mbgl-vendor-vulkan-headers
+    )
+endif()
 
 add_library(
     mbgl-test-runner SHARED
@@ -162,7 +193,7 @@ find_package(curl CONFIG)
 target_link_libraries(
     mbgl-test-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         mbgl-compiler-options
         $<$<BOOL:${curl_FOUND}>:curl::curl_static>
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
@@ -216,7 +247,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-benchmark-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
 )
@@ -267,7 +298,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-render-test-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         android
         log
         mbgl-compiler-options

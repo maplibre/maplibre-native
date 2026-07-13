@@ -2,7 +2,6 @@ package org.maplibre.android.testapp.geometry;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.maplibre.android.camera.CameraUpdateFactory;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
@@ -16,7 +15,6 @@ import org.junit.Test;
 /**
  * Instrumentation test to validate integration of LatLngBounds
  */
-@Ignore("https://github.com/maplibre/maplibre-native/issues/2319")
 public class LatLngBoundsTest extends BaseTest {
 
   private static final double MAP_BEARING = 50;

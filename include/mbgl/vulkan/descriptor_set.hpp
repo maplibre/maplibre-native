@@ -78,7 +78,7 @@ protected:
 class UniformDescriptorSet : public DescriptorSet {
 public:
     UniformDescriptorSet(Context& context_, DescriptorSetType type_);
-    virtual ~UniformDescriptorSet() = default;
+    ~UniformDescriptorSet() override = default;
 
     void update(const gfx::UniformBufferArray& uniforms,
                 uint32_t descriptorStartIndex,
@@ -89,7 +89,7 @@ public:
 class ImageDescriptorSet : public DescriptorSet {
 public:
     ImageDescriptorSet(Context& context_);
-    virtual ~ImageDescriptorSet() = default;
+    ~ImageDescriptorSet() override = default;
 
     void markDirty() override;
     const std::chrono::duration<double>& getLastModified() const { return lastModified; }

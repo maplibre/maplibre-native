@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
+#import "MLNNetworkResponse.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,6 +25,11 @@ NS_ASSUME_NONNULL_BEGIN
  are not supported at this time.
  */
 - (NSURLSession *)sessionForNetworkConfiguration:(MLNNetworkConfiguration *)configuration;
+
+- (NSMutableURLRequest *)willSendRequest:(NSMutableURLRequest *)request;
+
+- (MLNNetworkResponse *)didReceiveResponse:(MLNNetworkResponse *)response;
+
 @end
 
 /**

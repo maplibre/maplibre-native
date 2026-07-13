@@ -9,6 +9,7 @@
 #include <cstdarg>
 #include <exception>
 #include <sstream>
+#include <mutex>
 
 namespace mbgl {
 
@@ -33,9 +34,9 @@ public:
         } else {
             Log::record(severity, event, code, msg, {});
         }
-    } catch (...) {
-        // ignore exceptions during logging
-        // What would we do, log them?
+    } catch (...) { // NOLINT(bugprone-empty-catch)
+                    // ignore exceptions during logging
+                    // What would we do, log them?
 #if !defined(NDEBUG)
         [[maybe_unused]] auto ex = std::current_exception();
         assert(!"unhandled exception while logging");
@@ -68,12 +69,12 @@ void Log::useLogThread(bool enable, std::optional<EventSeverity> severity) {
 }
 
 void Log::setObserver(std::unique_ptr<Observer> observer) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     currentObserver = std::move(observer);
 }
 
 std::unique_ptr<Log::Observer> Log::removeObserver() {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     std::unique_ptr<Observer> observer;
     std::swap(observer, currentObserver);
     return observer;
@@ -92,7 +93,7 @@ void Log::record(EventSeverity severity,
                  int64_t code,
                  const std::string& msg,
                  const std::optional<std::string>& threadName) {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     if (currentObserver && severity != EventSeverity::Debug && currentObserver->onRecord(severity, event, code, msg)) {
         return;
     }

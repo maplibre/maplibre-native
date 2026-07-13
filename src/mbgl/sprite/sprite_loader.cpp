@@ -17,7 +17,9 @@
 
 namespace mbgl {
 
-static SpriteLoaderObserver nullObserver;
+namespace {
+SpriteLoaderObserver nullObserver;
+}
 
 struct SpriteLoader::Data {
     std::shared_ptr<const std::string> image;
@@ -47,10 +49,10 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
 
     dataMap[id] = std::make_unique<Data>();
     dataMap[id]->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, sprite](Response res) {
-        std::lock_guard<std::mutex> lock(dataMapMutex);
+        std::scoped_lock lock(dataMapMutex);
         Data* data = dataMap[sprite->id].get();
         if (res.error) {
-            observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
@@ -66,10 +68,10 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
 
     dataMap[id]->spriteRequest = fileSource.request(
         Resource::spriteImage(url, pixelRatio), [this, sprite](Response res) {
-            std::lock_guard<std::mutex> lock(dataMapMutex);
+            std::scoped_lock lock(dataMapMutex);
             Data* data = dataMap[sprite->id].get();
             if (res.error) {
-                observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+                observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
             } else if (res.notModified) {
                 return;
             } else if (res.noContent) {
@@ -99,20 +101,20 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
         /* parseClosure */
         [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
             try {
-                return {parseSprite(sprite.id, *image, *json), nullptr};
+                return {.images = parseSprite(sprite.id, *image, *json), .error = nullptr};
             } catch (...) {
-                return {{}, std::current_exception()};
+                return {.images = {}, .error = std::current_exception()};
             }
         },
         /* resultClosure */
-        [this, sprite = sprite, weak = weakFactory.makeWeakPtr()](ParseResult result) {
-            if (!weak) return; // This instance has been deleted.
-
-            if (result.error) {
-                observer->onSpriteError(std::optional(sprite), result.error);
-                return;
+        [this, sprite = sprite, factory = weakFactory.makeWeakPtr()](ParseResult result) {
+            if (auto guard = factory.lock(); factory) {
+                if (result.error) {
+                    observer->onSpriteError(std::optional(sprite), result.error);
+                } else {
+                    observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
+                }
             }
-            observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
         });
 }
 

@@ -10,12 +10,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
+import org.maplibre.android.BaseTest
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
-class LocationComponentOptionsTest {
+class LocationComponentOptionsTest : BaseTest() {
     @Mock
     private val context: Context? = null
 

@@ -58,10 +58,10 @@ Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSiz
         const auto c1 = zone.first;
         const auto c2 = zone.second;
         const auto lastStretch = cuts.back().stretch;
-        cuts.emplace_back(Cut{c1 - lastStretch, lastStretch});
-        cuts.emplace_back(Cut{c1 - lastStretch, lastStretch + (c2 - c1)});
+        cuts.emplace_back(Cut{.fixed = c1 - lastStretch, .stretch = lastStretch});
+        cuts.emplace_back(Cut{.fixed = c1 - lastStretch, .stretch = lastStretch + (c2 - c1)});
     }
-    cuts.emplace_back(Cut{fixedSize + border, stretchSize});
+    cuts.emplace_back(Cut{.fixed = fixedSize + border, .stretch = stretchSize});
     return cuts;
 }
 
@@ -184,7 +184,10 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     };
 
     if (!hasIconTextFit || (image.stretchX.empty() && image.stretchY.empty())) {
-        makeBox({0, -1}, {0, -1}, {0, static_cast<float>(imageWidth + 1)}, {0, static_cast<float>(imageHeight + 1)});
+        makeBox({.fixed = 0, .stretch = -1},
+                {.fixed = 0, .stretch = -1},
+                {.fixed = 0, .stretch = static_cast<float>(imageWidth + 1)},
+                {.fixed = 0, .stretch = static_cast<float>(imageHeight + 1)});
     } else {
         const auto xCuts = stretchZonesToCuts(stretchX, fixedWidth, stretchWidth);
         const auto yCuts = stretchZonesToCuts(stretchY, fixedHeight, stretchHeight);
@@ -264,11 +267,15 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 builtInOffset = {0.0f, 0.0f};
             }
 
+            // rectBuffer is in 1x logical units; only rect.w/h carry the texture
+            // scale. GL JS keeps 2x glyphs centered by storing fractional
+            // left/top metrics, so native local glyphs do the same.
+            const float textureScale = positionedGlyph.metrics.isDoubleResolution ? 2.0f : 1.0f;
             const float x1 = (positionedGlyph.metrics.left - rectBuffer) * positionedGlyph.scale - halfAdvance +
                              builtInOffset.x;
             const float y1 = (-positionedGlyph.metrics.top - rectBuffer) * positionedGlyph.scale + builtInOffset.y;
-            const float x2 = x1 + rect.w * positionedGlyph.scale / pixelRatio;
-            const float y2 = y1 + rect.h * positionedGlyph.scale / pixelRatio;
+            const float x2 = x1 + rect.w / textureScale * positionedGlyph.scale / pixelRatio;
+            const float y2 = y1 + rect.h / textureScale * positionedGlyph.scale / pixelRatio;
 
             Point<float> tl{x1, y1};
             Point<float> tr{x2, y1};

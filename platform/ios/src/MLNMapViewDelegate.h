@@ -1,7 +1,8 @@
 #import <UIKit/UIKit.h>
 
-#import <MLNTileOperation.h>
 #import "MLNCameraChangeReason.h"
+#import "MLNRenderingStats.h"
+#import "MLNTileOperation.h"
 #import "Mapbox.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -268,6 +269,23 @@ NS_ASSUME_NONNULL_BEGIN
                      frameEncodingTime:(double)frameEncodingTime
                     frameRenderingTime:(double)frameRenderingTime;
 /**
+ Tells the delegate that the map view has just redrawn.
+
+ This method is called any time the map view needs to redraw due to a change in
+ the viewpoint or style property transition. This method may be called very
+ frequently, even moreso than `-mapViewRegionIsChanging:`. Therefore, your
+ implementation of this method should be as lightweight as possible to avoid
+ affecting performance.
+
+ @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param renderingStats A collection of rendering statistics
+ */
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(MLNRenderingStats *)renderingStats;
+
+/**
  Tells the delegate that the map view is entering an idle state, and no more
  drawing will be necessary until new data is loaded or there is some interaction
  with the map.
@@ -301,6 +319,14 @@ NS_ASSUME_NONNULL_BEGIN
  ensure a map's style has loaded before modifying it at runtime
  */
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
+
+/**
+ Tells the delegate that the source changed.
+
+ @param mapView The map view that owns the source.
+ @param source The source that changed.
+ */
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source;
 
 /**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
@@ -476,6 +502,17 @@ Called when an error occurs while loading a sprite.
 > Warning: This method is not thread-safe.
 */
 - (void)mapView:(MLNMapView *)mapView spriteDidError:(NSString *)id url:(NSString *)url;
+
+// MARK: - Renderer
+
+/**
+Called when an error occurs while trying to render a layer or drawable.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapViewRendererDidError:(MLNMapView *)mapView;
 
 // MARK: Tracking User Location
 

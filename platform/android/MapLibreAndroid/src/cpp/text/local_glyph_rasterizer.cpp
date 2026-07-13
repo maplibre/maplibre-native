@@ -44,7 +44,7 @@ LocalGlyphRasterizer::LocalGlyphRasterizer() {
 
 PremultipliedImage LocalGlyphRasterizer::drawGlyphBitmap(const std::string& fontFamily,
                                                          const bool bold,
-                                                         const GlyphID glyphID) {
+                                                         const char16_t glyphID) {
     UniqueEnv env{AttachEnv()};
 
     static auto& javaClass = jni::Class<LocalGlyphRasterizer>::Singleton(*env);
@@ -57,6 +57,15 @@ PremultipliedImage LocalGlyphRasterizer::drawGlyphBitmap(const std::string& font
                                             jni::Make<jni::String>(*env, fontFamily),
                                             static_cast<jni::jboolean>(bold),
                                             static_cast<jni::jchar>(glyphID)));
+}
+
+float LocalGlyphRasterizer::getLastGlyphTop() {
+    UniqueEnv env{AttachEnv()};
+
+    static auto& javaClass = jni::Class<LocalGlyphRasterizer>::Singleton(*env);
+    static auto getLastGlyphTop = javaClass.GetMethod<jni::jfloat()>(*env, "getLastGlyphTop");
+
+    return javaObject.Call(*env, getLastGlyphTop);
 }
 
 void LocalGlyphRasterizer::registerNative(jni::JNIEnv& env) {
@@ -84,6 +93,8 @@ public:
         return androidLocalGlyphRasterizer.drawGlyphBitmap(*fontFamily, bold, glyphID);
     }
 
+    float getLastGlyphTop() { return androidLocalGlyphRasterizer.getLastGlyphTop(); }
+
 private:
     std::optional<std::string> fontFamily;
     android::LocalGlyphRasterizer androidLocalGlyphRasterizer;
@@ -98,6 +109,11 @@ bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) 
     return util::i18n::allowsFixedWidthGlyphGeneration(glyphID) && impl->isConfigured();
 }
 
+// 2x bitmap with 1x logical metrics.
+constexpr uint32_t kLocalGlyphTextureScale = 2;
+constexpr uint32_t kLocalGlyphLogicalSize = 30;
+constexpr uint32_t kLocalGlyphBitmapSize = kLocalGlyphLogicalSize * kLocalGlyphTextureScale;
+
 Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID glyphID) {
     Glyph fixedMetrics;
     if (!impl->isConfigured()) {
@@ -106,19 +122,21 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
 
     fixedMetrics.id = glyphID;
 
-    Size size(35, 35);
-
-    fixedMetrics.metrics.width = size.width;
-    fixedMetrics.metrics.height = size.height;
-    fixedMetrics.metrics.left = -2;
-    fixedMetrics.metrics.top = -5;
+    // Metrics are reported in 1x logical units; the bitmap is allocated at 2x.
+    fixedMetrics.metrics.width = kLocalGlyphLogicalSize;
+    fixedMetrics.metrics.height = kLocalGlyphLogicalSize;
+    fixedMetrics.metrics.left = -1.5f;
     fixedMetrics.metrics.advance = 24;
+    fixedMetrics.metrics.isDoubleResolution = true;
 
     PremultipliedImage rgbaBitmap = impl->drawGlyphBitmap(fontStack, glyphID);
+    fixedMetrics.metrics.top = impl->getLastGlyphTop();
 
-    // Copy alpha values from RGBA bitmap into the AlphaImage output
-    fixedMetrics.bitmap = AlphaImage(size);
-    for (uint32_t i = 0; i < size.width * size.height; i++) {
+    // Copy alpha values from RGBA bitmap into the AlphaImage output. The Java side
+    // produces a kLocalGlyphBitmapSize x kLocalGlyphBitmapSize bitmap.
+    const Size bitmapSize(kLocalGlyphBitmapSize, kLocalGlyphBitmapSize);
+    fixedMetrics.bitmap = AlphaImage(bitmapSize);
+    for (uint32_t i = 0; i < bitmapSize.width * bitmapSize.height; i++) {
         fixedMetrics.bitmap.data[i] = 0xff -
                                       round(0.2126 * rgbaBitmap.data[4 * i] + 0.7152 * rgbaBitmap.data[4 * i + 1] +
                                             0.0722 * rgbaBitmap.data[4 * i + 2]);

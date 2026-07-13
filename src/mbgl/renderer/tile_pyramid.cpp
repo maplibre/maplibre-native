@@ -22,8 +22,10 @@ namespace mbgl {
 
 using namespace style;
 
-static TileObserver nullObserver;
-static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+namespace {
+TileObserver nullObserver;
+const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+} // namespace
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),
@@ -89,9 +91,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     handleWrapJump(static_cast<float>(parameters.transformState.getLatLng().longitude()));
 
+    // Optionally shift the zoom level
+    double zoom = util::clamp<double>(parameters.transformState.getZoom() + parameters.tileLodZoomShift,
+                                      parameters.transformState.getMinZoom(),
+                                      parameters.transformState.getMaxZoom());
+
     const auto type = sourceImpl.type;
     // Determine the overzooming/underzooming amounts and required tiles.
-    int32_t overscaledZoom = util::coveringZoomLevel(parameters.transformState.getZoom(), type, tileSize);
+    int32_t overscaledZoom = util::coveringZoomLevel(zoom, type, tileSize);
     int32_t tileZoom = overscaledZoom;
     int32_t panZoom = zoomRange.max;
 
@@ -103,7 +110,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
 
-    if (overscaledZoom >= zoomRange.min) {
+    util::TileCoverParameters tileCoverParameters = {.transformState = parameters.transformState,
+                                                     .tileLodMinRadius = parameters.tileLodMinRadius,
+                                                     .tileLodScale = parameters.tileLodScale,
+                                                     .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
+                                                     .tileLodMode = parameters.tileLodMode};
+
+    if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
 
         // Make sure we're not reparsing overzoomed raster tiles.
@@ -123,11 +136,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             }
 
             if (panZoom < idealZoom) {
-                panTiles = util::tileCover(parameters.transformState, panZoom);
+                panTiles = util::tileCover(tileCoverParameters, panZoom, zoomRange);
             }
         }
 
-        idealTiles = util::tileCover(parameters.transformState, idealZoom, tileZoom);
+        idealTiles = util::tileCover(tileCoverParameters, idealZoom, zoomRange, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
             mbgl::Log::Warning(mbgl::Event::General,
@@ -146,7 +159,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     auto retainTileFn = [&](Tile& tile, TileNecessity necessity) -> void {
         if (retain.emplace(tile.id).second) {
-            tile.setUpdateParameters({minimumUpdateInterval, isVolatile});
+            tile.setUpdateParameters({.minimumUpdateInterval = minimumUpdateInterval, .isVolatile = isVolatile});
             tile.setNecessity(necessity);
         }
 
@@ -164,8 +177,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // levels. Child tiles are used from the cache, but not created.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
-        tileRange = util::TileRange::fromLatLngBounds(
-            *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));
+        int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
+                              ? zoomRange.max
+                              : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
         if (tileRange && !tileRange->contains(tileID.canonical)) {

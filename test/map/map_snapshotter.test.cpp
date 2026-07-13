@@ -7,8 +7,17 @@
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
+#include <mbgl/util/io.hpp>
 
 using namespace mbgl;
+
+static PremultipliedImage namedImage(const std::string& name) {
+    return decodeImage(util::read_file("test/fixtures/sprites/" + name + ".png"));
+}
+
+static std::unique_ptr<style::Image> namedMarker(const std::string& name) {
+    return std::make_unique<style::Image>(name, namedImage(name), 1.0f);
+}
 
 class SnapshotterObserver final : public MapSnapshotterObserver {
 public:
@@ -134,6 +143,34 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(runtimeStyling)) {
             runLoop.stop();
         });
     };
+
+    runLoop.run();
+}
+
+TEST(MapSnapshotter, TEST_REQUIRES_SERVER(annotation)) {
+    util::RunLoop runLoop;
+    MapSnapshotter snapshotter(Size{256, 128}, 1.0f, ResourceOptions(), ClientOptions());
+    snapshotter.setStyleURL("http://127.0.0.1:3000/online/style.json");
+    snapshotter.addAnnotationImage(namedMarker("default_marker"));
+    snapshotter.addAnnotation(SymbolAnnotation{Point<double>{0, 0}, "default_marker"});
+    FillAnnotation fillAnnotation{Polygon<double>{{{{0, 0}, {0, 45}, {45, 45}, {45, 0}}}}};
+    fillAnnotation.color = Color::red();
+    snapshotter.addAnnotation(fillAnnotation);
+    LineAnnotation lineAnnotation{LineString<double>{{{0, 0}, {45, 45}, {30, 0}}}};
+    lineAnnotation.color = Color::blue();
+    lineAnnotation.width = {5};
+    snapshotter.addAnnotation(lineAnnotation);
+    snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
+                                    mbgl::PremultipliedImage image,
+                                    mbgl::MapSnapshotter::Attributions,
+                                    mbgl::MapSnapshotter::PointForFn,
+                                    mbgl::MapSnapshotter::LatLngForFn) {
+        EXPECT_EQ(nullptr, ptr);
+        EXPECT_EQ(256, image.size.width);
+        EXPECT_EQ(128, image.size.height);
+        test::checkImage("test/fixtures/map/map_snapshotter_annotation", image, 0.005, 0.1);
+        runLoop.stop();
+    });
 
     runLoop.run();
 }

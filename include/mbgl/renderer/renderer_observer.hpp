@@ -1,15 +1,16 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/font_stack.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
+#include <mbgl/text/glyph_range.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/util/font_stack.hpp>
 
 #include <cstdint>
 #include <exception>
+#include <functional>
 #include <string>
 
 namespace mbgl {
@@ -51,11 +52,19 @@ public:
         onDidFinishRenderingFrame(mode, repaint, placementChanged);
     }
 
+    virtual void onDidFinishRenderingFrame(RenderMode mode,
+                                           bool repaint,
+                                           bool placementChanged,
+                                           const gfx::RenderingStats& stats) {
+        onDidFinishRenderingFrame(mode, repaint, placementChanged, stats.encodingTime, stats.renderingTime);
+    }
+
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
 
     /// Style is missing an image
-    virtual void onStyleImageMissing(const std::string&, Scheduler::Task&& done) { done(); }
+    using StyleImageMissingCallback = std::function<void()>;
+    virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration
@@ -71,6 +80,9 @@ public:
 
     // Tile loading
     virtual void onTileAction(TileOperation, const OverscaledTileID&, const std::string&) {}
+
+    /// Render layer or drawable failed
+    virtual void onRenderError(std::exception_ptr) {}
 };
 
 } // namespace mbgl

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gl/object.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/image.hpp>
 
@@ -26,6 +27,8 @@ public: // gfx::Texture2D
 
     Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
 
+    gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
+
     Size getSize() const noexcept override { return size; }
 
     size_t getDataSize() const noexcept override;
@@ -34,11 +37,11 @@ public: // gfx::Texture2D
 
     size_t numChannels() const noexcept override;
 
-    void create() noexcept override;
+    void create() override;
 
-    void upload(const void* pixelData, const Size& size_) noexcept override;
+    void upload(const void* pixelData, const Size& size_) override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
-    void upload() noexcept override;
+    void upload() override;
 
     bool needsUpload() const noexcept override { return !!image; };
 
@@ -59,12 +62,12 @@ public:
     void unbind() noexcept;
 
 private:
-    void allocateTexture() noexcept;
+    void allocateTexture();
     void updateTextureData(const void* data = nullptr) noexcept;
 
 private:
     gl::Context& context;
-    std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
+    std::unique_ptr<UniqueTexture> texture;
 
     SamplerState samplerState{};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};

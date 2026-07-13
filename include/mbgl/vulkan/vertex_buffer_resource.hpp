@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/vulkan/buffer_resource.hpp>
 
 #include <memory>
@@ -9,12 +10,10 @@ namespace vulkan {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
-    VertexBufferResource() noexcept = delete;
-    VertexBufferResource(BufferResource&& buffer_) noexcept
-        : buffer(std::move(buffer_)) {}
+    VertexBufferResource(BufferResource&& buffer_) noexcept;
     VertexBufferResource(VertexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}
-    ~VertexBufferResource() noexcept override = default;
+    ~VertexBufferResource() noexcept override;
 
     std::size_t getSizeInBytes() const noexcept { return buffer.getSizeInBytes(); }
     const void* contents() const noexcept { return buffer.contents(); }

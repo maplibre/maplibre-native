@@ -18,7 +18,9 @@ TEST(GL, DrawModeType) {
     ASSERT_EQ(GL_TRIANGLES, Enum<DrawModeType>::to(DrawModeType::Triangles));
     ASSERT_EQ(GL_TRIANGLE_STRIP, Enum<DrawModeType>::to(DrawModeType::TriangleStrip));
     ASSERT_EQ(GL_TRIANGLE_FAN, Enum<DrawModeType>::to(DrawModeType::TriangleFan));
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<DrawModeType>::to(static_cast<DrawModeType>(-1)));
+    ASSERT_EQ(
+        GL_INVALID_ENUM,
+        Enum<DrawModeType>::to(static_cast<DrawModeType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
 }
 
 namespace {
@@ -35,7 +37,9 @@ TEST(GL, ColorBlendEquationType) {
     ASSERT_EQ(ColorBlendEquationType::Subtract, enumIdentity(ColorBlendEquationType::Subtract));
     ASSERT_EQ(ColorBlendEquationType::ReverseSubtract, enumIdentity(ColorBlendEquationType::ReverseSubtract));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<ColorBlendEquationType>::to(static_cast<ColorBlendEquationType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<ColorBlendEquationType>::to(
+                  static_cast<ColorBlendEquationType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(ColorBlendEquationType{}, Enum<ColorBlendEquationType>::from(GL_RGBA8));
 }
 
@@ -56,7 +60,9 @@ TEST(GL, ColorBlendFactorType) {
     ASSERT_EQ(ColorBlendFactorType::OneMinusConstantAlpha, enumIdentity(ColorBlendFactorType::OneMinusConstantAlpha));
     ASSERT_EQ(ColorBlendFactorType::SrcAlphaSaturate, enumIdentity(ColorBlendFactorType::SrcAlphaSaturate));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<ColorBlendFactorType>::to(static_cast<ColorBlendFactorType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<ColorBlendFactorType>::to(
+                  static_cast<ColorBlendFactorType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(ColorBlendFactorType{}, Enum<ColorBlendFactorType>::from(GL_RGBA8));
 }
 
@@ -70,7 +76,9 @@ TEST(GL, DepthFunctionType) {
     ASSERT_EQ(DepthFunctionType::GreaterEqual, enumIdentity(DepthFunctionType::GreaterEqual));
     ASSERT_EQ(DepthFunctionType::Always, enumIdentity(DepthFunctionType::Always));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<DepthFunctionType>::to(static_cast<DepthFunctionType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<DepthFunctionType>::to(
+                  static_cast<DepthFunctionType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(DepthFunctionType{}, Enum<DepthFunctionType>::from(GL_RGBA8));
 }
 
@@ -92,7 +100,9 @@ TEST(GL, StencilFunctionType) {
     ASSERT_EQ(StencilFunctionType::GreaterEqual, enumIdentity(StencilFunctionType::GreaterEqual));
     ASSERT_EQ(StencilFunctionType::Always, enumIdentity(StencilFunctionType::Always));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<StencilFunctionType>::to(static_cast<StencilFunctionType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<StencilFunctionType>::to(
+                  static_cast<StencilFunctionType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(StencilFunctionType{}, Enum<StencilFunctionType>::from(GL_RGBA8));
 }
 
@@ -106,7 +116,9 @@ TEST(GL, StencilOpType) {
     ASSERT_EQ(StencilOpType::DecrementWrap, enumIdentity(StencilOpType::DecrementWrap));
     ASSERT_EQ(StencilOpType::Invert, enumIdentity(StencilOpType::Invert));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<StencilOpType>::to(static_cast<StencilOpType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<StencilOpType>::to(
+                  static_cast<StencilOpType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(StencilOpType{}, Enum<StencilOpType>::from(GL_RGBA8));
 }
 
@@ -115,7 +127,9 @@ TEST(GL, CullFaceSideType) {
     ASSERT_EQ(CullFaceSideType::Back, enumIdentity(CullFaceSideType::Back));
     ASSERT_EQ(CullFaceSideType::FrontAndBack, enumIdentity(CullFaceSideType::FrontAndBack));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<CullFaceSideType>::to(static_cast<CullFaceSideType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<CullFaceSideType>::to(
+                  static_cast<CullFaceSideType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(CullFaceSideType{}, Enum<CullFaceSideType>::from(GL_RGBA8));
 }
 
@@ -123,7 +137,9 @@ TEST(GL, CullFaceWindingType) {
     ASSERT_EQ(CullFaceWindingType::Clockwise, enumIdentity(CullFaceWindingType::Clockwise));
     ASSERT_EQ(CullFaceWindingType::CounterClockwise, enumIdentity(CullFaceWindingType::CounterClockwise));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<CullFaceWindingType>::to(static_cast<CullFaceWindingType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<CullFaceWindingType>::to(
+                  static_cast<CullFaceWindingType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(CullFaceWindingType{}, Enum<CullFaceWindingType>::from(GL_RGBA8));
 }
 
@@ -132,7 +148,9 @@ TEST(GL, BufferUsageType) {
     ASSERT_EQ(BufferUsageType::StaticDraw, enumIdentity(BufferUsageType::StaticDraw));
     ASSERT_EQ(BufferUsageType::DynamicDraw, enumIdentity(BufferUsageType::DynamicDraw));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<BufferUsageType>::to(static_cast<BufferUsageType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<BufferUsageType>::to(
+                  static_cast<BufferUsageType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(BufferUsageType{}, Enum<BufferUsageType>::from(GL_RGBA8));
 }
 
@@ -143,7 +161,9 @@ TEST(GL, TexturePixelType) {
     ASSERT_EQ(TexturePixelType::Depth, enumIdentity(TexturePixelType::Depth));
     ASSERT_EQ(TexturePixelType::Luminance, enumIdentity(TexturePixelType::Luminance));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<TexturePixelType>::to(static_cast<TexturePixelType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<TexturePixelType>::to(
+                  static_cast<TexturePixelType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(TexturePixelType{}, Enum<TexturePixelType>::from(GL_RGBA8));
 }
 
@@ -152,7 +172,9 @@ TEST(GL, TextureChannelDataType) {
     ASSERT_EQ(TextureChannelDataType::HalfFloat, enumIdentity(TextureChannelDataType::HalfFloat));
     ASSERT_EQ(TextureChannelDataType::Float, enumIdentity(TextureChannelDataType::Float));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<TextureChannelDataType>::to(static_cast<TextureChannelDataType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<TextureChannelDataType>::to(
+                  static_cast<TextureChannelDataType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(TextureChannelDataType{}, Enum<TextureChannelDataType>::from(GL_RGBA8));
 }
 
@@ -161,7 +183,9 @@ TEST(GL, RenderbufferPixelType) {
     ASSERT_EQ(RenderbufferPixelType::Depth, enumIdentity(RenderbufferPixelType::Depth));
     ASSERT_EQ(RenderbufferPixelType::DepthStencil, enumIdentity(RenderbufferPixelType::DepthStencil));
 
-    ASSERT_EQ(GL_INVALID_ENUM, Enum<RenderbufferPixelType>::to(static_cast<RenderbufferPixelType>(-1)));
+    ASSERT_EQ(GL_INVALID_ENUM,
+              Enum<RenderbufferPixelType>::to(
+                  static_cast<RenderbufferPixelType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
     ASSERT_EQ(RenderbufferPixelType{}, Enum<RenderbufferPixelType>::from(GL_RGBA8));
 }
 
@@ -176,7 +200,9 @@ TEST(GL, sizedFor) {
     ASSERT_EQ(GL_INVALID_ENUM,
               Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::Alpha, TextureChannelDataType::Float));
     ASSERT_EQ(GL_INVALID_ENUM,
-              Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::RGBA, static_cast<TextureChannelDataType>(-1)));
+              Enum<gfx::TexturePixelType>::sizedFor(
+                  TexturePixelType::RGBA,
+                  static_cast<TextureChannelDataType>(-1))); // NOLINT(clang-analyzer-optin.core.EnumCastOutOfRange)
 }
 
 #endif

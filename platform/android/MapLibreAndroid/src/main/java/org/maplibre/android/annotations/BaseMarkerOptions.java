@@ -12,7 +12,7 @@ import org.maplibre.android.geometry.LatLng;
  * @param <U> Type of the marker to be composed
  * @param <T> Type of the builder to be used for composing a custom Marker
  * @deprecated As of 7.0.0,
- * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+ * use <a href="https://github.com/maplibre/maplibre-plugins-android">
  *   MapLibre Annotation Plugin</a> instead
  */
 @Deprecated

@@ -12,7 +12,7 @@
 /cmake-build-debug
 /platform/android/build
 /platform/android/MapLibreAndroid/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
-/platform/windows/vendor/mesa3d/
+/platform/android/MapLibreAndroid/android-binaries-*.zip
 *.code-workspace
 
 local.properties
@@ -20,7 +20,9 @@ local.properties
 .DS_Store
 .cache
 compile_commands.json
+.build
 /build
+/build-*
 **/.idea
 **/.clwb
 /new_offline.db
@@ -34,6 +36,8 @@ compile_commands.json
 /platform/android/site
 node_modules
 .cxx
+.env
+vendor/dawn/
 
 # Node binaries.
 /lib
@@ -52,3 +56,8 @@ cache.sqlite
 cache.sqlite-journal
 out.png
 /test/android/app/build
+
+# Rust
+**/target/
+**/*.rs.bk
+**/*.profraw

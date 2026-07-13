@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/containers.hpp>
@@ -76,12 +76,14 @@ public:
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
             for (const auto& attrib : ShaderClass::attributes) {
-                if (!propertiesAsUniforms.second.count(attrib.id)) {
-                    shader->initAttribute(attrib);
+                if (!propertiesAsUniforms.second.contains(attrib.id)) {
+                    shader->initVertexAttribute(attrib);
                 }
             }
             for (const auto& attrib : ShaderClass::instanceAttributes) {
-                shader->initInstanceAttribute(attrib);
+                if (!propertiesAsUniforms.second.contains(attrib.id)) {
+                    shader->initInstanceAttribute(attrib);
+                }
             }
             for (const auto& texture : ShaderClass::textures) {
                 shader->initTexture(texture);

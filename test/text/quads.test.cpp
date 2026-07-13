@@ -10,11 +10,59 @@
 using namespace mbgl;
 using namespace mbgl::style;
 
+// Atlas padding is not scaled with textureScale, so a 2x glyph quad is 1
+// logical pixel smaller than its 1x equivalent. GL JS-style fractional metrics
+// keep its center aligned with the 1x quad.
+TEST(getGlyphQuads, DoubleResolutionGlyphPreservesLogicalQuadSize) {
+    GlyphMetrics metrics1x;
+    metrics1x.width = 24;
+    metrics1x.height = 24;
+    metrics1x.left = 0;
+    metrics1x.top = -8;
+    metrics1x.advance = 24;
+    metrics1x.isDoubleResolution = false;
+
+    GlyphMetrics metrics2x = metrics1x;
+    metrics2x.left += 0.5f;
+    metrics2x.top -= 0.5f;
+    metrics2x.isDoubleResolution = true;
+
+    // Rects reflect the real DynamicTextureAtlas output: bitmap.size + 2 *
+    // ImagePosition::padding (= 2). 1x bitmap 30 -> rect 32; 2x bitmap 60 -> rect 62.
+    Shaping shapedText1x;
+    shapedText1x.positionedLines.emplace_back();
+    shapedText1x.positionedLines.back().positionedGlyphs.emplace_back(
+        PositionedGlyph(u'A', 0.0f, 0.0f, false, 0, 1.0f, Rect<uint16_t>(0, 0, 32, 32), metrics1x, std::nullopt));
+
+    Shaping shapedText2x;
+    shapedText2x.positionedLines.emplace_back();
+    shapedText2x.positionedLines.back().positionedGlyphs.emplace_back(
+        PositionedGlyph(u'A', 0.0f, 0.0f, false, 0, 1.0f, Rect<uint16_t>(0, 0, 62, 62), metrics2x, std::nullopt));
+
+    SymbolLayoutProperties::Evaluated layout;
+    SymbolQuads quads1x = getGlyphQuads(shapedText1x, {{0, 0}}, layout, SymbolPlacementType::Point, {}, false);
+    SymbolQuads quads2x = getGlyphQuads(shapedText2x, {{0, 0}}, layout, SymbolPlacementType::Point, {}, false);
+
+    ASSERT_EQ(quads1x.size(), 1u);
+    ASSERT_EQ(quads2x.size(), 1u);
+
+    // The 2x quad is 1 logical pixel smaller, and shifted by 0.5px to keep the
+    // same center as the 1x quad.
+    EXPECT_FLOAT_EQ(quads1x[0].tl.x + 0.5f, quads2x[0].tl.x);
+    EXPECT_FLOAT_EQ(quads1x[0].tl.y + 0.5f, quads2x[0].tl.y);
+    EXPECT_FLOAT_EQ(quads1x[0].br.x - 0.5f, quads2x[0].br.x);
+    EXPECT_FLOAT_EQ(quads1x[0].br.y - 0.5f, quads2x[0].br.y);
+
+    EXPECT_FLOAT_EQ(quads1x[0].br.x - quads1x[0].tl.x, 32.0f);
+    EXPECT_FLOAT_EQ(quads2x[0].br.x - quads2x[0].tl.x, 31.0f);
+    EXPECT_FLOAT_EQ(quads1x[0].br.y - quads1x[0].tl.y, 32.0f);
+    EXPECT_FLOAT_EQ(quads2x[0].br.y - quads2x[0].tl.y, 31.0f);
+}
+
 TEST(getIconQuads, normal) {
     SymbolLayoutProperties::Evaluated layout;
     Anchor anchor(2.0, 3.0, 0.0, 0);
-    ImagePosition image = {mapbox::Bin(-1, 15, 11, 0, 0, 0, 0),
-                           style::Image::Impl("test", PremultipliedImage({1, 1}), 1.0f)};
+    ImagePosition image = {Rect<uint16_t>(0, 0, 15, 11), style::Image::Impl("test", PremultipliedImage({1, 1}), 1.0f)};
 
     auto shapedIcon = PositionedIcon::shapeIcon(image, {{-6.5f, -4.5f}}, SymbolAnchorType::Center);
 
@@ -36,7 +84,7 @@ TEST(getIconQuads, normal) {
 
 TEST(getIconQuads, style) {
     Anchor anchor(0.0, 0.0, 0.0, 0);
-    const ImagePosition image = {mapbox::Bin(-1, 20, 20, 0, 0, 0, 0),
+    const ImagePosition image = {Rect<uint16_t>(0, 0, 20, 20),
                                  style::Image::Impl("test", PremultipliedImage({1, 1}), 1.0f)};
 
     GeometryCoordinates line;

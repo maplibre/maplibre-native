@@ -1,15 +1,18 @@
 #include "android_renderer_frontend.hpp"
-#include "android_renderer_backend.hpp"
 
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
-#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/thread.hpp>
+#include <mbgl/util/logging.hpp>
+
+#include "android_renderer_backend.hpp"
+#include "attach_env.hpp"
 
 namespace mbgl {
 namespace android {
@@ -35,17 +38,16 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   double frameEncodingTime,
-                                   double frameRenderingTime) override {
+                                   const gfx::RenderingStats& stats) override {
         void (RendererObserver::*f)(
-            RenderMode, bool, bool, double, double) = &RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
+            RenderMode, bool, bool, const gfx::RenderingStats&) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, stats);
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
 
-    void onStyleImageMissing(const std::string& id, Scheduler::Task&& done) override {
-        delegate.invoke(&RendererObserver::onStyleImageMissing, id, std::move(done));
+    void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
+        delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
     }
 
     void onRemoveUnusedStyleImages(const std::vector<std::string>& ids) override {
@@ -86,18 +88,46 @@ public:
         delegate.invoke(&RendererObserver::onTileAction, op, id, sourceID);
     }
 
+    void onRenderError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onRenderError, err); }
+
 private:
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<RendererObserver> delegate;
 };
 
-AndroidRendererFrontend::AndroidRendererFrontend(MapRenderer& mapRenderer_)
-    : mapRenderer(mapRenderer_),
-      mapRunLoop(util::RunLoop::Get()),
-      updateAsyncTask(std::make_unique<util::AsyncTask>([this]() {
-          mapRenderer.update(std::move(updateParams));
-          mapRenderer.requestRender();
-      })) {}
+AndroidRendererFrontend::AndroidRendererFrontend(Private,
+                                                 jni::JNIEnv& env,
+                                                 const jni::Object<MapRenderer>& mapRendererObj)
+    : mapRenderer(MapRenderer::getNativePeer(env, mapRendererObj)),
+      mapRunLoop(util::RunLoop::Get()) {}
+
+std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(
+    jni::JNIEnv& env, const jni::Object<MapRenderer>& mapRendererObj) {
+    auto ptr = std::make_shared<AndroidRendererFrontend>(Private(), env, mapRendererObj);
+    ptr->init(env, mapRendererObj);
+    return ptr;
+}
+
+void AndroidRendererFrontend::init(jni::JNIEnv& env, const jni::Object<MapRenderer>& mapRendererObj) {
+    auto weakMapRenderer = std::make_shared<jni::WeakReference<jni::Object<MapRenderer>>>(env, mapRendererObj);
+
+    updateAsyncTask = std::make_unique<util::AsyncTask>(
+        [weakSelf = weak_from_this(), weakMapRenderer = std::move(weakMapRenderer)]() {
+            if (auto self = weakSelf.lock()) {
+                try {
+                    android::UniqueEnv _env = android::AttachEnv();
+                    auto mapRendererRef = weakMapRenderer->get(*_env);
+                    if (mapRendererRef) {
+                        self->mapRenderer.update(std::move(self->updateParams));
+                        self->mapRenderer.requestRender(*_env, mapRendererRef);
+                    }
+                } catch (const std::exception& exception) {
+                    Log::Error(Event::Android,
+                               std::string("AndroidRendererFrontend::updateAsyncTask failed: ") + exception.what());
+                }
+            }
+        });
+}
 
 AndroidRendererFrontend::~AndroidRendererFrontend() = default;
 
@@ -160,14 +190,26 @@ std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const Screen
     return mapRenderer.actor().ask(fn, point, options).get();
 }
 
-AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box) const {
+AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box,
+                                                             const std::chrono::milliseconds& timeout) const {
     // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(&Renderer::queryPointAnnotations, box).get();
+    auto future = mapRenderer.actor().ask(&Renderer::queryPointAnnotations, box);
+    if (future.wait_for(timeout) != std::future_status::ready) {
+        return {};
+    }
+
+    return future.get();
 }
 
-AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box) const {
+AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& box,
+                                                             const std::chrono::milliseconds& timeout) const {
     // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box).get();
+    auto future = mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box);
+    if (future.wait_for(timeout) != std::future_status::ready) {
+        return {};
+    }
+
+    return future.get();
 }
 
 FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(

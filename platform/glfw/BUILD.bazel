@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 objc_library(
@@ -12,6 +13,7 @@ objc_library(
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     deps = [
         "//:maplibre_lib",
+        "//vendor:args",
         "@glfw",
     ],
 )

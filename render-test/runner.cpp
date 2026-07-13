@@ -704,7 +704,11 @@ TestRunner::Impl::Impl(const TestMetadata& metadata,
               .withPixelRatio(metadata.pixelRatio)
               .withCrossSourceCollisions(metadata.crossSourceCollisions),
           resourceOptions,
-          clientOptions) {}
+          clientOptions) {
+    if (metadata.maxPitch) {
+        map.setBounds(BoundOptions().withMaxPitch(*metadata.maxPitch));
+    }
+}
 
 TestRunner::Impl::~Impl() {}
 
@@ -829,7 +833,14 @@ void TestRunner::run(TestMetadata& metadata) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
                     static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cv;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif

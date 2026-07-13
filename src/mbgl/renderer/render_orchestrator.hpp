@@ -1,7 +1,6 @@
 #pragma once
-#if MLN_DRAWABLE_RENDERER
+
 #include <mbgl/renderer/layer_group.hpp>
-#endif
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
@@ -24,9 +23,7 @@
 #include <vector>
 
 namespace mbgl {
-#if MLN_DRAWABLE_RENDERER
 class ChangeRequest;
-#endif
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -42,10 +39,10 @@ class RenderTree;
 
 namespace gfx {
 class ShaderRegistry;
-#if MLN_DRAWABLE_RENDERER
 class Drawable;
 using DrawablePtr = std::shared_ptr<Drawable>;
-#endif
+class DynamicTextureAtlas;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
 namespace style {
@@ -61,11 +58,15 @@ public:
                        const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
+#if MLN_RENDER_BACKEND_OPENGL
+    void enableAndroidEmulatorGoldfishMitigation(bool enable) { androidGoldfishMitigationEnabled = enable; }
+#endif
+
     void markContextLost() { contextLost = true; };
     // TODO: Introduce RenderOrchestratorObserver.
     void setObserver(RendererObserver*);
 
-    std::unique_ptr<RenderTree> createRenderTree(const std::shared_ptr<UpdateParameters>&);
+    std::unique_ptr<RenderTree> createRenderTree(const std::shared_ptr<UpdateParameters>&, gfx::DynamicTextureAtlasPtr);
 
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions&) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&) const;
@@ -102,7 +103,6 @@ public:
 
     void update(const std::shared_ptr<UpdateParameters>&);
 
-#if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr);
     bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
@@ -112,7 +112,11 @@ public:
     void visitLayerGroups(Func f) {
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
-                f(*pair.second);
+                try {
+                    f(*pair.second);
+                } catch (...) {
+                    observer->onRenderError(std::current_exception());
+                }
             }
         }
     }
@@ -121,7 +125,11 @@ public:
     void visitLayerGroupsReversed(Func f) {
         for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
             if (rit->second) {
-                f(*rit->second);
+                try {
+                    f(*rit->second);
+                } catch (...) {
+                    observer->onRenderError(std::current_exception());
+                }
             }
         }
     }
@@ -154,7 +162,6 @@ public:
             }
         }
     }
-#endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
@@ -186,13 +193,11 @@ private:
     void onTileAction(RenderSource&, TileOperation, const OverscaledTileID&, const std::string&) override;
 
     // ImageManagerObserver implementation
-    void onStyleImageMissing(const std::string&, Scheduler::Task&&) override;
+    void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
-#if MLN_DRAWABLE_RENDERER
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
-#endif
 
     RendererObserver* observer;
 
@@ -220,6 +225,10 @@ private:
     bool placedSymbolDataCollected = false;
     bool tileCacheEnabled = true;
 
+#if MLN_RENDER_BACKEND_OPENGL
+    bool androidGoldfishMitigationEnabled{false};
+#endif
+
     // Vectors with reserved capacity of layerImpls->size() to avoid
     // reallocation on each frame.
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
@@ -228,7 +237,6 @@ private:
 
     TaggedScheduler threadPool;
 
-#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
     using LayerGroupMap = std::multimap<int32_t, LayerGroupBasePtr>;
@@ -236,7 +244,6 @@ private:
 
     std::vector<RenderTargetPtr> renderTargets;
     RenderItem::DebugLayerGroupMap debugLayerGroups;
-#endif
 };
 
 } // namespace mbgl

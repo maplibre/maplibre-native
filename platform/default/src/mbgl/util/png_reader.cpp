@@ -10,12 +10,14 @@ extern "C" {
 #include <png.h>
 }
 
+namespace {
 template <size_t max, typename... Args>
-static std::string sprintf(const char* msg, Args... args) {
+std::string sprintf(const char* msg, Args... args) {
     char res[max];
     int len = snprintf(res, sizeof(res), msg, args...);
     return std::string(res, len);
 }
+} // namespace
 
 const static bool png_version_check [[maybe_unused]] = []() {
     const png_uint_32 version = png_access_version_number();
@@ -35,15 +37,16 @@ const static bool png_version_check [[maybe_unused]] = []() {
 
 namespace mbgl {
 
-static void user_error_fn(png_structp, png_const_charp error_msg) {
+namespace {
+void user_error_fn(png_structp, png_const_charp error_msg) {
     throw std::runtime_error(std::string("failed to read invalid png: '") + error_msg + "'");
 }
 
-static void user_warning_fn(png_structp, png_const_charp warning_msg) {
+void user_warning_fn(png_structp, png_const_charp warning_msg) {
     Log::Warning(Event::Image, std::string("ImageReader (PNG): ") + warning_msg);
 }
 
-static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {
+void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {
     auto* fin = reinterpret_cast<std::istream*>(png_get_io_ptr(png_ptr));
     fin->read(reinterpret_cast<char*>(data), length);
     std::streamsize read_count = fin->gcount();
@@ -51,6 +54,7 @@ static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length
         png_error(png_ptr, "Read Error");
     }
 }
+} // namespace
 
 struct png_struct_guard {
     png_struct_guard(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr)

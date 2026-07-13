@@ -196,12 +196,14 @@ std::optional<InputType> parseInputValue(const Convertible& input,
     return result;
 }
 
+namespace {
+
 template <typename T>
-static ParseResult create(type::Type outputType,
-                          std::unique_ptr<Expression> input,
-                          std::vector<std::pair<std::vector<InputType>, std::unique_ptr<Expression>>> branches,
-                          std::unique_ptr<Expression> otherwise,
-                          ParsingContext& ctx) {
+ParseResult create(type::Type outputType,
+                   std::unique_ptr<Expression> input,
+                   std::vector<std::pair<std::vector<InputType>, std::unique_ptr<Expression>>> branches,
+                   std::unique_ptr<Expression> otherwise,
+                   ParsingContext& ctx) {
     typename Match<T>::Branches typedBranches;
 
     std::size_t index = 2;
@@ -223,6 +225,8 @@ static ParseResult create(type::Type outputType,
     return ParseResult(std::make_unique<Match<T>>(
         std::move(outputType), std::move(input), std::move(typedBranches), std::move(otherwise)));
 }
+
+} // namespace
 
 ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));

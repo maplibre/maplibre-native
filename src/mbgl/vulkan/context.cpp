@@ -1,7 +1,6 @@
 #include <mbgl/vulkan/context.hpp>
 
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
@@ -16,6 +15,7 @@
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -41,7 +41,10 @@ constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
 constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
-static uint32_t glslangRefCount = 0;
+namespace {
+std::mutex glslangMutex;
+uint32_t glslangRefCount = 0;
+} // namespace
 
 class RenderbufferResource : public gfx::RenderbufferResource {
 public:
@@ -52,25 +55,38 @@ Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_),
       globalUniformBuffers(DescriptorSetType::Global, 0, 0, shaders::globalUBOCount) {
-    if (glslangRefCount++ == 0) {
-        glslang::InitializeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (glslangRefCount++ == 0) {
+            glslang::InitializeProcess();
+        }
     }
 
     initFrameResources();
 }
 
 Context::~Context() noexcept {
-    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+    MBGL_VERIFY_THREAD(tid);
 
     destroyResources();
 
-    if (--glslangRefCount == 0) {
-        glslang::FinalizeProcess();
+    {
+        std::scoped_lock lock(glslangMutex);
+        if (--glslangRefCount == 0) {
+            glslang::FinalizeProcess();
+        }
     }
+
+#if !defined(NDEBUG)
+    Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
+
+    assert(stats.isZero());
 }
 
 void Context::initFrameResources() {
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     const auto frameCount = backend.getMaxFrames();
 
     descriptorPoolMap.emplace(DescriptorSetType::Global,
@@ -83,7 +99,8 @@ void Context::initFrameResources() {
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, 0, shaders::maxUBOCountPerDrawable, 0));
+        DescriptorPoolGrowable(
+            drawableUniformDescriptorPoolSize, shaders::maxSSBOCountPerDrawable, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
@@ -93,56 +110,71 @@ void Context::initFrameResources() {
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, frameCount);
 
-    auto commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
+    auto commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
 
     frameResources.reserve(frameCount);
 
     for (uint32_t index = 0; index < frameCount; ++index) {
-        frameResources.emplace_back(commandBuffers[index],
-                                    device->createSemaphoreUnique({}),
-                                    device->createSemaphoreUnique({}),
-                                    device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
+        frameResources.emplace_back(
+            commandBuffers[index],
+            device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled), nullptr, dispatcher));
 
         const auto& frame = frameResources.back();
 
         backend.setDebugName(frame.commandBuffer.get(), "FrameCommandBuffer_" + std::to_string(index));
-        backend.setDebugName(frame.frameSemaphore.get(), "FrameSemaphore_" + std::to_string(index));
-        backend.setDebugName(frame.surfaceSemaphore.get(), "SurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
     }
 
     // force placeholder texture upload before any descriptor sets
-    (void)getDummyTexture();
+    static_cast<void>(getDummyTexture());
 
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, 0, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
+                                    shaders::layerSSBOStartId,
                                     shaders::maxSSBOCountPerLayer,
                                     shaders::maxUBOCountPerLayer,
                                     "LayerUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
-                                    shaders::globalUBOCount,
-                                    0,
+                                    shaders::drawableSSBOStartId,
+                                    shaders::maxSSBOCountPerDrawable,
                                     shaders::maxUBOCountPerDrawable,
                                     "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
 }
 
 void Context::destroyResources() {
-    backend.getDevice()->waitIdle();
+    MBGL_VERIFY_THREAD(tid);
+
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mbgl::Event::Render, "Vulkan device lost during context shutdown");
+    }
 
     for (auto& frame : frameResources) {
         frame.runDeletionQueue(*this);
     }
 
-    globalUniformBuffers.freeDescriptorSets();
-
     // all resources have unique handles
     frameResources.clear();
+
+    globalUniformBuffers.freeDescriptorSets();
+
+    for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+        globalUniformBuffers.set(i, nullptr);
+    }
+
+    dummyBuffer.reset();
+    dummyTexture2D.reset();
+
+    clipping.indexBuffer.reset();
+    clipping.vertexBuffer.reset();
 }
 
-void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
+void Context::enqueueDeletion(DeletionTask&& function) {
+    MBGL_VERIFY_THREAD(tid);
+
     if (frameResources.empty()) {
         function(*this);
         return;
@@ -151,32 +183,44 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    submitOneTimeCommand(backend.getCommandPool(), function);
+}
+
+void Context::submitOneTimeCommand(const vk::UniqueCommandBuffer& commandBuffer) {
     MLN_TRACE_FUNC();
 
-    const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
 
     const auto& device = backend.getDevice();
-    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo);
-    auto& commandBuffer = commandBuffers.front();
-
-    backend.setDebugName(commandBuffer.get(), "OneTimeSubmitCommandBuffer");
-
-    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
-    function(commandBuffer);
-    commandBuffer->end();
-
+    const auto& dispatcher = backend.getDispatcher();
     const auto submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
-
-    const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()));
-    backend.getGraphicsQueue().submit(submitInfo, fence.get());
+    const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()), nullptr, dispatcher);
+    backend.getGraphicsQueue().submit(submitInfo, fence.get(), dispatcher);
 
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-    const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout);
+    const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
     }
+}
+
+void Context::submitOneTimeCommand(const vk::UniqueCommandPool& pool,
+                                   const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+
+    const vk::CommandBufferAllocateInfo allocateInfo(pool.get(), vk::CommandBufferLevel::ePrimary, 1);
+    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
+    const auto& commandBuffer = commandBuffers.front();
+
+    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
+    function(commandBuffer);
+    commandBuffer->end(dispatcher);
+
+    submitOneTimeCommand(commandBuffer);
 }
 
 void Context::requestSurfaceUpdate(bool useDelay) {
@@ -194,19 +238,28 @@ void Context::requestSurfaceUpdate(bool useDelay) {
 
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
+
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     auto& frame = frameResources[frameResourceIndex];
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
-    const vk::Result waitFenceResult = device->waitForFences(1, &frame.flightFrameFence.get(), VK_TRUE, timeout);
+    const vk::Result waitFenceResult = device->waitForFences(
+        1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
     }
 }
+
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
+
+    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
 
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
     const auto& platformSurface = renderableResource.getPlatformSurface();
 
@@ -259,7 +312,11 @@ void Context::beginFrame() {
         MLN_TRACE_ZONE(acquireNextImageKHR);
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-                renderableResource.getSwapchain().get(), timeout, frame.surfaceSemaphore.get(), nullptr);
+                renderableResource.getSwapchain().get(),
+                timeout,
+                renderableResource.getAcquireSemaphore(),
+                nullptr,
+                dispatcher);
 
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
@@ -278,20 +335,24 @@ void Context::beginFrame() {
         renderableResource.setAcquiredImageIndex(frameResourceIndex);
     }
 
-    frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
-    frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+    frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources, dispatcher);
+    frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
 
     backend.getThreadPool().runRenderJobs();
 }
 
-void Context::endFrame() {
-    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
-}
+void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+
+#if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
+    std::scoped_lock lock(graphicsQueueSubmitMutex);
+#endif
+
+    const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];
-    frame.commandBuffer->end();
+    frame.commandBuffer->end(dispatcher);
 
     const auto& device = backend.getDevice();
     const auto& graphicsQueue = backend.getGraphicsQueue();
@@ -303,29 +364,29 @@ void Context::submitFrame() {
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
     if (platformSurface) {
-        submitInfo.setSignalSemaphores(frame.frameSemaphore.get())
-            .setWaitSemaphores(frame.surfaceSemaphore.get())
+        submitInfo.setSignalSemaphores(renderableResource.getPresentSemaphore())
+            .setWaitSemaphores(renderableResource.getAcquireSemaphore())
             .setWaitDstStageMask(waitStageMask);
     }
 
-    const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get());
+    const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get(), dispatcher);
     if (resetFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "Reset fence failed");
     }
 
-    graphicsQueue.submit(submitInfo, frame.flightFrameFence.get());
+    graphicsQueue.submit(submitInfo, frame.flightFrameFence.get(), dispatcher);
 
     // present rendered frame
     if (platformSurface) {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
                                      .setSwapchains(renderableResource.getSwapchain().get())
-                                     .setWaitSemaphores(frame.frameSemaphore.get())
+                                     .setWaitSemaphores(renderableResource.getPresentSemaphore())
                                      .setImageIndices(acquiredImage);
 
         try {
             const auto& presentQueue = backend.getPresentQueue();
-            const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
+            const vk::Result presentResult = presentQueue.presentKHR(presentInfo, dispatcher);
             if (presentResult == vk::Result::eSuboptimalKHR) {
                 requestSurfaceUpdate();
             }
@@ -357,6 +418,11 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     return program;
 }
 
+void Context::performCleanup() {
+    stats.numDrawCalls = 0;
+    ++stats.numFrames;
+}
+
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
@@ -378,11 +444,15 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    tileLayerGroup->setObserver(observer);
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+    layerGroup->setObserver(observer);
+    return layerGroup;
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
@@ -402,6 +472,10 @@ gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<Texture2D>(*this);
 }
 
+gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixelType pixelType) {
+    return std::make_shared<DynamicTexture>(*this, size, pixelType);
+}
+
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
     return std::make_shared<RenderTarget>(*this, size, type);
 }
@@ -415,13 +489,6 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
     return createOffscreenTexture(size, type, false, false);
-}
-
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                                     gfx::TexturePixelType,
-                                                                     gfx::TextureChannelDataType) {
-    throw std::runtime_error("Vulkan TextureResource not implemented");
-    return nullptr;
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
@@ -526,6 +593,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                 .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
     }
 
+    const auto& dispatcher = backend.getDispatcher();
     auto& shaderImpl = static_cast<ShaderProgram&>(*clipping.shader);
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& commandBuffer = renderPassImpl.getEncoder().getCommandBuffer();
@@ -534,21 +602,24 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
 
-    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
+    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
+    clipping.pipelineInfo.setScissorRect(
+        {0, 0, clipping.pipelineInfo.viewExtent.width, clipping.pipelineInfo.viewExtent.height});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
 
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
     const std::array<vk::DeviceSize, 1> offset = {0};
 
-    commandBuffer->bindVertexBuffers(0, vertexBuffers, offset);
-    commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16);
+    commandBuffer->bindVertexBuffers(0, vertexBuffers, offset, dispatcher);
+    commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
     const float rad = renderableResource.getRotation();
-    const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    const mat4 rotationMat = {
+        std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
-        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
+        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref, dispatcher);
 
         mat4 matrix;
         matrix::multiply(matrix, rotationMat, tileInfo.matrix);
@@ -559,8 +630,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
             vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
             0,
             sizeof(matrixf),
-            &matrixf);
-        commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
+            &matrixf,
+            dispatcher);
+        commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0, dispatcher);
     }
 
     stats.numDrawCalls++;
@@ -588,7 +660,7 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
         dummyTexture2D->setSize(size);
 
         submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
-            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer);
+            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer, false);
         });
     }
 
@@ -596,7 +668,7 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
-                                              size_t startId,
+                                              [[maybe_unused]] size_t startId,
                                               size_t storageCount,
                                               size_t uniformCount,
                                               const std::string& name) {
@@ -606,6 +678,7 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
         if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eVertex;
         }
+
         if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
             stageFlags |= vk::ShaderStageFlagBits::eFragment;
         }
@@ -621,7 +694,8 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
     }
 
     const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
-    layout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+    layout = backend.getDevice()->createDescriptorSetLayoutUnique(
+        descriptorSetLayoutCreateInfo, nullptr, backend.getDispatcher());
     backend.setDebugName(layout.get(), name);
 }
 
@@ -638,7 +712,7 @@ void Context::buildImageDescriptorSetLayout() {
 
     const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
     drawableImageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
-        descriptorSetLayoutCreateInfo);
+        descriptorSetLayoutCreateInfo, nullptr, backend.getDispatcher());
     backend.setDebugName(drawableImageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
 }
 
@@ -682,7 +756,9 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     };
 
     generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts));
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts),
+        nullptr,
+        backend.getDispatcher());
 
     backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
 
@@ -695,8 +771,23 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
     const auto pushConstant = vk::PushConstantRange().setSize(sizeof(matf4)).setStageFlags(stages);
 
+    auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
+
+#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+    // GPU assisted validation crashes when using a pipeline without descriptors.
+    // Use a compatible layout with the general pipeline when enabled
+    const std::vector<vk::DescriptorSetLayout> layouts = {
+        globalUniformDescriptorSetLayout.get(),
+        layerUniformDescriptorSetLayout.get(),
+        drawableUniformDescriptorSetLayout.get(),
+        drawableImageDescriptorSetLayout.get(),
+    };
+
+    layoutInfo.setSetLayouts(layouts);
+#endif
+
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant));
+        layoutInfo, nullptr, backend.getDispatcher());
 
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 
@@ -706,7 +797,9 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 void Context::FrameResources::runDeletionQueue(Context& context) {
     MLN_TRACE_FUNC();
 
-    for (const auto& function : deletionQueue) function(context);
+    for (const auto& function : deletionQueue) {
+        function(context);
+    }
 
     deletionQueue.clear();
 }

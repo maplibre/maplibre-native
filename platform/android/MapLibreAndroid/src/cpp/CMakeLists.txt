@@ -110,6 +110,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/map_renderer_runnable.hpp
             ${PROJECT_SOURCE_DIR}/native_map_view.cpp
             ${PROJECT_SOURCE_DIR}/native_map_view.hpp
+            ${PROJECT_SOURCE_DIR}/native_map_options.cpp
+            ${PROJECT_SOURCE_DIR}/native_map_options.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region.cpp
@@ -120,6 +122,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/offline/offline_region_error.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.hpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.cpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.cpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshotter.cpp
@@ -143,6 +147,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/layers/background_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.hpp
+            ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.cpp
+            ${PROJECT_SOURCE_DIR}/style/layers/color_relief_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.cpp
@@ -201,10 +207,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.hpp
     )
-    target_compile_definitions(
-        maplibre
-            PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
 endif()
 
 if(MLN_WITH_VULKAN)
@@ -213,10 +215,22 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.hpp
     )
-    target_compile_definitions(
-        maplibre
-            PRIVATE MLN_RENDER_BACKEND_VULKAN=1
+endif()
+
+if(MLN_WITH_WEBGPU)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_webgpu_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_webgpu_renderer_backend.hpp
     )
+    target_compile_definitions(maplibre PRIVATE MLN_RENDER_BACKEND_WEBGPU=1)
+    if(MLN_WEBGPU_IMPL_DAWN AND TARGET mbgl-vendor-dawn)
+        target_compile_definitions(maplibre PRIVATE MLN_WEBGPU_IMPL_DAWN=1)
+        target_link_libraries(maplibre PRIVATE mbgl-vendor-dawn)
+    elseif(MLN_WEBGPU_IMPL_WGPU AND TARGET mbgl-vendor-wgpu)
+        target_compile_definitions(maplibre PRIVATE MLN_WEBGPU_IMPL_WGPU=1)
+        target_link_libraries(maplibre PRIVATE mbgl-vendor-wgpu)
+    endif()
 endif()
 
 target_include_directories(
@@ -238,10 +252,12 @@ target_link_libraries(maplibre
                               $<$<CONFIG:Release>:-Wl,--icf=all>
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
                               $<$<CONFIG:Release>:-flto>
-                              $<$<CONFIG:Release>:-fuse-ld=gold>
-                              Mapbox::Base::jni.hpp
+                              $<$<CONFIG:Release>:-fuse-ld=lld>
+                              $<$<CONFIG:Release>:-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../../../version-script>
+                              #$<$<CONFIG:Release>:-Wl,-Bsymbolic>
+                              $<$<CONFIG:Release>:-Wl,-Bsymbolic-functions>
+                              MapLibreNative::Base::jni.hpp
                               mbgl-core
-                              mbgl-vendor-nontype_functional
                               mbgl-vendor-unique_resource)
 
 install(TARGETS maplibre LIBRARY DESTINATION lib)

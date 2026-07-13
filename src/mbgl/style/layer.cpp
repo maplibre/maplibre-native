@@ -12,6 +12,14 @@
 namespace mbgl {
 namespace style {
 
+// Added this to support plugins and that their LayerTypeInfo isn't the same point
+// across the board
+bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other) {
+    return ((strcmp(one->type, other->type) == 0) && (one->source == other->source) && (one->pass3d == other->pass3d) &&
+            (one->layout == other->layout) && (one->fadingTiles == other->fadingTiles) &&
+            (one->crossTileIndex == other->crossTileIndex) && (one->tileKind == other->tileKind));
+};
+
 static_assert(mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
               "tile kind error");
 static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),
@@ -19,7 +27,9 @@ static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type
 static_assert(mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
               "tile kind error");
 
-static LayerObserver nullObserver;
+namespace {
+LayerObserver nullObserver;
+}
 
 Layer::Layer(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
@@ -44,6 +54,7 @@ void Layer::setSourceLayer(const std::string& sourceLayer) {
     auto impl_ = mutableBaseImpl();
     impl_->sourceLayer = sourceLayer;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 void Layer::setSourceID(const std::string& sourceID) {
@@ -51,6 +62,7 @@ void Layer::setSourceID(const std::string& sourceID) {
     auto impl_ = mutableBaseImpl();
     impl_->source = sourceID;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 };
 
 const Filter& Layer::getFilter() const {

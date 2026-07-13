@@ -55,7 +55,7 @@ public:
                                        " Action: " << "Requesting,"
                                                    << " URL: " << res.url.c_str() << " Size: "
                                                    << (response.data != nullptr ? response.data->size() : 0) << "B,"
-                                                   << " Time");
+                                                   << " Time")
                 }
                 callback(response);
             });
@@ -169,7 +169,7 @@ public:
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
-    std::unique_ptr<AsyncRequest> request(const Resource& resource, std::function<void(Response)> callback) {
+    std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
         req->onCancel([actorRef = thread->actor(), req = req.get()]() {
@@ -195,7 +195,7 @@ public:
     void resume() { thread->resume(); }
 
     void setResourceOptions(ResourceOptions options) {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         resourceOptions = options;
         assetFileSource->setResourceOptions(options.clone());
         databaseFileSource->setResourceOptions(options.clone());
@@ -206,12 +206,12 @@ public:
     }
 
     ResourceOptions getResourceOptions() {
-        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        std::scoped_lock lock(resourceOptionsMutex);
         return resourceOptions.clone();
     }
 
     void setClientOptions(ClientOptions options) {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         clientOptions = options;
         assetFileSource->setClientOptions(options.clone());
         databaseFileSource->setClientOptions(options.clone());
@@ -222,7 +222,7 @@ public:
     }
 
     ClientOptions getClientOptions() {
-        std::lock_guard<std::mutex> lock(clientOptionsMutex);
+        std::scoped_lock lock(clientOptionsMutex);
         return clientOptions.clone();
     }
 
@@ -258,8 +258,7 @@ bool MainResourceLoader::supportsCacheOnlyRequests() const {
     return impl->supportsCacheOnlyRequests();
 }
 
-std::unique_ptr<AsyncRequest> MainResourceLoader::request(const Resource& resource,
-                                                          std::function<void(Response)> callback) {
+std::unique_ptr<AsyncRequest> MainResourceLoader::request(const Resource& resource, Callback callback) {
     return impl->request(resource, std::move(callback));
 }
 

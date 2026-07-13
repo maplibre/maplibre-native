@@ -37,7 +37,7 @@ class CustomSpriteActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             maplibreMap = it
-            it.setStyle(TestStyles.OPENFREEMAP_LIBERY) { style: Style ->
+            it.setStyle(TestStyles.OPENFREEMAP_LIBERTY) { style: Style ->
                 val fab = findViewById<FloatingActionButton>(R.id.fab)
                 fab.setColorFilter(
                     ContextCompat.getColor(

@@ -29,10 +29,14 @@ struct GeoJSONOptions {
     bool cluster = false;
     uint16_t clusterRadius = 50;
     uint8_t clusterMaxZoom = 17;
+    size_t clusterMinPoints = 2;
     using ClusterExpression = std::pair<std::shared_ptr<mbgl::style::expression::Expression>,
                                         std::shared_ptr<mbgl::style::expression::Expression>>;
     using ClusterProperties = std::map<std::string, ClusterExpression>;
     ClusterProperties clusterProperties;
+
+    // Update options
+    bool synchronousUpdate = false;
 
     static Immutable<GeoJSONOptions> defaultOptions();
 };
@@ -45,7 +49,7 @@ public:
                                                const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions());
 
     virtual ~GeoJSONData() = default;
-    virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&) = 0;
+    virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&, bool runSynchronously) = 0;
 
     // SuperclusterData
     virtual Features getChildren(std::uint32_t) = 0;
@@ -53,6 +57,7 @@ public:
     virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
 };
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class GeoJSONSource final : public Source {
 public:
     GeoJSONSource(std::string id, Immutable<GeoJSONOptions> = GeoJSONOptions::defaultOptions());
@@ -74,12 +79,15 @@ public:
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
+    bool isUpdateSynchronous() const noexcept;
+
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
+    std::atomic<uint64_t> requestGeneration{0};
     std::shared_ptr<Scheduler> sequencedScheduler;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`

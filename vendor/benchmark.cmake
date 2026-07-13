@@ -35,6 +35,12 @@ if(WIN32)
         mbgl-vendor-benchmark
         PUBLIC BENCHMARK_STATIC_DEFINE
     )
+
+    target_link_libraries(
+        mbgl-vendor-benchmark
+        PRIVATE
+        $<IF:$<BOOL:${MSVC}>,shlwapi,-lShlwapi>
+    )
 endif()
 
 target_include_directories(

@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 
@@ -39,6 +38,9 @@ public:
     gfx::Context& getContext() override;
     const gfx::Context& getContext() const override;
 
+    CommandEncoder& getCommandEncoder() { return commandEncoder; }
+    const CommandEncoder& getCommandEncoder() const { return commandEncoder; }
+
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
                                                                           gfx::BufferUsageType,
@@ -51,9 +53,9 @@ public:
                                                                         bool persistent) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
-    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&,
-                                                     gfx::BufferUsageType,
-                                                     bool forceUpdate);
+    BufferResource createBufferResource(const void* data, std::size_t size, size_t usage, bool persistent);
+
+    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, size_t usage, bool forceUpdate);
 
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
@@ -65,21 +67,6 @@ public:
         gfx::BufferUsageType,
         const std::optional<std::chrono::duration<double>> lastUpdate,
         /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
-
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                const void* data,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
-    void updateTextureResource(
-        gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
-
-    void updateTextureResourceSub(gfx::TextureResource&,
-                                  uint16_t xOffset,
-                                  uint16_t yOffset,
-                                  Size,
-                                  const void* data,
-                                  gfx::TexturePixelType,
-                                  gfx::TextureChannelDataType) override;
 
 private:
     void pushDebugGroup(const char* name) override;

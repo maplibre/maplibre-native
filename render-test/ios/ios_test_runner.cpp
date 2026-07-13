@@ -18,10 +18,10 @@ bool TestRunner::startTest(const std::string& manifestBasePath) {
         }
         argv.push_back(nullptr);
 
-        int finishedTestCount = 0;
-        std::function<void()> testStatus = [&]() {
+        std::function<void(mbgl::TestStatus)> testStatus = [&](mbgl::TestStatus status) {
             mbgl::Log::Info(mbgl::Event::General,
-                            "Current finished tests number is '" + std::to_string(++finishedTestCount) + "' ");
+                            "Current finished tests number is '" + std::to_string(status.completed) + "/" +
+                                std::to_string(status.total) + "' ");
         };
         mbgl::Log::Info(mbgl::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "' ");
 

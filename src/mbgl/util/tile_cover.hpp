@@ -1,16 +1,18 @@
 #pragma once
 
+#include <mbgl/map/transform_state.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/geometry.hpp>
+#include <mbgl/util/range.hpp>
 
 #include <vector>
 #include <memory>
+#include <numbers>
 #include <optional>
 
 namespace mbgl {
 
-class TransformState;
 class LatLngBounds;
 
 namespace util {
@@ -31,10 +33,19 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
+struct TileCoverParameters {
+    TransformState transformState;
+    double tileLodMinRadius = 3;
+    double tileLodScale = 1;
+    double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
+    TileLodMode tileLodMode = TileLodMode::Default;
+};
+
 int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;
 
-std::vector<OverscaledTileID> tileCover(const TransformState&,
+std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                         uint8_t z,
+                                        const Range<uint8_t> zoomRange,
                                         const std::optional<uint8_t>& overscaledZ = std::nullopt);
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds&, uint8_t z);
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>&, uint8_t z);

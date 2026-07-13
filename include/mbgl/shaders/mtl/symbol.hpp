@@ -29,19 +29,20 @@ struct alignas(16) SymbolDrawableUBO {
     /* 216 */ /*bool*/ int pitch_with_map;
     /* 220 */ /*bool*/ int is_size_zoom_constant;
     /* 224 */ /*bool*/ int is_size_feature_constant;
+    /* 228 */ /*bool*/ int is_offset;
 
-    /* 228 */ float size_t;
-    /* 232 */ float size;
+    /* 232 */ float size_t;
+    /* 236 */ float size;
 
     // Interpolations
-    /* 236 */ float fill_color_t;
-    /* 240 */ float halo_color_t;
-    /* 244 */ float opacity_t;
-    /* 248 */ float halo_width_t;
-    /* 252 */ float halo_blur_t;
-    /* 256 */
+    /* 240 */ float fill_color_t;
+    /* 244 */ float halo_color_t;
+    /* 248 */ float opacity_t;
+    /* 252 */ float halo_width_t;
+    /* 256 */ float halo_blur_t;
+    /* 260 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 16 * 16, "wrong size");
+static_assert(sizeof(SymbolDrawableUBO) == 17 * 16, "wrong size");
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
@@ -70,6 +71,8 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
+#define c_offscreen_degenerate_triangle_location -2.0
+
 )";
 
 template <>
@@ -86,14 +89,14 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(symbolUBOCount + 0)]];
-    float4 data [[attribute(symbolUBOCount + 1)]];
-    float4 pixeloffset [[attribute(symbolUBOCount + 2)]];
-    float3 projected_pos [[attribute(symbolUBOCount + 3)]];
-    float fade_opacity [[attribute(symbolUBOCount + 4)]];
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float4 pixeloffset [[attribute(2)]];
+    float3 projected_pos [[attribute(3)]];
+    float fade_opacity [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(symbolUBOCount + 5)]];
+    float opacity [[attribute(5)]];
 #endif
 };
 
@@ -116,6 +119,26 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+
+    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
+    const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const half fo = half(fade_opacity);
+#else
+    const half fo = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity);
+#endif
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
+            return {
+                .position     = float4(c_offscreen_degenerate_triangle_location,
+                                                   c_offscreen_degenerate_triangle_location,
+                                                   c_offscreen_degenerate_triangle_location, 1.0),
+            };
+        }
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -149,7 +172,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -172,17 +197,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
-    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
-    const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
-
     return {
         .position     = position,
         .tex          = half2(a_tex / drawable.texsize),
 #if defined(HAS_UNIFORM_u_opacity)
-        .fade_opacity = half(fade_opacity),
+        .fade_opacity = fo,
 #else
-        .opacity      = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity),
+        .opacity      = fo,
 #endif
     };
 }
@@ -211,8 +232,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 };
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolSDFIconShader";
+struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "SymbolSDFShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
@@ -224,26 +245,26 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(symbolUBOCount + 0)]];
-    float4 data [[attribute(symbolUBOCount + 1)]];
-    float4 pixeloffset [[attribute(symbolUBOCount + 2)]];
-    float3 projected_pos [[attribute(symbolUBOCount + 3)]];
-    float fade_opacity [[attribute(symbolUBOCount + 4)]];
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float4 pixeloffset [[attribute(2)]];
+    float3 projected_pos [[attribute(3)]];
+    float fade_opacity [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(symbolUBOCount + 5)]];
+    float4 fill_color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(symbolUBOCount + 6)]];
+    float4 halo_color [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(symbolUBOCount + 7)]];
+    float opacity [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(symbolUBOCount + 8)]];
+    float halo_width [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(symbolUBOCount + 9)]];
+    float halo_blur [[attribute(9)]];
 #endif
 };
 
@@ -279,6 +300,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+
+    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
+    const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
+        return {
+            .position     = float4(c_offscreen_degenerate_triangle_location,
+                                               c_offscreen_degenerate_triangle_location,
+                                               c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -316,7 +351,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -340,8 +377,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
 
     return {
         .position     = position,
@@ -363,7 +398,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / drawable.texsize),
         .gamma_scale  = half(position.w),
         .fontScale    = half(fontScale),
-        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
+        .fade_opacity = fo,
     };
 }
 
@@ -407,12 +442,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = in.fontScale * tileProps.gamma_scale;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
+    const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
+    const float gammaScaled = gamma * in.gamma_scale;
     const half4 color = tileProps.is_halo ? halo_color : fill_color;
-    const float gamma = ((tileProps.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileProps.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * tileProps.gamma_scale;
+    const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
     const float dist = image.sample(image_sampler, float2(in.tex)).a;
-    const float gamma_scaled = gamma * in.gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+
+    float alpha = smoothstep(innerEdge - gammaScaled, innerEdge + gammaScaled, dist);
+    if (tileProps.is_halo) {
+        // When drawing halos, if the fill is translucent we want the inside of the halo to be translucent as well
+        const float haloEdge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+        alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
+    }
 
     return half4(color * (alpha * opacity * in.fade_opacity));
 }
@@ -436,25 +481,25 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 #define ICON 0.0
 
 struct VertexStage {
-    float4 pos_offset [[attribute(symbolUBOCount + 0)]];
-    float4 data [[attribute(symbolUBOCount + 1)]];
-    float3 projected_pos [[attribute(symbolUBOCount + 2)]];
-    float fade_opacity [[attribute(symbolUBOCount + 3)]];
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float3 projected_pos [[attribute(2)]];
+    float fade_opacity [[attribute(3)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(symbolUBOCount + 4)]];
+    float4 fill_color [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(symbolUBOCount + 5)]];
+    float4 halo_color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(symbolUBOCount + 6)]];
+    float opacity [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(symbolUBOCount + 7)]];
+    float halo_width [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(symbolUBOCount + 8)]];
+    float halo_blur [[attribute(8)]];
 #endif
 };
 
@@ -493,6 +538,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
+    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
+    const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
+        return {
+            .position     = float4(c_offscreen_degenerate_triangle_location,
+                                                c_offscreen_degenerate_triangle_location,
+                                                c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
+
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -529,7 +588,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = size / 24.0;
 
@@ -555,9 +616,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
     const float gamma_scale = position.w;
-
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const bool is_icon = (is_sdf == ICON);
 
     return {
@@ -565,7 +623,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
         .gamma_scale  = half(gamma_scale),
         .fontScale    = half(fontScale),
-        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
+        .fade_opacity = fo,
         .is_icon      = is_icon,
 
 #if !defined(HAS_UNIFORM_u_fill_color)
@@ -632,13 +690,23 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
-    const half4 color = tileProps.is_halo ? halo_color : fill_color;
     const float fontGamma = in.fontScale * tileProps.gamma_scale;
-    const float gamma = ((tileProps.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileProps.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
+    const float gamma = tileProps.is_halo ? haloGamma : fillGamma;
+    const float gammaScaled = gamma * in.gamma_scale;
+    const half4 color = tileProps.is_halo ? halo_color : fill_color;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * tileProps.gamma_scale;
+    const float innerEdge = tileProps.is_halo ? haloInnerEdge : fillInnerEdge;
     const float dist = glyph_image.sample(glyph_sampler, float2(in.tex)).a;
-    const float gamma_scaled = gamma * in.gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+
+    float alpha = smoothstep(innerEdge - gammaScaled, innerEdge + gammaScaled, dist);
+    if (tileProps.is_halo) {
+        // When drawing halos, if the fill is translucent we want the inside of the halo to be translucent as well
+        const float haloEdge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+        alpha = min(smoothstep(haloEdge - gammaScaled, haloEdge + gammaScaled, dist), 1.0 - alpha);
+    }
 
     return half4(color * (alpha * opacity * in.fade_opacity));
 }

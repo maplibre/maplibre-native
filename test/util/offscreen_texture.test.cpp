@@ -10,11 +10,7 @@
 #include <mbgl/gl/headless_backend.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 
-#if MLN_LEGACY_RENDERER
-#include <mbgl/gl/texture.hpp>
-#else
 #include <mbgl/gl/texture2d.hpp>
-#endif
 
 using namespace mbgl;
 using namespace mbgl::platform;
@@ -28,8 +24,7 @@ TEST(OffscreenTexture, EmptyRed) {
     gfx::BackendScope scope{backend};
 
     // Scissor test shouldn't leak after gl::HeadlessBackend::bind().
-    MBGL_CHECK_ERROR(glScissor(64, 64, 128, 128));
-    static_cast<gl::Context&>(backend.getContext()).scissorTest.setCurrentValue(true);
+    static_cast<gl::Context&>(backend.getContext()).scissorTest.setCurrentValue({64, 64, 128, 128});
 
     backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
 
@@ -150,8 +145,7 @@ void main() {
     gl::OffscreenTexture offscreenTexture(context, {128, 128});
 
     // Scissor test shouldn't leak after OffscreenTexture::bind().
-    MBGL_CHECK_ERROR(glScissor(32, 32, 64, 64));
-    context.scissorTest.setCurrentValue(true);
+    context.scissorTest.setCurrentValue({32, 32, 64, 64});
 
     offscreenTexture.getResource<gl::RenderableResource>().bind();
 
@@ -173,13 +167,9 @@ void main() {
     test::checkImage("test/fixtures/offscreen_texture/render-to-fbo", image, 0, 0);
 
     // Now, composite the Framebuffer texture we've rendered to onto the main FBO.
-#if MLN_LEGACY_RENDERER
-    gl::bindTexture(context, 0, {offscreenTexture.getTexture().getResource(), gfx::TextureFilterType::Linear});
-    MBGL_CHECK_ERROR(glUniform1i(u_texture, 0));
-#else
     offscreenTexture.getTexture()->setSamplerConfiguration({gfx::TextureFilterType::Linear});
     std::static_pointer_cast<gl::Texture2D>(offscreenTexture.getTexture())->bind(u_texture, 0);
-#endif
+
     MBGL_CHECK_ERROR(glUseProgram(compositeShader.program));
     MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, viewportBuffer.buffer));
     MBGL_CHECK_ERROR(glEnableVertexAttribArray(compositeShader.a_pos));

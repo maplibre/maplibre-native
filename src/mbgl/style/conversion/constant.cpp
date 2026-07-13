@@ -11,7 +11,7 @@ std::optional<bool> Converter<bool>::operator()(const Convertible& value, Error&
         error.message = "value must be a boolean";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 std::optional<float> Converter<float>::operator()(const Convertible& value, Error& error) const {
@@ -20,7 +20,7 @@ std::optional<float> Converter<float>::operator()(const Convertible& value, Erro
         error.message = "value must be a number";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 std::optional<std::string> Converter<std::string>::operator()(const Convertible& value, Error& error) const {
@@ -29,7 +29,7 @@ std::optional<std::string> Converter<std::string>::operator()(const Convertible&
         error.message = "value must be a string";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 template <class T>
@@ -47,7 +47,7 @@ std::optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::ope
         return std::nullopt;
     }
 
-    return *result;
+    return result;
 }
 
 template <class T>
@@ -78,6 +78,8 @@ template std::optional<CirclePitchScaleType> Converter<CirclePitchScaleType>::op
                                                                                          Error&) const;
 template std::optional<HillshadeIlluminationAnchorType> Converter<HillshadeIlluminationAnchorType>::operator()(
     const Convertible&, Error&) const;
+template std::optional<HillshadeMethodType> Converter<HillshadeMethodType>::operator()(const Convertible&,
+                                                                                       Error&) const;
 template std::optional<IconTextFitType> Converter<IconTextFitType>::operator()(const Convertible&, Error&) const;
 template std::optional<LightAnchorType> Converter<LightAnchorType>::operator()(const Convertible&, Error&) const;
 template std::optional<LineCapType> Converter<LineCapType>::operator()(const Convertible&, Error&) const;
@@ -111,7 +113,29 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
         return std::nullopt;
     }
 
-    return *color;
+    return color;
+}
+
+std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(const Convertible& value,
+                                                                            Error& error) const {
+    if (!isArray(value)) {
+        // Try single color
+        auto color = convert<Color>(value, error);
+        if (!color) return std::nullopt;
+        return std::vector<Color>{*color};
+    }
+
+    std::vector<Color> result;
+    auto length = arrayLength(value);
+    result.reserve(length);
+
+    for (std::size_t i = 0; i < length; ++i) {
+        auto color = convert<Color>(arrayMember(value, i), error);
+        if (!color) return std::nullopt;
+        result.push_back(*color);
+    }
+
+    return result;
 }
 
 std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {
@@ -237,8 +261,13 @@ template std::optional<std::array<double, 3>> Converter<std::array<double, 3>>::
 
 std::optional<std::vector<float>> Converter<std::vector<float>>::operator()(const Convertible& value,
                                                                             Error& error) const {
+    // Allow single number to be converted to a single-element array
+    if (std::optional<float> number = toNumber(value)) {
+        return std::vector<float>{*number};
+    }
+
     if (!isArray(value)) {
-        error.message = "value must be an array";
+        error.message = "value must be a number or an array of numbers";
         return std::nullopt;
     }
 

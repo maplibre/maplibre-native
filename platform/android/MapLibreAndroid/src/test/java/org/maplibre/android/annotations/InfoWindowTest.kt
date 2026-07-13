@@ -7,10 +7,11 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Projection
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.BaseTest
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 
-class InfoWindowTest {
+class InfoWindowTest : BaseTest() {
     @InjectMocks
     var mMapView = Mockito.mock(MapView::class.java)
 

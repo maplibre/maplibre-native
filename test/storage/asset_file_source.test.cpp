@@ -182,4 +182,23 @@ TEST(AssetFileSource, URLEncoding) {
 
     loop.run();
 }
+
+TEST(AssetFileSource, RangeRequest) {
+    util::RunLoop loop;
+
+    AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
+
+    Resource resource(Resource::Unknown, "asset://nonempty");
+    resource.dataRange = std::make_pair<uint64_t, uint64_t>(4, 12);
+
+    std::unique_ptr<AsyncRequest> req = fs.request(resource, [&](Response res) {
+        req.reset();
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data.get());
+        EXPECT_EQ("ent is he", *res.data);
+        loop.stop();
+    });
+
+    loop.run();
+}
 #endif

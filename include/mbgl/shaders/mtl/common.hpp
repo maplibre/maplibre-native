@@ -23,7 +23,7 @@ using namespace metal;
 template <typename T1, typename T2>
 inline auto glMod(T1 x, T2 y) { return x - y * metal::floor(x/y); }
 
-float radians(float degrees) {
+inline float radians(float degrees) {
     return M_PI_F * degrees / 180.0;
 }
 

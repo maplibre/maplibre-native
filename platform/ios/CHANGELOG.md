@@ -2,7 +2,195 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## main
+## 6.27.0
+
+- Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
+
+## 6.26.1
+
+- Hide vendored HarfBuzz symbols on Apple ([#4263](https://github.com/maplibre/maplibre-native/pull/4263)).
+- Add attribute buffer index to support multiple attributes interleaved in single buffer bind [Core optimization] ([#4241](https://github.com/maplibre/maplibre-native/pull/4241)).
+- core: Fix crash in RenderLayer::updateTile when layerGroup is not a TileLayerGroup ([#4217](https://github.com/maplibre/maplibre-native/pull/4217)).
+- Expose Metal texture from headless backend ([#4267](https://github.com/maplibre/maplibre-native/pull/4267)).
+- Update metal-cpp ([#4087](https://github.com/maplibre/maplibre-native/pull/4087)).
+- Optimize fill extrusion memory by using instancing [Core optimization] ([#4256](https://github.com/maplibre/maplibre-native/pull/4256)).
+- fix(renderer): guard ImageManager callback against use-after-free ([#4233](https://github.com/maplibre/maplibre-native/pull/4233)).
+
+## 6.26.0
+
+Note: this release has some changes to how icon offsets behave on pitched maps. If this causes a regression for your use case please open an issue on `maplibre/maplibre-native`.
+
+- core: Handle allocation failure ([#4178](https://github.com/maplibre/maplibre-native/pull/4178)).
+- Disable icon scaling with offsets ([#3928](https://github.com/maplibre/maplibre-native/pull/3928)).
+- Fix: unconditionally rewriting contentScaleFactor/drawableSize every layout pass caused a feedback loop under iOS 26 Smart Display Zoom ([#4251](https://github.com/maplibre/maplibre-native/pull/4251)). This resolves CarPlay users were experiencing.
+- iOS: Fix case image expression crash ([#4269]((https://github.com/maplibre/maplibre-native/pull/4269))).
+
+## 6.25.1
+
+- iOS: Force `MLNMapView` layout after transitions ([#4225](https://github.com/maplibre/maplibre-native/pull/4225)).
+
+## 6.25.0
+
+- Expose Offline Region ID property on MLNOfflinePack for Darwin/iOS ([#4161](https://github.com/maplibre/maplibre-native/pull/4161)).
+- fix color-relief/hillshade invisible above fill layers on Metal/Vulkan/WebGPU ([#4166](https://github.com/maplibre/maplibre-native/pull/4166)).
+- core: better handle tile compression in PMTiles sources ([#4159](https://github.com/maplibre/maplibre-native/pull/4159)).
+- core: Use interleaved buffer for paint property binders ([#4124](https://github.com/maplibre/maplibre-native/pull/4124)).
+- Make sure MLNScaleBar is exported ([#4198](https://github.com/maplibre/maplibre-native/pull/4198)).
+
+## 6.24.0
+
+- Fix crashing of iOS test apps and add Heatmap ([#4099](https://github.com/maplibre/maplibre-native/pull/4099)).
+- Fix incorrect shader selection for text labels with inline images ([#4082](https://github.com/maplibre/maplibre-native/pull/4082)).
+- core: Update Hillshade Algorithms and add Color-Relief Layer support ([#3965](https://github.com/maplibre/maplibre-native/pull/3965)).
+- core: Fix scissor rectangle size ([#4147](https://github.com/maplibre/maplibre-native/pull/4147)).
+
+## 6.23.0
+
+- Add basic support for setting camera roll ([#4061](https://github.com/maplibre/maplibre-native/pull/4059)).
+- Make rendering stats thread safe ([#4059](https://github.com/maplibre/maplibre-native/pull/4059)).
+
+## 6.22.2
+
+- Metal backend resource for MacOS fixes ([#4020](https://github.com/maplibre/maplibre-native/pull/4020)).
+- Port several iOS fixes from GrabMaps ([#4023](https://github.com/maplibre/maplibre-native/pull/4023)).
+- Metal: only update offset if we call setVertexBuffer previously ([#4049](https://github.com/maplibre/maplibre-native/pull/4049)).
+
+## 6.22.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
+## 6.22.0
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+- Fix pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
+
+## 6.21.2
+
+- Fix crash due to pure virtual function call ([#3979](https://github.com/maplibre/maplibre-native/pull/3979)).
+
+## 6.21.1
+
+- Include static XCFramework in GitHub release.
+
+## 6.21.0
+
+- Allow setting frustum offset to not render edges of the screen ([#3676](https://github.com/maplibre/maplibre-native/pull/3676)).
+- Support hiding attribution on iOS ([#3952](https://github.com/maplibre/maplibre-native/pull/3952)).
+- Support extra annotations for snapshotter for iOS ([#3963](https://github.com/maplibre/maplibre-native/pull/3963)).
+
+## 6.20.1
+
+- Update to latest MLT submodule ([#3945](https://github.com/maplibre/maplibre-native/pull/3945)).
+- Fix LineBucket::addGeometry() empty coordinates. ([#2959](https://github.com/maplibre/maplibre-native/pull/2959)).
+
+## 6.20.0
+
+- Add configurable threshold for rotate gesture snapping to north ([#3914](https://github.com/maplibre/maplibre-native/pull/3914)).
+- Add support for parsing MLT-format vector tile sources ([#3246](https://github.com/maplibre/maplibre-native/pull/3246)).
+- Adds some network delegate methods ([#3917](https://github.com/maplibre/maplibre-native/pull/3917)).
+- Add accessibility annotation check ([#3926](https://github.com/maplibre/maplibre-native/pull/3926)).
+
+## 6.19.3
+
+- fix number-format/currency expression test for darwin ([#3900](https://github.com/maplibre/maplibre-native/pull/3900)).
+- Updates drawable size of metal view after it is attached to display hierarchy. ([#3903](https://github.com/maplibre/maplibre-native/pull/3903)).
+
+## 6.19.2
+
+- [metal] OffscreenTextureResource: fix compilation warnings ([#3727](https://github.com/maplibre/maplibre-native/pull/3727)).
+- Apply symbol shader changes from JS  for Metal, Vulkan, and OpenGL ([#3873](https://github.com/maplibre/maplibre-native/pull/3873)).
+- Fixes wrong map view dimension on CarPlay. ([#3890](https://github.com/maplibre/maplibre-native/pull/3890)).
+
+## 6.19.1
+
+- Tweak layer depth distribution ([#3738](https://github.com/maplibre/maplibre-native/pull/3738)).
+- Add weak pointer handling ([#3763](https://github.com/maplibre/maplibre-native/pull/3763)).
+- Apply just the changes from the MLT branch which aren't really part of that work ([#3793](https://github.com/maplibre/maplibre-native/pull/3793)).
+- Add extra UI settings and location manager settings. ([#3817](https://github.com/maplibre/maplibre-native/pull/3817)).
+- fix misplaced LineOffset and LineGapWidth ([#3840](https://github.com/maplibre/maplibre-native/pull/3840)).
+
+## 6.18.1
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+- Fix UB in TaggedString constructor ([#3748](https://github.com/maplibre/maplibre-native/pull/3748)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
+
+## 6.18.0
+
+- add the ability to have ios camera animation durations dynamic during navigation ([#3568](https://github.com/maplibre/maplibre-native/pull/3568)).
+- Fix dashed line issue when style change ([#3675](https://github.com/maplibre/maplibre-native/pull/3675)).
+- Add rendering info reports to `ActionJournal` ([#3545](https://github.com/maplibre/maplibre-native/pull/3545)).
+- Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
+
+## 6.17.1
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
+## 6.17.0
+
+- Fix render pipeline state bug ([#3598](https://github.com/maplibre/maplibre-native/pull/3598)).
+- Added the nearClippedProjMatrix to the drawing context ([#3599](https://github.com/maplibre/maplibre-native/pull/3599)).
+- feat: add clusterMinPoints option Android and iOS ([#3601](https://github.com/maplibre/maplibre-native/pull/3601)).
+
+## 6.16.0
+
+- Add run-time plug-in layer support to iOS ([#3430](https://github.com/maplibre/maplibre-native/pull/3430)).
+  Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/pluginlayers
+
+- Fix nullability of attributionHtmlString ([#3551](https://github.com/maplibre/maplibre-native/pull/3551)).
+- Fix the symbol blink issue by only placing the symbol in current level ([#3534](https://github.com/maplibre/maplibre-native/pull/3534)).
+- add functionality to metal render pass to cache winding order and cull mode ([#3566](https://github.com/maplibre/maplibre-native/pull/3566)).
+- Add polylines with geographic coordinates for custom drawables ([#3547](https://github.com/maplibre/maplibre-native/pull/3547)).
+- Reduce duplicate GPU buffer uploads ([#3577](https://github.com/maplibre/maplibre-native/pull/3577)).
+- Symbol Shader Performance Improvments ([#3576](https://github.com/maplibre/maplibre-native/pull/3576)).
+- Add an option to reverse the direction of the quick zoom gesture ([#3587](https://github.com/maplibre/maplibre-native/pull/3587)).
+
+## 6.15.0
+
+- Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/actionjournalexample
+- Expose MLNSource.attributionHtmlString ([#3502](https://github.com/maplibre/maplibre-native/pull/3502)).
+- Rendering statistics view ([#3322](https://github.com/maplibre/maplibre-native/pull/3322)). Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/renderingstatisticshud
+
+- Clean legacy code ([#3469](https://github.com/maplibre/maplibre-native/pull/3469)).
+- Rename Symbol SDF shader ([#3473](https://github.com/maplibre/maplibre-native/pull/3473)).
+- Clean more legacy code ([#3478](https://github.com/maplibre/maplibre-native/pull/3478)).
+- Remove some of unused legacy uniforms ([#3481](https://github.com/maplibre/maplibre-native/pull/3481)).
+- Pattern layout performance improvement ([#3495](https://github.com/maplibre/maplibre-native/pull/3495)).
+- Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
+- Fix incomplete feature state updates in GeometryTile and SourceFeatureState [Vector Tile Layer]. ([#3406](https://github.com/maplibre/maplibre-native/pull/3406)).
+
+## 6.14.0
+
+> [!IMPORTANT]
+> Please verify glyphs are loading correctly for your styles with this release. Despite careful testing, we also rely on our users to help test the new dynamic texture atlas and to [report any issues](https://github.com/maplibre/maplibre-native/issues/new?template=ios-bug-report.yml).
+
+- Force PMTiles metadata to always have XYZ tile scheme ([#3403](https://github.com/maplibre/maplibre-native/pull/3403)).
+- Add support to range requests in AssetFileSource ([#3404](https://github.com/maplibre/maplibre-native/pull/3404)).
+- Implement dynamic texture atlas ([#3198](https://github.com/maplibre/maplibre-native/pull/3198)).
+
+## 6.13.0
+
+- Allow initializing MLNMapView with style JSON ([#3240](https://github.com/maplibre/maplibre-native/pull/3240)).
+- Remove legacy renderer from source, build files and CI ([#3384](https://github.com/maplibre/maplibre-native/pull/3384)). Should have no impact on iOS since releases where already using the new drawable renderer architecture since 6.0.0.
+- Add missing `sourceDidChange` event ([#3421](https://github.com/maplibre/maplibre-native/pull/3421)).
+- Fix: follow with heading tracking mode cancels user location indicator update ([#3401](https://github.com/maplibre/maplibre-native/pull/3401)).
+
+## 6.12.3
+
+- add MLNDefines.h to make sure Metal backend is available in headers ([#3335](https://github.com/maplibre/maplibre-native/issues/3335)).
+
+## 6.12.2
+
+- Strip punctuation from attribution ([#3287](https://github.com/maplibre/maplibre-native/pull/3287)).
+- Revert [#3035](https://github.com/maplibre/maplibre-native/pull/3035) which was causing memory growth issue (#3315).
+- Apply clang-tidy fixes (mostly use designated initializers) ([#3328](https://github.com/maplibre/maplibre-native/pull/3328)).
+
+## 6.12.1
+
+- Use double quotes for MLNTileOperation.h import ([#3277](https://github.com/maplibre/maplibre-native/issues/3277)).
+- Warn on rejected line geometry ([#3088](https://github.com/maplibre/maplibre-native/pull/3088)).
 
 ## 6.12.0
 

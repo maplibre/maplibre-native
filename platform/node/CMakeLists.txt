@@ -1,12 +1,18 @@
-set(NODE_MODULE_MINIMUM_ABI 83) # Minimum supported Node.js version: 14
-set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
+set(NODE_MODULE_MINIMUM_ABI 127) # Minimum supported Node.js version: 22
+set(NODE_MODULE_CACHE_DIR ${CMAKE_BINARY_DIR}/headers)
+
+if(DEFINED ENV{MSYSTEM})
+    message(FATAL "MSYS2 is not supported, Node.js in Windows only has binary compatibility with Microsoft Visual C++.")
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
+
+# For node versions, see: https://raw.githubusercontent.com/nodejs/node/main/doc/abi_version_registry.json
 add_node_module(
     mbgl-node
     INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
-    NAN_VERSION 2.22.0
+    NAN_VERSION 2.27.0
     EXCLUDE_NODE_ABIS
         46
         47
@@ -37,15 +43,13 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/platform/default/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/vendor/nontype_functional/include
     PRIVATE ${LIBUV_INCLUDE_DIRS}
 )
 
 target_link_libraries(
     mbgl-node-loop
     PUBLIC
-        Mapbox::Base
-    INTERFACE mbgl-vendor-nontype_functional
+        MapLibreNative::Base
 )
 
 target_sources(
@@ -70,7 +74,6 @@ target_link_libraries(
     mbgl-node
     INTERFACE mbgl-node-loop
     INTERFACE Mapbox::Map
-    INTERFACE mbgl-vendor-nontype_functional
 )
 
 # FIXME: Node bindings only run fully on Linux now because it requires libuv RunLoop (which is the default on Linux). Also, Sanitizer will

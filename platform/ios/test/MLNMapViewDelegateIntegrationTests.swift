@@ -30,6 +30,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {}
 
+    func mapView(_: MLNMapView, sourceDidChange _: MLNSource) {}
+
     func mapView(_: MLNMapView, didSelect _: MLNAnnotation) {}
 
     func mapView(_: MLNMapView, didDeselect _: MLNAnnotation) {}
@@ -59,6 +61,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
     func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool) {}
 
     func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, frameEncodingTime _: Double, frameRenderingTime _: Double) {}
+
+    func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
 
     func mapView(_: MLNMapView, shapeAnnotationIsEnabled _: MLNShape) -> Bool { false }
 
@@ -123,4 +127,5 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
     func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {}
     func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {}
     func mapView(_: MLNMapView, spriteDidError _: String, url _: String) {}
+    func mapViewRendererDidError(_: MLNMapView) {}
 }

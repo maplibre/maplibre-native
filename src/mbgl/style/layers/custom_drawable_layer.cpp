@@ -15,7 +15,6 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/geometry.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
@@ -41,13 +40,13 @@ namespace style {
 using namespace shaders;
 
 namespace {
-const LayerTypeInfo typeInfoCustomDrawable{"custom-drawable",
-                                           LayerTypeInfo::Source::NotRequired,
-                                           LayerTypeInfo::Pass3D::NotRequired,
-                                           LayerTypeInfo::Layout::NotRequired,
-                                           LayerTypeInfo::FadingTiles::NotRequired,
-                                           LayerTypeInfo::CrossTileIndex::NotRequired,
-                                           LayerTypeInfo::TileKind::NotRequired};
+const LayerTypeInfo typeInfoCustomDrawable{.type = "custom-drawable",
+                                           .source = LayerTypeInfo::Source::NotRequired,
+                                           .pass3d = LayerTypeInfo::Pass3D::NotRequired,
+                                           .layout = LayerTypeInfo::Layout::NotRequired,
+                                           .fadingTiles = LayerTypeInfo::FadingTiles::NotRequired,
+                                           .crossTileIndex = LayerTypeInfo::CrossTileIndex::NotRequired,
+                                           .tileKind = LayerTypeInfo::TileKind::NotRequired};
 } // namespace
 
 CustomDrawableLayer::CustomDrawableLayer(const std::string& layerID, std::unique_ptr<CustomDrawableLayerHost> host)
@@ -121,28 +120,28 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::LineEvaluatedPropsUBO propsUBO = {options.color,
-                                                         options.blur,
-                                                         options.opacity,
-                                                         options.gapWidth,
-                                                         options.offset,
-                                                         options.width,
-                                                         /*floorwidth=*/0.0f,
-                                                         LineExpressionMask::None,
-                                                         0};
+        const shaders::LineEvaluatedPropsUBO propsUBO = {.color = options.color,
+                                                         .blur = options.blur,
+                                                         .opacity = options.opacity,
+                                                         .gapwidth = options.gapWidth,
+                                                         .offset = options.offset,
+                                                         .width = options.width,
+                                                         /*floorwidth=*/.floorwidth = 0.0f,
+                                                         .expressionMask = LineExpressionMask::None,
+                                                         .pad1 = 0};
 
         // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
         assert(propsUBO.expressionMask == LineExpressionMask::None);
 
         if (!expressionUniformBuffer) {
             const LineExpressionUBO exprUBO = {
-                /* .color = */ nullptr,
-                /* .blur = */ nullptr,
-                /* .opacity = */ nullptr,
-                /* .gapwidth = */ nullptr,
-                /* .offset = */ nullptr,
-                /* .width = */ nullptr,
-                /* .floorWidth = */ nullptr,
+                /* .color = */ .color = nullptr,
+                /* .blur = */ .blur = nullptr,
+                /* .opacity = */ .opacity = nullptr,
+                /* .gapwidth = */ .gapwidth = nullptr,
+                /* .offset = */ .offset = nullptr,
+                /* .width = */ .width = nullptr,
+                /* .floorWidth = */ .floorWidth = nullptr,
             };
 
             expressionUniformBuffer = parameters.context.createUniformBuffer(&exprUBO, sizeof(exprUBO));
@@ -160,16 +159,16 @@ public:
 #else
         const shaders::LineDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+            /* .matrix = */ .matrix = util::cast<float>(matrix),
+            /* .ratio = */ .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
 
-            /* .color_t = */ 0.f,
-            /* .blur_t = */ 0.f,
-            /* .opacity_t = */ 0.f,
-            /* .gapwidth_t = */ 0.f,
-            /* .offset_t = */ 0.f,
-            /* .width_t = */ 0.f,
-            /* .pad1 = */ 0
+            /* .color_t = */ .color_t = 0.f,
+            /* .blur_t = */ .blur_t = 0.f,
+            /* .opacity_t = */ .opacity_t = 0.f,
+            /* .gapwidth_t = */ .gapwidth_t = 0.f,
+            /* .offset_t = */ .offset_t = 0.f,
+            /* .width_t = */ .width_t = 0.f,
+            /* .pad1 = */ .pad1 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -241,30 +240,30 @@ public:
 
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
         shaders::WideVectorUniformsUBO uniform = {
-            /* .mvpMatrix = */ mvpMatrix,
-            /* .mvpMatrixDiff = */ mvpMatrixDiff,
-            /* .mvMatrix = */ mvMatrix,
-            /* .mvMatrixDiff = */ mvMatrixDiff,
-            /* .pMatrix = */ pMatrix,
-            /* .pMatrixDiff = */ pMatrixDiff,
-            /* .frameSize = */ {(float)renderableSize.width, (float)renderableSize.height},
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0};
+            /* .mvpMatrix = */ .mvpMatrix = mvpMatrix,
+            /* .mvpMatrixDiff = */ .mvpMatrixDiff = mvpMatrixDiff,
+            /* .mvMatrix = */ .mvMatrix = mvMatrix,
+            /* .mvMatrixDiff = */ .mvMatrixDiff = mvMatrixDiff,
+            /* .pMatrix = */ .pMatrix = pMatrix,
+            /* .pMatrixDiff = */ .pMatrixDiff = pMatrixDiff,
+            /* .frameSize = */ .frameSize = {(float)renderableSize.width, (float)renderableSize.height},
+            /* .pad1 = */ .pad1 = 0,
+            /* .pad2 = */ .pad2 = 0};
 
         shaders::WideVectorUniformWideVecUBO wideVec = {
-            /* .color = */ options.color,
-            /* .w2 = */ options.width,
-            /* .offset = */ options.offset,
-            /* .edge = */ 0.0f,      // TODO: MLN does not provide a value. Analyze impact.
-            /* .texRepeat = */ 0.0f, // N/A
-            /* .texOffset = */ {},   // N/A
-            /* .miterLimit = */ options.geometry.miterLimit,
-            /* .join = */ static_cast<int32_t>(options.geometry.joinType),
-            /* .cap = */ static_cast<int32_t>(options.geometry.beginCap), // TODO: MLN option for endCap to be
-                                                                          // implemented in the shader!
-            /* .hasExp = */ false,                                        // N/A
-            /* .interClipLimit = */ 0.0f,                                 // N/A
-            /* .pad1 = */ 0};
+            /* .color = */ .color = options.color,
+            /* .w2 = */ .w2 = options.width,
+            /* .offset = */ .offset = options.offset,
+            /* .edge = */ .edge = 0.0f,           // TODO: MLN does not provide a value. Analyze impact.
+            /* .texRepeat = */ .texRepeat = 0.0f, // N/A
+            /* .texOffset = */ .texOffset = {},   // N/A
+            /* .miterLimit = */ .miterLimit = options.geometry.miterLimit,
+            /* .join = */ .join = static_cast<int32_t>(options.geometry.joinType),
+            /* .cap = */ .cap = static_cast<int32_t>(options.geometry.beginCap), // TODO: MLN option for endCap to be
+                                                                                 // implemented in the shader!
+            /* .hasExp = */ .hasExp = false,                                     // N/A
+            /* .interClipLimit = */ .interClipLimit = 0.0f,                      // N/A
+            /* .pad1 = */ .pad1 = 0};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
@@ -306,12 +305,12 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ options.color,
-                                                         /* .outline_color = */ Color::white(),
-                                                         /* .opacity = */ options.opacity,
-                                                         /* .fade = */ 0.f,
-                                                         /* .from_scale = */ 0.f,
-                                                         /* .to_scale = */ 0.f};
+        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ .color = options.color,
+                                                         /* .outline_color = */ .outline_color = Color::white(),
+                                                         /* .opacity = */ .opacity = options.opacity,
+                                                         /* .fade = */ .fade = 0.f,
+                                                         /* .from_scale = */ .from_scale = 0.f,
+                                                         /* .to_scale = */ .to_scale = 0.f};
 
 #if MLN_UBO_CONSOLIDATION
         FillDrawableUnionUBO drawableUBO;
@@ -319,12 +318,12 @@ public:
 #else
         const shaders::FillDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix),
+            /* .matrix = */ .matrix = util::cast<float>(matrix),
 
-            /* .color_t = */ 0.f,
-            /* .opacity_t = */ 0.f,
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0
+            /* .color_t = */ .color_t = 0.f,
+            /* .opacity_t = */ .opacity_t = 0.f,
+            /* .pad1 = */ .pad1 = 0,
+            /* .pad2 = */ .pad2 = 0
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -391,17 +390,19 @@ public:
                                                                               parameters.pixelsToGLUnits[1] * factor};
 
         const shaders::CustomSymbolIconDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .extrude_scale = */ {extrudeScale[0] * options.size.width, extrudeScale[1] * options.size.height},
-            /* .anchor = */ options.anchor,
-            /* .angle_degrees = */ options.angleDegrees,
-            /* .scale_with_map = */ options.scaleWithMap,
-            /* .pitch_with_map = */ options.pitchWithMap,
-            /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
-            /* .aspect_ratio = */ parameters.pixelsToGLUnits[0] / parameters.pixelsToGLUnits[1],
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0,
-            /* .pad3 = */ 0};
+            /* .matrix = */ .matrix = util::cast<float>(matrix),
+            /* .extrude_scale = */ .extrude_scale = {extrudeScale[0] * options.size.width,
+                                                     extrudeScale[1] * options.size.height},
+            /* .anchor = */ .anchor = options.anchor,
+            /* .angle_degrees = */ .angle_degrees = options.angleDegrees,
+            /* .scale_with_map = */ .scale_with_map = options.scaleWithMap,
+            /* .pitch_with_map = */ .pitch_with_map = options.pitchWithMap,
+            /* .camera_to_center_distance = */ .camera_to_center_distance =
+                parameters.state.getCameraToCenterDistance(),
+            /* .aspect_ratio = */ .aspect_ratio = parameters.pixelsToGLUnits[0] / parameters.pixelsToGLUnits[1],
+            /* .pad1 = */ .pad1 = 0,
+            /* .pad2 = */ .pad2 = 0,
+            /* .pad3 = */ .pad3 = 0};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
@@ -431,8 +432,8 @@ public:
             callback(drawable, parameters, options);
         }
 
-        CustomGeometryDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(options.matrix),
-                                                 /* .color = */ options.color};
+        CustomGeometryDrawableUBO drawableUBO = {/* .matrix = */ .matrix = util::cast<float>(options.matrix),
+                                                 /* .color = */ .color = options.color};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCustomGeometryDrawableUBO, &drawableUBO, parameters.context);
@@ -520,8 +521,23 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
 
     switch (shaderType) {
         case LineShaderType::Classic: {
-            // TODO: build classic polyline with Geo coordinates
-            return util::SimpleIdentity::Empty;
+            // build classic polyline with Geo coordinates
+            if (!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault())) {
+                return util::SimpleIdentity::Empty;
+            }
+
+            // geographic coordinates require tile {0, 0, 0}
+            setTileID({0, 0, 0});
+
+            constexpr int32_t zoom = 0;
+            GeometryCoordinates tileCoordinates;
+            for (const auto& coord : coordinates) {
+                const auto point = Projection::project(LatLng(coord.y, coord.x), zoom);
+                tileCoordinates.push_back(Point<int16_t>(static_cast<int16_t>(point.x * mbgl::util::EXTENT),
+                                                         static_cast<int16_t>(point.y * mbgl::util::EXTENT)));
+            }
+
+            builder->addPolyline(tileCoordinates, lineOptions.geometry);
         } break;
 
         case LineShaderType::WideVector: {
@@ -582,7 +598,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addFill(const GeometryC
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-    SegmentVector<FillAttributes> triangleSegments;
+    SegmentVector triangleSegments;
 
     // generate fill geometry into buffers
     gfx::generateFillBuffers(geometry, vertices, triangles, triangleSegments);
@@ -630,8 +646,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
     for (int y = 0; y <= 1; ++y) {
         for (int x = 0; x <= 1; ++x) {
             vertices.emplace_back(
-                CustomSymbolIcon{{static_cast<float>(point.x * 2 + x), static_cast<float>(point.y * 2 + y)},
-                                 {textureCoordinates[x][0], textureCoordinates[y][1]}});
+                CustomSymbolIcon{.a_pos = {static_cast<float>(point.x * 2 + x), static_cast<float>(point.y * 2 + y)},
+                                 .a_tex = {textureCoordinates[x][0], textureCoordinates[y][1]}});
         }
     }
 
@@ -642,8 +658,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
 
     triangles.emplace_back(0, 1, 2, 1, 2, 3);
 
-    SegmentVector<CustomSymbolIcon> triangleSegments;
-    triangleSegments.emplace_back(Segment<CustomSymbolIcon>{0, 0, 4, 6});
+    SegmentVector triangleSegments;
+    triangleSegments.emplace_back(0, 0, 4, 6);
 
     // add to builder
     auto attrs = context.createVertexAttributeArray();
@@ -697,8 +713,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
     // geographic coordinates require tile {0, 0, 0}
     setTileID({0, 0, 0});
 
-    SegmentVector<GeometryVertex> triangleSegments;
-    triangleSegments.emplace_back(Segment<GeometryVertex>{0, 0, vertices->elements(), indices->elements()});
+    SegmentVector triangleSegments;
+    triangleSegments.emplace_back(0, 0, vertices->elements(), indices->elements());
 
     // add to builder
     auto attrs = context.createVertexAttributeArray();

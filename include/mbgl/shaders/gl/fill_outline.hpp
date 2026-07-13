@@ -6,28 +6,49 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::FillOutlineProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "FillOutlineProgram";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "FillOutlineShader";
+    static constexpr const char* vertex = R"(layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+};
 
-uniform mat4 u_matrix;
-uniform vec2 u_world;
+layout (std140) uniform FillOutlineDrawableUBO {
+    highp mat4 u_matrix;
+    // Interpolations
+    highp float u_outline_color_t;
+    highp float u_opacity_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+};
+
+layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
+};
+
+layout (location = 0) in vec2 a_pos;
 
 out vec2 v_pos;
 
 #ifndef HAS_UNIFORM_u_outline_color
-uniform lowp float u_outline_color_t;
 layout (location = 1) in highp vec4 a_outline_color;
 out highp vec4 outline_color;
-#else
-uniform highp vec4 u_outline_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 2) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {
@@ -43,20 +64,25 @@ lowp float opacity = u_opacity;
 #endif
 
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
-    v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
+    v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
 }
 )";
-    static constexpr const char* fragment = R"(in vec2 v_pos;
+    static constexpr const char* fragment = R"(layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
+};
+
+in vec2 v_pos;
 
 #ifndef HAS_UNIFORM_u_outline_color
 in highp vec4 outline_color;
-#else
-uniform highp vec4 u_outline_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {

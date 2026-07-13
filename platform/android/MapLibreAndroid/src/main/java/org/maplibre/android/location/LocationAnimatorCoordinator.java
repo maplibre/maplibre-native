@@ -108,6 +108,10 @@ final class LocationAnimatorCoordinator {
     LatLng previousCameraLatLng = currentCameraPosition.target;
     float previousCameraBearing = normalize((float) currentCameraPosition.bearing);
 
+    if (previousCameraLatLng == null) {
+      previousCameraLatLng = previousLayerLatLng;
+    }
+
     // generate targets for layer
     LatLng[] latLngValues = getLatLngValues(previousLayerLatLng, newLocations);
     Float[] bearingValues = getBearingValues(previousLayerBearing, newLocations);
@@ -334,7 +338,8 @@ final class LocationAnimatorCoordinator {
     createNewCameraAdapterAnimator(ANIMATOR_TILT, new Float[] {previousTiltLevel, targetTilt}, cancelableCallback);
   }
 
-  private void createNewLatLngAnimator(@MapLibreAnimator.Type int animatorType, LatLng previous, LatLng target) {
+  private void createNewLatLngAnimator(@MapLibreAnimator.Type int animatorType,
+                                       @NonNull LatLng previous, @NonNull LatLng target) {
     createNewLatLngAnimator(animatorType, new LatLng[] {previous, target});
   }
 
@@ -430,6 +435,10 @@ final class LocationAnimatorCoordinator {
 
     LatLng currentTarget = animator.getTarget();
     LatLng previousCameraTarget = currentCameraPosition.target;
+    if (previousCameraTarget == null) {
+      return false;
+    }
+
     createNewLatLngAnimator(ANIMATOR_CAMERA_LATLNG, previousCameraTarget, currentTarget);
 
     return immediateAnimation(projection, previousCameraTarget, currentTarget);

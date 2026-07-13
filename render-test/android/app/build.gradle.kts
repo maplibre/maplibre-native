@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.1.13356709"
 
     sourceSets {
         getByName("test") {
@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "org.maplibre.render_test_runner"
         compileSdk = 34
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
 
         val abi = if (project.hasProperty("maplibre.abis")) {
@@ -35,7 +35,6 @@ android {
         externalNativeBuild {
             cmake {
                 arguments("-DANDROID_STL=c++_static")
-                arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
                 targets.add("mbgl-render-test-runner")
             }
         }
@@ -61,12 +60,36 @@ android {
     productFlavors {
         create("opengl") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=ON")
+                }
+            }
         }
         create("vulkan") {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
                     arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
+                }
+            }
+        }
+        create("webgpuDawn") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_DAWN=ON")
+                }
+            }
+        }
+        create("webgpuWgpu") {
+            dimension = "renderer"
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_WEBGPU=ON", "-DMLN_WEBGPU_IMPL_WGPU=ON")
                 }
             }
         }

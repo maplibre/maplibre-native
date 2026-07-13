@@ -17,6 +17,12 @@ updates:
       github-actions:
         patterns:
           - '*'
+    cooldown:
+      default-days: 3
+      # no semver support for github-actions
+      # => no specific configuration for this
+      include:
+        - "*"
   - package-ecosystem: 'gradle'
     open-pull-requests-limit: 1
     directories:
@@ -29,3 +35,10 @@ updates:
       gradle-deps:
         patterns:
           - '*'
+    cooldown:
+      default-days: 5
+      semver-major-days: 5
+      semver-minor-days: 3
+      semver-patch-days: 3
+      include:
+        - "*"

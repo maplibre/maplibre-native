@@ -13,7 +13,7 @@ import { join } from "path";
  */
 async function getFilePaths(baseDir, predicate) {
   const entries = (await fs.readdir(baseDir, { withFileTypes: true }))
-  return entries.map((entry) => join(entry.path, entry.name)).filter(predicate);
+  return entries.map((entry) => join(baseDir, entry.name)).filter(predicate);
 }
 
 // documentation files that will be updated and source files that contain examples
