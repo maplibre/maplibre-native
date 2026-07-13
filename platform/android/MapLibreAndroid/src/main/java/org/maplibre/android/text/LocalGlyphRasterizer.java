@@ -4,11 +4,15 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * LocalGlyphRasterizer is the Android-specific platform implementation used
@@ -16,26 +20,60 @@ import androidx.annotation.WorkerThread;
  */
 @Keep
 public class LocalGlyphRasterizer {
+  private static final int TEXTURE_SCALE = 2;
+  private static final int BITMAP_SIZE = 60;
+  private static final int TEXT_SIZE = 48;
+  private static final int RASTER_BUFFER = 3 * TEXTURE_SCALE;
+  private static final float TOP_ADJUSTMENT = 26.5f;
+  private static final float BASELINE_X = 10;
+
   private final Bitmap bitmap;
   @NonNull
   private final Paint paint;
   @NonNull
   private final Canvas canvas;
+  @NonNull
+  private final Rect textBounds;
+  @NonNull
+  // Tiny cache (font stacks × 2 for bold/regular) so glyphs don't
+  // pay Typeface.create's cache lookup and internal lock per call.
+  private final Map<String, Typeface> typefaceCache;
+  // Updated by drawGlyphBitmap so native code can read the measured top without
+  // allocating a per-glyph result object.
+  private float glyphTop;
 
   LocalGlyphRasterizer() {
     /*
-      35x35px dimensions are hardwired to match local_glyph_rasterizer.cpp
-      These dimensions are large enough to draw a 24 point character in the middle
-      of the bitmap (y: 20) with some buffer around the edge
+      60x60px dimensions are hardwired to match local_glyph_rasterizer.cpp.
+      Glyphs are drawn at 2x texture resolution, while logical metrics stay at 1x.
+      These dimensions are large enough to draw a 48 px character in the middle
+      of the bitmap with some buffer around the edge.
     */
-    bitmap = Bitmap.createBitmap(35, 35, Bitmap.Config.ARGB_8888);
+    bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888);
 
     paint = new Paint();
     paint.setAntiAlias(true);
-    paint.setTextSize(24);
+    paint.setTextSize(TEXT_SIZE);
 
     canvas = new Canvas();
     canvas.setBitmap(bitmap);
+    textBounds = new Rect();
+    typefaceCache = new HashMap<>();
+  }
+
+  private void setTypeface(String fontFamily, boolean bold) {
+    String key = (bold ? "bold:" : "regular:") + fontFamily;
+    Typeface typeface = typefaceCache.get(key);
+    if (typeface == null) {
+      typeface = Typeface.create(fontFamily, bold ? Typeface.BOLD : Typeface.NORMAL);
+      typefaceCache.put(key, typeface);
+    }
+    paint.setTypeface(typeface);
+  }
+
+  private int measureGlyphTop(String glyph) {
+    paint.getTextBounds(glyph, 0, glyph.length(), textBounds);
+    return Math.max(0, -textBounds.top);
   }
 
   /***
@@ -51,9 +89,17 @@ public class LocalGlyphRasterizer {
    */
   @WorkerThread
   protected Bitmap drawGlyphBitmap(String fontFamily, boolean bold, char glyphID) {
-    paint.setTypeface(Typeface.create(fontFamily, bold ? Typeface.BOLD : Typeface.NORMAL));
+    setTypeface(fontFamily, bold);
+    String glyph = String.valueOf(glyphID);
+    int glyphTopPx = measureGlyphTop(glyph);
+    glyphTop = glyphTopPx / (float) TEXTURE_SCALE - TOP_ADJUSTMENT;
     canvas.drawColor(Color.WHITE);
-    canvas.drawText(String.valueOf(glyphID), 5, 25, paint);
+    canvas.drawText(glyph, BASELINE_X, RASTER_BUFFER + glyphTopPx, paint);
     return bitmap;
+  }
+
+  @WorkerThread
+  protected float getLastGlyphTop() {
+    return glyphTop;
   }
 }

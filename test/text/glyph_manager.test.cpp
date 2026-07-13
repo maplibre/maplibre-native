@@ -119,6 +119,13 @@ public:
     }
 };
 
+class KatakanaOnlyLocalGlyphRasterizer : public StubLocalGlyphRasterizer {
+public:
+    bool canRasterizeGlyph(const FontStack&, GlyphID glyphID) override {
+        return static_cast<char16_t>(glyphID) == u'テ';
+    }
+};
+
 class StubGlyphManagerObserver : public GlyphManagerObserver {
 public:
     void onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& glyphRange) override {
@@ -148,7 +155,11 @@ public:
     StubFileSource fileSource;
     StubGlyphManagerObserver observer;
     StubGlyphRequestor requestor;
-    GlyphManager glyphManager{std::make_unique<StubLocalGlyphRasterizer>()};
+    GlyphManager glyphManager;
+
+    GlyphManagerTest(
+        std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer = std::make_unique<StubLocalGlyphRasterizer>())
+        : glyphManager(std::move(localGlyphRasterizer)) {}
 
     void run(const std::string& url, GlyphDependencies dependencies) {
         // Squelch logging.
@@ -317,8 +328,40 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'中'}}}, .shapes = {}});
 }
 
-TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
+TEST(GlyphManager, LoadLocalCJKSymbols) {
     GlyphManagerTest test;
+    int glyphResponses = 0;
+
+    test.fileSource.glyphsResponse = [&](const Resource&) {
+        glyphResponses++;
+        return std::optional<Response>();
+    };
+
+    test.observer.glyphsLoaded = [&](const FontStack&, const GlyphRange&) {
+        glyphResponses++;
+    };
+
+    test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
+        EXPECT_EQ(glyphResponses, 0); // Local generation should prevent requesting any glyphs.
+
+        const auto& testPositions = glyphs.at(FontStackHasher()({{"Test Stack"}}));
+
+        ASSERT_EQ(testPositions.size(), 2u);
+        ASSERT_EQ(testPositions.count(u'〒'), 1u);
+        ASSERT_EQ(testPositions.count(u'！'), 1u);
+
+        test.end();
+    };
+
+    test.run("test/fixtures/resources/glyphs.pbf",
+             GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'〒', u'！'}}}, .shapes = {}});
+}
+
+TEST(GlyphManager, LocalCJKGlyphPrefersLocalRasterizationOverRange) {
+    // Verifies that locally-rasterized glyphs (like テ) are produced by the
+    // local rasterizer instead of using a glyph from an already-loaded PBF
+    // range.
+    GlyphManagerTest test(std::make_unique<KatakanaOnlyLocalGlyphRasterizer>());
     bool firstGlyphResponse = false;
 
     test.fileSource.glyphsResponse = [&](const Resource&) {
@@ -338,7 +381,7 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
             ASSERT_EQ(testPositions.count(u'々'), 1u);
 
             // Katakana letter te, should be locally rasterized
-            //  instead of using the glyph recieved from the range
+            //  instead of using the glyph received from the range
             //  for the ideagraphic mark
             test.glyphManager.getGlyphs(test.requestor,
                                         GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'テ'}}}, // 0x30c6
@@ -442,4 +485,17 @@ TEST(GlyphManager, ImmediateFileSource) {
 
     test.run("test/fixtures/resources/glyphs.pbf",
              GlyphDependencies{.glyphs = {{{{"Test Stack"}}, {u'a', u'å', u' '}}}, .shapes = {}});
+}
+
+// Guards against silent drift between allowsFixedWidthGlyphGeneration's range
+// coverage and the precomputed NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK used
+// for offline download progress estimation.
+TEST(i18n, GlyphRangeLocalGenerationCountMatchesConstant) {
+    uint32_t locallyGeneratedRanges = 0;
+    for (uint32_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; ++i) {
+        if (util::i18n::glyphRangeIsEntirelyLocallyGenerated(static_cast<char16_t>(i * GLYPHS_PER_GLYPH_RANGE))) {
+            ++locallyGeneratedRanges;
+        }
+    }
+    EXPECT_EQ(GLYPH_RANGES_PER_FONT_STACK - locallyGeneratedRanges, NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
 }
