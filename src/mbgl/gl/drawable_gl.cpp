@@ -13,7 +13,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 
-#if !defined(NDEBUG)
+#if defined(MLN_VALIDATE_UNIFORM_BLOCK_BINDINGS)
 #include <unordered_set>
 #endif
 
@@ -72,11 +72,12 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     impl->uniformBuffers.bind();
     bindTextures();
 
-#if !defined(NDEBUG)
+#if defined(MLN_VALIDATE_UNIFORM_BLOCK_BINDINGS)
     // A draw call issued while any of the shader's uniform blocks has no buffer bound
     // at its binding point is rejected by validating drivers ("DrawElements:
     // ValidateState() failed" on the Android emulator), silently dropping geometry.
-    // Name the offender, once per drawable/block pair.
+    // Name the offender, once per drawable/block pair. glGetIntegeri_v is a host
+    // round-trip per block per draw on the emulator, so this is opt-in.
     {
         const auto& shaderGLDebug = static_cast<const ShaderProgramGL&>(*shader);
         for (const auto& block : shaderGLDebug.getUniformBlocks()) {

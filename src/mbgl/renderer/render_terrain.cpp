@@ -94,11 +94,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // Get tiles from the DEM source
     auto renderTiles = demSource->getRawRenderTiles();
     if (renderTiles->empty()) {
-        Log::Warning(Event::Render, "Terrain DEM source has no tiles loaded yet");
         return;
     }
-
-    Log::Info(Event::Render, "Terrain processing " + std::to_string(renderTiles->size()) + " DEM tiles");
 
     // Cast to LayerGroup for addDrawable
     auto* lg = static_cast<LayerGroup*>(layerGroup.get());
@@ -138,7 +135,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     }
 
     // Create terrain drawables for each DEM tile
-    size_t newDrawables = 0;
     for (const auto& renderTile : *renderTiles) {
         const auto& tileID = renderTile.getOverscaledTileID();
 
@@ -225,14 +221,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         if (drawable) {
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = ownDEM;
-            newDrawables++;
         }
-    }
-
-    if (newDrawables > 0) {
-        Log::Info(Event::Render,
-                  "Terrain created " + std::to_string(newDrawables) +
-                      " new drawables (total: " + std::to_string(tilesWithDrawables.size()) + ")");
     }
 }
 
@@ -423,10 +412,6 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
                        indices.size(),
                        std::move(vertices),
                        std::move(indices)};
-
-    Log::Info(Event::General,
-              "Terrain mesh generated: " + std::to_string(mesh->vertexCount) + " vertices, " +
-                  std::to_string(mesh->indexCount) + " indices");
 }
 
 std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& context, const DEMData& demData) {
@@ -435,23 +420,6 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
     if (!imagePtr || imagePtr->size.isEmpty()) {
         Log::Warning(Event::Render, "DEM data has no image");
         return nullptr;
-    }
-
-    Log::Info(Event::Render,
-              "Creating DEM texture: size=" + std::to_string(imagePtr->size.width) + "x" +
-                  std::to_string(imagePtr->size.height) + ", bytes=" + std::to_string(imagePtr->bytes()));
-
-    // DEBUG: Check actual pixel values in the image
-    if (imagePtr->data && imagePtr->bytes() > 0) {
-        const uint8_t* pixels = imagePtr->data.get();
-        // Check first 10 pixels' RGB values
-        std::string pixelValues = "First 10 DEM pixels (RGBA): ";
-        for (size_t i = 0; i < std::min(size_t(10), imagePtr->bytes() / 4); i++) {
-            size_t offset = i * 4;
-            pixelValues += "[" + std::to_string(pixels[offset]) + "," + std::to_string(pixels[offset + 1]) + "," +
-                           std::to_string(pixels[offset + 2]) + "," + std::to_string(pixels[offset + 3]) + "] ";
-        }
-        Log::Info(Event::Render, pixelValues);
     }
 
     // Create a new texture
@@ -463,14 +431,12 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
 
     // Set the image data
     texture->setImage(imagePtr);
-    Log::Info(Event::Render, "DEM texture image data set successfully");
 
     // Configure sampler - use linear filtering for smooth elevation interpolation
     texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
                                       .wrapU = gfx::TextureWrapType::Clamp,
                                       .wrapV = gfx::TextureWrapType::Clamp});
 
-    Log::Info(Event::Render, "DEM texture created and configured successfully");
     return texture;
 }
 
@@ -524,7 +490,6 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createTestMapTexture(gfx::Context
                                       .wrapU = gfx::TextureWrapType::Repeat,
                                       .wrapV = gfx::TextureWrapType::Repeat});
 
-    Log::Info(Event::Render, "Test map texture created: " + std::to_string(size) + "x" + std::to_string(size));
     return texture;
 }
 
@@ -584,18 +549,13 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     // Set the DEM texture
     if (demTexture) {
         builder->setTexture(demTexture, 0); // Texture index 0 for DEM
-        Log::Info(Event::Render, "DEM texture bound to drawable for tile " + util::toString(tileID));
-    } else {
-        Log::Warning(Event::Render, "No DEM texture provided for tile " + util::toString(tileID));
     }
 
     if (!mapTexture) {
         mapTexture = createTestMapTexture(context);
-        Log::Warning(Event::Render, "No map texture provided, using test pattern for tile " + util::toString(tileID));
     }
     if (mapTexture) {
         builder->setTexture(mapTexture, 1); // Texture index 1 for map
-        Log::Info(Event::Render, "Map texture bound to drawable for tile " + util::toString(tileID));
     } else {
         Log::Warning(Event::Render, "Failed to create test map texture for tile " + util::toString(tileID));
     }

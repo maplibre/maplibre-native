@@ -16,17 +16,9 @@ namespace mbgl {
 using namespace shaders;
 
 void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    Log::Info(Event::Render,
-              "TerrainLayerTweaker::execute called, layerGroup.empty()=" + std::to_string(layerGroup.empty()) +
-                  ", terrain=" + std::to_string(terrain != nullptr));
-
     if (layerGroup.empty() || !terrain) {
-        Log::Warning(Event::Render, "TerrainLayerTweaker::execute early return - empty or no terrain");
         return;
     }
-
-    Log::Info(Event::Render,
-              "TerrainLayerTweaker processing " + std::to_string(layerGroup.getDrawableCount()) + " drawables");
 
     auto& context = parameters.context;
 

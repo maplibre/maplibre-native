@@ -428,7 +428,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         // Mark DEM source as needed for terrain rendering
         if (renderTerrain && renderTerrain->isEnabled() && sourceImpl->id == renderTerrain->getSourceID()) {
             sourceNeedsRendering = true;
-            Log::Info(Event::Render, "Marking DEM source '" + sourceImpl->id + "' for terrain rendering");
         }
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
