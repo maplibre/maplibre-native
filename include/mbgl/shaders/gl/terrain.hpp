@@ -13,6 +13,7 @@ out float v_elevation;
 
 layout (std140) uniform TerrainDrawableUBO {
     highp mat4 u_matrix;
+    highp vec4 u_dem_tile_coords;
 };
 
 layout (std140) uniform TerrainEvaluatedPropsUBO {
@@ -36,7 +37,10 @@ void main() {
     // Sample the DEM texture and decode elevation in meters using the source's
     // unpack vector, matching hillshade/color-relief (supports Mapbox Terrain-RGB
     // and Terrarium encodings)
-    vec4 demSample = texture(u_dem, v_uv) * 255.0;
+    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
+    // while this tile's own DEM is still loading
+    vec2 dem_uv = v_uv * u_dem_tile_coords.x + u_dem_tile_coords.yz;
+    vec4 demSample = texture(u_dem, dem_uv) * 255.0;
     demSample.a = -1.0;
     float elevationMeters = dot(demSample, u_unpack);
 

@@ -34,6 +34,7 @@ layout(push_constant) uniform Constants {
 
 struct TerrainDrawableUBO {
     mat4 matrix;
+    vec4 dem_coords;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idTerrainDrawableUBO) readonly buffer TerrainDrawableUBOVector {
@@ -62,7 +63,10 @@ void main() {
 
     // Sample the DEM texture and decode elevation in meters using the source's
     // unpack vector (supports Mapbox Terrain-RGB and Terrarium encodings)
-    vec4 dem_sample = textureLod(dem_sampler, frag_uv, 0.0) * 255.0;
+    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
+    // while this tile's own DEM is still loading
+    const vec2 dem_uv = frag_uv * drawable.dem_coords.x + drawable.dem_coords.yz;
+    vec4 dem_sample = textureLod(dem_sampler, dem_uv, 0.0) * 255.0;
     dem_sample.a = -1.0;
     const float elevation_meters = dot(dem_sample, props.unpack);
 

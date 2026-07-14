@@ -116,11 +116,25 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID()); });
     for (auto it = tilesWithDrawables.begin(); it != tilesWithDrawables.end();) {
         if (!currentTiles.contains(it->first)) {
-            demTextures.erase(it->first.toUnwrapped());
+            drawableDemCoords.erase(it->first);
             it = tilesWithDrawables.erase(it);
         } else {
             ++it;
         }
+    }
+    // Retain cached DEM textures that are related to the current tile set so they
+    // can serve as ancestor fallbacks while exact tiles load (as maplibre-gl-js
+    // retains terrain tiles in its source cache); drop unrelated ones
+    for (auto it = demTextures.begin(); it != demTextures.end();) {
+        bool related = false;
+        for (const auto& current : currentTiles) {
+            const UnwrappedTileID unwrapped = current.toUnwrapped();
+            if (unwrapped == it->first || unwrapped.isChildOf(it->first) || it->first.isChildOf(unwrapped)) {
+                related = true;
+                break;
+            }
+        }
+        it = related ? std::next(it) : demTextures.erase(it);
     }
 
     // Create terrain drawables for each DEM tile
@@ -128,19 +142,14 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     for (const auto& renderTile : *renderTiles) {
         const auto& tileID = renderTile.getOverscaledTileID();
 
-        Log::Info(Event::Render, "Terrain examining tile " + util::toString(tileID));
-
-        // Skip if we already have a drawable for this tile
-        if (tilesWithDrawables.contains(tileID)) {
-            Log::Info(Event::Render, "Terrain tile " + util::toString(tileID) + " already has drawable, skipping");
+        // Skip if the tile already has a drawable bound to its own DEM
+        if (const auto existing = tilesWithDrawables.find(tileID);
+            existing != tilesWithDrawables.end() && existing->second) {
             continue;
         }
 
         // Get the underlying Tile and cast to RasterDEMTile
         const auto& tile = renderTile.getTile();
-        Log::Info(Event::Render,
-                  "Terrain tile " + util::toString(tileID) + " kind=" + std::to_string(static_cast<int>(tile.kind)));
-
         if (tile.kind != Tile::Kind::RasterDEM) {
             Log::Warning(Event::Render, "Terrain tile " + util::toString(tileID) + " is not RasterDEM type");
             continue;
@@ -151,50 +160,72 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             continue;
         }
 
-        // Get the HillshadeBucket from the DEM tile
-        auto* hillshadeBucket = demTile->getBucket();
-        if (!hillshadeBucket) {
-            Log::Info(Event::Render, "Terrain tile " + util::toString(tileID) + " has no bucket yet (still loading)");
-            continue;
-        }
-
-        // Get DEM data from the bucket
-        const auto& demData = hillshadeBucket->getDEMData();
-        auto imagePtr = demData.getImagePtr();
-        if (!imagePtr || imagePtr->size.isEmpty()) {
-            Log::Warning(Event::Render, "Terrain tile " + util::toString(tileID) + " has empty DEM data");
-            continue;
-        }
-
-        // All tiles come from the same raster-dem source, so they share one encoding
-        demUnpackVector = demData.getUnpackVector();
-
-        Log::Info(Event::Render,
-                  "Terrain creating texture for tile " + util::toString(tileID) + " (DEM size: " +
-                      std::to_string(imagePtr->size.width) + "x" + std::to_string(imagePtr->size.height) + ")");
-
-        // Create the DEM texture, reusing a cached one for this tile if present
+        // Resolve the DEM texture: the tile's own decoded DEM if available,
+        // otherwise the closest cached ancestor as a fallback so the terrain
+        // mesh stays up while the tile loads (as maplibre-gl-js does)
         std::shared_ptr<gfx::Texture2D> demTexture;
-        if (auto cached = demTextures.find(tileID.toUnwrapped()); cached != demTextures.end()) {
-            demTexture = cached->second.texture;
-        } else {
-            demTexture = createDEMTexture(context, demData);
+        std::array<float, 4> demCoords{{1, 0, 0, 0}};
+        bool ownDEM = false;
+
+        auto* hillshadeBucket = demTile->getBucket();
+        const auto* demData = hillshadeBucket ? &hillshadeBucket->getDEMData() : nullptr;
+        if (demData && demData->getImagePtr() && !demData->getImagePtr()->size.isEmpty()) {
+            // All tiles come from the same raster-dem source, so they share one encoding
+            demUnpackVector = demData->getUnpackVector();
+
+            if (auto cached = demTextures.find(tileID.toUnwrapped()); cached != demTextures.end()) {
+                demTexture = cached->second.texture;
+            } else {
+                demTexture = createDEMTexture(context, *demData);
+                if (demTexture) {
+                    // Keep the texture available for elevation sampling by non-draped layers
+                    demTextures[tileID.toUnwrapped()] = {demTexture, demData->dim};
+                }
+            }
+            ownDEM = demTexture != nullptr;
+        }
+        if (!demTexture) {
+            // Fall back to the closest cached ancestor DEM
+            const UnwrappedTileID unwrapped = tileID.toUnwrapped();
+            const UnwrappedTileID* ancestorID = nullptr;
+            int bestZoom = -1;
+            for (const auto& [candidate, entry] : demTextures) {
+                if (candidate != unwrapped && unwrapped.isChildOf(candidate) &&
+                    static_cast<int>(candidate.canonical.z) > bestZoom) {
+                    bestZoom = candidate.canonical.z;
+                    ancestorID = &candidate;
+                    demTexture = entry.texture;
+                }
+            }
             if (!demTexture) {
-                Log::Warning(Event::Render, "Failed to create DEM texture for tile " + util::toString(tileID));
+                continue; // nothing to render this tile with yet
+            }
+            const int dz = unwrapped.canonical.z - ancestorID->canonical.z;
+            const float scale = static_cast<float>(1u << dz);
+            const float dx = static_cast<float>(unwrapped.canonical.x - (ancestorID->canonical.x << dz));
+            const float dy = static_cast<float>(unwrapped.canonical.y - (ancestorID->canonical.y << dz));
+            demCoords = {{1.0f / scale, dx / scale, dy / scale, 0.0f}};
+        }
+
+        // If a fallback drawable already exists for this tile, keep it until the
+        // tile's own DEM is ready, then replace it
+        if (const auto existing = tilesWithDrawables.find(tileID); existing != tilesWithDrawables.end()) {
+            if (!ownDEM) {
                 continue;
             }
-            // Keep the texture available for elevation sampling by non-draped layers
-            demTextures[tileID.toUnwrapped()] = {demTexture, demData.dim};
+            lg->removeDrawablesIf(
+                [&](gfx::Drawable& drawable) { return drawable.getTileID() && *drawable.getTileID() == tileID; });
+            tilesWithDrawables.erase(existing);
         }
+        drawableDemCoords[tileID] = demCoords;
 
         // Create terrain drawable for this tile
         auto drawable = createDrawableForTile(
             context, shaders, tileID, demTexture, texturePool.getRenderTarget(renderTile.id)->getTexture());
         if (drawable) {
             lg->addDrawable(std::move(drawable));
-            tilesWithDrawables[tileID] = true;
+            tilesWithDrawables[tileID] = ownDEM;
             newDrawables++;
-            Log::Info(Event::Render, "Created terrain drawable for tile " + util::toString(tileID));
         }
     }
 

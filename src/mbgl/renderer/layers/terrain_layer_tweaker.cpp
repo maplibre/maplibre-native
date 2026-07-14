@@ -75,7 +75,8 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #else
         const TerrainDrawableUBO drawableUBO = {
 #endif
-            .matrix = util::cast<float>(matrix)
+            .matrix = util::cast<float>(matrix),
+            .dem_coords = terrain->getDrawableDemCoords(*drawable.getTileID())
         };
 
 #if !MLN_UBO_CONSOLIDATION

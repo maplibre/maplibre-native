@@ -18,9 +18,10 @@ enum {
 
 struct alignas(16) TerrainDrawableUBO {
     /*  0 */ float4x4 matrix;
-    /* 64 */
+    /* 64 */ float4 dem_coords;
+    /* 80 */
 };
-static_assert(sizeof(TerrainDrawableUBO) == 4 * 16, "wrong size");
+static_assert(sizeof(TerrainDrawableUBO) == 5 * 16, "wrong size");
 
 struct alignas(16) TerrainTilePropsUBO {
     /*  0 */ float2 dem_tl;
@@ -84,7 +85,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Sample the DEM texture and decode elevation in meters using the source's
     // unpack vector, matching hillshade/color-relief (supports Mapbox Terrain-RGB
     // and Terrarium encodings)
-    float4 demSample = demTexture.sample(demSampler, uv) * 255.0;
+    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
+    // while this tile's own DEM is still loading
+    const float2 dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
+    float4 demSample = demTexture.sample(demSampler, dem_uv) * 255.0;
     demSample.a = -1.0;
     float elevationMeters = dot(demSample, props.unpack);
 

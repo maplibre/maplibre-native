@@ -33,6 +33,7 @@ struct GlobalIndexUBO {
 
 struct TerrainDrawableUBO {
     matrix: mat4x4<f32>,
+    dem_coords: vec4<f32>,
 };
 
 struct TerrainEvaluatedPropsUBO {
@@ -60,7 +61,10 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Sample the DEM texture and decode elevation in meters using the source's
     // unpack vector (supports Mapbox Terrain-RGB and Terrarium encodings)
-    var dem_sample = textureSampleLevel(dem_texture, texture_sampler, uv, 0.0) * 255.0;
+    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
+    // while this tile's own DEM is still loading
+    let dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
+    var dem_sample = textureSampleLevel(dem_texture, texture_sampler, dem_uv, 0.0) * 255.0;
     dem_sample.a = -1.0;
     let elevation_meters = dot(dem_sample, props.unpack);
 

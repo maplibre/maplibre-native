@@ -114,6 +114,15 @@ public:
     const std::array<float, 4>& getDEMUnpackVector() const { return demUnpackVector; }
 
     /**
+     * @brief Scale/offset mapping a terrain drawable's uv into its bound DEM
+     * texture ({1,0,0,0} unless an ancestor tile's DEM is bound as a fallback)
+     */
+    std::array<float, 4> getDrawableDemCoords(const OverscaledTileID& tileID) const {
+        const auto it = drawableDemCoords.find(tileID);
+        return it != drawableDemCoords.end() ? it->second : std::array<float, 4>{{1, 0, 0, 0}};
+    }
+
+    /**
      * @brief Per-tile DEM binding data for layers that sample elevation in their
      * vertex shaders (the native analog of maplibre-gl-js terrain.getTerrainData)
      */
@@ -203,8 +212,14 @@ private:
     // Terrain layer tweaker for UBO updates
     std::unique_ptr<TerrainLayerTweaker> tweaker;
 
-    // Track which tiles have terrain drawables
+    // Track which tiles have terrain drawables; the value is true when the
+    // drawable samples the tile's own DEM texture, false when it is using an
+    // ancestor tile's DEM as a fallback while its own DEM is still loading
     std::unordered_map<OverscaledTileID, bool> tilesWithDrawables;
+
+    // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
+    // an ancestor tile's DEM is bound); read by the terrain layer tweaker
+    std::map<OverscaledTileID, std::array<float, 4>> drawableDemCoords;
 
     // Mesh resolution (vertices per side)
     static constexpr size_t MESH_SIZE = 128;

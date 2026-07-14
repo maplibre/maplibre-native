@@ -7,9 +7,11 @@ namespace shaders {
 
 struct alignas(16) TerrainDrawableUBO {
     /*  0 */ std::array<float, 4 * 4> matrix;
-    /* 64 */
+    /* 64 */ std::array<float, 4> dem_coords; // scale, x offset, y offset into the bound DEM
+                                              // tile ({1,0,0,0} unless an ancestor is bound)
+    /* 80 */
 };
-static_assert(sizeof(TerrainDrawableUBO) == 4 * 16);
+static_assert(sizeof(TerrainDrawableUBO) == 5 * 16);
 
 struct alignas(16) TerrainTilePropsUBO {
     /*  0 */ std::array<float, 2> dem_tl;
