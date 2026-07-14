@@ -21,9 +21,8 @@ import org.maplibre.android.testapp.styles.TestStyles
  * the OpenFreeMap Liberty style combined with the Mapterhorn raster-dem
  * tiles (https://mapterhorn.com), both with worldwide coverage.
  *
- * The DEM sources, hillshade layer, and terrain configuration are added
- * at runtime with the style API. Terrain gets its own raster-dem source
- * (same tiles) per the maplibre-gl-js recommendation.
+ * The DEM source, hillshade layer, and terrain configuration are added
+ * at runtime with the style API.
  */
 class TerrainVectorMapActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
@@ -49,13 +48,10 @@ class TerrainVectorMapActivity : AppCompatActivity() {
     }
 
     private fun addTerrain(style: Style) {
-        // The Mapterhorn TileJSON declares "encoding": "terrarium", which the
-        // tileset parser picks up
-        style.addSource(RasterDemSource(SOURCE_ID_HILLSHADE, DEM_TILEJSON))
-        style.addSource(RasterDemSource(SOURCE_ID_TERRAIN, DEM_TILEJSON))
+        style.addSource(RasterDemSource(SOURCE_ID_DEM, DEM_TILEJSON))
 
         // Insert the hillshade below the first symbol layer so labels stay on top
-        val hillshade = HillshadeLayer(LAYER_ID_HILLSHADE, SOURCE_ID_HILLSHADE)
+        val hillshade = HillshadeLayer(LAYER_ID_HILLSHADE, SOURCE_ID_DEM)
             .withProperties(
                 hillshadeMethod("igor"),
                 hillshadeExaggeration(0.4f)
@@ -67,13 +63,12 @@ class TerrainVectorMapActivity : AppCompatActivity() {
             style.addLayer(hillshade)
         }
 
-        style.setTerrain(Terrain(SOURCE_ID_TERRAIN, 1.0f))
+        style.setTerrain(Terrain(SOURCE_ID_DEM, 1.0f))
     }
 
     companion object {
         private const val DEM_TILEJSON = "https://tiles.mapterhorn.com/tilejson.json"
-        private const val SOURCE_ID_HILLSHADE = "mapterhorn"
-        private const val SOURCE_ID_TERRAIN = "mapterhorn-terrain"
+        private const val SOURCE_ID_DEM = "mapterhorn"
         private const val LAYER_ID_HILLSHADE = "mapterhorn-hillshade"
     }
 
