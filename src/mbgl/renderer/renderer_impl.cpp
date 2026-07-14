@@ -284,50 +284,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     orchestrator.processChanges();
     orchestrator.addRenderTargets(texturePool);
-    orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroupBase) {
-        if (!layerGroupBase.shouldRenderToTerrain()) {
-            return;
-        }
-        if (layerGroupBase.getType() != LayerGroupBase::Type::TileLayerGroup) {
-            return;
-        }
-        TileLayerGroup& layerGroup = static_cast<TileLayerGroup&>(layerGroupBase);
-        std::vector<OverscaledTileID> tileIDs;
-        layerGroup.visitDrawables([&](gfx::Drawable& drawable) { tileIDs.emplace_back(drawable.getTileID().value()); });
-        std::map<UnwrappedTileID, TileLayerGroupPtr> singleTileLayerGroups;
-        for (const OverscaledTileID& tileID : tileIDs) {
-            std::optional<UnwrappedTileID> terrainTileID;
-            RenderTargetPtr renderTarget = texturePool.getRenderTargetAncestorOrDescendant(tileID.toUnwrapped(),
-                                                                                           terrainTileID);
-            if (!renderTarget) {
-                continue;
-            }
-            bool layerGroupPrexists = singleTileLayerGroups.contains(terrainTileID.value());
-            if (!layerGroupPrexists) {
-                singleTileLayerGroups[terrainTileID.value()] = context.createTileLayerGroup(
-                    layerGroup.getLayerIndex(), /*initialCapacity=*/1, layerGroupBase.getName(), true);
-                // Propagate the source layer's stencil tiles to the draped group. Without this,
-                // the draped TileLayerGroup has empty stencilTiles, so it skips clipping-mask
-                // registration (renderTileClippingMasks) and its 2D drawables then call
-                // stencilModeForClipping() for tiles that were never registered — asserting in
-                // debug (Dawn/wgpu) and crashing in release (Vulkan). The original group's tiles
-                // cover the draped drawables' tiles.
-                singleTileLayerGroups[terrainTileID.value()]->setStencilTiles(layerGroup.getStencilTiles());
-            }
-            TileLayerGroupPtr singleTileLayerGroup = singleTileLayerGroups[terrainTileID.value()];
-            renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
-            std::vector<gfx::UniqueDrawable> drawables = layerGroup.removeDrawables(RenderPass::Translucent, tileID);
-
-            if (!drawables.empty()) {
-                if (!layerGroupPrexists) {
-                    singleTileLayerGroup->addLayerTweaker(drawables[0]->getLayerTweaker());
-                }
-                for (auto& drawable : drawables) {
-                    singleTileLayerGroup->addDrawable(RenderPass::Translucent, tileID, std::move(drawable));
-                }
-            }
-        }
-    });
+    // Draped layer groups are not routed into individual render targets here;
+    // each drape RenderTarget renders every overlapping draped drawable itself
+    // (RenderTarget::renderDrapedLayerGroups), so a tile at a different zoom than
+    // the terrain cover is drawn into every target it covers, like gl-js.
 
     // Upload layer groups
     {
@@ -387,6 +347,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
+
+    // Refresh each terrain drape target's copy of the global paint params
+    // (same values plus the target tile in drape_tile)
+    if (orchestrator.getRenderTerrain()) {
+        texturePool.visitRenderTargets([&](std::shared_ptr<RenderTarget>& renderTarget) {
+            renderTarget->updateDrapeGlobalUBO(globalPaintParamsUBO, context);
+        });
+    }
 
     // - 3D PASS
     // -------------------------------------------------------------------------------------
@@ -468,7 +436,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
+            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
+                  layerGroup.shouldRenderToTerrain())) {
+                layerGroup.render(orchestrator, parameters);
+            }
             parameters.currentLayer++;
         });
     };
@@ -479,10 +450,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        // draw layer groups, translucent pass
+        // draw layer groups, translucent pass; draped groups render only into the
+        // terrain render targets (RenderTarget::renderDrapedLayerGroups)
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
+            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
+                  layerGroup.shouldRenderToTerrain())) {
+                layerGroup.render(orchestrator, parameters);
+            }
             if (parameters.currentLayer > 0) {
                 parameters.currentLayer--;
             }

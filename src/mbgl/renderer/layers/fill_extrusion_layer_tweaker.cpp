@@ -88,8 +88,16 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        // Fill extrusion is elevated, not draped
+        const auto matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          translation,
+                                          anchor,
+                                          nearClipped,
+                                          inViewportPixelUnits,
+                                          drawable,
+                                          /*aligned=*/false,
+                                          /*renderToTerrain=*/false);
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);

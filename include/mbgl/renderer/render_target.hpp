@@ -1,12 +1,14 @@
 #pragma once
 
 #include <mbgl/gfx/types.hpp>
+#include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/color.hpp>
 
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <ranges>
 #include <string>
 
@@ -16,9 +18,15 @@ namespace gfx {
 class Context;
 class Texture2D;
 class OffscreenTexture;
+class UniformBuffer;
 class UploadPass;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
+
+namespace shaders {
+struct GlobalPaintParamsUBO;
+} // namespace shaders
 
 class LayerGroupBase;
 class PaintParameters;
@@ -35,6 +43,16 @@ public:
 
     /// Set the color the render target is cleared to before its layer groups are drawn
     void setClearColor(const Color& color) { backgroundColor = color; }
+
+    /// Mark this render target as a terrain drape target for the given tile.
+    /// Drape targets render the orchestrator's draped tile layer groups
+    /// (filtered to overlapping tiles) instead of their own layer groups.
+    void setDrapeTileID(const UnwrappedTileID& id) { drapeTileID = id; }
+    const std::optional<UnwrappedTileID>& getDrapeTileID() const { return drapeTileID; }
+
+    /// Refresh this drape target's copy of the global paint parameters,
+    /// carrying the target tile in `drape_tile` (no-op for non-drape targets)
+    void updateDrapeGlobalUBO(const shaders::GlobalPaintParamsUBO& params, gfx::Context& context);
 
     /// Get the render target texture
     const gfx::Texture2DPtr& getTexture();
@@ -84,11 +102,15 @@ public:
     void render(RenderOrchestrator&, const RenderTree&, PaintParameters&);
 
 protected:
+    void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
+
     gfx::Context& context;
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     Color backgroundColor;
+    std::optional<UnwrappedTileID> drapeTileID;
+    gfx::UniformBufferPtr drapeGlobalUniformBuffer;
 };
 
 } // namespace mbgl

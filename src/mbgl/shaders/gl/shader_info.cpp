@@ -21,6 +21,7 @@ TextureInfo::TextureInfo(std::string_view name_, std::size_t id_)
 using BackgroundShaderInfo = ShaderInfo<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> BackgroundShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"BackgroundDrawableUBO", idBackgroundDrawableUBO},
     UniformBlockInfo{"BackgroundPropsUBO", idBackgroundPropsUBO},
 };
@@ -142,6 +143,7 @@ const std::vector<TextureInfo> DebugShaderInfo::textures = {
 using FillShaderInfo = ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"FillDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
@@ -309,6 +311,7 @@ const std::vector<TextureInfo> HillshadePrepareShaderInfo::textures = {
 using HillshadeShaderInfo = ShaderInfo<BuiltIn::HillshadeShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> HillshadeShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"HillshadeDrawableUBO", idHillshadeDrawableUBO},
     UniformBlockInfo{"HillshadeTilePropsUBO", idHillshadeTilePropsUBO},
     UniformBlockInfo{"HillshadeEvaluatedPropsUBO", idHillshadeEvaluatedPropsUBO},
@@ -325,6 +328,7 @@ const std::vector<TextureInfo> HillshadeShaderInfo::textures = {
 using ColorReliefShaderInfo = ShaderInfo<BuiltIn::ColorReliefShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> ColorReliefShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"ColorReliefDrawableUBO", idColorReliefDrawableUBO},
     UniformBlockInfo{"ColorReliefTilePropsUBO", idColorReliefTilePropsUBO},
     UniformBlockInfo{"ColorReliefEvaluatedPropsUBO", idColorReliefEvaluatedPropsUBO},
@@ -456,6 +460,7 @@ const std::vector<TextureInfo> LineSDFShaderInfo::textures = {
 using RasterShaderInfo = ShaderInfo<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> RasterShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"RasterDrawableUBO", idRasterDrawableUBO},
     UniformBlockInfo{"RasterEvaluatedPropsUBO", idRasterEvaluatedPropsUBO},
 };

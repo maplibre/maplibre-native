@@ -101,3 +101,29 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
                           f.y);
     return elevation * dem_exaggeration;
 }
+
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target. `matrix` is the drawable's tile-local
+// orthographic matrix with the drawable's tile (z, x, y) stored in its unused
+// third column, and `target_tile` is GlobalPaintParamsUBO's drape_tile (the
+// render target's tile, w != 0 while drawing into a drape target). The drape
+// projection is orthographic, so placing a tile that overlaps the target at a
+// different zoom is an affine transform in NDC. Factored so the offsets stay
+// exact in single precision for tile coordinates up to zoom ~22.
+vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    vec3 tile = vec3(matrix[2][0], matrix[2][1], matrix[2][2]);
+    float k = target_tile.x - tile.x; // target zoom - drawable zoom
+    float scale = exp2(k);
+    vec2 offset;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    clip.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return clip;
+}

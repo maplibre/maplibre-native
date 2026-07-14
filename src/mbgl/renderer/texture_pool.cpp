@@ -17,6 +17,7 @@ void TexturePool::createRenderTarget(gfx::Context& context, const UnwrappedTileI
     }
     auto renderTarget = context.createRenderTarget({tileSize, tileSize}, gfx::TextureChannelDataType::UnsignedByte);
     renderTarget->setClearColor(backgroundColor);
+    renderTarget->setDrapeTileID(id);
     renderTargets[id] = std::move(renderTarget);
 }
 
