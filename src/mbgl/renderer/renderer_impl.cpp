@@ -344,6 +344,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         .pixel_ratio = parameters.pixelRatio,
         .map_zoom = static_cast<float>(parameters.state.getZoom()),
         .pad1 = 0,
+        // Target tile while drawing into a terrain drape target (w != 0);
+        // the per-target buffers set it in RenderTarget::updateDrapeGlobalUBO
+        .drape_tile = {0.0f, 0.0f, 0.0f, 0.0f},
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
