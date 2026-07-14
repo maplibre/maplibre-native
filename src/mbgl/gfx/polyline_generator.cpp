@@ -338,7 +338,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                 offsetB = offset;
             }
 
-            // Close previous segement with bevel
+            // Close previous segment with bevel
             if (!startOfLine) {
                 addCurrentVertex(*currentCoordinate,
                                  distance,

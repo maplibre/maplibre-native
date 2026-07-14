@@ -45,7 +45,7 @@ ARG USERNAME=ubuntu
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# Create docker user wuth sudo rights as passed in by the build command
+# Create docker user with sudo rights as passed in by the build command
 # This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 # On a Mac, USER_GID might already exist, so ignore it if it fails (--force)
 RUN groupmod --gid $USER_GID $USERNAME \
