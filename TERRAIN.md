@@ -60,6 +60,24 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
 | `source` | string | (required) | ID of a raster-dem source to use for terrain |
 | `exaggeration` | number | 1.0 | Vertical exaggeration multiplier for elevation |
 
+### Sharing a source between terrain and hillshade
+
+maplibre-gl-js recommends giving terrain its own raster-dem source (even with
+the same tile URLs as a hillshade/color-relief source) because gl-js keeps a
+separate terrain source cache, and sharing one source between the terrain and
+a hillshade layer makes two caches with different retention fight over one
+tile set.
+
+MapLibre Native does not have that constraint: there is exactly one tile
+pyramid per style source, and terrain, hillshade, and color-relief consume the
+same `RasterDEMTile`s and share the decoded DEM data, so sharing a source is
+coherent and avoids downloading and decoding the tiles twice. A terrain-only
+source (no layer attached) also works; the render orchestrator marks the
+terrain's DEM source as needing rendering.
+
+For styles that must also run on maplibre-gl-js, follow the gl-js
+recommendation and declare separate sources; the test app examples do this.
+
 ## DEM Encoding
 
 Terrain decodes elevations with the same per-source unpack vector used by the

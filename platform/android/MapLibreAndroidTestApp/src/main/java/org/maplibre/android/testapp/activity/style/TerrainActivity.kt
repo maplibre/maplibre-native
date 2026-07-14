@@ -75,15 +75,26 @@ class TerrainActivity : AppCompatActivity() {
     companion object {
         // A self-contained style: color-relief provides the base coloring,
         // hillshade adds shading, and the terrain property drapes both over
-        // the 3D elevation mesh. All three read the same raster-dem source.
-        // The color ramp and hillshade tuning follow the WDB_COLOR_RELIEF_DARK
-        // tileserver-gl style.
+        // the 3D elevation mesh. The color ramp and hillshade tuning follow
+        // the WDB_COLOR_RELIEF_DARK tileserver-gl style.
+        //
+        // Terrain uses its own raster-dem source (same tiles) per the
+        // maplibre-gl-js recommendation: gl-js keeps a separate terrain source
+        // cache, so sharing one source between terrain and hillshade conflicts
+        // there. Native shares one tile pyramid per source and tolerates
+        // sharing, but the examples model the portable style structure.
         private val STYLE_JSON = """
             {
               "version": 8,
               "name": "Terrain demo",
               "sources": {
                 "mapterhorn": {
+                  "type": "raster-dem",
+                  "url": "https://tiles.mapterhorn.com/tilejson.json",
+                  "encoding": "terrarium",
+                  "attribution": "<a href=\"https://mapterhorn.com\">Mapterhorn</a>"
+                },
+                "mapterhorn-terrain": {
                   "type": "raster-dem",
                   "url": "https://tiles.mapterhorn.com/tilejson.json",
                   "encoding": "terrarium",
@@ -129,7 +140,7 @@ class TerrainActivity : AppCompatActivity() {
                 }
               ],
               "terrain": {
-                "source": "mapterhorn",
+                "source": "mapterhorn-terrain",
                 "exaggeration": 1.0
               }
             }
