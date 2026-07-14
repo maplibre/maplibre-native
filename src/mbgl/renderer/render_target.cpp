@@ -75,6 +75,11 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     parameters.updateStencilBufferAvailability();
 #endif
 
+    // The main render passes bind these in Renderer::Impl::render, but this pass runs
+    // before that; without the bind, drawables needing e.g. GlobalPaintParamsUBO are
+    // rejected by validating drivers ("DrawElements: ValidateState() failed").
+    context.bindGlobalUniformBuffers(*parameters.renderPass);
+
     const gfx::ScissorRect prevScissorRect = parameters.scissorRect;
     const auto& size = getTexture()->getSize();
     parameters.scissorRect = {.x = 0, .y = 0, .width = size.width, .height = size.height};
@@ -109,6 +114,8 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
             parameters.currentLayer--;
         }
     });
+
+    context.unbindGlobalUniformBuffers(*parameters.renderPass);
 
     parameters.renderPass.reset();
     parameters.encoder->present(*offscreenTexture);
