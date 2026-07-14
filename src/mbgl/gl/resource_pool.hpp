@@ -116,6 +116,10 @@ private:
     int64_t reuseCount = 0;   // total reused allocations
     int64_t releaseCount = 0; // total textures released
     int64_t freedCount = 0;   // total textures released and deallocated
+
+    // Shadow of the bytes this pool has added to RenderingStats::memTextures, used to
+    // diagnose accounting mismatches (see freeAllocatedGLMemory)
+    int64_t trackedStorage = 0;
 };
 
 } // namespace gl

@@ -162,7 +162,24 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
     context->renderingStats().numCreatedTextures++;
 
     // Add to descriptions
-    descriptions.emplace(id, desc);
+    if (const auto [existing, inserted] = descriptions.emplace(id, desc); !inserted) {
+        // GL handed out a texture name the pool still tracks; the old entry's GL object
+        // must have been deleted behind the pool's back. Reconcile the bookkeeping so
+        // the stale description does not corrupt the storage accounting.
+        const auto staleStorage = existing->second.getStorageSize();
+        Log::Error(Event::OpenGL,
+                   "Texture2DPool: GL reused texture id " + util::toString(id) +
+                       " which is still tracked (stale size " + util::toString(staleStorage) + " bytes)");
+        if (auto stale_it = pool.find(existing->second); stale_it != pool.end()) {
+            stale_it->second.used.erase(id);
+            stale_it->second.free.erase(id);
+        }
+        lru_cache.remove(id);
+        poolStorage -= staleStorage;
+        context->renderingStats().memTextures -= staleStorage;
+        trackedStorage -= static_cast<int64_t>(staleStorage);
+        existing->second = desc;
+    }
 
     // Add to pool
     pool[desc].used.insert(id);
@@ -171,6 +188,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
     auto storage = desc.getStorageSize();
     poolStorage += storage;
     context->renderingStats().memTextures += storage;
+    trackedStorage += static_cast<int64_t>(storage);
     MLN_TRACE_ALLOC_TEXTURE(id, storage);
 
     // Evict old textures if necessary
@@ -205,6 +223,25 @@ void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
     auto storage = desc.getStorageSize();
     poolStorage -= storage;
     context->renderingStats().memTextures -= storage;
+    trackedStorage -= static_cast<int64_t>(storage);
+    if (context->renderingStats().memTextures < 0) {
+        // Dump forensic state before the assert below aborts: if memTextures diverged
+        // from trackedStorage, something outside this pool modified the stat; if
+        // trackedStorage diverged from the sum of live descriptions, the pool's own
+        // bookkeeping is inconsistent.
+        int64_t descriptionsStorage = 0;
+        for (const auto& [descId, liveDesc] : descriptions) {
+            descriptionsStorage += static_cast<int64_t>(liveDesc.getStorageSize());
+        }
+        Log::Error(
+            Event::OpenGL,
+            "Texture2DPool accounting mismatch freeing id " + util::toString(id) + " (" + util::toString(storage) +
+                " bytes): memTextures=" + util::toString(context->renderingStats().memTextures) + " trackedStorage=" +
+                util::toString(trackedStorage) + " sum(descriptions)=" + util::toString(descriptionsStorage) +
+                " poolStorage=" + util::toString(poolStorage) + " live=" + util::toString(descriptions.size()) +
+                " allocs=" + util::toString(allocCount) + " reuses=" + util::toString(reuseCount) +
+                " releases=" + util::toString(releaseCount) + " freed=" + util::toString(freedCount));
+    }
     assert(context->renderingStats().memTextures >= 0);
     MLN_TRACE_FREE_TEXTURE(id);
 
