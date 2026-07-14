@@ -88,6 +88,7 @@
     <string name="description_local_glyph">Suzhou using Droid Sans for Chinese glyphs</string>
     <string name="description_hillshade">Example raster-dem source and hillshade layer</string>
     <string name="description_terrain">3D terrain with hillshade and color-relief from a raster-dem source</string>
+    <string name="description_terrain_innsbruck">3D terrain on the osm-bright vector basemap around Innsbruck</string>
     <string name="description_heatmaplayer">Use HeatmapLayer to visualise earthquakes</string>
     <string name="description_gesture_detector">Manipulate gestures detector\'s settings</string>
     <string name="description_offline_merge">Merge external offline database</string>
