@@ -239,21 +239,22 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
 
         // Skip if the tile already has a drawable bound to its own DEM
         if (const auto existing = tilesWithDrawables.find(tileID);
-            existing != tilesWithDrawables.end() && existing->second) {
+            existing != tilesWithDrawables.end() && existing->second == 2) {
             continue;
         }
 
         // Resolve the DEM texture: the tile's own decoded DEM if available,
         // otherwise the closest cached ancestor as a fallback so the terrain
-        // mesh stays up while the tile loads (as maplibre-gl-js does)
+        // mesh stays up while the tile loads (as maplibre-gl-js does),
+        // otherwise the flat placeholder
         std::shared_ptr<gfx::Texture2D> demTexture;
         std::array<float, 4> demCoords{{1, 0, 0, 0}};
-        bool ownDEM = false;
+        uint8_t demTier = 0;
 
         if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
             cached->second.lastUsed = demUpdateCounter;
             demTexture = cached->second.texture;
-            ownDEM = true;
+            demTier = 2;
         } else {
             // Fall back to the closest cached ancestor DEM
             const UnwrappedTileID* ancestorID = nullptr;
@@ -269,21 +270,29 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 }
             }
             if (!demTexture) {
+                // No DEM at all yet: render the mesh flat with the placeholder
+                // DEM so the draped map still shows (a briefly flat area is
+                // less jarring than a hole in the terrain)
                 ++skippedNoDEM;
-                continue; // nothing to render this tile with yet
+                demTexture = getPlaceholderDEMTexture(context);
+                if (!demTexture) {
+                    continue;
+                }
+            } else {
+                ancestorEntry->lastUsed = demUpdateCounter;
+                demTier = 1;
+                const int dz = unwrapped.canonical.z - ancestorID->canonical.z;
+                const float scale = static_cast<float>(1u << dz);
+                const float dx = static_cast<float>(unwrapped.canonical.x - (ancestorID->canonical.x << dz));
+                const float dy = static_cast<float>(unwrapped.canonical.y - (ancestorID->canonical.y << dz));
+                demCoords = {{1.0f / scale, dx / scale, dy / scale, 0.0f}};
             }
-            ancestorEntry->lastUsed = demUpdateCounter;
-            const int dz = unwrapped.canonical.z - ancestorID->canonical.z;
-            const float scale = static_cast<float>(1u << dz);
-            const float dx = static_cast<float>(unwrapped.canonical.x - (ancestorID->canonical.x << dz));
-            const float dy = static_cast<float>(unwrapped.canonical.y - (ancestorID->canonical.y << dz));
-            demCoords = {{1.0f / scale, dx / scale, dy / scale, 0.0f}};
         }
 
-        // If a fallback drawable already exists for this tile, keep it until the
-        // tile's own DEM is ready, then replace it
+        // If a drawable already exists for this tile, keep it until a higher
+        // DEM quality tier becomes available, then replace it
         if (const auto existing = tilesWithDrawables.find(tileID); existing != tilesWithDrawables.end()) {
-            if (!ownDEM) {
+            if (existing->second >= demTier) {
                 continue;
             }
             lg->removeDrawablesIf(
@@ -300,7 +309,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, renderTarget->getTexture());
         if (drawable) {
             lg->addDrawable(std::move(drawable));
-            tilesWithDrawables[tileID] = ownDEM;
+            tilesWithDrawables[tileID] = demTier;
         }
     }
 

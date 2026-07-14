@@ -223,7 +223,10 @@ private:
     // Track which tiles have terrain drawables; the value is true when the
     // drawable samples the tile's own DEM texture, false when it is using an
     // ancestor tile's DEM as a fallback while its own DEM is still loading
-    std::unordered_map<OverscaledTileID, bool> tilesWithDrawables;
+    // Mesh drawables by tile, with the DEM quality tier they were built with
+    // (0 = placeholder/flat, 1 = ancestor fallback, 2 = own DEM); a drawable
+    // is replaced whenever a higher tier becomes available
+    std::unordered_map<OverscaledTileID, uint8_t> tilesWithDrawables;
 
     // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
     // an ancestor tile's DEM is bound); read by the terrain layer tweaker
