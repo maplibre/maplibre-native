@@ -12,6 +12,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <cmath>
@@ -223,10 +224,13 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
         // keep the previously rendered content instead of re-rendering blurrier.
         // A change in the style's draped layer set forces a re-render.
         const DrapeCoverage coverage = computeDrapeCoverage(orchestrator);
-        if (bakedCoverage.totalGroups == coverage.totalGroups && coverage.worseThan(bakedCoverage)) {
+        const double now = util::MonotonicTimer::now().count();
+        if (bakedCoverage.totalGroups == coverage.totalGroups && coverage.worseThan(bakedCoverage) &&
+            now - bakedCoverageTime < maxBakedCoverageAge) {
             return;
         }
         bakedCoverage = coverage;
+        bakedCoverageTime = now;
 
         // TEMP diagnostic: name drape targets that render with most of their
         // layers missing (throttled; remove before merging)
