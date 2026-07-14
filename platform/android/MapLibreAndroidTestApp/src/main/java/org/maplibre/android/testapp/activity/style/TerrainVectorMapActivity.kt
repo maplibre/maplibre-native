@@ -1,28 +1,29 @@
 package org.maplibre.android.testapp.activity.style
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.json.JSONArray
-import org.json.JSONObject
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.HillshadeLayer
+import org.maplibre.android.style.layers.PropertyFactory.hillshadeExaggeration
+import org.maplibre.android.style.layers.PropertyFactory.hillshadeMethod
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.sources.RasterDemSource
+import org.maplibre.android.style.terrain.Terrain
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
-import java.net.URL
-import kotlin.concurrent.thread
 
 /**
  * Test activity showcasing 3D terrain on a full-planet vector basemap:
  * the OpenFreeMap Liberty style combined with the Mapterhorn raster-dem
  * tiles (https://mapterhorn.com), both with worldwide coverage.
  *
- * The terrain root property has no runtime styling API yet, so the style
- * JSON is fetched and patched with the DEM sources, a hillshade layer,
- * and the terrain configuration before it is loaded.
+ * The DEM sources, hillshade layer, and terrain configuration are added
+ * at runtime with the style API. Terrain gets its own raster-dem source
+ * (same tiles) per the maplibre-gl-js recommendation.
  */
 class TerrainVectorMapActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
@@ -41,85 +42,39 @@ class TerrainVectorMapActivity : AppCompatActivity() {
                 .tilt(60.0)
                 .bearing(20.0)
                 .build()
-            loadTerrainStyle()
+            map.setStyle(Style.Builder().fromUri(TestStyles.OPENFREEMAP_LIBERTY)) { style ->
+                addTerrain(style)
+            }
         }
     }
 
-    private fun loadTerrainStyle() {
-        thread {
-            val styleJson = try {
-                buildTerrainStyle(URL(TestStyles.OPENFREEMAP_LIBERTY).readText())
-            } catch (e: Exception) {
-                runOnUiThread {
-                    Toast.makeText(this, "Failed to load style: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-                return@thread
-            }
-            runOnUiThread {
-                if (!isFinishing && !isDestroyed) {
-                    maplibreMap.setStyle(Style.Builder().fromJson(styleJson))
-                }
-            }
+    private fun addTerrain(style: Style) {
+        // The Mapterhorn TileJSON declares "encoding": "terrarium", which the
+        // tileset parser picks up
+        style.addSource(RasterDemSource(SOURCE_ID_HILLSHADE, DEM_TILEJSON))
+        style.addSource(RasterDemSource(SOURCE_ID_TERRAIN, DEM_TILEJSON))
+
+        // Insert the hillshade below the first symbol layer so labels stay on top
+        val hillshade = HillshadeLayer(LAYER_ID_HILLSHADE, SOURCE_ID_HILLSHADE)
+            .withProperties(
+                hillshadeMethod("igor"),
+                hillshadeExaggeration(0.4f)
+            )
+        val firstSymbolLayer = style.layers.firstOrNull { it is SymbolLayer }
+        if (firstSymbolLayer != null) {
+            style.addLayerBelow(hillshade, firstSymbolLayer.id)
+        } else {
+            style.addLayer(hillshade)
         }
+
+        style.setTerrain(Terrain(SOURCE_ID_TERRAIN, 1.0f))
     }
 
     companion object {
         private const val DEM_TILEJSON = "https://tiles.mapterhorn.com/tilejson.json"
-
-        /**
-         * Add the Mapterhorn DEM sources, a hillshade layer, and the terrain
-         * configuration to a fetched style. Terrain gets its own raster-dem
-         * source (same tiles) per the maplibre-gl-js recommendation.
-         */
-        private fun buildTerrainStyle(baseStyle: String): String {
-            val style = JSONObject(baseStyle)
-
-            val demSource = JSONObject()
-                .put("type", "raster-dem")
-                .put("url", DEM_TILEJSON)
-                .put("encoding", "terrarium")
-                .put("attribution", "<a href=\"https://mapterhorn.com\">Mapterhorn</a>")
-            val sources = style.getJSONObject("sources")
-            sources.put("mapterhorn", demSource)
-            sources.put("mapterhorn-terrain", JSONObject(demSource.toString()))
-
-            val hillshadeLayer = JSONObject()
-                .put("id", "mapterhorn-hillshade")
-                .put("type", "hillshade")
-                .put("source", "mapterhorn")
-                .put(
-                    "paint",
-                    JSONObject()
-                        .put("hillshade-method", "igor")
-                        .put("hillshade-exaggeration", 0.4)
-                )
-
-            // Insert the hillshade below the first symbol layer so labels stay on top
-            val layers = style.getJSONArray("layers")
-            val patchedLayers = JSONArray()
-            var inserted = false
-            for (i in 0 until layers.length()) {
-                val layer = layers.getJSONObject(i)
-                if (!inserted && layer.optString("type") == "symbol") {
-                    patchedLayers.put(hillshadeLayer)
-                    inserted = true
-                }
-                patchedLayers.put(layer)
-            }
-            if (!inserted) {
-                patchedLayers.put(hillshadeLayer)
-            }
-            style.put("layers", patchedLayers)
-
-            style.put(
-                "terrain",
-                JSONObject()
-                    .put("source", "mapterhorn-terrain")
-                    .put("exaggeration", 1.0)
-            )
-
-            return style.toString()
-        }
+        private const val SOURCE_ID_HILLSHADE = "mapterhorn"
+        private const val SOURCE_ID_TERRAIN = "mapterhorn-terrain"
+        private const val LAYER_ID_HILLSHADE = "mapterhorn-hillshade"
     }
 
     override fun onStart() {
