@@ -58,33 +58,6 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
-// Sample the terrain elevation in meters at a tile-local coordinate, with manual
-// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
-// as in the maplibre-gl-js get_elevation() prelude function
-float circleElevation(float2 pos,
-                      device const CircleDrawableUBO& drawable,
-                      texture2d<float, access::sample> demTexture,
-                      sampler demSampler) {
-    if (drawable.dem_enabled == 0.0) {
-        return 0.0;
-    }
-    const float2 coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
-    const float2 f = fract(coord);
-    const float2 c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
-    const float d = 1.0 / (drawable.dem_dim + 2.0);
-    float4 tl = demTexture.sample(demSampler, c) * 255.0;
-    tl.a = -1.0;
-    float4 tr = demTexture.sample(demSampler, c + float2(d, 0.0)) * 255.0;
-    tr.a = -1.0;
-    float4 bl = demTexture.sample(demSampler, c + float2(0.0, d)) * 255.0;
-    bl.a = -1.0;
-    float4 br = demTexture.sample(demSampler, c + float2(d, d)) * 255.0;
-    br.a = -1.0;
-    const float elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
-                                mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
-                                f.y);
-    return elevation * drawable.dem_exaggeration;
-}
 
 )";
 
@@ -183,7 +156,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const float2 circle_center = floor(float2(vertx.position) * 0.5);
-    const float ele = circleElevation(circle_center, drawable, demTexture, demSampler);
+    const float ele = get_elevation(circle_center,
+                                    demTexture,
+                                    demSampler,
+                                    drawable.dem_coords,
+                                    drawable.dem_unpack,
+                                    drawable.dem_dim,
+                                    drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
 
     float4 position;
     if (props.pitch_with_map) {

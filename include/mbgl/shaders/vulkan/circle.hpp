@@ -87,30 +87,6 @@ layout(std140, set = LAYER_SET_INDEX, binding = idCircleDrawableUBO) readonly bu
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
 
-// Sample the terrain elevation in meters at a tile-local coordinate, with manual
-// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
-// as in the maplibre-gl-js get_elevation() prelude function
-float circleElevation(vec2 pos, const CircleDrawableUBO drawable) {
-    if (drawable.dem_enabled == 0.0) {
-        return 0.0;
-    }
-    const vec2 coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
-    const vec2 f = fract(coord);
-    const vec2 c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
-    const float d = 1.0 / (drawable.dem_dim + 2.0);
-    vec4 tl = textureLod(dem_sampler, c, 0.0) * 255.0;
-    tl.a = -1.0;
-    vec4 tr = textureLod(dem_sampler, c + vec2(d, 0.0), 0.0) * 255.0;
-    tr.a = -1.0;
-    vec4 bl = textureLod(dem_sampler, c + vec2(0.0, d), 0.0) * 255.0;
-    bl.a = -1.0;
-    vec4 br = textureLod(dem_sampler, c + vec2(d, d), 0.0) * 255.0;
-    br.a = -1.0;
-    const float elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
-                                mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
-                                f.y);
-    return elevation * drawable.dem_exaggeration;
-}
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
@@ -177,7 +153,7 @@ void main() {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const vec2 circle_center = floor(in_position * 0.5);
-    const float ele = circleElevation(circle_center, drawable);
+    const float ele = get_elevation(circle_center, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
 
     if (props.pitch_with_map) {
         vec2 corner_position = circle_center;

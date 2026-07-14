@@ -73,30 +73,6 @@ struct GlobalIndexUBO {
 @group(1) @binding(0) var dem_sampler: sampler;
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
 
-// Sample the terrain elevation in meters at a tile-local coordinate, with manual
-// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
-// as in the maplibre-gl-js get_elevation() prelude function
-fn circleElevation(pos: vec2<f32>, drawable: CircleDrawableUBO) -> f32 {
-    if (drawable.dem_enabled == 0.0) {
-        return 0.0;
-    }
-    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
-    let f = fract(coord);
-    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
-    let d = 1.0 / (drawable.dem_dim + 2.0);
-    var tl = textureSampleLevel(dem_texture, dem_sampler, c, 0.0) * 255.0;
-    tl.a = -1.0;
-    var tr = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
-    tr.a = -1.0;
-    var bl = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
-    bl.a = -1.0;
-    var br = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
-    br.a = -1.0;
-    let elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
-                        mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
-                        f.y);
-    return elevation * drawable.dem_exaggeration;
-}
 @group(0) @binding(4) var<uniform> props: CircleEvaluatedPropsUBO;
 )";
 
@@ -133,7 +109,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude = glMod2v(pos_f, vec2<f32>(2.0, 2.0)) * 2.0 - vec2<f32>(1.0, 1.0);
     let scaled_extrude = extrude * drawable.extrude_scale;
     let circle_center = floor(pos_f * 0.5);
-    let ele = circleElevation(circle_center, drawable);
+    let ele = get_elevation(circle_center, dem_texture, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
 
     var color = props.color;
 #ifndef HAS_UNIFORM_u_color

@@ -39,6 +39,40 @@ fn gl_mod(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
     return glMod2v(x, y);
 }
 
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
+// texture and dem_* values are passed in as arguments rather than read from globals.
+fn get_elevation(pos: vec2<f32>,
+                 dem: texture_2d<f32>,
+                 dem_sampler: sampler,
+                 dem_coords: vec4<f32>,
+                 dem_unpack: vec4<f32>,
+                 dem_dim: f32,
+                 dem_exaggeration: f32,
+                 dem_enabled: f32) -> f32 {
+    if (dem_enabled == 0.0) {
+        return 0.0;
+    }
+    let coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.0;
+    let f = fract(coord);
+    let c = (floor(coord) + 0.5) / (dem_dim + 2.0);
+    let d = 1.0 / (dem_dim + 2.0);
+    var tl = textureSampleLevel(dem, dem_sampler, c, 0.0) * 255.0;
+    tl.a = -1.0;
+    var tr = textureSampleLevel(dem, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
+    tr.a = -1.0;
+    var bl = textureSampleLevel(dem, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
+    bl.a = -1.0;
+    var br = textureSampleLevel(dem, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
+    br.a = -1.0;
+    let elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                        mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                        f.y);
+    return elevation * dem_exaggeration;
+}
+
 // Radians conversion
 fn radians(degrees: f32) -> f32 {
     return PI * degrees / 180.0;
