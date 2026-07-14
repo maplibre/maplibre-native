@@ -216,7 +216,24 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
     }
 
+    // TEMP diagnostic: periodic terrain state summary (remove before merging)
+    if (demUpdateCounter % 120 == 1) {
+        std::map<uint8_t, int> zoomHistogram;
+        for (const auto& id : renderTileIDs) {
+            zoomHistogram[id.canonical.z]++;
+        }
+        std::string zooms;
+        for (const auto& [z, n] : zoomHistogram) {
+            zooms += "z" + util::toString(static_cast<int>(z)) + ":" + util::toString(n) + " ";
+        }
+        Log::Info(Event::Render,
+                  "Terrain: renderTiles=" + util::toString(renderTileIDs.size()) + " (" + zooms + ") meshTiles=" +
+                      util::toString(meshTiles.size()) + " demTextures=" + util::toString(demTextures.size()) +
+                      " drawables=" + util::toString(tilesWithDrawables.size()));
+    }
+
     // Create terrain drawables for each mesh tile
+    size_t skippedNoDEM = 0;
     for (const auto& unwrapped : meshTiles) {
         const OverscaledTileID tileID(unwrapped.canonical.z, unwrapped.wrap, unwrapped.canonical);
 
@@ -252,6 +269,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 }
             }
             if (!demTexture) {
+                ++skippedNoDEM;
                 continue; // nothing to render this tile with yet
             }
             ancestorEntry->lastUsed = demUpdateCounter;
@@ -284,6 +302,12 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = ownDEM;
         }
+    }
+
+    // TEMP diagnostic (remove before merging)
+    if (skippedNoDEM > 0 && demUpdateCounter % 120 == 1) {
+        Log::Warning(Event::Render,
+                     "Terrain: " + util::toString(skippedNoDEM) + " mesh tiles have no DEM (own or ancestor) yet");
     }
 }
 

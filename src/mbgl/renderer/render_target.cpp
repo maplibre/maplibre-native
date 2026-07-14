@@ -11,6 +11,8 @@
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
+#include <mbgl/util/logging.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <cmath>
 
@@ -225,6 +227,19 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
             return;
         }
         bakedCoverage = coverage;
+
+        // TEMP diagnostic: name drape targets that render with most of their
+        // layers missing (throttled; remove before merging)
+        if (coverage.groupsWithContent * 2 < coverage.totalGroups) {
+            static uint32_t throttle = 0;
+            if (++throttle % 60 == 1) {
+                Log::Warning(Event::Render,
+                             "Drape target " + util::toString(*drapeTileID) + " rendering with " +
+                                 util::toString(coverage.groupsWithContent) + "/" +
+                                 util::toString(coverage.totalGroups) +
+                                 " draped layers, deficit=" + util::toString(coverage.zoomDeficit));
+            }
+        }
     }
 
     // The offscreen target has a depth attachment (no stencil), matching maplibre-gl-js's
