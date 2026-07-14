@@ -1,14 +1,21 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/texture2d.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
+#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string.hpp>
+
+#if !defined(NDEBUG)
+#include <unordered_set>
+#endif
 
 namespace mbgl {
 namespace gl {
@@ -64,6 +71,30 @@ void DrawableGL::draw(PaintParameters& parameters) const {
 
     impl->uniformBuffers.bind();
     bindTextures();
+
+#if !defined(NDEBUG)
+    // A draw call issued while any of the shader's uniform blocks has no buffer bound
+    // at its binding point is rejected by validating drivers ("DrawElements:
+    // ValidateState() failed" on the Android emulator), silently dropping geometry.
+    // Name the offender, once per drawable/block pair.
+    {
+        const auto& shaderGLDebug = static_cast<const ShaderProgramGL&>(*shader);
+        for (const auto& block : shaderGLDebug.getUniformBlocks()) {
+            platform::GLint bound = 0;
+            MBGL_CHECK_ERROR(platform::glGetIntegeri_v(
+                GL_UNIFORM_BUFFER_BINDING, static_cast<platform::GLuint>(block.binding), &bound));
+            if (bound == 0) {
+                static std::unordered_set<std::string> reported;
+                if (reported.emplace(getName() + "/" + std::string(block.name)).second) {
+                    mbgl::Log::Warning(Event::OpenGL,
+                                       "Drawable '" + getName() + "' drawn with no buffer bound for uniform block '" +
+                                           std::string(block.name) + "' (binding " + util::toString(block.binding) +
+                                           ")");
+                }
+            }
+        }
+    }
+#endif
 
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);

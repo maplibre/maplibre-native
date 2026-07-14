@@ -204,8 +204,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
 }
 
 void Texture2DPool::checkStatsConsistency(const char* where) {
-    if (statsDivergenceReported ||
-        static_cast<int64_t>(context->renderingStats().memTextures) == trackedStorage) {
+    if (statsDivergenceReported || static_cast<int64_t>(context->renderingStats().memTextures) == trackedStorage) {
         return;
     }
     statsDivergenceReported = true;
@@ -256,13 +255,15 @@ void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
         for (const auto& [descId, liveDesc] : descriptions) {
             descriptionsStorage += static_cast<int64_t>(liveDesc.getStorageSize());
         }
-        const std::string dump =
-            "Texture2DPool accounting mismatch freeing id " + util::toString(id) + " (" + util::toString(storage) +
-            " bytes): memTextures=" + util::toString(context->renderingStats().memTextures) + " trackedStorage=" +
-            util::toString(trackedStorage) + " sum(descriptions)=" + util::toString(descriptionsStorage) +
-            " poolStorage=" + util::toString(poolStorage) + " live=" + util::toString(descriptions.size()) +
-            " allocs=" + util::toString(allocCount) + " reuses=" + util::toString(reuseCount) +
-            " releases=" + util::toString(releaseCount) + " freed=" + util::toString(freedCount);
+        const std::string dump = "Texture2DPool accounting mismatch freeing id " + util::toString(id) + " (" +
+                                 util::toString(storage) +
+                                 " bytes): memTextures=" + util::toString(context->renderingStats().memTextures) +
+                                 " trackedStorage=" + util::toString(trackedStorage) +
+                                 " sum(descriptions)=" + util::toString(descriptionsStorage) +
+                                 " poolStorage=" + util::toString(poolStorage) +
+                                 " live=" + util::toString(descriptions.size()) +
+                                 " allocs=" + util::toString(allocCount) + " reuses=" + util::toString(reuseCount) +
+                                 " releases=" + util::toString(releaseCount) + " freed=" + util::toString(freedCount);
         Log::Error(Event::OpenGL, dump);
 #ifdef __ANDROID__
         // Abort with the dump as the abort message so it persists in the tombstone
