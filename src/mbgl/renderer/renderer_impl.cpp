@@ -242,9 +242,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         RenderSource* demSource = orchestrator.getRenderSource(terrain->getSourceID());
         auto renderTiles = demSource->getRawRenderTiles();
 
+        std::set<UnwrappedTileID> demTileIDs;
         for (const auto& renderTile : *renderTiles) {
+            demTileIDs.insert(renderTile.id);
             texturePool.createRenderTarget(context, renderTile.id, renderTreeParameters.backgroundColor);
         }
+        texturePool.removeStaleRenderTargets(demTileIDs);
     }
 
     // - UPLOAD PASS -------------------------------------------------------------------------------

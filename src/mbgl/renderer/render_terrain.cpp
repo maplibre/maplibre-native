@@ -32,6 +32,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <unordered_set>
 
 namespace mbgl {
 
@@ -65,17 +66,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         } else {
             Log::Warning(Event::Render, "Terrain could not find DEM source: " + impl->sourceID);
         }
-    }
-
-    // TEMP: Always rebuild to pick up latest code changes
-    // Clear and recreate layer group every time until terrain is stable
-    if (layerGroup && tilesWithDrawables.size() > 0) {
-        Log::Info(Event::Render,
-                  "Force rebuilding terrain layer group (had " + std::to_string(tilesWithDrawables.size()) +
-                      " old drawables)");
-        activateLayerGroup(false, changes); // Deactivate old layer group
-        layerGroup.reset();                 // Clear the layer group to force recreation
-        tilesWithDrawables.clear();
     }
 
     // Create layer group if we don't have one (including after rebuild)
@@ -114,6 +104,23 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     auto* lg = static_cast<LayerGroup*>(layerGroup.get());
     if (!lg) {
         return;
+    }
+
+    // Drop drawables and cached DEM textures for tiles that left the DEM tile set,
+    // keeping everything else intact between frames
+    std::unordered_set<OverscaledTileID> currentTiles;
+    for (const auto& renderTile : *renderTiles) {
+        currentTiles.insert(renderTile.getOverscaledTileID());
+    }
+    lg->removeDrawablesIf(
+        [&](gfx::Drawable& drawable) { return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID()); });
+    for (auto it = tilesWithDrawables.begin(); it != tilesWithDrawables.end();) {
+        if (!currentTiles.contains(it->first)) {
+            demTextures.erase(it->first.toUnwrapped());
+            it = tilesWithDrawables.erase(it);
+        } else {
+            ++it;
+        }
     }
 
     // Create terrain drawables for each DEM tile
@@ -166,15 +173,19 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                   "Terrain creating texture for tile " + util::toString(tileID) + " (DEM size: " +
                       std::to_string(imagePtr->size.width) + "x" + std::to_string(imagePtr->size.height) + ")");
 
-        // Create DEM texture from the data
-        auto demTexture = createDEMTexture(context, demData);
-        if (!demTexture) {
-            Log::Warning(Event::Render, "Failed to create DEM texture for tile " + util::toString(tileID));
-            continue;
+        // Create the DEM texture, reusing a cached one for this tile if present
+        std::shared_ptr<gfx::Texture2D> demTexture;
+        if (auto cached = demTextures.find(tileID.toUnwrapped()); cached != demTextures.end()) {
+            demTexture = cached->second.texture;
+        } else {
+            demTexture = createDEMTexture(context, demData);
+            if (!demTexture) {
+                Log::Warning(Event::Render, "Failed to create DEM texture for tile " + util::toString(tileID));
+                continue;
+            }
+            // Keep the texture available for elevation sampling by non-draped layers
+            demTextures[tileID.toUnwrapped()] = {demTexture, demData.dim};
         }
-
-        // Keep the texture available for elevation sampling by non-draped layers
-        demTextures[tileID.toUnwrapped()] = {demTexture, demData.dim};
 
         // Create terrain drawable for this tile
         auto drawable = createDrawableForTile(
