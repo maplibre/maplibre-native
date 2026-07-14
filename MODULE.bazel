@@ -20,6 +20,17 @@ local_path_override(
     path = "vendor/maplibre-tile-spec",
 )
 
+# rules_xcodeproj accidentally includes a trailing comma in the generated
+# Testing.framework rsync exclusion, causing intermittent test-host build races.
+# TODO: Remove this override once the upstream fix is released:
+# https://github.com/MobileNativeFoundation/rules_xcodeproj/pull/3321
+single_version_override(
+    module_name = "rules_xcodeproj",
+    patch_strip = 1,
+    patches = ["//bazel/patches/rules_xcodeproj:testing-framework.patch"],
+    version = "3.3.0",
+)
+
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "20.14.0")
 
