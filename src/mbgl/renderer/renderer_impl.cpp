@@ -33,7 +33,7 @@
 #include <Metal/MTLCaptureManager.hpp>
 #include <Metal/MTLCaptureScope.hpp>
 /// Enable programmatic Metal frame captures for specific frame numbers.
-/// Requries iOS 13
+/// Requires iOS 13
 constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
@@ -395,6 +395,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
+#if MLN_RENDER_BACKEND_OPENGL
+            parameters.updateStencilBufferAvailability();
+#endif
 
             // TODO is this needed?
             // if (!parameters.staticData.depthRenderbuffer ||
@@ -445,6 +448,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                  .clearColor = color,
                  .clearDepth = 1.0f,
                  .clearStencil = 0});
+#if MLN_RENDER_BACKEND_OPENGL
+            parameters.updateStencilBufferAvailability();
+#endif
         }
     };
 

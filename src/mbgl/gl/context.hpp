@@ -79,6 +79,7 @@ public:
     void setColorMode(const gfx::ColorMode&);
     void setCullFaceMode(const gfx::CullFaceMode&);
     void setScissorTest(const gfx::ScissorRect&);
+    bool hasStencilBuffer() const;
 
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 

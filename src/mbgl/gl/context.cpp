@@ -684,7 +684,7 @@ void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
     cullFace = mode.enabled;
 
     // These shouldn't need to be updated when face culling is disabled, but we
-    // might end up having the same isssues with Adreno 2xx GPUs as noted in
+    // might end up having the same issues with Adreno 2xx GPUs as noted in
     // Context::setDepthMode.
     cullFaceSide = mode.side;
     cullFaceWinding = mode.winding;
@@ -726,6 +726,12 @@ void Context::setStencilMode(const gfx::StencilMode& stencil) {
         stencilOp = {stencil.fail, stencil.depthFail, stencil.pass};
         apply_visitor([&](const auto& test) { stencilFunc = {test.func, stencil.ref, test.mask}; }, stencil.test);
     }
+}
+
+bool Context::hasStencilBuffer() const {
+    GLint bits = 0;
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_STENCIL_BITS, &bits));
+    return bits > 0;
 }
 
 void Context::setColorMode(const gfx::ColorMode& color) {

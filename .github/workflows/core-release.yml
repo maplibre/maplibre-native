@@ -22,6 +22,7 @@ jobs:
         run: |
           tar czf maplibre-native-headers.tar.gz \
             include \
+            platform/default/include \
             vendor/maplibre-native-base/include \
             vendor/maplibre-native-base/deps/variant/include \
             vendor/maplibre-native-base/deps/geometry.hpp/include \
@@ -51,7 +52,7 @@ jobs:
 
       - run: brew install webp libuv
 
-      - uses: taiki-e/install-action@c7eb1735f09259a5035e8e5d44b1406b1cddc0fb # v2.83.0
+      - uses: taiki-e/install-action@2ca9b94c269419b7b0c711c09d0b21c4e1d51145 # v2.83.1
         with:
           tool: armerge@2
 
@@ -109,7 +110,7 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@c7eb1735f09259a5035e8e5d44b1406b1cddc0fb # v2.83.0
+      - uses: taiki-e/install-action@2ca9b94c269419b7b0c711c09d0b21c4e1d51145 # v2.83.1
         with:
           tool: armerge@2
 
