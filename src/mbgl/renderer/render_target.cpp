@@ -108,19 +108,49 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
         orchestrator.visitLayerGroupsReversed(f);
     };
 
-    // Enable only the drawables whose tile overlaps this target, remembering
-    // the previous state so unrelated enable flags are not clobbered.
+    // Enable, per layer group, a single consistent coverage of this target,
+    // remembering the previous state so unrelated enable flags are not
+    // clobbered. The render tile set can contain overlapping tiles (a parent
+    // standing in for missing children next to already-loaded children); the
+    // main passes resolve that overlap with stencil clipping, but the drape
+    // targets have no stencil attachment, so a blurry parent would draw over
+    // its sharp children. Prefer exact matches, then the deepest covering
+    // ancestor, then descendants (which cannot overlap each other's area
+    // without an ancestor between them being preferred instead).
     std::vector<std::pair<gfx::Drawable*, bool>> savedEnabled;
     visitDrapedGroups(visitForward, [&](LayerGroupBase& layerGroup) {
-        static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](gfx::Drawable& drawable) {
+        auto& tileLayerGroup = static_cast<TileLayerGroup&>(layerGroup);
+
+        bool haveExact = false;
+        std::optional<UnwrappedTileID> bestAncestor;
+        tileLayerGroup.visitDrawables([&](const gfx::Drawable& drawable) {
+            if (!drawable.getEnabled() || !drawable.getTileID()) {
+                return;
+            }
+            const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
+            if (unwrapped == *drapeTileID) {
+                haveExact = true;
+            } else if (drapeTileID->isChildOf(unwrapped)) {
+                if (!bestAncestor || unwrapped.canonical.z > bestAncestor->canonical.z) {
+                    bestAncestor = unwrapped;
+                }
+            }
+        });
+
+        tileLayerGroup.visitDrawables([&](gfx::Drawable& drawable) {
             savedEnabled.emplace_back(&drawable, drawable.getEnabled());
-            bool overlaps = false;
+            bool enable = false;
             if (const auto& tileID = drawable.getTileID()) {
                 const UnwrappedTileID unwrapped = tileID->toUnwrapped();
-                overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
-                           drapeTileID->isChildOf(unwrapped);
+                if (haveExact) {
+                    enable = unwrapped == *drapeTileID;
+                } else if (bestAncestor) {
+                    enable = unwrapped == *bestAncestor;
+                } else {
+                    enable = unwrapped.isChildOf(*drapeTileID);
+                }
             }
-            drawable.setEnabled(drawable.getEnabled() && overlaps);
+            drawable.setEnabled(drawable.getEnabled() && enable);
         });
     });
 
