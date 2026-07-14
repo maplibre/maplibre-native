@@ -3,6 +3,10 @@
 #include <cassert>
 #include <type_traits>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
@@ -194,11 +198,30 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
     // Evict old textures if necessary
     evict();
 
+    checkStatsConsistency("allocateGLMemory");
+
     return id;
+}
+
+void Texture2DPool::checkStatsConsistency(const char* where) {
+    if (statsDivergenceReported ||
+        static_cast<int64_t>(context->renderingStats().memTextures) == trackedStorage) {
+        return;
+    }
+    statsDivergenceReported = true;
+    Log::Error(Event::OpenGL,
+               std::string("Texture2DPool stats divergence in ") + where +
+                   ": memTextures=" + util::toString(context->renderingStats().memTextures) +
+                   " trackedStorage=" + util::toString(trackedStorage) + " poolStorage=" + util::toString(poolStorage) +
+                   " live=" + util::toString(descriptions.size()) + " allocs=" + util::toString(allocCount) +
+                   " reuses=" + util::toString(reuseCount) + " releases=" + util::toString(releaseCount) +
+                   " freed=" + util::toString(freedCount));
 }
 
 void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
     MLN_TRACE_FUNC();
+
+    checkStatsConsistency("freeAllocatedGLMemory");
 
     // Remove from descriptions
     auto desc_it = descriptions.find(id);
@@ -233,14 +256,19 @@ void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
         for (const auto& [descId, liveDesc] : descriptions) {
             descriptionsStorage += static_cast<int64_t>(liveDesc.getStorageSize());
         }
-        Log::Error(
-            Event::OpenGL,
+        const std::string dump =
             "Texture2DPool accounting mismatch freeing id " + util::toString(id) + " (" + util::toString(storage) +
-                " bytes): memTextures=" + util::toString(context->renderingStats().memTextures) + " trackedStorage=" +
-                util::toString(trackedStorage) + " sum(descriptions)=" + util::toString(descriptionsStorage) +
-                " poolStorage=" + util::toString(poolStorage) + " live=" + util::toString(descriptions.size()) +
-                " allocs=" + util::toString(allocCount) + " reuses=" + util::toString(reuseCount) +
-                " releases=" + util::toString(releaseCount) + " freed=" + util::toString(freedCount));
+            " bytes): memTextures=" + util::toString(context->renderingStats().memTextures) + " trackedStorage=" +
+            util::toString(trackedStorage) + " sum(descriptions)=" + util::toString(descriptionsStorage) +
+            " poolStorage=" + util::toString(poolStorage) + " live=" + util::toString(descriptions.size()) +
+            " allocs=" + util::toString(allocCount) + " reuses=" + util::toString(reuseCount) +
+            " releases=" + util::toString(releaseCount) + " freed=" + util::toString(freedCount);
+        Log::Error(Event::OpenGL, dump);
+#ifdef __ANDROID__
+        // Abort with the dump as the abort message so it persists in the tombstone
+        // and dropbox crash entry (logcat does not survive a reboot).
+        __android_log_assert("memTextures >= 0", "Mbgl", "%s", dump.c_str());
+#endif
     }
     assert(context->renderingStats().memTextures >= 0);
     MLN_TRACE_FREE_TEXTURE(id);

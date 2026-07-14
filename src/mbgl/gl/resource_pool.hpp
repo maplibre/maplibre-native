@@ -120,6 +120,12 @@ private:
     // Shadow of the bytes this pool has added to RenderingStats::memTextures, used to
     // diagnose accounting mismatches (see freeAllocatedGLMemory)
     int64_t trackedStorage = 0;
+    // Report the first memTextures/trackedStorage divergence only once
+    bool statsDivergenceReported = false;
+
+    // The pool is the sole writer of RenderingStats::memTextures on this backend, so it
+    // must always equal trackedStorage; log the first moment that stops being true.
+    void checkStatsConsistency(const char* where);
 };
 
 } // namespace gl
