@@ -32,6 +32,10 @@ public:
     /// enable stencil test/write.
     virtual bool hasStencilAttachment() const { return true; }
 
+    /// Whether this renderable is the window surface (offscreen render targets
+    /// return false; they have no swapchain or surface transform)
+    virtual bool isSurface() const { return false; }
+
 protected:
     RendererBackend& backend;
 
@@ -75,6 +79,8 @@ public:
 
     bool hasSurfaceTransformSupport() const;
     bool didSurfaceTransformUpdate() const;
+
+    bool isSurface() const override { return true; }
 
     // rotation needed to align framebuffer contents with device surface
     float getRotation() const override;

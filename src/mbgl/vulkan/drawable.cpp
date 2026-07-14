@@ -301,12 +301,20 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (!bindAttributes(encoder)) return;
     if (!bindDescriptors(encoder)) return;
 
+    // ubo_index plus the current drape target tile (w != 0 only while recording
+    // into a terrain drape target); layout matches the shaders' push_constant block
+    struct {
+        uint32_t uboIndex;
+        float pad[3];
+        std::array<float, 4> drapeTile;
+    } pushData{uboIndex, {0, 0, 0}, parameters.currentDrapeTile};
+    static_assert(sizeof(pushData) == 32);
     commandBuffer->pushConstants(
         context.getGeneralPipelineLayout().get(),
         vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         0,
-        sizeof(uboIndex),
-        &uboIndex,
+        sizeof(pushData),
+        &pushData,
         dispatcher);
 
     if (enableDepth) {

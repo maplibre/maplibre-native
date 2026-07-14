@@ -528,15 +528,20 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& context = const_cast<Context&>(*this);
 
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
-    if (renderableResource.hasSurfaceTransformSupport()) {
-        float surfaceRotation = renderableResource.getRotation();
+    // Offscreen render targets (e.g. the terrain drape targets) are not surface
+    // renderables and have no swapchain or surface transform
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<RenderableResource>();
+    if (renderableResource.isSurface()) {
+        auto& surfaceResource = static_cast<SurfaceRenderableResource&>(renderableResource);
+        if (surfaceResource.hasSurfaceTransformSupport()) {
+            float surfaceRotation = surfaceResource.getRotation();
 
-        const shaders::GlobalPlatformParamsUBO platformUBO = {
-            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
-            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(
-            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+            const shaders::GlobalPlatformParamsUBO platformUBO = {
+                /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+                /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+            context.globalUniformBuffers.createOrUpdate(
+                shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+        }
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
@@ -758,7 +763,9 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     if (generalPipelineLayout) return generalPipelineLayout;
 
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
-    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(uint32_t)).setStageFlags(stages);
+    // ubo_index at offset 0 plus the drape target tile at offset 16
+    // (see shaders::DrawablePushConstants)
+    const auto pushConstant = vk::PushConstantRange().setSize(32).setStageFlags(stages);
 
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),

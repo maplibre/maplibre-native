@@ -30,6 +30,7 @@ layout(location = 1) in ivec2 in_texture_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct HillshadeDrawableUBO {
@@ -46,6 +47,7 @@ void main() {
     const HillshadeDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     frag_position = vec2(in_texture_position) / 8192.0;
@@ -67,6 +69,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct HillshadeTilePropsUBO {

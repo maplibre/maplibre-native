@@ -86,6 +86,12 @@ public:
     /// Set when 3D terrain is enabled; used by layer tweakers to bind DEM elevation data
     RenderTerrain* terrain = nullptr;
 
+    /// (z, x including wrap, y, 1) of the drape render target currently being
+    /// rendered into, zero otherwise; backends without per-pass global uniform
+    /// rebinding (Vulkan push constants) deliver it to apply_drape_transform
+    /// from here at draw-record time
+    std::array<float, 4> currentDrapeTile{{0, 0, 0, 0}};
+
     RenderPass pass = RenderPass::Opaque;
     MapMode mapMode;
     MapDebugOptions debugOptions;

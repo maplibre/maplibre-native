@@ -248,9 +248,33 @@ struct alignas(16) GlobalPaintParamsUBO {
     /* 36 */ float pixel_ratio;
     /* 40 */ float map_zoom;
     /* 44 */ float pad1;
-    /* 48 */
+    /* 48 */ float4 drape_tile;
+    /* 64 */
 };
-static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "wrong size");
+static_assert(sizeof(GlobalPaintParamsUBO) == 4 * 16, "wrong size");
+
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target (see the GL prelude for the derivation).
+// `matrix` carries the drawable's tile (z, x, y) in its unused third column and
+// target_tile is GlobalPaintParamsUBO::drape_tile (w != 0 while drawing into a
+// drape target).
+inline float4 apply_drape_transform(float4 clip, float4x4 matrix, float4 target_tile) {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    const float3 tile = float3(matrix[2][0], matrix[2][1], matrix[2][2]);
+    const float k = target_tile.x - tile.x; // target zoom - drawable zoom
+    const float scale = exp2(k);
+    float2 offset;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    clip.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return clip;
+}
 
 enum {
     idGlobalPaintParamsUBO,

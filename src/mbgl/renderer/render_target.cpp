@@ -74,17 +74,21 @@ void RenderTarget::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
 
+void RenderTarget::setDrapeTileID(const UnwrappedTileID& id) {
+    drapeTileID = id;
+    const auto z = static_cast<float>(id.canonical.z);
+    drapeTileValues = {z,
+                       static_cast<float>(id.canonical.x) + static_cast<float>(id.wrap) * std::exp2(z),
+                       static_cast<float>(id.canonical.y),
+                       1.0f};
+}
+
 void RenderTarget::updateDrapeGlobalUBO(const shaders::GlobalPaintParamsUBO& params, gfx::Context& context_) {
     if (!drapeTileID) {
         return;
     }
     shaders::GlobalPaintParamsUBO drapeParams = params;
-    const auto z = static_cast<float>(drapeTileID->canonical.z);
-    drapeParams.drape_tile = {
-        z,
-        static_cast<float>(drapeTileID->canonical.x) + static_cast<float>(drapeTileID->wrap) * std::exp2(z),
-        static_cast<float>(drapeTileID->canonical.y),
-        1.0f};
+    drapeParams.drape_tile = drapeTileValues;
     if (!drapeGlobalUniformBuffer) {
         drapeGlobalUniformBuffer = context_.createUniformBuffer(&drapeParams, sizeof(drapeParams), true);
     } else {
@@ -276,7 +280,9 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     if (drapeTileID) {
         // Terrain drape target: render the orchestrator's draped layer groups
         // (their tweakers already ran in the main layer group update)
+        parameters.currentDrapeTile = drapeTileValues;
         renderDrapedLayerGroups(orchestrator, parameters);
+        parameters.currentDrapeTile = {{0, 0, 0, 0}};
     } else {
         // Run layer tweakers to update any dynamic elements
         parameters.currentLayer = 0;

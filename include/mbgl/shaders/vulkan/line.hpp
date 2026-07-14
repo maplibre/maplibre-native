@@ -54,6 +54,7 @@ layout(location = 7) in vec2 in_width;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct LineDrawableUBO {
@@ -171,6 +172,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
@@ -295,6 +297,7 @@ layout(location = 6) in vec2 in_width;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct LineGradientDrawableUBO {
@@ -406,6 +409,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
@@ -529,6 +533,7 @@ layout(location = 8) in uvec4 in_pattern_to;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct LinePatternDrawableUBO {
@@ -656,6 +661,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
@@ -695,6 +701,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct LinePatternTilePropertiesUBO {
@@ -846,6 +853,7 @@ layout(location = 8) in vec2 in_floorwidth;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct LineSDFDrawableUBO {
@@ -982,6 +990,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
@@ -1024,6 +1033,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct LineSDFTilePropsUBO {

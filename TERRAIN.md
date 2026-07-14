@@ -228,9 +228,20 @@ params bound in the target's own render pass. On top of that:
   (`RenderTerrain::expandToDeepestCover`); only DEM/drape textures fall back
   to ancestors while tiles load.
 
-Metal/Vulkan/WebGPU still need the mechanical shader-side sweep (declare
-`drape_tile`, call `apply_drape_transform`); until then their draped
-rendering places zoom-mismatched tiles incorrectly.
+Backend status:
+
+- **OpenGL**: complete (per-target GlobalPaintParams copy bound per pass).
+- **Metal**: complete (same mechanism; globals bind per encoder, so the
+  per-target buffer swap works).
+- **Vulkan**: complete, but the target tile travels in the **push constants**
+  next to the consolidation `ubo_index` (32-byte range in the general
+  pipeline layout, `PaintParameters::currentDrapeTile` at draw-record time):
+  the global descriptor set is one per frame-in-flight with a dirty flag, so
+  a per-target buffer swap would be silently ignored.
+- **WebGPU**: pending. No push constants, and drawables cache bind groups, so
+  neither channel reaches per-target data; needs dynamic uniform offsets or
+  per-target bind groups. Until then WebGPU drapes place zoom-mismatched
+  tiles incorrectly (exact-match tiles render correctly).
 
 ### Convergence with maplibre-gl-js (ask before doing)
 
@@ -285,6 +296,13 @@ Without it, symbols show through mountains.
   covering tiles (horizon/occlusion aware). Native has its own tile LOD system
   (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) for reducing
   distant-tile zoom at pitch, but it is not elevation-aware.
+- Transitional artifacts while panning/zooming (observed in emulator testing):
+  brief flat/empty far-field areas while the DEM cover has no render tile yet,
+  and re-resolve flicker when the LOD migrates an area between zoom levels
+  (targets and meshes are destroyed with their baked content). Both are
+  structurally addressed by the first two convergence items above (terrain
+  tile cover computed from the ideal cover; render-target caching keyed on
+  the tile stack).
 
 ### Cleanup before merging
 
@@ -292,6 +310,8 @@ Without it, symbols show through mountains.
   terrain_layer_tweaker.cpp, mtl/drawable.cpp)
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
+- Remove the TEMP terrain diagnostics (throttled logs in render_target.cpp and
+  render_terrain.cpp)
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing

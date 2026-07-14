@@ -47,7 +47,7 @@ public:
     /// Mark this render target as a terrain drape target for the given tile.
     /// Drape targets render the orchestrator's draped tile layer groups
     /// (filtered to overlapping tiles) instead of their own layer groups.
-    void setDrapeTileID(const UnwrappedTileID& id) { drapeTileID = id; }
+    void setDrapeTileID(const UnwrappedTileID& id);
     const std::optional<UnwrappedTileID>& getDrapeTileID() const { return drapeTileID; }
 
     /// Refresh this drape target's copy of the global paint parameters,
@@ -122,6 +122,9 @@ protected:
     LayerGroupMap layerGroupsByLayerIndex;
     Color backgroundColor;
     std::optional<UnwrappedTileID> drapeTileID;
+    // (z, x including wrap, y, 1) of the drape tile, as consumed by
+    // apply_drape_transform; w = 1 marks an active drape target
+    std::array<float, 4> drapeTileValues{{0, 0, 0, 0}};
     gfx::UniformBufferPtr drapeGlobalUniformBuffer;
     // Coverage baked into the target texture by the last actual render; when the
     // available coverage temporarily gets worse (tiles mid-load while panning),

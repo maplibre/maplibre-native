@@ -37,6 +37,7 @@ layout(location = 2) in vec2 in_opacity;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillDrawableUBO {
@@ -73,6 +74,7 @@ void main() {
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 }
 )";
@@ -140,6 +142,7 @@ layout(location = 2) in vec2 in_opacity;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillOutlineDrawableUBO {
@@ -178,6 +181,7 @@ void main() {
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     frag_position = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * paintParams.world_size;
@@ -260,6 +264,7 @@ layout(location = 3) in vec2 in_opacity;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillPatternDrawableUBO {
@@ -350,6 +355,7 @@ void main() {
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, in_position),
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 }
 )";
@@ -375,6 +381,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillPatternTilePropsUBO {
@@ -472,6 +479,7 @@ layout(location = 3) in vec2 in_opacity;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillOutlinePatternDrawableUBO {
@@ -561,6 +569,7 @@ void main() {
 
     const vec2 position2 = in_position.xy;
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position2),
@@ -591,6 +600,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillOutlinePatternTilePropsUBO {
@@ -680,6 +690,7 @@ layout(location = 1) in uvec4 in_data;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct FillOutlineTriangulatedDrawableUBO {
@@ -728,6 +739,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude

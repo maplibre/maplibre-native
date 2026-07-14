@@ -105,6 +105,7 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float pixel_ratio;
     float map_zoom;
     float pad1;
+    vec4 drape_tile;
 } paintParams;
 
 #ifdef USE_SURFACE_TRANSFORM
@@ -119,6 +120,29 @@ void applySurfaceTransform() {
 #endif
 
     gl_Position.y *= -1.0;
+}
+
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target (see the GL prelude for the derivation).
+// `matrix` carries the drawable's tile (z, x, y) in its unused third column and
+// target_tile is GlobalPaintParamsUBO::drape_tile (w != 0 while drawing into a
+// drape target). Must be applied before applySurfaceTransform().
+vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    vec3 tile = vec3(matrix[2][0], matrix[2][1], matrix[2][2]);
+    float k = target_tile.x - tile.x; // target zoom - drawable zoom
+    float scale = exp2(k);
+    vec2 offset;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    clip.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return clip;
 }
 
 // Sample the terrain elevation in meters at a tile-local coordinate, with manual
@@ -180,6 +204,7 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float pixel_ratio;
     float map_zoom;
     float pad1;
+    vec4 drape_tile;
 } paintParams;
 
 )";
