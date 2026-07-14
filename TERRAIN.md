@@ -205,43 +205,65 @@ Implemented:
 The reference for each phase is the maplibre-gl-js implementation
 (`src/render/terrain.ts`, `src/render/render_to_texture.ts`, `src/shaders/_prelude.vertex.glsl`).
 
-### Drape routing rework (required)
+### Drape routing rework (done on GL; other backends pending)
 
-**Defect**: draped drawables are routed into exactly one terrain render target
-(`renderer_impl.cpp` / `TexturePool::getRenderTargetAncestorOrDescendant`, which
-returns the single deepest ancestor-or-descendant match). A drape tile at a
-lower zoom than the terrain cover — a raster/vector parent tile standing in for
-unloaded children, or a 256px-tile raster source whose pyramid runs one zoom
-deeper than the DEM — covers several terrain tiles but is drawn into only one
-of them. The rest render the clear color where that layer should be, producing
-patchy, per-frame-changing drapes (very visible in the "3D Terrain (OSM
-raster)" Android activity). The zoom-mismatch matrix math itself
-(`getTerrainRttPosMatrix`) is correct; the routing multiplicity is the gap.
+Implemented following gl-js `render_to_texture.ts` semantics. Draped layer
+groups stay in the orchestrator; each drape `RenderTarget` renders every
+draped drawable whose tile overlaps its target tile. The drape projection is
+orthographic, so placement into a zoom-mismatched target is an affine
+transform in NDC, applied in the vertex shader (`apply_drape_transform` in
+the prelude): the drawable's tile rides in the unused third column of its
+tile-local drape matrix, and the target tile is carried in
+`GlobalPaintParamsUBO::drape_tile` via a per-target copy of the global paint
+params bound in the target's own render pass. On top of that:
 
-**Reference**: gl-js `render_to_texture.ts` iterates each terrain tile and
-draws *all* overlapping source tiles into its framebuffer, setting `u_matrix`
-per draw call, so a parent tile paints into every child target it covers.
+- Per (target, layer group), a single consistent coverage is selected (exact
+  matches, else the deepest covering ancestor, else descendants), because the
+  render tile set legitimately overlaps while tiles load and drape targets
+  have no stencil to resolve the overlap.
+- A drape target keeps its previously rendered content while the available
+  coverage is temporarily worse than what is already baked in, so panning
+  does not degrade already-seen detail.
+- Terrain mesh tiles always stay at the ideal cover
+  (`RenderTerrain::expandToDeepestCover`); only DEM/drape textures fall back
+  to ancestors while tiles load.
 
-**Design (per-target transform)**: keep draped drawables in their layer
-groups instead of moving them into per-target groups. The drape projection is
-orthographic, so placing a tile into a target is an affine transform in NDC:
+Metal/Vulkan/WebGPU still need the mechanical shader-side sweep (declare
+`drape_tile`, call `apply_drape_transform`); until then their draped
+rendering places zoom-mismatched tiles incorrectly.
 
-- Each render target owns a small per-target UBO with its tile id, updated
-  once per frame and bound in `RenderTarget::render` (which already binds
-  global UBOs per pass), so deferred backends (Metal/Vulkan/WebGPU) see no
-  mid-frame buffer hazards.
-- Draped drawable UBOs carry a tile-local ortho matrix plus the drawable's
-  tile coordinates (constant per frame, no per-target variance).
-- A shared vertex prelude helper applies `pos.xy * scale + offset` computed
-  from (drawable tile, target tile) — same mechanical shader sweep as
-  `get_elevation`.
-- `RenderTarget::render` iterates the draped layer groups and enables only the
-  drawables whose tile overlaps its target tile (ancestor/equal/descendant),
-  letting one drawable record into every target it covers with zero copies.
+### Convergence with maplibre-gl-js (ask before doing)
 
-This keeps all routing logic in shared renderer code; the alternative
-(cloning drawables per extra target) would require duplication support inside
-all four backends' drawable implementations.
+Places where the native implementation reaches gl-js behavior through
+different mechanisms. Each is working; converging would simplify review
+against the gl-js reference, but the native variant may actually be the
+better fit for the drawable architecture — **discuss/decide before spending
+time on any of these**:
+
+- **Terrain tile cover**: native derives terrain mesh tiles from the
+  `TilePyramid` render set and reverse-engineers the ideal cover out of it
+  (`expandToDeepestCover`); gl-js computes the ideal cover directly in a
+  dedicated terrain source cache. A direct terrain tile cover (reusing
+  native's `tileCover`/LOD machinery) would remove the expansion step.
+- **Drape re-render policy**: native skips re-rendering a target only when
+  coverage got strictly worse; gl-js re-renders a terrain tile's texture only
+  when its layer/tile stack *changes* (content-hash caching). Stack-based
+  caching subsumes the current heuristic and is also the single biggest
+  frame-rate lever: today every drape target re-renders every frame.
+- **Drawable tile id transport**: the tile id rides in the unused third
+  column of the drape matrix to avoid a 12-struct UBO layout sweep across
+  four backends. Explicit `drape_tile` UBO fields would be the boring,
+  reviewable version. (gl-js needs neither: WebGL sets `u_matrix` per draw
+  call; native's prebaked-UBO/deferred-recording architecture cannot.)
+
+### Performance target
+
+Downstream users include real-time applications (e.g. aviation/flight
+planning on Android) where sustained frame rate matters more than fast
+initial load. The main known lever is the drape re-render policy above
+(render-target caching); after that, per-frame CPU work in
+`RenderTarget::renderDrapedLayerGroups` (drawable visits scale with targets ×
+drawables) and DEM texture upload scheduling. Real-device profiling welcome.
 
 ### Phase 2 - Symbol occlusion (required)
 
