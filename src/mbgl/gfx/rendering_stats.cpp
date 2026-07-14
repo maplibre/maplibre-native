@@ -13,18 +13,18 @@ namespace mbgl {
 namespace gfx {
 
 bool RenderingStats::isZero() const {
-    const auto expectedZeros = {numActiveTextures,
-                                numTextureBindings,
-                                numBuffers,
-                                numVertexBuffers,
-                                numIndexBuffers,
-                                numUniformBuffers,
-                                numFrameBuffers,
-                                memTextures,
-                                memBuffers,
-                                memIndexBuffers,
-                                memVertexBuffers,
-                                memUniformBuffers};
+    const std::initializer_list<int64_t> expectedZeros = {numActiveTextures,
+                                                          numTextureBindings,
+                                                          numBuffers,
+                                                          numVertexBuffers,
+                                                          numIndexBuffers,
+                                                          numUniformBuffers,
+                                                          numFrameBuffers,
+                                                          memTextures,
+                                                          memBuffers,
+                                                          memIndexBuffers,
+                                                          memVertexBuffers,
+                                                          memUniformBuffers};
     return std::ranges::all_of(expectedZeros, [](auto x) { return x == 0; });
 }
 
