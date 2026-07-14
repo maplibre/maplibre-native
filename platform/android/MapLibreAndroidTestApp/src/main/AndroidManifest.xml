@@ -1061,10 +1061,10 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-            android:name=".activity.style.TerrainInnsbruckActivity"
-            android:description="@string/description_terrain_innsbruck"
+            android:name=".activity.style.TerrainVectorMapActivity"
+            android:description="@string/description_terrain_vector"
             android:exported="true"
-            android:label="@string/activity_terrain_innsbruck">
+            android:label="@string/activity_terrain_vector">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_style" />
