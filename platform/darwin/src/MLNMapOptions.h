@@ -37,6 +37,11 @@ MLN_EXPORT
  */
 @property NSArray *pluginLayers;
 
+/**
+    Enable FastPFOR decoding for vector tiles. Defaults to `NO`.
+ */
+@property bool fastPFOREnabled;
+
 @end
 
 NS_ASSUME_NONNULL_END

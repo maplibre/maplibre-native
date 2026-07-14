@@ -47,5 +47,11 @@ bool NativeMapOptions::asyncRendererCleanup(jni::JNIEnv &env, const jni::Object<
     return obj.Get(env, asyncRendererCleanupField);
 }
 
+bool NativeMapOptions::fastPFOREnabled(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
+    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+    auto field = javaClass.GetField<jni::jboolean>(env, "fastPFOREnabled");
+    return obj.Get(env, field);
+}
+
 } // namespace android
 } // namespace mbgl
