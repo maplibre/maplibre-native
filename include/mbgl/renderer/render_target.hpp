@@ -104,6 +104,18 @@ public:
 protected:
     void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
 
+    /// How well the currently available draped tiles cover this drape target
+    struct DrapeCoverage {
+        int32_t totalGroups = -1;      // draped layer groups in the style
+        int32_t groupsWithContent = 0; // groups with at least one usable tile
+        int64_t zoomDeficit = 0;       // sum of zoom levels lost to ancestor fallbacks
+        bool worseThan(const DrapeCoverage& other) const {
+            return groupsWithContent < other.groupsWithContent ||
+                   (groupsWithContent == other.groupsWithContent && zoomDeficit > other.zoomDeficit);
+        }
+    };
+    DrapeCoverage computeDrapeCoverage(RenderOrchestrator&) const;
+
     gfx::Context& context;
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
@@ -111,6 +123,11 @@ protected:
     Color backgroundColor;
     std::optional<UnwrappedTileID> drapeTileID;
     gfx::UniformBufferPtr drapeGlobalUniformBuffer;
+    // Coverage baked into the target texture by the last actual render; when the
+    // available coverage temporarily gets worse (tiles mid-load while panning),
+    // the target keeps its previously rendered content instead of re-rendering
+    // blurrier, so already-seen detail does not degrade.
+    DrapeCoverage bakedCoverage;
 };
 
 } // namespace mbgl

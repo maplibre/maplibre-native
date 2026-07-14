@@ -89,6 +89,39 @@ void RenderTarget::updateDrapeGlobalUBO(const shaders::GlobalPaintParamsUBO& par
     }
 }
 
+RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrator& orchestrator) const {
+    DrapeCoverage coverage;
+    coverage.totalGroups = 0;
+    orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+        if (layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup || !layerGroup.shouldRenderToTerrain()) {
+            return;
+        }
+        coverage.totalGroups++;
+        bool haveExactOrDescendant = false;
+        std::optional<UnwrappedTileID> bestAncestor;
+        static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
+            if (!drawable.getEnabled() || !drawable.getTileID()) {
+                return;
+            }
+            const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
+            if (unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID)) {
+                haveExactOrDescendant = true;
+            } else if (drapeTileID->isChildOf(unwrapped)) {
+                if (!bestAncestor || unwrapped.canonical.z > bestAncestor->canonical.z) {
+                    bestAncestor = unwrapped;
+                }
+            }
+        });
+        if (haveExactOrDescendant) {
+            coverage.groupsWithContent++;
+        } else if (bestAncestor) {
+            coverage.groupsWithContent++;
+            coverage.zoomDeficit += drapeTileID->canonical.z - bestAncestor->canonical.z;
+        }
+    });
+    return coverage;
+}
+
 void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, PaintParameters& parameters) {
     // Following gl-js render_to_texture: every draped layer tile that overlaps this
     // target's tile is drawn into it; the vertex shader places overlapping tiles via
@@ -182,6 +215,18 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
 }
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
+    if (drapeTileID) {
+        // If the available coverage is temporarily worse than what is already
+        // baked into the target texture (tiles mid-load while the camera moves),
+        // keep the previously rendered content instead of re-rendering blurrier.
+        // A change in the style's draped layer set forces a re-render.
+        const DrapeCoverage coverage = computeDrapeCoverage(orchestrator);
+        if (bakedCoverage.totalGroups == coverage.totalGroups && coverage.worseThan(bakedCoverage)) {
+            return;
+        }
+        bakedCoverage = coverage;
+    }
+
     // The offscreen target has a depth attachment (no stencil), matching maplibre-gl-js's
     // drape framebuffer, so clear depth each frame. Stencil is not present.
     parameters.renderPass = parameters.encoder->createRenderPass(
