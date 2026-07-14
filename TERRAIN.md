@@ -1,17 +1,23 @@
-# Terrain Rendering (Metal Backend)
+# Terrain Rendering
 
-This document describes the 3D terrain rendering implementation for MapLibre Native's Metal backend.
+This document describes the 3D terrain rendering implementation for MapLibre Native.
 
 ## Overview
 
-Terrain rendering enables draping the map over 3D elevation data from Digital Elevation Model (DEM) tiles. This feature provides a 3D visualization of geographic terrain with realistic elevation.
+Terrain rendering enables draping the map over 3D elevation data from Digital Elevation Model (DEM) tiles. This feature provides a 3D visualization of geographic terrain with realistic elevation. The architecture follows maplibre-gl-js (`src/render/terrain.ts`, `src/render/render_to_texture.ts`).
 
 ## Features
 
-- **Metal Backend Only**: Initial implementation targets Metal rendering backend (iOS/macOS)
-- **DEM Support**: Uses raster-dem tiles in Mapbox Terrain RGB format
-- **Exaggeration**: Configurable vertical exaggeration multiplier
-- **Shared Elevation Functions**: All Metal shaders can sample terrain elevation
+- **All Backends**: OpenGL, Metal, Vulkan, and WebGPU
+- **DEM Support**: raster-dem tiles in Mapbox Terrain-RGB or Terrarium encoding,
+  decoded via the source's unpack vector like hillshade and color-relief
+- **Layer Draping**: background, fill, line, raster, hillshade, and color-relief
+  layers render into per-tile render targets draped over the terrain mesh
+- **Elevated Layers**: symbol, circle, and fill-extrusion layers sample the DEM in
+  their vertex shaders and are displaced by the terrain elevation
+- **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
+- **Shared Elevation Function**: a `get_elevation()` helper in every backend's
+  shader prelude
 
 ## Style Configuration
 
@@ -56,13 +62,14 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
 
 ## DEM Encoding
 
-MapLibre Native terrain supports the **Mapbox Terrain RGB** encoding format:
+Terrain decodes elevations with the same per-source unpack vector used by the
+hillshade and color-relief layers (`DEMData::getUnpackVector()`), so both
+supported raster-dem encodings work:
 
-```
-elevation_meters = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)
-```
-
-Where R, G, B are the RGB pixel values (0-255) from the DEM tile.
+- **Mapbox Terrain-RGB** (`"encoding": "mapbox"`, the default):
+  `elevation = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)`
+- **Terrarium** (`"encoding": "terrarium"`):
+  `elevation = (R * 256 + G + B / 256) - 32768`
 
 ## Implementation Details
 
@@ -80,14 +87,29 @@ The terrain system consists of several key components:
    - Provides elevation lookups
    - Manages DEM source references
 
-3. **Metal Shaders** (`TerrainShader`)
-   - Vertex shader samples DEM texture
-   - Displaces vertices by elevation
-   - Applies exaggeration multiplier
+3. **Terrain Shaders** (`TerrainShader`, all four backends)
+   - Vertex shader samples the DEM texture and displaces vertices by elevation
+   - Fragment shader samples the draped render-to-texture map tile
+   - Applies the styled exaggeration multiplier
 
-4. **Common Shader Functions**
-   - `decode_elevation()` - Decodes Terrain RGB format
-   - `get_elevation()` - Samples elevation from DEM texture
+4. **Render-to-Texture Draping** (`TexturePool`, `RenderTarget`)
+   - Draped layer groups (created with `renderToTerrain = true`) have their
+     drawables moved into per-terrain-tile render targets each frame
+   - The render targets are cleared to the map background color (the terrain
+     mesh renders unblended) and have a depth attachment for correct
+     inter-layer depth within the drape
+
+5. **Elevated (non-draped) Layers** (`RenderTerrain::getTerrainData`)
+   - Symbol, circle, and fill-extrusion tweakers bind the covering DEM tile's
+     texture per drawable, with ancestor-tile fallback and a 1x1 placeholder
+     when no tile is loaded
+   - Their vertex shaders call the shared `get_elevation()` prelude helper,
+     which does manual bilinear interpolation on DEM pixel centers using the
+     1px backfilled tile border, matching maplibre-gl-js
+
+6. **CPU Elevation Queries** (`RenderTerrain::getElevation`)
+   - DEM tile lookup with ancestor fallback and bilinear interpolation,
+     mirroring maplibre-gl-js `Terrain.getDEMElevation`
 
 ### Files Modified/Created
 
@@ -106,9 +128,12 @@ The terrain system consists of several key components:
 - `src/mbgl/renderer/render_orchestrator.hpp/cpp` - Terrain integration
 
 **Shaders:**
-- `include/mbgl/shaders/mtl/terrain.hpp` - Metal terrain shader
+- `shaders/terrain.vertex.glsl` / `shaders/terrain.fragment.glsl` - GL terrain shader sources
+- `include/mbgl/shaders/mtl/terrain.hpp`, `include/mbgl/shaders/vulkan/terrain.hpp`,
+  `include/mbgl/shaders/webgpu/terrain.hpp` - backend terrain shaders
 - `include/mbgl/shaders/terrain_layer_ubo.hpp` - Terrain UBO structures
-- `include/mbgl/shaders/mtl/common.hpp` - Added elevation functions
+- `shaders/_prelude.vertex.glsl`, `include/mbgl/shaders/{mtl,vulkan,webgpu}/common.hpp` -
+  shared `get_elevation()` prelude helper
 - `shaders/manifest.json` - Added TerrainShader entry
 
 **Build System:**
@@ -125,63 +150,42 @@ Terrain uses a regular grid mesh (128×128 vertices = 16,641 vertices, 32,768 tr
 
 ### Shader Integration
 
-All Metal shaders have access to terrain elevation through common functions defined in `mtl/common.hpp`:
+Every backend's shader prelude defines a shared elevation helper. Unlike
+maplibre-gl-js (which uses global terrain uniforms), MapLibre Native carries the
+DEM binding per drawable, so the values are passed as arguments:
 
-```metal
-// Get elevation at UV coordinates from DEM texture
-float elevation = get_elevation(demTexture, demSampler, uv);
+```glsl
+float ele = get_elevation(pos, u_dem, u_dem_coords, u_dem_unpack,
+                          u_dem_dim, u_dem_exaggeration, u_dem_enabled);
 ```
 
-This enables future work to make all layers terrain-aware (draping symbols, lines, etc. over terrain).
+Layers opt in by adding the `dem_*` fields to their drawable UBO, binding the
+DEM texture in their layer tweaker via `RenderTerrain::getTerrainData()`, and
+calling the helper in their vertex shader (see the circle, symbol, and
+fill-extrusion layers for the pattern).
 
 ## Current Status
 
 Implemented:
 
 - Terrain shaders and registration for all four backends (OpenGL, Metal, Vulkan, WebGPU)
-- DEM decoding via the source's unpack vector (Mapbox Terrain-RGB and Terrarium),
-  matching hillshade/color-relief and maplibre-gl-js
-- Layer draping: background, fill, line, raster, hillshade, and color-relief layer
-  groups render into per-tile render targets that are draped over the terrain mesh
-  (the same layer set maplibre-gl-js drapes)
-- Style parsing of the `terrain` root property (`source`, `exaggeration`) per the style spec,
-  with exaggeration applied as styled (1.0 = true scale)
-- CPU elevation queries (`RenderTerrain::getElevation`) with DEM tile ancestor fallback
-  and bilinear interpolation, mirroring maplibre-gl-js `Terrain.getDEMElevation`
+- DEM decoding via the source's unpack vector (Mapbox Terrain-RGB and Terrarium)
+- Layer draping for background, fill, line, raster, hillshade, and color-relief,
+  with a depth attachment on the drape render targets and per-drape clip masks
+- Elevation for the non-draped layers: symbol (icon/SDF/text-and-icon), circle,
+  and fill-extrusion on all four backends, via the shared `get_elevation()`
+  prelude helper and per-drawable DEM bindings
+- Style parsing of the `terrain` root property (`source`, `exaggeration`) per the
+  style spec, with exaggeration applied as styled (1.0 = true scale)
+- CPU elevation queries (`RenderTerrain::getElevation`) with DEM tile ancestor
+  fallback and bilinear interpolation
+- Line antialiasing gamma handled per drawable (1.0 when draped into a terrain
+  render target, perspective ratio otherwise)
 
 ## Remaining Work for Production
 
 The reference for each phase is the maplibre-gl-js implementation
 (`src/render/terrain.ts`, `src/render/render_to_texture.ts`, `src/shaders/_prelude.vertex.glsl`).
-
-### Phase 1 - Elevation for non-draped layers (required)
-
-Symbols, circles, and fill-extrusion currently render at z=0, so they float over
-valleys and sink into peaks. gl-js elevates them with a `get_elevation()` helper
-in the vertex shader (`TERRAIN3D` sections of `_prelude.vertex.glsl`).
-
-Status:
-- **circle** — implemented on all four backends (per-drawable DEM texture plus
-  `dem_*` fields in `CircleDrawableUBO`, bound by the circle layer tweaker via
-  `RenderTerrain::getTerrainData`).
-- **fill-extrusion** — `dem_*` added to `FillExtrusionDrawableUBO` (all backends,
-  so the consolidated SSBO stride matches) and elevation implemented for the
-  **OpenGL** non-pattern shader; the fill-extrusion tweaker binds the DEM texture
-  and fills `dem_*`. Still TODO: Metal/Vulkan/WebGPU non-pattern (incl. the Metal/
-  Vulkan instanced side-geometry variants) and all pattern variants — their UBO
-  struct is already grown, so each is just the shader elevation logic + textures.
-- **symbol** — not started.
-
-Symbol and fill-extrusion follow the circle pattern:
-
-- Bind the covering DEM tile's texture plus a `TerrainElevationUBO`
-  (dem-tile matrix, unpack vector, exaggeration, dem dimension) to symbol,
-  circle, and fill-extrusion drawables when terrain is enabled
-- Sample the DEM with manual bilinear interpolation on pixel centers
-  (`dim + 2` with the backfilled 1px border, as gl-js does) and displace
-  the vertex z by the decoded elevation
-- Apply to all four backends' symbol (icon/sdf/text-and-icon), circle, and
-  fill-extrusion shaders
 
 ### Phase 2 - Symbol occlusion (required)
 
@@ -191,28 +195,38 @@ Without it, symbols show through mountains.
 
 ### Phase 3 - Seams and quality
 
-- Backfilled DEM tile borders and pixel-center sampling to remove seams
-  between DEM tiles
+- Backfilled DEM tile borders and pixel-center sampling in the terrain mesh
+  shader itself (the elevated layers already sample this way)
 - Mesh skirts (gl-js `a_pos3d.z` flag + `u_ele_delta`) to hide cracks between
   neighboring tiles at different zoom levels
 - Camera-terrain collision using `RenderTerrain::getElevation`
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
+- Elevation for CPU-projected along-line labels in viewport alignment
+  (gl-js applies it in the CPU symbol projection)
 
 ### Cleanup before merging
 
-- Remove the per-frame `Log::Info` debug logging (renderer, drawable, tweaker paths)
+- Remove the per-frame `Log::Info` debug logging (render_terrain.cpp,
+  terrain_layer_tweaker.cpp, mtl/drawable.cpp)
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
+- Evict DEM textures for unused tiles (`RenderTerrain::demTextures` currently
+  grows unbounded)
+- Runtime styling API for terrain (`setTerrain`) on the platform SDKs
 
 ## Testing
 
-To test terrain rendering:
-
-1. Use the example style JSON above
-2. Ensure Metal renderer is enabled: `--//:renderer=metal`
-3. Build the iOS app: `bazel build //platform/ios:App --//:renderer=metal`
-4. Load a style with terrain configuration
-5. Verify terrain parsing in debug logs
+- **Render tests**: `metrics/integration/render-tests/terrain/` contains
+  `default` and `pitched-world`, ported from maplibre-gl-js. They are in
+  `metrics/ignores/platform-all.json` until native-rendered baselines are
+  captured (the expected images are gl-js renders). The gl-js `terrain/symbol`
+  test is worth porting now that symbols are elevated (needs its DEM fixtures
+  loaded into `metrics/cache-style.db`).
+- **Android**: the test app has a "3D Terrain" activity (Style category)
+  showing terrain + hillshade + color-relief from the Mapterhorn raster-dem
+  source, camera pitched at the Matterhorn. Works with both the `opengl` and
+  `vulkan` flavors.
+- Or load any style with a `terrain` root property, e.g. the example above.
 
 ## API Usage
 
