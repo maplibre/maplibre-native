@@ -32,6 +32,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <unordered_set>
 
 namespace mbgl {
@@ -40,6 +41,35 @@ RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
     : impl(std::move(impl_)) {}
 
 RenderTerrain::~RenderTerrain() = default;
+
+std::set<UnwrappedTileID> RenderTerrain::expandToDeepestCover(const std::set<UnwrappedTileID>& tileIDs) {
+    std::set<UnwrappedTileID> out;
+    const std::function<void(const UnwrappedTileID&)> insert = [&](const UnwrappedTileID& id) {
+        bool hasDeeper = false;
+        for (const auto& other : tileIDs) {
+            if (other.isChildOf(id)) {
+                hasDeeper = true;
+                break;
+            }
+        }
+        if (!hasDeeper) {
+            out.insert(id);
+            return;
+        }
+        // A deeper tile overlaps this one: replace it by its children (the
+        // children that are themselves in the set are handled at top level)
+        for (const auto& childCanonical : id.canonical.children()) {
+            const UnwrappedTileID child(id.wrap, childCanonical);
+            if (!tileIDs.contains(child)) {
+                insert(child);
+            }
+        }
+    };
+    for (const auto& id : tileIDs) {
+        insert(id);
+    }
+    return out;
+}
 
 void RenderTerrain::update(const UpdateParameters& /*parameters*/) {
     // Find the DEM source if we haven't already
@@ -103,11 +133,42 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         return;
     }
 
-    // Drop drawables and cached DEM textures for tiles that left the DEM tile set,
-    // keeping everything else intact between frames
-    std::unordered_set<OverscaledTileID> currentTiles;
+    // Decode and cache the DEM textures of loaded DEM tiles
     for (const auto& renderTile : *renderTiles) {
-        currentTiles.insert(renderTile.getOverscaledTileID());
+        const auto& tile = renderTile.getTile();
+        if (tile.kind != Tile::Kind::RasterDEM) {
+            continue;
+        }
+        auto* demTile = const_cast<RasterDEMTile*>(static_cast<const RasterDEMTile*>(&tile));
+        auto* hillshadeBucket = demTile->getBucket();
+        const auto* demData = hillshadeBucket ? &hillshadeBucket->getDEMData() : nullptr;
+        if (demData && demData->getImagePtr() && !demData->getImagePtr()->size.isEmpty()) {
+            // All tiles come from the same raster-dem source, so they share one encoding
+            demUnpackVector = demData->getUnpackVector();
+            if (demTextures.find(renderTile.id) == demTextures.end()) {
+                if (auto texture = createDEMTexture(context, *demData)) {
+                    // Keep the texture available for elevation sampling by non-draped layers
+                    demTextures[renderTile.id] = {texture, demData->dim};
+                }
+            }
+        }
+    }
+
+    // The mesh tile set: parent fallback render tiles expanded to the ideal
+    // cover so terrain meshes never overlap (a parent mesh would draw its
+    // lower-resolution drape over the sharp meshes of its loaded children);
+    // synthetic tiles sample ancestor DEM/drape textures instead.
+    std::set<UnwrappedTileID> renderTileIDs;
+    for (const auto& renderTile : *renderTiles) {
+        renderTileIDs.insert(renderTile.id);
+    }
+    const std::set<UnwrappedTileID> meshTiles = expandToDeepestCover(renderTileIDs);
+
+    // Drop drawables and cached DEM textures for tiles that left the mesh tile
+    // set, keeping everything else intact between frames
+    std::unordered_set<OverscaledTileID> currentTiles;
+    for (const auto& id : meshTiles) {
+        currentTiles.emplace(id.canonical.z, id.wrap, id.canonical);
     }
     lg->removeDrawablesIf(
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID()); });
@@ -134,25 +195,13 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         it = related ? std::next(it) : demTextures.erase(it);
     }
 
-    // Create terrain drawables for each DEM tile
-    for (const auto& renderTile : *renderTiles) {
-        const auto& tileID = renderTile.getOverscaledTileID();
+    // Create terrain drawables for each mesh tile
+    for (const auto& unwrapped : meshTiles) {
+        const OverscaledTileID tileID(unwrapped.canonical.z, unwrapped.wrap, unwrapped.canonical);
 
         // Skip if the tile already has a drawable bound to its own DEM
         if (const auto existing = tilesWithDrawables.find(tileID);
             existing != tilesWithDrawables.end() && existing->second) {
-            continue;
-        }
-
-        // Get the underlying Tile and cast to RasterDEMTile
-        const auto& tile = renderTile.getTile();
-        if (tile.kind != Tile::Kind::RasterDEM) {
-            Log::Warning(Event::Render, "Terrain tile " + util::toString(tileID) + " is not RasterDEM type");
-            continue;
-        }
-
-        auto* demTile = const_cast<RasterDEMTile*>(static_cast<const RasterDEMTile*>(&tile));
-        if (!demTile) {
             continue;
         }
 
@@ -163,26 +212,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         std::array<float, 4> demCoords{{1, 0, 0, 0}};
         bool ownDEM = false;
 
-        auto* hillshadeBucket = demTile->getBucket();
-        const auto* demData = hillshadeBucket ? &hillshadeBucket->getDEMData() : nullptr;
-        if (demData && demData->getImagePtr() && !demData->getImagePtr()->size.isEmpty()) {
-            // All tiles come from the same raster-dem source, so they share one encoding
-            demUnpackVector = demData->getUnpackVector();
-
-            if (auto cached = demTextures.find(tileID.toUnwrapped()); cached != demTextures.end()) {
-                demTexture = cached->second.texture;
-            } else {
-                demTexture = createDEMTexture(context, *demData);
-                if (demTexture) {
-                    // Keep the texture available for elevation sampling by non-draped layers
-                    demTextures[tileID.toUnwrapped()] = {demTexture, demData->dim};
-                }
-            }
-            ownDEM = demTexture != nullptr;
-        }
-        if (!demTexture) {
+        if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
+            demTexture = cached->second.texture;
+            ownDEM = true;
+        } else {
             // Fall back to the closest cached ancestor DEM
-            const UnwrappedTileID unwrapped = tileID.toUnwrapped();
             const UnwrappedTileID* ancestorID = nullptr;
             int bestZoom = -1;
             for (const auto& [candidate, entry] : demTextures) {
@@ -216,8 +250,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         drawableDemCoords[tileID] = demCoords;
 
         // Create terrain drawable for this tile
-        auto drawable = createDrawableForTile(
-            context, shaders, tileID, demTexture, texturePool.getRenderTarget(renderTile.id)->getTexture());
+        const auto renderTarget = texturePool.getRenderTarget(unwrapped);
+        if (!renderTarget) {
+            continue;
+        }
+        auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, renderTarget->getTexture());
         if (drawable) {
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = ownDEM;

@@ -10,6 +10,7 @@
 #include <array>
 #include <memory>
 #include <map>
+#include <set>
 #include <string>
 #include <optional>
 #include <vector>
@@ -49,6 +50,13 @@ class RenderTerrain {
 public:
     RenderTerrain(Immutable<style::Terrain::Impl>);
     ~RenderTerrain();
+
+    /// The terrain mesh (and drape render target) tile set for a DEM render
+    /// tile set: parent fallback tiles are expanded to the zoom of the deepest
+    /// overlapping tile, so meshes never overlap. Like maplibre-gl-js, mesh
+    /// tiles stay at the ideal cover and only the DEM/drape textures fall back
+    /// to ancestors while tiles load.
+    static std::set<UnwrappedTileID> expandToDeepestCover(const std::set<UnwrappedTileID>& tileIDs);
 
     /**
      * @brief Update terrain state for the current frame

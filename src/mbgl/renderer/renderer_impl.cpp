@@ -242,10 +242,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         RenderSource* demSource = orchestrator.getRenderSource(terrain->getSourceID());
         auto renderTiles = demSource->getRawRenderTiles();
 
-        std::set<UnwrappedTileID> demTileIDs;
+        // Match RenderTerrain's mesh tile set: parent fallback tiles expanded
+        // to the ideal cover so each mesh tile has its own drape target
+        std::set<UnwrappedTileID> renderTileIDs;
         for (const auto& renderTile : *renderTiles) {
-            demTileIDs.insert(renderTile.id);
-            texturePool.createRenderTarget(context, renderTile.id, renderTreeParameters.backgroundColor);
+            renderTileIDs.insert(renderTile.id);
+        }
+        const std::set<UnwrappedTileID> demTileIDs = RenderTerrain::expandToDeepestCover(renderTileIDs);
+        for (const auto& id : demTileIDs) {
+            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
     }
