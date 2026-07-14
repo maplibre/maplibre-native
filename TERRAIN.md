@@ -205,6 +205,44 @@ Implemented:
 The reference for each phase is the maplibre-gl-js implementation
 (`src/render/terrain.ts`, `src/render/render_to_texture.ts`, `src/shaders/_prelude.vertex.glsl`).
 
+### Drape routing rework (required)
+
+**Defect**: draped drawables are routed into exactly one terrain render target
+(`renderer_impl.cpp` / `TexturePool::getRenderTargetAncestorOrDescendant`, which
+returns the single deepest ancestor-or-descendant match). A drape tile at a
+lower zoom than the terrain cover — a raster/vector parent tile standing in for
+unloaded children, or a 256px-tile raster source whose pyramid runs one zoom
+deeper than the DEM — covers several terrain tiles but is drawn into only one
+of them. The rest render the clear color where that layer should be, producing
+patchy, per-frame-changing drapes (very visible in the "3D Terrain (OSM
+raster)" Android activity). The zoom-mismatch matrix math itself
+(`getTerrainRttPosMatrix`) is correct; the routing multiplicity is the gap.
+
+**Reference**: gl-js `render_to_texture.ts` iterates each terrain tile and
+draws *all* overlapping source tiles into its framebuffer, setting `u_matrix`
+per draw call, so a parent tile paints into every child target it covers.
+
+**Design (per-target transform)**: keep draped drawables in their layer
+groups instead of moving them into per-target groups. The drape projection is
+orthographic, so placing a tile into a target is an affine transform in NDC:
+
+- Each render target owns a small per-target UBO with its tile id, updated
+  once per frame and bound in `RenderTarget::render` (which already binds
+  global UBOs per pass), so deferred backends (Metal/Vulkan/WebGPU) see no
+  mid-frame buffer hazards.
+- Draped drawable UBOs carry a tile-local ortho matrix plus the drawable's
+  tile coordinates (constant per frame, no per-target variance).
+- A shared vertex prelude helper applies `pos.xy * scale + offset` computed
+  from (drawable tile, target tile) — same mechanical shader sweep as
+  `get_elevation`.
+- `RenderTarget::render` iterates the draped layer groups and enables only the
+  drawables whose tile overlaps its target tile (ancestor/equal/descendant),
+  letting one drawable record into every target it covers with zero copies.
+
+This keeps all routing logic in shared renderer code; the alternative
+(cloning drawables per extra target) would require duplication support inside
+all four backends' drawable implementations.
+
 ### Phase 2 - Symbol occlusion (required)
 
 gl-js renders a depth pass of the terrain mesh into a packed-RGBA texture and
@@ -221,6 +259,10 @@ Without it, symbols show through mountains.
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
 - Elevation for CPU-projected along-line labels in viewport alignment
   (gl-js applies it in the CPU symbol projection)
+- Terrain-aware tile cover: gl-js consults the elevation data when computing
+  covering tiles (horizon/occlusion aware). Native has its own tile LOD system
+  (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) for reducing
+  distant-tile zoom at pitch, but it is not elevation-aware.
 
 ### Cleanup before merging
 
