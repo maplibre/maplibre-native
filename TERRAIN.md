@@ -230,7 +230,7 @@ Without it, symbols show through mountains.
 - Decide whether heatmap should be draped (gl-js does not drape it)
 - Evict DEM textures for unused tiles (`RenderTerrain::demTextures` currently
   grows unbounded)
-- Runtime styling API for terrain (`setTerrain`) on the platform SDKs
+- Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
 
@@ -266,6 +266,17 @@ if (currentTerrain) {
 
 // Remove terrain
 style->setTerrain(nullptr);
+```
+
+### Android API
+
+```kotlin
+// Requires a raster-dem source in the style (its TileJSON may carry the encoding)
+style.addSource(RasterDemSource("terrain-source", "https://tiles.mapterhorn.com/tilejson.json"))
+style.setTerrain(Terrain("terrain-source", exaggeration = 1.0f))
+
+val terrain = style.getTerrain() // null when terrain is not enabled
+style.setTerrain(null)           // disable terrain
 ```
 
 ### Style JSON API

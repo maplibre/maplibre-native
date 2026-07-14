@@ -35,6 +35,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.terrain.Terrain;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
@@ -1174,6 +1175,31 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setTerrain(@Nullable Terrain terrain) {
+    if (checkState("setTerrain")) {
+      return;
+    }
+    if (terrain == null) {
+      nativeRemoveTerrain();
+    } else {
+      nativeSetTerrain(terrain.getSourceId(), terrain.getExaggeration());
+    }
+  }
+
+  @Override
+  @Nullable
+  public Terrain getTerrain() {
+    if (checkState("getTerrain")) {
+      return null;
+    }
+    String sourceId = nativeGetTerrainSourceId();
+    if (sourceId == null) {
+      return null;
+    }
+    return new Terrain(sourceId, nativeGetTerrainExaggeration());
+  }
+
+  @Override
   public float getPixelRatio() {
     return pixelRatio;
   }
@@ -1766,6 +1792,19 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native Light nativeGetLight();
+
+  @Keep
+  private native void nativeSetTerrain(String sourceId, float exaggeration);
+
+  @Keep
+  private native void nativeRemoveTerrain();
+
+  @Nullable
+  @Keep
+  private native String nativeGetTerrainSourceId();
+
+  @Keep
+  private native float nativeGetTerrainExaggeration();
 
   @Keep
   private native void nativeSetPrefetchTiles(boolean enable);
