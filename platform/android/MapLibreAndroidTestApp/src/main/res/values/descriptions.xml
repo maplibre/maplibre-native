@@ -89,6 +89,7 @@
     <string name="description_hillshade">Example raster-dem source and hillshade layer</string>
     <string name="description_terrain">3D terrain with hillshade and color-relief from a raster-dem source</string>
     <string name="description_terrain_vector">3D terrain and hillshade on the OpenFreeMap Liberty planet basemap</string>
+    <string name="description_terrain_osm">OSM raster tiles draped over 3D terrain with hillshade</string>
     <string name="description_terrain_debug">The maplibre-gl-js terrain debug style with numbered tiles on synthetic terrain</string>
     <string name="description_heatmaplayer">Use HeatmapLayer to visualise earthquakes</string>
     <string name="description_gesture_detector">Manipulate gestures detector\'s settings</string>
