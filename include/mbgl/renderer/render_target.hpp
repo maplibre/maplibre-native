@@ -49,7 +49,7 @@ public:
 
     /// @brief  Get a specific layer group by index
     /// @param layerIndex index
-    /// @return the layer group if existant, othewise a shared null pointer
+    /// @return the layer group if existent, otherwise a shared null pointer
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
 
     /// Execute the given function for each contained layer group

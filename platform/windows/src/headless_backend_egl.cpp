@@ -6,6 +6,7 @@
 #include <EGL/egl.h>
 
 #include <cassert>
+#include <memory>
 #include <sstream>
 #include <iomanip>
 
@@ -53,12 +54,9 @@ public:
     ~EGLDisplayConfig() { eglTerminate(display); }
 
     static std::shared_ptr<const EGLDisplayConfig> create() {
-        static std::weak_ptr<const EGLDisplayConfig> instance;
-        auto shared = instance.lock();
-        if (!shared) {
-            instance = shared = std::make_shared<EGLDisplayConfig>(Key{});
-        }
-        return shared;
+        // C++11 magic static guarantees thread-safe one-shot initialization.
+        static const auto instance = std::make_shared<EGLDisplayConfig>(Key{});
+        return instance;
     }
 
 public:

@@ -30,6 +30,11 @@ const GeoJSONSource::Impl& GeoJSONSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
+/*!
+ * \brief GeoJSONSource::setURL
+ * Set the url to a geojson file which can be fetched
+ * \param url_
+ */
 void GeoJSONSource::setURL(const std::string& url_) {
     url = url_;
 
