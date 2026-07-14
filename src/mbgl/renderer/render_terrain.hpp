@@ -242,8 +242,14 @@ private:
     struct DEMTextureEntry {
         std::shared_ptr<gfx::Texture2D> texture;
         int32_t dim;
+        uint64_t lastUsed = 0;
     };
     std::map<UnwrappedTileID, DEMTextureEntry> demTextures;
+    // Retention cap for demTextures (~1MB per 514x514 DEM texture); entries not
+    // used in the current frame are evicted least-recently-used first beyond
+    // this, preventing unbounded growth while browsing (previously reached 2GB+)
+    static constexpr size_t maxDEMTextures = 96;
+    uint64_t demUpdateCounter = 0;
 
     // See getPlaceholderDEMTexture
     std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;

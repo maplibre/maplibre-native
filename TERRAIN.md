@@ -292,8 +292,6 @@ Without it, symbols show through mountains.
   terrain_layer_tweaker.cpp, mtl/drawable.cpp)
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
-- Evict DEM textures for unused tiles (`RenderTerrain::demTextures` currently
-  grows unbounded)
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing

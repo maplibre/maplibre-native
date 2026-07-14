@@ -73,8 +73,8 @@ struct RenderingStats {
     /// Sum of uniform buffers update sizes
     std::size_t uniformUpdateBytes = 0;
 
-    /// Total texture memory
-    int memTextures = 0;
+    /// Total texture memory (int64_t: terrain scenes can track more than 2GB)
+    int64_t memTextures = 0;
     /// Total buffer memory
     int memBuffers = 0;
     /// Total index buffer memory

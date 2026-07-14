@@ -30,6 +30,7 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -134,6 +135,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     }
 
     // Decode and cache the DEM textures of loaded DEM tiles
+    ++demUpdateCounter;
     for (const auto& renderTile : *renderTiles) {
         const auto& tile = renderTile.getTile();
         if (tile.kind != Tile::Kind::RasterDEM) {
@@ -145,11 +147,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         if (demData && demData->getImagePtr() && !demData->getImagePtr()->size.isEmpty()) {
             // All tiles come from the same raster-dem source, so they share one encoding
             demUnpackVector = demData->getUnpackVector();
-            if (demTextures.find(renderTile.id) == demTextures.end()) {
-                if (auto texture = createDEMTexture(context, *demData)) {
-                    // Keep the texture available for elevation sampling by non-draped layers
-                    demTextures[renderTile.id] = {texture, demData->dim};
-                }
+            if (auto existing = demTextures.find(renderTile.id); existing != demTextures.end()) {
+                existing->second.lastUsed = demUpdateCounter;
+            } else if (auto texture = createDEMTexture(context, *demData)) {
+                // Keep the texture available for elevation sampling by non-draped layers
+                demTextures[renderTile.id] = {texture, demData->dim, demUpdateCounter};
             }
         }
     }
@@ -194,6 +196,25 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
         it = related ? std::next(it) : demTextures.erase(it);
     }
+    // Cap the cache: ancestor/descendant relations accumulate while browsing
+    // (zooming makes whole chains "related"), which previously grew past 2GB
+    // of DEM textures and overflowed/OOMed. Evict least-recently-used entries
+    // that were not used this frame until the cache is back under budget.
+    if (demTextures.size() > maxDEMTextures) {
+        std::vector<std::pair<uint64_t, UnwrappedTileID>> evictable;
+        for (const auto& [id, entry] : demTextures) {
+            if (entry.lastUsed != demUpdateCounter) {
+                evictable.emplace_back(entry.lastUsed, id);
+            }
+        }
+        std::sort(evictable.begin(), evictable.end());
+        for (const auto& [lastUsed, id] : evictable) {
+            if (demTextures.size() <= maxDEMTextures) {
+                break;
+            }
+            demTextures.erase(id);
+        }
+    }
 
     // Create terrain drawables for each mesh tile
     for (const auto& unwrapped : meshTiles) {
@@ -213,23 +234,27 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         bool ownDEM = false;
 
         if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
+            cached->second.lastUsed = demUpdateCounter;
             demTexture = cached->second.texture;
             ownDEM = true;
         } else {
             // Fall back to the closest cached ancestor DEM
             const UnwrappedTileID* ancestorID = nullptr;
+            DEMTextureEntry* ancestorEntry = nullptr;
             int bestZoom = -1;
-            for (const auto& [candidate, entry] : demTextures) {
+            for (auto& [candidate, entry] : demTextures) {
                 if (candidate != unwrapped && unwrapped.isChildOf(candidate) &&
                     static_cast<int>(candidate.canonical.z) > bestZoom) {
                     bestZoom = candidate.canonical.z;
                     ancestorID = &candidate;
+                    ancestorEntry = &entry;
                     demTexture = entry.texture;
                 }
             }
             if (!demTexture) {
                 continue; // nothing to render this tile with yet
             }
+            ancestorEntry->lastUsed = demUpdateCounter;
             const int dz = unwrapped.canonical.z - ancestorID->canonical.z;
             const float scale = static_cast<float>(1u << dz);
             const float dx = static_cast<float>(unwrapped.canonical.x - (ancestorID->canonical.x << dz));
