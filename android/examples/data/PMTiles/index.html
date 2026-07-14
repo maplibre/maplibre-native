@@ -938,6 +938,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PMTiles
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -954,6 +972,58 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#loading-a-style-that-uses-pmtiles-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading a style that uses PMTiles sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-pmtiles-source-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a PMTiles source directly
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-a-local-pmtiles-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading a local PMTiles file
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1447,17 +1517,62 @@
 
 
 <h1 id="pmtiles">PMTiles</h1>
-<p>Starting MapLibre Android 11.7.0, using <a href="https://docs.protomaps.com/pmtiles/">PMTiles</a> as a data source is supported. You can prefix your vector tile source with <code>pmtiles://</code> to load a PMTiles file. The rest of the URL continue with be <code>https://</code> to load a remote PMTiles file, <code>asset://</code> to load an asset or <code>file://</code> to load a local PMTiles file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/sources/PMTilesActivity.kt"><code>PMTilesActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
+</div>
+<p>Starting MapLibre Android 11.7.0, <a href="https://docs.protomaps.com/pmtiles/">PMTiles</a> archives are supported as tile sources. Prefix any tile source URL with <code>pmtiles://</code> to read from a PMTiles archive:</p>
+<ul>
+<li><code>pmtiles://https://</code> — stream tiles from a remote file</li>
+<li><code>pmtiles://file://</code> — read a file from device storage (use <code>getExternalFilesDir</code> or <code>filesDir</code> for the path)</li>
+</ul>
+<p>The <code>pmtiles://</code> prefix works with any <a href="https://maplibre.org/maplibre-style-spec/sources/">tile source type</a> (e.g. <code>vector</code>, <code>raster</code>, <code>raster-dem</code>, etc.), from a style JSON or dynamically.</p>
+<p>Unlike MapLibre GL JS, which resolves relative URLs against the style's base URL, MapLibre Native requires the URL inside <code>pmtiles://</code> to be fully specified (e.g. <code>pmtiles://https://example.com/tiles.pmtiles</code>, not <code>pmtiles://tiles.pmtiles</code>).</p>
 <blockquote>
-<p>Note: PMTiles sources do not currently support offline pack downloads.</p>
+<p>Note: PMTiles sources do not support offline pack downloads or caching.</p>
 </blockquote>
-<p>Oliver Wipfli has made a style available that combines a <a href="">Protomaps</a> basemap togehter with Foursquare's POI dataset. It is available in the <a href="https://github.com/wipfli/foursquare-os-places-pmtiles">wipfli/foursquare-os-places-pmtiles</a> repository on GitHub. The style to use is</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>https://raw.githubusercontent.com/wipfli/foursquare-os-places-pmtiles/refs/heads/main/style.json
+<h2 id="loading-a-style-that-uses-pmtiles-sources">Loading a style that uses PMTiles sources</h2>
+<p>Load a style JSON that references <code>pmtiles://</code> sources. The example below loads a satellite imagery basemap of the Central Alps and sets the initial camera position:</p>
+<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">map</span><span class="p">.</span><span class="na">setStyle</span><span class="p">(</span><span class="s">&quot;https://demotiles.maplibre.org/pmtiles/raster/style-imagery.json&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">style</span><span class="w"> </span><span class="o">-&gt;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">map</span><span class="p">.</span><span class="na">cameraPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CameraPosition</span><span class="p">.</span><span class="na">Builder</span><span class="p">()</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="p">.</span><span class="na">target</span><span class="p">(</span><span class="n">LatLng</span><span class="p">(</span><span class="m">47.5</span><span class="p">,</span><span class="w"> </span><span class="m">12.0</span><span class="p">))</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="p">.</span><span class="na">zoom</span><span class="p">(</span><span class="m">9.0</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">()</span>
 </span></code></pre></div>
-<p>The neat thing about this style is that it only uses PMTiles vector sources. PMTiles can be hosted with a relatively simple file server (or file hosting service) instead of a more complex specialized tile server.</p>
-<figure>
-  <img alt="Screenshot of PMTiles based style using Protomaps basemap with Foursquare POIs" src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/pmtiles-demo.png" width="300" />
-</figure>
+<h2 id="adding-a-pmtiles-source-directly">Adding a PMTiles source directly</h2>
+<p>Add <code>vector</code> sources from PMTiles archives to an already-loaded style. The example overlays two places datasets — <a href="https://overturemaps.org/">Overture Maps</a> (yellow) and <a href="https://opensource.foursquare.com/os-places/">Foursquare OS Places</a> (blue) — both using <code>CircleLayer</code>. The <code>setSourceLayer</code> call names the layer within the archive to render:</p>
+<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">overtureSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorSource</span><span class="p">(</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="s">&quot;overture-places&quot;</span><span class="p">,</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="s">&quot;pmtiles://https://overturemaps-tiles-us-west-2-beta.s3.amazonaws.com/2026-01-21/places.pmtiles&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">style</span><span class="p">.</span><span class="na">addSource</span><span class="p">(</span><span class="n">overtureSource</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">val</span><span class="w"> </span><span class="nv">overtureLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CircleLayer</span><span class="p">(</span><span class="s">&quot;overture-layer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;overture-places&quot;</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">overtureLayer</span><span class="p">.</span><span class="na">setSourceLayer</span><span class="p">(</span><span class="s">&quot;place&quot;</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">overtureLayer</span><span class="p">.</span><span class="na">setProperties</span><span class="p">(</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">circleColor</span><span class="p">(</span><span class="n">Color</span><span class="p">.</span><span class="na">parseColor</span><span class="p">(</span><span class="s">&quot;#f5c800&quot;</span><span class="p">)),</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">circleRadius</span><span class="p">(</span><span class="m">4f</span><span class="p">),</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">circleOpacity</span><span class="p">(</span><span class="m">0.6f</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span><span class="n">overtureLayer</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The same pattern works for <code>raster</code> archives using <code>RasterSource</code> and <code>RasterLayer</code>.</p>
+<blockquote>
+<p>Note: <code>raster-dem</code> sources added programmatically cannot specify <code>encoding</code> via the current Android API. Define <code>raster-dem</code> sources with terrarium encoding in the style JSON instead, where the <code>encoding</code> field is fully supported.</p>
+</blockquote>
+<h2 id="loading-a-local-pmtiles-file">Loading a local PMTiles file</h2>
+<p>For files on device storage, use <code>file://</code> with an absolute path. The example below uses <code>getExternalFilesDir(null)</code> to locate a file downloaded to the app's external files directory:</p>
+<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getExternalFilesDir</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span><span class="o">?.</span><span class="na">absolutePath</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/watercolor.pmtiles&quot;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">val</span><span class="w"> </span><span class="nv">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RasterSource</span><span class="p">(</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="s">&quot;watercolor&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="s">&quot;pmtiles://file://</span><span class="si">$</span><span class="n">path</span><span class="s">&quot;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="m">256</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">style</span><span class="p">.</span><span class="na">addSource</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span><span class="n">RasterLayer</span><span class="p">(</span><span class="s">&quot;watercolor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;watercolor&quot;</span><span class="p">))</span>
+</span></code></pre></div>
+<blockquote>
+<p>Note: <code>pmtiles://asset://</code> (files in <code>src/main/assets/</code>) is not currently supported. <code>AssetManagerFileSource</code> does not implement byte-range reads, which PMTiles requires to read its header and metadata. Use <code>file://</code> from device storage instead. See the <a href="https://github.com/maplibre/maplibre-native/issues/4360">open issue</a> for status.</p>
+</blockquote>
 
 
 
