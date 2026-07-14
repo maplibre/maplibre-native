@@ -67,7 +67,7 @@ class TerrainVectorMapActivity : AppCompatActivity() {
             style.addLayer(hillshade)
         }
 
-        style.setTerrain(Terrain(SOURCE_ID_TERRAIN, 1.0f))
+        style.setTerrain(Terrain(source = SOURCE_ID_TERRAIN, exaggeration = 1.0f))
     }
 
     companion object {

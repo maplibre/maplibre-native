@@ -11,24 +11,24 @@ package org.maplibre.android.style.terrain
  * uses the same tiles as a hillshade source) so styles stay portable with
  * maplibre-gl-js, which keeps a separate terrain source cache.
  *
- * @property sourceId the id of the raster-dem source providing the elevation data
+ * @property source the id of the raster-dem source providing the elevation data
  * @property exaggeration the vertical exaggeration multiplier, 1.0 by default
  */
 class Terrain @JvmOverloads constructor(
-    val sourceId: String,
+    val source: String,
     val exaggeration: Float = 1.0f
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Terrain) return false
-        return sourceId == other.sourceId && exaggeration == other.exaggeration
+        return source == other.source && exaggeration == other.exaggeration
     }
 
     override fun hashCode(): Int {
-        return 31 * sourceId.hashCode() + exaggeration.hashCode()
+        return 31 * source.hashCode() + exaggeration.hashCode()
     }
 
     override fun toString(): String {
-        return "Terrain{sourceId=$sourceId, exaggeration=$exaggeration}"
+        return "Terrain{source=$source, exaggeration=$exaggeration}"
     }
 }

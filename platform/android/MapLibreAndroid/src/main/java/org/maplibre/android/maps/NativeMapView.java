@@ -1182,7 +1182,7 @@ final class NativeMapView implements NativeMap {
     if (terrain == null) {
       nativeRemoveTerrain();
     } else {
-      nativeSetTerrain(terrain.getSourceId(), terrain.getExaggeration());
+      nativeSetTerrain(terrain.getSource(), terrain.getExaggeration());
     }
   }
 
