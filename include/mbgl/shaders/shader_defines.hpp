@@ -383,6 +383,7 @@ enum {
 enum {
     idSymbolImageTexture,
     idSymbolImageIconTexture,
+    idSymbolDEMTexture,
     symbolTextureCount
 };
 

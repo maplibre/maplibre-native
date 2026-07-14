@@ -50,7 +50,19 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
+    // 3D terrain elevation
+    highp vec4 u_dem_coords;
+    highp vec4 u_dem_unpack;
+    highp float u_dem_dim;
+    highp float u_dem_exaggeration;
+    lowp float u_dem_enabled;
+    lowp float drawable_pad4;
 };
+
+uniform sampler2D u_dem;
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp vec4 u_text_fill_color;
@@ -105,7 +117,8 @@ lowp float opacity = u_opacity;
         size = u_size;
     }
 
-    vec4 projectedPoint = u_matrix * vec4(a_pos, 0, 1);
+    float ele = get_elevation(a_pos, u_dem, u_dem_coords, u_dem_unpack, u_dem_dim, u_dem_exaggeration, u_dem_enabled);
+    vec4 projectedPoint = u_matrix * vec4(a_pos, ele, 1);
     highp float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     highp float distance_ratio = u_pitch_with_map ?
@@ -125,7 +138,7 @@ lowp float opacity = u_opacity;
     highp float symbol_rotation = 0.0;
     if (u_rotate_symbol) {
         // See comments in symbol_sdf.vertex
-        vec4 offsetProjectedPoint = u_matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        vec4 offsetProjectedPoint = u_matrix * vec4(a_pos + vec2(1, 0), ele, 1);
 
         vec2 a = projectedPoint.xy / projectedPoint.w;
         vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -137,8 +150,9 @@ lowp float opacity = u_opacity;
     highp float angle_cos = cos(segment_angle + symbol_rotation);
     mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    vec4 projected_pos = u_label_plane_matrix * vec4(a_projected_pos.xy, 0.0, 1.0);
-    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * max(a_minFontScale, fontScale) + a_pxoffset / 16.0), 0.0, 1.0);
+    vec4 projected_pos = u_label_plane_matrix * vec4(a_projected_pos.xy, ele, 1.0);
+    float z = float(u_pitch_with_map) * projected_pos.z / projected_pos.w;
+    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * max(a_minFontScale, fontScale) + a_pxoffset / 16.0), z, 1.0);
 
     v_tex = a_tex / u_texsize;
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);

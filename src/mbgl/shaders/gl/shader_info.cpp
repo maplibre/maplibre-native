@@ -487,6 +487,7 @@ const std::vector<AttributeInfo> SymbolIconShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> SymbolIconShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
+    TextureInfo{"u_dem", idSymbolDEMTexture},
 };
 
 // Symbol SDF
@@ -512,6 +513,7 @@ const std::vector<AttributeInfo> SymbolSDFShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> SymbolSDFShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
+    TextureInfo{"u_dem", idSymbolDEMTexture},
 };
 
 // Symbol Text & Icon
@@ -537,6 +539,7 @@ const std::vector<AttributeInfo> SymbolTextAndIconShaderInfo::attributes = {
 const std::vector<TextureInfo> SymbolTextAndIconShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
     TextureInfo{"u_texture_icon", idSymbolImageIconTexture},
+    TextureInfo{"u_dem", idSymbolDEMTexture},
 };
 
 // Terrain

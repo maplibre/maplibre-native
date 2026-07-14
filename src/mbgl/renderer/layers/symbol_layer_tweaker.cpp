@@ -10,6 +10,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
@@ -165,6 +166,18 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
+        // When terrain is enabled, bind the covering DEM tile so the vertex
+        // shader can displace symbol anchors by the terrain elevation
+        std::optional<RenderTerrain::TerrainData> terrainData;
+        if (parameters.terrain && parameters.terrain->isEnabled()) {
+            terrainData = parameters.terrain->getTerrainData(tileID);
+        }
+        if (parameters.terrain) {
+            drawable.setTexture(
+                terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
+                idSymbolDEMTexture);
+        }
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -192,6 +205,17 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
+            .pad1 = 0,
+            .pad2 = 0,
+            .pad3 = 0,
+
+            .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_unpack = parameters.terrain ? parameters.terrain->getDEMUnpackVector()
+                                             : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_dim = terrainData ? terrainData->demDim : 0.0f,
+            .dem_exaggeration = parameters.terrain ? parameters.terrain->getExaggeration() : 0.0f,
+            .dem_enabled = terrainData ? 1.0f : 0.0f,
+            .pad4 = 0,
         };
 
 #if MLN_UBO_CONSOLIDATION

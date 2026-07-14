@@ -52,7 +52,18 @@ struct SymbolDrawableUBO {
     opacity_t: f32,
     halo_width_t: f32,
     halo_blur_t: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
+    // 3D terrain elevation
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad4: f32,
 };
+
 
 struct SymbolTilePropsUBO {
     is_text: u32,
@@ -89,7 +100,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "SymbolIconShader";
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()"
@@ -117,6 +128,8 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
+@group(1) @binding(2) var dem_sampler: sampler;
+@group(1) @binding(3) var dem_texture: texture_2d<f32>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -166,7 +179,8 @@ fn main(in: VertexInput) -> VertexOutput {
         size = drawable.size;
     }
 
-    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
+    let ele = get_elevation(a_pos, dem_texture, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, ele, 1.0);
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -185,7 +199,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var symbol_rotation = 0.0;
     if (drawable.rotate_symbol != 0u) {
-        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
+        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), ele, 1.0);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
         symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
@@ -195,10 +209,11 @@ fn main(in: VertexInput) -> VertexOutput {
     let angle_cos = cos(segment_angle + symbol_rotation);
     let rotation_matrix = mat2x2<f32>(angle_cos, -angle_sin, angle_sin, angle_cos);
 
-    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, ele, 1.0);
+    let z = f32(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     let pos0 = projected_pos.xy / projected_pos.w;
     let posOffset = a_offset * max(a_minFontScale, vec2<f32>(fontScale)) / 32.0 + a_pxoffset / 16.0;
-    let position = drawable.coord_matrix * vec4<f32>(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+    let position = drawable.coord_matrix * vec4<f32>(pos0 + rotation_matrix * posOffset, z, 1.0);
 
     out.position = position;
     out.tex = a_tex / drawable.texsize;
@@ -245,7 +260,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "SymbolSDFShader";
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()"
@@ -299,6 +314,8 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
+@group(1) @binding(2) var dem_sampler: sampler;
+@group(1) @binding(3) var dem_texture: texture_2d<f32>;
 @group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
 
 @vertex
@@ -341,7 +358,8 @@ fn main(in: VertexInput) -> VertexOutput {
         size = drawable.size;
     }
 
-    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
+    let ele = get_elevation(a_pos, dem_texture, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, ele, 1.0);
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -360,7 +378,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var symbol_rotation = 0.0;
     if (drawable.rotate_symbol != 0u) {
-        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
+        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), ele, 1.0);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
         symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
@@ -370,10 +388,11 @@ fn main(in: VertexInput) -> VertexOutput {
     let angle_cos = cos(segment_angle + symbol_rotation);
     let rotation_matrix = mat2x2<f32>(angle_cos, -angle_sin, angle_sin, angle_cos);
 
-    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, ele, 1.0);
+    let z = f32(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     let pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     let pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    let position = drawable.coord_matrix * vec4<f32>(pos0, 0.0, 1.0);
+    let position = drawable.coord_matrix * vec4<f32>(pos0, z, 1.0);
 
     out.position = position;
     out.tex = a_tex / drawable.texsize;
@@ -494,7 +513,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU
     static constexpr const char* name = "SymbolTextAndIconShader";
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()"
@@ -548,6 +567,8 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
+@group(1) @binding(4) var dem_sampler: sampler;
+@group(1) @binding(5) var dem_texture: texture_2d<f32>;
 
 const SDF = 1.0;
 const ICON = 0.0;
@@ -592,7 +613,8 @@ fn main(in: VertexInput) -> VertexOutput {
         size = drawable.size;
     }
 
-    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, 0.0, 1.0);
+    let ele = get_elevation(a_pos, dem_texture, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    let projectedPoint = drawable.matrix * vec4<f32>(a_pos, ele, 1.0);
     let camera_to_anchor_distance = projectedPoint.w;
     let pitch_with_map = drawable.pitch_with_map != 0u;
     let distance_ratio = select(
@@ -610,7 +632,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     var symbol_rotation = 0.0;
     if (drawable.rotate_symbol != 0u) {
-        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), 0.0, 1.0);
+        let offsetProjectedPoint = drawable.matrix * vec4<f32>(a_pos + vec2<f32>(1.0, 0.0), ele, 1.0);
         let a = projectedPoint.xy / projectedPoint.w;
         let b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
         symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
@@ -620,10 +642,11 @@ fn main(in: VertexInput) -> VertexOutput {
     let angle_cos = cos(segment_angle + symbol_rotation);
     let rotation_matrix = mat2x2<f32>(angle_cos, -angle_sin, angle_sin, angle_cos);
 
-    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, 0.0, 1.0);
+    let projected_pos = drawable.label_plane_matrix * vec4<f32>(in.projected_pos.xy, ele, 1.0);
+    let z = f32(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     let pos_rot = a_offset / 32.0 * fontScale;
     let pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    let position = drawable.coord_matrix * vec4<f32>(pos0, 0.0, 1.0);
+    let position = drawable.coord_matrix * vec4<f32>(pos0, z, 1.0);
     let gamma_scale = position.w;
     let is_icon = select(1.0, 0.0, is_sdf == SDF);
 
