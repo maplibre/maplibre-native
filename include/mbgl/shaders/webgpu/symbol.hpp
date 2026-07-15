@@ -100,7 +100,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "SymbolIconShader";
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()"
@@ -130,6 +130,8 @@ struct VertexOutput {
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
 @group(1) @binding(2) var dem_sampler: sampler;
 @group(1) @binding(3) var dem_texture: texture_2d<f32>;
+@group(1) @binding(4) var depth_sampler: sampler;
+@group(1) @binding(5) var depth_texture: texture_2d<f32>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -218,6 +220,8 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = position;
     out.tex = a_tex / drawable.texsize;
     out.fade_opacity = fade_opacity;
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    out.fade_opacity = out.fade_opacity * calculate_visibility(out.position, depth_texture, depth_sampler, drawable.dem_enabled);
 #ifndef HAS_UNIFORM_u_opacity
     out.opacity = final_opacity;
 #endif
@@ -260,7 +264,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "SymbolSDFShader";
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()"
@@ -316,6 +320,8 @@ struct VertexOutput {
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
 @group(1) @binding(2) var dem_sampler: sampler;
 @group(1) @binding(3) var dem_texture: texture_2d<f32>;
+@group(1) @binding(4) var depth_sampler: sampler;
+@group(1) @binding(5) var depth_texture: texture_2d<f32>;
 @group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
 
 @vertex
@@ -399,6 +405,8 @@ fn main(in: VertexInput) -> VertexOutput {
     out.gamma_scale = position.w;
     out.fontScale = fontScale;
     out.fade_opacity = fo;
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    out.fade_opacity = out.fade_opacity * calculate_visibility(out.position, depth_texture, depth_sampler, drawable.dem_enabled);
 #ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);
 #endif
@@ -513,7 +521,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU
     static constexpr const char* name = "SymbolTextAndIconShader";
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 3> textures;
+    static const std::array<TextureInfo, 4> textures;
     static constexpr auto prelude = symbolShaderPrelude;
 
     static constexpr auto vertex = R"()"
@@ -569,6 +577,8 @@ struct VertexOutput {
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
 @group(1) @binding(4) var dem_sampler: sampler;
 @group(1) @binding(5) var dem_texture: texture_2d<f32>;
+@group(1) @binding(6) var depth_sampler: sampler;
+@group(1) @binding(7) var depth_texture: texture_2d<f32>;
 
 const SDF = 1.0;
 const ICON = 0.0;
@@ -657,6 +667,8 @@ fn main(in: VertexInput) -> VertexOutput {
     out.gamma_scale = gamma_scale;
     out.fontScale = fontScale;
     out.fade_opacity = fo;
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    out.fade_opacity = out.fade_opacity * calculate_visibility(out.position, depth_texture, depth_sampler, drawable.dem_enabled);
     out.is_icon = is_icon;
 
 #ifndef HAS_UNIFORM_u_fill_color

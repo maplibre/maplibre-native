@@ -122,6 +122,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::TerrainShader,
+                  shaders::BuiltIn::TerrainDepthShader,
                   shaders::BuiltIn::WideVectorShader>(registry, parameters);
 }
 

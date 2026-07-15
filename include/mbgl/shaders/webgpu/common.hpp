@@ -98,6 +98,32 @@ fn apply_drape_transform(clip: vec4<f32>, matrix: mat4x4<f32>, target_tile: vec4
     return result;
 }
 
+// Unpack a depth value packed by the terrain depth pass (webgpu/terrain_depth.hpp),
+// converted to NDC z, as in the maplibre-gl-js prelude
+fn unpack_depth(rgba_depth: vec4<f32>) -> f32 {
+    let bit_shift = vec4<f32>(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// WebGPU has y-up NDC but a top-left texture origin (like Metal, unlike GL), so
+// the V coordinate is flipped here where the GL version does not flip.
+fn calculate_visibility(pos: vec4<f32>,
+                        depth_texture: texture_2d<f32>,
+                        depth_sampler: sampler,
+                        depth_enabled: f32) -> f32 {
+    if (depth_enabled == 0.0) {
+        return 1.0;
+    }
+    let uv = pos.xy / pos.w * 0.5 + 0.5;
+    let depth = unpack_depth(textureSampleLevel(depth_texture, depth_sampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0));
+    if (pos.z / pos.w > depth) {
+        return 0.0;
+    }
+    return 1.0;
+}
+
 fn radians(degrees: f32) -> f32 {
     return PI * degrees / 180.0;
 }
