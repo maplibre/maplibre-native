@@ -4,28 +4,30 @@ This document describes the 3D terrain rendering implementation for MapLibre Nat
 
 ## Continuing this work
 
-- Branch `terrain-3d-color-relief` (fork remote `wifidb`). It is the color-relief
-  work plus 3D terrain; PRs are based against `main`.
 - The reference implementation is upstream **maplibre-gl-js**; when in doubt,
   match its behaviour - it has been in production a long time. Key files:
   `src/render/terrain.ts`, `src/render/render_to_texture.ts` (render-to-texture
   draping), `src/geo/projection/covering_tiles.ts` (elevation-aware tile cover),
   `src/ui/camera.ts` (`_elevateCameraIfInsideTerrain`), and the terrain vertex
   prelude.
-- **Build + device-test loop (Android, OpenGL flavour)**, the flavour used to
-  develop this:
+- Most development and testing has been on **Android / OpenGL**; the other
+  renderers are implemented but far less exercised. Build a specific renderer
+  flavour rather than `assembleDebug` (which fans out to every flavour and
+  currently fails on WebGPU's Gradle config):
   - `cd platform/android && ./gradlew :MapLibreAndroidTestApp:installOpenglDebug -Pmaplibre.abis=<abi>`
     (`arm64-v8a` for a phone, `x86_64` for the emulator). `assembleOpenglDebug`
-    to build without installing. `assembleDebug` fans out to every renderer
-    flavour and currently fails on WebGPU's Gradle config - build the specific
-    flavour instead.
-  - The exerciser is `TerrainOsmRasterActivity` (OSM raster draped over Mapterhorn
-    DEM, Innsbruck) - it reproduces the raster-draping cases. There is also a
-    planet-vector terrain activity.
-  - Verify Vulkan builds too: `:MapLibreAndroid:assembleVulkanDebug`.
-- Recent landed fixes (newest first): mesh frustum cull, elevation-aware tile
-  cover, `terrain_depth` shader includes for mtl/vulkan/webgpu, drape stencil
-  clipping. A collision-only camera fix was tried and reverted (see Phase 4).
+    builds without installing; `:MapLibreAndroid:assembleVulkanDebug` /
+    `assembleMetalDebug` to check the other backends build.
+- Android test activities (under `activity/style`, in the app's Style section):
+  - `TerrainActivity` - self-contained style with color-relief + hillshade over
+    3D terrain (Matterhorn); a bright hypsometric colour ramp to show color-relief.
+  - `TerrainVectorMapActivity` - a full-planet vector basemap (OpenFreeMap
+    Liberty) draped over terrain, DEM/hillshade/terrain added at runtime.
+  - `TerrainOsmRasterActivity` - OSM raster draped over terrain (Innsbruck);
+    exercises the raster-draping cases.
+  - `TerrainDebugTilesActivity` - the gl-js terrain debug-tiles style (numbered
+    tiles over synthetic terrain), for comparing tile zoom / draping against
+    gl-js.
 
 ## Overview
 
