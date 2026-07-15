@@ -277,11 +277,34 @@ initial load. The main known lever is the drape re-render policy above
 `RenderTarget::renderDrapedLayerGroups` (drawable visits scale with targets ×
 drawables) and DEM texture upload scheduling. Real-device profiling welcome.
 
-### Phase 2 - Symbol occlusion (required)
+### Phase 2 - Symbol occlusion (done, all backends)
 
-gl-js renders a depth pass of the terrain mesh into a packed-RGBA texture and
-fades symbols that are behind terrain (`calculate_visibility`/`depthOpacity`).
-Without it, symbols show through mountains.
+Implemented following gl-js: a depth pass of the terrain mesh is rendered into a
+packed-RGBA texture, and the symbol shaders fade symbols that are behind the
+terrain (`calculate_visibility`), so labels no longer show through mountains.
+
+- `TerrainDepthShader` re-renders the terrain meshes (same DEM displacement as
+  the terrain shader, sharing its UBO layout) into a viewport-sized target,
+  packing the fragment depth into RGBA8. It is driven by
+  `RenderTerrain::renderDepth` after the drape targets, from a depth twin of
+  each mesh drawable held in a separate layer group; the existing terrain
+  tweaker fills both groups' UBOs.
+- `RenderTerrain::getDepthTexture` hands symbol tweakers the packed texture, or
+  a 1x1 far-plane placeholder (everything visible) before the pass has run.
+- Symbol drawables bind it at `idSymbolDepthTexture`; the test reuses the
+  `dem_enabled` flag, since occlusion is exactly terrain-enabled.
+
+**Backend note - the depth lookup's V coordinate is not the same everywhere.**
+OpenGL samples the depth texture with the unflipped `ndc * 0.5 + 0.5`; Metal and
+WebGPU have y-up NDC but a top-left texture origin, so they flip V; Vulkan needs
+no flip because its y-down NDC and top-left origin agree, provided the position
+is taken after `applySurfaceTransform()` (which is where its symbol shaders
+already compute fade opacity). The convention was confirmed per backend against
+the existing `heatmap_texture` shaders, which sample a render target the same
+way: GL flips `a_pos.y`, Metal and WebGPU do not.
+
+Verified working on OpenGL on device (icons behind terrain are hidden);
+Metal/Vulkan/WebGPU follow the same structure but are not yet run on hardware.
 
 ### Phase 3 - Seams and quality
 
