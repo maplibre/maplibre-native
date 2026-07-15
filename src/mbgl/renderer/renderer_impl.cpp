@@ -574,7 +574,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // consistent with what was drawn, so the whole check is done here; the observer
     // marshals the correction to the map thread, which applies it. Only sent on collision.
     if (auto* terrain = orchestrator.getRenderTerrain(); terrain && terrain->isEnabled()) {
-        const double terrainAtCamera = terrain->getElevationForLatLng(state.getCameraLatLng(), state.getZoom());
+        double terrainAtCamera = terrain->getElevationForLatLng(state.getCameraLatLng(), state.getZoom());
+        if (terrainAtCamera == 0.0) {
+            // The camera's own ground point sits behind the view and is often outside the
+            // loaded DEM, so no data there. Fall back to the centre, which is on screen and
+            // loaded - this is the terrain the user dives into when zooming in, the case
+            // where the whole view goes black inside the surface.
+            terrainAtCamera = terrain->getElevationForLatLng(state.getLatLng(LatLng::Unwrapped), state.getZoom());
+        }
         if (terrainAtCamera != 0.0) {
             if (const auto corrected = state.cameraCollisionCorrection(terrainAtCamera)) {
                 observer->onTerrainCameraCollision(*corrected);
