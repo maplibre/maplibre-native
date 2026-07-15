@@ -721,13 +721,18 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
         builder->setTexture(demTexture, 0); // Texture index 0 for DEM
     }
 
-    if (!mapTexture && !depthPass) {
-        mapTexture = createTestMapTexture(context);
-    }
-    if (mapTexture) {
-        builder->setTexture(mapTexture, 1); // Texture index 1 for map
-    } else {
-        Log::Warning(Event::Render, "Failed to create test map texture for tile " + util::toString(tileID));
+    // The depth pass samples only the DEM and writes packed depth, so it has no
+    // map texture by design; only the draped pass needs one (falling back to the
+    // test pattern if the render target has no texture yet)
+    if (!depthPass) {
+        if (!mapTexture) {
+            mapTexture = createTestMapTexture(context);
+        }
+        if (mapTexture) {
+            builder->setTexture(mapTexture, 1); // Texture index 1 for map
+        } else {
+            Log::Warning(Event::Render, "Failed to create test map texture for tile " + util::toString(tileID));
+        }
     }
 
     // Flush to create the drawable
