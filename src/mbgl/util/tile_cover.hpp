@@ -33,12 +33,30 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
+/// Supplies the elevation range of a tile, so that the tile cover can test terrain
+/// against the view frustum instead of the flat ground plane. Terrain rising towards
+/// the camera occupies screen space that its flat footprint does not, so without this
+/// a tile whose relief is in view is judged off-screen and never requested - which
+/// leaves the terrain mesh with nothing to drape. Implemented over the DEM source's
+/// loaded tiles; see maplibre-gl-js CoveringTilesOptions::terrain, which this mirrors.
+class TileElevationProvider {
+public:
+    virtual ~TileElevationProvider() = default;
+
+    /// The lowest and highest elevation within the tile, in meters, or nullopt when
+    /// no DEM covering the tile is loaded (the caller then falls back to flat).
+    virtual std::optional<Range<double>> getTileElevationRange(const CanonicalTileID&) const = 0;
+};
+
 struct TileCoverParameters {
     TransformState transformState;
     double tileLodMinRadius = 3;
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     TileLodMode tileLodMode = TileLodMode::Default;
+    /// Optional; when null the cover is computed against the flat ground plane, as
+    /// it was before terrain support.
+    const TileElevationProvider* elevationProvider = nullptr;
 };
 
 int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;

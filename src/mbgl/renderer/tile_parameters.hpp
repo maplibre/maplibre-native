@@ -21,6 +21,10 @@ class DynamicTextureAtlas;
 using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
+namespace util {
+class TileElevationProvider;
+} // namespace util
+
 class TileParameters {
 public:
     const float pixelRatio;
@@ -40,6 +44,9 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     bool isUpdateSynchronous = false;
+    /// Terrain elevation for the tile cover; null when there is no terrain, which
+    /// leaves the cover flat. See util::TileElevationProvider.
+    const util::TileElevationProvider* elevationProvider = nullptr;
 };
 
 } // namespace mbgl

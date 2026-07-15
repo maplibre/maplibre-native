@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/dem_elevation_provider.hpp>
 #include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
@@ -229,6 +230,20 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     } else if (renderTerrain) {
         renderTerrain.reset();
     }
+
+    // Let every source's tile cover account for the height of the terrain, so that the
+    // sources are asked for the tiles the terrain mesh will need. Without this the cover
+    // is computed against the flat ground plane and relief leaning towards the camera -
+    // the near edge of the view, at high zoom - is judged off-screen, leaving the mesh
+    // there with an empty drape. Outlives the source update loop below.
+    //
+    // The DEM tiles read here are the previous frame's, as in gl-js: the cover only has
+    // to be conservative, and a DEM that is still loading converges on the next frame.
+    const bool terrainEnabled = renderTerrain && renderTerrain->isEnabled();
+    const DEMElevationProvider elevationProvider{
+        terrainEnabled ? getRenderSource(renderTerrain->getSourceID()) : nullptr,
+        terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
+    tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;

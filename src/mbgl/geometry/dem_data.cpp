@@ -1,6 +1,8 @@
 #include <mbgl/geometry/dem_data.hpp>
 #include <mbgl/math/clamp.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 
 DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _encoding)
@@ -41,6 +43,23 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _enco
     memcpy(data, data + stride, stride * 4);
     // bottom horizontal border with corners
     memcpy(data + (dim + 1) * stride, data + dim * stride, stride * 4);
+
+    // The elevation range of the tile, used to give the tile a height when testing
+    // it against the view frustum (see util::tileCover): terrain rising towards the
+    // camera is visible from further away than its flat footprint suggests. Computed
+    // once here, on the worker thread that decodes the tile, rather than per frame.
+    // The border is excluded: it is a copy of the edge pixels until neighbouring
+    // tiles backfill it, so it holds no elevation this tile does not already have.
+    if (dim > 0) {
+        minElevation = maxElevation = get(0, 0);
+        for (int32_t y = 0; y < dim; y++) {
+            for (int32_t x = 0; x < dim; x++) {
+                const int32_t value = get(x, y);
+                minElevation = std::min(minElevation, value);
+                maxElevation = std::max(maxElevation, value);
+            }
+        }
+    }
 }
 
 // This function takes the DEMData from a neighboring tile and backfills the

@@ -185,6 +185,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_terrain.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/dem_elevation_provider.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/texture_pool.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.hpp
