@@ -204,7 +204,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
 }
 
 void Texture2DPool::checkStatsConsistency(const char* where) {
-    if (statsDivergenceReported || static_cast<int64_t>(context->renderingStats().memTextures) == trackedStorage) {
+    if (statsDivergenceReported || context->renderingStats().memTextures == trackedStorage) {
         return;
     }
     statsDivergenceReported = true;
