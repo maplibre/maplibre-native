@@ -11,8 +11,6 @@
 #include <optional>
 #include <ranges>
 #include <string>
-#include <utility>
-#include <vector>
 
 namespace mbgl {
 
@@ -122,12 +120,6 @@ protected:
         double zoom = -1;
         /// Evaluated-property generation; see LayerTweaker::getPropertiesEpoch
         uint64_t propertiesEpoch = 0;
-
-        /// TEMP diagnostic (remove before merging): for each draped layer group that has
-        /// no tile overlapping this target, its name and the tile it does have nearest to
-        /// this target's area, to tell "the source never covered this" apart from "the
-        /// source has it at a zoom the drape did not accept".
-        std::vector<std::pair<std::string, std::string>> emptyGroups;
 
         /// Whether this would draw exactly what `other` already did
         bool sameContentAs(const DrapeCoverage& other) const {

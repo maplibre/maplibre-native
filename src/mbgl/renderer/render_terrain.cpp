@@ -245,30 +245,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
     }
 
-    // TEMP diagnostic: periodic terrain state summary (remove before merging)
-    if (demUpdateCounter % 120 == 1) {
-        std::map<uint8_t, int> zoomHistogram;
-        for (const auto& id : renderTileIDs) {
-            zoomHistogram[id.canonical.z]++;
-        }
-        std::string zooms;
-        for (const auto& [z, n] : zoomHistogram) {
-            zooms += "z" + util::toString(static_cast<int>(z)) + ":" + util::toString(n) + " ";
-        }
-        std::string tileList;
-        for (const auto& id : renderTileIDs) {
-            tileList += util::toString(id) + " ";
-        }
-        Log::Info(Event::Render,
-                  "Terrain: renderTiles=" + util::toString(renderTileIDs.size()) + " (" + zooms + ") meshTiles=" +
-                      util::toString(meshTiles.size()) + " demTextures=" + util::toString(demTextures.size()) +
-                      " drawables=" + util::toString(tilesWithDrawables.size()) +
-                      " pitch=" + util::toString(static_cast<int>(state.getPitch() * 180.0 / 3.14159)) +
-                      " z=" + util::toString(state.getZoom()) + " [" + tileList + "]");
-    }
-
     // Create terrain drawables for each mesh tile
-    size_t skippedNoDEM = 0;
     for (const auto& unwrapped : meshTiles) {
         const OverscaledTileID tileID(unwrapped.canonical.z, unwrapped.wrap, unwrapped.canonical);
 
@@ -308,7 +285,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 // No DEM at all yet: render the mesh flat with the placeholder
                 // DEM so the draped map still shows (a briefly flat area is
                 // less jarring than a hole in the terrain)
-                ++skippedNoDEM;
                 demTexture = getPlaceholderDEMTexture(context);
                 if (!demTexture) {
                     continue;
@@ -356,12 +332,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 }
             }
         }
-    }
-
-    // TEMP diagnostic (remove before merging)
-    if (skippedNoDEM > 0 && demUpdateCounter % 120 == 1) {
-        Log::Warning(Event::Render,
-                     "Terrain: " + util::toString(skippedNoDEM) + " mesh tiles have no DEM (own or ancestor) yet");
     }
 }
 

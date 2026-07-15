@@ -2,6 +2,30 @@
 
 This document describes the 3D terrain rendering implementation for MapLibre Native.
 
+## Continuing this work
+
+- Branch `terrain-3d-color-relief` (fork remote `wifidb`). It is the color-relief
+  work plus 3D terrain; PRs are based against `main`.
+- The reference implementation is **maplibre-gl-js-ml** (the maplibre-gl-js fork);
+  when in doubt, match its behaviour - it has been in production a long time. Key
+  files: `src/render/terrain.ts`, `src/webgl/render_to_texture.ts`,
+  `src/geo/projection/covering_tiles.ts`, `src/ui/camera.ts`,
+  `src/shaders/_prelude_terrain.vertex.glsl`.
+- **Build + device-test loop (Android, OpenGL flavour)**, the flavour used to
+  develop this:
+  - `cd platform/android && ./gradlew :MapLibreAndroidTestApp:installOpenglDebug -Pmaplibre.abis=<abi>`
+    (`arm64-v8a` for a phone, `x86_64` for the emulator). `assembleOpenglDebug`
+    to build without installing. `assembleDebug` fans out to every renderer
+    flavour and currently fails on WebGPU's Gradle config - build the specific
+    flavour instead.
+  - The exerciser is `TerrainOsmRasterActivity` (OSM raster draped over Mapterhorn
+    DEM, Innsbruck) - it reproduces the raster-draping cases. There is also a
+    planet-vector terrain activity.
+  - Verify Vulkan builds too: `:MapLibreAndroid:assembleVulkanDebug`.
+- Recent landed fixes (newest first): mesh frustum cull, elevation-aware tile
+  cover, `terrain_depth` shader includes for mtl/vulkan/webgpu, drape stencil
+  clipping. A collision-only camera fix was tried and reverted (see Phase 4).
+
 ## Overview
 
 Terrain rendering enables draping the map over 3D elevation data from Digital Elevation Model (DEM) tiles. This feature provides a 3D visualization of geographic terrain with realistic elevation. The architecture follows maplibre-gl-js (`src/render/terrain.ts`, `src/render/render_to_texture.ts`).
@@ -189,7 +213,15 @@ Implemented:
 - Terrain shaders and registration for all four backends (OpenGL, Metal, Vulkan, WebGPU)
 - DEM decoding via the source's unpack vector (Mapbox Terrain-RGB and Terrarium)
 - Layer draping for background, fill, line, raster, hillshade, and color-relief,
-  with a depth attachment on the drape render targets and per-drape clip masks
+  with depth+stencil attachments on the drape render targets. Every overlapping
+  tile is drawn and the layer groups' tile clipping masks resolve parent/child
+  overlap (gl-js `coordsAscending`), so a drape target is only ever empty when
+  the source genuinely has no tile for it - no more black-while-panning.
+- Elevation-aware tile cover: covering tiles are tested against the frustum with
+  the height of their DEM, so relief leaning towards the camera is requested
+  (`DEMData` min/max, `util::TileElevationProvider` / `DEMElevationProvider`,
+  `Frustum::intersectsElevated`), and the terrain mesh is frustum-culled so a
+  sparse DEM's low-zoom ancestor tiles are not meshed off-screen.
 - Elevation for the non-draped layers: symbol (icon/SDF/text-and-icon), circle,
   and fill-extrusion on all four backends, via the shared `get_elevation()`
   prelude helper and per-drawable DEM bindings
@@ -217,16 +249,26 @@ tile-local drape matrix, and the target tile is carried in
 `GlobalPaintParamsUBO::drape_tile` via a per-target copy of the global paint
 params bound in the target's own render pass. On top of that:
 
-- Per (target, layer group), a single consistent coverage is selected (exact
-  matches, else the deepest covering ancestor, else descendants), because the
-  render tile set legitimately overlaps while tiles load and drape targets
-  have no stencil to resolve the overlap.
+- Every overlapping tile is drawn into the target and the layer groups' own
+  tile clipping masks resolve parent-over-child overlap, exactly as gl-js does
+  (`coordsAscending` + `renderTileClippingMasks`). This is what fixed drape
+  targets rendering black when their exact tile was not loaded: a parent tile
+  standing in for unloaded children now reaches every child target it covers.
+  It required giving drape targets a **stencil** attachment (gl-js's RTT
+  framebuffer has one) and building the masks with the drape placement rather
+  than the camera matrix - `PaintParameters::clipMatrixForTile` evaluates the
+  `apply_drape_transform` affine CPU-side, and the mask cache is invalidated on
+  entering/leaving a drape (it is keyed only on the tile set). This replaced an
+  earlier "pick one consistent tile per layer group" heuristic that returned
+  nothing, hence black, whenever a target's tile was outside the loaded set.
 - A drape target keeps its previously rendered content while the available
   coverage is temporarily worse than what is already baked in, so panning
-  does not degrade already-seen detail.
-- Terrain mesh tiles always stay at the ideal cover
-  (`RenderTerrain::expandToDeepestCover`); only DEM/drape textures fall back
-  to ancestors while tiles load.
+  does not degrade already-seen detail (`RenderTarget::DrapeCoverage`).
+- Terrain mesh tiles stay at the ideal cover (`RenderTerrain::expandToDeepestCover`),
+  then are **frustum-culled** (`util::frustumCull`) so a sparse DEM's large
+  low-zoom ancestor tile is not meshed across its off-screen extent - those
+  off-screen meshes had no on-screen source to drape and rendered near-black.
+  Only DEM/drape textures fall back to ancestors while tiles load.
 
 Backend status:
 
@@ -320,8 +362,17 @@ Metal/Vulkan/WebGPU follow the same structure but are not yet run on hardware.
   shader itself (the elevated layers already sample this way)
 - Mesh skirts (gl-js `a_pos3d.z` flag + `u_ele_delta`) to hide cracks between
   neighboring tiles at different zoom levels
-- Camera-terrain collision (partly addressed by the collision-only fix, see
-  Phase 4 for the complete terrain-anchored camera)
+- Camera-terrain collision: a collision-only fix was prototyped and reverted
+  (felt worse - it corrected only after the gesture); the real fix is the
+  terrain-anchored camera in Phase 4
+- **Zoom-0 terrain exaggeration bug**: at zoom 0 the terrain relief is rendered
+  far more exaggerated than at zoom 1+; zooming in past zoom 1 it looks normal.
+  Long-standing (predates this work) and reproduces on device. Likely a
+  zoom-dependent scale in the elevation-to-world-height conversion (the mesh
+  vertex height uses `exaggeration` in metres, which the projection converts to
+  pixels via a metres-per-pixel that is zoom-dependent); at zoom 0 the world is
+  one tile so the scale is extreme. Compare against gl-js, which does not show
+  this. Not yet investigated.
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
 - Elevation for CPU-projected along-line labels in viewport alignment
   (gl-js applies it in the CPU symbol projection)
@@ -391,13 +442,18 @@ from entering the terrain in the first place rather than correcting afterwards.
 
 ### Cleanup before merging
 
-- Remove the per-frame `Log::Info` debug logging (render_terrain.cpp,
-  terrain_layer_tweaker.cpp, mtl/drawable.cpp)
+- **(done)** Removed the TEMP terrain diagnostics: the throttled drape-coverage
+  warning and `DrapeCoverage::emptyGroups` in render_target.cpp, and the
+  per-frame terrain-summary / `skippedNoDEM` logs in render_terrain.cpp. The
+  remaining `Log::Info`/`Warning` in render_terrain.cpp are one-time setup and
+  error logs, not per-frame.
+- Still to remove: any per-frame debug logging in terrain_layer_tweaker.cpp and
+  mtl/drawable.cpp, and the `// TEMP: Disable depth testing` in the terrain
+  drawable setup (render_terrain.cpp) - that one is functional, confirm the
+  depth mode is correct before removing.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
-- Remove the TEMP terrain diagnostics (throttled logs in render_target.cpp and
-  render_terrain.cpp)
-- Rcould we just untime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
+- Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
 
