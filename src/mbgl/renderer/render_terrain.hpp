@@ -20,7 +20,6 @@
 namespace mbgl {
 
 class TransformState;
-class LatLng;
 class UpdateParameters;
 class RenderSource;
 class PaintParameters;
@@ -101,14 +100,6 @@ public:
      * @return Elevation in meters with exaggeration multiplier applied
      */
     float getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const;
-
-    /**
-     * @brief Exaggerated terrain elevation, in meters, at a geographic location.
-     * Samples the best available DEM tile (own or ancestor); 0 when none is loaded.
-     * Mirrors maplibre-gl-js Terrain.getElevationForLngLatZoom, used to keep the map
-     * centre resting on the terrain surface (see Map centre-clamped-to-ground).
-     */
-    float getElevationForLatLng(const LatLng& latLng, double zoom) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier

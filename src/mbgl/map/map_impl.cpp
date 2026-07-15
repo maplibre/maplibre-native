@@ -317,21 +317,6 @@ void Map::Impl::onDidFinishRenderingMap() {
     }
 };
 
-void Map::Impl::onTerrainCameraCollision(const CameraOptions& correctedCamera) {
-    // The render side found the camera below the terrain and computed options that lift
-    // it back above the surface (zoom + pitch only; centre and bearing unchanged). Runs
-    // on the map thread (the observer is marshalled here), so touching the transform is
-    // safe. Skipped while the user drives the camera or an animation is running, so a
-    // gesture or flyTo is never fought; a later settled frame re-checks. Applied with
-    // jumpTo, i.e. the normal centre-preserving camera path, so it cannot run away the
-    // way a direct centre-altitude change does.
-    if (transform.isGestureInProgress() || transform.inTransition()) {
-        return;
-    }
-    transform.jumpTo(correctedCamera);
-    onUpdate();
-}
-
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     transform.jumpTo(camera);

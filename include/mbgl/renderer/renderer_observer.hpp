@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/map/camera.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/font_stack.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
@@ -62,13 +61,6 @@ public:
 
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
-
-    /// The camera dropped below the terrain surface for the frame just rendered, and these
-    /// camera options (zoom + pitch, centre and bearing unchanged) lift it back above the
-    /// surface. Sent only on such a collision. The DEM lives on the render thread, so this
-    /// is the channel that carries the correction back to the map thread; platforms that do
-    /// not forward it simply leave the camera as-is (near-terrain view may go black).
-    virtual void onTerrainCameraCollision(const CameraOptions& /*correctedCamera*/) {}
 
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;

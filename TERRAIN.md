@@ -378,11 +378,16 @@ That is the Phase 4 work.
 
 The **collision-only** subset (gl-js `_elevateCameraIfInsideTerrain`: recompute a
 consistent `CameraOptions` and `jumpTo` only when the camera is below terrain,
-which never touches the core plane math) is more contained and is implemented
-separately; it reduces but does not fully remove the artefact, since it does not
-anchor the centre to the surface. The render→map elevation channel it uses
-(`RendererObserver::onTerrainElevationChanged`, forwarded per platform) is the
-reusable piece for Phase 4.
+which never touches the core plane math) was prototyped and then reverted - it
+kept panning stable and did not run away, but only corrected *after* the gesture
+(a brief black flash while zooming in, then a pop back out), which felt worse
+than leaving the camera alone. A render→map elevation channel
+(`RendererObserver::onTerrainCameraCollision`, forwarded per platform) plus
+`TransformState::getCameraLatLng` / `getCameraAltitude` /
+`cameraCollisionCorrection` and `RenderTerrain::getElevationForLatLng` were the
+building blocks; see the reverted commits for the reference implementation. The
+right Phase 4 fix is the terrain-anchored centre above, which prevents the camera
+from entering the terrain in the first place rather than correcting afterwards.
 
 ### Cleanup before merging
 
