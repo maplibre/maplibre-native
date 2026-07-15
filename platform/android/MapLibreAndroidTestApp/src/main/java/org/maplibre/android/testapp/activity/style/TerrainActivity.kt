@@ -75,8 +75,11 @@ class TerrainActivity : AppCompatActivity() {
     companion object {
         // A self-contained style: color-relief provides the base coloring,
         // hillshade adds shading, and the terrain property drapes both over
-        // the 3D elevation mesh. The color ramp and hillshade tuning follow
-        // the WDB_COLOR_RELIEF_DARK tileserver-gl style.
+        // the 3D elevation mesh. The colour ramp is a bright hypsometric tint
+        // with many bands (green lowlands through gold and brown to snow) so the
+        // color-relief output is clearly visible across the Matterhorn's ~1500 m
+        // to ~4500 m range; the hillshade is kept subtle so it shades the relief
+        // without crushing the colours.
         //
         // Terrain uses its own raster-dem source (same tiles) per the
         // maplibre-gl-js recommendation: gl-js keeps a separate terrain source
@@ -105,7 +108,7 @@ class TerrainActivity : AppCompatActivity() {
                 {
                   "id": "background",
                   "type": "background",
-                  "paint": { "background-color": "#0e1512" }
+                  "paint": { "background-color": "#d8e4ec" }
                 },
                 {
                   "id": "color-relief",
@@ -115,13 +118,16 @@ class TerrainActivity : AppCompatActivity() {
                     "color-relief-color": [
                       "interpolate", ["linear"], ["elevation"],
                       0, "rgba(0,0,0,0)",
-                      0.1, "#121d10",
-                      500, "#152010",
-                      1000, "#1a2610",
-                      2000, "#1e2a14",
-                      2500, "#232e18",
-                      3500, "#2a3420",
-                      4000, "#343c2c"
+                      250, "#aee0a0",
+                      750, "#c8e878",
+                      1250, "#eee8a0",
+                      1750, "#e8cf7a",
+                      2250, "#dcac5f",
+                      2750, "#c8864a",
+                      3250, "#b06a45",
+                      3750, "#9c7f70",
+                      4250, "#d8d4cc",
+                      4478, "#ffffff"
                     ]
                   }
                 },
@@ -132,10 +138,10 @@ class TerrainActivity : AppCompatActivity() {
                   "paint": {
                     "hillshade-method": "igor",
                     "hillshade-illumination-anchor": "map",
-                    "hillshade-exaggeration": 0.5,
-                    "hillshade-shadow-color": "#000000",
-                    "hillshade-highlight-color": "#2a3820",
-                    "hillshade-accent-color": "#050a04"
+                    "hillshade-exaggeration": 0.3,
+                    "hillshade-shadow-color": "#4a4a4a",
+                    "hillshade-highlight-color": "#ffffff",
+                    "hillshade-accent-color": "#8a8a8a"
                   }
                 }
               ],
