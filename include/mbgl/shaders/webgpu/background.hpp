@@ -61,7 +61,8 @@ fn main(in: VertexInput) -> VertexOutput {
                              drawable.matrix_col1,
                              drawable.matrix_col2,
                              drawable.matrix_col3);
-    let clip = matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let raw_clip = matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let clip = apply_drape_transform(raw_clip, matrix, paintParams.drape_tile);
     out.position = clip;
     return out;
 }
@@ -169,7 +170,8 @@ fn main(in: VertexInput) -> VertexOutput {
         pos
     );
 
-    let clip = matrix * vec4<f32>(pos, 0.0, 1.0);
+    let raw_clip = matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = apply_drape_transform(raw_clip, matrix, paintParams.drape_tile);
     out.position = clip;
     return out;
 }

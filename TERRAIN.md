@@ -238,10 +238,11 @@ Backend status:
   pipeline layout, `PaintParameters::currentDrapeTile` at draw-record time):
   the global descriptor set is one per frame-in-flight with a dirty flag, so
   a per-target buffer swap would be silently ignored.
-- **WebGPU**: pending. No push constants, and drawables cache bind groups, so
-  neither channel reaches per-target data; needs dynamic uniform offsets or
-  per-target bind groups. Until then WebGPU drapes place zoom-mismatched
-  tiles incorrectly (exact-match tiles render correctly).
+- **WebGPU**: complete (same per-target buffer mechanism as GL/Metal). This
+  works because drawables currently rebuild their bind groups on every draw,
+  picking up the per-pass buffer swap; if bind-group caching is introduced
+  later, drape targets will need per-target bind groups or dynamic uniform
+  offsets instead.
 
 ### Convergence with maplibre-gl-js (ask before doing)
 

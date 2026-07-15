@@ -74,6 +74,30 @@ fn get_elevation(pos: vec2<f32>,
 }
 
 // Radians conversion
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target (see the GL prelude for the derivation).
+// `matrix` carries the drawable's tile (z, x, y) in its unused third column and
+// target_tile is GlobalPaintParamsUBO drape_tile (w != 0 while drawing into a
+// drape target).
+fn apply_drape_transform(clip: vec4<f32>, matrix: mat4x4<f32>, target_tile: vec4<f32>) -> vec4<f32> {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    let tile = matrix[2].xyz;
+    let k = target_tile.x - tile.x; // target zoom - drawable zoom
+    let scale = exp2(k);
+    var offset: vec2<f32>;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    var result = clip;
+    result.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    result.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return result;
+}
+
 fn radians(degrees: f32) -> f32 {
     return PI * degrees / 180.0;
 }
