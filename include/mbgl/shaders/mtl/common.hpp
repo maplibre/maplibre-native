@@ -95,6 +95,29 @@ inline float get_elevation(float2 pos,
     return elevation * dem_exaggeration;
 }
 
+// Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp),
+// converted to NDC z, as in the maplibre-gl-js prelude
+inline float unpack_depth(float4 rgba_depth) {
+    const float4 bit_shift = float4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// Unlike gl-js (global terrain uniforms), the depth texture and enable flag are
+// passed as arguments.
+inline float calculate_visibility(float4 pos,
+                                  texture2d<float, access::sample> depth_texture,
+                                  sampler depth_sampler,
+                                  float depth_enabled) {
+    if (depth_enabled == 0.0) {
+        return 1.0;
+    }
+    const float2 uv = pos.xy / pos.w * 0.5 + 0.5;
+    const float depth = unpack_depth(depth_texture.sample(depth_sampler, float2(uv.x, 1.0 - uv.y)));
+    return pos.z / pos.w > depth ? 0.0 : 1.0;
+}
+
 template<class ForwardIt, class T>
 ForwardIt upper_bound(ForwardIt first, ForwardIt last, thread const T& value)
 {

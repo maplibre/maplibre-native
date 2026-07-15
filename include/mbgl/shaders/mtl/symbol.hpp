@@ -96,7 +96,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
@@ -131,7 +131,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
                                 texture2d<float, access::sample> demTexture [[texture(1)]],
-                                sampler demSampler [[sampler(1)]]) {
+                                sampler demSampler [[sampler(1)]],
+                                texture2d<float, access::sample> depthTexture [[texture(2)]],
+                                sampler depthSampler [[sampler(2)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -214,14 +216,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w;
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, z, 1.0);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(position, depthTexture, depthSampler, drawable.dem_enabled));
 
     return {
         .position     = position,
         .tex          = half2(a_tex / drawable.texsize),
 #if defined(HAS_UNIFORM_u_opacity)
-        .fade_opacity = fo,
+        .fade_opacity = fo * vis,
 #else
-        .opacity      = fo,
+        .opacity      = fo * vis,
 #endif
     };
 }
@@ -257,7 +261,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
@@ -317,7 +321,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
                                 texture2d<float, access::sample> demTexture [[texture(1)]],
-                                sampler demSampler [[sampler(1)]]) {
+                                sampler demSampler [[sampler(1)]],
+                                texture2d<float, access::sample> depthTexture [[texture(2)]],
+                                sampler depthSampler [[sampler(2)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -400,6 +406,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(position, depthTexture, depthSampler, drawable.dem_enabled));
 
     return {
         .position     = position,
@@ -421,7 +429,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / drawable.texsize),
         .gamma_scale  = half(position.w),
         .fontScale    = half(fontScale),
-        .fade_opacity = fo,
+        .fade_opacity = fo * vis,
     };
 }
 
@@ -495,7 +503,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 3> textures;
+    static const std::array<TextureInfo, 4> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
@@ -559,7 +567,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
                                 texture2d<float, access::sample> demTexture [[texture(2)]],
-                                sampler demSampler [[sampler(2)]]) {
+                                sampler demSampler [[sampler(2)]],
+                                texture2d<float, access::sample> depthTexture [[texture(3)]],
+                                sampler depthSampler [[sampler(3)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -643,6 +653,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos_rot = a_offset / 32.0 * fontScale;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(position, depthTexture, depthSampler, drawable.dem_enabled));
     const float gamma_scale = position.w;
     const bool is_icon = (is_sdf == ICON);
 
@@ -651,7 +663,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
         .gamma_scale  = half(gamma_scale),
         .fontScale    = half(fontScale),
-        .fade_opacity = fo,
+        .fade_opacity = fo * vis,
         .is_icon      = is_icon,
 
 #if !defined(HAS_UNIFORM_u_fill_color)
