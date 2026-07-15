@@ -27,6 +27,7 @@
 #include <mbgl/shaders/vulkan/raster.hpp>
 #include <mbgl/shaders/vulkan/symbol.hpp>
 #include <mbgl/shaders/vulkan/terrain.hpp>
+#include <mbgl/shaders/vulkan/terrain_depth.hpp>
 #include <mbgl/shaders/vulkan/widevector.hpp>
 
 #include <cassert>

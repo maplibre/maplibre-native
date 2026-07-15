@@ -30,6 +30,7 @@
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol.hpp>
 #include <mbgl/shaders/mtl/terrain.hpp>
+#include <mbgl/shaders/mtl/terrain_depth.hpp>
 #include <mbgl/shaders/mtl/widevector.hpp>
 
 #include <cassert>

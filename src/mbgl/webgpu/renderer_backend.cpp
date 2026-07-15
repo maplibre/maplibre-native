@@ -27,6 +27,7 @@
 #include <mbgl/shaders/webgpu/raster.hpp>
 #include <mbgl/shaders/webgpu/symbol.hpp>
 #include <mbgl/shaders/webgpu/terrain.hpp>
+#include <mbgl/shaders/webgpu/terrain_depth.hpp>
 #include <mbgl/shaders/webgpu/widevector.hpp>
 
 namespace mbgl {
