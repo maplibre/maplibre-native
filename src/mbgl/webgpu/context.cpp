@@ -139,8 +139,10 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(*this, size, type);
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const bool stencil) {
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {

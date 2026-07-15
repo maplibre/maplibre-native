@@ -252,8 +252,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.renderTargetPrepared) {
             // Set up tile render target
             const uint16_t tilesize = bucket.getDEMData().dim;
-            auto renderTarget = context.createRenderTarget({tilesize, tilesize},
-                                                           gfx::TextureChannelDataType::UnsignedByte);
+            auto renderTarget = context.createRenderTarget(
+                {tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/false);
             if (!renderTarget) {
                 continue;
             }

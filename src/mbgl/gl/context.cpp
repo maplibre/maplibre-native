@@ -445,7 +445,16 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Siz
                                                                        const gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();
 
-    return std::make_unique<gl::OffscreenTexture>(*this, size, type);
+    return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
+}
+
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
+                                                                       const gfx::TextureChannelDataType type,
+                                                                       const bool depth,
+                                                                       const bool stencil) {
+    MLN_TRACE_FUNC();
+
+    return std::make_unique<gl::OffscreenTexture>(*this, size, type, depth, stencil);
 }
 
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
@@ -607,10 +616,12 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const bool stencil) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<RenderTarget>(*this, size, type);
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
@@ -642,6 +653,25 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color,
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
     bindDepthRenderbuffer(depth);
+    checkFramebuffer();
+    return {color.getSize(), std::move(fbo)};
+}
+
+Framebuffer Context::createFramebuffer(
+    const gfx::Texture2D& color, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
+    MLN_TRACE_FUNC();
+
+    if (color.getSize() != depthStencil.getSize()) {
+        throw std::runtime_error("Renderbuffer size mismatch");
+    }
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
     return {color.getSize(), std::move(fbo)};
 }

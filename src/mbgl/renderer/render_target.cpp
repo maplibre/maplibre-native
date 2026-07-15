@@ -19,9 +19,12 @@
 
 namespace mbgl {
 
-RenderTarget::RenderTarget(gfx::Context& context_, const Size size, const gfx::TextureChannelDataType type)
+RenderTarget::RenderTarget(gfx::Context& context_,
+                           const Size size,
+                           const gfx::TextureChannelDataType type,
+                           const bool stencil)
     : context(context_) {
-    offscreenTexture = context.createOffscreenTexture(size, type);
+    offscreenTexture = context.createOffscreenTexture(size, type, /*depth=*/true, stencil);
     backgroundColor = Color{0.0f, 0.0f, 0.0f, 1.0f};
 }
 
@@ -114,26 +117,27 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
                 return;
             }
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
-            const bool overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
-                                  drapeTileID->isChildOf(unwrapped);
-            if (overlaps) {
-                // Identify the content by drawable id, so a tile loading, unloading
-                // or being rebuilt all change the signature
-                util::hash_combine(coverage.contentHash, drawable.getID().id());
-            }
             if (unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID)) {
                 haveExactOrDescendant = true;
             } else if (drapeTileID->isChildOf(unwrapped)) {
                 if (!bestAncestor || unwrapped.canonical.z > bestAncestor->canonical.z) {
                     bestAncestor = unwrapped;
                 }
+            } else {
+                return; // no overlap: contributes nothing to this target
             }
+            // Identify the content by drawable id, so a tile loading, unloading
+            // or being rebuilt all change the signature
+            util::hash_combine(coverage.contentHash, drawable.getID().id());
         });
-        if (haveExactOrDescendant) {
+        if (haveExactOrDescendant || bestAncestor) {
             coverage.groupsWithContent++;
-        } else if (bestAncestor) {
-            coverage.groupsWithContent++;
-            coverage.zoomDeficit += drapeTileID->canonical.z - bestAncestor->canonical.z;
+            // Only the coarsest standalone fallback counts as lost detail; when an
+            // exact or deeper tile is present the ancestor is clipped away by the
+            // tile masks and costs nothing.
+            if (!haveExactOrDescendant) {
+                coverage.zoomDeficit += drapeTileID->canonical.z - bestAncestor->canonical.z;
+            }
         }
     });
     return coverage;
@@ -158,49 +162,26 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
         orchestrator.visitLayerGroupsReversed(f);
     };
 
-    // Enable, per layer group, a single consistent coverage of this target,
-    // remembering the previous state so unrelated enable flags are not
-    // clobbered. The render tile set can contain overlapping tiles (a parent
-    // standing in for missing children next to already-loaded children); the
-    // main passes resolve that overlap with stencil clipping, but the drape
-    // targets have no stencil attachment, so a blurry parent would draw over
-    // its sharp children. Prefer exact matches, then the deepest covering
-    // ancestor, then descendants (which cannot overlap each other's area
-    // without an ancestor between them being preferred instead).
+    // Enable every drawable whose tile overlaps this target and disable the rest,
+    // remembering the previous state so unrelated enable flags are not clobbered.
+    // Every overlapping tile is drawn, as in gl-js (coordsAscending): a parent
+    // standing in for unloaded children renders into each child target it covers,
+    // so a target is only empty when the source genuinely has nothing for it.
+    // Where a parent overlaps already-loaded children, the layer groups' own tile
+    // clipping masks resolve it, exactly as they do in the main passes - drape
+    // targets carry a stencil attachment for this, and the masks are built with
+    // the drape placement by PaintParameters::clipMatrixForTile.
     std::vector<std::pair<gfx::Drawable*, bool>> savedEnabled;
     visitDrapedGroups(visitForward, [&](LayerGroupBase& layerGroup) {
-        auto& tileLayerGroup = static_cast<TileLayerGroup&>(layerGroup);
-
-        bool haveExact = false;
-        std::optional<UnwrappedTileID> bestAncestor;
-        tileLayerGroup.visitDrawables([&](const gfx::Drawable& drawable) {
-            if (!drawable.getEnabled() || !drawable.getTileID()) {
-                return;
-            }
-            const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
-            if (unwrapped == *drapeTileID) {
-                haveExact = true;
-            } else if (drapeTileID->isChildOf(unwrapped)) {
-                if (!bestAncestor || unwrapped.canonical.z > bestAncestor->canonical.z) {
-                    bestAncestor = unwrapped;
-                }
-            }
-        });
-
-        tileLayerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](gfx::Drawable& drawable) {
             savedEnabled.emplace_back(&drawable, drawable.getEnabled());
-            bool enable = false;
+            bool overlaps = false;
             if (const auto& tileID = drawable.getTileID()) {
                 const UnwrappedTileID unwrapped = tileID->toUnwrapped();
-                if (haveExact) {
-                    enable = unwrapped == *drapeTileID;
-                } else if (bestAncestor) {
-                    enable = unwrapped == *bestAncestor;
-                } else {
-                    enable = unwrapped.isChildOf(*drapeTileID);
-                }
+                overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
+                           drapeTileID->isChildOf(unwrapped);
             }
-            drawable.setEnabled(drawable.getEnabled() && enable);
+            drawable.setEnabled(drawable.getEnabled() && overlaps);
         });
     });
 
@@ -275,14 +256,29 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
         }
     }
 
-    // The offscreen target has a depth attachment (no stencil), matching maplibre-gl-js's
-    // drape framebuffer, so clear depth each frame. Stencil is not present.
+    // Drape targets carry a depth and stencil attachment, as maplibre-gl-js's
+    // render-to-texture framebuffer does; both are cleared each frame. Targets that
+    // are not draped (e.g. the hillshade prepare pass) have depth only.
     parameters.renderPass = parameters.encoder->createRenderPass(
         "render target",
-        {.renderable = *offscreenTexture, .clearColor = backgroundColor, .clearDepth = 1.0f, .clearStencil = {}});
+        {.renderable = *offscreenTexture,
+         .clearColor = backgroundColor,
+         .clearDepth = 1.0f,
+         .clearStencil = drapeTileID ? 0 : std::optional<int32_t>{}});
 #if MLN_RENDER_BACKEND_OPENGL
     parameters.updateStencilBufferAvailability();
 #endif
+
+    if (drapeTileID) {
+        // Placement for apply_drape_transform, and for the CPU-side equivalent that
+        // builds this target's tile clipping masks (clipMatrixForTile). Set before
+        // clearing the stencil, which itself draws a covering quad on some backends.
+        parameters.currentDrapeTile = drapeTileValues;
+        // Drop clipping masks cached from the main passes or another drape target:
+        // the same tile set placed into a different target needs different masks.
+        // The render pass above already cleared the stencil buffer itself.
+        parameters.invalidateTileClippingMasks();
+    }
 
     // For drape targets, swap in this target's copy of the global paint params,
     // which carries the target tile in `drape_tile` for apply_drape_transform.
@@ -305,9 +301,10 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     if (drapeTileID) {
         // Terrain drape target: render the orchestrator's draped layer groups
         // (their tweakers already ran in the main layer group update)
-        parameters.currentDrapeTile = drapeTileValues;
         renderDrapedLayerGroups(orchestrator, parameters);
         parameters.currentDrapeTile = {{0, 0, 0, 0}};
+        // Leaving drape placement: the masks just built do not apply to what renders next
+        parameters.invalidateTileClippingMasks();
     } else {
         // Run layer tweakers to update any dynamic elements
         parameters.currentLayer = 0;

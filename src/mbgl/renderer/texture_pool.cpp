@@ -15,7 +15,11 @@ void TexturePool::createRenderTarget(gfx::Context& context, const UnwrappedTileI
         it->second->setClearColor(backgroundColor);
         return;
     }
-    auto renderTarget = context.createRenderTarget({tileSize, tileSize}, gfx::TextureChannelDataType::UnsignedByte);
+    // Drape targets render several overlapping draped tiles (a parent standing in for missing
+    // children beside already-loaded children); the stencil clips them against each other,
+    // as maplibre-gl-js does for its render-to-texture framebuffer.
+    auto renderTarget = context.createRenderTarget(
+        {tileSize, tileSize}, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/true);
     renderTarget->setClearColor(backgroundColor);
     renderTarget->setDrapeTileID(id);
     renderTargets[id] = std::move(renderTarget);

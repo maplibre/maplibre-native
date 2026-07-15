@@ -108,6 +108,14 @@ public:
 
     mat4 matrixForTile(const UnwrappedTileID&, bool aligned = false) const;
 
+    /// The matrix that places a tile's clipping-mask quad where that tile's geometry
+    /// actually lands. Outside a drape pass this is `matrixForTile`. Inside one, draped
+    /// geometry does not use the camera matrix at all - it uses a tile-local orthographic
+    /// matrix plus an affine NDC placement the vertex shader applies from the drawable and
+    /// target tile ids (apply_drape_transform), so the mask has to be built the same way or
+    /// it would clip against the wrong region.
+    mat4 clipMatrixForTile(const UnwrappedTileID&) const;
+
     // Stencil handling
 public:
 #if MLN_RENDER_BACKEND_OPENGL
@@ -127,6 +135,12 @@ public:
 
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
     void clearStencil();
+
+    /// Forget the cached tile clipping masks, without touching the stencil buffer.
+    /// The cache is keyed only on the tile set, so it has to be dropped whenever the
+    /// same tiles would now be placed differently - entering or leaving a drape
+    /// target, or moving between drape targets (see clipMatrixForTile).
+    void invalidateTileClippingMasks() { tileClippingMaskIDs.clear(); }
 
     /// @brief Get a stencil mode for rendering constrined to the specified tile ID.
     /// The tile ID must have been present in the set previously passed to `renderTileClippingMasks`

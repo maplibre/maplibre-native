@@ -44,7 +44,10 @@ public:
     void reduceMemoryUsage() override;
 
     // Resource creation
-    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool,
+                                                                  bool) override;
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
     gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
@@ -65,7 +68,7 @@ public:
                                    bool renderToTerrain) override;
     gfx::Texture2DPtr createTexture2D() override;
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     // State management
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;

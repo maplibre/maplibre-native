@@ -8,8 +8,10 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/mat4.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/context.hpp>
@@ -117,6 +119,44 @@ mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned)
     return matrix;
 }
 
+mat4 PaintParameters::clipMatrixForTile(const UnwrappedTileID& tileID) const {
+    if (currentDrapeTile[3] == 0.0f) {
+        return matrixForTile(tileID);
+    }
+
+    // Tile-local orthographic matrix, as LayerTweaker::getTileMatrix builds for draped
+    // geometry.
+    mat4 matrix;
+    matrix::ortho(matrix, 0, util::EXTENT, util::EXTENT, 0, 0, 1);
+
+    // Then the placement apply_drape_transform performs in the vertex shader, evaluated
+    // here instead. Keep this in sync with _prelude.vertex.glsl.
+    const double z = tileID.canonical.z;
+    const double x = tileID.canonical.x + tileID.wrap * std::exp2(z);
+    const double y = tileID.canonical.y;
+    const double k = currentDrapeTile[0] - z;
+    const double scale = std::exp2(k);
+    double offsetX, offsetY;
+    if (k >= 0.0) {
+        offsetX = x * scale - currentDrapeTile[1];
+        offsetY = y * scale - currentDrapeTile[2];
+    } else {
+        offsetX = (x - currentDrapeTile[1] * std::exp2(-k)) * scale;
+        offsetY = (y - currentDrapeTile[2] * std::exp2(-k)) * scale;
+    }
+
+    // clip.xy = clip.xy * scale + (scale - 1 + 2 * offset.x, 1 - scale - 2 * offset.y);
+    // the draped ortho matrix gives w = 1, so this is an affine premultiply.
+    mat4 affine;
+    matrix::identity(affine);
+    affine[0] = scale;
+    affine[5] = scale;
+    affine[12] = scale - 1.0 + 2.0 * offsetX;
+    affine[13] = 1.0 - scale - 2.0 * offsetY;
+    matrix::multiply(matrix, affine, matrix);
+    return matrix;
+}
+
 gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {
     if (currentLayer < opaquePassCutoff) {
         return gfx::DepthMode::disabled();
@@ -220,7 +260,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile(tileID)),
+        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(clipMatrixForTile(tileID)),
                                                /* .stencil_ref = */ static_cast<uint32_t>(stencilID),
                                                /* .pad1 = */ 0,
                                                /* .pad2 = */ 0,
@@ -256,7 +296,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{.matrix = util::cast<float>(matrixForTile(tileID)),
+        tileUBOs.emplace_back(shaders::ClipUBO{.matrix = util::cast<float>(clipMatrixForTile(tileID)),
                                                .stencil_ref = static_cast<uint32_t>(stencilID),
                                                .pad1 = 0,
                                                .pad2 = 0,
@@ -294,7 +334,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{matrixForTile(tileID), stencilID});
+        tileUBOs.emplace_back(shaders::ClipUBO{clipMatrixForTile(tileID), stencilID});
     }
 
     if (!tileUBOs.empty()) {
@@ -346,7 +386,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                            staticData.clippingMaskSegments,
                            ClippingMaskProgram::computeAllUniformValues(
                                ClippingMaskProgram::LayoutUniformValues{
-                                   uniforms::matrix::Value(matrixForTile(tileID)),
+                                   uniforms::matrix::Value(clipMatrixForTile(tileID)),
                                },
                                paintAttributeData,
                                properties,

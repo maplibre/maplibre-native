@@ -137,11 +137,13 @@ public:
 
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
     Framebuffer createFramebuffer(const gfx::Texture2D& color,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth);
+    Framebuffer createFramebuffer(const gfx::Texture2D& color,
+                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil);
 
     gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
 
@@ -220,6 +222,11 @@ private:
 
 public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
+
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool depth,
+                                                                  bool stencil) override;
 
 private:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,

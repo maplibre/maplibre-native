@@ -38,7 +38,7 @@ using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 /// Render target class
 class RenderTarget {
 public:
-    RenderTarget(gfx::Context& context, const Size size, const gfx::TextureChannelDataType type);
+    RenderTarget(gfx::Context& context, const Size size, const gfx::TextureChannelDataType type, bool stencil);
     ~RenderTarget();
 
     /// Set the color the render target is cleared to before its layer groups are drawn

@@ -174,7 +174,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a render target
     if (!renderTarget) {
-        renderTarget = context.createRenderTarget(size, gfx::TextureChannelDataType::HalfFloat);
+        renderTarget = context.createRenderTarget(size, gfx::TextureChannelDataType::HalfFloat, /*stencil=*/false);
         if (!renderTarget) {
             return;
         }

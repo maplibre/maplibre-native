@@ -462,7 +462,8 @@ void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
     }
     const Size size = parameters.backend.getDefaultRenderable().getSize();
     if (!depthRenderTarget || depthRenderTarget->getTexture()->getSize() != size) {
-        depthRenderTarget = parameters.context.createRenderTarget(size, gfx::TextureChannelDataType::UnsignedByte);
+        depthRenderTarget = parameters.context.createRenderTarget(
+            size, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/false);
         if (!depthRenderTarget) {
             return;
         }

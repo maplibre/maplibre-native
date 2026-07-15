@@ -245,8 +245,10 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(*this, size, type);
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const bool stencil) {
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
@@ -471,8 +473,6 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    // Render targets (e.g. the terrain drape RTT) get a depth attachment but no stencil,
-    // matching maplibre-gl-js's drape framebuffer.
     return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
 }
 

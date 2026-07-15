@@ -101,7 +101,7 @@ public:
 
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     void resetState(gfx::DepthMode, gfx::ColorMode) override {}
 
@@ -112,7 +112,10 @@ public:
 
     void setDirtyState() override {}
 
-    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool,
+                                                                  bool) override;
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
