@@ -6,11 +6,12 @@ This document describes the 3D terrain rendering implementation for MapLibre Nat
 
 - Branch `terrain-3d-color-relief` (fork remote `wifidb`). It is the color-relief
   work plus 3D terrain; PRs are based against `main`.
-- The reference implementation is **maplibre-gl-js-ml** (the maplibre-gl-js fork);
-  when in doubt, match its behaviour - it has been in production a long time. Key
-  files: `src/render/terrain.ts`, `src/webgl/render_to_texture.ts`,
-  `src/geo/projection/covering_tiles.ts`, `src/ui/camera.ts`,
-  `src/shaders/_prelude_terrain.vertex.glsl`.
+- The reference implementation is upstream **maplibre-gl-js**; when in doubt,
+  match its behaviour - it has been in production a long time. Key files:
+  `src/render/terrain.ts`, `src/render/render_to_texture.ts` (render-to-texture
+  draping), `src/geo/projection/covering_tiles.ts` (elevation-aware tile cover),
+  `src/ui/camera.ts` (`_elevateCameraIfInsideTerrain`), and the terrain vertex
+  prelude.
 - **Build + device-test loop (Android, OpenGL flavour)**, the flavour used to
   develop this:
   - `cd platform/android && ./gradlew :MapLibreAndroidTestApp:installOpenglDebug -Pmaplibre.abis=<abi>`
