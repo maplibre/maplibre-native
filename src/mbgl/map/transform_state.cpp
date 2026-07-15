@@ -296,6 +296,66 @@ FreeCameraOptions TransformState::getFreeCameraOptions() const {
     return options;
 }
 
+LatLng TransformState::getCameraLatLng() const {
+    updateCameraState();
+    const vec3 position = camera.getPosition();
+    return latLngFromMercator({position[0], position[1]});
+}
+
+double TransformState::getCameraAltitude() const {
+    updateCameraState();
+    const vec3 position = camera.getPosition();
+    // Mercator z back to metres, the inverse of updateStateFromCamera's conversion.
+    return position[2] * Projection::getMetersPerPixelAtLatitude(getCameraLatLng().latitude(), 0) * util::tileSize_D;
+}
+
+std::optional<CameraOptions> TransformState::cameraCollisionCorrection(double terrainElevationAtCamera) const {
+    const LatLng cameraLatLng = getCameraLatLng();
+    const double cameraAltitude = getCameraAltitude();
+
+    // A small margin so the camera settles just above the surface and micro-deficits do
+    // not churn the camera every frame.
+    constexpr double marginMeters = 1.0;
+    if (cameraAltitude >= terrainElevationAtCamera + marginMeters) {
+        return std::nullopt;
+    }
+
+    // Place the camera at the surface over its own ground point, still looking at the
+    // centre (kept at sea level, matching native's centre-on-z=0 model). Normalised
+    // mercator, as maplibre-gl-js calculateCameraOptionsFromTo works in.
+    const LatLng center = getLatLng(LatLng::Unwrapped);
+    const auto mercX = [](double lng) {
+        return (180.0 + lng) / 360.0;
+    };
+    const auto mercY = [](double lat) {
+        return (180.0 - (180.0 / pi) * std::log(std::tan(pi / 4.0 + lat * pi / 360.0))) / 360.0;
+    };
+    const auto mercZ = [](double alt, double lat) {
+        return alt / (std::cos(util::deg2rad(lat)) * util::M2PI * util::EARTH_RADIUS_M);
+    };
+
+    const double fromX = mercX(cameraLatLng.longitude());
+    const double fromY = mercY(cameraLatLng.latitude());
+    const double fromZ = mercZ(terrainElevationAtCamera, cameraLatLng.latitude());
+    const double toX = mercX(center.longitude());
+    const double toY = mercY(center.latitude());
+
+    const double dx = toX - fromX;
+    const double dy = toY - fromY;
+    const double dz = -fromZ; // centre altitude is 0
+    const double distance3D = std::hypot(std::hypot(dx, dy), dz);
+    if (distance3D < 1e-12) {
+        return std::nullopt;
+    }
+    const double groundDistance = std::hypot(dx, dy);
+
+    const double newZoom = scaleZoom(getCameraToCenterDistance() / distance3D / util::tileSize_D);
+    // Camera is above the centre (dz < 0), so pitch is below 90 degrees.
+    const double pitchRad = pi / 2.0 - std::acos(util::clamp(groundDistance / distance3D, 0.0, 1.0));
+
+    return CameraOptions().withZoom(newZoom).withPitch(util::rad2deg(pitchRad));
+}
+
 bool TransformState::setCameraPosition(const vec3& position) {
     if (std::isnan(position[0]) || std::isnan(position[1]) || std::isnan(position[2])) return false;
 

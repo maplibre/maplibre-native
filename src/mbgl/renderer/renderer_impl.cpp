@@ -26,6 +26,7 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/render_terrain.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/renderer/layers/terrain_layer_tweaker.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -566,6 +567,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
         context.threadSafeCopyRenderingStats());
+
+    // Terrain-camera collision: if the camera dropped below the terrain surface this frame
+    // (which leaves the near part of the view black), report camera options that lift it
+    // back above. The DEM lives here on the render thread and the transform there is
+    // consistent with what was drawn, so the whole check is done here; the observer
+    // marshals the correction to the map thread, which applies it. Only sent on collision.
+    if (auto* terrain = orchestrator.getRenderTerrain(); terrain && terrain->isEnabled()) {
+        const double terrainAtCamera = terrain->getElevationForLatLng(state.getCameraLatLng(), state.getZoom());
+        if (terrainAtCamera != 0.0) {
+            if (const auto corrected = state.cameraCollisionCorrection(terrainAtCamera)) {
+                observer->onTerrainCameraCollision(*corrected);
+            }
+        }
+    }
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

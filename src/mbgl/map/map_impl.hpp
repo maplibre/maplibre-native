@@ -63,6 +63,7 @@ public:
     void onDidFinishRenderingFrame(RenderMode, bool, bool, const gfx::RenderingStats&) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
+    void onTerrainCameraCollision(const CameraOptions& correctedCamera) final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;

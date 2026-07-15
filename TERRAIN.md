@@ -320,14 +320,19 @@ Metal/Vulkan/WebGPU follow the same structure but are not yet run on hardware.
   shader itself (the elevated layers already sample this way)
 - Mesh skirts (gl-js `a_pos3d.z` flag + `u_ele_delta`) to hide cracks between
   neighboring tiles at different zoom levels
-- Camera-terrain collision using `RenderTerrain::getElevation`
+- Camera-terrain collision (partly addressed by the collision-only fix, see
+  Phase 4 for the complete terrain-anchored camera)
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
 - Elevation for CPU-projected along-line labels in viewport alignment
   (gl-js applies it in the CPU symbol projection)
-- Terrain-aware tile cover: gl-js consults the elevation data when computing
-  covering tiles (horizon/occlusion aware). Native has its own tile LOD system
-  (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) for reducing
-  distant-tile zoom at pitch, but it is not elevation-aware.
+- Terrain-aware tile cover **(done)**: the covering-tile frustum test now gives
+  each tile the height of its DEM (`DEMData` min/max, `util::TileElevationProvider`
+  / `DEMElevationProvider`, `Frustum::intersectsElevated`), so relief leaning
+  towards the camera is requested instead of judged off-screen. The mesh is also
+  frustum-culled after `expandToDeepestCover` so a sparse DEM's large low-zoom
+  ancestor tiles are not meshed across their off-screen extent. Native's tile LOD
+  system (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) still drives
+  the *zoom* selection and is not elevation-aware; only visibility is.
 - Transitional artifacts while panning/zooming (observed in emulator testing):
   brief flat/empty far-field areas while the DEM cover has no render tile yet,
   and re-resolve flicker when the LOD migrates an area between zoom levels
@@ -335,6 +340,49 @@ Metal/Vulkan/WebGPU follow the same structure but are not yet run on hardware.
   structurally addressed by the first two convergence items above (terrain
   tile cover computed from the ideal cover; render-target caching keyed on
   the tile stack).
+
+### Phase 4 - Terrain-anchored camera (needs a complete fix)
+
+At high pitch over tall terrain the near (bottom) part of the view goes black:
+the camera sits at or below the terrain surface, so the near rays hit nothing
+and clear to the background. This is a camera-model problem, not a tile/drape
+one — confirmed on device with a clean tile diagnostic (all tiles covered, mesh
+== drawables) while the bottom of the frame was black below a terrain silhouette.
+
+Research into why a quick fix is not enough (2026-07, Innsbruck, Android GL):
+
+- **maplibre-gl-js** decouples `center` (a fixed lng/lat anchor) from `elevation`
+  (the terrain height at that anchor). "Centre clamped to ground"
+  (`getCenterClampedToGround`, default on) sets `transform.elevation =
+  terrain.getElevationForLngLatZoom(center)` each terrain update, so the whole
+  view rides the terrain surface and the camera stays above it. A separate
+  safety, `_elevateCameraIfInsideTerrain`, lifts the camera via a fully
+  recomputed `CameraOptions` (`calculateCameraOptionsFromTo`) only when it dips
+  below terrain.
+
+- **maplibre-native** has no such decoupling. `TransformState` defines the map
+  centre as *where the camera ray meets the z=0 sea-level plane*
+  (`updateStateFromCamera`, which also forces centre altitude back to 0), and
+  the projection treats `z` as `cameraToSeaLevelDistance = cameraToCenterDistance
+  + |z|/cos(pitch)`. Feeding a terrain height into `setCenterAltitude` therefore
+  interacts with the sea-level-anchored model so that the resolved centre shifts,
+  which re-samples a higher elevation, which shifts it again — a runaway pan
+  (observed: the centre jumping ~40 km per frame, "the map pans as soon as you
+  touch it").
+
+So a correct "camera rides the terrain" feature (the gl-js
+`getCenterClampedToGround` behaviour) requires teaching native's camera model
+that the centre sits on terrain rather than sea level — a real change to
+`TransformState`'s centre/plane math, not a wrapper around `setCenterAltitude`.
+That is the Phase 4 work.
+
+The **collision-only** subset (gl-js `_elevateCameraIfInsideTerrain`: recompute a
+consistent `CameraOptions` and `jumpTo` only when the camera is below terrain,
+which never touches the core plane math) is more contained and is implemented
+separately; it reduces but does not fully remove the artefact, since it does not
+anchor the centre to the surface. The render→map elevation channel it uses
+(`RendererObserver::onTerrainElevationChanged`, forwarded per platform) is the
+reusable piece for Phase 4.
 
 ### Cleanup before merging
 

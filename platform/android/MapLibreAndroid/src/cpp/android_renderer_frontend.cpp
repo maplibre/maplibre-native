@@ -46,6 +46,10 @@ public:
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
 
+    void onTerrainCameraCollision(const CameraOptions& correctedCamera) override {
+        delegate.invoke(&RendererObserver::onTerrainCameraCollision, correctedCamera);
+    }
+
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
     }

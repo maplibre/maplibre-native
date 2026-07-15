@@ -257,6 +257,20 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
+    // The camera's own ground position and height above sea level, as maplibre-gl-js
+    // getCameraLngLat / getCameraAltitude expose them. Used to detect when the camera
+    // has dropped below the terrain surface (terrain-camera collision).
+    LatLng getCameraLatLng() const;
+    double getCameraAltitude() const;
+
+    // If the camera has dropped below the terrain (its altitude is under
+    // `terrainElevationAtCamera`, in metres), returns camera options that lift it back
+    // to the surface while keeping the same centre and bearing - only zoom and pitch
+    // change, so this never touches the sea-level-centre plane math that makes a direct
+    // centre-altitude change run away. Empty when the camera is already above terrain.
+    // Follows maplibre-gl-js _elevateCameraIfInsideTerrain / calculateCameraOptionsFromTo.
+    std::optional<CameraOptions> cameraCollisionCorrection(double terrainElevationAtCamera) const;
+
 private:
     bool rotatedNorth() const;
 

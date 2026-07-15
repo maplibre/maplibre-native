@@ -15,6 +15,8 @@
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/geometry/dem_data.hpp>
 #include <mbgl/util/tile_cover.hpp>
+#include <mbgl/util/tile_coordinate.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/tile/raster_dem_tile.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
@@ -259,12 +261,16 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         for (const auto& id : renderTileIDs) {
             tileList += util::toString(id) + " ";
         }
-        Log::Info(Event::Render,
-                  "Terrain: renderTiles=" + util::toString(renderTileIDs.size()) + " (" + zooms + ") meshTiles=" +
-                      util::toString(meshTiles.size()) + " demTextures=" + util::toString(demTextures.size()) +
-                      " drawables=" + util::toString(tilesWithDrawables.size()) +
-                      " pitch=" + util::toString(static_cast<int>(state.getPitch() * 180.0 / 3.14159)) +
-                      " z=" + util::toString(state.getZoom()) + " [" + tileList + "]");
+        Log::Info(
+            Event::Render,
+            "Terrain: renderTiles=" + util::toString(renderTileIDs.size()) + " (" + zooms + ") meshTiles=" +
+                util::toString(meshTiles.size()) + " demTextures=" + util::toString(demTextures.size()) +
+                " drawables=" + util::toString(tilesWithDrawables.size()) +
+                " pitch=" + util::toString(static_cast<int>(state.getPitch() * 180.0 / 3.14159)) +
+                " z=" + util::toString(state.getZoom()) +
+                " camAlt=" + util::toString(static_cast<int>(state.getCameraAltitude())) + " terrainAtCam=" +
+                util::toString(static_cast<int>(getElevationForLatLng(state.getCameraLatLng(), state.getZoom()))) +
+                " [" + tileList + "]");
     }
 
     // Create terrain drawables for each mesh tile
@@ -428,6 +434,24 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID, float x, float 
 
 float RenderTerrain::getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const {
     return getElevation(tileID, x, y) * getExaggeration();
+}
+
+float RenderTerrain::getElevationForLatLng(const LatLng& latLng, double zoom) const {
+    // Locate the tile containing the point and the point's position within it, then
+    // sample; getElevation falls back to the nearest loaded ancestor DEM. Mirrors
+    // maplibre-gl-js Terrain._getOverscaledTileIDFromLngLatZoom + getElevation.
+    const auto tileZoom = static_cast<uint8_t>(std::max(0.0, std::floor(zoom)));
+    const auto tc = TileCoordinate::fromLatLng(tileZoom, latLng);
+    const auto tileX = static_cast<int32_t>(std::floor(tc.p.x));
+    const auto tileY = static_cast<int32_t>(std::floor(tc.p.y));
+    const uint32_t tiles = 1u << tileZoom;
+    if (tileX < 0 || tileY < 0 || static_cast<uint32_t>(tileX) >= tiles || static_cast<uint32_t>(tileY) >= tiles) {
+        return 0.0f;
+    }
+    const UnwrappedTileID tileID(tileZoom, tileX, tileY);
+    const auto x = static_cast<float>((tc.p.x - tileX) * util::EXTENT);
+    const auto y = static_cast<float>((tc.p.y - tileY) * util::EXTENT);
+    return getElevationWithExaggeration(tileID, x, y);
 }
 
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {
