@@ -285,6 +285,14 @@ Without it, symbols show through mountains.
 
 ### Phase 3 - Seams and quality
 
+- **Drape target size is hardcoded to 512x512** (`Renderer::Impl::texturePool`,
+  the long-standing `// TODO: tile size`). It ignores `pixelRatio` and the
+  source tile size, so on a high-DPI device (e.g. pixel ratio 3.5) a terrain
+  tile covering a large screen area has its draped map content rendered at
+  512x512 and upscaled onto the mesh, costing sharpness. gl-js exposes a
+  terrain quality factor for this. Sizing this up trades GPU memory directly
+  (one texture per terrain tile), so it wants measuring alongside the render
+  cache below rather than a blind bump.
 - Backfilled DEM tile borders and pixel-center sampling in the terrain mesh
   shader itself (the elevated layers already sample this way)
 - Mesh skirts (gl-js `a_pos3d.z` flag + `u_ele_delta`) to hide cracks between
@@ -313,7 +321,7 @@ Without it, symbols show through mountains.
 - Decide whether heatmap should be draped (gl-js does not drape it)
 - Remove the TEMP terrain diagnostics (throttled logs in render_target.cpp and
   render_terrain.cpp)
-- Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
+- Rcould we just untime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
 
