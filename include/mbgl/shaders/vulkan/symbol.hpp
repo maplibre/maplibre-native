@@ -20,7 +20,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
@@ -80,6 +80,7 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
 } drawableVector;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D depth_sampler;
 
 
 layout(location = 0) out mediump vec2 frag_tex;
@@ -159,6 +160,8 @@ void main() {
 #else
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t) * fade_opacity;
 #endif
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    frag_opacity *= calculate_visibility(gl_Position, depth_sampler, drawable.dem_enabled);
 }
 )";
 
@@ -226,7 +229,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
@@ -302,6 +305,7 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
 } drawableVector;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D depth_sampler;
 
 
 layout(location = 0) out mediump vec2 frag_tex;
@@ -402,6 +406,8 @@ void main() {
 
     frag_tex = a_tex / drawable.texsize;
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    frag_fade_opacity *= calculate_visibility(gl_Position, depth_sampler, drawable.dem_enabled);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 
@@ -549,7 +555,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan
 
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 3> textures;
+    static const std::array<TextureInfo, 4> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
@@ -627,6 +633,7 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
 } drawableVector;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
 
 
 layout(location = 0) out mediump vec2 frag_tex;
@@ -732,6 +739,8 @@ void main() {
 
 	frag_tex = a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize);
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    frag_fade_opacity *= calculate_visibility(gl_Position, depth_sampler, drawable.dem_enabled);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 
