@@ -138,13 +138,31 @@ The terrain system consists of several key components:
    - Applies the styled exaggeration multiplier
 
 4. **Render-to-Texture Draping** (`TexturePool`, `RenderTarget`)
-   - Draped layer groups (created with `renderToTerrain = true`) have their
-     drawables moved into per-terrain-tile render targets each frame
-   - The render targets are cleared to the map background color (the terrain
-     mesh renders unblended) and have a depth attachment for correct
-     inter-layer depth within the drape
+   - Each terrain tile has a persistent render target; the orchestrator's draped
+     layer groups render into every target their tiles overlap (they are not
+     moved out of the orchestrator)
+   - Targets are cleared to the map background color and carry depth **and
+     stencil** attachments; every overlapping source tile is drawn and the layer
+     groups' tile clipping masks resolve parent/child overlap
+     (`PaintParameters::clipMatrixForTile` builds the masks with the drape
+     placement)
+   - A content-hash render cache (`RenderTarget::DrapeCoverage`) skips
+     re-rendering a target whose draped content, zoom, and evaluated properties
+     are unchanged, so panning does not re-render every drape every frame
 
-5. **Elevated (non-draped) Layers** (`RenderTerrain::getTerrainData`)
+5. **Terrain tile cover** (`RenderTerrain::expandToDeepestCover`,
+   `util::frustumCull`, `DEMElevationProvider`)
+   - Mesh tiles come from the DEM source's render tiles expanded to the ideal
+     cover, then frustum-culled with each tile's DEM min/max elevation so
+     relief facing the camera is kept and off-screen low-zoom tiles are dropped
+   - The same elevation feeds `Frustum::intersectsElevated` in `util::tileCover`,
+     so every source requests the tiles the terrain mesh needs
+
+6. **Symbol occlusion** (`TerrainDepthShader`, `RenderTerrain::renderDepth`)
+   - A depth pass of the terrain mesh is packed into an RGBA texture; symbol
+     shaders fade labels that fall behind the terrain
+
+7. **Elevated (non-draped) Layers** (`RenderTerrain::getTerrainData`)
    - Symbol, circle, and fill-extrusion tweakers bind the covering DEM tile's
      texture per drawable, with ancestor-tile fallback and a 1x1 placeholder
      when no tile is loaded
@@ -152,37 +170,38 @@ The terrain system consists of several key components:
      which does manual bilinear interpolation on DEM pixel centers using the
      1px backfilled tile border, matching maplibre-gl-js
 
-6. **CPU Elevation Queries** (`RenderTerrain::getElevation`)
+8. **CPU Elevation Queries** (`RenderTerrain::getElevation`)
    - DEM tile lookup with ancestor fallback and bilinear interpolation,
      mirroring maplibre-gl-js `Terrain.getDEMElevation`
 
-### Files Modified/Created
+### Key files
 
-**Style System:**
-- `include/mbgl/style/terrain.hpp` - Public terrain API
-- `src/mbgl/style/terrain.cpp` - Terrain implementation
-- `src/mbgl/style/terrain_impl.hpp` - Immutable terrain data
-- `include/mbgl/style/terrain_observer.hpp` - Change observer
-- `include/mbgl/style/conversion/terrain.hpp` - JSON conversion
-- `src/mbgl/style/conversion/terrain.cpp` - JSON parsing
+Not exhaustive - terrain touches many layers/shaders across four backends, and
+the git history is the source of truth. The main pieces:
+
+**Style:** `style/terrain.{hpp,cpp}`, `style/terrain_impl.hpp`,
+`style/terrain_observer.hpp`, `style/conversion/terrain.{hpp,cpp}`.
 
 **Rendering:**
-- `src/mbgl/renderer/render_terrain.hpp` - Terrain rendering manager
-- `src/mbgl/renderer/render_terrain.cpp` - Mesh generation and elevation lookups
-- `src/mbgl/renderer/update_parameters.hpp` - Added terrain parameter
-- `src/mbgl/renderer/render_orchestrator.hpp/cpp` - Terrain integration
+- `renderer/render_terrain.{hpp,cpp}` - mesh generation, DEM caching, mesh tile
+  cover, depth pass, elevation lookups
+- `renderer/render_target.{hpp,cpp}`, `renderer/texture_pool.{hpp,cpp}` - drape
+  render targets (depth+stencil), the content-hash render cache
+- `renderer/dem_elevation_provider.{hpp,cpp}`, `util/tile_cover.*`,
+  `util/bounding_volumes.*` - elevation-aware tile cover and frustum cull
+- `renderer/paint_parameters.{hpp,cpp}` - drape clip-mask matrix
+  (`clipMatrixForTile`)
+- `renderer/layers/terrain_layer_tweaker.{hpp,cpp}` and the circle/symbol/
+  fill-extrusion tweakers - per-drawable DEM binding and elevation
+- `renderer/render_orchestrator.*`, `renderer/update_parameters.hpp` - integration
 
-**Shaders:**
-- `shaders/terrain.vertex.glsl` / `shaders/terrain.fragment.glsl` - GL terrain shader sources
-- `include/mbgl/shaders/mtl/terrain.hpp`, `include/mbgl/shaders/vulkan/terrain.hpp`,
-  `include/mbgl/shaders/webgpu/terrain.hpp` - backend terrain shaders
-- `include/mbgl/shaders/terrain_layer_ubo.hpp` - Terrain UBO structures
-- `shaders/_prelude.vertex.glsl`, `include/mbgl/shaders/{mtl,vulkan,webgpu}/common.hpp` -
-  shared `get_elevation()` prelude helper
-- `shaders/manifest.json` - Added TerrainShader entry
+**Shaders:** `shaders/terrain*.glsl` and `shaders/terrain_depth*.glsl` (GL
+sources), `shaders/{mtl,vulkan,webgpu}/terrain{,_depth}.*`, the shared
+`get_elevation()` / `apply_drape_transform()` helpers in each backend's prelude,
+`shaders/terrain_layer_ubo.hpp`, `shaders/manifest.json`.
 
-**Build System:**
-- `bazel/core.bzl` - Added terrain source files
+**Build:** `bazel/core.bzl` and the top-level `CMakeLists.txt` both list terrain
+sources explicitly - new `src/`/`include/` files must be added to both.
 
 ### Mesh Generation
 
@@ -240,7 +259,7 @@ Implemented:
 The reference for each phase is the maplibre-gl-js implementation
 (`src/render/terrain.ts`, `src/render/render_to_texture.ts`, `src/shaders/_prelude.vertex.glsl`).
 
-### Drape routing rework (done on GL; other backends pending)
+### Drape routing rework (implemented on all backends; OpenGL device-tested)
 
 Implemented following gl-js `render_to_texture.ts` semantics. Draped layer
 groups stay in the orchestrator; each drape `RenderTarget` renders every
@@ -302,11 +321,6 @@ time on any of these**:
   (`expandToDeepestCover`); gl-js computes the ideal cover directly in a
   dedicated terrain source cache. A direct terrain tile cover (reusing
   native's `tileCover`/LOD machinery) would remove the expansion step.
-- **Drape re-render policy**: native skips re-rendering a target only when
-  coverage got strictly worse; gl-js re-renders a terrain tile's texture only
-  when its layer/tile stack *changes* (content-hash caching). Stack-based
-  caching subsumes the current heuristic and is also the single biggest
-  frame-rate lever: today every drape target re-renders every frame.
 - **Drawable tile id transport**: the tile id rides in the unused third
   column of the drape matrix to avoid a 12-struct UBO layout sweep across
   four backends. Explicit `drape_tile` UBO fields would be the boring,
@@ -317,10 +331,12 @@ time on any of these**:
 
 Downstream users include real-time applications (e.g. aviation/flight
 planning on Android) where sustained frame rate matters more than fast
-initial load. The main known lever is the drape re-render policy above
-(render-target caching); after that, per-frame CPU work in
-`RenderTarget::renderDrapedLayerGroups` (drawable visits scale with targets ×
-drawables) and DEM texture upload scheduling. Real-device profiling welcome.
+initial load. The content-hash render cache (above) already skips re-rendering
+unchanged drape targets. Remaining levers: the per-frame CPU work in
+`RenderTarget::computeDrapeCoverage` / `renderDrapedLayerGroups` (drawable
+visits scale with targets × drawables, run even on a cache hit), the hardcoded
+512x512 drape target size, and DEM texture upload scheduling. Real-device
+profiling welcome.
 
 ### Phase 2 - Symbol occlusion (done, all backends)
 
@@ -368,32 +384,28 @@ Metal/Vulkan/WebGPU follow the same structure but are not yet run on hardware.
 - Camera-terrain collision: a collision-only fix was prototyped and reverted
   (felt worse - it corrected only after the gesture); the real fix is the
   terrain-anchored camera in Phase 4
-- **Zoom-0 terrain exaggeration bug**: at zoom 0 the terrain relief is rendered
-  far more exaggerated than at zoom 1+; zooming in past zoom 1 it looks normal.
-  Long-standing (predates this work) and reproduces on device. Likely a
-  zoom-dependent scale in the elevation-to-world-height conversion (the mesh
-  vertex height uses `exaggeration` in metres, which the projection converts to
-  pixels via a metres-per-pixel that is zoom-dependent); at zoom 0 the world is
-  one tile so the scale is extreme. Compare against gl-js, which does not show
-  this. Not yet investigated.
+- **Zoom-0 intensity bug (terrain *and* hillshade)**: at zoom 0 the relief is
+  rendered far more intense than at zoom 1+ - terrain elevation looks
+  over-exaggerated and the existing hillshade layer is over-shaded; zooming in
+  past zoom 1 both look normal. Long-standing: the hillshade version predates
+  this terrain work, so it is likely one shared cause - a zoom-dependent scale in
+  the elevation/derivative math (e.g. a metres-per-pixel or DEM-derivative term
+  that blows up when the whole world is a single tile at zoom 0), not something
+  specific to terrain. Reproduces on device; gl-js does not show it. Worth fixing
+  for both layers together. Not yet investigated.
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
 - Elevation for CPU-projected along-line labels in viewport alignment
   (gl-js applies it in the CPU symbol projection)
-- Terrain-aware tile cover **(done)**: the covering-tile frustum test now gives
-  each tile the height of its DEM (`DEMData` min/max, `util::TileElevationProvider`
-  / `DEMElevationProvider`, `Frustum::intersectsElevated`), so relief leaning
-  towards the camera is requested instead of judged off-screen. The mesh is also
-  frustum-culled after `expandToDeepestCover` so a sparse DEM's large low-zoom
-  ancestor tiles are not meshed across their off-screen extent. Native's tile LOD
+- Elevation-aware tile cover is **done** (see Current Status / the tile-cover
+  component above), but only *visibility* is elevation-aware. Native's tile LOD
   system (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) still drives
-  the *zoom* selection and is not elevation-aware; only visibility is.
+  the *zoom* selection and is not elevation-aware.
 - Transitional artifacts while panning/zooming (observed in emulator testing):
   brief flat/empty far-field areas while the DEM cover has no render tile yet,
-  and re-resolve flicker when the LOD migrates an area between zoom levels
-  (targets and meshes are destroyed with their baked content). Both are
-  structurally addressed by the first two convergence items above (terrain
-  tile cover computed from the ideal cover; render-target caching keyed on
-  the tile stack).
+  and re-resolve flicker when the LOD migrates an area between zoom levels. The
+  content-hash render cache and elevation-aware cover reduce these; the remaining
+  case is the terrain mesh cover deriving from the DEM source's render set rather
+  than a dedicated ideal cover (see the tile-cover convergence item above).
 
 ### Phase 4 - Terrain-anchored camera (needs a complete fix)
 
@@ -449,11 +461,10 @@ from entering the terrain in the first place rather than correcting afterwards.
   warning and `DrapeCoverage::emptyGroups` in render_target.cpp, and the
   per-frame terrain-summary / `skippedNoDEM` logs in render_terrain.cpp. The
   remaining `Log::Info`/`Warning` in render_terrain.cpp are one-time setup and
-  error logs, not per-frame.
-- Still to remove: any per-frame debug logging in terrain_layer_tweaker.cpp and
-  mtl/drawable.cpp, and the `// TEMP: Disable depth testing` in the terrain
-  drawable setup (render_terrain.cpp) - that one is functional, confirm the
-  depth mode is correct before removing.
+  error logs, not per-frame; terrain_layer_tweaker.cpp has no per-frame logging.
+- Still to review: the `// TEMP: Disable depth testing` in the terrain drawable
+  setup (render_terrain.cpp) - it is functional, so confirm the depth mode is
+  correct before changing it. Check mtl/drawable.cpp for any leftover debug logs.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
@@ -466,10 +477,11 @@ from entering the terrain in the first place rather than correcting afterwards.
   captured (the expected images are gl-js renders). The gl-js `terrain/symbol`
   test is worth porting now that symbols are elevated (needs its DEM fixtures
   loaded into `metrics/cache-style.db`).
-- **Android**: the test app has a "3D Terrain" activity (Style category)
-  showing terrain + hillshade + color-relief from the Mapterhorn raster-dem
-  source, camera pitched at the Matterhorn. Works with both the `opengl` and
-  `vulkan` flavors.
+- **Android**: the test app has four terrain activities in the Style category
+  (`TerrainActivity`, `TerrainVectorMapActivity`, `TerrainOsmRasterActivity`,
+  `TerrainDebugTilesActivity` - see "Continuing this work" for what each covers).
+  Developed and tested on the `opengl` flavour; the other flavours build but are
+  far less exercised on device.
 - Or load any style with a `terrain` root property, e.g. the example above.
 
 ## API Usage
