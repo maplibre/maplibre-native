@@ -493,6 +493,7 @@ const std::vector<AttributeInfo> SymbolIconShaderInfo::attributes = {
 const std::vector<TextureInfo> SymbolIconShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
     TextureInfo{"u_dem", idSymbolDEMTexture},
+    TextureInfo{"u_depth", idSymbolDepthTexture},
 };
 
 // Symbol SDF
@@ -519,6 +520,7 @@ const std::vector<AttributeInfo> SymbolSDFShaderInfo::attributes = {
 const std::vector<TextureInfo> SymbolSDFShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
     TextureInfo{"u_dem", idSymbolDEMTexture},
+    TextureInfo{"u_depth", idSymbolDepthTexture},
 };
 
 // Symbol Text & Icon
@@ -545,6 +547,7 @@ const std::vector<TextureInfo> SymbolTextAndIconShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
     TextureInfo{"u_texture_icon", idSymbolImageIconTexture},
     TextureInfo{"u_dem", idSymbolDEMTexture},
+    TextureInfo{"u_depth", idSymbolDepthTexture},
 };
 
 // Terrain
@@ -561,6 +564,20 @@ const std::vector<AttributeInfo> TerrainShaderInfo::attributes = {
 const std::vector<TextureInfo> TerrainShaderInfo::textures = {
     TextureInfo{"u_dem", idTerrainDEMTexture},
     TextureInfo{"u_map", idTerrainMapTexture},
+};
+
+// Terrain Depth
+using TerrainDepthShaderInfo = ShaderInfo<BuiltIn::TerrainDepthShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> TerrainDepthShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"TerrainDrawableUBO", idTerrainDrawableUBO},
+    UniformBlockInfo{"TerrainEvaluatedPropsUBO", idTerrainEvaluatedPropsUBO},
+};
+const std::vector<AttributeInfo> TerrainDepthShaderInfo::attributes = {
+    AttributeInfo{"a_pos", idTerrainPosVertexAttribute},
+};
+const std::vector<TextureInfo> TerrainDepthShaderInfo::textures = {
+    TextureInfo{"u_dem", idTerrainDEMTexture},
 };
 
 } // namespace shaders

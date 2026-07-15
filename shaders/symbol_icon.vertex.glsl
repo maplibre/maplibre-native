@@ -53,6 +53,7 @@ layout (std140) uniform SymbolDrawableUBO {
 };
 
 uniform sampler2D u_dem;
+uniform sampler2D u_depth;
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp vec4 u_text_fill_color;
@@ -141,4 +142,5 @@ void main() {
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);
     float fade_change = fade_opacity[1] > 0.5 ? u_symbol_fade_change : -u_symbol_fade_change;
     v_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
+    v_fade_opacity *= calculate_visibility(gl_Position, u_depth, u_dem_enabled);
 }

@@ -176,6 +176,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             drawable.setTexture(
                 terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
                 idSymbolDEMTexture);
+            // Packed terrain depth for occlusion (calculate_visibility)
+            drawable.setTexture(parameters.terrain->getDepthTexture(context), idSymbolDepthTexture);
         }
 
 #if MLN_UBO_CONSOLIDATION

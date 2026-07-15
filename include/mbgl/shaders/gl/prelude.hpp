@@ -137,6 +137,26 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
     clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
     return clip;
 }
+
+// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl),
+// converted to NDC z, as in the maplibre-gl-js prelude
+float unpack_depth(vec4 rgba_depth) {
+    const highp vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// Unlike gl-js (global terrain uniforms), the depth sampler and enable flag are
+// passed as arguments.
+float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
+    if (depth_enabled == 0.0) {
+        return 1.0;
+    }
+    vec2 uv = pos.xy / pos.w * 0.5 + 0.5;
+    float depth = unpack_depth(texture(depth_texture, uv));
+    return pos.z / pos.w > depth ? 0.0 : 1.0;
+}
 )";
     static constexpr const char* fragment = R"(#ifdef GL_ES
 precision mediump float;

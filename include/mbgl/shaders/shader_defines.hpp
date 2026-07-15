@@ -384,6 +384,7 @@ enum {
     idSymbolImageTexture,
     idSymbolImageIconTexture,
     idSymbolDEMTexture,
+    idSymbolDepthTexture,
     symbolTextureCount
 };
 

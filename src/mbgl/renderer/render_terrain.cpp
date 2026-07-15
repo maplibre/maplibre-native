@@ -7,6 +7,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/terrain_layer_tweaker.hpp>
@@ -15,6 +16,8 @@
 #include <mbgl/tile/raster_dem_tile.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/renderable.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
@@ -111,6 +114,12 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
     }
 
+    // Depth-pass twin of the terrain layer group; not activated in the
+    // orchestrator, rendered only by renderDepth into the depth target
+    if (!depthLayerGroup) {
+        depthLayerGroup = context.createLayerGroup(TERRAIN_LAYER_INDEX, /*initialCapacity=*/1, "terrain-depth", false);
+    }
+
     // Create tweaker if we don't have one
     if (!tweaker) {
         tweaker = std::make_unique<TerrainLayerTweaker>(this);
@@ -174,6 +183,12 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     }
     lg->removeDrawablesIf(
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID()); });
+    auto* depthLg = static_cast<LayerGroup*>(depthLayerGroup.get());
+    if (depthLg) {
+        depthLg->removeDrawablesIf([&](gfx::Drawable& drawable) {
+            return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID());
+        });
+    }
     for (auto it = tilesWithDrawables.begin(); it != tilesWithDrawables.end();) {
         if (!currentTiles.contains(it->first)) {
             drawableDemCoords.erase(it->first);
@@ -297,6 +312,10 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             }
             lg->removeDrawablesIf(
                 [&](gfx::Drawable& drawable) { return drawable.getTileID() && *drawable.getTileID() == tileID; });
+            if (depthLg) {
+                depthLg->removeDrawablesIf(
+                    [&](gfx::Drawable& drawable) { return drawable.getTileID() && *drawable.getTileID() == tileID; });
+            }
             tilesWithDrawables.erase(existing);
         }
         drawableDemCoords[tileID] = demCoords;
@@ -310,6 +329,12 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         if (drawable) {
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = demTier;
+            if (depthLg) {
+                if (auto depthDrawable = createDrawableForTile(
+                        context, shaders, tileID, demTexture, nullptr, /*depthPass=*/true)) {
+                    depthLg->addDrawable(std::move(depthDrawable));
+                }
+            }
         }
     }
 
@@ -427,6 +452,42 @@ const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getPlaceholderDEMTexture(g
                                                         .wrapV = gfx::TextureWrapType::Clamp});
     }
     return placeholderDEMTexture;
+}
+
+void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
+                                const RenderTree& renderTree,
+                                PaintParameters& parameters) {
+    if (!depthLayerGroup || depthLayerGroup->empty()) {
+        return;
+    }
+    const Size size = parameters.backend.getDefaultRenderable().getSize();
+    if (!depthRenderTarget || depthRenderTarget->getTexture()->getSize() != size) {
+        depthRenderTarget = parameters.context.createRenderTarget(size, gfx::TextureChannelDataType::UnsignedByte);
+        if (!depthRenderTarget) {
+            return;
+        }
+        // Far plane everywhere the terrain does not cover (unpack_depth(1,1,1,1) ~ 1.0)
+        depthRenderTarget->setClearColor(Color::white());
+        depthRenderTarget->addLayerGroup(depthLayerGroup, /*replace=*/true);
+    }
+    depthRenderTarget->render(orchestrator, renderTree, parameters);
+}
+
+const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getDepthTexture(gfx::Context& context) {
+    if (depthRenderTarget) {
+        return depthRenderTarget->getTexture();
+    }
+    if (!placeholderDepthTexture) {
+        // Far-plane packed depth: symbols compare as visible until the pass runs
+        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
+        std::memset(image->data.get(), 0xFF, image->bytes());
+        placeholderDepthTexture = context.createTexture2D();
+        placeholderDepthTexture->setImage(image);
+        placeholderDepthTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                                          .wrapU = gfx::TextureWrapType::Clamp,
+                                                          .wrapV = gfx::TextureWrapType::Clamp});
+    }
+    return placeholderDepthTexture;
 }
 
 float RenderTerrain::getExaggeration() const {
@@ -592,7 +653,8 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
                                                                     gfx::ShaderRegistry& shaders,
                                                                     const OverscaledTileID& tileID,
                                                                     std::shared_ptr<gfx::Texture2D> demTexture,
-                                                                    std::shared_ptr<gfx::Texture2D> mapTexture) {
+                                                                    std::shared_ptr<gfx::Texture2D> mapTexture,
+                                                                    bool depthPass) {
     // Ensure mesh is generated
     const auto& terrainMesh = getMesh(context);
 
@@ -602,14 +664,18 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     }
 
     // Get terrain shader
-    auto terrainShader = context.getGenericShader(shaders, "TerrainShader");
+    auto terrainShader = context.getGenericShader(shaders, depthPass ? "TerrainDepthShader" : "TerrainShader");
     if (!terrainShader) {
-        Log::Error(Event::Render, "Terrain shader not found");
+        // The depth shader is not registered on all backends yet; symbols
+        // then sample the far-plane placeholder and stay visible
+        if (!depthPass) {
+            Log::Error(Event::Render, "Terrain shader not found");
+        }
         return nullptr;
     }
 
     // Create drawable builder
-    auto builder = context.createDrawableBuilder("terrain-tile");
+    auto builder = context.createDrawableBuilder(depthPass ? "terrain-depth-tile" : "terrain-tile");
     if (!builder) {
         Log::Error(Event::Render, "Failed to create drawable builder for terrain tile");
         return nullptr;
@@ -620,10 +686,19 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     // TEMP: Disable depth testing to render on top of everything
     builder->setShader(terrainShader);
     builder->setRenderPass(RenderPass::Translucent); // Translucent pass renders in forward order (high index = front)
-    builder->setDepthType(gfx::DepthMaskType::ReadOnly); // Don't write depth
-    builder->setColorMode(gfx::ColorMode::unblended());
-    builder->setEnableDepth(false); // Disable depth testing
-    builder->setIs3D(false);        // Treat as 2D for now
+    if (depthPass) {
+        // The depth pass renders packed depth with real depth testing so the
+        // nearest surface wins, into the terrain depth target (renderDepth)
+        builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+        builder->setColorMode(gfx::ColorMode::unblended());
+        builder->setEnableDepth(true);
+        builder->setIs3D(true);
+    } else {
+        builder->setDepthType(gfx::DepthMaskType::ReadOnly); // Don't write depth
+        builder->setColorMode(gfx::ColorMode::unblended());
+        builder->setEnableDepth(false); // Disable depth testing
+        builder->setIs3D(false);        // Treat as 2D for now
+    }
 
     // Set vertex data - copy vertices to raw buffer
     std::vector<uint8_t> vertexData(terrainMesh.vertices.size() * sizeof(int16_t));
@@ -646,7 +721,7 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
         builder->setTexture(demTexture, 0); // Texture index 0 for DEM
     }
 
-    if (!mapTexture) {
+    if (!mapTexture && !depthPass) {
         mapTexture = createTestMapTexture(context);
     }
     if (mapTexture) {

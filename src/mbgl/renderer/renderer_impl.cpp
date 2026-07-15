@@ -318,6 +318,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                 if (const auto& layerGroup = terrain->getLayerGroup()) {
                     terrainTweaker->execute(*layerGroup, parameters);
                 }
+                if (const auto& depthLayerGroup = terrain->getDepthLayerGroup()) {
+                    terrainTweaker->execute(*depthLayerGroup, parameters);
+                }
             }
         }
 
@@ -502,6 +505,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         drawable3DPass();
     }
     drawableTargetsPass();
+    // Terrain depth pass for symbol occlusion (sampled by calculate_visibility)
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        terrain->renderDepth(orchestrator, renderTree, parameters);
+    }
     commonClearPass();
     context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();

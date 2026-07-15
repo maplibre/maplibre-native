@@ -185,6 +185,21 @@ public:
     const LayerGroupBasePtr& getLayerGroup() const { return layerGroup; }
 
     /**
+     * @brief Render the terrain depth pass: the terrain meshes drawn with the
+     * depth-packing shader into a viewport-sized render target, sampled by the
+     * symbol shaders for occlusion (maplibre-gl-js calculate_visibility)
+     */
+    void renderDepth(RenderOrchestrator&, const RenderTree&, PaintParameters&);
+
+    /// The packed-RGBA terrain depth texture for the current frame, or a 1x1
+    /// far-plane placeholder while the depth pass has not rendered yet
+    const std::shared_ptr<gfx::Texture2D>& getDepthTexture(gfx::Context&);
+
+    /// Layer group holding the terrain depth-pass drawables (not part of the
+    /// orchestrator; rendered only by renderDepth)
+    const LayerGroupBasePtr& getDepthLayerGroup() const { return depthLayerGroup; }
+
+    /**
      * @brief Get the terrain layer tweaker
      */
     TerrainLayerTweaker* getTweaker() const { return tweaker.get(); }
@@ -216,6 +231,12 @@ private:
 
     // Layer group for terrain drawables
     LayerGroupBasePtr layerGroup;
+
+    // Layer group and viewport-sized target for the terrain depth pass
+    LayerGroupBasePtr depthLayerGroup;
+    std::shared_ptr<RenderTarget> depthRenderTarget;
+    // See getDepthTexture
+    std::shared_ptr<gfx::Texture2D> placeholderDepthTexture;
 
     // Terrain layer tweaker for UBO updates
     std::unique_ptr<TerrainLayerTweaker> tweaker;
@@ -288,7 +309,8 @@ private:
                                                          gfx::ShaderRegistry& shaders,
                                                          const OverscaledTileID& tileID,
                                                          std::shared_ptr<gfx::Texture2D> demTexture,
-                                                         std::shared_ptr<gfx::Texture2D> mapTexture);
+                                                         std::shared_ptr<gfx::Texture2D> mapTexture,
+                                                         bool depthPass = false);
 };
 
 } // namespace mbgl
