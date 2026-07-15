@@ -104,17 +104,36 @@ public:
 protected:
     void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
 
-    /// How well the currently available draped tiles cover this drape target
+    /// What the draped layers would currently render into this target: how well
+    /// they cover it, and a signature of the exact content
     struct DrapeCoverage {
         int32_t totalGroups = -1;      // draped layer groups in the style
         int32_t groupsWithContent = 0; // groups with at least one usable tile
         int64_t zoomDeficit = 0;       // sum of zoom levels lost to ancestor fallbacks
+
+        /// Hash of the drawables overlapping this target, by unique drawable id, so
+        /// a tile loading, unloading, or being rebuilt from new bucket data all
+        /// change it (a tile id alone would not catch a rebuild).
+        std::size_t contentHash = 0;
+        /// Zoom is not in contentHash's drawable ids but draped UBOs carry
+        /// zoom-derived values (line ratio, interpolation factors)
+        double zoom = -1;
+        /// Evaluated-property generation; see LayerTweaker::getPropertiesEpoch
+        uint64_t propertiesEpoch = 0;
+
+        /// Whether this would draw exactly what `other` already did
+        bool sameContentAs(const DrapeCoverage& other) const {
+            return totalGroups == other.totalGroups && contentHash == other.contentHash && zoom == other.zoom &&
+                   propertiesEpoch == other.propertiesEpoch;
+        }
+        /// Whether this would draw less than `other`: fewer layers with content, or
+        /// the same layers via coarser ancestor fallbacks
         bool worseThan(const DrapeCoverage& other) const {
             return groupsWithContent < other.groupsWithContent ||
                    (groupsWithContent == other.groupsWithContent && zoomDeficit > other.zoomDeficit);
         }
     };
-    DrapeCoverage computeDrapeCoverage(RenderOrchestrator&) const;
+    DrapeCoverage computeDrapeCoverage(RenderOrchestrator&, const PaintParameters&) const;
 
     gfx::Context& context;
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;

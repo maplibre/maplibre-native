@@ -11,6 +11,7 @@
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
+#include <mbgl/util/hash.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 
@@ -95,9 +96,12 @@ void RenderTarget::updateDrapeGlobalUBO(const shaders::GlobalPaintParamsUBO& par
     }
 }
 
-RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrator& orchestrator) const {
+RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrator& orchestrator,
+                                                               const PaintParameters& parameters) const {
     DrapeCoverage coverage;
     coverage.totalGroups = 0;
+    coverage.zoom = parameters.state.getZoom();
+    coverage.propertiesEpoch = LayerTweaker::getPropertiesEpoch();
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup || !layerGroup.shouldRenderToTerrain()) {
             return;
@@ -110,6 +114,13 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
                 return;
             }
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
+            const bool overlaps = unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID) ||
+                                  drapeTileID->isChildOf(unwrapped);
+            if (overlaps) {
+                // Identify the content by drawable id, so a tile loading, unloading
+                // or being rebuilt all change the signature
+                util::hash_combine(coverage.contentHash, drawable.getID().id());
+            }
             if (unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID)) {
                 haveExactOrDescendant = true;
             } else if (drapeTileID->isChildOf(unwrapped)) {
@@ -222,19 +233,30 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
     if (drapeTileID) {
-        // Keep whatever is already baked into the target texture when the
-        // currently available coverage is strictly worse (fewer draped layers
-        // with content, or coarser ancestor fallbacks) than what was last
-        // rendered. This is the core anti-flicker rule: while the camera sits
-        // or pans, a tile's vector/raster content briefly drops out of the
-        // render set (eviction, reload, a transiently changing draped-group
-        // count) and would otherwise re-render the drape empty (dark) before
-        // recovering. Re-render only when coverage is equal or better, so the
-        // texture never regresses to less content than it already shows. The
-        // target's own lifetime bounds staleness: when its terrain tile leaves
-        // the cover, the target and its baked content are destroyed.
-        const DrapeCoverage coverage = computeDrapeCoverage(orchestrator);
-        if (coverage.worseThan(bakedCoverage)) {
+        const DrapeCoverage coverage = computeDrapeCoverage(orchestrator, parameters);
+
+        // Render cache: a drape is rendered with a tile-local orthographic matrix,
+        // so its content does not depend on where the camera is - only on which
+        // drawables cover this tile, the zoom (draped UBOs carry zoom-derived
+        // values), and the evaluated properties. When none of those changed, the
+        // texture is already correct: keep it. This is what makes panning cheap,
+        // since panning changes none of them, and it is the maplibre-gl-js
+        // behaviour (render a terrain tile's texture only when its stack changes).
+        if (coverage.sameContentAs(bakedCoverage)) {
+            return;
+        }
+
+        // Otherwise the content did change. Keep what is already baked when the new
+        // content would be strictly worse (fewer draped layers with content, or
+        // coarser ancestor fallbacks): while browsing, a tile's content briefly
+        // drops out of the render set (eviction, reload) and re-rendering would
+        // flash the drape empty before it recovers. A change in evaluated
+        // properties is exempt and always re-renders, because it is authoritative:
+        // a style edit that removes a draped layer is legitimately "worse" and must
+        // not be held back forever. Otherwise the target's lifetime bounds
+        // staleness: when its terrain tile leaves the cover it is destroyed.
+        const bool propertiesChanged = coverage.propertiesEpoch != bakedCoverage.propertiesEpoch;
+        if (!propertiesChanged && coverage.worseThan(bakedCoverage)) {
             return;
         }
         bakedCoverage = coverage;

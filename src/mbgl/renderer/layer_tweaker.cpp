@@ -70,9 +70,12 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
         tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
 
+uint64_t LayerTweaker::propertiesEpoch = 0;
+
 void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
     evaluatedProperties = std::move(newProps);
     propertiesUpdated = true;
+    ++propertiesEpoch;
 }
 
 void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
