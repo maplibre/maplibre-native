@@ -16,6 +16,7 @@
 #include <mbgl/util/string.hpp>
 
 #include <cmath>
+#include <set>
 
 namespace mbgl {
 
@@ -112,11 +113,16 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
         coverage.totalGroups++;
         bool haveExactOrDescendant = false;
         std::optional<UnwrappedTileID> bestAncestor;
+        // TEMP diagnostic: what this group holds when nothing overlaps
+        std::size_t tilesInGroup = 0;
+        std::set<UnwrappedTileID> groupTiles;
         static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
             if (!drawable.getEnabled() || !drawable.getTileID()) {
                 return;
             }
             const UnwrappedTileID unwrapped = drawable.getTileID()->toUnwrapped();
+            tilesInGroup++;
+            groupTiles.insert(unwrapped);
             if (unwrapped == *drapeTileID || unwrapped.isChildOf(*drapeTileID)) {
                 haveExactOrDescendant = true;
             } else if (drapeTileID->isChildOf(unwrapped)) {
@@ -138,6 +144,17 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
             if (!haveExactOrDescendant) {
                 coverage.zoomDeficit += drapeTileID->canonical.z - bestAncestor->canonical.z;
             }
+        } else {
+            std::string held = util::toString(tilesInGroup) + " drawables covering [";
+            std::size_t shown = 0;
+            for (const auto& id : groupTiles) {
+                if (shown++ == 8) {
+                    held += ", ...";
+                    break;
+                }
+                held += (shown > 1 ? ", " : "") + util::toString(id);
+            }
+            coverage.emptyGroups.emplace_back(layerGroup.getName(), held + "]");
         }
     });
     return coverage;
@@ -242,16 +259,21 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
         }
         bakedCoverage = coverage;
 
-        // TEMP diagnostic: name drape targets that render with most of their
-        // layers missing (throttled; remove before merging)
-        if (coverage.groupsWithContent * 2 < coverage.totalGroups) {
+        // TEMP diagnostic: name drape targets rendering with any draped layer
+        // missing, and say what that layer holds instead (throttled; remove
+        // before merging)
+        if (!coverage.emptyGroups.empty()) {
             static uint32_t throttle = 0;
-            if (++throttle % 60 == 1) {
-                Log::Warning(Event::Render,
-                             "Drape target " + util::toString(*drapeTileID) + " rendering with " +
-                                 util::toString(coverage.groupsWithContent) + "/" +
-                                 util::toString(coverage.totalGroups) +
-                                 " draped layers, deficit=" + util::toString(coverage.zoomDeficit));
+            if (++throttle % 30 == 1) {
+                std::string missing;
+                for (const auto& [name, held] : coverage.emptyGroups) {
+                    missing += (missing.empty() ? "" : "; ") + name + " has " + held;
+                }
+                Log::Warning(
+                    Event::Render,
+                    "Drape target " + util::toString(*drapeTileID) + " rendering with " +
+                        util::toString(coverage.groupsWithContent) + "/" + util::toString(coverage.totalGroups) +
+                        " draped layers, deficit=" + util::toString(coverage.zoomDeficit) + ", missing: " + missing);
             }
         }
     }
