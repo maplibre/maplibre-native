@@ -359,6 +359,50 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     return ids;
 }
 
+std::set<UnwrappedTileID> frustumCull(const TileCoverParameters& state, const std::set<UnwrappedTileID>& tiles) {
+    if (tiles.empty()) {
+        return {};
+    }
+    const auto& transform = state.transformState;
+    const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
+
+    // Express every tile in the units of the deepest one, so its aabb is that tile's
+    // footprint scaled up (never down) - the same tile-units-at-a-zoom space the
+    // frustum is built in.
+    uint8_t refZ = 0;
+    for (const auto& id : tiles) {
+        refZ = std::max(refZ, id.canonical.z);
+    }
+    const double numTiles = std::exp2(static_cast<double>(refZ));
+    const double worldSize = Projection::worldSize(transform.getScale());
+    const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, refZ, flippedY);
+    // Meters to tile-units at refZ; see the same conversion in tileCover.
+    const double metersToTileUnits = numTiles / (std::cos(util::deg2rad(transform.getLatLng().latitude())) *
+                                                 util::M2PI * util::EARTH_RADIUS_M);
+
+    std::set<UnwrappedTileID> result;
+    for (const auto& id : tiles) {
+        const double span = std::exp2(static_cast<double>(refZ - id.canonical.z));
+        const double x0 = (id.canonical.x + id.wrap * std::exp2(static_cast<double>(id.canonical.z))) * span;
+        const double y0 = id.canonical.y * span;
+        AABB aabb({{x0, y0, 0.0}}, {{x0 + span, y0 + span, 0.0}});
+
+        if (state.elevationProvider) {
+            if (const auto range = state.elevationProvider->getTileElevationRange(id.canonical)) {
+                aabb.min[2] = range->min * metersToTileUnits;
+                aabb.max[2] = range->max * metersToTileUnits;
+            }
+        }
+
+        const bool elevated = aabb.min[2] != 0.0 || aabb.max[2] != 0.0;
+        const IntersectionResult intersection = elevated ? frustum.intersectsElevated(aabb) : frustum.intersects(aabb);
+        if (intersection != IntersectionResult::Separate) {
+            result.insert(id);
+        }
+    }
+    return result;
+}
+
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds& bounds_, uint8_t z) {
     if (bounds_.isEmpty() || bounds_.south() > util::LATITUDE_MAX || bounds_.north() < -util::LATITUDE_MAX) {
         return {};

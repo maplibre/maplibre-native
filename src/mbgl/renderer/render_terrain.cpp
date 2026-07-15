@@ -7,12 +7,14 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/renderer/dem_elevation_provider.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/terrain_layer_tweaker.hpp>
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/geometry/dem_data.hpp>
+#include <mbgl/util/tile_cover.hpp>
 #include <mbgl/tile/raster_dem_tile.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
@@ -88,7 +90,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                            gfx::ShaderRegistry& shaders,
                            gfx::Context& context,
                            const TexturePool& texturePool,
-                           const TransformState& /*state*/,
+                           const TransformState& state,
                            const std::shared_ptr<UpdateParameters>& /*updateParameters*/,
                            const RenderTree& /*renderTree*/,
                            UniqueChangeRequestVec& changes) {
@@ -173,7 +175,19 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     for (const auto& renderTile : *renderTiles) {
         renderTileIDs.insert(renderTile.id);
     }
-    const std::set<UnwrappedTileID> meshTiles = expandToDeepestCover(renderTileIDs);
+    std::set<UnwrappedTileID> meshTiles = expandToDeepestCover(renderTileIDs);
+
+    // Drop mesh tiles that fall outside the view. A sparse DEM contributes large
+    // low-zoom ancestor tiles; expandToDeepestCover subdivides each across its whole
+    // area, but most of a low-zoom tile is off-screen, and meshing it there creates
+    // drape targets that no on-screen source covers - they render empty (near-black
+    // hillshade with no raster). Culling to the frustum, elevation included, leaves
+    // only the mesh that is actually visible.
+    {
+        DEMElevationProvider elevationProvider(demSource, getExaggeration());
+        const util::TileCoverParameters cullParams{.transformState = state, .elevationProvider = &elevationProvider};
+        meshTiles = util::frustumCull(cullParams, meshTiles);
+    }
 
     // Drop drawables and cached DEM textures for tiles that left the mesh tile
     // set, keeping everything else intact between frames
@@ -241,10 +255,16 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         for (const auto& [z, n] : zoomHistogram) {
             zooms += "z" + util::toString(static_cast<int>(z)) + ":" + util::toString(n) + " ";
         }
+        std::string tileList;
+        for (const auto& id : renderTileIDs) {
+            tileList += util::toString(id) + " ";
+        }
         Log::Info(Event::Render,
                   "Terrain: renderTiles=" + util::toString(renderTileIDs.size()) + " (" + zooms + ") meshTiles=" +
                       util::toString(meshTiles.size()) + " demTextures=" + util::toString(demTextures.size()) +
-                      " drawables=" + util::toString(tilesWithDrawables.size()));
+                      " drawables=" + util::toString(tilesWithDrawables.size()) +
+                      " pitch=" + util::toString(static_cast<int>(state.getPitch() * 180.0 / 3.14159)) +
+                      " z=" + util::toString(state.getZoom()) + " [" + tileList + "]");
     }
 
     // Create terrain drawables for each mesh tile

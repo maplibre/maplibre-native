@@ -10,6 +10,7 @@
 #include <memory>
 #include <numbers>
 #include <optional>
+#include <set>
 
 namespace mbgl {
 
@@ -65,6 +66,14 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                         uint8_t z,
                                         const Range<uint8_t> zoomRange,
                                         const std::optional<uint8_t>& overscaledZ = std::nullopt);
+
+/// Keep only the tiles whose (elevation-aware) bounds intersect the view frustum.
+/// The terrain mesh is built by subdividing the DEM source's render tiles, which
+/// include large low-zoom ancestors when the DEM is sparse; most of such a tile's
+/// area is off-screen, and meshing it creates drape targets no on-screen source
+/// covers - so they render empty. Culling the mesh set to the frustum drops that
+/// off-screen area. Uses params.elevationProvider the same way tileCover does.
+std::set<UnwrappedTileID> frustumCull(const TileCoverParameters& state, const std::set<UnwrappedTileID>& tiles);
 std::vector<UnwrappedTileID> tileCover(const LatLngBounds&, uint8_t z);
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>&, uint8_t z);
 
