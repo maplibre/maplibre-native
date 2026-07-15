@@ -408,9 +408,24 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     };
 
     const auto drawableTargetsPass = [&] {
-        // draw render targets
-        orchestrator.visitRenderTargets(
-            [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
+        // Render targets are held in insertion order, but the terrain drape targets
+        // consume the others: draping the hillshade layer samples the texture its
+        // prepare pass renders. A drape target added in an earlier frame therefore
+        // sits ahead of a prepare target added later and would sample it before it
+        // was drawn this frame - reading black, which the hillshade decodes as the
+        // maximum slope (the prepare pass encodes flat as 0.5, not 0), shading the
+        // whole tile solid. Draw the producers first, then the drapes that sample
+        // them.
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+            if (!renderTarget.getDrapeTileID()) {
+                renderTarget.render(orchestrator, renderTree, parameters);
+            }
+        });
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+            if (renderTarget.getDrapeTileID()) {
+                renderTarget.render(orchestrator, renderTree, parameters);
+            }
+        });
     };
 
     const auto commonClearPass = [&] {

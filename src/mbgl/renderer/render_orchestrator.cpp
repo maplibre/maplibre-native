@@ -1044,12 +1044,19 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
 }
 
 void RenderOrchestrator::addRenderTargets(const TexturePool& texturePool) {
-    texturePool.visitRenderTargets([&](const RenderTargetPtr& renderTarget) {
-        auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
-        if (it == renderTargets.end()) {
-            renderTargets.emplace_back(renderTarget);
-        }
-    });
+    // The pool owns the terrain drape targets and drops them when their tile leaves
+    // the cover, so rebuild our drape entries from it each frame. Merely adding
+    // would keep every drape target ever created alive here, rendering forever.
+    // Targets owned elsewhere (the hillshade prepare targets, added by change
+    // request) have no drape tile and are left untouched.
+    renderTargets.erase(std::remove_if(renderTargets.begin(),
+                                       renderTargets.end(),
+                                       [](const RenderTargetPtr& renderTarget) {
+                                           return renderTarget && renderTarget->getDrapeTileID().has_value();
+                                       }),
+                        renderTargets.end());
+    texturePool.visitRenderTargets(
+        [&](const RenderTargetPtr& renderTarget) { renderTargets.emplace_back(renderTarget); });
 }
 
 void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {
