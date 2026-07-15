@@ -126,16 +126,12 @@ protected:
     // apply_drape_transform; w = 1 marks an active drape target
     std::array<float, 4> drapeTileValues{{0, 0, 0, 0}};
     gfx::UniformBufferPtr drapeGlobalUniformBuffer;
-    // Coverage baked into the target texture by the last actual render; when the
-    // available coverage temporarily gets worse (tiles mid-load while panning),
-    // the target keeps its previously rendered content instead of re-rendering
-    // blurrier, so already-seen detail does not degrade. Time-bounded: after
-    // maxBakedCoverageAge the current coverage is rendered regardless, so a
-    // target can never lock in stale content (the coverage metric cannot
-    // distinguish "layer has no features here" from "tile missing").
+    // Coverage baked into the target texture by the last actual render. The
+    // target keeps its previously rendered content whenever the currently
+    // available coverage is strictly worse, so a drape never regresses to
+    // fewer layers / coarser fallbacks than it already shows (anti-flicker);
+    // see RenderTarget::render.
     DrapeCoverage bakedCoverage;
-    double bakedCoverageTime = 0;
-    static constexpr double maxBakedCoverageAge = 2.0; // seconds
 };
 
 } // namespace mbgl

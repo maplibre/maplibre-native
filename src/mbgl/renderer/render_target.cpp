@@ -12,7 +12,6 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <cmath>
@@ -223,18 +222,22 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
     if (drapeTileID) {
-        // If the available coverage is temporarily worse than what is already
-        // baked into the target texture (tiles mid-load while the camera moves),
-        // keep the previously rendered content instead of re-rendering blurrier.
-        // A change in the style's draped layer set forces a re-render.
+        // Keep whatever is already baked into the target texture when the
+        // currently available coverage is strictly worse (fewer draped layers
+        // with content, or coarser ancestor fallbacks) than what was last
+        // rendered. This is the core anti-flicker rule: while the camera sits
+        // or pans, a tile's vector/raster content briefly drops out of the
+        // render set (eviction, reload, a transiently changing draped-group
+        // count) and would otherwise re-render the drape empty (dark) before
+        // recovering. Re-render only when coverage is equal or better, so the
+        // texture never regresses to less content than it already shows. The
+        // target's own lifetime bounds staleness: when its terrain tile leaves
+        // the cover, the target and its baked content are destroyed.
         const DrapeCoverage coverage = computeDrapeCoverage(orchestrator);
-        const double now = util::MonotonicTimer::now().count();
-        if (bakedCoverage.totalGroups == coverage.totalGroups && coverage.worseThan(bakedCoverage) &&
-            now - bakedCoverageTime < maxBakedCoverageAge) {
+        if (coverage.worseThan(bakedCoverage)) {
             return;
         }
         bakedCoverage = coverage;
-        bakedCoverageTime = now;
 
         // TEMP diagnostic: name drape targets that render with most of their
         // layers missing (throttled; remove before merging)
