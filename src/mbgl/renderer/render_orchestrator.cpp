@@ -351,6 +351,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
         renderSource->setCacheEnabled(tileCacheEnabled);
+        renderSource->setFastPFOREnabled(updateParameters->fastPFOREnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
     transformState = updateParameters->transformState;
