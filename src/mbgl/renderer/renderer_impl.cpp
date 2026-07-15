@@ -193,9 +193,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     observer->onWillStartRenderingFrame();
 
-    const uint16_t tilesize = 512; // TODO;
-    TexturePool texturePool(tilesize);
-
     const TransformState& state = renderTreeParameters.transformParams.state;
     const Size& size = staticData->backendSize;
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
@@ -253,6 +250,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
+    } else {
+        // The pool persists across frames, so release the drape targets when
+        // terrain is disabled instead of holding their textures indefinitely
+        texturePool.removeStaleRenderTargets({});
     }
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
@@ -564,6 +565,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
 void Renderer::Impl::reduceMemoryUse() {
     assert(gfx::BackendScope::exists());
+    // The drape targets are the largest reclaimable GPU allocation (one
+    // tile-sized texture per terrain tile); they are rebuilt on the next frame
+    texturePool.removeStaleRenderTargets({});
     backend.getContext().reduceMemoryUsage();
 }
 
