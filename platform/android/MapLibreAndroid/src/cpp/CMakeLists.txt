@@ -8,8 +8,15 @@ project(MapLibreAndroid)
 # libmaplibre.so) and maplibre-vulkan (output libmaplibre-vulkan.so) SHARED
 # targets, and returns from its scope. The matching `if` below then skips
 # this file's normal single-backend maplibre target.
-add_subdirectory(../../../../../
-                 ../../../../../${ANDROID_ABI})
+# MLN_ANDROID_TOP_BINARY_DIR is set by the multi-backend ExternalProject sub-builds
+# to give each backend (opengl/vulkan) its own isolated static library output dir,
+# preventing LTO object corruption when both sub-builds share the same arm64-v8a/ dir.
+# Single-backend builds (invoked directly by AGP) leave it unset and get the default.
+if(NOT DEFINED MLN_ANDROID_TOP_BINARY_DIR)
+    get_filename_component(MLN_ANDROID_TOP_BINARY_DIR
+        "${CMAKE_CURRENT_BINARY_DIR}/../../../../../${ANDROID_ABI}" ABSOLUTE)
+endif()
+add_subdirectory(../../../../../ ${MLN_ANDROID_TOP_BINARY_DIR})
 
 if(MLN_ANDROID_MULTI_BACKEND)
     return()

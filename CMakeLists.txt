@@ -70,6 +70,8 @@ if(MLN_ANDROID_MULTI_BACKEND)
     set(_multi_opengl_dir ${CMAKE_BINARY_DIR}/multi-opengl)
     set(_multi_vulkan_dir ${CMAKE_BINARY_DIR}/multi-vulkan)
 
+    set(_multi_android_lib_dir ${CMAKE_CURRENT_SOURCE_DIR}/platform/android/MapLibreAndroid)
+
     ExternalProject_Add(maplibre-opengl-build
         SOURCE_DIR ${_multi_android_source_dir}
         BINARY_DIR ${_multi_opengl_dir}
@@ -77,6 +79,7 @@ if(MLN_ANDROID_MULTI_BACKEND)
             ${_multi_forward_args}
             -DMLN_WITH_OPENGL=ON
             -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${_multi_opengl_dir}/lib
+            "-DMLN_ANDROID_TOP_BINARY_DIR=${_multi_android_lib_dir}/${ANDROID_ABI}-opengl"
         BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target maplibre
         INSTALL_COMMAND ""
         BUILD_ALWAYS 1)
@@ -88,6 +91,7 @@ if(MLN_ANDROID_MULTI_BACKEND)
             ${_multi_forward_args}
             -DMLN_WITH_VULKAN=ON
             -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${_multi_vulkan_dir}/lib
+            "-DMLN_ANDROID_TOP_BINARY_DIR=${_multi_android_lib_dir}/${ANDROID_ABI}-vulkan"
         BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target maplibre
         INSTALL_COMMAND ""
         BUILD_ALWAYS 1)
