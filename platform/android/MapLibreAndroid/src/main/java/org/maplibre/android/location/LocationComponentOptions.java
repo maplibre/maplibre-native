@@ -133,7 +133,7 @@ public class LocationComponentOptions implements Parcelable {
   private RectF trackingMultiFingerProtectedMoveArea;
   private String layerAbove;
   private String layerBelow;
-  private Boolean bearingOnTop;
+  private boolean bearingOnTop;
   private float trackingAnimationDurationMultiplier;
   private boolean compassAnimationEnabled;
   private boolean accuracyAnimationEnabled;
@@ -178,7 +178,7 @@ public class LocationComponentOptions implements Parcelable {
     RectF trackingMultiFingerProtectedMoveArea,
     String layerAbove,
     String layerBelow,
-    Boolean bearingOnTop,
+    boolean bearingOnTop,
     float trackingAnimationDurationMultiplier,
     boolean compassAnimationEnabled,
     boolean accuracyAnimationEnabled,
@@ -809,7 +809,7 @@ public class LocationComponentOptions implements Parcelable {
    *
    * @return true if the bearing icon is rendered above the foreground icon, false otherwise.
    */
-  public Boolean bearingOnTop() {
+  public boolean bearingOnTop() {
     return bearingOnTop;
   }
 
@@ -1361,7 +1361,7 @@ public class LocationComponentOptions implements Parcelable {
     private RectF trackingMultiFingerProtectedMoveArea;
     private String layerAbove;
     private String layerBelow;
-    private Boolean bearingOnTop;
+    private boolean bearingOnTop;
     private Float trackingAnimationDurationMultiplier;
     private Boolean compassAnimationEnabled;
     private Boolean accuracyAnimationEnabled;
@@ -1899,7 +1899,7 @@ public class LocationComponentOptions implements Parcelable {
      * @param bearingOnTop true to render the bearing icon above the foreground icon, false for below.
      */
     @NonNull
-    public LocationComponentOptions.Builder bearingOnTop(Boolean bearingOnTop) {
+    public LocationComponentOptions.Builder bearingOnTop(boolean bearingOnTop) {
       this.bearingOnTop = bearingOnTop;
       return this;
     }

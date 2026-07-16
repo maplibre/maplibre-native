@@ -142,7 +142,7 @@ class LocationLayerControllerTest : BaseTest() {
             false
         )
         Mockito.verify(style)
-            .addLayerBelow(backgroundLayer, LocationComponentConstants.FOREGROUND_LAYER)
+            .addLayerBelow(backgroundLayer, LocationComponentConstants.BEARING_LAYER)
     }
 
     @Test
@@ -181,8 +181,7 @@ class LocationLayerControllerTest : BaseTest() {
             internalRenderModeChangedListener,
             false
         )
-        Mockito.verify(style)
-            .addLayerBelow(foregroundLayer, LocationComponentConstants.BEARING_LAYER)
+        Mockito.verify(style).addLayer(foregroundLayer)
     }
 
     @Test
@@ -223,7 +222,8 @@ class LocationLayerControllerTest : BaseTest() {
             internalRenderModeChangedListener,
             false
         )
-        Mockito.verify(style).addLayerBelow(bearingLayer, layerBelow)
+        Mockito.verify(style)
+            .addLayerBelow(bearingLayer, LocationComponentConstants.FOREGROUND_LAYER)
     }
 
     @Test
@@ -757,11 +757,11 @@ class LocationLayerControllerTest : BaseTest() {
         Mockito.verify(style).removeLayer(LocationComponentConstants.BACKGROUND_LAYER)
         Mockito.verify(style).removeLayer(LocationComponentConstants.SHADOW_LAYER)
         Mockito.verify(style).removeLayer(LocationComponentConstants.ACCURACY_LAYER)
-        Mockito.verify(style).addLayerBelow(bearingLayer2, layerBelow)
+        Mockito.verify(style).addLayerBelow(foregroundLayer2, layerBelow)
         Mockito.verify(style)
-            .addLayerBelow(foregroundLayer2, LocationComponentConstants.BEARING_LAYER)
+            .addLayerBelow(bearingLayer2, LocationComponentConstants.FOREGROUND_LAYER)
         Mockito.verify(style)
-            .addLayerBelow(backgroundLayer2, LocationComponentConstants.FOREGROUND_LAYER)
+            .addLayerBelow(backgroundLayer2, LocationComponentConstants.BEARING_LAYER)
         Mockito.verify(style)
             .addLayerBelow(shadowLayer2, LocationComponentConstants.BACKGROUND_LAYER)
         Mockito.verify(style)
