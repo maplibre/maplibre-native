@@ -9,7 +9,7 @@ on:
         options:
           - full
           - pre
-        description: Whether to make a release, choose full release (uses platform/macos/VERSION) or pre-release
+        description: Whether to make a release, choose full release (uses platform/ios/VERSION, shared with iOS) or pre-release
       pre_release_version:
         type: string
         default: ''
@@ -35,7 +35,7 @@ jobs:
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
             --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal \
             --//platform/macos:macos_loop=cfrunloop \
-            //platform/macos:MapLibre.dynamic --embed_label=maplibre_macos_"$(cat VERSION)"
+            //platform/macos:MapLibre.dynamic --embed_label=maplibre_macos_"$(cat ../ios/VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal --//platform/macos:macos_loop=cfrunloop //platform/macos:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
       - name: Create .zip with debug symbols
@@ -81,7 +81,7 @@ jobs:
         run: |
           bazel build --compilation_mode=opt --copt -g --copt="-Oz" --strip never \
             --//:renderer=metal --//platform/macos:macos_loop=cfrunloop \
-            //platform/macos:MapLibre.static --embed_label=maplibre_macos_"$(cat VERSION)"
+            //platform/macos:MapLibre.static --embed_label=maplibre_macos_"$(cat ../ios/VERSION)"
           echo xcframework_static="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal --//platform/macos:macos_loop=cfrunloop //platform/macos:MapLibre.static)" >> "$GITHUB_ENV"
 
       - name: Add license to XCFramework zip
@@ -121,18 +121,20 @@ jobs:
         with:
           node-version-file: ".nvmrc"
 
+      # macOS releases share the iOS version (platform/ios/VERSION) so both
+      # platforms stay aligned. The changelog stays macOS-specific.
       - name: Get version (release)
         if: github.event.inputs.release == 'full'
         run: |
-          echo version="$(head VERSION)" >> "$GITHUB_ENV"
-          echo changelog_version_heading="## $(head VERSION)" >> "$GITHUB_ENV"
+          echo version="$(head ../ios/VERSION)" >> "$GITHUB_ENV"
+          echo changelog_version_heading="## $(head ../ios/VERSION)" >> "$GITHUB_ENV"
 
       - name: Get version (pre-release)
         if: github.event.inputs.release == 'pre'
         run: |
           version="${{ github.event.inputs.pre_release_version }}"
           if [[ -z "$version" ]]; then
-            version="$(head VERSION)"-pre${{ github.sha }}
+            version="$(head ../ios/VERSION)"-pre${{ github.sha }}
           fi
           if [[ "$version" != *"pre"* ]]; then
             echo "::error::Pre-release version must include 'pre' (Current version: $version)"
