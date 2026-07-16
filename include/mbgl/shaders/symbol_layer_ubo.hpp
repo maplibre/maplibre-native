@@ -18,19 +18,20 @@ struct alignas(16) SymbolDrawableUBO {
     /* 216 */ /*bool*/ int pitch_with_map;
     /* 220 */ /*bool*/ int is_size_zoom_constant;
     /* 224 */ /*bool*/ int is_size_feature_constant;
+    /* 228 */ /*bool*/ int is_offset;
 
-    /* 228 */ float size_t;
-    /* 232 */ float size;
+    /* 232 */ float size_t;
+    /* 236 */ float size;
 
     // Interpolations
-    /* 236 */ float fill_color_t;
-    /* 240 */ float halo_color_t;
-    /* 244 */ float opacity_t;
-    /* 248 */ float halo_width_t;
-    /* 252 */ float halo_blur_t;
-    /* 256 */
+    /* 240 */ float fill_color_t;
+    /* 244 */ float halo_color_t;
+    /* 248 */ float opacity_t;
+    /* 252 */ float halo_width_t;
+    /* 256 */ float halo_blur_t;
+    /* 260 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 16 * 16);
+static_assert(sizeof(SymbolDrawableUBO) == 17 * 16);
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;

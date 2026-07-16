@@ -100,6 +100,10 @@ public class MapLibreMapOptions implements Parcelable {
   private long actionJournalLogFileCount = 5;
   private int actionJournalRenderingReportInterval = 60;
 
+  private boolean asyncRendererCleanup = false;
+
+  private boolean fastPFOREnabled = false;
+
   /**
    * Creates a new MapLibreMapOptions object.
    *
@@ -163,6 +167,10 @@ public class MapLibreMapOptions implements Parcelable {
     actionJournalLogFileSize = in.readLong();
     actionJournalLogFileCount = in.readLong();
     actionJournalRenderingReportInterval = in.readInt();
+
+    asyncRendererCleanup = in.readByte() != 0;
+
+    fastPFOREnabled = in.readByte() != 0;
   }
 
   /**
@@ -331,6 +339,14 @@ public class MapLibreMapOptions implements Parcelable {
       );
       maplibreMapOptions.actionJournalRenderingReportInterval(
               typedArray.getInteger(R.styleable.maplibre_MapView_maplibre_actionJournalRenderingReportInterval, 60)
+      );
+
+      maplibreMapOptions.asyncRendererCleanup(
+              typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_asyncRendererCleanup, false)
+      );
+
+      maplibreMapOptions.fastPFOREnabled(
+              typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_fastPFOREnabled, false)
       );
     } finally {
       typedArray.recycle();
@@ -829,6 +845,32 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * By default, backend cleanup executes on the render thread
+   * (with the main thread waiting for the task to finish).
+   * Enabling this defers cleanup work to the garbage collector/finalzer thread. This can reduce
+   * shutdown stalls on the main thread, but introduces a non-deterministic cleanup timing and
+   * might expose possible OpenGL driver issues.
+   *
+   * @param asyncRendererCleanup true to enable, false to disable
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions asyncRendererCleanup(boolean asyncRendererCleanup) {
+    this.asyncRendererCleanup = asyncRendererCleanup;
+    return this;
+  }
+
+  /**
+   * Enable FastPFOR decompression for vector tiles, defaults to false.
+   * @param enable true to enable, false to disable
+   * @return This
+   */
+  @NonNull public MapLibreMapOptions fastPFOREnabled(boolean enable) {
+    this.fastPFOREnabled = enable;
+    return this;
+  }
+
+  /**
    * Enable local ideograph font family, defaults to true.
    *
    * @param enabled true to enable, false to disable
@@ -964,6 +1006,24 @@ public class MapLibreMapOptions implements Parcelable {
    */
   public int getActionJournalRenderingReportInterval() {
     return actionJournalRenderingReportInterval;
+  }
+
+  /**
+   * Check whether the renderer backend is async
+   *
+   * @return true if async
+   */
+  public boolean getAsyncRendererCleanup() {
+    return asyncRendererCleanup;
+  }
+
+  /**
+   * Check whether FastPFOR decompression is enabled for vector tiles.
+   *
+   * @return true if enabled
+   */
+  public boolean getFastPFOREnabled() {
+    return fastPFOREnabled;
   }
 
   /**
@@ -1356,6 +1416,10 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeLong(actionJournalLogFileSize);
     dest.writeLong(actionJournalLogFileCount);
     dest.writeInt(actionJournalRenderingReportInterval);
+
+    dest.writeByte((byte) (asyncRendererCleanup ? 1 : 0));
+
+    dest.writeByte((byte) (fastPFOREnabled ? 1 : 0));
   }
 
   @Override
@@ -1496,6 +1560,14 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
+    if (asyncRendererCleanup != options.asyncRendererCleanup) {
+      return false;
+    }
+
+    if (fastPFOREnabled != options.fastPFOREnabled) {
+      return false;
+    }
+
     return false;
   }
 
@@ -1548,6 +1620,8 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + (int) actionJournalLogFileSize;
     result = 31 * result + (int) actionJournalLogFileCount;
     result = 31 * result + (int) actionJournalRenderingReportInterval;
+    result = 31 * result + (asyncRendererCleanup ? 1 : 0);
+    result = 31 * result + (fastPFOREnabled ? 1 : 0);
     return result;
   }
 }

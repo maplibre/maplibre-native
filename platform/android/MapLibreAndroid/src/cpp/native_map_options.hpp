@@ -19,6 +19,8 @@ public:
     static util::ActionJournalOptions getActionJournalOptions(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
     static float pixelRatio(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
     static bool crossSourceCollisions(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
+    static bool asyncRendererCleanup(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
+    static bool fastPFOREnabled(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
 };
 
 } // namespace android

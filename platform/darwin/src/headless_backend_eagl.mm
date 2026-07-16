@@ -7,7 +7,7 @@
 namespace mbgl {
 namespace gl {
 
-class EAGLBackendImpl : public HeadlessBackend::Impl {
+class EAGLBackendImpl final : public HeadlessBackend::Impl {
 public:
   EAGLBackendImpl() {
     glContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];

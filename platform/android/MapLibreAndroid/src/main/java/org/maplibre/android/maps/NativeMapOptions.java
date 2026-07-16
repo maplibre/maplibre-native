@@ -10,6 +10,9 @@ public class NativeMapOptions {
   private final long actionJournalLogFileSize;
   private final long actionJournalLogFileCount;
   private final int actionJournalRenderingReportInterval;
+  private final boolean asyncRendererCleanup;
+
+  private final boolean fastPFOREnabled;
 
   public NativeMapOptions(MapLibreMapOptions options) {
     pixelRatio = options.getPixelRatio();
@@ -20,6 +23,8 @@ public class NativeMapOptions {
     actionJournalLogFileSize = options.getActionJournalLogFileSize();
     actionJournalLogFileCount = options.getActionJournalLogFileCount();
     actionJournalRenderingReportInterval = options.getActionJournalRenderingReportInterval();
+    asyncRendererCleanup = options.getAsyncRendererCleanup();
+    fastPFOREnabled = options.getFastPFOREnabled();
   }
 
   public NativeMapOptions(float pixelRatio, boolean crossSourceCollisions) {
@@ -31,6 +36,9 @@ public class NativeMapOptions {
     actionJournalLogFileSize = 0;
     actionJournalLogFileCount = 0;
     actionJournalRenderingReportInterval = 0;
+
+    asyncRendererCleanup = false;
+    fastPFOREnabled = false;
   }
 
   public float pixelRatio() {
@@ -59,5 +67,13 @@ public class NativeMapOptions {
 
   public int actionJournalRenderingReportInterval() {
     return actionJournalRenderingReportInterval;
+  }
+
+  public boolean asyncRendererCleanup() {
+    return asyncRendererCleanup;
+  }
+
+  public boolean fastPFOREnabled() {
+    return fastPFOREnabled;
   }
 }

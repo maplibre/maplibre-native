@@ -110,10 +110,24 @@
         "uses_ubos": true
     },
     {
+        "name": "FillExtrusionInstancedShader",
+        "header": "fill_extrusion_instanced",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "FillExtrusionPatternShader",
         "header": "fill_extrusion_pattern",
         "glsl_vert": "fill_extrusion_pattern.vertex.glsl",
         "glsl_frag": "fill_extrusion_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillExtrusionPatternInstancedShader",
+        "header": "fill_extrusion_pattern_instanced",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
         "uses_ubos": true
     },
     {
