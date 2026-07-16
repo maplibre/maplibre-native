@@ -422,7 +422,6 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
 void Drawable::bindTextures(RenderPass& renderPass) const {
     const bool isTerrain = (getName() == "terrain-tile");
 
-
     for (size_t id = 0; id < textures.size(); id++) {
         if (const auto& texture = textures[id]) {
             if (const auto& location = shader->getSamplerLocation(id)) {

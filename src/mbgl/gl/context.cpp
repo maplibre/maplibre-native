@@ -569,7 +569,8 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
                                                 bool renderToTerrain) {
     MLN_TRACE_FUNC();
 
-    auto tileLayerGroup = std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name), renderToTerrain);
+    auto tileLayerGroup = std::make_shared<TileLayerGroupGL>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     tileLayerGroup->setObserver(observer);
     return tileLayerGroup;
 }
