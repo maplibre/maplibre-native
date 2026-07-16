@@ -38,6 +38,9 @@ public:
     gfx::Context& getContext() override;
     const gfx::Context& getContext() const override;
 
+    CommandEncoder& getCommandEncoder() { return commandEncoder; }
+    const CommandEncoder& getCommandEncoder() const { return commandEncoder; }
+
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
                                                                           gfx::BufferUsageType,
@@ -50,9 +53,9 @@ public:
                                                                         bool persistent) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
-    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&,
-                                                     gfx::BufferUsageType,
-                                                     bool forceUpdate);
+    BufferResource createBufferResource(const void* data, std::size_t size, size_t usage, bool persistent);
+
+    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, size_t usage, bool forceUpdate);
 
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,

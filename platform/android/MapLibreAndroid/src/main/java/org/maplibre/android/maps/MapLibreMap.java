@@ -1194,7 +1194,7 @@ public final class MapLibreMap {
    * @param markerOptions A marker options object that defines how to render the marker
    * @return The {@code Marker} that was added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1213,7 +1213,7 @@ public final class MapLibreMap {
    * @param markerOptions A marker options object that defines how to render the marker
    * @return The {@code Marker} that was added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1232,7 +1232,7 @@ public final class MapLibreMap {
    * @param markerOptionsList A list of marker options objects that defines how to render the markers
    * @return A list of the {@code Marker}s that were added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1249,7 +1249,7 @@ public final class MapLibreMap {
    *
    * @param updatedMarker An updated marker object
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1263,7 +1263,7 @@ public final class MapLibreMap {
    * @param polylineOptions A polyline options object that defines how to render the polyline
    * @return The {@code Polyine} that was added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1278,7 +1278,7 @@ public final class MapLibreMap {
    * @param polylineOptionsList A list of polyline options objects that defines how to render the polylines.
    * @return A list of the {@code Polyline}s that were added to the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1292,7 +1292,7 @@ public final class MapLibreMap {
    *
    * @param polyline An updated polyline object.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1306,7 +1306,7 @@ public final class MapLibreMap {
    * @param polygonOptions A polygon options object that defines how to render the polygon.
    * @return The {@code Polygon} that was added to the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1321,7 +1321,7 @@ public final class MapLibreMap {
    * @param polygonOptionsList A list of polygon options objects that defines how to render the polygons
    * @return A list of the {@code Polygon}s that were added to the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1335,7 +1335,7 @@ public final class MapLibreMap {
    *
    * @param polygon An updated polygon object
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1351,7 +1351,7 @@ public final class MapLibreMap {
    *
    * @param marker Marker to remove
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1367,7 +1367,7 @@ public final class MapLibreMap {
    *
    * @param polyline Polyline to remove
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1383,7 +1383,7 @@ public final class MapLibreMap {
    *
    * @param polygon Polygon to remove
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1396,7 +1396,7 @@ public final class MapLibreMap {
    *
    * @param annotation The annotation object to remove.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1409,7 +1409,7 @@ public final class MapLibreMap {
    *
    * @param id The identifier associated to the annotation to be removed
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1422,7 +1422,7 @@ public final class MapLibreMap {
    *
    * @param annotationList A list of annotation objects to remove.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1434,7 +1434,7 @@ public final class MapLibreMap {
    * Removes all annotations from the map.
    *
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1446,7 +1446,7 @@ public final class MapLibreMap {
    * Removes all markers, polylines, polygons, overlays, etc from the map.
    *
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1460,7 +1460,7 @@ public final class MapLibreMap {
    * @param id the id used to look up an annotation
    * @return An annotation with a matched id, null is returned if no match was found
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1475,7 +1475,7 @@ public final class MapLibreMap {
    * @return A list of all the annotation objects. The returned object is a copy so modifying this
    * list will not update the map
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1490,7 +1490,7 @@ public final class MapLibreMap {
    * @return A list of all the markers objects. The returned object is a copy so modifying this
    * list will not update the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1505,7 +1505,7 @@ public final class MapLibreMap {
    * @return A list of all the polygon objects. The returned object is a copy so modifying this
    * list will not update the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1520,7 +1520,7 @@ public final class MapLibreMap {
    * @return A list of all the polylines objects. The returned object is a copy so modifying this
    * list will not update the map.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1535,7 +1535,7 @@ public final class MapLibreMap {
    * @param listener The callback that's invoked when the user clicks on a marker.
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1549,7 +1549,7 @@ public final class MapLibreMap {
    * @param listener The callback that's invoked when the user clicks on a polygon.
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1563,7 +1563,7 @@ public final class MapLibreMap {
    * @param listener The callback that's invoked when the user clicks on a polyline.
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1581,7 +1581,7 @@ public final class MapLibreMap {
    *
    * @param marker The marker to select.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1597,7 +1597,7 @@ public final class MapLibreMap {
    * Deselects any currently selected marker. All markers will have it's info window closed.
    *
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1610,7 +1610,7 @@ public final class MapLibreMap {
    *
    * @param marker the marker to deselect
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1623,7 +1623,7 @@ public final class MapLibreMap {
    *
    * @return The currently selected marker.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1646,7 +1646,7 @@ public final class MapLibreMap {
    * @param infoWindowAdapter The callback to be invoked when an info window will be shown.
    *                          To unset the callback, use null.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1659,7 +1659,7 @@ public final class MapLibreMap {
    *
    * @return The callback to be invoked when an info window will be shown.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1673,7 +1673,7 @@ public final class MapLibreMap {
    *
    * @param allow If true, map allows concurrent multiple infowindows to be shown.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -1686,7 +1686,7 @@ public final class MapLibreMap {
    *
    * @return If true, map allows concurrent multiple infowindows to be shown.
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2539,7 +2539,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setOnMarkerClickListener(OnMarkerClickListener)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2558,7 +2558,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setOnPolygonClickListener(OnPolygonClickListener)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2576,7 +2576,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setOnPolylineClickListener(OnPolylineClickListener)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated
@@ -2639,7 +2639,7 @@ public final class MapLibreMap {
    *
    * @see MapLibreMap#setInfoWindowAdapter(InfoWindowAdapter)
    * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
+   * use <a href="https://github.com/maplibre/maplibre-plugins-android">
    * MapLibre Annotation Plugin</a> instead
    */
   @Deprecated

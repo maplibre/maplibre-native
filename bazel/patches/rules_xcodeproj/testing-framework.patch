@@ -1,0 +1,12 @@
+diff --git a/xcodeproj/internal/bazel_integration_files/BUILD b/xcodeproj/internal/bazel_integration_files/BUILD
+--- a/xcodeproj/internal/bazel_integration_files/BUILD
++++ b/xcodeproj/internal/bazel_integration_files/BUILD
+@@ -52,7 +52,7 @@ frameworks=(
+   'libclang_rt.ubsan*.dylib'
+   'libXCTestBundleInject.dylib'
+   'libXCTestSwiftSupport.dylib'
+-  'Testing.framework',
++  'Testing.framework'
+   'XCTAutomationSupport.framework'
+   'XCTest.framework'
+   'XCTestCore.framework'

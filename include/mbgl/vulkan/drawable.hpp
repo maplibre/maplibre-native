@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
+#include <mbgl/gfx/upload_pass.hpp>
 
 #include <memory>
 
@@ -51,7 +52,12 @@ public:
                                 const SegmentBase* segments,
                                 std::size_t segmentCount) override;
 
+    void setTextures(const Textures& textures_) noexcept override;
+    void setTextures(Textures&& textures_) noexcept override;
+    void setTexture(gfx::Texture2DPtr texture, size_t id) override;
+
 protected:
+    void setSharedBuffers(const gfx::VertexAttributeArray&, const gfx::AttributeBindingArray&);
     void buildVulkanInputBindings();
 
     bool bindAttributes(CommandEncoder&) const;

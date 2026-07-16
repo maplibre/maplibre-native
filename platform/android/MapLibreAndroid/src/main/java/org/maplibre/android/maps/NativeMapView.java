@@ -13,6 +13,7 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.JsonObject;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.LibraryLoader;
@@ -1000,7 +1001,17 @@ final class NativeMapView implements NativeMap {
     if (checkState("removeLayer")) {
       return false;
     }
-    return nativeRemoveLayer(layer.getNativePtr());
+    if (layer.isDetached()) {
+      Logger.w(TAG, "Ignoring removeLayer() call on detached layer reference.");
+      return false;
+    }
+
+    final long nativePtr = layer.getNativePtr();
+    if (nativePtr == 0L) {
+      Logger.w(TAG, "Ignoring removeLayer() call on released layer pointer.");
+      return false;
+    }
+    return nativeRemoveLayer(nativePtr);
   }
 
   @Override
@@ -1111,6 +1122,39 @@ final class NativeMapView implements NativeMap {
       layerIds,
       filter != null ? filter.toArray() : null);
     return features != null ? Arrays.asList(features) : new ArrayList<Feature>();
+  }
+
+  @Override
+  public void setFeatureState(@NonNull String sourceId,
+                              @Nullable String sourceLayerId,
+                              @NonNull String featureId,
+                              @NonNull JsonObject state) {
+    if (checkState("setFeatureState")) {
+      return;
+    }
+    nativeSetFeatureState(sourceId, sourceLayerId, featureId, state);
+  }
+
+  @Override
+  @Nullable
+  public JsonObject getFeatureState(@NonNull String sourceId,
+                                    @Nullable String sourceLayerId,
+                                    @NonNull String featureId) {
+    if (checkState("getFeatureState")) {
+      return null;
+    }
+    return nativeGetFeatureState(sourceId, sourceLayerId, featureId);
+  }
+
+  @Override
+  public void removeFeatureState(@NonNull String sourceId,
+                                 @Nullable String sourceLayerId,
+                                 @Nullable String featureId,
+                                 @Nullable String stateKey) {
+    if (checkState("removeFeatureState")) {
+      return;
+    }
+    nativeRemoveFeatureState(sourceId, sourceLayerId, featureId, stateKey);
   }
 
   @Override
@@ -1700,6 +1744,24 @@ final class NativeMapView implements NativeMap {
                                                              float right, float bottom,
                                                              String[] layerIds,
                                                              Object[] filter);
+
+  @Keep
+  private native void nativeSetFeatureState(String sourceId,
+                                            String sourceLayerId,
+                                            String featureId,
+                                            JsonObject state);
+
+  @Nullable
+  @Keep
+  private native JsonObject nativeGetFeatureState(String sourceId,
+                                                  String sourceLayerId,
+                                                  String featureId);
+
+  @Keep
+  private native void nativeRemoveFeatureState(String sourceId,
+                                               String sourceLayerId,
+                                               String featureId,
+                                               String stateKey);
 
   @NonNull
   @Keep

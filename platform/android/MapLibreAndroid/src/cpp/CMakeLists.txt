@@ -269,7 +269,10 @@ target_link_libraries(maplibre
                               $<$<CONFIG:Release>:-Wl,--icf=all>
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
                               $<$<CONFIG:Release>:-flto>
-                              $<$<CONFIG:Release>:-fuse-ld=gold>
+                              $<$<CONFIG:Release>:-fuse-ld=lld>
+                              $<$<CONFIG:Release>:-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../../../version-script>
+                              #$<$<CONFIG:Release>:-Wl,-Bsymbolic>
+                              $<$<CONFIG:Release>:-Wl,-Bsymbolic-functions>
                               MapLibreNative::Base::jni.hpp
                               mbgl-core
                               mbgl-vendor-unique_resource)
