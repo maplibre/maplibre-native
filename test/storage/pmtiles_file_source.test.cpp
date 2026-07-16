@@ -124,6 +124,27 @@ TEST(PMTilesFileSource, CorruptGzipTile) {
     loop.run();
 }
 
+// Metadata whose bytes start with gzip magic but are otherwise corrupt must yield an error
+// response — the decompression failure must not propagate as an exception. Unlike the tile path,
+// this one runs on the PMTiles file source thread with no handler above it, so an escaping
+// exception calls std::terminate and aborts the process.
+TEST(PMTilesFileSource, CorruptGzipMetadata) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        {Resource::Unknown, toAbsoluteURL("corrupt-gzip-metadata.pmtiles")}, [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
+            EXPECT_NE(res.error->message.find("Error decompressing PMTiles metadata:"), std::string::npos);
+            loop.stop();
+        });
+
+    loop.run();
+}
+
 // Regression test for https://github.com/maplibre/maplibre-native/issues/3690 — the loading
 // method for PMTiles sub-requests changed from `Network` to `All` so that http(s)-hosted
 // archives flow through the ambient cache. The file:// path bypasses the cache by design,

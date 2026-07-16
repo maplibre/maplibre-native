@@ -213,7 +213,7 @@ public:
     /// Add a polyline in geographic coordinates, using wide vectors.
     void addWideVectorPolylineGlobal(const LineString<double>& coordinates, const gfx::PolylineGeneratorOptions&);
 
-    /// return the curent vertex count
+    /// return the current vertex count
     std::size_t curVertexCount() const;
 
     bool empty() const { return !(drawables.size() || curVertexCount()); }

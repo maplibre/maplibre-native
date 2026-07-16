@@ -483,7 +483,9 @@ void SurfaceRenderableResource::queueSurfaceRead() {
     }
 
     surfaceRead = true;
-    backend.getContext<Context>().requestSurfaceUpdate(false);
+    if (surface) {
+        backend.getContext<Context>().requestSurfaceUpdate(false);
+    }
 }
 
 void SurfaceRenderableResource::copySurfaceToReadTexture() {
@@ -502,25 +504,23 @@ void SurfaceRenderableResource::copySurfaceToReadTexture() {
     const auto swapchainImage = getAcquiredImage();
     auto& commandBuffer = contextImpl.getCommandBuffer();
 
-    if (surface) {
-        const auto barrier = vk::ImageMemoryBarrier()
+    const auto oldLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
+    const auto srcStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    const vk::AccessFlags srcAccess = vk::AccessFlagBits::eColorAttachmentWrite;
+    const vk::AccessFlags dstAccess = vk::AccessFlagBits::eTransferRead;
+
+    const auto readBarrier = vk::ImageMemoryBarrier()
                                  .setImage(swapchainImage)
-                                 .setOldLayout(vk::ImageLayout::ePresentSrcKHR)
+                                 .setOldLayout(oldLayout)
                                  .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
-                                 .setSrcAccessMask({})
-                                 .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                 .setSrcAccessMask(srcAccess)
+                                 .setDstAccessMask(dstAccess)
                                  .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                                  .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                                  .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
-        commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                                       vk::PipelineStageFlagBits::eTransfer,
-                                       {},
-                                       nullptr,
-                                       nullptr,
-                                       barrier,
-                                       dispatcher);
-    }
+    commandBuffer->pipelineBarrier(
+        srcStage, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, readBarrier, dispatcher);
 
     bool useBlit =
         surface &&
@@ -536,22 +536,22 @@ void SurfaceRenderableResource::copySurfaceToReadTexture() {
     }
 
     if (surface) {
-        const auto barrier = vk::ImageMemoryBarrier()
-                                 .setImage(swapchainImage)
-                                 .setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
-                                 .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
-                                 .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)
-                                 .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
-                                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                                 .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+        const auto presentBarrier = vk::ImageMemoryBarrier()
+                                        .setImage(swapchainImage)
+                                        .setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                        .setNewLayout(vk::ImageLayout::ePresentSrcKHR)
+                                        .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)
+                                        .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                                        .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                        .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                        .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
         commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
                                        vk::PipelineStageFlagBits::eTransfer,
                                        {},
                                        nullptr,
                                        nullptr,
-                                       barrier,
+                                       presentBarrier,
                                        dispatcher);
     }
 }

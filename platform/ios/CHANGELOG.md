@@ -2,6 +2,10 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+- Convert a PMTiles metadata decompression failure into an error response instead of an uncaught exception ([#4399](https://github.com/maplibre/maplibre-native/pull/4399)).
+
 ## 6.27.0
 
 - Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
