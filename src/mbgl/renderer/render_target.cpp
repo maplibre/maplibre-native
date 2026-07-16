@@ -189,6 +189,17 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
     parameters.depthRangeSize = 1 -
                                 (layerGroupCount + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
+    // Number the two passes over the same (draped-only) group sequence. The opaque pass
+    // below assigns 0..drapedCount-1 (reversed visit), so the translucent pass must start
+    // at drapedCount-1 (forward visit) for each group to keep the SAME currentLayer in
+    // both passes. Starting at the orchestrator's total group count (which includes the
+    // non-draped symbol groups) skews depthModeForSublayer's per-layer depth: translucent
+    // fills then test at depths beyond what the opaque pass wrote and are discarded — on
+    // styles with many symbol layers this silently dropped all low-stack draped fills
+    // (landcover, parks, water).
+    size_t drapedCount = 0;
+    visitDrapedGroups(visitForward, [&](LayerGroupBase&) { drapedCount++; });
+
     // draw draped layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
     parameters.currentLayer = 0;
@@ -199,7 +210,7 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
 
     // draw draped layer groups, translucent pass
     parameters.pass = RenderPass::Translucent;
-    parameters.currentLayer = static_cast<uint32_t>(layerGroupCount) - 1;
+    parameters.currentLayer = drapedCount > 0 ? static_cast<uint32_t>(drapedCount) - 1 : 0;
     visitDrapedGroups(visitForward, [&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
         if (parameters.currentLayer > 0) {
