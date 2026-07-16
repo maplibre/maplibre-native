@@ -26,70 +26,91 @@ class LocationComponentPositionManagerTest : BaseTest() {
 
     @Test
     fun update_noChange_null() {
-        val positionManager = LocationComponentPositionManager(style, null, null)
-        val requiresUpdate = positionManager.update(null, null)
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
+        val requiresUpdate = positionManager.update(null, null, false)
         assertFalse(requiresUpdate)
     }
 
     @Test
     fun update_noChange_above() {
-        val positionManager = LocationComponentPositionManager(style, "above", null)
-        val requiresUpdate = positionManager.update("above", null)
+        val positionManager = LocationComponentPositionManager(style, "above", null, false)
+        val requiresUpdate = positionManager.update("above", null, false)
         assertFalse(requiresUpdate)
     }
 
     @Test
     fun update_noChange_below() {
-        val positionManager = LocationComponentPositionManager(style, null, "below")
-        val requiresUpdate = positionManager.update(null, "below")
+        val positionManager = LocationComponentPositionManager(style, null, "below", false)
+        val requiresUpdate = positionManager.update(null, "below", false)
+        assertFalse(requiresUpdate)
+    }
+
+    @Test
+    fun update_noChange_bearingOnTop() {
+        val positionManager = LocationComponentPositionManager(style, null, null, true)
+        val requiresUpdate = positionManager.update(null, null, true)
         assertFalse(requiresUpdate)
     }
 
     @Test
     fun update_fromNull_above() {
-        val positionManager = LocationComponentPositionManager(style, null, null)
-        val requiresUpdate = positionManager.update("above", null)
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
+        val requiresUpdate = positionManager.update("above", null, false)
         assertTrue(requiresUpdate)
     }
 
     @Test
     fun update_fromNull_below() {
-        val positionManager = LocationComponentPositionManager(style, null, null)
-        val requiresUpdate = positionManager.update(null, "below")
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
+        val requiresUpdate = positionManager.update(null, "below", false)
         assertTrue(requiresUpdate)
     }
 
     @Test
     fun update_toNull_above() {
-        val positionManager = LocationComponentPositionManager(style, "above", null)
-        val requiresUpdate = positionManager.update(null, null)
+        val positionManager = LocationComponentPositionManager(style, "above", null, false)
+        val requiresUpdate = positionManager.update(null, null, false)
         assertTrue(requiresUpdate)
     }
 
     @Test
     fun update_toNull_below() {
-        val positionManager = LocationComponentPositionManager(style, null, "below")
-        val requiresUpdate = positionManager.update(null, null)
+        val positionManager = LocationComponentPositionManager(style, null, "below", false)
+        val requiresUpdate = positionManager.update(null, null, false)
         assertTrue(requiresUpdate)
     }
 
     @Test
     fun update_fromValue_above() {
-        val positionManager = LocationComponentPositionManager(style, "above1", null)
-        val requiresUpdate = positionManager.update("above2", null)
+        val positionManager = LocationComponentPositionManager(style, "above1", null, false)
+        val requiresUpdate = positionManager.update("above2", null, false)
         assertTrue(requiresUpdate)
     }
 
     @Test
     fun update_fromValue_below() {
-        val positionManager = LocationComponentPositionManager(style, null, "below1")
-        val requiresUpdate = positionManager.update(null, "below2")
+        val positionManager = LocationComponentPositionManager(style, null, "below1", false)
+        val requiresUpdate = positionManager.update(null, "below2", false)
+        assertTrue(requiresUpdate)
+    }
+
+    @Test
+    fun update_bearingOnTop_changed() {
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
+        val requiresUpdate = positionManager.update(null, null, true)
+        assertTrue(requiresUpdate)
+    }
+
+    @Test
+    fun update_bearingOnTop_changedToFalse() {
+        val positionManager = LocationComponentPositionManager(style, null, null, true)
+        val requiresUpdate = positionManager.update(null, null, false)
         assertTrue(requiresUpdate)
     }
 
     @Test
     fun addLayer_noModifier() {
-        val positionManager = LocationComponentPositionManager(style, null, null)
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
         positionManager.addLayerToMap(layer)
 
         verify { style.addLayer(layer) }
@@ -97,7 +118,7 @@ class LocationComponentPositionManagerTest : BaseTest() {
 
     @Test
     fun addLayer_above() {
-        val positionManager = LocationComponentPositionManager(style, "above", null)
+        val positionManager = LocationComponentPositionManager(style, "above", null, false)
         positionManager.addLayerToMap(layer)
 
         verify { style.addLayerAbove(layer, "above") }
@@ -105,7 +126,7 @@ class LocationComponentPositionManagerTest : BaseTest() {
 
     @Test
     fun addLayer_below() {
-        val positionManager = LocationComponentPositionManager(style, null, "below")
+        val positionManager = LocationComponentPositionManager(style, null, "below", false)
         positionManager.addLayerToMap(layer)
 
         verify { style.addLayerBelow(layer, "below") }
@@ -113,8 +134,8 @@ class LocationComponentPositionManagerTest : BaseTest() {
 
     @Test
     fun addLayer_afterUpdate_above() {
-        val positionManager = LocationComponentPositionManager(style, null, null)
-        positionManager.update("above", null)
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
+        positionManager.update("above", null, false)
         positionManager.addLayerToMap(layer)
 
         verify { style.addLayerAbove(layer, "above") }
@@ -122,8 +143,8 @@ class LocationComponentPositionManagerTest : BaseTest() {
 
     @Test
     fun addLayer_afterUpdate_below() {
-        val positionManager = LocationComponentPositionManager(style, null, null)
-        positionManager.update(null, "below")
+        val positionManager = LocationComponentPositionManager(style, null, null, false)
+        positionManager.update(null, "below", false)
         positionManager.addLayerToMap(layer)
 
         verify { style.addLayerBelow(layer, "below") }
