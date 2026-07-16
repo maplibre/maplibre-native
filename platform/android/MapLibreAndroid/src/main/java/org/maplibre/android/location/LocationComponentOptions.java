@@ -804,6 +804,11 @@ public class LocationComponentOptions implements Parcelable {
     return layerBelow;
   }
 
+  /**
+   * Whether the bearing icon is rendered on top of the foreground icon in the location layer stack.
+   *
+   * @return true if the bearing icon is rendered above the foreground icon, false otherwise.
+   */
   public Boolean bearingOnTop() {
     return bearingOnTop;
   }
@@ -1886,6 +1891,14 @@ public class LocationComponentOptions implements Parcelable {
       return this;
     }
 
+    /**
+     * Sets whether the bearing icon is rendered on top of the foreground icon in the location
+     * layer stack. When true, the bearing layer is placed above the foreground layer; when false,
+     * it is rendered below.
+     *
+     * @param bearingOnTop true to render the bearing icon above the foreground icon, false for below.
+     */
+    @NonNull
     public LocationComponentOptions.Builder bearingOnTop(Boolean bearingOnTop) {
       this.bearingOnTop = bearingOnTop;
       return this;
