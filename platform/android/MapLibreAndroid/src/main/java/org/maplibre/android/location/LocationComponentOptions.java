@@ -1192,7 +1192,7 @@ public class LocationComponentOptions implements Parcelable {
     dest.writeParcelable(this.trackingMultiFingerProtectedMoveArea, flags);
     dest.writeString(this.layerAbove);
     dest.writeString(this.layerBelow);
-    dest.writeBoolean(this.bearingOnTop);
+    dest.writeByte(this.bearingOnTop ? (byte) 1 : (byte) 0);
     dest.writeFloat(this.trackingAnimationDurationMultiplier);
     dest.writeByte(this.compassAnimationEnabled ? (byte) 1 : (byte) 0);
     dest.writeByte(this.accuracyAnimationEnabled ? (byte) 1 : (byte) 0);
