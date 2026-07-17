@@ -33,9 +33,13 @@
       "id": "selected-layer",
       "type": "circle",
       "source": "style-source",
-      "filter": ["==", ["feature-state", "selected"], true],
       "paint": {
-        "circle-radius": 12,
+        "circle-radius": [
+          "case",
+          ["boolean", ["feature-state", "selected"], false],
+          24,
+          0
+        ],
         "circle-color": "#ff0000"
       }
     }
