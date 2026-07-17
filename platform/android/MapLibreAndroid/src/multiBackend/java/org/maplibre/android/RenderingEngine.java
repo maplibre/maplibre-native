@@ -21,7 +21,7 @@ import androidx.annotation.NonNull;
 public final class RenderingEngine {
 
   /**
-   * Matches the android.hardware.vulkan.version <uses-feature> declared for this flavor.
+   * Matches the android.hardware.vulkan.version `uses-feature` declared for this flavor.
    */
   private static final int REQUIRED_VULKAN_VERSION = 0x400003;
 
