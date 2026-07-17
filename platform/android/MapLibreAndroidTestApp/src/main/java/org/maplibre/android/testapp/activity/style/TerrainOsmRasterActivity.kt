@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.style
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
@@ -26,6 +27,8 @@ class TerrainOsmRasterActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             maplibreMap = map
+            // Let the tilt gesture reach the full supported pitch over 3D terrain
+            map.setMaxPitchPreference(MapLibreConstants.MAXIMUM_PITCH_LIMIT.toDouble())
             // Match the maplibre-gl-js 3D Terrain example's view of Innsbruck
             map.cameraPosition = CameraPosition.Builder()
                 .target(LatLng(47.27574, 11.39085))
