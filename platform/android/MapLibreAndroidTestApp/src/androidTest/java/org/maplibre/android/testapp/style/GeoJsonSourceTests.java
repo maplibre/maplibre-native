@@ -23,6 +23,7 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.graphics.PointF;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link GeoJsonSource}
@@ -134,10 +137,11 @@ public class GeoJsonSourceTests extends EspressoTest {
 
       JsonObject state = new JsonObject();
       state.addProperty("selected", true);
-      source.setFeatureState("feature-1", state);
+      assertTrue(source.setFeatureState("feature-1", state));
+      assertEquals(state, source.getFeatureState("feature-1"));
 
       // The feature-state update is applied on a subsequent render pass, so
-      // poll until the filter re-evaluates rather than relying on a single
+      // poll until the paint property re-evaluates rather than relying on a single
       // didBecomeIdle callback (which can be missed if the repaint completes
       // before the listener is attached).
       assertEquals(1, pollFeatureCount(uiController, maplibreMap, 1));
@@ -161,17 +165,20 @@ public class GeoJsonSourceTests extends EspressoTest {
       GeoJsonSource source = maplibreMap.getStyle().getSourceAs("style-source");
       JsonObject state = new JsonObject();
       state.addProperty("selected", true);
-      source.setFeatureState("feature-1", state);
+      assertTrue(source.setFeatureState("feature-1", state));
       assertEquals(1, pollFeatureCount(uiController, maplibreMap, 1));
 
-      source.removeFeatureState(null, "selected");
+      assertTrue(source.removeFeatureState(null, "selected"));
       assertEquals(0, pollFeatureCount(uiController, maplibreMap, 0));
+      assertNull(source.getFeatureState("feature-1"));
     });
   }
 
   private int queryFeatureCount(org.maplibre.android.maps.MapLibreMap maplibreMap) {
+    PointF queryPoint = maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0));
+    queryPoint.offset(12, 0);
     return maplibreMap.queryRenderedFeatures(
-            maplibreMap.getProjection().toScreenLocation(new LatLng(0.0, 0.0)), "selected-layer").size();
+            queryPoint, "selected-layer").size();
   }
 
   private int pollFeatureCount(androidx.test.espresso.UiController uiController,
