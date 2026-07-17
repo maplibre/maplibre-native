@@ -2,25 +2,18 @@ cmake_minimum_required(VERSION 3.10)
 
 project(MapLibreAndroid)
 
-# Always invoke the top-level CMakeLists. When MLN_ANDROID_MULTI_BACKEND=ON
-# (set by the Gradle multiBackend flavor via -D), the top-level handles the
-# dual-backend ExternalProject_Add setup, declares maplibre-opengl (output
-# libmaplibre.so) and maplibre-vulkan (output libmaplibre-vulkan.so) SHARED
-# targets, and returns from its scope. The matching `if` below then skips
-# this file's normal single-backend maplibre target.
-# MLN_ANDROID_TOP_BINARY_DIR is set by the multi-backend ExternalProject sub-builds
-# to give each backend (opengl/vulkan) its own isolated static library output dir,
-# preventing LTO object corruption when both sub-builds share the same arm64-v8a/ dir.
-# Single-backend builds (invoked directly by AGP) leave it unset and get the default.
-if(NOT DEFINED MLN_ANDROID_TOP_BINARY_DIR)
-    get_filename_component(MLN_ANDROID_TOP_BINARY_DIR
-        "${CMAKE_CURRENT_BINARY_DIR}/../../../../../${ANDROID_ABI}" ABSOLUTE)
-endif()
-add_subdirectory(../../../../../ ${MLN_ANDROID_TOP_BINARY_DIR})
-
+# (a) Multi-flavor build is self-contained in MultiBackend.cmake and only entered for the
+# Gradle `multiBackend` flavor (which passes -DMLN_ANDROID_MULTI_BACKEND=ON). It never touches
+# the shared top-level CMakeLists; the single-backend path below is unaffected.
 if(MLN_ANDROID_MULTI_BACKEND)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/MultiBackend.cmake)
     return()
 endif()
+
+# (b) Build core into THIS configure's own build dir (was: ../../../../../${ANDROID_ABI}, an
+# out-of-tree path both multi sub-builds collided on). Each configure now has its own dir, so
+# the multi sub-builds isolate automatically -- no MLN_ANDROID_TOP_BINARY_DIR guard needed.
+add_subdirectory(../../../../../ ${CMAKE_CURRENT_BINARY_DIR}/maplibre-core)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
