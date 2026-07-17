@@ -102,7 +102,7 @@ class LocationLayerControllerTest : BaseTest() {
             false
         )
         Mockito.verify(style)
-            .addLayerBelow(shadowLayer, LocationComponentConstants.BACKGROUND_LAYER)
+            .addLayerBelow(shadowLayer, LocationComponentConstants.BEARING_LAYER)
     }
 
     @Test
@@ -142,7 +142,7 @@ class LocationLayerControllerTest : BaseTest() {
             false
         )
         Mockito.verify(style)
-            .addLayerBelow(backgroundLayer, LocationComponentConstants.BEARING_LAYER)
+            .addLayerBelow(backgroundLayer, LocationComponentConstants.FOREGROUND_LAYER)
     }
 
     @Test
@@ -223,7 +223,7 @@ class LocationLayerControllerTest : BaseTest() {
             false
         )
         Mockito.verify(style)
-            .addLayerBelow(bearingLayer, LocationComponentConstants.FOREGROUND_LAYER)
+            .addLayerBelow(bearingLayer, LocationComponentConstants.BACKGROUND_LAYER)
     }
 
     @Test
@@ -759,11 +759,11 @@ class LocationLayerControllerTest : BaseTest() {
         Mockito.verify(style).removeLayer(LocationComponentConstants.ACCURACY_LAYER)
         Mockito.verify(style).addLayerBelow(foregroundLayer2, layerBelow)
         Mockito.verify(style)
-            .addLayerBelow(bearingLayer2, LocationComponentConstants.FOREGROUND_LAYER)
+            .addLayerBelow(backgroundLayer2, LocationComponentConstants.FOREGROUND_LAYER)
         Mockito.verify(style)
-            .addLayerBelow(backgroundLayer2, LocationComponentConstants.BEARING_LAYER)
+            .addLayerBelow(bearingLayer2, LocationComponentConstants.BACKGROUND_LAYER)
         Mockito.verify(style)
-            .addLayerBelow(shadowLayer2, LocationComponentConstants.BACKGROUND_LAYER)
+            .addLayerBelow(shadowLayer2, LocationComponentConstants.BEARING_LAYER)
         Mockito.verify(style)
             .addLayerBelow(accuracyLayer2, LocationComponentConstants.BACKGROUND_LAYER)
     }
