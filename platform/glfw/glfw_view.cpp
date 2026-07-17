@@ -977,7 +977,7 @@ void GLFWView::makeSnapshot(bool withOverlay) {
                 oss << "Made snapshot './snapshot.png' with size w:" << image.size.width << "px h:" << image.size.height
                     << "px";
                 mbgl::Log::Info(mbgl::Event::General, oss.str());
-                std::ofstream file("./snapshot.png");
+                std::ofstream file("./snapshot.png", std::ios::out | std::ios::binary);
                 file << mbgl::encodePNG(image);
             } else {
                 mbgl::Log::Error(mbgl::Event::General, "Failed to make a snapshot!");

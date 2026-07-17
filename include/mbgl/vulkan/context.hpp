@@ -153,6 +153,7 @@ public:
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
+    vk::UniqueCommandBuffer& getCommandBuffer() { return frameResources[frameResourceIndex].commandBuffer; }
     void enqueueDeletion(DeletionTask&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
     void submitOneTimeCommand(const vk::UniqueCommandBuffer& buffer);

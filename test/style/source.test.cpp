@@ -21,11 +21,12 @@
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/style.hpp>
 
-#include <mbgl/renderer/sources/render_raster_source.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/sources/render_geojson_source.hpp>
+#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
+#include <mbgl/renderer/sources/render_raster_source.hpp>
+#include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
@@ -46,9 +47,9 @@
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
-#include <cstdint>
-#include <optional>
 #include <gmock/gmock.h>
+
+#include <optional>
 
 using namespace mbgl;
 using SourceType = mbgl::style::SourceType;
@@ -63,7 +64,7 @@ public:
     Transform transform;
     TransformState transformState;
     AnnotationManager annotationManager{style};
-    std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    std::shared_ptr<ImageManager> imageManager = ImageManager::create();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
@@ -1001,7 +1002,7 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
 
     source.setGeoJSONData(nullptr);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
-    EXPECT_FALSE(renderSource.isLoaded()); // Tiles remain in continous mode.
+    EXPECT_FALSE(renderSource.isLoaded()); // Tiles remain in continuous mode.
 
     source.setGeoJSONData(geoJSONData);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());

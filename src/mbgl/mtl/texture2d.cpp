@@ -146,7 +146,7 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
     }
 }
 
-void Texture2D::createMetalTexture() noexcept {
+void Texture2D::createMetalTexture() {
     if (size == Size{0, 0}) {
         return;
     }
@@ -181,6 +181,9 @@ void Texture2D::createMetalTexture() noexcept {
         }
 #endif
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
+        if (!metalTexture) {
+            throw std::bad_alloc();
+        }
     }
 
     if (metalTexture) {
@@ -193,7 +196,7 @@ void Texture2D::createMetalTexture() noexcept {
     }
 }
 
-void Texture2D::create() noexcept {
+void Texture2D::create() {
     if (textureDirty) {
         createMetalTexture();
     }
@@ -225,7 +228,7 @@ MTL::Texture* Texture2D::getMetalTexture() const noexcept {
     return metalTexture.get();
 }
 
-void Texture2D::updateSamplerConfiguration() noexcept {
+void Texture2D::updateSamplerConfiguration() {
     auto samplerDescriptor = NS::TransferPtr(MTL::SamplerDescriptor::alloc()->init());
     samplerDescriptor->setMinFilter(samplerState.filter == gfx::TextureFilterType::Nearest
                                         ? MTL::SamplerMinMagFilterNearest
@@ -240,11 +243,14 @@ void Texture2D::updateSamplerConfiguration() noexcept {
                                            ? MTL::SamplerAddressModeClampToEdge
                                            : MTL::SamplerAddressModeRepeat);
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
+    if (!metalSamplerState) {
+        throw std::bad_alloc();
+    }
 
     samplerStateDirty = false;
 }
 
-void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
+void Texture2D::bind(RenderPass& renderPass, int32_t location) {
     assert(!textureDirty);
 
     // Update the sampler state if it was changed after resource creation
@@ -278,7 +284,7 @@ void Texture2D::unbind(RenderPass&, int32_t /*location*/) noexcept {
     context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) { stats.numTextureBindings--; });
 }
 
-void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
+void Texture2D::upload(const void* pixelData, const Size& size_) {
     setSize(size_);
     if (textureDirty) {
         createMetalTexture();
@@ -316,7 +322,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     });
 }
 
-void Texture2D::upload() noexcept {
+void Texture2D::upload() {
     if (image && image->valid()) {
         mbgl::Log::Info(
             mbgl::Event::Render,

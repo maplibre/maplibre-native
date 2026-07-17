@@ -124,6 +124,62 @@ TEST(PMTilesFileSource, CorruptGzipTile) {
     loop.run();
 }
 
+// Metadata whose bytes start with gzip magic but are otherwise corrupt must yield an error
+// response — the decompression failure must not propagate as an exception. Unlike the tile path,
+// this one runs on the PMTiles file source thread with no handler above it, so an escaping
+// exception calls std::terminate and aborts the process.
+TEST(PMTilesFileSource, CorruptGzipMetadata) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req = pmtiles.request(
+        {Resource::Unknown, toAbsoluteURL("corrupt-gzip-metadata.pmtiles")}, [&](Response res) {
+            req.reset();
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
+            EXPECT_NE(res.error->message.find("Error decompressing PMTiles metadata:"), std::string::npos);
+            loop.stop();
+        });
+
+    loop.run();
+}
+
+// Regression test for https://github.com/maplibre/maplibre-native/issues/3690 — the loading
+// method for PMTiles sub-requests changed from `Network` to `All` so that http(s)-hosted
+// archives flow through the ambient cache. The file:// path bypasses the cache by design,
+// so this test can only confirm that issuing the same tile twice still succeeds; a true
+// cache-hit assertion requires an http(s) PMTiles fixture and a mock server.
+TEST(PMTilesFileSource, RepeatedTileRequest) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    std::unique_ptr<AsyncRequest> req1;
+    std::unique_ptr<AsyncRequest> req2;
+
+    req1 = pmtiles.request(
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        [&](Response res1) {
+            req1.reset();
+            ASSERT_EQ(nullptr, res1.error);
+            ASSERT_TRUE(res1.data.get());
+            const auto firstSize = res1.data->size();
+
+            req2 = pmtiles.request(
+                Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+                [&, firstSize](Response res2) {
+                    req2.reset();
+                    EXPECT_EQ(nullptr, res2.error);
+                    ASSERT_TRUE(res2.data.get());
+                    EXPECT_EQ(firstSize, res2.data->size());
+                    loop.stop();
+                });
+        });
+
+    loop.run();
+}
+
 // An archive whose header flags tile_compression=GZIP but whose individual tiles are stored
 // without compression must be served without error (uncompressed bytes passed through as-is).
 TEST(PMTilesFileSource, UncompressedTile) {

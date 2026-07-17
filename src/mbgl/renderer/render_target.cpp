@@ -77,6 +77,9 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     parameters.renderPass = parameters.encoder->createRenderPass(
         "render target",
         {.renderable = *offscreenTexture, .clearColor = backgroundColor, .clearDepth = {}, .clearStencil = {}});
+#if MLN_RENDER_BACKEND_OPENGL
+    parameters.updateStencilBufferAvailability();
+#endif
 
     const gfx::ScissorRect prevScissorRect = parameters.scissorRect;
     const auto& size = getTexture()->getSize();

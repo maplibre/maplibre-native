@@ -54,6 +54,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       mode(mapOptions.mapMode()),
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
+      fastPFOREnabled(mapOptions.fastPFOREnabled()),
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
@@ -138,6 +139,7 @@ void Map::Impl::onUpdate() {
                                .prefetchZoomDelta = prefetchZoomDelta,
                                .stillImageRequest = bool(stillImageRequest),
                                .crossSourceCollisions = crossSourceCollisions,
+                               .fastPFOREnabled = fastPFOREnabled,
                                .tileLodMinRadius = tileLodMinRadius,
                                .tileLodScale = tileLodScale,
                                .tileLodPitchThreshold = tileLodPitchThreshold,
@@ -432,6 +434,10 @@ void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const
     if (actionJournal) {
         actionJournal->impl->onTileAction(op, id, sourceID);
     }
+}
+
+void Map::Impl::onRenderError(std::exception_ptr error) {
+    observer.onRenderError(error);
 }
 
 } // namespace mbgl

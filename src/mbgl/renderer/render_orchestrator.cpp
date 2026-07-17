@@ -119,7 +119,7 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
                                        const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
-      imageManager(std::make_unique<ImageManager>()),
+      imageManager(ImageManager::create()),
       lineAtlas(std::make_unique<LineAtlas>()),
       patternAtlas(std::make_unique<PatternAtlas>()),
       imageImpls(makeMutable<std::vector<Immutable<style::Image::Impl>>>()),
@@ -351,6 +351,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
         renderSource->setCacheEnabled(tileCacheEnabled);
+        renderSource->setFastPFOREnabled(updateParameters->fastPFOREnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
     transformState = updateParameters->transformState;
@@ -1001,7 +1002,11 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
             renderLayer.removeAllDrawables();
         }
 #endif
-        renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
+        try {
+            renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
+        } catch (...) {
+            observer->onRenderError(std::current_exception());
+        }
     }
 
     // Update terrain if enabled

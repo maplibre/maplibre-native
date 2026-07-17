@@ -88,6 +88,8 @@ public:
         delegate.invoke(&RendererObserver::onTileAction, op, id, sourceID);
     }
 
+    void onRenderError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onRenderError, err); }
+
 private:
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<RendererObserver> delegate;
@@ -166,6 +168,28 @@ std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::str
                                                                   const SourceQueryOptions& options) const {
     // Waits for the result from the orchestration thread and returns
     return mapRenderer.actor().ask(&Renderer::querySourceFeatures, sourceID, options).get();
+}
+
+void AndroidRendererFrontend::setFeatureState(const std::string& sourceID,
+                                              const std::optional<std::string>& sourceLayerID,
+                                              const std::string& featureID,
+                                              const FeatureState& state) const {
+    mapRenderer.actor().invoke(&Renderer::setFeatureState, sourceID, sourceLayerID, featureID, state);
+}
+
+FeatureState AndroidRendererFrontend::getFeatureState(const std::string& sourceID,
+                                                      const std::optional<std::string>& sourceLayerID,
+                                                      const std::string& featureID) const {
+    auto getFeatureState = static_cast<FeatureState (Renderer::*)(
+        const std::string&, const std::optional<std::string>&, const std::string&) const>(&Renderer::getFeatureState);
+    return mapRenderer.actor().ask(getFeatureState, sourceID, sourceLayerID, featureID).get();
+}
+
+void AndroidRendererFrontend::removeFeatureState(const std::string& sourceID,
+                                                 const std::optional<std::string>& sourceLayerID,
+                                                 const std::optional<std::string>& featureID,
+                                                 const std::optional<std::string>& stateKey) const {
+    mapRenderer.actor().invoke(&Renderer::removeFeatureState, sourceID, sourceLayerID, featureID, stateKey);
 }
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenBox& box,
