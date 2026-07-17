@@ -84,18 +84,28 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   @Override
   public void addLayers(LocationComponentPositionManager positionManager) {
 
-    String firstLayer = positionManager.bearingOnTop ? BEARING_LAYER : FOREGROUND_LAYER;
-    String secondLayer = positionManager.bearingOnTop ? FOREGROUND_LAYER : BEARING_LAYER;
+    if (positionManager.bearingOnTop) {
+      // positions the top-most reference layer
+      Layer layer = layerSourceProvider.generateLayer(BEARING_LAYER);
+      positionManager.addLayerToMap(layer);
+      layerSet.add(layer.getId());
 
-    // positions the top-most reference layer
-    Layer layer = layerSourceProvider.generateLayer(firstLayer);
-    positionManager.addLayerToMap(layer);
-    layerSet.add(layer.getId());
+      // adds remaining layers while keeping the order
+      addSymbolLayer(FOREGROUND_LAYER, BEARING_LAYER);
+      addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER);
+      addSymbolLayer(SHADOW_LAYER, BACKGROUND_LAYER);
+    } else {
+      // positions the top-most reference layer
+      Layer layer = layerSourceProvider.generateLayer(FOREGROUND_LAYER);
+      positionManager.addLayerToMap(layer);
+      layerSet.add(layer.getId());
 
-    // adds remaining layers while keeping the order
-    addSymbolLayer(secondLayer, firstLayer);
-    addSymbolLayer(BACKGROUND_LAYER, secondLayer);
-    addSymbolLayer(SHADOW_LAYER, BACKGROUND_LAYER);
+      // adds remaining layers while keeping the order
+      addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER);
+      addSymbolLayer(BEARING_LAYER, BACKGROUND_LAYER);
+      addSymbolLayer(SHADOW_LAYER, BEARING_LAYER);
+    }
+
     addAccuracyLayer();
     addPulsingCircleLayerToMap();
   }
