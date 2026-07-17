@@ -154,6 +154,23 @@ mat4 PaintParameters::clipMatrixForTile(const UnwrappedTileID& tileID) const {
     affine[12] = scale - 1.0 + 2.0 * offsetX;
     affine[13] = 1.0 - scale - 2.0 * offsetY;
     matrix::multiply(matrix, affine, matrix);
+
+#if !MLN_RENDER_BACKEND_OPENGL
+    // Remap clip z from GL's [-1, 1] to Vulkan/Metal/WebGPU's [0, 1], exactly as
+    // LayerTweaker::getTileMatrix does for the draped drawable matrix. The tile
+    // clipping-mask quad has in_position.z = 0, so matrix::ortho puts its clip z at
+    // -1 — behind the near plane on those backends, so the mask is clipped away and no
+    // stencil is written. Stencil-tested draped layers (fill, line) then fail the
+    // stencil test everywhere and draw nothing over the terrain (a fill/line vector
+    // basemap draped on terrain renders blank; color-relief/hillshade, which don't
+    // stencil-test, were unaffected). The affine above only touches x/y, so remapping
+    // the final matrix's z is equivalent to remapping the ortho.
+    matrix[2] = 0.5 * (matrix[2] + matrix[3]);
+    matrix[6] = 0.5 * (matrix[6] + matrix[7]);
+    matrix[10] = 0.5 * (matrix[10] + matrix[11]);
+    matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+#endif
+
     return matrix;
 }
 
