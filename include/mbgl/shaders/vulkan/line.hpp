@@ -173,7 +173,7 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
     if (drawable.pad1 != 0.0) {
@@ -410,7 +410,7 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -662,7 +662,7 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -991,7 +991,7 @@ void main() {
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);

@@ -60,7 +60,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     highp vec2 epsilon = 1.0 / tileProps.dimension;
     float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;

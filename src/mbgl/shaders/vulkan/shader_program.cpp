@@ -238,7 +238,15 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                         .setLayout(pipelineLayout.get())
                                         .setRenderPass(pipelineInfo.renderPass);
 
-    pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo, nullptr, dispatcher).value);
+    // Pass the context's shared VkPipelineCache: the ShaderProgram pipeline map keys on
+    // the VkRenderPass handle, so each terrain drape target (its own render pass) is a
+    // cache miss and hits this create. Without a pipeline cache every such miss fully
+    // recompiles the shaders (~ms each — the dominant cost when many drape targets render
+    // per frame); the cache lets the driver reuse the compiled shaders across compatible
+    // render passes so these become cheap.
+    pipeline = std::move(
+        device->createGraphicsPipelineUnique(context.getPipelineCache(), pipelineCreateInfo, nullptr, dispatcher)
+            .value);
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");
 
     return pipeline;

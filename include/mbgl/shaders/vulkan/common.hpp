@@ -114,12 +114,31 @@ layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
 } platformParams;
 #endif
 
-void applySurfaceTransform() {
+// Draped geometry passes its drape target tile (the push-constant drape_tile that
+// apply_drape_transform also uses; the per-target global UBO swap is a no-op on
+// Vulkan). While drawing into a drape target (drape_tile.w != 0) the surface
+// transform is skipped: the offscreen drape target is oriented by the tile-local
+// drape ortho and matched by the terrain shader's uv.y sample flip, so applying the
+// swapchain's pre-rotation + y-down flip on top would mirror every draped tile
+// vertically — the draped map (color-relief, hillshade, fill, ...) stops lining up
+// with the terrain heights, and apply_drape_transform's zoom-mismatch y-offset
+// inverts (the misalignment grows on zoom-out). Matches the GL path, which applies
+// no surface flip to draped geometry.
+void applySurfaceTransform(vec4 drape_tile) {
+    if (drape_tile.w != 0.0) {
+        return;
+    }
+
 #ifdef USE_SURFACE_TRANSFORM
     gl_Position.xy = platformParams.rotation * gl_Position.xy;
 #endif
 
     gl_Position.y *= -1.0;
+}
+
+// Non-draped geometry renders to the swapchain and always gets the surface transform.
+void applySurfaceTransform() {
+    applySurfaceTransform(vec4(0.0));
 }
 
 // Place a clip-space position computed with a tile-local drape matrix into the

@@ -157,6 +157,15 @@ public:
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
+    // Shared pipeline cache passed to every vkCreateGraphicsPipelines. Without it the
+    // driver recompiles a pipeline's shaders from scratch on every cache miss; the
+    // maplibre-side pipeline cache (ShaderProgram) keys on the VkRenderPass handle, so
+    // each terrain drape target (its own render pass) misses and would otherwise pay a
+    // full ~several-ms shader compile per target per frame. The VkPipelineCache lets the
+    // driver reuse the compiled shaders across compatible render passes, so the repeated
+    // creates become cheap lookups.
+    vk::PipelineCache getPipelineCache();
+
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     vk::UniqueCommandBuffer& getCommandBuffer() { return frameResources[frameResourceIndex].commandBuffer; }
     void enqueueDeletion(DeletionTask&& function);
@@ -205,6 +214,7 @@ private:
     vk::UniqueDescriptorSetLayout drawableImageDescriptorSetLayout;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;
+    vk::UniquePipelineCache pipelineCache;
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;

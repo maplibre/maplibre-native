@@ -5,17 +5,23 @@
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <algorithm>
 #include <array>
+#include <vector>
 
 namespace mbgl {
 namespace vulkan {
 
 class OffscreenTextureResource final : public RenderableResource {
 public:
-    OffscreenTextureResource(RendererBackend& backend_, const Size size_, const gfx::TextureChannelDataType type_)
+    OffscreenTextureResource(RendererBackend& backend_,
+                             const Size size_,
+                             const gfx::TextureChannelDataType type_,
+                             bool stencil_)
         : RenderableResource(backend_),
           size(size_),
-          type(type_) {
+          type(type_),
+          wantsStencil(stencil_) {
         assert(!size.isEmpty());
 
         extent.width = size.width;
@@ -50,8 +56,11 @@ public:
 
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
 
-    // Offscreen render targets have a depth attachment but no stencil (matching gl-js).
-    bool hasStencilAttachment() const override { return false; }
+    // True once createDepthImage() has picked a combined depth/stencil format; false for a
+    // depth-only target or if stencil support was requested but no supported format was found
+    // (createDepthImage() logs an error and hasStencilAttachment() falls back to depth-only so
+    // the target still renders, just without tile-clipping).
+    bool hasStencilAttachment() const override { return stencilSupported; }
 
     PremultipliedImage readStillImage() {
         if (!colorTexture) {
@@ -67,10 +76,35 @@ public:
         return colorTexture;
     }
 
-    // Create a depth-only attachment for the offscreen target, matching gl-js's drape
-    // framebuffer (depth, no stencil). eD32Sfloat is a Vulkan-mandated depth format.
+    // Create the depth (and, for drape render targets, stencil) attachment for the offscreen
+    // target. Terrain drape targets need a stencil to clip overlapping draped tiles against
+    // each other (TexturePool::createRenderTarget), matching gl-js's render-to-texture
+    // framebuffer; other offscreen textures (e.g. the depth-occlusion pass) stay depth-only.
+    // eD32Sfloat is a Vulkan-mandated depth-only format; a combined depth/stencil format is
+    // not universally guaranteed, so it is queried the same way
+    // SurfaceRenderableResource::initDepthStencil() does for the main framebuffer.
     void createDepthImage() {
         if (depthAllocation) return;
+
+        if (wantsStencil) {
+            const auto& physicalDevice = backend.getPhysicalDevice();
+            const auto& dispatcher = backend.getDispatcher();
+            const std::vector<vk::Format> formats = {
+                vk::Format::eD24UnormS8Uint,
+                vk::Format::eD32SfloatS8Uint,
+                vk::Format::eD16UnormS8Uint,
+            };
+            const auto& formatIt = std::find_if(formats.begin(), formats.end(), [&](const auto& format) {
+                const auto& formatProps = physicalDevice.getFormatProperties(format, dispatcher);
+                return formatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment;
+            });
+            if (formatIt != formats.end()) {
+                depthFormat = *formatIt;
+                stencilSupported = true;
+            } else {
+                mbgl::Log::Error(mbgl::Event::Render, "Depth/Stencil format not available for offscreen texture");
+            }
+        }
 
         const auto imageCreateInfo = vk::ImageCreateInfo()
                                          .setImageType(vk::ImageType::e2D)
@@ -95,12 +129,13 @@ public:
             return;
         }
 
+        const auto depthAspect = stencilSupported ? (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
+                                                  : vk::ImageAspectFlags(vk::ImageAspectFlagBits::eDepth);
         const auto imageViewCreateInfo = vk::ImageViewCreateInfo()
                                              .setImage(depthAllocation->image)
                                              .setViewType(vk::ImageViewType::e2D)
                                              .setFormat(depthFormat)
-                                             .setSubresourceRange(vk::ImageSubresourceRange(
-                                                 vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
+                                             .setSubresourceRange(vk::ImageSubresourceRange(depthAspect, 0, 1, 0, 1));
 
         depthAllocation->imageView = backend.getDevice()->createImageViewUnique(
             imageViewCreateInfo, nullptr, backend.getDispatcher());
@@ -128,7 +163,7 @@ public:
                 .setSamples(vk::SampleCountFlagBits::e1)
                 .setLoadOp(vk::AttachmentLoadOp::eClear)
                 .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                .setStencilLoadOp(stencilSupported ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eDontCare)
                 .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
                 .setInitialLayout(vk::ImageLayout::eUndefined)
                 .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
@@ -185,6 +220,8 @@ public:
 private:
     const Size size;
     const gfx::TextureChannelDataType type;
+    const bool wantsStencil;
+    bool stencilSupported = false;
 
     gfx::Texture2DPtr colorTexture;
     UniqueImageAllocation depthAllocation;
@@ -196,12 +233,9 @@ OffscreenTexture::OffscreenTexture(Context& context,
                                    const Size size_,
                                    const gfx::TextureChannelDataType type,
                                    [[maybe_unused]] bool depth,
-                                   [[maybe_unused]] bool stencil)
-    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type)) {
-    // The offscreen resource always provides a depth attachment (no stencil), matching
-    // gl-js's drape framebuffer; a stencil attachment is not supported.
-    assert(!stencil);
-}
+                                   bool stencil)
+    : gfx::OffscreenTexture(
+          size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type, stencil)) {}
 
 bool OffscreenTexture::isRenderable() {
     return true;

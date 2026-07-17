@@ -46,7 +46,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 }
 )";
 
@@ -136,7 +136,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 }
 )";
 

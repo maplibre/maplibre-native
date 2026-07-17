@@ -48,7 +48,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     frag_position = vec2(in_texture_position) / 8192.0;
     frag_position.y = 1.0 - frag_position.y;

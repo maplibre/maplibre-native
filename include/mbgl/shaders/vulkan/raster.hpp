@@ -63,7 +63,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
-    applySurfaceTransform();
+    applySurfaceTransform(constant.drape_tile);
 
     // We are using Int16 for texture position coordinates to give us enough precision for
     // fractional coordinates. We use 8192 to scale the texture coordinates in the buffer

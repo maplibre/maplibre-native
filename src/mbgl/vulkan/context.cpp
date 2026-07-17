@@ -627,7 +627,18 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindVertexBuffers(0, vertexBuffers, offset, dispatcher);
     commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
 
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    // Cast to the polymorphic base, not SurfaceRenderableResource: this render pass's
+    // renderable is the main window surface for ordinary rendering, but an offscreen
+    // OffscreenTextureResource for a terrain drape target (render_target.cpp) - an
+    // unrelated sibling type. getResource<T>() is an unchecked static_cast, so casting
+    // to the concrete surface type here reinterpreted an OffscreenTextureResource's
+    // memory as a SurfaceRenderableResource and read garbage for the rotation, which
+    // corrupted the tile-clipping-mask matrix and made every draped drawable that
+    // stencil-tests against it (color-relief, hillshade, ...) fail to render. The base
+    // class's default getRotation() (0, correct for an orthographic drape target) is
+    // picked up automatically via virtual dispatch for OffscreenTextureResource, while
+    // SurfaceRenderableResource still overrides it with the real device rotation.
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<RenderableResource>();
     const float rad = renderableResource.getRotation();
     const mat4 rotationMat = {
         std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
@@ -811,6 +822,15 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 
     return pushConstantPipelineLayout;
+}
+
+vk::PipelineCache Context::getPipelineCache() {
+    if (!pipelineCache) {
+        pipelineCache = backend.getDevice()->createPipelineCacheUnique(
+            vk::PipelineCacheCreateInfo(), nullptr, backend.getDispatcher());
+        backend.setDebugName(pipelineCache.get(), "PipelineCache");
+    }
+    return pipelineCache.get();
 }
 
 void Context::FrameResources::runDeletionQueue(Context& context) {
