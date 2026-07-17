@@ -6,7 +6,7 @@ import org.maplibre.android.RenderingEngine;
 
 /**
  * multiBackend flavor: when asked to load "maplibre", routes to either
- * libmaplibre.so (OpenGL, the default name) or libmaplibre-vulkan.so based on
+ * libmaplibre.so (Vulkan, the default name) or libmaplibre-opengl.so based on
  * {@link RenderingEngine#getCurrentType()}. Any other library name is loaded
  * verbatim.
  */
@@ -21,8 +21,8 @@ public class LibraryLoaderProviderImpl implements LibraryLoaderProvider {
     @Override
     public void load(String name) {
       if ("maplibre".equals(name)
-          && RenderingEngine.getCurrentType() == RenderingEngine.Type.VULKAN) {
-        System.loadLibrary("maplibre-vulkan");
+          && RenderingEngine.getCurrentType() == RenderingEngine.Type.OPENGL) {
+        System.loadLibrary("maplibre-opengl");
       } else {
         System.loadLibrary(name);
       }

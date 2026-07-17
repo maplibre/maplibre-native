@@ -1,6 +1,6 @@
 # Android multi-backend build (Gradle `multiBackend` flavor only).
 #
-# Builds libmaplibre.so (OpenGL) and libmaplibre-vulkan.so (Vulkan) by invoking this directory's
+# Builds libmaplibre.so (Vulkan) and libmaplibre-opengl.so (OpenGL) by invoking this directory's
 # stock single-backend build twice via ExternalProject, and surfaces both to AGP as SHARED
 # targets so both .so land in the multiBackend AAR.
 #
@@ -58,10 +58,7 @@ ExternalProject_Add(maplibre-vulkan-build
 set(_stub ${CMAKE_BINARY_DIR}/maplibre_multi_stub.cpp)
 file(WRITE ${_stub} "extern \"C\" void maplibre_multi_backend_stub() {}\n")
 
-add_library(maplibre-opengl SHARED ${_stub})
-# Produce libmaplibre.so (not libmaplibre-opengl.so) so the OpenGL output matches the
-# single-backend OpenGL AAR's library name.
-set_target_properties(maplibre-opengl PROPERTIES OUTPUT_NAME maplibre)
+add_library(maplibre-opengl SHARED ${_stub})    # -> libmaplibre-opengl.so
 add_dependencies(maplibre-opengl maplibre-opengl-build)
 add_custom_command(TARGET maplibre-opengl POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
@@ -69,7 +66,11 @@ add_custom_command(TARGET maplibre-opengl POST_BUILD
         $<TARGET_FILE:maplibre-opengl>
     VERBATIM)
 
-add_library(maplibre-vulkan SHARED ${_stub})    # -> libmaplibre-vulkan.so
+add_library(maplibre-vulkan SHARED ${_stub})
+# Produce libmaplibre.so (not libmaplibre-vulkan.so): Vulkan is the multiBackend AAR's
+# default/primary library, matching the SDK-wide convention where Vulkan is the default
+# backend and OpenGL ships as the explicitly-named "-opengl" variant.
+set_target_properties(maplibre-vulkan PROPERTIES OUTPUT_NAME maplibre)
 add_dependencies(maplibre-vulkan maplibre-vulkan-build)
 add_custom_command(TARGET maplibre-vulkan POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
