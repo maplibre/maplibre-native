@@ -7,8 +7,10 @@ import android.content.pm.PackageManager
 import android.content.res.Resources.NotFoundException
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
@@ -18,11 +20,14 @@ import androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.maplibre.android.RenderingEngine
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.adapter.FeatureAdapter
 import org.maplibre.android.testapp.adapter.FeatureSectionAdapter
 import org.maplibre.android.testapp.model.activity.Feature
+import org.maplibre.android.testapp.utils.AppRestarter
 import org.maplibre.android.testapp.utils.ItemClickSupport
+import org.maplibre.android.testapp.utils.RenderingEnginePreference
 import timber.log.Timber
 import java.util.*
 
@@ -182,6 +187,49 @@ class FeatureOverviewActivity : AppCompatActivity() {
             }
         })
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_rendering_engine) {
+            showRenderingEngineDialog()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showRenderingEngineDialog() {
+        val engineTypes = RenderingEngine.Type.values()
+        val currentType = RenderingEngine.getCurrentType()
+        val labels = engineTypes.map { type ->
+            if (type == currentType) {
+                getString(R.string.rendering_engine_current_label, type.name)
+            } else {
+                type.name
+            }
+        }.toTypedArray()
+        val checkedIndex = engineTypes.indexOf(currentType)
+        AlertDialog.Builder(this)
+            .setTitle(R.string.rendering_engine_dialog_title)
+            .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
+                dialog.dismiss()
+                switchRenderingEngine(engineTypes[which])
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    // RenderingEngine.setCurrentType() throws once MapLibre.getInstance() has run
+    // (which already happened in Application#onCreate() by the time this activity is
+    // shown), so it can't be probed here. The choice is persisted and applied on the
+    // next launch instead, before MapLibre.getInstance() runs — see
+    // MapLibreApplication#applyPersistedRenderingEngine(), which also surfaces the
+    // unsupported-backend error if the persisted choice turns out not to be supported.
+    private fun switchRenderingEngine(type: RenderingEngine.Type) {
+        if (type == RenderingEngine.getCurrentType()) {
+            return
+        }
+        RenderingEnginePreference.save(this, type)
+        AppRestarter.restart(this)
     }
 
     // Filter the features based on the search query
