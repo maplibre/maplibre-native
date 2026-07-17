@@ -123,7 +123,6 @@ class BenchmarkActivity : AppCompatActivity() {
                "OpenFreeMap Bright"
             ),
             styleURLs = listOf(
-//                {"message":"User is not authorized to access this resource with an explicit deny in an identity-based policy"}
                 "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
                 "https://americanamap.org/style.json",
 //                "https://api.protomaps.com/styles/v2/light.json?key=e761cc7daedf832a",
