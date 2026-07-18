@@ -26,7 +26,9 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/render_terrain.hpp>
+#include <mbgl/renderer/dem_elevation_provider.hpp>
 #include <mbgl/renderer/layers/terrain_layer_tweaker.hpp>
+#include <mbgl/util/tile_cover.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/renderer_backend.hpp>
@@ -245,7 +247,18 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         for (const auto& renderTile : *renderTiles) {
             renderTileIDs.insert(renderTile.id);
         }
-        const std::set<UnwrappedTileID> demTileIDs = RenderTerrain::expandToDeepestCover(renderTileIDs);
+        std::set<UnwrappedTileID> demTileIDs = RenderTerrain::expandToDeepestCover(renderTileIDs);
+        // RenderTerrain frustum-culls this same set before meshing (a sparse DEM's
+        // large low-zoom ancestors are mostly off-screen). Cull here too so we only
+        // allocate drape targets for mesh tiles that survive - otherwise the pool
+        // grows with off-screen targets as the camera browses/zooms, ballooning
+        // memory until it OOM-crashes.
+        {
+            DEMElevationProvider elevationProvider(demSource, terrain->getExaggeration());
+            const util::TileCoverParameters cullParams{.transformState = state,
+                                                       .elevationProvider = &elevationProvider};
+            demTileIDs = util::frustumCull(cullParams, demTileIDs);
+        }
         for (const auto& id : demTileIDs) {
             texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
         }
