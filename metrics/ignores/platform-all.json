@@ -103,6 +103,8 @@
     "render-tests/symbol-cross-fade/chinese": "https://github.com/mapbox/mapbox-gl-native/issues/10619",
     "render-tests/terrain/default": "3D terrain is experimental; expected image is a maplibre-gl-js render pending native baselines",
     "render-tests/terrain/pitched-world": "3D terrain is experimental; expected image is a maplibre-gl-js render pending native baselines",
+    "render-tests/terrain/skirts-auto": "3D terrain is experimental; expected image is a maplibre-gl-js render pending native baselines",
+    "render-tests/terrain/skirts-none": "3D terrain is experimental; expected image is a maplibre-gl-js render pending native baselines",
     "render-tests/text-max-width/zero-width-point-placement": "https://github.com/mapbox/mapbox-gl-native/issues/15648",
     "render-tests/text-size/nan": "https://github.com/mapbox/mapbox-gl-native/issues/16020",
     "render-tests/text-variable-anchor/remember-last-placement": "skip - fails on gl-native, as symbol index is not functional at static map mode - needs issue",
