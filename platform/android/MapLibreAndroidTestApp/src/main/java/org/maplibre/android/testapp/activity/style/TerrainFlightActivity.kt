@@ -129,7 +129,11 @@ class TerrainFlightActivity : AppCompatActivity() {
         val heading = bearingBetween(here, ahead) +
             ROTATION_AMPLITUDE_DEG * sin(distance / ROTATION_PERIOD_KM * 2.0 * Math.PI)
         val tilt = FLIGHT_TILT + TILT_AMPLITUDE_DEG * sin(distance / TILT_PERIOD_KM * 2.0 * Math.PI)
-        val zoom = ZOOM_MID + ZOOM_AMPLITUDE * sin(distance / ZOOM_PERIOD_KM * 2.0 * Math.PI)
+        // Start at the high-altitude (low-zoom) end of the sweep (-cos is +1 at
+        // distance 0), so the flight opens well above the terrain and only dives
+        // to the low FPV zoom later - the camera is sea-level-anchored, so opening
+        // low over a peak would start inside the mountain (TERRAIN.md Phase 4).
+        val zoom = ZOOM_MID - ZOOM_AMPLITUDE * cos(distance / ZOOM_PERIOD_KM * 2.0 * Math.PI)
         return CameraPosition.Builder()
             .target(here)
             .zoom(zoom)
