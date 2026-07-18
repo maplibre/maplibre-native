@@ -43,6 +43,26 @@
 
 namespace mbgl {
 
+namespace {
+
+// Scale and x/y offset mapping a child tile's local space into the (possibly
+// ancestor) DEM tile that covers it: a child dz levels deeper occupies the
+// 1/scale sub-square at (dx, dy) of the ancestor.
+struct DEMSubTileOffset {
+    float scale;
+    float dx;
+    float dy;
+};
+
+DEMSubTileOffset demSubTileOffset(const CanonicalTileID& child, const CanonicalTileID& ancestor) {
+    const int dz = child.z - ancestor.z;
+    return {static_cast<float>(1u << dz),
+            static_cast<float>(child.x - (ancestor.x << dz)),
+            static_cast<float>(child.y - (ancestor.y << dz))};
+}
+
+} // namespace
+
 RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
     : impl(std::move(impl_)) {}
 
@@ -77,15 +97,6 @@ std::set<UnwrappedTileID> RenderTerrain::expandToDeepestCover(const std::set<Unw
     return out;
 }
 
-void RenderTerrain::update(const UpdateParameters& /*parameters*/) {
-    // Find the DEM source if we haven't already
-    if (!demSource && !impl->sourceID.empty()) {
-        // In a full implementation, we would look up the source from parameters.sources
-        // and cache the RenderSource pointer
-        // For now, this is a placeholder
-    }
-}
-
 void RenderTerrain::update(RenderOrchestrator& orchestrator,
                            gfx::ShaderRegistry& shaders,
                            gfx::Context& context,
@@ -97,9 +108,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // Find the DEM source if we haven't already
     if (!demSource && !impl->sourceID.empty()) {
         demSource = orchestrator.getRenderSource(impl->sourceID);
-        if (demSource) {
-            Log::Info(Event::Render, "Terrain found DEM source: " + impl->sourceID);
-        } else {
+        if (!demSource) {
             Log::Warning(Event::Render, "Terrain could not find DEM source: " + impl->sourceID);
         }
     }
@@ -109,7 +118,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         if (auto layerGroup_ = context.createLayerGroup(TERRAIN_LAYER_INDEX, /*initialCapacity=*/1, "terrain", false)) {
             layerGroup = std::move(layerGroup_);
             activateLayerGroup(true, changes);
-            Log::Info(Event::Render, "Created terrain layer group");
         } else {
             Log::Error(Event::Render, "Failed to create terrain layer group");
             return;
@@ -125,7 +133,6 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // Create tweaker if we don't have one
     if (!tweaker) {
         tweaker = std::make_unique<TerrainLayerTweaker>(this);
-        Log::Info(Event::Render, "Created terrain layer tweaker");
     }
 
     // If we don't have a DEM source, we can't create terrain drawables
@@ -292,11 +299,8 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             } else {
                 ancestorEntry->lastUsed = demUpdateCounter;
                 demTier = 1;
-                const int dz = unwrapped.canonical.z - ancestorID->canonical.z;
-                const float scale = static_cast<float>(1u << dz);
-                const float dx = static_cast<float>(unwrapped.canonical.x - (ancestorID->canonical.x << dz));
-                const float dy = static_cast<float>(unwrapped.canonical.y - (ancestorID->canonical.y << dz));
-                demCoords = {{1.0f / scale, dx / scale, dy / scale, 0.0f}};
+                const auto off = demSubTileOffset(unwrapped.canonical, ancestorID->canonical);
+                demCoords = {{1.0f / off.scale, off.dx / off.scale, off.dy / off.scale, 0.0f}};
             }
         }
 
@@ -372,12 +376,9 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID, float x, float 
 
     // Map the tile-local coordinate into the (possibly ancestor) DEM tile
     const UnwrappedTileID& demTileID = demRenderTile->id;
-    const int dz = tileID.canonical.z - demTileID.canonical.z;
-    const float scale = static_cast<float>(1u << dz);
-    const float dx = static_cast<float>(tileID.canonical.x - (demTileID.canonical.x << dz));
-    const float dy = static_cast<float>(tileID.canonical.y - (demTileID.canonical.y << dz));
-    const float xInDem = (dx * util::EXTENT + x) / scale;
-    const float yInDem = (dy * util::EXTENT + y) / scale;
+    const auto off = demSubTileOffset(tileID.canonical, demTileID.canonical);
+    const float xInDem = (off.dx * util::EXTENT + x) / off.scale;
+    const float yInDem = (off.dy * util::EXTENT + y) / off.scale;
 
     // Bilinear interpolation of the DEM texels, as in maplibre-gl-js Terrain.getDEMElevation
     const float dim = static_cast<float>(demData.dim);
@@ -419,14 +420,11 @@ std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const Un
 
     // Map tile-local coordinates (0..EXTENT) of the requested tile into
     // normalized coordinates (0..1) of the (possibly ancestor) DEM tile
-    const int dz = tileID.canonical.z - demTileID->canonical.z;
-    const float scale = static_cast<float>(1u << dz);
-    const float dx = static_cast<float>(tileID.canonical.x - (demTileID->canonical.x << dz));
-    const float dy = static_cast<float>(tileID.canonical.y - (demTileID->canonical.y << dz));
+    const auto off = demSubTileOffset(tileID.canonical, demTileID->canonical);
 
     return TerrainData{
         .demTexture = entry->texture,
-        .demCoords = {{1.0f / (util::EXTENT * scale), dx / scale, dy / scale, 0.0f}},
+        .demCoords = {{1.0f / (util::EXTENT * off.scale), off.dx / off.scale, off.dy / off.scale, 0.0f}},
         .demDim = static_cast<float>(entry->dim),
     };
 }
@@ -522,7 +520,7 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
             // Position coordinates (in tile space 0-8192)
             vertices.push_back(static_cast<int16_t>(x * posStep));
             vertices.push_back(static_cast<int16_t>(y * posStep));
-            // Texture coordinates (same as position for now - will be used to sample DEM)
+            // Texture coordinates (tile-space, used to sample the DEM)
             vertices.push_back(static_cast<int16_t>(x * texStep));
             vertices.push_back(static_cast<int16_t>(y * texStep));
         }
@@ -587,59 +585,6 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
     return texture;
 }
 
-std::shared_ptr<gfx::Texture2D> RenderTerrain::createTestMapTexture(gfx::Context& context) {
-    // Create a simple test texture with a checkerboard pattern
-    // This will be replaced with actual render-to-texture output later
-    const uint32_t size = 512;       // 512x512 texture
-    const uint32_t checkerSize = 64; // Size of each checker square
-
-    // Create RGBA pixel data
-    auto imageData = std::make_unique<uint8_t[]>(size * size * 4);
-
-    for (uint32_t y = 0; y < size; y++) {
-        for (uint32_t x = 0; x < size; x++) {
-            uint32_t index = (y * size + x) * 4;
-
-            // Create checkerboard pattern
-            bool isWhite = ((x / checkerSize) + (y / checkerSize)) % 2 == 0;
-
-            if (isWhite) {
-                // White with full alpha
-                imageData[index + 0] = 255; // R
-                imageData[index + 1] = 255; // G
-                imageData[index + 2] = 255; // B
-                imageData[index + 3] = 255; // A
-            } else {
-                // Light blue with full alpha
-                imageData[index + 0] = 100; // R
-                imageData[index + 1] = 150; // G
-                imageData[index + 2] = 255; // B
-                imageData[index + 3] = 255; // A
-            }
-        }
-    }
-
-    // Create PremultipliedImage from raw data
-    auto image = std::make_shared<PremultipliedImage>(Size{size, size}, std::move(imageData));
-
-    // Create texture
-    auto texture = context.createTexture2D();
-    if (!texture) {
-        Log::Error(Event::Render, "Failed to create test map texture");
-        return nullptr;
-    }
-
-    // Set the image
-    texture->setImage(image);
-
-    // Configure sampler
-    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
-                                      .wrapU = gfx::TextureWrapType::Repeat,
-                                      .wrapV = gfx::TextureWrapType::Repeat});
-
-    return texture;
-}
-
 std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context& context,
                                                                     gfx::ShaderRegistry& shaders,
                                                                     const OverscaledTileID& tileID,
@@ -672,11 +617,10 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
         return nullptr;
     }
 
-    // Configure builder - terrain is 3D and writes depth
-    // NOTE: Using Translucent pass because Opaque pass renders in REVERSE order (high index = back)
-    // TEMP: Disable depth testing to render on top of everything
+    // The drape pass uses the Translucent render pass because it renders in
+    // forward order (high index = front), unlike Opaque which renders reversed.
     builder->setShader(terrainShader);
-    builder->setRenderPass(RenderPass::Translucent); // Translucent pass renders in forward order (high index = front)
+    builder->setRenderPass(RenderPass::Translucent);
     if (depthPass) {
         // The depth pass renders packed depth with real depth testing so the
         // nearest surface wins, into the terrain depth target (renderDepth)
@@ -685,10 +629,12 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
         builder->setEnableDepth(true);
         builder->setIs3D(true);
     } else {
-        builder->setDepthType(gfx::DepthMaskType::ReadOnly); // Don't write depth
+        // The drape renders the tile pyramid into the offscreen target, so it
+        // neither tests nor writes the main depth buffer.
+        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::unblended());
-        builder->setEnableDepth(false); // Disable depth testing
-        builder->setIs3D(false);        // Treat as 2D for now
+        builder->setEnableDepth(false);
+        builder->setIs3D(false);
     }
 
     // Set vertex data - copy vertices to raw buffer
@@ -713,16 +659,12 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     }
 
     // The depth pass samples only the DEM and writes packed depth, so it has no
-    // map texture by design; only the draped pass needs one (falling back to the
-    // test pattern if the render target has no texture yet)
+    // map texture by design; only the draped pass binds the drape render target
     if (!depthPass) {
-        if (!mapTexture) {
-            mapTexture = createTestMapTexture(context);
-        }
         if (mapTexture) {
             builder->setTexture(mapTexture, 1); // Texture index 1 for map
         } else {
-            Log::Warning(Event::Render, "Failed to create test map texture for tile " + util::toString(tileID));
+            Log::Warning(Event::Render, "No drape texture for terrain tile " + util::toString(tileID));
         }
     }
 
@@ -741,13 +683,6 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
     drawable->setTileID(tileID);
 
     return std::move(drawable);
-}
-
-RenderSource* RenderTerrain::findDEMSource(const UpdateParameters& /*parameters*/) {
-    // TODO: Implement source lookup
-    // This would iterate through parameters.sources to find the raster-dem source
-    // matching impl->sourceID
-    return nullptr;
 }
 
 void RenderTerrain::activateLayerGroup(bool activate, UniqueChangeRequestVec& changes) {

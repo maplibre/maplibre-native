@@ -459,12 +459,21 @@ from entering the terrain in the first place rather than correcting afterwards.
 
 - **(done)** Removed the TEMP terrain diagnostics: the throttled drape-coverage
   warning and `DrapeCoverage::emptyGroups` in render_target.cpp, and the
-  per-frame terrain-summary / `skippedNoDEM` logs in render_terrain.cpp. The
-  remaining `Log::Info`/`Warning` in render_terrain.cpp are one-time setup and
-  error logs, not per-frame; terrain_layer_tweaker.cpp has no per-frame logging.
-- Still to review: the `// TEMP: Disable depth testing` in the terrain drawable
-  setup (render_terrain.cpp) - it is functional, so confirm the depth mode is
-  correct before changing it. Check mtl/drawable.cpp for any leftover debug logs.
+  per-frame terrain-summary / `skippedNoDEM` logs in render_terrain.cpp.
+- **(done)** Removed the terrain bring-up debug scaffolding: the `TERRAIN:`
+  texture/upload logs in mtl/drawable.cpp and the `getName() == "terrain"` logs
+  in mtl/layer_group.cpp (both back to their upstream bodies bar the
+  `renderToTerrain` constructor arg); the checkerboard `createTestMapTexture`
+  fallback, the dead `findDEMSource`, and the no-op `update(UpdateParameters)`
+  in render_terrain.cpp; the opt-in `MLN_VALIDATE_UNIFORM_BLOCK_BINDINGS` block
+  in gl/drawable_gl.cpp; and the Metal terrain shader's elevation-gradient debug
+  fallback (it now samples the drape texture like the GL/Vulkan/WebGPU shaders).
+  The `// TEMP: Disable depth testing` comment is gone — the drape pass not
+  testing/writing the main depth buffer is intentional and unchanged. The
+  duplicated DEM sub-tile mapping (`dz`/`scale`/`dx`/`dy`) in render_terrain.cpp
+  is now a single `demSubTileOffset` helper. The remaining logs in
+  render_terrain.cpp are one-time warning/error logs; terrain_layer_tweaker.cpp
+  has no per-frame logging.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
 - Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)

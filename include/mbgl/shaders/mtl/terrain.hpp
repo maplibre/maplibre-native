@@ -98,13 +98,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Create 3D position with elevation as Z coordinate
     float4 position = drawable.matrix * float4(pos.x, pos.y, elevation, 1.0);
 
-    // Pack elevation value for fragment shader visualization
-    float packedValue = elevation;
-
     return {
-        .position    = position,
-        .uv          = uv,
-        .elevation   = packedValue,  // Pass packed RGBA to detect any non-zero values
+        .position  = position,
+        .uv        = uv,
+        .elevation = elevation,
     };
 }
 
@@ -118,34 +115,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Sample the map texture (render-to-texture output) for the surface color
     // Note: Y-coordinate is flipped (1.0 - y) to match OpenGL convention
-    float4 mapColor = mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y));
-
-    // If map texture has valid data, use it; otherwise fall back to elevation-based coloring
-    // Check if alpha is > 0 to detect valid map data
-    if (mapColor.a > 0.01) {
-        return half4(mapColor);
-    }
-
-    // Fallback: elevation-based color gradient for debugging
-    float elevation = in.elevation;
-    float normalizedElevation = clamp((elevation - 500.0) / 3500.0, 0.0, 1.0);
-
-    float3 color;
-    if (normalizedElevation < 0.33) {
-        float t = normalizedElevation / 0.33;
-        color = mix(float3(0.2, 0.4, 0.8), float3(0.3, 0.7, 0.3), t);
-    } else if (normalizedElevation < 0.66) {
-        float t = (normalizedElevation - 0.33) / 0.33;
-        color = mix(float3(0.3, 0.7, 0.3), float3(0.6, 0.5, 0.3), t);
-    } else {
-        float t = (normalizedElevation - 0.66) / 0.34;
-        color = mix(float3(0.6, 0.5, 0.3), float3(0.95, 0.95, 0.95), t);
-    }
-
-    float gridLine = step(0.98, fract(in.uv.x * 4.0)) + step(0.98, fract(in.uv.y * 4.0));
-    color = mix(color, float3(1.0, 1.0, 1.0), gridLine * 0.5);
-
-    return half4(half3(color), 1.0);
+    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
 }
 )";
 };

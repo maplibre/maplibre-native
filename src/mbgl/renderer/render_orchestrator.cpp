@@ -221,12 +221,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         renderLight.evaluate(evaluationParameters);
     }
 
-    // Update terrain.
+    // Update terrain. The per-frame drawable/DEM update happens later in
+    // updateRenderTree once the render sources have been updated; here we only
+    // (re)create or drop the RenderTerrain to match the style.
     if (updateParameters->terrain) {
         if (!renderTerrain || renderTerrain->getImpl() != *updateParameters->terrain) {
             renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
         }
-        renderTerrain->update(*updateParameters);
     } else if (renderTerrain) {
         renderTerrain.reset();
     }

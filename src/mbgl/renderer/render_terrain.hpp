@@ -59,12 +59,6 @@ public:
     static std::set<UnwrappedTileID> expandToDeepestCover(const std::set<UnwrappedTileID>& tileIDs);
 
     /**
-     * @brief Update terrain state for the current frame
-     * @param parameters Update parameters including transform state and sources
-     */
-    void update(const UpdateParameters& parameters);
-
-    /**
      * @brief Update terrain rendering (create/update drawables)
      * @param orchestrator Render orchestrator for accessing render sources
      * @param shaders Shader registry for getting terrain shader
@@ -217,11 +211,6 @@ private:
     void generateMesh(gfx::Context& context);
 
     /**
-     * @brief Find the DEM source for the current terrain
-     */
-    RenderSource* findDEMSource(const UpdateParameters& parameters);
-
-    /**
      * @brief Activate or deactivate the layer group
      */
     void activateLayerGroup(bool activate, UniqueChangeRequestVec& changes);
@@ -288,14 +277,6 @@ private:
      * @return Shared pointer to created texture
      */
     std::shared_ptr<gfx::Texture2D> createDEMTexture(gfx::Context& context, const DEMData& demData);
-
-    /**
-     * @brief Create a test map texture (checkerboard pattern)
-     * This will be replaced with render-to-texture output later
-     * @param context Graphics context
-     * @return Shared pointer to created texture
-     */
-    std::shared_ptr<gfx::Texture2D> createTestMapTexture(gfx::Context& context);
 
     /**
      * @brief Create a terrain drawable for a specific tile
