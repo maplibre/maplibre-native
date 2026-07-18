@@ -129,8 +129,9 @@ public:
             return;
         }
 
-        const auto depthAspect = stencilSupported ? (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
-                                                  : vk::ImageAspectFlags(vk::ImageAspectFlagBits::eDepth);
+        const auto depthAspect = stencilSupported
+                                     ? (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)
+                                     : vk::ImageAspectFlags(vk::ImageAspectFlagBits::eDepth);
         const auto imageViewCreateInfo = vk::ImageViewCreateInfo()
                                              .setImage(depthAllocation->image)
                                              .setViewType(vk::ImageViewType::e2D)
@@ -234,8 +235,8 @@ OffscreenTexture::OffscreenTexture(Context& context,
                                    const gfx::TextureChannelDataType type,
                                    [[maybe_unused]] bool depth,
                                    bool stencil)
-    : gfx::OffscreenTexture(
-          size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type, stencil)) {}
+    : gfx::OffscreenTexture(size,
+                            std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type, stencil)) {}
 
 bool OffscreenTexture::isRenderable() {
     return true;
