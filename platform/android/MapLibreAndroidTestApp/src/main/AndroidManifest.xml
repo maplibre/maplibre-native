@@ -1109,6 +1109,18 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
+            android:name=".activity.style.TerrainFlightActivity"
+            android:description="@string/description_terrain_flight"
+            android:exported="true"
+            android:label="@string/activity_terrain_flight">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
             android:name=".activity.style.HeatmapLayerActivity"
             android:description="@string/description_heatmaplayer"
             android:exported="true"
