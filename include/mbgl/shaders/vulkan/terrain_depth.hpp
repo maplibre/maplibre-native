@@ -51,12 +51,9 @@ void main() {
     // Same elevation displacement as the terrain shader (vulkan/terrain.hpp),
     // rendering only depth for the symbol occlusion pass
     const vec2 pos = vec2(in_position);
-    const vec2 uv = pos / 8192.0;
 
-    const vec2 dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
-    vec4 dem_sample = textureLod(dem_sampler, dem_uv, 0.0) * 255.0;
-    dem_sample.a = -1.0;
-    const float elevation = dot(dem_sample, props.unpack) * props.exaggeration;
+    const float elevation = get_elevation(pos, dem_sampler, drawable.dem_coords, props.unpack,
+                                          drawable.dem_coords.w, props.exaggeration, 1.0);
 
     gl_Position = drawable.matrix * vec4(pos.x, pos.y, elevation, 1.0);
     // Must match the transform the symbol pass applies, so the depth texture

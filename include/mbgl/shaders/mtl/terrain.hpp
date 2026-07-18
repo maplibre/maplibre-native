@@ -77,23 +77,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const TerrainDrawableUBO& drawable = drawableVector[uboIndex];
 
-    // Convert vertex position to normalized texture coordinates [0, 1]
     // The mesh was generated with coordinates from 0 to EXTENT (8192)
     float2 pos = float2(vertx.pos);
     float2 uv = pos / 8192.0;
 
-    // Sample the DEM texture and decode elevation in meters using the source's
-    // unpack vector, matching hillshade/color-relief (supports Mapbox Terrain-RGB
-    // and Terrarium encodings)
-    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
-    // while this tile's own DEM is still loading
-    const float2 dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
-    float4 demSample = demTexture.sample(demSampler, dem_uv) * 255.0;
-    demSample.a = -1.0;
-    float elevationMeters = dot(demSample, props.unpack);
-
-    // Apply exaggeration for visible relief (default: 1.0, can be set higher for dramatic effect)
-    float elevation = elevationMeters * props.exaggeration;
+    // Decode the DEM and interpolate in meters via the shared helper (the packed
+    // Terrain-RGB/Terrarium DEM cannot be hardware-filtered, so it is sampled
+    // NEAREST and interpolated after decoding, matching maplibre-gl-js and the
+    // elevated layers). Map into the bound DEM tile; an ancestor tile is bound as
+    // a fallback while this tile's own DEM loads. dem_coords.w = DEM dimension.
+    float elevation = get_elevation(pos, demTexture, demSampler, drawable.dem_coords, props.unpack,
+                                    drawable.dem_coords.w, props.exaggeration, 1.0);
 
     // Create 3D position with elevation as Z coordinate
     float4 position = drawable.matrix * float4(pos.x, pos.y, elevation, 1.0);

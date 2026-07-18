@@ -59,16 +59,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
     let uv = pos / 8192.0;
 
-    // Sample the DEM texture and decode elevation in meters using the source's
-    // unpack vector (supports Mapbox Terrain-RGB and Terrarium encodings)
-    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
-    // while this tile's own DEM is still loading
-    let dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
-    var dem_sample = textureSampleLevel(dem_texture, texture_sampler, dem_uv, 0.0) * 255.0;
-    dem_sample.a = -1.0;
-    let elevation_meters = dot(dem_sample, props.unpack);
-
-    let elevation = elevation_meters * props.exaggeration;
+    // Decode the DEM and interpolate in meters via the shared helper (the packed
+    // Terrain-RGB/Terrarium DEM cannot be hardware-filtered, so it is sampled
+    // NEAREST and interpolated after decoding, matching maplibre-gl-js and the
+    // elevated layers). Map into the bound DEM tile; an ancestor tile is bound as
+    // a fallback while this tile's own DEM loads. dem_coords.w = DEM dimension.
+    let elevation = get_elevation(pos, dem_texture, texture_sampler, drawable.dem_coords, props.unpack,
+                                  drawable.dem_coords.w, props.exaggeration, 1.0);
 
     out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation, 1.0);
     out.uv = uv;

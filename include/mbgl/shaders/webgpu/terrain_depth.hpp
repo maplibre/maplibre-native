@@ -55,12 +55,9 @@ fn main(in: VertexInput) -> VertexOutput {
     // Same elevation displacement as the terrain shader (webgpu/terrain.hpp),
     // rendering only depth for the symbol occlusion pass
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let uv = pos / 8192.0;
 
-    let dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
-    var dem_sample = textureSampleLevel(dem_texture, texture_sampler, dem_uv, 0.0) * 255.0;
-    dem_sample.a = -1.0;
-    let elevation = dot(dem_sample, props.unpack) * props.exaggeration;
+    let elevation = get_elevation(pos, dem_texture, texture_sampler, drawable.dem_coords, props.unpack,
+                                  drawable.dem_coords.w, props.exaggeration, 1.0);
 
     out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation, 1.0);
     return out;

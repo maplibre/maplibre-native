@@ -163,8 +163,10 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         auto* hillshadeBucket = demTile->getBucket();
         const auto* demData = hillshadeBucket ? &hillshadeBucket->getDEMData() : nullptr;
         if (demData && demData->getImagePtr() && !demData->getImagePtr()->size.isEmpty()) {
-            // All tiles come from the same raster-dem source, so they share one encoding
+            // All tiles come from the same raster-dem source, so they share one
+            // encoding and DEM dimension
             demUnpackVector = demData->getUnpackVector();
+            demDim = demData->dim;
             if (auto existing = demTextures.find(renderTile.id); existing != demTextures.end()) {
                 existing->second.lastUsed = demUpdateCounter;
             } else if (auto texture = createDEMTexture(context, *demData)) {
@@ -267,7 +269,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // mesh stays up while the tile loads (as maplibre-gl-js does),
         // otherwise the flat placeholder
         std::shared_ptr<gfx::Texture2D> demTexture;
-        std::array<float, 4> demCoords{{1, 0, 0, 0}};
+        // {scale, x offset, y offset, DEM dim}: maps tile-local coords (0..EXTENT)
+        // into the bound DEM tile's normalized space, matching getTerrainData so
+        // the terrain mesh and the elevated layers sample identically. The DEM
+        // dimension rides in .w for the shader's get_elevation() call.
+        std::array<float, 4> demCoords{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
         uint8_t demTier = 0;
 
         if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
@@ -300,7 +306,10 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 ancestorEntry->lastUsed = demUpdateCounter;
                 demTier = 1;
                 const auto off = demSubTileOffset(unwrapped.canonical, ancestorID->canonical);
-                demCoords = {{1.0f / off.scale, off.dx / off.scale, off.dy / off.scale, 0.0f}};
+                demCoords = {{1.0f / (util::EXTENT * off.scale),
+                              off.dx / off.scale,
+                              off.dy / off.scale,
+                              static_cast<float>(demDim)}};
             }
         }
 
@@ -577,8 +586,11 @@ std::shared_ptr<gfx::Texture2D> RenderTerrain::createDEMTexture(gfx::Context& co
     // Set the image data
     texture->setImage(imagePtr);
 
-    // Configure sampler - use linear filtering for smooth elevation interpolation
-    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+    // Nearest filtering: the packed Terrain-RGB/Terrarium DEM cannot be hardware
+    // interpolated (blending the encoded bytes does not blend the decoded
+    // elevations), so shaders decode each texel and interpolate in meters via
+    // get_elevation(). This matches maplibre-gl-js, which binds the DEM NEAREST.
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
                                       .wrapU = gfx::TextureWrapType::Clamp,
                                       .wrapV = gfx::TextureWrapType::Clamp});
 

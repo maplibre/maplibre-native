@@ -42,12 +42,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Same elevation displacement as the terrain shader (mtl/terrain.hpp),
     // rendering only depth for the symbol occlusion pass
     const float2 pos = float2(vertx.pos);
-    const float2 uv = pos / 8192.0;
 
-    const float2 dem_uv = uv * drawable.dem_coords.x + drawable.dem_coords.yz;
-    float4 demSample = demTexture.sample(demSampler, dem_uv) * 255.0;
-    demSample.a = -1.0;
-    const float elevation = dot(demSample, props.unpack) * props.exaggeration;
+    const float elevation = get_elevation(pos, demTexture, demSampler, drawable.dem_coords, props.unpack,
+                                          drawable.dem_coords.w, props.exaggeration, 1.0);
 
     return {
         .position = drawable.matrix * float4(pos.x, pos.y, elevation, 1.0),

@@ -3,6 +3,7 @@
 #include <mbgl/style/terrain_impl.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/renderer/texture_pool.hpp>
@@ -116,12 +117,15 @@ public:
     const std::array<float, 4>& getDEMUnpackVector() const { return demUnpackVector; }
 
     /**
-     * @brief Scale/offset mapping a terrain drawable's uv into its bound DEM
-     * texture ({1,0,0,0} unless an ancestor tile's DEM is bound as a fallback)
+     * @brief {scale, x offset, y offset, DEM dim} mapping a terrain drawable's
+     * tile-local position (0..EXTENT) into its bound DEM texture's normalized
+     * space, for the shader's get_elevation() (see the demCoords built in update)
      */
     std::array<float, 4> getDrawableDemCoords(const OverscaledTileID& tileID) const {
         const auto it = drawableDemCoords.find(tileID);
-        return it != drawableDemCoords.end() ? it->second : std::array<float, 4>{{1, 0, 0, 0}};
+        return it != drawableDemCoords.end()
+                   ? it->second
+                   : std::array<float, 4>{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
     }
 
     /**
@@ -250,6 +254,10 @@ private:
 
     // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
     std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+
+    // DEM tile inner dimension (e.g. 256/512), source-constant; rides in
+    // dem_coords.w so the shader's get_elevation() knows the texel grid
+    int32_t demDim = 0;
 
     // DEM textures by tile, for elevation sampling by non-draped layers
     struct DEMTextureEntry {

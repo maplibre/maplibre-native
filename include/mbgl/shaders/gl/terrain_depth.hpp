@@ -29,12 +29,9 @@ void main() {
     // Same elevation displacement as the terrain shader (terrain.vertex.glsl),
     // rendering only depth for the symbol occlusion pass
     vec2 pos = vec2(a_pos);
-    vec2 uv = pos / 8192.0;
 
-    vec2 dem_uv = uv * u_dem_tile_coords.x + u_dem_tile_coords.yz;
-    vec4 demSample = texture(u_dem, dem_uv) * 255.0;
-    demSample.a = -1.0;
-    float elevation = dot(demSample, u_unpack) * u_exaggeration;
+    float elevation = get_elevation(pos, u_dem, u_dem_tile_coords, u_unpack,
+                                    u_dem_tile_coords.w, u_exaggeration, 1.0);
 
     gl_Position = u_matrix * vec4(pos.x, pos.y, elevation, 1.0);
 }

@@ -61,16 +61,13 @@ void main() {
     const vec2 pos = vec2(in_position);
     frag_uv = pos / 8192.0;
 
-    // Sample the DEM texture and decode elevation in meters using the source's
-    // unpack vector (supports Mapbox Terrain-RGB and Terrarium encodings)
-    // Map into the bound DEM tile; an ancestor tile is bound as a fallback
-    // while this tile's own DEM is still loading
-    const vec2 dem_uv = frag_uv * drawable.dem_coords.x + drawable.dem_coords.yz;
-    vec4 dem_sample = textureLod(dem_sampler, dem_uv, 0.0) * 255.0;
-    dem_sample.a = -1.0;
-    const float elevation_meters = dot(dem_sample, props.unpack);
-
-    frag_elevation = elevation_meters * props.exaggeration;
+    // Decode the DEM and interpolate in meters via the shared helper (the packed
+    // Terrain-RGB/Terrarium DEM cannot be hardware-filtered, so it is sampled
+    // NEAREST and interpolated after decoding, matching maplibre-gl-js and the
+    // elevated layers). Map into the bound DEM tile; an ancestor tile is bound as
+    // a fallback while this tile's own DEM loads. dem_coords.w = DEM dimension.
+    frag_elevation = get_elevation(pos, dem_sampler, drawable.dem_coords, props.unpack,
+                                   drawable.dem_coords.w, props.exaggeration, 1.0);
 
     gl_Position = drawable.matrix * vec4(pos.x, pos.y, frag_elevation, 1.0);
     applySurfaceTransform();
