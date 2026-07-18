@@ -229,6 +229,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
         }
     } else if (renderTerrain) {
+        // Unregister the terrain mesh layer group from the orchestrator before
+        // dropping RenderTerrain, or the orchestrator keeps its own reference and
+        // draws the orphaned mesh - a second, floating terrain surface after the
+        // user toggles 3D terrain off and back on.
+        UniqueChangeRequestVec terrainChanges;
+        renderTerrain->deactivate(terrainChanges);
+        addChanges(terrainChanges);
         renderTerrain.reset();
     }
 

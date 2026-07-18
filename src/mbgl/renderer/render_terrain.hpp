@@ -112,6 +112,18 @@ public:
     bool isEnabled() const;
 
     /**
+     * @brief Remove the terrain's mesh layer group from the orchestrator.
+     *
+     * Must be queued (and the changes processed) before this RenderTerrain is
+     * destroyed. activateLayerGroup() registers the mesh layer group with the
+     * orchestrator, which then holds its own reference; dropping RenderTerrain
+     * alone leaves that group behind, so the orchestrator keeps drawing an
+     * orphaned terrain surface (a second, floating terrain layer appears after
+     * the user toggles 3D terrain off and back on).
+     */
+    void deactivate(UniqueChangeRequestVec& changes);
+
+    /**
      * @brief Get the DEM unpack vector for the source's raster-dem encoding
      */
     const std::array<float, 4>& getDEMUnpackVector() const { return demUnpackVector; }

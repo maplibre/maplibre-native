@@ -759,4 +759,11 @@ void RenderTerrain::activateLayerGroup(bool activate, UniqueChangeRequestVec& ch
     }
 }
 
+void RenderTerrain::deactivate(UniqueChangeRequestVec& changes) {
+    // depthLayerGroup / depthRenderTarget are owned by this RenderTerrain and
+    // released with it; only the mesh layerGroup is registered separately with
+    // the orchestrator, so that is all we need to unregister here.
+    activateLayerGroup(false, changes);
+}
+
 } // namespace mbgl
