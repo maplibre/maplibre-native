@@ -23,8 +23,8 @@ const std::array<AttributeInfo, 6> SymbolIconShaderSource::attributes = {
 };
 const std::array<TextureInfo, 3> SymbolIconShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
-    TextureInfo{1, idSymbolDEMTexture},
-    TextureInfo{2, idSymbolDepthTexture},
+    TextureInfo{2, idSymbolDEMTexture},
+    TextureInfo{3, idSymbolDepthTexture},
 };
 
 //
@@ -49,8 +49,8 @@ const std::array<AttributeInfo, 10> SymbolSDFShaderSource::attributes = {
 };
 const std::array<TextureInfo, 3> SymbolSDFShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
-    TextureInfo{1, idSymbolDEMTexture},
-    TextureInfo{2, idSymbolDepthTexture},
+    TextureInfo{2, idSymbolDEMTexture},
+    TextureInfo{3, idSymbolDepthTexture},
 };
 
 //

@@ -79,8 +79,11 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
 
-layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
-layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D depth_sampler;
+// Bindings match the texture enum ids (idSymbolDEMTexture=2, idSymbolDepthTexture=3):
+// the Vulkan descriptor set binds textures[id] to binding[id], so binding 1
+// (idSymbolImageIconTexture) is unused by this variant and left as a gap.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
 
 
 layout(location = 0) out mediump vec2 frag_tex;
@@ -304,8 +307,11 @@ layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly bu
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
 
-layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D dem_sampler;
-layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D depth_sampler;
+// Bindings match the texture enum ids (idSymbolDEMTexture=2, idSymbolDepthTexture=3):
+// the Vulkan descriptor set binds textures[id] to binding[id], so binding 1
+// (idSymbolImageIconTexture) is unused by this variant and left as a gap.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
 
 
 layout(location = 0) out mediump vec2 frag_tex;

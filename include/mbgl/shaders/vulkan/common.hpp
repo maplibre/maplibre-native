@@ -169,11 +169,13 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
 // matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // sampler and dem_* values are passed in as arguments rather than read from globals.
-// Unpack a depth value packed by the terrain depth pass (vulkan/terrain_depth.hpp),
-// converted to NDC z, as in the maplibre-gl-js prelude
+// Unpack a depth value packed by the terrain depth pass (vulkan/terrain_depth.hpp).
+// The pass packs gl_FragCoord.z, which on Vulkan's [0,1] NDC-z equals the clip-space
+// z/w compared against in calculate_visibility - so, unlike the maplibre-gl-js/GL
+// prelude ([-1,1] NDC-z, which remaps with *2-1), Vulkan returns the [0,1] value as is.
 float unpack_depth(vec4 rgba_depth) {
     const vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+    return dot(rgba_depth, bit_shift);
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
