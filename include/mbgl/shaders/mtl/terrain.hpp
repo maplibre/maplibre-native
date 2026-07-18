@@ -92,7 +92,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // that hides the cracks between neighbouring tiles at different zoom levels
     // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag.
     const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
-    float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
+    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
+    // The solid-red probe showed the terrain mesh renders on Metal at world zoom
+    // (pitched-world, elevation ~0) but is blank at high zoom (default/skirts,
+    // significant elevation). Hypothesis: elevation lifts the mesh into the near
+    // half of the frustum, which Metal's [0,1] NDC-z clips but GL's [-1,1] keeps.
+    // Flatten the mesh to the tile plane to test it: if the terrain now renders
+    // red at high zoom, elevation-induced depth clipping is the cause.
+    // Restore the line below (elevation - ele_delta) to re-enable real elevation.
+    float4 position = drawable.matrix * float4(pos.x, pos.y, 0.0, 1.0);
+    // float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
 
     return {
         .position  = position,
