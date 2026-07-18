@@ -168,8 +168,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // When terrain is enabled, bind the covering DEM tile so the vertex
         // shader can displace symbol anchors by the terrain elevation
+        const bool terrainEnabled = parameters.terrain && parameters.terrain->isEnabled();
         std::optional<RenderTerrain::TerrainData> terrainData;
-        if (parameters.terrain && parameters.terrain->isEnabled()) {
+        if (terrainEnabled) {
             terrainData = parameters.terrain->getTerrainData(tileID);
         }
         if (parameters.terrain) {
@@ -179,6 +180,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             // Packed terrain depth for occlusion (calculate_visibility)
             drawable.setTexture(parameters.terrain->getDepthTexture(context), idSymbolDepthTexture);
         }
+
+        // The terrain surface writes depth so its skirts get occluded; symbols
+        // must not depth-test against it (their occlusion behind terrain comes
+        // from the depth texture / calculate_visibility above), or a label would
+        // be culled by the very surface it labels. Depth stays on without terrain.
+        drawable.setEnableDepth(!terrainEnabled);
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {

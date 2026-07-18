@@ -508,61 +508,106 @@ const RenderTerrain::TerrainMesh& RenderTerrain::getMesh(gfx::Context& context) 
 }
 
 void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
-    // Generate a regular grid mesh for terrain
-    // This mesh will be reused for all tiles and displaced by DEM data in shaders
-
+    // A regular grid mesh (reused for every tile, displaced by the DEM in the
+    // vertex shader) plus a skirt: each tile edge is duplicated into a curtain
+    // that the shader drops by u_ele_delta, hiding the cracks between neighbouring
+    // tiles at different zoom levels. Ported from maplibre-gl-js Terrain
+    // getTerrainMesh()/_buildSkirts().
     const size_t gridSize = MESH_SIZE;
-    const size_t verticesPerSide = gridSize + 1;
-    const size_t totalVertices = verticesPerSide * verticesPerSide;
+    const size_t vps = gridSize + 1; // vertices per side
+    const float step = static_cast<float>(util::EXTENT) / static_cast<float>(gridSize);
 
-    // Vertex data: Each vertex has pos (x,y) and texture_pos (u,v)
-    // Store as int16_t (short) for Metal short2 attribute format
-    // Format: [pos.x, pos.y, tex.u, tex.v, pos.x, pos.y, tex.u, tex.v, ...]
     std::vector<int16_t> vertices;
-    vertices.reserve(totalVertices * 4); // 4 shorts per vertex (x, y, u, v)
+    std::vector<uint16_t> indices;
 
-    const float posStep = static_cast<float>(util::EXTENT) / static_cast<float>(gridSize);
-    const float texStep = static_cast<float>(util::EXTENT) / static_cast<float>(gridSize);
+    // Each vertex is 4 shorts: x, y, skirt flag (0 = surface, 1 = skirt),
+    // unused. uv is derived from x,y in the shader, so the 3rd/4th shorts are free
+    // to carry the skirt flag (the native analog of gl-js Pos3d.z).
+    const auto addVert = [&](float x, float y, int16_t skirt) {
+        vertices.push_back(static_cast<int16_t>(x));
+        vertices.push_back(static_cast<int16_t>(y));
+        vertices.push_back(skirt);
+        vertices.push_back(0);
+    };
 
-    for (size_t y = 0; y < verticesPerSide; ++y) {
-        for (size_t x = 0; x < verticesPerSide; ++x) {
-            // Position coordinates (in tile space 0-8192)
-            vertices.push_back(static_cast<int16_t>(x * posStep));
-            vertices.push_back(static_cast<int16_t>(y * posStep));
-            // Texture coordinates (tile-space, used to sample the DEM)
-            vertices.push_back(static_cast<int16_t>(x * texStep));
-            vertices.push_back(static_cast<int16_t>(y * texStep));
+    // Surface grid
+    for (size_t y = 0; y < vps; ++y) {
+        for (size_t x = 0; x < vps; ++x) {
+            addVert(x * step, y * step, 0);
         }
     }
-
-    // Index data: generate triangles for the grid
-    std::vector<uint16_t> indices;
-    indices.reserve(gridSize * gridSize * 6); // 2 triangles per grid cell, 3 indices per triangle
-
     for (size_t y = 0; y < gridSize; ++y) {
         for (size_t x = 0; x < gridSize; ++x) {
-            // Calculate vertex indices for this grid cell
-            uint16_t topLeft = static_cast<uint16_t>(y * verticesPerSide + x);
-            uint16_t topRight = topLeft + 1;
-            uint16_t bottomLeft = static_cast<uint16_t>((y + 1) * verticesPerSide + x);
-            uint16_t bottomRight = bottomLeft + 1;
-
-            // First triangle (top-left, bottom-left, top-right)
+            const uint16_t topLeft = static_cast<uint16_t>(y * vps + x);
+            const uint16_t topRight = static_cast<uint16_t>(topLeft + 1);
+            const uint16_t bottomLeft = static_cast<uint16_t>((y + 1) * vps + x);
+            const uint16_t bottomRight = static_cast<uint16_t>(bottomLeft + 1);
             indices.push_back(topLeft);
             indices.push_back(bottomLeft);
             indices.push_back(topRight);
-
-            // Second triangle (top-right, bottom-left, bottom-right)
             indices.push_back(topRight);
             indices.push_back(bottomLeft);
             indices.push_back(bottomRight);
         }
     }
 
-    // Store mesh data with raw vertices and indices
-    mesh = TerrainMesh{nullptr,             // vertexBuffer - will be created when creating drawable
-                       nullptr,             // indexBuffer - will be created when creating drawable
-                       vertices.size() / 4, // 4 shorts per vertex (x, y, u, v)
+    // Top/bottom skirt rows (reference the grid's top/bottom edge rows)
+    const auto extent = static_cast<float>(util::EXTENT);
+    const uint16_t offsetTop = static_cast<uint16_t>(vertices.size() / 4);
+    const uint16_t offsetTopEdge = 0;
+    const uint16_t offsetBottom = static_cast<uint16_t>(offsetTop + vps);
+    const uint16_t offsetBottomEdge = static_cast<uint16_t>(vps * gridSize);
+    for (size_t x = 0; x < vps; ++x) {
+        addVert(x * step, 0.0f, 1);
+    }
+    for (size_t x = 0; x < vps; ++x) {
+        addVert(x * step, extent, 1);
+    }
+    for (uint16_t x = 0; x < gridSize; ++x) {
+        indices.insert(indices.end(),
+                       {static_cast<uint16_t>(offsetBottomEdge + x),
+                        static_cast<uint16_t>(offsetBottom + x),
+                        static_cast<uint16_t>(offsetBottom + x + 1),
+                        static_cast<uint16_t>(offsetBottomEdge + x),
+                        static_cast<uint16_t>(offsetBottom + x + 1),
+                        static_cast<uint16_t>(offsetBottomEdge + x + 1),
+                        static_cast<uint16_t>(offsetTopEdge + x),
+                        static_cast<uint16_t>(offsetTop + x + 1),
+                        static_cast<uint16_t>(offsetTop + x),
+                        static_cast<uint16_t>(offsetTopEdge + x),
+                        static_cast<uint16_t>(offsetTopEdge + x + 1),
+                        static_cast<uint16_t>(offsetTop + x + 1)});
+    }
+
+    // Left/right skirt frames (self-contained strips of paired surface/skirt verts)
+    const uint16_t offsetLeft = static_cast<uint16_t>(vertices.size() / 4);
+    const uint16_t offsetRight = static_cast<uint16_t>(offsetLeft + vps * 2);
+    for (int edge = 0; edge <= 1; ++edge) {
+        for (size_t y = 0; y < vps; ++y) {
+            for (int16_t z = 0; z <= 1; ++z) {
+                addVert(static_cast<float>(edge) * extent, y * step, z);
+            }
+        }
+    }
+    for (uint16_t y = 0; y < gridSize * 2; y += 2) {
+        indices.insert(indices.end(),
+                       {static_cast<uint16_t>(offsetLeft + y),
+                        static_cast<uint16_t>(offsetLeft + y + 1),
+                        static_cast<uint16_t>(offsetLeft + y + 3),
+                        static_cast<uint16_t>(offsetLeft + y),
+                        static_cast<uint16_t>(offsetLeft + y + 3),
+                        static_cast<uint16_t>(offsetLeft + y + 2),
+                        static_cast<uint16_t>(offsetRight + y),
+                        static_cast<uint16_t>(offsetRight + y + 3),
+                        static_cast<uint16_t>(offsetRight + y + 1),
+                        static_cast<uint16_t>(offsetRight + y),
+                        static_cast<uint16_t>(offsetRight + y + 2),
+                        static_cast<uint16_t>(offsetRight + y + 3)});
+    }
+
+    mesh = TerrainMesh{nullptr, // vertexBuffer - created when building the drawable
+                       nullptr, // indexBuffer - created when building the drawable
+                       vertices.size() / 4,
                        indices.size(),
                        std::move(vertices),
                        std::move(indices)};
@@ -641,12 +686,19 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
         builder->setEnableDepth(true);
         builder->setIs3D(true);
     } else {
-        // The drape renders the tile pyramid into the offscreen target, so it
-        // neither tests nor writes the main depth buffer.
-        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+        // The terrain surface is 3D geometry, so it tests and writes depth: nearer
+        // terrain occludes farther terrain, and - crucially - occludes the skirt
+        // curtains hanging below each tile edge, so the skirts only show through
+        // the cracks they exist to fill rather than drawing over the surface.
+        //
+        // Symbols (and other layers that occlude against terrain via the depth
+        // texture) must not main-depth-test against this surface, or they would be
+        // culled by the terrain they sit on - the symbol tweaker disables their
+        // depth test while terrain is enabled.
+        builder->setDepthType(gfx::DepthMaskType::ReadWrite);
         builder->setColorMode(gfx::ColorMode::unblended());
-        builder->setEnableDepth(false);
-        builder->setIs3D(false);
+        builder->setEnableDepth(true);
+        builder->setIs3D(true);
     }
 
     // Set vertex data - copy vertices to raw buffer

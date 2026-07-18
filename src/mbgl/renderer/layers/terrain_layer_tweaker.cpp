@@ -7,9 +7,13 @@
 #include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/shaders/terrain_layer_ubo.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/logging.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace mbgl {
 
@@ -30,7 +34,13 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     // Get terrain properties; per the style spec, exaggeration is applied as-is
     // (default 1.0 renders true-scale elevation)
     const float exaggeration = terrain->getExaggeration();
-    const float elevationOffset = 0.0f;
+
+    // Skirt depth (u_ele_delta): the shader drops the mesh's skirt vertices by
+    // this many metres into a curtain that hides the cracks between neighbouring
+    // tiles at different zoom levels. ~1/5 of the tile's world width at this zoom,
+    // matching maplibre-gl-js Terrain.getSkirtLength().
+    const auto zoom = std::max(static_cast<double>(parameters.state.getZoom()), 0.0);
+    const float elevationOffset = static_cast<float>(util::M2PI * util::EARTH_RADIUS_M / std::pow(2.0, zoom) / 5.0);
 
     // Populate layer-level UBO with terrain properties
     auto& layerUniforms = layerGroup.mutableUniformBuffers();

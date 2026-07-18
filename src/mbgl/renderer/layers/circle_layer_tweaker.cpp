@@ -90,8 +90,9 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // When terrain is enabled, bind the covering DEM tile so the vertex
         // shader can displace circle centers by the terrain elevation
+        const bool terrainEnabled = parameters.terrain && parameters.terrain->isEnabled();
         std::optional<RenderTerrain::TerrainData> terrainData;
-        if (parameters.terrain && parameters.terrain->isEnabled()) {
+        if (terrainEnabled) {
             terrainData = parameters.terrain->getTerrainData(tileID);
         }
         if (parameters.terrain) {
@@ -99,6 +100,13 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
                 idCircleDEMTexture);
         }
+
+        // The terrain surface writes depth (so its skirts get occluded); circles
+        // are elevated onto that surface and must not depth-test against it, or
+        // they would be culled by the ground they sit on. Depth stays on without
+        // terrain. (Circles have no depth-texture occlusion path, so they simply
+        // draw on top of the terrain, as in maplibre-gl-js.)
+        drawable.setEnableDepth(!terrainEnabled);
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {

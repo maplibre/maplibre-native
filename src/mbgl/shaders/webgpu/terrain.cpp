@@ -7,9 +7,8 @@ namespace shaders {
 
 using TerrainShaderSource = ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 2> TerrainShaderSource::attributes = {
-    AttributeInfo{5, gfx::AttributeDataType::Short2, idTerrainPosVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Short2, idTerrainTexturePosVertexAttribute},
+const std::array<AttributeInfo, 1> TerrainShaderSource::attributes = {
+    AttributeInfo{5, gfx::AttributeDataType::Short4, idTerrainPosVertexAttribute},
 };
 const std::array<TextureInfo, 2> TerrainShaderSource::textures = {
     TextureInfo{0, idTerrainDEMTexture},

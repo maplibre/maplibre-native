@@ -18,15 +18,14 @@ template <>
 struct ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "TerrainShader";
 
-    static const std::array<AttributeInfo, 2> attributes;
+    static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto prelude = terrainShaderPrelude;
     static constexpr auto vertex = R"(
 
-layout(location = 0) in ivec2 in_position;
-layout(location = 1) in ivec2 in_texture_position;
+layout(location = 0) in ivec4 in_position; // xy = tile position, z = skirt flag (1 = skirt)
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -58,7 +57,7 @@ void main() {
     const TerrainDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     // The mesh was generated with coordinates from 0 to EXTENT (8192)
-    const vec2 pos = vec2(in_position);
+    const vec2 pos = vec2(in_position.xy);
     frag_uv = pos / 8192.0;
 
     // Decode the DEM and interpolate in meters via the shared helper (the packed
@@ -69,7 +68,11 @@ void main() {
     frag_elevation = get_elevation(pos, dem_sampler, drawable.dem_coords, props.unpack,
                                    drawable.dem_coords.w, props.exaggeration, 1.0);
 
-    gl_Position = drawable.matrix * vec4(pos.x, pos.y, frag_elevation, 1.0);
+    // Skirt vertices hang below the surface by elevation_offset, forming a curtain
+    // that hides the cracks between neighbouring tiles at different zoom levels
+    // (maplibre-gl-js u_ele_delta). in_position.z carries the skirt flag.
+    const float ele_delta = in_position.z == 1 ? props.elevation_offset : 0.0;
+    gl_Position = drawable.matrix * vec4(pos.x, pos.y, frag_elevation - ele_delta, 1.0);
     applySurfaceTransform();
 }
 )";

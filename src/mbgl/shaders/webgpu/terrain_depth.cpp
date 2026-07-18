@@ -8,7 +8,7 @@ namespace shaders {
 using TerrainDepthShaderSource = ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 1> TerrainDepthShaderSource::attributes = {
-    AttributeInfo{5, gfx::AttributeDataType::Short2, idTerrainPosVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Short4, idTerrainPosVertexAttribute},
 };
 const std::array<TextureInfo, 1> TerrainDepthShaderSource::textures = {
     TextureInfo{0, idTerrainDEMTexture},

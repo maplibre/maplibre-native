@@ -6,9 +6,8 @@ namespace shaders {
 
 using TerrainShaderSource = ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 2> TerrainShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, terrainUBOCount + 0, idTerrainPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, terrainUBOCount + 0, idTerrainTexturePosVertexAttribute},
+const std::array<AttributeInfo, 1> TerrainShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short4, terrainUBOCount + 0, idTerrainPosVertexAttribute},
 };
 const std::array<TextureInfo, 2> TerrainShaderSource::textures = {
     TextureInfo{0, idTerrainDEMTexture},

@@ -7,7 +7,7 @@ namespace shaders {
 using TerrainDepthShaderSource = ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 1> TerrainDepthShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, terrainUBOCount + 0, idTerrainPosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short4, terrainUBOCount + 0, idTerrainPosVertexAttribute},
 };
 const std::array<TextureInfo, 1> TerrainDepthShaderSource::textures = {
     TextureInfo{0, idTerrainDEMTexture},

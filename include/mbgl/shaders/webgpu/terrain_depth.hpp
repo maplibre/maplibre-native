@@ -16,7 +16,7 @@ struct ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::WebGPU> {
 
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(5) position: vec2<i32>,
+    @location(5) position: vec4<i32>, // xy = tile position, z = skirt flag (1 = skirt)
 };
 
 struct VertexOutput {
@@ -59,7 +59,9 @@ fn main(in: VertexInput) -> VertexOutput {
     let elevation = get_elevation(pos, dem_texture, texture_sampler, drawable.dem_coords, props.unpack,
                                   drawable.dem_coords.w, props.exaggeration, 1.0);
 
-    out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation, 1.0);
+    // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
+    let ele_delta = select(0.0, props.elevation_offset, in.position.z == 1);
+    out.position = drawable.matrix * vec4<f32>(pos.x, pos.y, elevation - ele_delta, 1.0);
     return out;
 }
 )";

@@ -50,7 +50,7 @@ struct ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 2> attributes;
+    static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
@@ -58,8 +58,7 @@ struct ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short2 texture_pos [[attribute(1)]];
+    short4 pos [[attribute(0)]]; // xy = tile position, z = skirt flag (1 = skirt)
 };
 
 struct FragmentStage {
@@ -78,7 +77,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const TerrainDrawableUBO& drawable = drawableVector[uboIndex];
 
     // The mesh was generated with coordinates from 0 to EXTENT (8192)
-    float2 pos = float2(vertx.pos);
+    float2 pos = float2(vertx.pos.xy);
     float2 uv = pos / 8192.0;
 
     // Decode the DEM and interpolate in meters via the shared helper (the packed
@@ -89,8 +88,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float elevation = get_elevation(pos, demTexture, demSampler, drawable.dem_coords, props.unpack,
                                     drawable.dem_coords.w, props.exaggeration, 1.0);
 
-    // Create 3D position with elevation as Z coordinate
-    float4 position = drawable.matrix * float4(pos.x, pos.y, elevation, 1.0);
+    // Skirt vertices hang below the surface by elevation_offset, forming a curtain
+    // that hides the cracks between neighbouring tiles at different zoom levels
+    // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag.
+    const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
+    float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
 
     return {
         .position  = position,

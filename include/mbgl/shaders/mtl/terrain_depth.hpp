@@ -23,7 +23,7 @@ struct ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
+    short4 pos [[attribute(0)]]; // xy = tile position, z = skirt flag (1 = skirt)
 };
 
 struct FragmentStage {
@@ -41,13 +41,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Same elevation displacement as the terrain shader (mtl/terrain.hpp),
     // rendering only depth for the symbol occlusion pass
-    const float2 pos = float2(vertx.pos);
+    const float2 pos = float2(vertx.pos.xy);
 
     const float elevation = get_elevation(pos, demTexture, demSampler, drawable.dem_coords, props.unpack,
                                           drawable.dem_coords.w, props.exaggeration, 1.0);
 
+    // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
+    const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
     return {
-        .position = drawable.matrix * float4(pos.x, pos.y, elevation, 1.0),
+        .position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0),
     };
 }
 

@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::Vulkan> {
     static constexpr auto prelude = terrainShaderPrelude;
     static constexpr auto vertex = R"(
 
-layout(location = 0) in ivec2 in_position;
+layout(location = 0) in ivec4 in_position; // xy = tile position, z = skirt flag (1 = skirt)
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -50,12 +50,14 @@ void main() {
 
     // Same elevation displacement as the terrain shader (vulkan/terrain.hpp),
     // rendering only depth for the symbol occlusion pass
-    const vec2 pos = vec2(in_position);
+    const vec2 pos = vec2(in_position.xy);
 
     const float elevation = get_elevation(pos, dem_sampler, drawable.dem_coords, props.unpack,
                                           drawable.dem_coords.w, props.exaggeration, 1.0);
 
-    gl_Position = drawable.matrix * vec4(pos.x, pos.y, elevation, 1.0);
+    // Skirt vertices drop below the surface by elevation_offset (gl-js u_ele_delta)
+    const float ele_delta = in_position.z == 1 ? props.elevation_offset : 0.0;
+    gl_Position = drawable.matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
     // Must match the transform the symbol pass applies, so the depth texture
     // and the symbols it occludes share one clip space
     applySurfaceTransform();
