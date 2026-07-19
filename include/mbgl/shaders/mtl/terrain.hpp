@@ -109,19 +109,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // terrain/default renders fully white though its DEM (mapbox, correct) and
-    // number raster both load. Paint the terrain surface a solid color, ignoring
-    // the drape, to split the cause:
-    //   - solid-color terrain shape appears -> the mesh renders; the fault is the
-    //     raster-on-terrain drape (default drapes a raster; skirts drape vector).
-    //   - still blank -> the mesh itself is clipped (high elevation at zoom 13 /
-    //     exaggeration 2 -> Metal [0,1] near-plane clip; needs the surface z-remap).
-    return half4(0.0, 0.6, 1.0, 1.0);
-
     // Sample the map texture (render-to-texture output) for the surface color
     // Note: Y-coordinate is flipped (1.0 - y) to match OpenGL convention
-    // return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
+    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
 }
 )";
 };

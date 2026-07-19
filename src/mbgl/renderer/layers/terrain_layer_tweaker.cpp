@@ -68,6 +68,23 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         // This uses the same matrix calculation as other layers
         mat4 matrix = parameters.matrixForTile(tileID);
 
+#if !MLN_RENDER_BACKEND_OPENGL
+        // matrixForTile builds a GL-convention projection (clip z in [-1, 1]); Vulkan,
+        // Metal and WebGPU clip to [0, 1]. The terrain surface carries real elevation,
+        // so tall terrain near the camera (e.g. the default test: zoom 13, exaggeration
+        // 2, ~3000 m Alps DEM) lands in the near half of the GL clip volume (z < 0) and
+        // is clipped away on those backends - the whole surface renders blank while flat
+        // or low terrain still shows. Remap clip z from [-1, 1] to [0, 1], z' = (z+w)/2,
+        // by halving row 2 and folding in row 3 (w). Matches LayerTweaker::getTileMatrix
+        // and clipMatrixForTile, which remap the draped / RTT matrices for the same
+        // reason. Monotonic, so skirt-vs-surface depth ordering and the packed depth
+        // texture used for symbol occlusion are preserved. GL is unchanged.
+        matrix[2] = 0.5 * (matrix[2] + matrix[3]);
+        matrix[6] = 0.5 * (matrix[6] + matrix[7]);
+        matrix[10] = 0.5 * (matrix[10] + matrix[11]);
+        matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+#endif
+
 #if !MLN_UBO_CONSOLIDATION
         auto& drawableUniforms = drawable.mutableUniformBuffers();
 #endif
