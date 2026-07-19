@@ -10,7 +10,6 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/util/projection.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <algorithm>
@@ -66,26 +65,11 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         // Calculate transformation matrix for this terrain tile
-        // This uses the same matrix calculation as other layers
+        // This uses the same matrix calculation as other layers. The metres->world
+        // pixels elevation scale (pixelsPerMeter) is baked into the projection matrix
+        // in TransformState::getProjMatrix, so it applies here and to the elevated
+        // symbol / circle layers consistently, matching maplibre-gl-js.
         mat4 matrix = parameters.matrixForTile(tileID);
-
-        // Scale the elevation (Z) axis from metres to world pixels. matrixForTile maps
-        // tile X/Y into world pixels (scale s/EXTENT) but leaves the Z axis at scale 1,
-        // so the terrain vertex's elevation - which get_elevation returns in metres - is
-        // fed into the projection unscaled while X/Y are in world pixels. maplibre-gl-js
-        // bakes this pixelsPerMeter factor into its projection matrix (projectTileFor3D).
-        // Without it the elevation is over-scaled by ~1/pixelsPerMeter (which grows with
-        // zoom), and at high zoom / exaggeration the mesh is pushed out of the frustum so
-        // the whole surface renders blank (terrain/default: zoom 13, exaggeration 2,
-        // ~3000 m Alps DEM). Scale the matrix's third column (the Z/elevation axis) so
-        // elevation contributes in the same world-pixel units as X/Y.
-        const double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(
-                                                parameters.state.getLatLng().latitude(),
-                                                parameters.state.getZoom());
-        matrix[8] *= pixelsPerMeter;
-        matrix[9] *= pixelsPerMeter;
-        matrix[10] *= pixelsPerMeter;
-        matrix[11] *= pixelsPerMeter;
 
 #if !MLN_RENDER_BACKEND_OPENGL
         // matrixForTile builds a GL-convention projection (clip z in [-1, 1]); Vulkan,
