@@ -1,25 +1,13 @@
 name: terrain-render-test
 
-# On-demand macOS/Metal render tests scoped to a single filter (default: the
-# terrain tests). Much faster than the full node-ci render-test suite - it builds
-# only mbgl-render-test-runner and runs the matching tests - and always uploads
-# the HTML diff report plus the actual/diff PNGs, so a failing terrain render can
-# be inspected without digging through the whole suite. Trigger it from the
-# Actions tab ("Run workflow"); set "update" to rewrite the expected.png baselines
-# from this build's native render.
+# macOS/Metal render tests scoped to the terrain tests, run on every push. Much
+# faster than the full node-ci render-test suite - it builds only
+# mbgl-render-test-runner and runs just the tests matching "terrain" - and always
+# uploads the HTML diff report plus the actual/diff PNGs, so a failing terrain
+# render can be inspected without digging through the whole suite.
 
 on:
-  workflow_dispatch:
-    inputs:
-      filter:
-        description: "Test path regex to run (passed to --filter)"
-        required: false
-        default: "terrain"
-      update:
-        description: "Rewrite expected.png baselines from this render (--update default)"
-        type: boolean
-        required: false
-        default: false
+  push:
 
 permissions:
   contents: read
@@ -74,14 +62,9 @@ jobs:
         id: render_tests
         continue-on-error: true
         run: |
-          UPDATE_FLAG=""
-          if [ "${{ inputs.update }}" = "true" ]; then
-            UPDATE_FLAG="--update default"
-          fi
           ./build/mbgl-render-test-runner \
             --manifestPath metrics/macos-xcode11-release-style.json \
-            --filter "${{ inputs.filter }}" \
-            $UPDATE_FLAG
+            --filter terrain
 
       - name: Upload render test report and images
         if: always()
@@ -93,6 +76,6 @@ jobs:
             metrics/macos-xcode11-release-style.html
             metrics/integration/render-tests/terrain/**/*.png
 
-      - name: Fail if render tests failed (skipped when updating baselines)
-        if: steps.render_tests.outcome == 'failure' && inputs.update != true
+      - name: Fail if render tests failed
+        if: steps.render_tests.outcome == 'failure'
         run: exit 1
