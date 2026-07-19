@@ -420,10 +420,26 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
 }
 
 void Drawable::bindTextures(RenderPass& renderPass) const {
+    // TEMPORARY terrain DEM debug: trace which texture (by size) lands in which
+    // sampler slot for terrain draws, to check the vertex-stage DEM read. The DEM
+    // is 258x258 and should resolve to location 0; the drape/map is 512x512 at
+    // location 1. Remove once the Metal terrain DEM read is fixed.
+    const bool terrainDebug = getName().find("terrain") != std::string::npos;
     for (size_t id = 0; id < textures.size(); id++) {
         if (const auto& texture = textures[id]) {
             if (const auto& location = shader->getSamplerLocation(id)) {
+                if (terrainDebug) {
+                    const auto sz = texture->getSize();
+                    Log::Info(Event::Render,
+                              "[terrain-dem-debug] bindTextures drawable='" + getName() + "' textureIndex=" +
+                                  util::toString(id) + " -> samplerLocation=" + util::toString(*location) +
+                                  " size=" + util::toString(sz.width) + "x" + util::toString(sz.height));
+                }
                 static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
+            } else if (terrainDebug) {
+                Log::Warning(Event::Render,
+                             "[terrain-dem-debug] bindTextures drawable='" + getName() + "' textureIndex=" +
+                                 util::toString(id) + " has NO sampler location (not bound)");
             }
         }
     }
