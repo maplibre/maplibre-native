@@ -23,7 +23,6 @@
       "tiles": [
         "local://tiles/terrain/{z}-{x}-{y}.terrain.png"
       ],
-      "encoding": "terrarium",
       "tileSize": 256
     },
     "features": {
