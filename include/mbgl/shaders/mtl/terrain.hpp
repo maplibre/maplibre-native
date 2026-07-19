@@ -109,9 +109,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-    // Sample the map texture (render-to-texture output) for the surface color
-    // Note: Y-coordinate is flipped (1.0 - y) to match OpenGL convention
-    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
+    // Sample the map texture (render-to-texture output) for the surface color.
+    // The drape RTT is rendered with the core's GL-convention projection. On Vulkan
+    // (NDC Y-down) that stores the RTT already flipped, so its terrain shader samples
+    // 1.0 - uv.y. Metal's NDC is Y-up, so the RTT is stored upright and the V must NOT
+    // be flipped here - sampling 1.0 - uv.y flips the draped map vertically (north/south
+    // swapped about the view). Sample uv.y directly on Metal.
+    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y)));
 }
 )";
 };
