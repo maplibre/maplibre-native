@@ -92,15 +92,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // that hides the cracks between neighbouring tiles at different zoom levels
     // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag.
     const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
-    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // terrain/default's mesh produces no fragments (solid-color probe stayed blank)
-    // and the [0,1] z-remap did not un-clip it, so it is not a near-plane z-clip.
-    // Flatten the surface to elevation 0 to test whether the elevation MAGNITUDE is
-    // what drops the mesh (zoom 13, exaggeration 2, ~6000 m):
-    //   - renders flat -> elevation magnitude clips it (w/behind-camera or bad scale);
-    //   - still blank  -> the fault is not the elevation value (mesh/DEM/build).
-    float4 position = drawable.matrix * float4(pos.x, pos.y, 0.0, 1.0);
-    // float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
+    float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
 
     return {
         .position  = position,

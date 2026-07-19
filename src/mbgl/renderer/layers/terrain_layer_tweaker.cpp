@@ -10,6 +10,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/util/projection.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <algorithm>
@@ -68,17 +69,32 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         // This uses the same matrix calculation as other layers
         mat4 matrix = parameters.matrixForTile(tileID);
 
+        // Scale the elevation (Z) axis from metres to world pixels. matrixForTile maps
+        // tile X/Y into world pixels (scale s/EXTENT) but leaves the Z axis at scale 1,
+        // so the terrain vertex's elevation - which get_elevation returns in metres - is
+        // fed into the projection unscaled while X/Y are in world pixels. maplibre-gl-js
+        // bakes this pixelsPerMeter factor into its projection matrix (projectTileFor3D).
+        // Without it the elevation is over-scaled by ~1/pixelsPerMeter (which grows with
+        // zoom), and at high zoom / exaggeration the mesh is pushed out of the frustum so
+        // the whole surface renders blank (terrain/default: zoom 13, exaggeration 2,
+        // ~3000 m Alps DEM). Scale the matrix's third column (the Z/elevation axis) so
+        // elevation contributes in the same world-pixel units as X/Y.
+        const double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(
+                                                parameters.state.getLatLng().latitude(),
+                                                parameters.state.getZoom());
+        matrix[8] *= pixelsPerMeter;
+        matrix[9] *= pixelsPerMeter;
+        matrix[10] *= pixelsPerMeter;
+        matrix[11] *= pixelsPerMeter;
+
 #if !MLN_RENDER_BACKEND_OPENGL
         // matrixForTile builds a GL-convention projection (clip z in [-1, 1]); Vulkan,
-        // Metal and WebGPU clip to [0, 1]. The terrain surface carries real elevation,
-        // so tall terrain near the camera (e.g. the default test: zoom 13, exaggeration
-        // 2, ~3000 m Alps DEM) lands in the near half of the GL clip volume (z < 0) and
-        // is clipped away on those backends - the whole surface renders blank while flat
-        // or low terrain still shows. Remap clip z from [-1, 1] to [0, 1], z' = (z+w)/2,
-        // by halving row 2 and folding in row 3 (w). Matches LayerTweaker::getTileMatrix
-        // and clipMatrixForTile, which remap the draped / RTT matrices for the same
-        // reason. Monotonic, so skirt-vs-surface depth ordering and the packed depth
-        // texture used for symbol occlusion are preserved. GL is unchanged.
+        // Metal and WebGPU clip to [0, 1]. Remap clip z from [-1, 1] to [0, 1] the usual
+        // way, z' = (z + w) / 2, so terrain that projects into the near half of the GL
+        // clip volume (z < 0) is not clipped away on those backends. Matches
+        // LayerTweaker::getTileMatrix and clipMatrixForTile, which remap the draped / RTT
+        // matrices for the same reason. Monotonic, so skirt-vs-surface depth ordering and
+        // the packed depth texture used for symbol occlusion are preserved; GL unchanged.
         matrix[2] = 0.5 * (matrix[2] + matrix[3]);
         matrix[6] = 0.5 * (matrix[6] + matrix[7]);
         matrix[10] = 0.5 * (matrix[10] + matrix[11]);
