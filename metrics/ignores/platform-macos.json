@@ -6,9 +6,5 @@
     "render-tests/symbol-visibility/visible": "Needs to be investigated and fixed.",
     "render-tests/fill-outline-color/zoom-and-property-function": "It will be fixed after triangulated lines will support data driven properties",
     "render-tests/fill-outline-color/property-function": "It will be fixed after triangulated lines will support data driven properties",
-    "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847",
-    "render-tests/terrain/default": "3D terrain Metal-only: the DEM sampled in the terrain vertex shader decodes to garbage (huge elevation clips the mesh) while the same texture reads correctly in fragment shaders (color-relief passes). Needs a Metal GPU capture to confirm the vertex-stage DEM texture binding. Renders correctly on GL/Vulkan.",
-    "render-tests/terrain/pitched-world": "3D terrain Metal-only, see terrain/default: vertex-stage DEM read is wrong on Metal; renders on GL/Vulkan.",
-    "render-tests/terrain/skirts-auto": "3D terrain Metal-only, see terrain/default: vertex-stage DEM read is wrong on Metal; renders on GL/Vulkan.",
-    "render-tests/terrain/skirts-none": "3D terrain Metal-only, see terrain/default: vertex-stage DEM read is wrong on Metal; renders on GL/Vulkan."
+    "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847"
 }
