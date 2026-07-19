@@ -81,23 +81,18 @@ inline float get_elevation(float2 pos,
     const float2 f = fract(coord);
     const float2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
     const float d = 1.0 / (dem_dim + 2.0);
-    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // Single-tap decode was blank while raw s.r rendered. That means a channel reads
-    // OUTSIDE the normalized [0,1] range in the Metal vertex stage. This probe forces
-    // a blank (huge elevation) if ANY channel of the vertex-stage sample is > 1.5,
-    // else renders:
-    //   - blank -> the vertex-stage DEM sample returns un-normalized/garbage channels
-    //     (texture read broken in the vertex stage despite fragment reads being fine).
-    //   - renders -> all channels are in [0,1]; the fault is the *255/dot arithmetic.
-    (void)f;
-    (void)d;
-    (void)dem_unpack;
-    (void)dem_exaggeration;
-    float4 s = dem.sample(dem_sampler, c, level(0.0));
-    if (s.r > 1.5 || s.g > 1.5 || s.b > 1.5 || s.r < -0.5 || s.g < -0.5 || s.b < -0.5) {
-        return 100000.0;
-    }
-    return s.r * 3000.0;
+    float4 tl = dem.sample(dem_sampler, c) * 255.0;
+    tl.a = -1.0;
+    float4 tr = dem.sample(dem_sampler, c + float2(d, 0.0)) * 255.0;
+    tr.a = -1.0;
+    float4 bl = dem.sample(dem_sampler, c + float2(0.0, d)) * 255.0;
+    bl.a = -1.0;
+    float4 br = dem.sample(dem_sampler, c + float2(d, d)) * 255.0;
+    br.a = -1.0;
+    const float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                                mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                                f.y);
+    return elevation * dem_exaggeration;
 }
 
 // Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp),
