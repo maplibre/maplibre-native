@@ -269,7 +269,21 @@ jobs:
         id: terrain_render_tests
         if: runner.os == 'macOS'
         continue-on-error: true
-        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-terrain-style.json
+        run: |
+          echo "==================== TERRAIN RENDER TESTS: START ===================="
+          echo "arch: $(uname -m)  manifest: metrics/macos-terrain-style.json"
+          if [ ! -x ./build/mbgl-render-test-runner ]; then
+            echo "!!! ./build/mbgl-render-test-runner is missing or not executable"
+            ls -la ./build | head
+          fi
+          ./build/mbgl-render-test-runner --manifestPath metrics/macos-terrain-style.json --filter terrain
+          status=$?
+          echo "==================== TERRAIN RENDER TESTS: END (exit ${status}) ===================="
+          echo "-------- terrain report / images produced --------"
+          ls -la metrics/macos-terrain-style.html 2>/dev/null || echo "(no terrain HTML report produced)"
+          find metrics/integration/render-tests/terrain -name '*.png' 2>/dev/null | sort || echo "(no terrain PNGs found)"
+          echo "--------------------------------------------------"
+          exit ${status}
 
       - name: Upload terrain render test artifacts (macOS)
         if: runner.os == 'macOS'
