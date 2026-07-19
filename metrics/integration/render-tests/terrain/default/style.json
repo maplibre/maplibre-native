@@ -16,7 +16,7 @@
     "terrain": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.terrain.png"
+        "local://tiles/terrain-shading/{z}-{x}-{y}.terrain.png"
       ],
       "maxzoom": 12,
       "tileSize": 256
@@ -24,7 +24,7 @@
     "osm": {
       "type": "raster",
       "tiles": [
-        "local://tiles/debug-tiles/number/{z}-{x}-{y}.png"
+        "local://tiles/number/{z}.png"
       ],
       "maxzoom": 17,
       "tileSize": 256
