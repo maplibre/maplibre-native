@@ -265,6 +265,22 @@ jobs:
           path: metrics/macos-xcode11-release-style.html
           if-no-files-found: ignore
 
+      - name: Run terrain render tests on macOS
+        id: terrain_render_tests
+        if: runner.os == 'macOS'
+        continue-on-error: true
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-terrain-style.json
+
+      - name: Upload terrain render test artifacts (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: terrain-render-test-results_${{ matrix.arch }}
+          path: |
+            metrics/macos-terrain-style.html
+            metrics/integration/render-tests/terrain/**/*.png
+          if-no-files-found: warn
+
       - name: Fail macOS render tests when required
         if: runner.os == 'macOS' && steps.render_tests.outcome == 'failure' && runner.arch != 'X64'
         run: exit 1
