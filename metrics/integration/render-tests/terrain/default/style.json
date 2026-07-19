@@ -24,7 +24,7 @@
     "osm": {
       "type": "raster",
       "tiles": [
-        "https://demotiles.maplibre.org/debug-tiles/number/{z}.png"
+        "local://tiles/debug-tiles/number/{z}-{x}-{y}.png"
       ],
       "maxzoom": 17,
       "tileSize": 256

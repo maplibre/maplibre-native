@@ -276,10 +276,7 @@ jobs:
             echo "!!! ./build/mbgl-render-test-runner is missing or not executable"
             ls -la ./build | head
           fi
-          # --online so the terrain/default test can fetch its remote debug-tiles
-          # raster (https://demotiles.maplibre.org/...); skirts/pitched-world use
-          # local:// tiles served from cache-style.db and are unaffected.
-          ./build/mbgl-render-test-runner --manifestPath metrics/macos-terrain-style.json --filter terrain --online
+          ./build/mbgl-render-test-runner --manifestPath metrics/macos-terrain-style.json --filter terrain
           status=$?
           echo "==================== TERRAIN RENDER TESTS: END (exit ${status}) ===================="
           echo "-------- terrain report / images produced --------"
