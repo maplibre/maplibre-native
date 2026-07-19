@@ -82,20 +82,28 @@ inline float get_elevation(float2 pos,
     const float2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
     const float d = 1.0 / (dem_dim + 2.0);
     // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // z-remap and explicit-LOD fixes were both no-ops, yet a constant elevation
-    // rendered - so get_elevation's output is garbage on Metal. Split the cause by
-    // returning the RAW DEM sample (bypassing the unpack math), scaled to a visible
-    // elevation range:
-    //   - renders with relief -> the vertex-stage DEM sample returns sane data; the
-    //     fault is the unpack math / dem_unpack UBO.
-    //   - blank -> the DEM sample itself returns garbage in the vertex stage
-    //     (texture/sampler not effective in the Metal vertex stage).
-    (void)f;
-    (void)d;
+    // The raw DEM sample rendered (sane, normalized), so the vertex-stage texture
+    // access is fine. This probe does the FULL decode but with a HARDCODED Mapbox
+    // Terrain-RGB unpack vector, bypassing the props.unpack UBO value:
+    //   - renders with real relief -> props.unpack's content was garbage on Metal
+    //     (the TerrainEvaluatedPropsUBO isn't reaching this draw), so R/G/B and the
+    //     decode are fine and the fix is on the UBO side.
+    //   - blank -> the sample's G/B channels or the decode itself are wrong on Metal.
+    const float4 hardUnpack = float4(6553.6, 25.6, 0.1, 10000.0);
+    float4 tl = dem.sample(dem_sampler, c, level(0.0)) * 255.0;
+    tl.a = -1.0;
+    float4 tr = dem.sample(dem_sampler, c + float2(d, 0.0), level(0.0)) * 255.0;
+    tr.a = -1.0;
+    float4 bl = dem.sample(dem_sampler, c + float2(0.0, d), level(0.0)) * 255.0;
+    bl.a = -1.0;
+    float4 br = dem.sample(dem_sampler, c + float2(d, d), level(0.0)) * 255.0;
+    br.a = -1.0;
     (void)dem_unpack;
     (void)dem_exaggeration;
-    float4 s = dem.sample(dem_sampler, c, level(0.0));
-    return s.r * 3000.0;
+    const float elevation = mix(mix(dot(tl, hardUnpack), dot(tr, hardUnpack), f.x),
+                                mix(dot(bl, hardUnpack), dot(br, hardUnpack), f.x),
+                                f.y);
+    return elevation;
 }
 
 // Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp),
