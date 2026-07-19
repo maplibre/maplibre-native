@@ -109,22 +109,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-    // ---------------------------------------------------------------------
-    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // Metal terrain render tests (terrain/{default,skirts-auto,skirts-none,
-    // pitched-world}) render blank while GL/Vulkan pass. This bisects the two
-    // remaining causes: ignore the drape map texture and output a solid color.
-    //   - if the terrain mesh appears (red, mountain-shaped) -> mesh+depth are
-    //     fine and the bug is the drape CONTENT not landing in the Metal RTT.
-    //   - if it stays blank -> the mesh/depth surface pass itself is not
-    //     drawing on Metal (is3D / NDC-z depth-clip).
-    // Restore the line below to re-enable normal draped sampling.
-    return half4(1.0, 0.0, 0.0, 1.0);
-    // ---------------------------------------------------------------------
-
     // Sample the map texture (render-to-texture output) for the surface color
     // Note: Y-coordinate is flipped (1.0 - y) to match OpenGL convention
-    // return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
+    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
 }
 )";
 };
