@@ -92,19 +92,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // that hides the cracks between neighbouring tiles at different zoom levels
     // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag.
     const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
-    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // The clip-z remap (429af7c) had zero effect, which proves the Metal terrain
-    // blank is NOT a z-clip issue (a matrix row-2/3 remap is identical to remapping
-    // position.z at the output). Flattening the mesh (Z = 0) rendered; real elevation
-    // does not. That isolates the cause to the elevation VALUE. Substitute a constant,
-    // sane elevation (500 m) for get_elevation's result:
-    //   - renders as a raised plane -> get_elevation returns garbage on Metal (e.g. an
-    //     unbound / wrong ancestor DEM sampled at high zoom), producing huge positions
-    //     that clip.
-    //   - still blank -> the matrix/geometry path mishandles any nonzero elevation.
-    const float testElevation = 500.0;
-    float4 position = drawable.matrix * float4(pos.x, pos.y, testElevation - ele_delta, 1.0);
-    // float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
+    float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
 
     return {
         .position  = position,
