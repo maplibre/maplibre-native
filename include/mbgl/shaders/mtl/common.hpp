@@ -82,20 +82,22 @@ inline float get_elevation(float2 pos,
     const float2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
     const float d = 1.0 / (dem_dim + 2.0);
     // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
-    // Full 4-tap decode (hardcoded unpack) was blank while a single raw R sample
-    // rendered. This probe does a SINGLE-tap full R/G/B decode (hardcoded unpack,
-    // no neighbour taps, no mix) to split the remaining causes:
-    //   - renders with relief -> one sample decodes fine; the fault is the 4 taps /
-    //     mix (multiple texture samples in a Metal vertex shader misbehaving).
-    //   - blank -> even one sample's G/B decode is garbage in the Metal vertex stage.
-    const float4 hardUnpack = float4(6553.6, 25.6, 0.1, 10000.0);
+    // Single-tap decode was blank while raw s.r rendered. That means a channel reads
+    // OUTSIDE the normalized [0,1] range in the Metal vertex stage. This probe forces
+    // a blank (huge elevation) if ANY channel of the vertex-stage sample is > 1.5,
+    // else renders:
+    //   - blank -> the vertex-stage DEM sample returns un-normalized/garbage channels
+    //     (texture read broken in the vertex stage despite fragment reads being fine).
+    //   - renders -> all channels are in [0,1]; the fault is the *255/dot arithmetic.
     (void)f;
     (void)d;
     (void)dem_unpack;
     (void)dem_exaggeration;
-    float4 s = dem.sample(dem_sampler, c, level(0.0)) * 255.0;
-    s.a = -1.0;
-    return dot(s, hardUnpack);
+    float4 s = dem.sample(dem_sampler, c, level(0.0));
+    if (s.r > 1.5 || s.g > 1.5 || s.b > 1.5 || s.r < -0.5 || s.g < -0.5 || s.b < -0.5) {
+        return 100000.0;
+    }
+    return s.r * 3000.0;
 }
 
 // Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp),
