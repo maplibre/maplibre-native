@@ -719,29 +719,13 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
 
     // Set the DEM texture
     if (demTexture) {
-        // TEMPORARY terrain DEM debug: confirm the DEM texture attached to the
-        // surface/depth drawable (size, and whether it is the shared placeholder).
-        // Remove once the Metal terrain DEM read is fixed.
-        const auto demSize = demTexture->getSize();
-        Log::Info(Event::Render,
-                  "[terrain-dem-debug] createDrawable tile=" + util::toString(tileID) +
-                      (depthPass ? " (depth)" : " (surface)") + " DEM index=0 size=" +
-                      util::toString(demSize.width) + "x" + util::toString(demSize.height) +
-                      (demTexture == placeholderDEMTexture ? " [PLACEHOLDER]" : " [real]"));
         builder->setTexture(demTexture, 0); // Texture index 0 for DEM
-    } else {
-        Log::Warning(Event::Render,
-                     "[terrain-dem-debug] createDrawable tile=" + util::toString(tileID) + " has NO DEM texture");
     }
 
     // The depth pass samples only the DEM and writes packed depth, so it has no
     // map texture by design; only the draped pass binds the drape render target
     if (!depthPass) {
         if (mapTexture) {
-            const auto mapSize = mapTexture->getSize();
-            Log::Info(Event::Render,
-                      "[terrain-dem-debug] createDrawable tile=" + util::toString(tileID) + " map index=1 size=" +
-                          util::toString(mapSize.width) + "x" + util::toString(mapSize.height));
             builder->setTexture(mapTexture, 1); // Texture index 1 for map
         } else {
             Log::Warning(Event::Render, "No drape texture for terrain tile " + util::toString(tileID));
