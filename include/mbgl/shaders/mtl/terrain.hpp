@@ -65,6 +65,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 uv;
     float elevation;
+    float3 demRaw; // TEMPORARY DIAGNOSTIC: raw DEM texel sampled in the vertex stage
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -92,12 +93,26 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // that hides the cracks between neighbouring tiles at different zoom levels
     // (maplibre-gl-js u_ele_delta). pos.z carries the skirt flag.
     const float ele_delta = (float(vertx.pos.z) == 1.0) ? props.elevation_offset : 0.0;
-    float4 position = drawable.matrix * float4(pos.x, pos.y, elevation - ele_delta, 1.0);
+
+    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
+    // CPU-side logging confirmed the DEM texture is uploaded (258x258) and bound at
+    // sampler location 0, yet the vertex-stage decode is garbage. Flatten the mesh
+    // (Z = 0, so nothing clips) and pass the RAW DEM texel this vertex reads - sampled
+    // at the same coord get_elevation uses - out to the fragment, which paints it as
+    // the surface color. The rendered tile then shows what the vertex stage actually
+    // reads from the DEM: a real DEM pattern (mostly green/blue, near-black red) means
+    // the sample is correct and the decode math is at fault; the blue vector drape or
+    // a shifted/noisy pattern means the vertex reads the wrong texture/texels.
+    const float2 demCoord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_coords.w + 1.0;
+    const float2 demSampleCoord = (floor(demCoord) + 0.5) / (drawable.dem_coords.w + 2.0);
+    const float3 demRaw = demTexture.sample(demSampler, demSampleCoord, level(0.0)).rgb;
+    float4 position = drawable.matrix * float4(pos.x, pos.y, 0.0 - ele_delta, 1.0);
 
     return {
         .position  = position,
         .uv        = uv,
         .elevation = elevation,
+        .demRaw    = demRaw,
     };
 }
 
@@ -109,9 +124,16 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
+    // TEMPORARY DIAGNOSTIC - REMOVE BEFORE MERGE
+    // Paint the raw DEM texel the vertex stage read (see vertexMain) as the surface
+    // color, and boost the red (Terrain-RGB high byte, normally near-black) so the
+    // three channels are all visible. Restore the map-texture sample below to return
+    // to normal draped rendering.
+    return half4(saturate(in.demRaw.r * 40.0), in.demRaw.g, in.demRaw.b, 1.0);
+
     // Sample the map texture (render-to-texture output) for the surface color
     // Note: Y-coordinate is flipped (1.0 - y) to match OpenGL convention
-    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
+    // return half4(mapTexture.sample(mapSampler, float2(in.uv.x, 1.0 - in.uv.y)));
 }
 )";
 };
