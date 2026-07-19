@@ -177,22 +177,6 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
 
     matrix::multiply(projMatrix, cameraToClip, worldToCamera);
 
-    // Scale the elevation (world Z) axis from metres to world pixels, matching
-    // maplibre-gl-js, which bakes pixelsPerMeter into its projection matrix
-    // (mercator_transform: mat4.scale(m, [1, 1, pixelPerMeter])). The terrain
-    // surface and the elevated symbol / circle layers feed raw metres from
-    // get_elevation into vec4(x, y, elevation, 1); worldToCamera treats that Z in
-    // the same units as the world-pixel X/Y, so without this scale elevation is
-    // ~1/pixelsPerMeter too tall (13x at z12) and, crucially, terrain and labels
-    // scale together only if both go through this one matrix. 2D geometry has
-    // z = 0 and is unaffected. Axonometric applies pixelsPerMeter to its skew
-    // separately below, so it is left out here.
-    if (!axonometric) {
-        const double pixelsPerMeter = 1.0 /
-                                      Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
-        matrix::scale(projMatrix, projMatrix, 1.0, 1.0, pixelsPerMeter);
-    }
-
     if (axonometric) {
         // mat[11] controls perspective
         projMatrix[11] = 0.0;
