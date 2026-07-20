@@ -35,7 +35,7 @@ property: `background-color`, `line-width`, etc., with a second level of directo
 
 The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:
 
-- `cache-style.db`, `cache-metrics.db`: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.
+- `cache-style.db`, `cache-metrics.db`: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test execution.
 - `binary-size`: binary-size checks. Not used right now, see [#3379](https://github.com/maplibre/maplibre-native/issues/3379).
 - `expectations`: expectations for various platforms. E.g. `expectations/platform-android` is referenced by the `android-render-test-runner-metrics.json` manifest under its `expectation_paths` key.
 - `ignores`: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
@@ -57,7 +57,7 @@ The JSON files in this directory are the manifests (to be passed to render test 
    }
    ```
 
-#### `metrics/intergration`
+#### `metrics/integration`
 
 - `data`, `geojson`, `glyphs`, `image`, `sprites`, `styles`, `tiles`, `tilesets`, `video`: various data used by the render tests.
 - `expression-tests`: tests that verify the behavior of [expressions](https://maplibre.org/maplibre-style-spec/expressions/) of the MapLibre Style Spec.

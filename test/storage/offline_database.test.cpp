@@ -159,7 +159,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     }
 
     // Now, we're "freeing up" some space on the disk, and try to insert and
-    // query again. This time, we should be opening the datbase, creating the
+    // query again. This time, we should be opening the database, creating the
     // schema, and writing the data so that we can retrieve it again.
     fs.allowFileCreate(true);
     for (const auto& res : {fixture::resource, fixture::tile}) {
