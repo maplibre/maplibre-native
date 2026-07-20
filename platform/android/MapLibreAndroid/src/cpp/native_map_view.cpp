@@ -87,7 +87,8 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
         .withPixelRatio(pixelRatio)
         .withConstrainMode(ConstrainMode::HeightOnly)
         .withViewportMode(ViewportMode::Default)
-        .withCrossSourceCollisions(NativeMapOptions::crossSourceCollisions(_env, jNativeMapOptions));
+        .withCrossSourceCollisions(NativeMapOptions::crossSourceCollisions(_env, jNativeMapOptions))
+        .withFastPFOREnabled(NativeMapOptions::fastPFOREnabled(_env, jNativeMapOptions));
 
     // Create the core map
     map = std::make_unique<mbgl::Map>(
