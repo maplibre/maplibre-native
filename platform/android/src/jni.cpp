@@ -7,6 +7,12 @@ namespace android {
 
 JavaVM* theJVM;
 
+#if MLN_WEBGPU_IMPL_FFI
+extern "C" MBGL_EXPORT void mbgl_android_set_jvm(JavaVM* vm) {
+    theJVM = vm;
+}
+#endif
+
 // TODO: remove
 bool attach_jni_thread(JavaVM* vm, JNIEnv** env, std::string threadName) {
     assert(vm != nullptr);

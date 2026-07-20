@@ -2,9 +2,18 @@ if(TARGET mbgl-harfbuzz)
     return()
 endif()
 if (MLN_TEXT_SHAPING_HARFBUZZ)
-    add_library(mbgl-harfbuzz STATIC
-        ${CMAKE_CURRENT_LIST_DIR}/harfbuzz/src/harfbuzz.cc
-    )
+    if (MLN_WEBGPU_IMPL_FFI)
+		add_library(mbgl-harfbuzz SHARED
+			${CMAKE_CURRENT_LIST_DIR}/harfbuzz/src/harfbuzz.cc
+		)
+        # This target is consumed as a shared dependency by other DSOs.
+        # Keep symbols visible so runtime resolution (e.g. hb_ft_font_create) succeeds on Android.
+        set_target_properties(mbgl-harfbuzz PROPERTIES CXX_VISIBILITY_PRESET default VISIBILITY_INLINES_HIDDEN OFF)
+	else()
+		add_library(mbgl-harfbuzz STATIC
+			${CMAKE_CURRENT_LIST_DIR}/harfbuzz/src/harfbuzz.cc
+		)
+    endif()
 
     target_include_directories(mbgl-harfbuzz
         PUBLIC

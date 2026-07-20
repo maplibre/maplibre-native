@@ -67,15 +67,27 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
+        ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
+        ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
 )
+
+if(MLN_WEBGPU_IMPL_FFI)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/rust/src/http_file_source.cpp
+    )
+endif()
 
 if(MLN_WITH_OPENGL)
     target_sources(
@@ -319,3 +331,47 @@ add_custom_command(
 )
 
 install(TARGETS mbgl-render-test-runner LIBRARY DESTINATION lib)
+
+find_program(ARMERGE NAMES armerge)
+
+if(NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    message(STATUS "Found armerge: ${ARMERGE}")
+
+    # Detect NDK toolchain binaries for armerge
+    set(ARMERGE_LD "${ANDROID_TOOLCHAIN_ROOT}/bin/${ANDROID_TOOLCHAIN_PREFIX}ld")
+    set(ARMERGE_OBJCOPY "${ANDROID_TOOLCHAIN_ROOT}/bin/llvm-objcopy")
+    set(ARMERGE_RANLIB "${ANDROID_TOOLCHAIN_ROOT}/bin/llvm-ranlib")
+
+    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
+    set(STATIC_LIBS "")
+
+    if(MLN_WITH_VULKAN)
+        find_static_library(STATIC_LIBS NAMES glslang)
+        find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
+        find_static_library(STATIC_LIBS NAMES SPIRV)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
+        find_static_library(STATIC_LIBS NAMES MachineIndependent)
+        find_static_library(STATIC_LIBS NAMES GenericCodeGen)
+    endif()
+
+    find_static_library(STATIC_LIBS NAMES z)
+
+    add_custom_command(
+        TARGET mbgl-core
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E env
+            LD=${ARMERGE_LD}
+            OBJCOPY=${ARMERGE_OBJCOPY}
+            RANLIB=${ARMERGE_RANLIB}
+            ${ARMERGE} --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+                $<TARGET_FILE:mbgl-core>
+                $<TARGET_FILE:mbgl-freetype>
+                $<TARGET_FILE:mbgl-vendor-csscolorparser>
+                $<TARGET_FILE:mbgl-harfbuzz>
+                $<TARGET_FILE:mbgl-vendor-parsedate>
+                $<TARGET_FILE:mbgl-vendor-sqlite>
+                $<TARGET_FILE:mbgl-vendor-icu>
+                ${STATIC_LIBS}
+    )
+endif()
