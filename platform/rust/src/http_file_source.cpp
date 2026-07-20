@@ -55,9 +55,7 @@ class HTTPNoopRequest final : public AsyncRequest {};
 
 class HTTPRequest final : public AsyncRequest {
 public:
-    HTTPRequest(Resource resource_,
-                FileSource::Callback callback_,
-                                mln::bridge::RustHttpRequestFn request_fn_)
+    HTTPRequest(Resource resource_, FileSource::Callback callback_, mln::bridge::RustHttpRequestFn request_fn_)
         : resource(std::move(resource_)),
           callback(std::move(callback_)),
           request_fn(request_fn_),
@@ -118,8 +116,8 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
 
     Response response;
     if (!request_fn) {
-        response.error =
-            std::make_unique<Response::Error>(Response::Error::Reason::Other, "Rust HTTP bridge is not registered");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                           "Rust HTTP bridge is not registered");
         callback(response);
         return std::make_unique<HTTPNoopRequest>();
     }

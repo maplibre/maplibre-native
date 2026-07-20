@@ -10,7 +10,8 @@ namespace mbgl {
 
 class HttpResponse {
 public:
-    explicit HttpResponse(Response* response_) : response(response_) {
+    explicit HttpResponse(Response* response_)
+        : response(response_) {
         if (response) {
             response->data.reset();
         }
