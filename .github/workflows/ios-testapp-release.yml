@@ -25,7 +25,6 @@ jobs:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
-          cache-save: ${{ github.event_name != 'pull_request' }}
 
       - name: Install Apple signing assets
         run: platform/ios/scripts/ios-ci-install-signing-assets.sh
