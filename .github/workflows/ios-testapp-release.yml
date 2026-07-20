@@ -42,6 +42,9 @@ jobs:
           IOS_PROFILE_TYPE: IOS_APP_STORE
           IOS_CERTIFICATE_NAME: MapLibre TestFlight CI
           IOS_PROFILE_NAME: MapLibre TestFlight App Store
+          IOS_EXISTING_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          IOS_EXISTING_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_CI_RECREATE_PROFILE: 1
         run: |
           set -euo pipefail
           assets_dir="$RUNNER_TEMP/testflight-signing"
