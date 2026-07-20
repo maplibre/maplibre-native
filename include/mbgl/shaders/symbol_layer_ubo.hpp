@@ -39,7 +39,11 @@ struct alignas(16) SymbolDrawableUBO {
     /* 304 */ float dem_dim;
     /* 308 */ float dem_exaggeration;
     /* 312 */ float dem_enabled;
-    /* 316 */ float pad4;
+    // Terrain enabled globally: gates occlusion (calculate_visibility) even for
+    // tiles with no DEM data of their own (dem_enabled gates only the elevation).
+    // A distant label whose tile is outside the terrain cover must still hide
+    // behind mountains, as in maplibre-gl-js.
+    /* 316 */ float depth_enabled;
     /* 320 */
 };
 static_assert(sizeof(SymbolDrawableUBO) == 20 * 16);

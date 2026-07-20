@@ -72,7 +72,7 @@ struct SymbolDrawableUBO {
     float dem_dim;
     float dem_exaggeration;
     float dem_enabled;
-    float pad4;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -164,7 +164,7 @@ void main() {
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t) * fade_opacity;
 #endif
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    frag_opacity *= calculate_visibility(gl_Position, depth_sampler, drawable.dem_enabled);
+    frag_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
 }
 )";
 
@@ -300,7 +300,7 @@ struct SymbolDrawableUBO {
     float dem_dim;
     float dem_exaggeration;
     float dem_enabled;
-    float pad4;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -413,7 +413,7 @@ void main() {
     frag_tex = a_tex / drawable.texsize;
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    frag_fade_opacity *= calculate_visibility(gl_Position, depth_sampler, drawable.dem_enabled);
+    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 
@@ -631,7 +631,7 @@ struct SymbolDrawableUBO {
     float dem_dim;
     float dem_exaggeration;
     float dem_enabled;
-    float pad4;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -746,7 +746,7 @@ void main() {
 	frag_tex = a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize);
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    frag_fade_opacity *= calculate_visibility(gl_Position, depth_sampler, drawable.dem_enabled);
+    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 

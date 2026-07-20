@@ -50,7 +50,7 @@ struct alignas(16) SymbolDrawableUBO {
     /* 304 */ float dem_dim;
     /* 308 */ float dem_exaggeration;
     /* 312 */ float dem_enabled;
-    /* 316 */ float pad4;
+    /* 316 */ float depth_enabled;
     /* 320 */
 };
 static_assert(sizeof(SymbolDrawableUBO) == 20 * 16, "wrong size");
@@ -217,7 +217,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, z, 1.0);
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(position, depthTexture, depthSampler, drawable.dem_enabled));
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
 
     return {
         .position     = position,
@@ -407,7 +407,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(position, depthTexture, depthSampler, drawable.dem_enabled));
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
 
     return {
         .position     = position,
@@ -654,7 +654,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(position, depthTexture, depthSampler, drawable.dem_enabled));
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
     const float gamma_scale = position.w;
     const bool is_icon = (is_sdf == ICON);
 

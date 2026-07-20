@@ -105,10 +105,23 @@ fn unpack_depth(rgba_depth: vec4<f32>) -> f32 {
     return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
 }
 
-// Whether a clip-space position is visible in front of the terrain, from the
-// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
+// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
+// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
+// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
 // WebGPU has y-up NDC but a top-left texture origin (like Metal, unlike GL), so
 // the V coordinate is flipped here where the GL version does not flip.
+fn depth_opacity(frag: vec3<f32>,
+                 depth_texture: texture_2d<f32>,
+                 depth_sampler: sampler) -> f32 {
+    let uv = frag.xy * 0.5 + 0.5;
+    let d = unpack_depth(textureSampleLevel(depth_texture, depth_sampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0)) +
+            0.0001 - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 fn calculate_visibility(pos: vec4<f32>,
                         depth_texture: texture_2d<f32>,
                         depth_sampler: sampler,
@@ -116,12 +129,15 @@ fn calculate_visibility(pos: vec4<f32>,
     if (depth_enabled == 0.0) {
         return 1.0;
     }
-    let uv = pos.xy / pos.w * 0.5 + 0.5;
-    let depth = unpack_depth(textureSampleLevel(depth_texture, depth_sampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0));
-    if (pos.z / pos.w > depth) {
-        return 0.0;
+    let frag = pos.xyz / pos.w;
+    // check if coordinate is fully visible
+    let d = depth_opacity(frag, depth_texture, depth_sampler);
+    if (d > 0.95) {
+        return 1.0;
     }
-    return 1.0;
+    // if not, sample some pixels above: a label whose anchor is just behind a
+    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
+    return (d + depth_opacity(frag + vec3<f32>(0.0, 0.01, 0.0), depth_texture, depth_sampler)) / 2.0;
 }
 
 fn radians(degrees: f32) -> f32 {

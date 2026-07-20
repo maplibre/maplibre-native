@@ -59,7 +59,7 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_dem_dim;
     highp float u_dem_exaggeration;
     lowp float u_dem_enabled;
-    lowp float drawable_pad4;
+    lowp float u_depth_enabled;
 };
 
 uniform sampler2D u_dem;
@@ -159,7 +159,7 @@ lowp float opacity = u_opacity;
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);
     float fade_change = fade_opacity[1] > 0.5 ? u_symbol_fade_change : -u_symbol_fade_change;
     v_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
-    v_fade_opacity *= calculate_visibility(gl_Position, u_depth, u_dem_enabled);
+    v_fade_opacity *= calculate_visibility(projectedPoint, u_depth, u_depth_enabled);
 }
 )";
     static constexpr const char* fragment = R"(uniform sampler2D u_texture;

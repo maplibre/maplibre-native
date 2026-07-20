@@ -457,8 +457,27 @@ void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
     if (!depthLayerGroup || depthLayerGroup->empty()) {
         return;
     }
+    prepareDepthTarget(parameters);
+    if (!depthRenderTarget) {
+        return;
+    }
+    depthRenderTarget->render(orchestrator, renderTree, parameters);
+}
+
+void RenderTerrain::prepareDepthTarget(PaintParameters& parameters) {
+    // Called at the start of the render (before the upload phase) as well as from
+    // renderDepth, so the depth target already exists when the symbol tweaker binds
+    // getDepthTexture() for this frame. Creating it lazily in renderDepth alone left
+    // the symbols bound to the far-plane placeholder for that frame - permanently so
+    // in single-frame renders like the render tests, where terrain occlusion then
+    // never engaged.
     const Size size = parameters.backend.getDefaultRenderable().getSize();
-    if (!depthRenderTarget || depthRenderTarget->getTexture()->getSize() != size) {
+    if (size.isEmpty()) {
+        // Early frames can run before the surface has a real size; a degenerate
+        // render target here would hand the symbol tweaker a broken texture
+        return;
+    }
+    if (!depthRenderTarget || !depthRenderTarget->getTexture() || depthRenderTarget->getTexture()->getSize() != size) {
         depthRenderTarget = parameters.context.createRenderTarget(
             size, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/false);
         if (!depthRenderTarget) {
@@ -466,13 +485,16 @@ void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
         }
         // Far plane everywhere the terrain does not cover (unpack_depth(1,1,1,1) ~ 1.0)
         depthRenderTarget->setClearColor(Color::white());
+    }
+    // (Re)attach the depth layer group; it may not have existed yet when the
+    // target was first created on an early frame
+    if (depthLayerGroup) {
         depthRenderTarget->addLayerGroup(depthLayerGroup, /*replace=*/true);
     }
-    depthRenderTarget->render(orchestrator, renderTree, parameters);
 }
 
 const std::shared_ptr<gfx::Texture2D>& RenderTerrain::getDepthTexture(gfx::Context& context) {
-    if (depthRenderTarget) {
+    if (depthRenderTarget && depthRenderTarget->getTexture()) {
         return depthRenderTarget->getTexture();
     }
     if (!placeholderDepthTexture) {

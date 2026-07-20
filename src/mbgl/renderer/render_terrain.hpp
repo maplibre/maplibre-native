@@ -201,6 +201,15 @@ public:
      */
     void renderDepth(RenderOrchestrator&, const RenderTree&, PaintParameters&);
 
+    /**
+     * @brief Ensure the depth render target exists for this frame's size.
+     *
+     * Must run before the upload phase so the symbol tweaker binds the real
+     * depth texture rather than the far-plane placeholder; renderDepth then
+     * renders into it later the same frame, before the symbols draw.
+     */
+    void prepareDepthTarget(PaintParameters&);
+
     /// The packed-RGBA terrain depth texture for the current frame, or a 1x1
     /// far-plane placeholder while the depth pass has not rendered yet
     const std::shared_ptr<gfx::Texture2D>& getDepthTexture(gfx::Context&);

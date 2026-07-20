@@ -136,6 +136,17 @@ void applySurfaceTransform(vec4 drape_tile) {
     gl_Position.y *= -1.0;
 }
 
+// Same surface transform applied to a value instead of gl_Position: used to bring a
+// tile-projected position into the clip space the terrain depth pass rendered in
+// (which itself went through applySurfaceTransform), e.g. for calculate_visibility.
+vec4 surface_transformed(vec4 pos) {
+#ifdef USE_SURFACE_TRANSFORM
+    pos.xy = platformParams.rotation * pos.xy;
+#endif
+    pos.y *= -1.0;
+    return pos;
+}
+
 // Non-draped geometry renders to the swapchain and always gets the surface transform.
 void applySurfaceTransform() {
     applySurfaceTransform(vec4(0.0));
@@ -170,12 +181,16 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // sampler and dem_* values are passed in as arguments rather than read from globals.
 // Unpack a depth value packed by the terrain depth pass (vulkan/terrain_depth.hpp).
-// The pass packs gl_FragCoord.z, which on Vulkan's [0,1] NDC-z equals the clip-space
-// z/w compared against in calculate_visibility - so, unlike the maplibre-gl-js/GL
-// prelude ([-1,1] NDC-z, which remaps with *2-1), Vulkan returns the [0,1] value as is.
+// The pass packs gl_FragCoord.z in [0,1]; remap it to [-1,1] with *2-1, as the GL
+// prelude and Metal do. The terrain depth pass renders with the terrain tweaker's
+// matrix, which remaps clip z from GL's [-1,1] to Vulkan's [0,1] - but the SYMBOL
+// matrices carry no such remap, so the pos.z/pos.w compared in calculate_visibility
+// is still in GL convention ([-1,1]). Returning the stored [0,1] value unconverted
+// made the comparison almost never fire (labels showed through terrain); converting
+// back to [-1,1] puts both sides in the same (GL) z space.
 float unpack_depth(vec4 rgba_depth) {
     const vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
@@ -183,13 +198,29 @@ float unpack_depth(vec4 rgba_depth) {
 // Pass the position *after* applySurfaceTransform(), so it shares the clip space
 // the depth pass rendered in; Vulkan's y-down NDC and top-left texture origin
 // then agree, so no V flip is needed (unlike Metal).
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
+// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
+// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
+// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    const float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+}
 float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
-    const vec2 uv = pos.xy / pos.w * 0.5 + 0.5;
-    const float depth = unpack_depth(texture(depth_texture, uv));
-    return pos.z / pos.w > depth ? 0.0 : 1.0;
+    const vec3 frag = pos.xyz / pos.w;
+    // check if coordinate is fully visible
+    const float d = depth_opacity(frag, depth_texture);
+    if (d > 0.95) {
+        return 1.0;
+    }
+    // if not, sample some pixels above: a label whose anchor is just behind a
+    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour).
+    // Vulkan NDC is y-down (pos comes after applySurfaceTransform), so "above"
+    // on screen is -y, where gl-js's y-up NDC uses +y.
+    return (d + depth_opacity(frag + vec3(0.0, -0.01, 0.0), depth_texture)) / 2.0;
 }
 
 float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,

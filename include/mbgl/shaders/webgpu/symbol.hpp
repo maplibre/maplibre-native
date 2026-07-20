@@ -61,7 +61,7 @@ struct SymbolDrawableUBO {
     dem_dim: f32,
     dem_exaggeration: f32,
     dem_enabled: f32,
-    pad4: f32,
+    depth_enabled: f32,
 };
 
 
@@ -221,7 +221,7 @@ fn main(in: VertexInput) -> VertexOutput {
     out.tex = a_tex / drawable.texsize;
     out.fade_opacity = fade_opacity;
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    out.fade_opacity = out.fade_opacity * calculate_visibility(out.position, depth_texture, depth_sampler, drawable.dem_enabled);
+    out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled);
 #ifndef HAS_UNIFORM_u_opacity
     out.opacity = final_opacity;
 #endif
@@ -406,7 +406,7 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fontScale = fontScale;
     out.fade_opacity = fo;
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    out.fade_opacity = out.fade_opacity * calculate_visibility(out.position, depth_texture, depth_sampler, drawable.dem_enabled);
+    out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled);
 #ifndef HAS_UNIFORM_u_fill_color
     out.fill_color = unpack_mix_color(in.fill_color, drawable.fill_color_t);
 #endif
@@ -668,7 +668,7 @@ fn main(in: VertexInput) -> VertexOutput {
     out.fontScale = fontScale;
     out.fade_opacity = fo;
     // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    out.fade_opacity = out.fade_opacity * calculate_visibility(out.position, depth_texture, depth_sampler, drawable.dem_enabled);
+    out.fade_opacity = out.fade_opacity * calculate_visibility(projectedPoint, depth_texture, depth_sampler, drawable.depth_enabled);
     out.is_icon = is_icon;
 
 #ifndef HAS_UNIFORM_u_fill_color

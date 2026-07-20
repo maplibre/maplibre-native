@@ -303,6 +303,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     orchestrator.processChanges();
     orchestrator.addRenderTargets(texturePool);
+
+    // Create the terrain occlusion depth target before the upload phase, so the
+    // symbol tweaker binds the real depth texture for THIS frame instead of the
+    // far-plane placeholder (in single-frame renders like the render tests the
+    // placeholder would otherwise never be replaced and occlusion never engage).
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        terrain->prepareDepthTarget(parameters);
+    }
+
     // Draped layer groups are not routed into individual render targets here;
     // each drape RenderTarget renders every overlapping draped drawable itself
     // (RenderTarget::renderDrapedLayerGroups), so a tile at a different zoom than
@@ -346,6 +355,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+
+        // The terrain depth layer group is deliberately not registered with the
+        // orchestrator (it renders only in RenderTerrain::renderDepth), so the
+        // visitLayerGroups upload above does not cover it. Upload it explicitly:
+        // without this its drawables never get vertex buffers, the Vulkan binds
+        // fail silently and the depth pass records nothing, so the occlusion
+        // depth texture stays at the far plane and symbols are never hidden
+        // behind terrain (GL builds attribute state at draw time and got away
+        // with it).
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            if (const auto& depthLayerGroup = terrain->getDepthLayerGroup()) {
+                depthLayerGroup->upload(*uploadPass);
+            }
+        }
 
         // Give the render targets a chance to upload
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
