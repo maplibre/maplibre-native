@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Create iOS development signing assets for CI and print them as YAML.
+# Create Apple signing assets for CI and print them as YAML.
 #
 # Usage:
 #   APPSTORE_ISSUER_ID=<issuer-uuid> \
@@ -10,10 +10,14 @@
 #
 # Optional environment:
 #   IOS_BUNDLE_ID_PREFIX=org.maplibre
+#   IOS_BUNDLE_IDENTIFIER=org.maplibre.*
+#   IOS_CERTIFICATE_TYPE=IOS_DEVELOPMENT
+#   IOS_PROFILE_TYPE=IOS_APP_DEVELOPMENT
+#   IOS_CI_OUTPUT_DIR=/path/to/private/output
 #   IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE=1
 #
-# The script creates a wildcard iOS Development provisioning profile for
-# "${IOS_BUNDLE_ID_PREFIX}.*" and prints the certificate, profile, passwords,
+# By default, the script creates a wildcard iOS Development provisioning profile
+# for "${IOS_BUNDLE_ID_PREFIX}.*" and prints the certificate, profile, passwords,
 # and bundle ID prefix as YAML for embedding in ios-ci.yml.
 
 set -euo pipefail
@@ -21,6 +25,9 @@ set -euo pipefail
 bundle_id_prefix="${IOS_BUNDLE_ID_PREFIX:-org.maplibre}"
 profile_name="${IOS_PROFILE_NAME:-MapLibre iOS CI Wildcard Development}"
 certificate_name="${IOS_CERTIFICATE_NAME:-MapLibre iOS CI}"
+bundle_identifier="${IOS_BUNDLE_IDENTIFIER:-$bundle_id_prefix.*}"
+certificate_type="${IOS_CERTIFICATE_TYPE:-IOS_DEVELOPMENT}"
+profile_type="${IOS_PROFILE_TYPE:-IOS_APP_DEVELOPMENT}"
 
 require_env() {
   local name="$1"
@@ -166,7 +173,6 @@ asc_status_file="$work_dir/asc_status"
 
 p12_password="${P12_PASSWORD:-$(openssl rand -base64 32)}"
 keychain_password="${KEYCHAIN_PASSWORD:-$(openssl rand -base64 32)}"
-wildcard_identifier="$bundle_id_prefix.*"
 
 private_key_path="$work_dir/ios-ci.key"
 csr_path="$work_dir/ios-ci.csr"
@@ -199,9 +205,9 @@ if [[ "${IOS_CI_RECREATE_DEVELOPMENT_CERTIFICATE:-}" == "1" ]]; then
 fi
 
 csr_content="$(cat "$csr_path")"
-csr_body="$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: "IOS_DEVELOPMENT", csrContent: ARGV.fetch(0) } } })' -- "$csr_content")"
+csr_body="$(ruby -rjson -e 'puts JSON.generate({ data: { type: "certificates", attributes: { certificateType: ARGV.fetch(1), csrContent: ARGV.fetch(0) } } })' -- "$csr_content" "$certificate_type")"
 if ! certificate_response="$(asc_request POST /v1/certificates "$csr_body")"; then
-  if [[ "$(cat "$asc_status_file" 2>/dev/null)" == "409" ]]; then
+  if [[ "$(cat "$asc_status_file" 2>/dev/null)" == "409" && "$certificate_type" == "IOS_DEVELOPMENT" ]]; then
     echo "A current iOS Development certificate already exists; deleting and retrying." >&2
     certificates_response="$(asc_request GET '/v1/certificates?filter%5BcertificateType%5D=IOS_DEVELOPMENT&limit=10')"
     while IFS= read -r certificate_id_to_delete; do
@@ -228,17 +234,20 @@ printf '%s' "$certificate_content" | base64 --decode >"$certificate_der_path" 2>
 openssl x509 -inform DER -in "$certificate_der_path" -out "$certificate_pem_path"
 openssl pkcs12 -export -inkey "$private_key_path" -in "$certificate_pem_path" -out "$p12_path" -password "pass:$p12_password"
 
-bundle_filter="$(urlencode "$wildcard_identifier")"
+bundle_filter="$(urlencode "$bundle_identifier")"
 bundle_response="$(asc_request GET "/v1/bundleIds?filter%5Bidentifier%5D=$bundle_filter")"
 bundle_id="$(printf '%s' "$bundle_response" | json_get data 0 id)"
 
 if [[ -z "$bundle_id" ]]; then
-  bundle_response="$(asc_request POST /v1/bundleIds "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "bundleIds", attributes: { name: ARGV.fetch(0), identifier: ARGV.fetch(1), platform: "IOS" } } })' -- "$profile_name" "$wildcard_identifier")")"
+  bundle_response="$(asc_request POST /v1/bundleIds "$(ruby -rjson -e 'puts JSON.generate({ data: { type: "bundleIds", attributes: { name: ARGV.fetch(0), identifier: ARGV.fetch(1), platform: "IOS" } } })' -- "$profile_name" "$bundle_identifier")")"
   bundle_id="$(printf '%s' "$bundle_response" | json_get data id)"
 fi
 
-devices_response="$(asc_request GET '/v1/devices?filter%5Bplatform%5D=IOS&filter%5Bstatus%5D=ENABLED&limit=200')"
-device_ids="$(printf '%s' "$devices_response" | json_array_ids)"
+device_ids=""
+if [[ "$profile_type" == "IOS_APP_DEVELOPMENT" || "$profile_type" == "IOS_APP_ADHOC" ]]; then
+  devices_response="$(asc_request GET '/v1/devices?filter%5Bplatform%5D=IOS&filter%5Bstatus%5D=ENABLED&limit=200')"
+  device_ids="$(printf '%s' "$devices_response" | json_array_ids)"
+fi
 
 profile_body="$(
   ruby -rjson -e '
@@ -251,18 +260,26 @@ profile_body="$(
     puts JSON.generate({
       data: {
         type: "profiles",
-        attributes: { name: ARGV.fetch(0), profileType: "IOS_APP_DEVELOPMENT" },
+        attributes: { name: ARGV.fetch(0), profileType: ARGV.fetch(3) },
         relationships: relationships,
       },
     })
-  ' -- "$profile_name" "$bundle_id" "$certificate_id" <<<"$device_ids"
+  ' -- "$profile_name" "$bundle_id" "$certificate_id" "$profile_type" <<<"$device_ids"
 )"
 
 profile_response="$(asc_request POST /v1/profiles "$profile_body")"
 profile_content="$(printf '%s' "$profile_response" | json_get data attributes profileContent)"
 printf '%s' "$profile_content" | base64 --decode >"$profile_path" 2>/dev/null || printf '%s' "$profile_content" | base64 -D >"$profile_path"
 
-cat <<YAML
+if [[ -n "${IOS_CI_OUTPUT_DIR:-}" ]]; then
+  mkdir -p "$IOS_CI_OUTPUT_DIR"
+  chmod 700 "$IOS_CI_OUTPUT_DIR"
+  cp "$p12_path" "$IOS_CI_OUTPUT_DIR/certificate.p12"
+  cp "$profile_path" "$IOS_CI_OUTPUT_DIR/profile.mobileprovision"
+  printf '%s' "$p12_password" >"$IOS_CI_OUTPUT_DIR/p12-password"
+  chmod 600 "$IOS_CI_OUTPUT_DIR"/*
+else
+  cat <<YAML
 # Generated by platform/ios/scripts/ios-ci-create-signing-assets.sh.
 # Paste the following block into the 'Install Apple signing assets' step env in ios-ci.yml.
 BUILD_CERTIFICATE_BASE64: $(base64_one_line "$p12_path")
@@ -271,5 +288,6 @@ BUILD_PROVISION_PROFILE_BASE64: $(base64_one_line "$profile_path")
 KEYCHAIN_PASSWORD: $keychain_password
 IOS_BUNDLE_ID_PREFIX: $bundle_id_prefix
 YAML
+fi
 
 echo "Created signing certificate '$certificate_name' and provisioning profile '$profile_name'." >&2

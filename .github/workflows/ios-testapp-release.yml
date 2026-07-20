@@ -2,6 +2,11 @@ name: ios-testapp-release
 
 on:
   workflow_dispatch:
+    inputs:
+      bootstrap_signing:
+        description: Generate and store new TestFlight signing assets
+        type: boolean
+        default: false
   pull_request:
 
 permissions:
@@ -12,7 +17,54 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  bootstrap-signing:
+    if: github.event_name == 'workflow_dispatch' && inputs.bootstrap_signing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Generate repository secrets token
+        id: generate-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          permission-secrets: write
+
+      - name: Generate and store TestFlight signing assets
+        shell: bash
+        env:
+          APPSTORE_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          IOS_BUNDLE_ID_PREFIX: ${{ vars.IOS_BUNDLE_ID_PREFIX }}
+          IOS_BUNDLE_IDENTIFIER: org.maplibre.maplibre.app
+          IOS_CERTIFICATE_TYPE: DISTRIBUTION
+          IOS_PROFILE_TYPE: IOS_APP_STORE
+          IOS_CERTIFICATE_NAME: MapLibre TestFlight CI
+          IOS_PROFILE_NAME: MapLibre TestFlight App Store
+        run: |
+          set -euo pipefail
+          assets_dir="$RUNNER_TEMP/testflight-signing"
+          export IOS_CI_OUTPUT_DIR="$assets_dir"
+
+          platform/ios/scripts/ios-ci-create-signing-assets.sh
+
+          base64 -w 0 "$assets_dir/certificate.p12" |
+            gh secret set IOS_DISTRIBUTION_CERTIFICATE --repo "$GITHUB_REPOSITORY"
+          base64 -w 0 "$assets_dir/profile.mobileprovision" |
+            gh secret set IOS_PROVISIONING_PROFILE --repo "$GITHUB_REPOSITORY"
+          gh secret set IOS_DISTRIBUTION_CERTIFICATE_PASSWORD \
+            --repo "$GITHUB_REPOSITORY" \
+            --body "$(cat "$assets_dir/p12-password")"
+
+          rm -rf "$assets_dir"
+
   ios-testapp-release:
+    if: github.event_name == 'pull_request' || inputs.bootstrap_signing != true
     runs-on: macos-26
     timeout-minutes: 90
     steps:
