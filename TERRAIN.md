@@ -364,8 +364,71 @@ already compute fade opacity). The convention was confirmed per backend against
 the existing `heatmap_texture` shaders, which sample a render target the same
 way: GL flips `a_pos.y`, Metal and WebGPU do not.
 
-Verified working on OpenGL on device (icons behind terrain are hidden);
-Metal/Vulkan/WebGPU follow the same structure but are not yet run on hardware.
+**2026-07-19/20 update - Vulkan occlusion debugged and fixed on device; GL now
+suspected broken by the same change.** Occlusion had *never* actually worked on
+Vulkan (the "verified... on OpenGL" note above was accurate, but Vulkan/Metal/
+WebGPU following "the same structure" turned out not to be enough). On-device
+debugging (screenshots + targeted shader probes) found six independent Vulkan
+defects, all now fixed:
+
+1. The terrain depth layer group is never registered with the orchestrator (by
+   design - it's rendered only from `RenderTerrain::renderDepth`), so the
+   general upload pass skipped it: its drawables had no vertex buffers, and
+   Vulkan's `bindAttributes` failed silently every frame. Fix: upload it
+   explicitly in `Renderer::Impl::render`. GL builds attribute state at draw
+   time, so it never hit this.
+2. `RenderTerrain::renderDepth` created the depth render target lazily, after
+   the symbol tweaker had already bound `getDepthTexture()` for the frame -
+   symbols got the 1x1 far-plane placeholder for that frame, permanently so in
+   single-frame renders (the render tests). Fix: `prepareDepthTarget()` runs
+   before the upload phase now.
+3. Vulkan's `unpack_depth` returned the stored `[0,1]` depth as-is, but symbol
+   matrices carry no `[-1,1]->[0,1]` remap (only the terrain/drape matrices do
+   - see Phase 2's original z-remap note above), so the compared z was still
+   GL-convention and the comparison almost never fired. Fixed to `*2-1`,
+   matching GL and Metal.
+4. The visibility test was a hard binary z compare; on-surface labels z-fought
+   it. Replaced with gl-js's actual `depthOpacity()`: a small bias, a soft fade
+   over ~0.002 NDC, and a second sample above the anchor (a label just behind a
+   ridge still shows if its glyphs poke above it). Ported to all four backends.
+5. Occlusion was gated on `dem_enabled` (does *this tile* have DEM data), so
+   labels from tiles outside the terrain cover - exactly the distant labels
+   that pierce mountains near the horizon - skipped occlusion entirely. Added
+   a global `depth_enabled` flag (terrain on) in `SymbolDrawableUBO`'s former
+   padding slot; `dem_enabled` still gates only the elevation.
+6. The position compared against the depth texture was `gl_Position` - for
+   screen-aligned text that's post label-plane/`coord_matrix`, a different clip
+   space than the depth pass (and than gl-js, which compares its tile-projected
+   `projectedPoint`). Switched all four backends to pass `projectedPoint`, with
+   Vulkan additionally running it through a new `surface_transformed()` helper
+   (same transform `applySurfaceTransform()` applies to `gl_Position`).
+
+Verified on Android/Vulkan on-device (`TerrainVectorMapActivity`, planet-vector
+basemap over the Alps): distant city labels correctly hide behind the
+Nordkette at both steep and shallow pitch, with gl-js's soft fade at ridge
+crests. Committed as `aaa145cc85df`.
+
+**Known issue - GL regressed by the same fix (#6 above), unconfirmed cause.**
+After the Vulkan fix landed, GL symbol occlusion - previously verified working
+on device - stopped hiding labels behind terrain (OpenGL flavour,
+`TerrainVectorMapActivity`, reported on device 2026-07-20). Fixes #1-3 are
+Vulkan/Metal-specific dead code on GL (its `unpack_depth` already had the
+`*2-1`, and GL builds attribute state at draw time so #1 never applied), and
+#4/#5 only *broaden* when occlusion applies, so they're unlikely culprits. The
+prime suspect is #6: GL's occlusion was implemented and tuned against
+`gl_Position` (the final label-plane-adjusted screen position), and switching
+its `calculate_visibility` argument to `projectedPoint` (the raw tile-projected
+anchor, matching gl-js and fixing Vulkan's shallow-pitch failure) may not be
+correct for GL's particular label-plane/pitch/rotation pipeline, or may expose
+a second, GL-specific bug that `gl_Position` happened to mask. Not yet
+diagnosed on device - `projectedPoint` is provably what gl-js itself compares,
+so the fix is more likely to find *why* it fails on GL than to revert it.
+Next step: run the local `terrain/occlusion-debug` render test (uncommitted
+style at `metrics/integration/render-tests/terrain/occlusion-debug/`) against
+a GL build to check whether the depth texture populates on GL the way it was
+confirmed to on Vulkan (see the diagnostic pattern in the aaa145c commit
+message / this session's history), before assuming the coordinate-space
+hypothesis is right.
 
 ### Phase 3 - Seams and quality
 
