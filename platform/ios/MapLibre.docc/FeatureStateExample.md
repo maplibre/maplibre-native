@@ -219,15 +219,6 @@ let colorExpression = NSExpression(mglJSONObject: [
 - ``MLNVectorTileSource/removeFeatureStateForSourceLayerID:featureID:`` - Remove all state from a feature
 - ``MLNVectorTileSource/resetFeatureStatesForSourceLayerID:`` - Remove all feature state from a source layer
 
-## Best Practices
-
-1. **Use meaningful state keys**: Choose descriptive names like "selected", "highlighted", "touched"
-2. **Keep state values simple**: Use basic JSON types (strings, numbers, booleans)
-3. **Store feature identifiers, not features**: Feature state is keyed by identifier, so keeping the identifier of e.g. the selected feature is enough
-4. **Clear state when appropriate**: Remove state when features are no longer relevant
-5. **Use feature-state expressions**: Create dynamic styling that responds to state changes
-6. **Handle edge cases**: Always provide fallback values in expressions
-
 ## Related Examples
 
 - [Predicates and Expressions](Predicates_and_Expressions.md) - Learn about style expressions

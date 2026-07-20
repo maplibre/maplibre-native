@@ -68,8 +68,6 @@ class MLNFeatureStateTests: XCTestCase, MLNMapViewDelegate {
         style.addSource(source)
         style.addLayer(MLNCircleStyleLayer(identifier: "states-circles", source: source))
 
-        // Wait for two full frames so the render source exists even if a frame
-        // was already in flight when the layer was added.
         waitForRenderedFrame()
         waitForRenderedFrame()
 
