@@ -7,6 +7,10 @@ on:
         description: Generate and store new TestFlight signing assets
         type: boolean
         default: false
+      bootstrap_public_certificate:
+        description: Base64-encoded certificate used to encrypt generated signing assets
+        type: string
+        default: ''
   pull_request:
 
 permissions:
@@ -25,21 +29,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Generate repository secrets token
-        id: generate-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
-          permission-secrets: write
-
-      - name: Generate and store TestFlight signing assets
+      - name: Generate and encrypt TestFlight signing assets
         shell: bash
         env:
           APPSTORE_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
           APPSTORE_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          BOOTSTRAP_PUBLIC_CERTIFICATE_BASE64: ${{ inputs.bootstrap_public_certificate }}
           IOS_BUNDLE_ID_PREFIX: ${{ vars.IOS_BUNDLE_ID_PREFIX }}
           IOS_BUNDLE_IDENTIFIER: org.maplibre.maplibre.app
           IOS_CERTIFICATE_TYPE: DISTRIBUTION
@@ -49,19 +45,38 @@ jobs:
         run: |
           set -euo pipefail
           assets_dir="$RUNNER_TEMP/testflight-signing"
+          archive_path="$RUNNER_TEMP/testflight-signing.tar"
+          certificate_path="$RUNNER_TEMP/bootstrap-public-certificate.pem"
+          encrypted_path="$RUNNER_TEMP/testflight-signing.cms"
           export IOS_CI_OUTPUT_DIR="$assets_dir"
+
+          if [[ -z "$BOOTSTRAP_PUBLIC_CERTIFICATE_BASE64" ]]; then
+            echo "::error::bootstrap_public_certificate is required"
+            exit 1
+          fi
 
           platform/ios/scripts/ios-ci-create-signing-assets.sh
 
-          base64 -w 0 "$assets_dir/certificate.p12" |
-            gh secret set IOS_DISTRIBUTION_CERTIFICATE --repo "$GITHUB_REPOSITORY"
-          base64 -w 0 "$assets_dir/profile.mobileprovision" |
-            gh secret set IOS_PROVISIONING_PROFILE --repo "$GITHUB_REPOSITORY"
-          gh secret set IOS_DISTRIBUTION_CERTIFICATE_PASSWORD \
-            --repo "$GITHUB_REPOSITORY" \
-            --body "$(cat "$assets_dir/p12-password")"
+          printf '%s' "$BOOTSTRAP_PUBLIC_CERTIFICATE_BASE64" |
+            base64 --decode >"$certificate_path"
+          tar -C "$assets_dir" -cf "$archive_path" .
+          openssl cms -encrypt \
+            -binary \
+            -aes256 \
+            -in "$archive_path" \
+            -outform DER \
+            -out "$encrypted_path" \
+            "$certificate_path"
 
-          rm -rf "$assets_dir"
+          rm -rf "$assets_dir" "$archive_path" "$certificate_path"
+
+      - name: Upload encrypted signing assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-testapp-signing-bootstrap
+          path: ${{ runner.temp }}/testflight-signing.cms
+          if-no-files-found: error
+          retention-days: 1
 
   ios-testapp-release:
     if: github.event_name == 'pull_request' || inputs.bootstrap_signing != true
