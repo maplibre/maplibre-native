@@ -26,7 +26,10 @@ if (extra.has("vvl_version")) {
 // Declare variables for the Vulkan Validation Layers download and extraction paths.
 val vvlSite = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
 val vvlLibRoot = projectDir // Set project root or change to rootDir if needed
-val vvlJniLibDir = "$vvlLibRoot/src/vulkanDebug/jniLibs"
+val vvlJniLibDirs = arrayOf(
+    "$vvlLibRoot/src/vulkanDebug/jniLibs",
+    "$vvlLibRoot/src/multiBackendDebug/jniLibs" // multiBackend flavor also uses Vulkan rendering engine
+)
 val vvlSoName = "libVkLayer_khronos_validation.so"
 
 // Download the release zip file to ${vvlLibRoot}/
@@ -46,19 +49,23 @@ val download = tasks.register("download") {
     }
 }
 
-val unzip = tasks.register<Copy>("unzip") {
+val unzip = tasks.register("unzip") {
     dependsOn(download)
 
-    from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip"))) {
-        eachFile {
-            path = path.substringAfter("/")
-        }
-        includeEmptyDirs = false // Optional: Exclude empty directories if not needed
-    }
-    into(file(vvlJniLibDir))
+    doLast {
+        vvlJniLibDirs.forEach { vvlJniLibDir ->
+            mkdir(vvlJniLibDir)
 
-    doFirst {
-        mkdir(vvlJniLibDir)
+            copy {
+                from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip"))) {
+                    eachFile {
+                        path = path.substringAfter("/")
+                    }
+                    includeEmptyDirs = false // Optional: Exclude empty directories if not needed
+                }
+                into(file(vvlJniLibDir))
+            }
+        }
     }
 }
 
