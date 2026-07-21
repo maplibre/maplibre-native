@@ -331,7 +331,7 @@ public class LocationComponentOptions implements Parcelable {
       typedArray.getString(R.styleable.maplibre_LocationComponent_maplibre_layer_below));
 
     builder.bearingOnTop(
-      typedArray.getBoolean(R.styleable.maplibre_LocationComponent_maplibre_bearing_on_top, false));
+      typedArray.getBoolean(R.styleable.maplibre_LocationComponent_maplibre_bearing_on_top, true));
 
     float minScale = typedArray.getFloat(
       R.styleable.maplibre_LocationComponent_maplibre_minZoomIconScale, MIN_ZOOM_ICON_SCALE_DEFAULT);
