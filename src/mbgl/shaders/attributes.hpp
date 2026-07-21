@@ -24,7 +24,7 @@ MBGL_DEFINE_ATTRIBUTE(float, 1, offset);
 MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, decimals_ed);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
- 
+
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, instance);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, pos_scale);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_tltr);
