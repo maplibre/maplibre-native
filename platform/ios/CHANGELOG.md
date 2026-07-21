@@ -9,6 +9,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
 - Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
 - feat(core): render local CJK glyphs at 2x texture resolution ([#4304](https://github.com/maplibre/maplibre-native/pull/4304)).
+- Convert a PMTiles metadata decompression failure into an error response instead of an uncaught exception ([#4399](https://github.com/maplibre/maplibre-native/pull/4399)).
 - fix(core): notify layer observer when source-layer or source-id changes ([#4372](https://github.com/maplibre/maplibre-native/pull/4372)).
 - Fix MLNNetworkConfiguration not forwarding 'didReceiveResponse' to its delegate. ([#4393](https://github.com/maplibre/maplibre-native/pull/4393)).
 - core: add nearClippedProjectionMatrix to MLNCustomStyleLayer ([#4364](https://github.com/maplibre/maplibre-native/pull/4364)).
