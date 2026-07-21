@@ -2767,4 +2767,24 @@ The unit is in density-independent pixels only for SDF sprites that were created
     return new LayoutPropertyValue<>("circle-sort-key", value);
   }
 
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionRoundedCornerDistance(Float value) {
+    return new LayoutPropertyValue<>("fill-extrusion-rounded-corner-distance", value);
+  }
+
+  /**
+   * The distance from the corner that will be cut and replaced with rounded corner.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Expression> fillExtrusionRoundedCornerDistance(Expression value) {
+    return new LayoutPropertyValue<>("fill-extrusion-rounded-corner-distance", value);
+  }
+
 }
