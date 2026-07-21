@@ -1,29 +1,58 @@
+name: ios-testapp-release
+
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ios-testapp-release:
-    runs-on: macos-latest
+    runs-on: macos-26
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
+          persist-credentials: false
 
-      - name: Setup certificate
-        run: |
-          echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > platform/ios/app-swift/MapLibre.mobileprovision
+      - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
 
-      - name: Update BUILD.bazel
-        run: |
-          sed -i '' 's/xcode_profile/:MapLibre.mobileprovision/' platform/ios/app-swift/BUILD.bazel
+      - name: Install Apple signing assets
+        run: platform/ios/scripts/ios-ci-install-signing-assets.sh
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          IOS_BUNDLE_ID_PREFIX: ${{ vars.IOS_BUNDLE_ID_PREFIX }}
 
       - name: Build
-        run: bazel build //platform/ios/app-swift:MapLibreApp -c opt  --ios_multi_cpus=arm64 --//:renderer=metal --action_env=SENTRY_DSN=${{ vars.SENTRY_DSN_IOS }} --embed_label=maplibre_app_1.0_build_"$(date +%s)"
+        shell: bash
+        run: |
+          set -euo pipefail
+          build_number="$(date +%s)"
+          bazel build //platform/ios/app-swift:MapLibreApp \
+            --compilation_mode=opt \
+            --ios_multi_cpus=arm64 \
+            --//:renderer=metal \
+            --action_env=SENTRY_DSN="${{ vars.SENTRY_DSN_IOS }}" \
+            --embed_label="maplibre_app_1.0_build_${build_number}"
+          test -f bazel-bin/platform/ios/app-swift/MapLibreApp.ipa
 
-      - name: 'Upload app to TestFlight'
+      - name: Upload app to TestFlight
         uses: apple-actions/upload-testflight-build@1ad58030672057aa084b4e96beb6f7a8c627f9e6 # v5.2.1
         with:
-          app-path: 'bazel-bin/platform/ios/app-swift/MapLibreApp.ipa'
+          app-path: bazel-bin/platform/ios/app-swift/MapLibreApp.ipa
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
           api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          wait-for-processing: 'true'
