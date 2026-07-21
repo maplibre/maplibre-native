@@ -206,7 +206,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;

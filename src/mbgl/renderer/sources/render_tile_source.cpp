@@ -130,7 +130,7 @@ public:
                 .gapwidth_t = 0.f,
                 .offset_t = 0.f,
                 .width_t = 0.f,
-                .pad1 = 0
+                .pad1 = 0.f
             };
 
 #if MLN_UBO_CONSOLIDATION
@@ -234,7 +234,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             auto inserted = debugLayerGroups.insert(
                 std::make_pair(type,
                                context.createTileLayerGroup(
-                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName))));
+                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName), true)));
             assert(inserted.second);
             it = inserted.first;
         }

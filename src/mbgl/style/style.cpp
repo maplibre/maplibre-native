@@ -2,6 +2,7 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/light.hpp>
+#include <mbgl/style/terrain.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/style_impl.hpp>
@@ -73,6 +74,19 @@ Light* Style::getLight() {
 
 const Light* Style::getLight() const {
     return impl->getLight();
+}
+
+void Style::setTerrain(std::unique_ptr<Terrain> terrain) {
+    impl->setTerrain(std::move(terrain));
+}
+
+Terrain* Style::getTerrain() {
+    impl->mutated = true;
+    return impl->getTerrain();
+}
+
+const Terrain* Style::getTerrain() const {
+    return impl->getTerrain();
 }
 
 std::optional<Image> Style::getImage(const std::string& name) const {

@@ -47,6 +47,8 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/symbol.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/terrain.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/terrain_depth.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/widevector.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
@@ -87,6 +89,8 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/symbol.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/terrain.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/terrain_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/widevector.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/uniform_buffer.hpp

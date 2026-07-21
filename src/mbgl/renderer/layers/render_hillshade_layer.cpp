@@ -25,6 +25,8 @@
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 
+#include <unordered_set>
+
 namespace mbgl {
 
 using namespace style;
@@ -136,11 +138,6 @@ void RenderHillshadeLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     removeRenderTargets(changes);
 }
 
-void RenderHillshadeLayer::addRenderTarget(const RenderTargetPtr& renderTarget, UniqueChangeRequestVec& changes) {
-    activateRenderTarget(renderTarget, true, changes);
-    activatedRenderTargets.emplace_back(renderTarget);
-}
-
 void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) {
     for (const auto& renderTarget : activatedRenderTargets) {
         activateRenderTarget(renderTarget, false, changes);
@@ -164,7 +161,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -231,6 +228,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return hillshadePrepareVertexAttrs;
     };
 
+    // Prepare targets of the tiles still in the cover this frame. Diffed against
+    // activatedRenderTargets below so departed tiles' targets are released; otherwise
+    // that list grows without bound while panning and pins every prepare target's
+    // offscreen + DEM textures forever (OOM).
+    std::vector<RenderTargetPtr> currentRenderTargets;
+    currentRenderTargets.reserve(renderTiles->size());
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -252,16 +256,15 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.renderTargetPrepared) {
             // Set up tile render target
             const uint16_t tilesize = bucket.getDEMData().dim;
-            auto renderTarget = context.createRenderTarget({tilesize, tilesize},
-                                                           gfx::TextureChannelDataType::UnsignedByte);
+            auto renderTarget = context.createRenderTarget(
+                {tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/false);
             if (!renderTarget) {
                 continue;
             }
             bucket.renderTarget = renderTarget;
             bucket.renderTargetPrepared = true;
-            addRenderTarget(renderTarget, changes);
 
-            auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
+            auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID(), false);
             if (!singleTileLayerGroup) {
                 return;
             }
@@ -302,6 +305,11 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
+        }
+
+        // This tile is in the cover; keep its prepare target active this frame.
+        if (bucket.renderTarget) {
+            currentRenderTargets.emplace_back(bucket.renderTarget);
         }
 
         // Set up tile drawable
@@ -385,6 +393,33 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
+    }
+
+    // Reconcile the active prepare-target set with the tiles still in the cover. Release
+    // targets whose tile has left (frees their offscreen + DEM textures) and register any
+    // newly covered ones. Diffed by identity so persistent tiles cause no churn.
+    {
+        std::unordered_set<const void*> live;
+        live.reserve(currentRenderTargets.size());
+        for (const auto& rt : currentRenderTargets) {
+            live.insert(rt.get());
+        }
+        std::unordered_set<const void*> prev;
+        prev.reserve(activatedRenderTargets.size());
+        for (const auto& rt : activatedRenderTargets) {
+            prev.insert(rt.get());
+        }
+        for (const auto& rt : activatedRenderTargets) {
+            if (!live.contains(rt.get())) {
+                activateRenderTarget(rt, false, changes);
+            }
+        }
+        for (const auto& rt : currentRenderTargets) {
+            if (!prev.contains(rt.get())) {
+                activateRenderTarget(rt, true, changes);
+            }
+        }
+        activatedRenderTargets = std::move(currentRenderTargets);
     }
 }
 

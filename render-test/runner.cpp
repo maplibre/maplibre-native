@@ -44,7 +44,10 @@ GfxProbe::GfxProbe(const mbgl::gfx::RenderingStats& stats, const GfxProbe& prev)
       numTextures(stats.numActiveTextures),
       memIndexBuffers(stats.memIndexBuffers, std::max(stats.memIndexBuffers, prev.memIndexBuffers.peak)),
       memVertexBuffers(stats.memVertexBuffers, std::max(stats.memVertexBuffers, prev.memVertexBuffers.peak)),
-      memTextures(stats.memTextures, std::max(stats.memTextures, prev.memTextures.peak)) {}
+      // RenderingStats::memTextures is int64_t; GfxProbe::Memory tracks int (render
+      // tests never approach 2GB), so narrow to match its (int, int) constructor
+      memTextures(static_cast<int>(stats.memTextures),
+                  std::max(static_cast<int>(stats.memTextures), prev.memTextures.peak)) {}
 
 // static
 gfx::HeadlessBackend::SwapBehaviour swapBehavior(MapMode mode) {

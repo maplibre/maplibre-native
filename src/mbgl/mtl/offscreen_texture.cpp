@@ -73,6 +73,10 @@ public:
             depthTexture->create();
             if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
                 depthTarget->setTexture(static_cast<Texture2D*>(depthTexture.get())->getMetalTexture());
+                // Clear depth each frame; the drape's depth buffer is not read back.
+                depthTarget->setLoadAction(MTL::LoadActionClear);
+                depthTarget->setClearDepth(1.0);
+                depthTarget->setStoreAction(MTL::StoreActionDontCare);
             }
         }
         if (stencilTexture) {

@@ -26,6 +26,7 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/style/terrain.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/filter.hpp>
 #include <mbgl/renderer/query.hpp>
@@ -1079,6 +1080,27 @@ jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
     }
 }
 
+void NativeMapView::setTerrain(JNIEnv& env, const jni::String& sourceId, jni::jfloat exaggeration) {
+    map->getStyle().setTerrain(
+        std::make_unique<mbgl::style::Terrain>(jni::Make<std::string>(env, sourceId), exaggeration));
+}
+
+void NativeMapView::removeTerrain(JNIEnv&) {
+    map->getStyle().setTerrain(nullptr);
+}
+
+jni::Local<jni::String> NativeMapView::getTerrainSourceId(JNIEnv& env) {
+    if (const auto* terrain = map->getStyle().getTerrain()) {
+        return jni::Make<jni::String>(env, terrain->getSource());
+    }
+    return jni::Local<jni::String>();
+}
+
+jni::jfloat NativeMapView::getTerrainExaggeration(JNIEnv&) {
+    const auto* terrain = map->getStyle().getTerrain();
+    return terrain ? terrain->getExaggeration() : 1.0f;
+}
+
 jni::Local<jni::Array<jni::Object<Layer>>> NativeMapView::getLayers(JNIEnv& env) {
     // Get the core layers
     std::vector<style::Layer*> layers = map->getStyle().getLayers();
@@ -1487,6 +1509,10 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getFeatureState, "nativeGetFeatureState"),
         METHOD(&NativeMapView::removeFeatureState, "nativeRemoveFeatureState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
+        METHOD(&NativeMapView::setTerrain, "nativeSetTerrain"),
+        METHOD(&NativeMapView::removeTerrain, "nativeRemoveTerrain"),
+        METHOD(&NativeMapView::getTerrainSourceId, "nativeGetTerrainSourceId"),
+        METHOD(&NativeMapView::getTerrainExaggeration, "nativeGetTerrainExaggeration"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),
         METHOD(&NativeMapView::addLayer, "nativeAddLayer"),

@@ -114,7 +114,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), false)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -353,6 +353,13 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short4);
+        }
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionCentroidVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillExtrusionLayoutVertex, a3),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
         }
 #endif
 

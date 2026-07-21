@@ -83,6 +83,94 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     vec2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
+
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// as in the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
+// sampler and dem_* values are passed in as arguments rather than read from globals.
+float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
+                    float dem_dim, float dem_exaggeration, float dem_enabled) {
+    if (dem_enabled == 0.0) {
+        return 0.0;
+    }
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.0;
+    vec2 f = fract(coord);
+    vec2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
+    float d = 1.0 / (dem_dim + 2.0);
+    vec4 tl = texture(dem, c) * 255.0;
+    tl.a = -1.0;
+    vec4 tr = texture(dem, c + vec2(d, 0.0)) * 255.0;
+    tr.a = -1.0;
+    vec4 bl = texture(dem, c + vec2(0.0, d)) * 255.0;
+    bl.a = -1.0;
+    vec4 br = texture(dem, c + vec2(d, d)) * 255.0;
+    br.a = -1.0;
+    float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                          mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                          f.y);
+    return elevation * dem_exaggeration;
+}
+
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target. `matrix` is the drawable's tile-local
+// orthographic matrix with the drawable's tile (z, x, y) stored in its unused
+// third column, and `target_tile` is GlobalPaintParamsUBO's drape_tile (the
+// render target's tile, w != 0 while drawing into a drape target). The drape
+// projection is orthographic, so placing a tile that overlaps the target at a
+// different zoom is an affine transform in NDC. Factored so the offsets stay
+// exact in single precision for tile coordinates up to zoom ~22.
+vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    vec3 tile = vec3(matrix[2][0], matrix[2][1], matrix[2][2]);
+    float k = target_tile.x - tile.x; // target zoom - drawable zoom
+    float scale = exp2(k);
+    vec2 offset;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    clip.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return clip;
+}
+
+// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl),
+// converted to NDC z, as in the maplibre-gl-js prelude
+float unpack_depth(vec4 rgba_depth) {
+    const highp vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// Unlike gl-js (global terrain uniforms), the depth sampler and enable flag are
+// passed as arguments.
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
+// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
+// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
+// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+}
+float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
+    if (depth_enabled == 0.0) {
+        return 1.0;
+    }
+    vec3 frag = pos.xyz / pos.w;
+    // check if coordinate is fully visible
+    highp float d = depth_opacity(frag, depth_texture);
+    if (d > 0.95) {
+        return 1.0;
+    }
+    // if not, sample some pixels above: a label whose anchor is just behind a
+    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
+    return (d + depth_opacity(frag + vec3(0.0, 0.01, 0.0), depth_texture)) / 2.0;
+}
 )";
     static constexpr const char* fragment = R"(#ifdef GL_ES
 precision mediump float;

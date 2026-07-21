@@ -10,6 +10,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
@@ -134,7 +135,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             constexpr bool inViewportPixelUnits = false;
             const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                        : evaluated.get<style::IconTranslateAnchor>();
-            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+            matrix = getTileMatrix(
+                tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable, false, false);
         }
 
         // from symbol_program, makeValues
@@ -164,6 +166,27 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
+        // When terrain is enabled, bind the covering DEM tile so the vertex
+        // shader can displace symbol anchors by the terrain elevation
+        const bool terrainEnabled = parameters.terrain && parameters.terrain->isEnabled();
+        std::optional<RenderTerrain::TerrainData> terrainData;
+        if (terrainEnabled) {
+            terrainData = parameters.terrain->getTerrainData(tileID);
+        }
+        if (parameters.terrain) {
+            drawable.setTexture(
+                terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
+                idSymbolDEMTexture);
+            // Packed terrain depth for occlusion (calculate_visibility)
+            drawable.setTexture(parameters.terrain->getDepthTexture(context), idSymbolDepthTexture);
+        }
+
+        // The terrain surface writes depth so its skirts get occluded; symbols
+        // must not depth-test against it (their occlusion behind terrain comes
+        // from the depth texture / calculate_visibility above), or a label would
+        // be culled by the very surface it labels. Depth stays on without terrain.
+        drawable.setEnableDepth(!terrainEnabled);
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -191,6 +214,17 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
+            .pad1 = 0,
+            .pad2 = 0,
+            .pad3 = 0,
+
+            .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_unpack = parameters.terrain ? parameters.terrain->getDEMUnpackVector()
+                                             : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_dim = terrainData ? terrainData->demDim : 0.0f,
+            .dem_exaggeration = parameters.terrain ? parameters.terrain->getExaggeration() : 0.0f,
+            .dem_enabled = terrainData ? 1.0f : 0.0f,
+            .depth_enabled = terrainEnabled ? 1.0f : 0.0f,
         };
 
 #if MLN_UBO_CONSOLIDATION

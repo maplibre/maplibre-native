@@ -443,14 +443,21 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
+                                                std::size_t initialCapacity,
+                                                std::string name,
+                                                bool renderToTerrain) {
+    auto tileLayerGroup = std::make_shared<TileLayerGroup>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     tileLayerGroup->setObserver(observer);
     return tileLayerGroup;
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
+                                        std::size_t initialCapacity,
+                                        std::string name,
+                                        bool renderToTerrain) {
+    auto layerGroup = std::make_shared<LayerGroup>(layerIndex, initialCapacity, name, renderToTerrain);
     layerGroup->setObserver(observer);
     return layerGroup;
 }
@@ -476,8 +483,10 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(*this, size, type);
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const bool stencil) {
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
@@ -488,7 +497,7 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    return createOffscreenTexture(size, type, false, false);
+    return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
@@ -519,15 +528,20 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& context = const_cast<Context&>(*this);
 
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
-    if (renderableResource.hasSurfaceTransformSupport()) {
-        float surfaceRotation = renderableResource.getRotation();
+    // Offscreen render targets (e.g. the terrain drape targets) are not surface
+    // renderables and have no swapchain or surface transform
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<RenderableResource>();
+    if (renderableResource.isSurface()) {
+        auto& surfaceResource = static_cast<SurfaceRenderableResource&>(renderableResource);
+        if (surfaceResource.hasSurfaceTransformSupport()) {
+            float surfaceRotation = surfaceResource.getRotation();
 
-        const shaders::GlobalPlatformParamsUBO platformUBO = {
-            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
-            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(
-            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+            const shaders::GlobalPlatformParamsUBO platformUBO = {
+                /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+                /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+            context.globalUniformBuffers.createOrUpdate(
+                shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+        }
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
@@ -613,7 +627,18 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindVertexBuffers(0, vertexBuffers, offset, dispatcher);
     commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
 
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    // Cast to the polymorphic base, not SurfaceRenderableResource: this render pass's
+    // renderable is the main window surface for ordinary rendering, but an offscreen
+    // OffscreenTextureResource for a terrain drape target (render_target.cpp) - an
+    // unrelated sibling type. getResource<T>() is an unchecked static_cast, so casting
+    // to the concrete surface type here reinterpreted an OffscreenTextureResource's
+    // memory as a SurfaceRenderableResource and read garbage for the rotation, which
+    // corrupted the tile-clipping-mask matrix and made every draped drawable that
+    // stencil-tests against it (color-relief, hillshade, ...) fail to render. The base
+    // class's default getRotation() (0, correct for an orthographic drape target) is
+    // picked up automatically via virtual dispatch for OffscreenTextureResource, while
+    // SurfaceRenderableResource still overrides it with the real device rotation.
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<RenderableResource>();
     const float rad = renderableResource.getRotation();
     const mat4 rotationMat = {
         std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
@@ -705,7 +730,10 @@ void Context::buildImageDescriptorSetLayout() {
     for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(static_cast<uint32_t>(i))
-                               .setStageFlags(vk::ShaderStageFlagBits::eFragment)
+                               // vertex stage included for shaders that sample in the vertex
+                               // shader, e.g. the terrain DEM displacement
+                               .setStageFlags(vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
+                                              vk::ShaderStageFlagBits::eFragment)
                                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
                                .setDescriptorCount(1));
     }
@@ -746,7 +774,9 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     if (generalPipelineLayout) return generalPipelineLayout;
 
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
-    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(uint32_t)).setStageFlags(stages);
+    // ubo_index at offset 0 plus the drape target tile at offset 16
+    // (see shaders::DrawablePushConstants)
+    const auto pushConstant = vk::PushConstantRange().setSize(32).setStageFlags(stages);
 
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
@@ -792,6 +822,15 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 
     return pushConstantPipelineLayout;
+}
+
+vk::PipelineCache Context::getPipelineCache() {
+    if (!pipelineCache) {
+        pipelineCache = backend.getDevice()->createPipelineCacheUnique(
+            vk::PipelineCacheCreateInfo(), nullptr, backend.getDispatcher());
+        backend.setDebugName(pipelineCache.get(), "PipelineCache");
+    }
+    return pipelineCache.get();
 }
 
 void Context::FrameResources::runDeletionQueue(Context& context) {

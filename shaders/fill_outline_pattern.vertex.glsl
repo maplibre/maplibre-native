@@ -8,6 +8,7 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_pixel_ratio;
     highp float u_map_zoom;
     lowp float global_pad1;
+    highp vec4 u_drape_tile;
 };
 
 layout (std140) uniform FillOutlinePatternDrawableUBO {
@@ -64,6 +65,7 @@ void main() {
     float toScale = u_to_scale;
 
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
 
     vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);

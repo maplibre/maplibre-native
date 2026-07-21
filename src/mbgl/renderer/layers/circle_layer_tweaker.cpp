@@ -5,6 +5,7 @@
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
@@ -81,11 +82,31 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
         const auto matrix = getTileMatrix(
-            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable, false, false);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, zoom);
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                : parameters.pixelsToGLUnits;
+
+        // When terrain is enabled, bind the covering DEM tile so the vertex
+        // shader can displace circle centers by the terrain elevation
+        const bool terrainEnabled = parameters.terrain && parameters.terrain->isEnabled();
+        std::optional<RenderTerrain::TerrainData> terrainData;
+        if (terrainEnabled) {
+            terrainData = parameters.terrain->getTerrainData(tileID);
+        }
+        if (parameters.terrain) {
+            drawable.setTexture(
+                terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
+                idCircleDEMTexture);
+        }
+
+        // The terrain surface writes depth (so its skirts get occluded); circles
+        // are elevated onto that surface and must not depth-test against it, or
+        // they would be culled by the ground they sit on. Depth stays on without
+        // terrain. (Circles have no depth-texture occlusion path, so they simply
+        // draw on top of the terrain, as in maplibre-gl-js.)
+        drawable.setEnableDepth(!terrainEnabled);
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
@@ -105,7 +126,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .stroke_opacity_t = std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
             .pad1 = 0,
             .pad2 = 0,
-            .pad3 = 0
+            .pad3 = 0,
+
+            .dem_coords = terrainData ? terrainData->demCoords : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_unpack = parameters.terrain ? parameters.terrain->getDEMUnpackVector()
+                                             : std::array<float, 4>{{0, 0, 0, 0}},
+            .dem_dim = terrainData ? terrainData->demDim : 0.0f,
+            .dem_exaggeration = parameters.terrain ? parameters.terrain->getExaggeration() : 0.0f,
+            .dem_enabled = terrainData ? 1.0f : 0.0f,
+            .pad4 = 0
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

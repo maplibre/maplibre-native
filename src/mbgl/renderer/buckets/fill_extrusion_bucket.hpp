@@ -20,7 +20,7 @@ using FillExtrusionStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
 using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::ed_discard>>;
 #else
-using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::normal_ed>>;
+using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::normal_ed, attributes::centroid>>;
 #endif
 
 class FillExtrusionBucket final : public Bucket {
@@ -60,7 +60,7 @@ public:
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(
-        Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e) {
+        Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e, Point<int16_t> centroid) {
         const auto factor = pow(2, 13);
 
         return FillExtrusionLayoutVertex{{{p.x, p.y}},
@@ -71,7 +71,8 @@ public:
                                            static_cast<int16_t>(ny * factor * 2),
                                            static_cast<int16_t>(nz * factor * 2),
                                            // The edgedistance attribute is used for wrapping fill_extrusion patterns
-                                           static_cast<int16_t>(e)}}};
+                                           static_cast<int16_t>(e)}},
+                                         {{centroid.x, centroid.y}}};
     }
 #endif
 

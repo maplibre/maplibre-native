@@ -83,6 +83,14 @@ public:
 
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
 
+    /// Create an offscreen texture with explicit depth/stencil attachments. Terrain drape
+    /// targets need a stencil to clip overlapping draped tiles against each other, as
+    /// maplibre-gl-js does for its render-to-texture framebuffer.
+    virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size,
+                                                                     TextureChannelDataType,
+                                                                     bool depth,
+                                                                     bool stencil) = 0;
+
     template <RenderbufferPixelType pixelType>
     Renderbuffer<pixelType> createRenderbuffer(const Size size) {
         return {size, createRenderbufferResource(pixelType, size)};
@@ -138,10 +146,14 @@ public:
     /// Create a tile layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
                                                    std::size_t initialCapacity,
-                                                   std::string name) = 0;
+                                                   std::string name,
+                                                   bool renderToTerrain) = 0;
 
     /// Create a layer group implementation
-    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) = 0;
+    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex,
+                                           std::size_t initialCapacity,
+                                           std::string name,
+                                           bool renderToTerrain) = 0;
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
@@ -149,8 +161,9 @@ public:
     /// Create a dynamic texture
     virtual DynamicTexturePtr createDynamicTexture(Size size, TexturePixelType pixelType) = 0;
 
-    /// Create a render target
-    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
+    /// Create a render target. `stencil` attaches a stencil buffer, which terrain drape
+    /// targets need to clip overlapping draped tiles against each other.
+    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type, bool stencil) = 0;
 
     /// Resets the context state to defaults
     virtual void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) = 0;

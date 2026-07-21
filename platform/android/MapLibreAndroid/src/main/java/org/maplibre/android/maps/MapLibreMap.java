@@ -537,7 +537,7 @@ public final class MapLibreMap {
    * @param minPitch The new minimum Pitch.
    */
   public void setMinPitchPreference(
-    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH) double minPitch) {
+    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double minPitch) {
     transform.setMinPitch(minPitch);
   }
 
@@ -561,13 +561,13 @@ public final class MapLibreMap {
    * Sets the maximum Pitch the map can be displayed at.
    * </p>
    * <p>
-   * The default and upper bound for maximum Pitch is 60.
+   * The default maximum Pitch is 60; values up to 85 are accepted.
    * </p>
    *
    * @param maxPitch The new maximum Pitch.
    */
   public void setMaxPitchPreference(@FloatRange(from = MapLibreConstants.MINIMUM_PITCH,
-    to = MapLibreConstants.MAXIMUM_PITCH) double maxPitch) {
+    to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double maxPitch) {
     transform.setMaxPitch(maxPitch);
   }
 

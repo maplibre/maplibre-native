@@ -27,6 +27,9 @@ MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, ed_discard);
 #else
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, normal_ed);
+// Per-polygon centroid (tile-local), used to sample a single terrain elevation
+// per building so extrusions don't shear across a slope (see fill_extrusion)
+MBGL_DEFINE_ATTRIBUTE(int16_t, 2, centroid);
 #endif
 
 template <typename T, std::size_t N>

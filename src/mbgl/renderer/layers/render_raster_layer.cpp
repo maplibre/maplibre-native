@@ -244,7 +244,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.vertices.empty()) {
             if (!imageLayerGroup) {
                 // Set up a layer group
-                imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+                imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true);
                 imageLayerGroup->addLayerTweaker(layerTweaker);
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
             }
@@ -275,7 +275,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             });
         } else {
             // Set up a tile layer group
-            if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
                 layerGroup_->addLayerTweaker(layerTweaker);
                 setLayerGroup(std::move(layerGroup_), changes);
             }

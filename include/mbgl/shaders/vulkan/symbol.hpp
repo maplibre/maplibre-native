@@ -20,7 +20,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
@@ -63,11 +63,28 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+    float pad1;
+    float pad2;
+    float pad3;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
+
+// Bindings match the texture enum ids (idSymbolDEMTexture=2, idSymbolDepthTexture=3):
+// the Vulkan descriptor set binds textures[id] to binding[id], so binding 1
+// (idSymbolImageIconTexture) is unused by this variant and left as a gap.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
+
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_opacity;
@@ -96,7 +113,8 @@ void main() {
         size = drawable.size;
     }
 
-    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, 0, 1);
+    const float ele = get_elevation(a_pos, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, ele, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = drawable.pitch_with_map ?
@@ -116,7 +134,7 @@ void main() {
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
         // See comments in symbol_sdf.vertex
-        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), ele, 1);
 
         const vec2 a = projectedPoint.xy / projectedPoint.w;
         const vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -127,10 +145,11 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
+    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, ele, 1.0);
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const vec2 pos0 = projected_pos.xy / projected_pos.w;
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
-    gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, z, 1.0);
     applySurfaceTransform();
 
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
@@ -144,6 +163,8 @@ void main() {
 #else
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t) * fade_opacity;
 #endif
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    frag_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
 }
 )";
 
@@ -211,7 +232,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Vulkan> {
 
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
@@ -270,11 +291,28 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+    float pad1;
+    float pad2;
+    float pad3;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
+
+// Bindings match the texture enum ids (idSymbolDEMTexture=2, idSymbolDepthTexture=3):
+// the Vulkan descriptor set binds textures[id] to binding[id], so binding 1
+// (idSymbolImageIconTexture) is unused by this variant and left as a gap.
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
+
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
@@ -323,7 +361,8 @@ void main() {
         size = drawable.size;
     }
 
-    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, 0, 1);
+    const float ele = get_elevation(a_pos, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, ele, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -350,7 +389,7 @@ void main() {
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), ele, 1);
 
         const vec2 a = projectedPoint.xy / projectedPoint.w;
         const vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -361,10 +400,11 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
+    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, ele, 1.0);
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(pos0, z, 1.0);
     applySurfaceTransform();
 
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
@@ -372,6 +412,8 @@ void main() {
 
     frag_tex = a_tex / drawable.texsize;
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 
@@ -519,7 +561,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan
 
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 4> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto vertex = R"(
@@ -580,11 +622,25 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+    float pad1;
+    float pad2;
+    float pad3;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float depth_enabled;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 2) uniform sampler2D dem_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 3) uniform sampler2D depth_sampler;
+
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
@@ -635,7 +691,8 @@ void main() {
         size = drawable.size;
     }
 
-    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, 0, 1);
+    const float ele = get_elevation(a_pos, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, ele, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -662,7 +719,7 @@ void main() {
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), ele, 1);
 
         const vec2 a = projectedPoint.xy / projectedPoint.w;
         const vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -673,10 +730,11 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
+    const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, ele, 1.0);
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const vec2 pos_rot = a_offset / 32.0 * fontScale;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(pos0, z, 1.0);
     applySurfaceTransform();
 
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
@@ -687,6 +745,8 @@ void main() {
 
 	frag_tex = a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize);
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    frag_fade_opacity *= calculate_visibility(surface_transformed(projectedPoint), depth_sampler, drawable.depth_enabled);
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
 

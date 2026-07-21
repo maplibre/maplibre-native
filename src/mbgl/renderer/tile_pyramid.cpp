@@ -114,7 +114,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                                                      .tileLodMinRadius = parameters.tileLodMinRadius,
                                                      .tileLodScale = parameters.tileLodScale,
                                                      .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
-                                                     .tileLodMode = parameters.tileLodMode};
+                                                     .tileLodMode = parameters.tileLodMode,
+                                                     .elevationProvider = parameters.elevationProvider};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);

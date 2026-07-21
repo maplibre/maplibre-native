@@ -8,8 +8,10 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/mat4.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/context.hpp>
@@ -61,6 +63,7 @@ PaintParameters::PaintParameters(gfx::Context& context_,
                                  RenderStaticData& staticData_,
                                  LineAtlas& lineAtlas_,
                                  PatternAtlas& patternAtlas_,
+                                 TexturePool& texturePool_,
                                  uint64_t frameCount_,
                                  double tileLodMinRadius_,
                                  double tileLodScale_,
@@ -76,6 +79,7 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       staticData(staticData_),
       lineAtlas(lineAtlas_),
       patternAtlas(patternAtlas_),
+      texturePool(texturePool_),
       mapMode(mode_),
       debugOptions(debugOptions_),
       timePoint(timePoint_),
@@ -112,6 +116,61 @@ mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned)
     mat4 matrix;
     state.matrixFor(matrix, tileID);
     matrix::multiply(matrix, aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix, matrix);
+    return matrix;
+}
+
+mat4 PaintParameters::clipMatrixForTile(const UnwrappedTileID& tileID) const {
+    if (currentDrapeTile[3] == 0.0f) {
+        return matrixForTile(tileID);
+    }
+
+    // Tile-local orthographic matrix, as LayerTweaker::getTileMatrix builds for draped
+    // geometry.
+    mat4 matrix;
+    matrix::ortho(matrix, 0, util::EXTENT, util::EXTENT, 0, 0, 1);
+
+    // Then the placement apply_drape_transform performs in the vertex shader, evaluated
+    // here instead. Keep this in sync with _prelude.vertex.glsl.
+    const double z = tileID.canonical.z;
+    const double x = tileID.canonical.x + tileID.wrap * std::exp2(z);
+    const double y = tileID.canonical.y;
+    const double k = currentDrapeTile[0] - z;
+    const double scale = std::exp2(k);
+    double offsetX, offsetY;
+    if (k >= 0.0) {
+        offsetX = x * scale - currentDrapeTile[1];
+        offsetY = y * scale - currentDrapeTile[2];
+    } else {
+        offsetX = (x - currentDrapeTile[1] * std::exp2(-k)) * scale;
+        offsetY = (y - currentDrapeTile[2] * std::exp2(-k)) * scale;
+    }
+
+    // clip.xy = clip.xy * scale + (scale - 1 + 2 * offset.x, 1 - scale - 2 * offset.y);
+    // the draped ortho matrix gives w = 1, so this is an affine premultiply.
+    mat4 affine;
+    matrix::identity(affine);
+    affine[0] = scale;
+    affine[5] = scale;
+    affine[12] = scale - 1.0 + 2.0 * offsetX;
+    affine[13] = 1.0 - scale - 2.0 * offsetY;
+    matrix::multiply(matrix, affine, matrix);
+
+#if !MLN_RENDER_BACKEND_OPENGL
+    // Remap clip z from GL's [-1, 1] to Vulkan/Metal/WebGPU's [0, 1], exactly as
+    // LayerTweaker::getTileMatrix does for the draped drawable matrix. The tile
+    // clipping-mask quad has in_position.z = 0, so matrix::ortho puts its clip z at
+    // -1 — behind the near plane on those backends, so the mask is clipped away and no
+    // stencil is written. Stencil-tested draped layers (fill, line) then fail the
+    // stencil test everywhere and draw nothing over the terrain (a fill/line vector
+    // basemap draped on terrain renders blank; color-relief/hillshade, which don't
+    // stencil-test, were unaffected). The affine above only touches x/y, so remapping
+    // the final matrix's z is equivalent to remapping the ortho.
+    matrix[2] = 0.5 * (matrix[2] + matrix[3]);
+    matrix[6] = 0.5 * (matrix[6] + matrix[7]);
+    matrix[10] = 0.5 * (matrix[10] + matrix[11]);
+    matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+#endif
+
     return matrix;
 }
 
@@ -218,7 +277,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile(tileID)),
+        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(clipMatrixForTile(tileID)),
                                                /* .stencil_ref = */ static_cast<uint32_t>(stencilID),
                                                /* .pad1 = */ 0,
                                                /* .pad2 = */ 0,
@@ -254,7 +313,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{.matrix = util::cast<float>(matrixForTile(tileID)),
+        tileUBOs.emplace_back(shaders::ClipUBO{.matrix = util::cast<float>(clipMatrixForTile(tileID)),
                                                .stencil_ref = static_cast<uint32_t>(stencilID),
                                                .pad1 = 0,
                                                .pad2 = 0,
@@ -292,7 +351,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{matrixForTile(tileID), stencilID});
+        tileUBOs.emplace_back(shaders::ClipUBO{clipMatrixForTile(tileID), stencilID});
     }
 
     if (!tileUBOs.empty()) {
@@ -344,7 +403,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                            staticData.clippingMaskSegments,
                            ClippingMaskProgram::computeAllUniformValues(
                                ClippingMaskProgram::LayoutUniformValues{
-                                   uniforms::matrix::Value(matrixForTile(tileID)),
+                                   uniforms::matrix::Value(clipMatrixForTile(tileID)),
                                },
                                paintAttributeData,
                                properties,

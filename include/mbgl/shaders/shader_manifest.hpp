@@ -37,5 +37,7 @@
 #include <mbgl/shaders/gl/symbol_icon.hpp>
 #include <mbgl/shaders/gl/symbol_sdf.hpp>
 #include <mbgl/shaders/gl/symbol_text_and_icon.hpp>
+#include <mbgl/shaders/gl/terrain.hpp>
+#include <mbgl/shaders/gl/terrain_depth.hpp>
 #include <mbgl/shaders/gl/wide_vector.hpp>
 #endif

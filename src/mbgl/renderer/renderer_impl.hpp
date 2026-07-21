@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/render_orchestrator.hpp>
+#include <mbgl/renderer/texture_pool.hpp>
 #include <mbgl/gfx/context_observer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -46,6 +47,14 @@ private:
 
     // TODO: Move orchestrator to Map::Impl.
     RenderOrchestrator orchestrator;
+
+    /// Terrain drape render targets, persistent across frames. These must outlive
+    /// the frame: each target caches its rendered texture (and the coverage baked
+    /// into it, see RenderTarget::render), and the terrain drawables hold the
+    /// textures they sample. Rebuilding the pool per frame would reallocate every
+    /// tile-sized target every frame - churning GPU memory and discarding the
+    /// baked content that suppresses drape flicker.
+    TexturePool texturePool{512}; // TODO: tile size
 
     gfx::RendererBackend& backend;
 

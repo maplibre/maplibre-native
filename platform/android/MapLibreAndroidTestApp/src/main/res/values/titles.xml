@@ -84,6 +84,11 @@
     <string name="activity_pmtiles">PMTiles</string>
     <string name="activity_local_glyph">Local CJK glyph generation</string>
     <string name="activity_hillshade">Hillshade</string>
+    <string name="activity_terrain">3D Terrain</string>
+    <string name="activity_terrain_vector">3D Terrain (planet vector map)</string>
+    <string name="activity_terrain_osm">3D Terrain (OSM raster)</string>
+    <string name="activity_terrain_debug">3D Terrain (debug tiles)</string>
+    <string name="activity_terrain_flight">3D Terrain (FPV flight)</string>
     <string name="activity_heatmaplayer">Heatmap layer</string>
     <string name="activity_gesture_detector">Gestures detector</string>
     <string name="activity_offline_merge">Offline DB merge</string>

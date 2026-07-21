@@ -13,6 +13,8 @@
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/texture_pool.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/convert.hpp>
@@ -23,6 +25,10 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/renderer/render_terrain.hpp>
+#include <mbgl/renderer/dem_elevation_provider.hpp>
+#include <mbgl/renderer/layers/terrain_layer_tweaker.hpp>
+#include <mbgl/util/tile_cover.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/renderer_backend.hpp>
@@ -215,6 +221,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         *staticData,
         renderTree.getLineAtlas(),
         renderTree.getPatternAtlas(),
+        texturePool,
         frameCount,
         updateParameters->tileLodMinRadius,
         updateParameters->tileLodScale,
@@ -225,9 +232,42 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
+    parameters.terrain = orchestrator.getRenderTerrain();
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
 
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
+
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        RenderSource* demSource = orchestrator.getRenderSource(terrain->getSourceID());
+        auto renderTiles = demSource->getRawRenderTiles();
+
+        // Match RenderTerrain's mesh tile set: parent fallback tiles expanded
+        // to the ideal cover so each mesh tile has its own drape target
+        std::set<UnwrappedTileID> renderTileIDs;
+        for (const auto& renderTile : *renderTiles) {
+            renderTileIDs.insert(renderTile.id);
+        }
+        std::set<UnwrappedTileID> demTileIDs = RenderTerrain::expandToDeepestCover(renderTileIDs);
+        // RenderTerrain frustum-culls this same set before meshing (a sparse DEM's
+        // large low-zoom ancestors are mostly off-screen). Cull here too so we only
+        // allocate drape targets for mesh tiles that survive - otherwise the pool
+        // grows with off-screen targets as the camera browses/zooms, ballooning
+        // memory until it OOM-crashes.
+        {
+            DEMElevationProvider elevationProvider(demSource, terrain->getExaggeration());
+            const util::TileCoverParameters cullParams{.transformState = state,
+                                                       .elevationProvider = &elevationProvider};
+            demTileIDs = util::frustumCull(cullParams, demTileIDs);
+        }
+        for (const auto& id : demTileIDs) {
+            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
+        }
+        texturePool.removeStaleRenderTargets(demTileIDs);
+    } else {
+        // The pool persists across frames, so release the drape targets when
+        // terrain is disabled instead of holding their textures indefinitely
+        texturePool.removeStaleRenderTargets({});
+    }
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -253,11 +293,29 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // - LAYER GROUP UPDATE ------------------------------------------------------------------------
     // Updates all layer groups and process changes
     if (staticData && staticData->shaders) {
-        orchestrator.updateLayers(
-            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
+        orchestrator.updateLayers(*staticData->shaders,
+                                  context,
+                                  renderTreeParameters.transformParams.state,
+                                  updateParameters,
+                                  renderTree,
+                                  texturePool);
     }
 
     orchestrator.processChanges();
+    orchestrator.addRenderTargets(texturePool);
+
+    // Create the terrain occlusion depth target before the upload phase, so the
+    // symbol tweaker binds the real depth texture for THIS frame instead of the
+    // far-plane placeholder (in single-frame renders like the render tests the
+    // placeholder would otherwise never be replaced and occlusion never engage).
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        terrain->prepareDepthTarget(parameters);
+    }
+
+    // Draped layer groups are not routed into individual render targets here;
+    // each drape RenderTarget renders every overlapping draped drawable itself
+    // (RenderTarget::renderDrapedLayerGroups), so a tile at a different zoom than
+    // the terrain cover is drawn into every target it covers, like gl-js.
 
     // Upload layer groups
     {
@@ -276,6 +334,19 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             layerGroup.runTweakers(renderTree, parameters);
             parameters.currentLayer++;
         });
+
+        // Run terrain tweaker if terrain is enabled
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            if (auto* terrainTweaker = terrain->getTweaker()) {
+                if (const auto& layerGroup = terrain->getLayerGroup()) {
+                    terrainTweaker->execute(*layerGroup, parameters);
+                }
+                if (const auto& depthLayerGroup = terrain->getDepthLayerGroup()) {
+                    terrainTweaker->execute(*depthLayerGroup, parameters);
+                }
+            }
+        }
+
         parameters.currentLayer = 0;
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.runTweakers(renderTree, parameters);
@@ -284,6 +355,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+
+        // The terrain depth layer group is deliberately not registered with the
+        // orchestrator (it renders only in RenderTerrain::renderDepth), so the
+        // visitLayerGroups upload above does not cover it. Upload it explicitly:
+        // without this its drawables never get vertex buffers, the Vulkan binds
+        // fail silently and the depth pass records nothing, so the occlusion
+        // depth texture stays at the far plane and symbols are never hidden
+        // behind terrain (GL builds attribute state at draw time and got away
+        // with it).
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            if (const auto& depthLayerGroup = terrain->getDepthLayerGroup()) {
+                depthLayerGroup->upload(*uploadPass);
+            }
+        }
 
         // Give the render targets a chance to upload
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
@@ -304,9 +389,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         .pixel_ratio = parameters.pixelRatio,
         .map_zoom = static_cast<float>(parameters.state.getZoom()),
         .pad1 = 0,
+        // Target tile while drawing into a terrain drape target (w != 0);
+        // the per-target buffers set it in RenderTarget::updateDrapeGlobalUBO
+        .drape_tile = {0.0f, 0.0f, 0.0f, 0.0f},
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
+
+    // Refresh each terrain drape target's copy of the global paint params
+    // (same values plus the target tile in drape_tile)
+    if (orchestrator.getRenderTerrain()) {
+        texturePool.visitRenderTargets([&](std::shared_ptr<RenderTarget>& renderTarget) {
+            renderTarget->updateDrapeGlobalUBO(globalPaintParamsUBO, context);
+        });
+    }
 
     // - 3D PASS
     // -------------------------------------------------------------------------------------
@@ -348,9 +444,24 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     };
 
     const auto drawableTargetsPass = [&] {
-        // draw render targets
-        orchestrator.visitRenderTargets(
-            [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
+        // Render targets are held in insertion order, but the terrain drape targets
+        // consume the others: draping the hillshade layer samples the texture its
+        // prepare pass renders. A drape target added in an earlier frame therefore
+        // sits ahead of a prepare target added later and would sample it before it
+        // was drawn this frame - reading black, which the hillshade decodes as the
+        // maximum slope (the prepare pass encodes flat as 0.5, not 0), shading the
+        // whole tile solid. Draw the producers first, then the drapes that sample
+        // them.
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+            if (!renderTarget.getDrapeTileID()) {
+                renderTarget.render(orchestrator, renderTree, parameters);
+            }
+        });
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+            if (renderTarget.getDrapeTileID()) {
+                renderTarget.render(orchestrator, renderTree, parameters);
+            }
+        });
     };
 
     const auto commonClearPass = [&] {
@@ -388,7 +499,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
+            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
+                  layerGroup.shouldRenderToTerrain())) {
+                layerGroup.render(orchestrator, parameters);
+            }
             parameters.currentLayer++;
         });
     };
@@ -399,10 +513,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        // draw layer groups, translucent pass
+        // draw layer groups, translucent pass; draped groups render only into the
+        // terrain render targets (RenderTarget::renderDrapedLayerGroups)
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
+            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
+                  layerGroup.shouldRenderToTerrain())) {
+                layerGroup.render(orchestrator, parameters);
+            }
             if (parameters.currentLayer > 0) {
                 parameters.currentLayer--;
             }
@@ -439,6 +557,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         drawable3DPass();
     }
     drawableTargetsPass();
+    // Terrain depth pass for symbol occlusion (sampled by calculate_visibility)
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        terrain->renderDepth(orchestrator, renderTree, parameters);
+    }
     commonClearPass();
     context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();
@@ -494,6 +616,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
 void Renderer::Impl::reduceMemoryUse() {
     assert(gfx::BackendScope::exists());
+    // The drape targets are the largest reclaimable GPU allocation (one
+    // tile-sized texture per terrain tile); they are rebuilt on the next frame
+    texturePool.removeStaleRenderTargets({});
     backend.getContext().reduceMemoryUsage();
 }
 

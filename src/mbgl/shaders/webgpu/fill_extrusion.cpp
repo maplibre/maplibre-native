@@ -10,14 +10,17 @@ namespace shaders {
 
 using FillExtrusionShaderSource = ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 5> FillExtrusionShaderSource::attributes = {
+const std::array<AttributeInfo, 6> FillExtrusionShaderSource::attributes = {
     AttributeInfo{3, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
     AttributeInfo{4, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
     AttributeInfo{6, gfx::AttributeDataType::Float2, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::Float2, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Short2, idFillExtrusionCentroidVertexAttribute},
 };
-const std::array<TextureInfo, 0> FillExtrusionShaderSource::textures = {};
+const std::array<TextureInfo, 1> FillExtrusionShaderSource::textures = {
+    TextureInfo{0, idFillExtrusionDEMTexture},
+};
 
 //
 // Fill extrusion pattern

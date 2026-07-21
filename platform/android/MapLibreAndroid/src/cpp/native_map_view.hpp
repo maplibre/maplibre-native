@@ -278,6 +278,14 @@ public:
 
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
 
+    void setTerrain(JNIEnv&, const jni::String& sourceId, jni::jfloat exaggeration);
+
+    void removeTerrain(JNIEnv&);
+
+    jni::Local<jni::String> getTerrainSourceId(JNIEnv&);
+
+    jni::jfloat getTerrainExaggeration(JNIEnv&);
+
     jni::Local<jni::Array<jni::Object<Layer>>> getLayers(JNIEnv&);
 
     jni::Local<jni::Object<Layer>> getLayer(JNIEnv&, const jni::String&);

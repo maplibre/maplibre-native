@@ -57,6 +57,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
@@ -204,6 +211,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
@@ -378,6 +392,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
@@ -644,6 +665,13 @@ struct FillExtrusionDrawableUBO {
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
+    // 3D terrain elevation
+    vec4 dem_coords;
+    vec4 dem_unpack;
+    float dem_dim;
+    float dem_exaggeration;
+    float dem_enabled;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {

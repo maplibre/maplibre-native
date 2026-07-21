@@ -29,6 +29,8 @@
 #include <mbgl/shaders/mtl/location_indicator.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol.hpp>
+#include <mbgl/shaders/mtl/terrain.hpp>
+#include <mbgl/shaders/mtl/terrain_depth.hpp>
 #include <mbgl/shaders/mtl/widevector.hpp>
 
 #include <cassert>
@@ -135,6 +137,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::TerrainShader,
+                  shaders::BuiltIn::TerrainDepthShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 

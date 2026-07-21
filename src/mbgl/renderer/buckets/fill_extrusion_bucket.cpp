@@ -18,6 +18,7 @@
 #endif
 
 #include <cassert>
+#include <cmath>
 
 namespace mapbox {
 namespace util {
@@ -75,6 +76,22 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         if (totalVertices == 0) continue;
 
+#if !MLN_USE_FILL_EXTRUSION_INSTANCING
+        // Polygon centroid (outer ring), so the whole extrusion is raised by a
+        // single terrain elevation instead of shearing across a slope (as gl-js does)
+        Point<int16_t> centroid{0, 0};
+        if (!polygon.empty() && !polygon.front().empty()) {
+            Point<double> accum{0.0, 0.0};
+            for (const auto& pt : polygon.front()) {
+                accum.x += pt.x;
+                accum.y += pt.y;
+            }
+            const auto count = static_cast<double>(polygon.front().size());
+            centroid.x = static_cast<int16_t>(std::floor(accum.x / count));
+            centroid.y = static_cast<int16_t>(std::floor(accum.y / count));
+        }
+#endif
+
         std::vector<uint32_t> flatIndices;
         flatIndices.reserve(totalVertices);
 
@@ -121,7 +138,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                 }
 #else
                 vertices.emplace_back(
-                    FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
+                    FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance), centroid));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 
@@ -138,16 +155,16 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     }
 
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance), centroid));
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance), centroid));
 
                     edgeDistance += dist;
 
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance), centroid));
                     vertices.emplace_back(FillExtrusionBucket::layoutVertex(
-                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance), centroid));
 
                     // ┌──────┐
                     // │ 0  1 │ Counter-Clockwise winding order.

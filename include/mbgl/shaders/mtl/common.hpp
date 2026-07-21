@@ -61,6 +61,82 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
+// texture and dem_* values are passed in as arguments rather than read from globals.
+inline float get_elevation(float2 pos,
+                           texture2d<float, access::sample> dem,
+                           sampler dem_sampler,
+                           float4 dem_coords,
+                           float4 dem_unpack,
+                           float dem_dim,
+                           float dem_exaggeration,
+                           float dem_enabled) {
+    if (dem_enabled == 0.0) {
+        return 0.0;
+    }
+    const float2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.0;
+    const float2 f = fract(coord);
+    const float2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
+    const float d = 1.0 / (dem_dim + 2.0);
+    float4 tl = dem.sample(dem_sampler, c) * 255.0;
+    tl.a = -1.0;
+    float4 tr = dem.sample(dem_sampler, c + float2(d, 0.0)) * 255.0;
+    tr.a = -1.0;
+    float4 bl = dem.sample(dem_sampler, c + float2(0.0, d)) * 255.0;
+    bl.a = -1.0;
+    float4 br = dem.sample(dem_sampler, c + float2(d, d)) * 255.0;
+    br.a = -1.0;
+    const float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                                mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                                f.y);
+    return elevation * dem_exaggeration;
+}
+
+// Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp),
+// converted to NDC z, as in the maplibre-gl-js prelude
+inline float unpack_depth(float4 rgba_depth) {
+    const float4 bit_shift = float4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+}
+
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
+// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
+// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
+// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+inline float depth_opacity(float3 frag,
+                           texture2d<float, access::sample> depth_texture,
+                           sampler depth_sampler) {
+    const float2 uv = frag.xy * 0.5 + 0.5;
+    const float d = unpack_depth(depth_texture.sample(depth_sampler, float2(uv.x, 1.0 - uv.y))) + 0.0001 -
+                    frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// Unlike gl-js (global terrain uniforms), the depth texture and enable flag are
+// passed as arguments.
+inline float calculate_visibility(float4 pos,
+                                  texture2d<float, access::sample> depth_texture,
+                                  sampler depth_sampler,
+                                  float depth_enabled) {
+    if (depth_enabled == 0.0) {
+        return 1.0;
+    }
+    const float3 frag = pos.xyz / pos.w;
+    // check if coordinate is fully visible
+    const float d = depth_opacity(frag, depth_texture, depth_sampler);
+    if (d > 0.95) {
+        return 1.0;
+    }
+    // if not, sample some pixels above: a label whose anchor is just behind a
+    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
+    return (d + depth_opacity(frag + float3(0.0, 0.01, 0.0), depth_texture, depth_sampler)) / 2.0;
+}
+
 template<class ForwardIt, class T>
 ForwardIt upper_bound(ForwardIt first, ForwardIt last, thread const T& value)
 {
@@ -214,9 +290,33 @@ struct alignas(16) GlobalPaintParamsUBO {
     /* 36 */ float pixel_ratio;
     /* 40 */ float map_zoom;
     /* 44 */ float pad1;
-    /* 48 */
+    /* 48 */ float4 drape_tile;
+    /* 64 */
 };
-static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "wrong size");
+static_assert(sizeof(GlobalPaintParamsUBO) == 4 * 16, "wrong size");
+
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target (see the GL prelude for the derivation).
+// `matrix` carries the drawable's tile (z, x, y) in its unused third column and
+// target_tile is GlobalPaintParamsUBO::drape_tile (w != 0 while drawing into a
+// drape target).
+inline float4 apply_drape_transform(float4 clip, float4x4 matrix, float4 target_tile) {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    const float3 tile = float3(matrix[2][0], matrix[2][1], matrix[2][2]);
+    const float k = target_tile.x - tile.x; // target zoom - drawable zoom
+    const float scale = exp2(k);
+    float2 offset;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    clip.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return clip;
+}
 
 enum {
     idGlobalPaintParamsUBO,

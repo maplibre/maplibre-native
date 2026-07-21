@@ -54,6 +54,8 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/symbol.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/terrain.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/terrain_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/widevector.hpp
 )
 
@@ -100,5 +102,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/terrain.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/terrain_depth.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/widevector.cpp
 )

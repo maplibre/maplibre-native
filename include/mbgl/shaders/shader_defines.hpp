@@ -73,6 +73,12 @@ enum {
     symbolLayerSSBOCount = drawableReservedUBOCount
 };
 
+enum {
+    idTerrainDrawableUBO = idDrawableReservedVertexOnlyUBO,    // SSBO
+    idTerrainTilePropsUBO = idDrawableReservedFragmentOnlyUBO, // SSBO
+    terrainLayerSSBOCount = drawableReservedUBOCount
+};
+
 // layer UBOs
 static constexpr uint32_t layerUBOStartId = std::max({static_cast<uint32_t>(drawableReservedUBOCount),
                                                       static_cast<uint32_t>(backgroundLayerSSBOCount),
@@ -84,7 +90,8 @@ static constexpr uint32_t layerUBOStartId = std::max({static_cast<uint32_t>(draw
                                                       static_cast<uint32_t>(colorReliefLayerSSBOCount),
                                                       static_cast<uint32_t>(lineLayerSSBOCount),
                                                       static_cast<uint32_t>(rasterLayerSSBOCount),
-                                                      static_cast<uint32_t>(symbolLayerSSBOCount)});
+                                                      static_cast<uint32_t>(symbolLayerSSBOCount),
+                                                      static_cast<uint32_t>(terrainLayerSSBOCount)});
 
 #if MLN_RENDER_BACKEND_VULKAN
 #define getEnumValue(packed, unpacked) unpacked
@@ -148,6 +155,11 @@ enum {
     symbolLayerUBOCount
 };
 
+enum {
+    idTerrainEvaluatedPropsUBO = getEnumValue(terrainLayerSSBOCount, layerUBOStartId),
+    terrainLayerUBOCount
+};
+
 // drawable SSBOs
 
 static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(backgroundLayerUBOCount),
@@ -159,7 +171,8 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(hillshadeLayerUBOCount),
                                                           static_cast<uint32_t>(lineLayerUBOCount),
                                                           static_cast<uint32_t>(rasterLayerUBOCount),
-                                                          static_cast<uint32_t>(symbolLayerUBOCount)});
+                                                          static_cast<uint32_t>(symbolLayerUBOCount),
+                                                          static_cast<uint32_t>(terrainLayerUBOCount)});
 
 enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
@@ -251,6 +264,10 @@ enum {
 };
 
 enum {
+    terrainUBOCount = getEnumValue(terrainLayerUBOCount, drawableUBOStartId)
+};
+
+enum {
     idWideVectorUniformsUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId),         // UBO
     idWideVectorUniformWideVecUBO = getEnumValue(drawableReservedUBOCount, idWideVectorUniformsUBO + 1), // UBO
     wideVectorUBOCount
@@ -275,6 +292,7 @@ static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>
                                                            static_cast<uint32_t>(locationIndicatorUBOCount),
                                                            static_cast<uint32_t>(rasterUBOCount),
                                                            static_cast<uint32_t>(symbolUBOCount),
+                                                           static_cast<uint32_t>(terrainUBOCount),
                                                            static_cast<uint32_t>(wideVectorUBOCount)});
 
 static constexpr uint32_t maxSSBOCountPerLayer = layerUBOStartId - layerSSBOStartId;
@@ -290,6 +308,7 @@ enum {
 };
 
 enum {
+    idCircleDEMTexture,
     circleTextureCount
 };
 
@@ -323,6 +342,7 @@ enum {
 
 enum {
     idFillExtrusionImageTexture,
+    idFillExtrusionDEMTexture,
     fillExtrusionTextureCount
 };
 
@@ -363,7 +383,15 @@ enum {
 enum {
     idSymbolImageTexture,
     idSymbolImageIconTexture,
+    idSymbolDEMTexture,
+    idSymbolDepthTexture,
     symbolTextureCount
+};
+
+enum {
+    idTerrainDEMTexture,
+    idTerrainMapTexture,
+    terrainTextureCount
 };
 
 static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint32_t>(backgroundTextureCount),
@@ -381,7 +409,8 @@ static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint3
                                                                static_cast<uint32_t>(lineTextureCount),
                                                                static_cast<uint32_t>(locationIndicatorTextureCount),
                                                                static_cast<uint32_t>(rasterTextureCount),
-                                                               static_cast<uint32_t>(symbolTextureCount)});
+                                                               static_cast<uint32_t>(symbolTextureCount),
+                                                               static_cast<uint32_t>(terrainTextureCount)});
 
 // Vertex attribute defines
 enum {
@@ -456,6 +485,7 @@ enum {
     idFillExtrusionEdDiscardAttribute,
 #else
     idFillExtrusionNormalEdVertexAttribute,
+    idFillExtrusionCentroidVertexAttribute,
 #endif
 
     // Data driven
@@ -538,6 +568,12 @@ enum {
 };
 
 enum {
+    idTerrainPosVertexAttribute,
+    idTerrainTexturePosVertexAttribute,
+    terrainVertexAttributeCount
+};
+
+enum {
     idWideVectorScreenPos,
     idWideVectorColor,
     idWideVectorIndex,
@@ -571,6 +607,7 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
     static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
     static_cast<uint32_t>(symbolVertexAttributeCount),
+    static_cast<uint32_t>(terrainVertexAttributeCount),
     static_cast<uint32_t>(wideVectorAttributeCount),
     static_cast<uint32_t>(wideVectorInstanceAttributeCount),
 });

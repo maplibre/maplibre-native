@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU> {
 
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = R"(
 struct CircleDrawableUBO {
@@ -29,6 +29,12 @@ struct CircleDrawableUBO {
     pad1: f32,
     pad2: f32,
     pad3: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad4: f32,
 };
 
 struct CircleEvaluatedPropsUBO {
@@ -64,6 +70,9 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<CircleDrawableUBO>;
+@group(1) @binding(0) var dem_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+
 @group(0) @binding(4) var<uniform> props: CircleEvaluatedPropsUBO;
 )";
 
@@ -100,6 +109,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude = glMod2v(pos_f, vec2<f32>(2.0, 2.0)) * 2.0 - vec2<f32>(1.0, 1.0);
     let scaled_extrude = extrude * drawable.extrude_scale;
     let circle_center = floor(pos_f * 0.5);
+    let ele = get_elevation(circle_center, dem_texture, dem_sampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
 
     var color = props.color;
 #ifndef HAS_UNIFORM_u_color
@@ -144,13 +154,13 @@ fn main(in: VertexInput) -> VertexOutput {
         if (scale_with_map) {
             corner_position += scaled_extrude * radius_with_stroke;
         } else {
-            let projected_center = drawable.matrix * vec4<f32>(circle_center, 0.0, 1.0);
+            let projected_center = drawable.matrix * vec4<f32>(circle_center, ele, 1.0);
             corner_position += scaled_extrude * radius_with_stroke *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
-        position = drawable.matrix * vec4<f32>(corner_position, 0.0, 1.0);
+        position = drawable.matrix * vec4<f32>(corner_position, ele, 1.0);
     } else {
-        position = drawable.matrix * vec4<f32>(circle_center, 0.0, 1.0);
+        position = drawable.matrix * vec4<f32>(circle_center, ele, 1.0);
         var factor = position.w;
         if (scale_with_map) {
             factor = paintParams.camera_to_center_distance;

@@ -4,6 +4,7 @@
 #include <mbgl/style/sprite.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/light.hpp>
+#include <mbgl/style/terrain.hpp>
 
 #include <mbgl/text/glyph.hpp>
 
@@ -39,6 +40,7 @@ public:
 
     TransitionOptions transition{{util::DEFAULT_TRANSITION_DURATION}};
     Light light;
+    std::optional<Terrain> terrain;
 
     std::string name;
     LatLng latLng;
@@ -54,6 +56,7 @@ public:
 private:
     void parseTransition(const JSValue&);
     void parseLight(const JSValue&);
+    void parseTerrain(const JSValue&);
     void parseSources(const JSValue&);
     void parseSprites(const JSValue&);
     void parseLayers(const JSValue&);
