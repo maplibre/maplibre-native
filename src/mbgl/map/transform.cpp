@@ -514,7 +514,7 @@ void Transform::rotateBy(double angleDegree, const AnimationOptions& animation) 
 /*!
  * \brief Transform::getBearing
  * Bearing in radiant
- * \return
+ * \return bearing in radians
  */
 double Transform::getBearing() const {
     return state.getBearing();
