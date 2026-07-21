@@ -16,6 +16,11 @@
 namespace mbgl {
 namespace style {
 
+struct FillExtrusionRoundedCornerDistance : LayoutProperty<float> {
+    static constexpr const char *name() { return "fill-extrusion-rounded-corner-distance"; }
+    static float defaultValue() { return 0.f; }
+};
+
 struct FillExtrusionBase : DataDrivenPaintProperty<float, attributes::base, uniforms::base> {
     static float defaultValue() { return 0.f; }
 };
@@ -47,6 +52,10 @@ struct FillExtrusionTranslateAnchor : PaintProperty<TranslateAnchorType> {
 struct FillExtrusionVerticalGradient : PaintProperty<bool> {
     static bool defaultValue() { return true; }
 };
+
+class FillExtrusionLayoutProperties : public Properties<
+    FillExtrusionRoundedCornerDistance
+> {};
 
 class FillExtrusionPaintProperties : public Properties<
     FillExtrusionBase,
