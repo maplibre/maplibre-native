@@ -1070,12 +1070,17 @@ void RenderOrchestrator::addRenderTargets(const TexturePool& texturePool) {
     // The pool owns the terrain drape targets and drops them when their tile leaves
     // the cover, so rebuild our drape entries from it each frame. Merely adding
     // would keep every drape target ever created alive here, rendering forever.
-    // Targets owned elsewhere (the hillshade prepare targets, added by change
-    // request) have no drape tile and are left untouched.
+    //
+    // Non-drape targets (the hillshade prepare targets, added by change request) are
+    // owned by their tile's bucket. When only this list still references one, the
+    // bucket has been evicted, so drop it here too; otherwise its offscreen (prepare)
+    // and DEM input textures leak as hillshade tiles cycle in and out of the cover.
     renderTargets.erase(std::remove_if(renderTargets.begin(),
                                        renderTargets.end(),
                                        [](const RenderTargetPtr& renderTarget) {
-                                           return renderTarget && renderTarget->getDrapeTileID().has_value();
+                                           if (!renderTarget) return true;
+                                           if (renderTarget->getDrapeTileID().has_value()) return true;
+                                           return renderTarget.use_count() == 1;
                                        }),
                         renderTargets.end());
     texturePool.visitRenderTargets(
