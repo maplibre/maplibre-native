@@ -15,7 +15,7 @@ set_target_properties(
     mbgl-vendor-polylabel
     PROPERTIES
         INTERFACE_MAPLIBRE_NAME "polylabel"
-        INTERFACE_MAPLIBRE_URL "https://github.com/mapbox/polylabel"
-        INTERFACE_MAPLIBRE_AUTHOR "Mapbox"
+        INTERFACE_MAPLIBRE_URL "https://github.com/mapnik/polylabel"
+        INTERFACE_MAPLIBRE_AUTHOR "Mapnik"
         INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/polylabel/LICENSE
 )
