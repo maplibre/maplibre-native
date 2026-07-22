@@ -1,5 +1,39 @@
 # Changelog MapLibre Native for Android
 
+## 13.4.0
+
+### ✨ Features and improvements
+
+- Add feature state functionality to Android ([#4219](https://github.com/maplibre/maplibre-native/pull/4219)).
+- Add fill extrusion style property that enables rounded corners for extruded buildings (Core feature) ([#4343](https://github.com/maplibre/maplibre-native/pull/4343)).
+- Enable FastPFOR encodings in MLT ([#4146](https://github.com/maplibre/maplibre-native/pull/4146)).
+- feat(android): Create default OkHttpClient only when needed ([#4411](https://github.com/maplibre/maplibre-native/pull/4411)).
+- feat(android): Vulkan graphics backend support for Android custom layers ([#4348](https://github.com/maplibre/maplibre-native/pull/4348)).
+- feat(core): render local CJK glyphs at 2x texture resolution ([#4304](https://github.com/maplibre/maplibre-native/pull/4304)).
+
+### 🐞 Bug fixes
+
+- Clamp pan offset to the horizon on pitched maps ([#3105](https://github.com/maplibre/maplibre-native/pull/3105)) (#4362).
+- Convert a PMTiles metadata decompression failure into an error response ([#4399](https://github.com/maplibre/maplibre-native/pull/4399)).
+- core: do not use JSON serialization for layer grouping key ([#4075](https://github.com/maplibre/maplibre-native/pull/4075)).
+- core: Fix Vulkan snapshot timing for headless too ([#4397](https://github.com/maplibre/maplibre-native/pull/4397)).
+- core: Tolerate stencil clipping setup failures ([#4317](https://github.com/maplibre/maplibre-native/pull/4317)).
+- fix(core): make headless OpenGL display singletons thread-safe ([#4332](https://github.com/maplibre/maplibre-native/pull/4332)).
+- fix(core): notify layer observer when source-layer or source-id changes ([#4372](https://github.com/maplibre/maplibre-native/pull/4372)).
+- fix(proguard): overly broad enum keep rule ([#4365](https://github.com/maplibre/maplibre-native/pull/4365)).
+
+## 13.3.1
+
+### ✨ Features and improvements
+
+- Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
+
+### 🐞 Bug fixes
+
+- fix(core): Update image descriptor sets when removing textures ([#4351](https://github.com/maplibre/maplibre-native/pull/4351)).
+- Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
+- core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
+
 ## 13.3.0
 
 ### ✨ Features and improvements

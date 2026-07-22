@@ -153,6 +153,8 @@ target_link_libraries(
         $<BUILD_INTERFACE:mbgl-vendor-parsedate>
         $<BUILD_INTERFACE:mbgl-vendor-nunicode>
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
+        $<BUILD_INTERFACE:mlt-cpp>
+        $<BUILD_INTERFACE:fastpfor-lib>
         $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:mbgl-vendor-filesystem>>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
@@ -179,6 +181,8 @@ if(MLN_QT_HAS_PARENT)
         mbgl-vendor-parsedate
         mbgl-vendor-nunicode
         mbgl-vendor-csscolorparser
+        mlt-cpp
+        fastpfor-lib
         $<$<PLATFORM_ID:iOS>:mbgl-vendor-filesystem>
         $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:mbgl-vendor-sqlite>
         $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:mbgl-vendor-icu>
