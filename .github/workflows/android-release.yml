@@ -137,7 +137,7 @@ jobs:
           elif [ "$renderer" = "opengl" ]; then
             ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
           elif [ "$renderer" = "multiBackend" ]; then
-            ./gradlew :MapLibreAndroid:publishMultibackend{{ env.buildtype }}PublicationToMavenCentralRepository
+            ./gradlew :MapLibreAndroid:publishMultibackend${{ env.buildtype }}PublicationToMavenCentralRepository
           else
             echo "::error ::Unknown renderer '$renderer'"; exit 1
           fi
