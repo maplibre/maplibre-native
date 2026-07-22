@@ -316,12 +316,20 @@ GeometryCollectionFloat roundPolygonCorners(GeometryCollection& polygon, double 
             auto cornerPoint = convertPoint<double>(ring[i]);
             auto nextPoint = convertPoint<double>(ring[(i + 1) % nVertices]);
 
+            auto edge1Len = util::dist<double>(cornerPoint, prevPoint);
+            auto edge2Len = util::dist<double>(cornerPoint, nextPoint);
+            if (edge1Len == 0.0 || edge2Len == 0.0) {
+                // Duplicate vertex: no direction to round, keep it as-is.
+                roundedCornerRing.emplace_back(convertPoint<float>(ring[i]));
+                continue;
+            }
+
             // Compute the start and end points of the rounded corner
             auto edge1Vector = util::normal<double>(prevPoint, cornerPoint);
             auto edge2Vector = util::normal<double>(cornerPoint, nextPoint);
 
-            auto edge1MaxCornerDistance = util::dist<double>(cornerPoint, prevPoint) * maxEdgeLenPercent;
-            auto edge2MaxCornerDistance = util::dist<double>(cornerPoint, nextPoint) * maxEdgeLenPercent;
+            auto edge1MaxCornerDistance = edge1Len * maxEdgeLenPercent;
+            auto edge2MaxCornerDistance = edge2Len * maxEdgeLenPercent;
             auto cornerDistance = std::min({desiredCornerDistance, edge1MaxCornerDistance, edge2MaxCornerDistance});
 
             auto startPoint = cornerPoint - edge1Vector * cornerDistance;
