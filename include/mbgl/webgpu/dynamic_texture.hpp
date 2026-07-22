@@ -12,13 +12,16 @@ public:
     DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType);
 
     void uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) override;
-    void uploadDeferredImages() override;
+    void uploadDeferredImages(gfx::UploadPass&) override;
     bool removeTexture(const gfx::TextureHandle& texHandle) override;
 
     using ImagesToUpload =
         std::unordered_map<gfx::TextureHandle, std::unique_ptr<uint8_t[]>, gfx::TextureHandle::Hasher>;
 
 private:
+    Context& context;
+    Size size;
+    gfx::TexturePixelType pixelType;
     bool deferredCreation = false;
     ImagesToUpload imagesToUpload;
 };
