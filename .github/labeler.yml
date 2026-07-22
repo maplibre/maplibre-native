@@ -64,3 +64,8 @@ WebGPU:
     - '**/*webgpu*/**'
     - '**/*wgpu*'
     - '**/*dawn*'
+MultiBackend:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*multiBackend*'
+    - '**/*multiBackend*/**'

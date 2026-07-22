@@ -74,6 +74,7 @@ jobs:
         RENDERER:
           - vulkan
           - opengl
+          - multiBackend
         BUILDTYPE:
           - Release
           - Debug
@@ -133,8 +134,12 @@ jobs:
           if [ "$renderer" = "opengl" ]; then
             ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToMavenCentralRepository
             ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToMavenCentralRepository
-          else
+          elif [ "$renderer" = "opengl" ]
             ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
+          elif [ "$renderer" = "multiBackend" ]
+            ./gradlew :MapLibreAndroid:publishMultibackend{{ env.buildtype }}PublicationToMavenCentralRepository
+          else
+            echo "::error ::Unknown renderer '$renderer'"; exit 1
           fi
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}

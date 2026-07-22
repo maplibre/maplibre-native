@@ -16,8 +16,9 @@ endif
 
 ifeq ($(RENDERER), opengl)
 else ifeq ($(RENDERER), vulkan)
+else ifeq ($(RENDERER), multiBackend)
 else
-  $(error RENDERER must be 'opengl' or 'vulkan')
+  $(error RENDERER must be 'opengl' or 'vulkan' or 'multiBackend')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
