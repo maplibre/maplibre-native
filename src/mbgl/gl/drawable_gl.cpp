@@ -1,6 +1,7 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_impl.hpp>
 #include <mbgl/gl/texture2d.hpp>
+#include <mbgl/gl/texture_2d_array.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
@@ -347,6 +348,12 @@ void DrawableGL::bindTextures() const {
             if (const auto& location = shader->getSamplerLocation(id)) {
                 static_cast<gl::Texture2D&>(*texture).bind(static_cast<int32_t>(*location), unit++);
             }
+        }
+    }
+    // Extra sampler2DArray (instanced terrain depth DEM), bound with the program active here.
+    if (arrayTexture && arrayTextureSlot >= 0) {
+        if (const auto& location = shader->getSamplerLocation(static_cast<size_t>(arrayTextureSlot))) {
+            arrayTexture->bind(static_cast<int32_t>(*location), unit++);
         }
     }
 }

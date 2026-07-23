@@ -17,6 +17,11 @@
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/tile/raster_dem_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/gl/context.hpp>
+#include <mbgl/gl/texture_2d_array.hpp>
+#include <mbgl/gl/drawable_gl.hpp> // gl::DrawableGL::setArrayTexture for the instanced depth DEM
+#endif
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -39,6 +44,7 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/util/convert.hpp> // util::cast for the instanced depth UBO matrix
 #include <mbgl/util/hash.hpp>    // util::hash_combine for the depth-instance set signature
+#include <mbgl/gfx/vertex_attribute.hpp> // VertexAttributeArray for the a_instance attribute
 
 #include <algorithm>
 #include <cmath>
@@ -630,9 +636,8 @@ void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
     // depth render. (Bind integration is the main on-device shakeout item - Texture2DArray is
     // GL-only and outside the gfx texture abstraction.)
     updateInstancedDepthUBO(parameters);
-    if (demTextureArray && demTextureArray->valid()) {
-        demTextureArray->bind(shaders::idTerrainDEMArrayTexture, shaders::idTerrainDEMArrayTexture);
-    }
+    // The DEM array is bound by the instanced drawable itself (DrawableGL::setArrayTexture ->
+    // bindTextures), so no manual bind here.
 #endif
     depthRenderTarget->render(orchestrator, renderTree, parameters);
 }
@@ -1015,8 +1020,8 @@ void RenderTerrain::rebuildInstancedDepthDrawable(gfx::Context& context, gfx::Sh
         return;
     }
 
-    const auto& mesh = getDepthMesh(context);
-    if (mesh.vertices.empty() || mesh.indices.empty()) {
+    const auto& depthMeshRef = getDepthMesh(context);
+    if (depthMeshRef.vertices.empty() || depthMeshRef.indices.empty()) {
         return;
     }
     auto shader = context.getGenericShader(shaders, "TerrainDepthShader");
@@ -1034,19 +1039,19 @@ void RenderTerrain::rebuildInstancedDepthDrawable(gfx::Context& context, gfx::Sh
     builder->setEnableDepth(true);
     builder->setIs3D(true);
 
-    std::vector<uint8_t> vtx(mesh.vertices.size() * sizeof(int16_t));
-    std::memcpy(vtx.data(), mesh.vertices.data(), vtx.size());
-    builder->setRawVertices(std::move(vtx), mesh.vertexCount, gfx::AttributeDataType::Short4);
+    std::vector<uint8_t> vtx(depthMeshRef.vertices.size() * sizeof(int16_t));
+    std::memcpy(vtx.data(), depthMeshRef.vertices.data(), vtx.size());
+    builder->setRawVertices(std::move(vtx), depthMeshRef.vertexCount, gfx::AttributeDataType::Short4);
 
     SegmentVector segs;
-    segs.emplace_back(0, 0, mesh.vertexCount, mesh.indexCount);
-    std::vector<uint16_t> idx = mesh.indices;
+    segs.emplace_back(0, 0, depthMeshRef.vertexCount, depthMeshRef.indexCount);
+    std::vector<uint16_t> idx = depthMeshRef.indices;
     builder->setSegments(gfx::Triangles(), std::move(idx), segs.data(), segs.size());
 
     // Per-instance index attribute (divisor 1). Its element count is the instance count the
     // GL backend draws (drawInstanced uses instanceAttrs->getMinCount()).
     auto instAttrs = context.createVertexAttributeArray();
-    if (const auto& a = instAttrs->set(idTerrainInstanceVertexAttribute)) {
+    if (const auto& a = instAttrs->set(shaders::idTerrainInstanceVertexAttribute)) {
         for (std::size_t i = 0; i < n; ++i) {
             a->set(i, static_cast<float>(i));
         }
@@ -1056,6 +1061,10 @@ void RenderTerrain::rebuildInstancedDepthDrawable(gfx::Context& context, gfx::Sh
     builder->flush(context);
     auto drawables = builder->clearDrawables();
     if (!drawables.empty()) {
+        // Bind the packed DEM array as u_dem_array (slot idTerrainDEMArrayTexture); DrawableGL
+        // binds it in bindTextures() with the program active, using the shader sampler location.
+        static_cast<gl::DrawableGL&>(*drawables[0])
+            .setArrayTexture(demTextureArray.get(), shaders::idTerrainDEMArrayTexture);
         depthLg->addDrawable(std::move(drawables[0]));
     }
 }
