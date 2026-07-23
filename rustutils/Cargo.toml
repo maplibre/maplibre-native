@@ -7,7 +7,7 @@ description = "Core Rust utilities for MapLibre Native"
 edition = "2021"
 license = "BSD-2-Clause"
 repository = "https://github.com/maplibre/maplibre-native"
-rust-version = "1.78.0"
+rust-version = "1.92"
 
 [lib]
 crate-type = ["staticlib"]
