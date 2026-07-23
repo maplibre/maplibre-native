@@ -22,7 +22,7 @@ public:
 
 private:
     class Impl;
-    std::unique_ptr<Impl> impl;
+    std::shared_ptr<Impl> impl;
 };
 
 } // namespace mbgl

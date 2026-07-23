@@ -15,6 +15,7 @@ crate-type = ["staticlib"]
 [dependencies]
 csscolorparser = "0.7.0"
 cxx = "1.0.157"
+mlt-core = { path = "../vendor/maplibre-tile-spec/rust/mlt-core" }
 
 [profile.release]
 lto = true
