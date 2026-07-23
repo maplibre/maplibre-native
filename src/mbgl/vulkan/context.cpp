@@ -36,9 +36,9 @@ namespace vulkan {
 // this can be queried at runtime (VkPhysicalDeviceLimits.maxVertexInputBindings)
 constexpr uint32_t maximumVertexBindingCount = 16;
 
-constexpr uint32_t globalDescriptorPoolSize = 3 * 4;
-constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
-constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
+constexpr uint32_t globalDescriptorPoolSize = 2 * 1;
+constexpr uint32_t layerDescriptorPoolSize = 2 * 256;
+constexpr uint32_t drawableUniformDescriptorPoolSize = 2 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
 namespace {
