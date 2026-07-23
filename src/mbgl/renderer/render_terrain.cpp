@@ -1076,12 +1076,18 @@ void RenderTerrain::rebuildInstancedDepthDrawable(gfx::Context& context, gfx::Sh
 void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
     auto* depthLg = static_cast<LayerGroup*>(depthLayerGroup.get());
     const std::size_t n = depthInstances.size();
+
     if (!depthLg || n == 0) {
         return;
     }
     auto& context = parameters.context;
 
-    std::vector<shaders::TerrainDepthInstanceUBO> arr(n);
+    // The shader declares the block as a fixed array u_inst[TERRAIN_MAX_INSTANCES]
+    // (== maxDepthInstances), so GLES requires the bound buffer/range to be at least
+    // that full static size (sizeof(UBO) * maxDepthInstances). Allocate the whole block
+    // and fill only the first n entries; the rest stay zero-initialized. Sizing the
+    // buffer to n instead triggers "Bound buffer is too small" and the draw is dropped.
+    std::vector<shaders::TerrainDepthInstanceUBO> arr(maxDepthInstances);
     for (std::size_t i = 0; i < n; ++i) {
         const auto& inst = depthInstances[i];
         mat4 m = parameters.matrixForTile(inst.tileID.toUnwrapped());
@@ -1096,7 +1102,7 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
         arr[i].dem_layer = inst.demLayer;
         arr[i].pad1 = arr[i].pad2 = arr[i].pad3 = 0.0f;
     }
-    const std::size_t bytes = sizeof(shaders::TerrainDepthInstanceUBO) * n;
+    const std::size_t bytes = sizeof(shaders::TerrainDepthInstanceUBO) * maxDepthInstances;
     if (!depthInstanceUBO || depthInstanceUBO->getSize() < bytes) {
         depthInstanceUBO = context.createUniformBuffer(arr.data(), bytes, false, true);
     } else {

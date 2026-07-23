@@ -31,13 +31,17 @@ layout (std140) uniform TerrainEvaluatedPropsUBO {
     lowp float props_pad2;
 };
 
-layout (location = 0) in vec4 a_pos;             // xy = tile position, z = skirt flag (1 = skirt vertex)
-layout (location = 1) in highp float a_instance; // per-instance index (divisor 1); also sets instance count
+layout (location = 0) in vec4 a_pos; // xy = tile position, z = skirt flag (1 = skirt vertex)
 
 uniform highp sampler2DArray u_dem_array;
 
+out highp float v_depth;
+
 void main() {
-    int idx = int(a_instance + 0.5);
+    // gl_InstanceID selects this instance's tile slot. A per-instance vertex attribute is not
+    // usable on the GL backend (getInstanceAttributes() is always empty, so divisor 1 is never
+    // bound and the attribute reads 0 for every instance); the built-in index is authoritative.
+    int idx = gl_InstanceID;
     highp mat4 matrix = u_inst[idx].matrix;
     highp vec4 dem_coords = u_inst[idx].dem_coords;
     highp float dem_layer = u_inst[idx].dem_layer;
@@ -49,13 +53,18 @@ void main() {
 
     float ele_delta = a_pos.z == 1.0 ? u_elevation_offset : 0.0;
     gl_Position = matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
+    // Carry clip-space NDC z (not gl_FragCoord.z window depth) so the packed value is
+    // independent of glDepthRange and matches the symbol's frag.z = pos.z/pos.w, exactly
+    // as maplibre-gl-js terrain_depth does (v_depth = gl_Position.z / gl_Position.w).
+    v_depth = gl_Position.z / gl_Position.w;
 }
 )";
-    static constexpr const char* fragment = R"(void main() {
-    // Pack the fragment depth into RGBA8, as in the maplibre-gl-js
+    static constexpr const char* fragment = R"(in highp float v_depth;
+void main() {
+    // Pack the clip-space NDC depth into RGBA8, as in the maplibre-gl-js
     // terrain_depth shader; unpacked by unpack_depth() in the vertex prelude
     // for calculate_visibility()
-    highp float depth = gl_FragCoord.z;
+    highp float depth = v_depth;
     const highp vec4 bit_shift = vec4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
     const highp vec4 bit_mask = vec4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
     highp vec4 res = fract(depth * bit_shift);

@@ -576,8 +576,11 @@ const std::vector<UniformBlockInfo> TerrainDepthShaderInfo::uniformBlocks = {
     UniformBlockInfo{"TerrainEvaluatedPropsUBO", idTerrainEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> TerrainDepthShaderInfo::attributes = {
+    // Only a_pos is a real shader attribute. The instanced depth pass indexes tiles via the
+    // built-in gl_InstanceID, not a per-instance vertex attribute (the GL backend never binds
+    // instance attributes / divisor 1). The C++ instance-attribute array is kept solely as the
+    // instance-count source for DrawableGL::draw; it is not a program attribute here.
     AttributeInfo{"a_pos", idTerrainPosVertexAttribute},
-    AttributeInfo{"a_instance", idTerrainInstanceVertexAttribute},
 };
 const std::vector<TextureInfo> TerrainDepthShaderInfo::textures = {
     TextureInfo{"u_dem_array", idTerrainDEMArrayTexture},

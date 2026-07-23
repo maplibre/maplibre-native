@@ -25,16 +25,24 @@ layout (std140) uniform TerrainEvaluatedPropsUBO {
     lowp float props_pad2;
 };
 
-layout (location = 0) in vec4 a_pos;             // xy = tile position, z = skirt flag (1 = skirt vertex)
-layout (location = 1) in highp float a_instance; // per-instance index (divisor 1); also sets instance count
+layout (location = 0) in vec4 a_pos; // xy = tile position, z = skirt flag (1 = skirt vertex)
 
 uniform highp sampler2DArray u_dem_array;
 
+out highp float v_depth;
+
 void main() {
-    // Instanced depth pass: one draw covers every terrain mesh tile; a_instance selects this
+    // Instanced depth pass: one draw covers every terrain mesh tile; gl_InstanceID selects this
     // instance's tile data. Same elevation displacement (incl. skirt drop) as terrain.vertex,
     // rendering only packed depth for symbol occlusion (calculate_visibility).
-    int idx = int(a_instance + 0.5);
+    //
+    // We use the built-in gl_InstanceID rather than a per-instance vertex attribute: the GL
+    // backend keeps all program attributes in vertexAttributes and always returns an empty
+    // getInstanceAttributes(), so an instance attribute (divisor 1) is never actually bound -
+    // it reads the default 0 for every instance. The C++ instance-attribute array is still set
+    // on the drawable, but only as the instance-count source (DrawableGL::draw reads its
+    // getMinCount()); the index itself comes from gl_InstanceID.
+    int idx = gl_InstanceID;
     highp mat4 matrix = u_inst[idx].matrix;
     highp vec4 dem_coords = u_inst[idx].dem_coords;
     highp float dem_layer = u_inst[idx].dem_layer;
@@ -46,4 +54,8 @@ void main() {
 
     float ele_delta = a_pos.z == 1.0 ? u_elevation_offset : 0.0;
     gl_Position = matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
+    // Carry clip-space NDC z (not gl_FragCoord.z window depth) so the packed value is
+    // independent of glDepthRange and matches the symbol's frag.z = pos.z/pos.w, exactly
+    // as maplibre-gl-js terrain_depth does (v_depth = gl_Position.z / gl_Position.w).
+    v_depth = gl_Position.z / gl_Position.w;
 }

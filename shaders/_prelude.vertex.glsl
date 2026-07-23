@@ -151,11 +151,23 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
     return clip;
 }
 
-// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl),
-// converted to NDC z, as in the maplibre-gl-js prelude
+// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl).
+// Matches maplibre-gl-js unpack(): the depth pass packs gl_Position.z/gl_Position.w
+// (clip-space NDC z) directly, so no window-depth remap (no *2-1, no glDepthRange dependency).
 float unpack_depth(vec4 rgba_depth) {
     const highp vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+    return dot(rgba_depth, bit_shift);
+}
+
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully hidden,
+// with a soft ramp and a small bias so geometry sitting exactly on the terrain surface
+// (e.g. a label anchored to it) does not occlude itself. Matches maplibre-gl-js depthOpacity().
+highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    // gl-js uses 500 (ramp over ~0.002 NDC). Our perspective depth is compressed into a tighter
+    // NDC band near the far plane, so behind-ridge separations are only a few 1e-4; steepen to
+    // 5000 so those fully occlude. On-surface labels keep d = +0.0001 > 0 and stay fully visible.
+    return 1.0 - max(0.0, min(1.0, -d * 5000.0));
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
@@ -166,7 +178,11 @@ float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enable
     if (depth_enabled == 0.0) {
         return 1.0;
     }
-    vec2 uv = pos.xy / pos.w * 0.5 + 0.5;
-    float depth = unpack_depth(texture(depth_texture, uv));
-    return pos.z / pos.w > depth ? 0.0 : 1.0;
+    vec3 frag = pos.xyz / pos.w;
+    highp float d = depth_opacity(frag, depth_texture);
+    if (d > 0.95) {
+        return 1.0;
+    }
+    // a label whose anchor is just behind a ridge still shows if its glyphs poke above it
+    return (d + depth_opacity(frag + vec3(0.0, 0.01, 0.0), depth_texture)) / 2.0;
 }
