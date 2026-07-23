@@ -69,6 +69,7 @@ private:
     const mlt::Feature& feature;
     std::uint32_t extent;
 
+    // lazy init
     mutable std::optional<GeometryCollection> lines;
     mutable std::optional<PropertyMap> properties;
 };
@@ -118,9 +119,9 @@ FeatureIdentifier VectorMLTTileFeature::getID() const {
 struct PointConverter {
     double scale;
 
-    inline constexpr static GeometryCoordinate convert(double scale_, const mlt::Coordinate& coord) {
-        return {static_cast<std::int16_t>(std::round(coord.x * scale_)),
-                static_cast<std::int16_t>(std::round(coord.y * scale_))};
+    inline constexpr static GeometryCoordinate convert(double scale, const mlt::Coordinate& coord) {
+        return {static_cast<std::int16_t>(std::round(coord.x * scale)),
+                static_cast<std::int16_t>(std::round(coord.y * scale))};
     }
 
     GeometryCoordinate operator()(const mlt::Coordinate& coord) const { return convert(scale, coord); }
@@ -200,7 +201,9 @@ public:
 
     std::unique_ptr<GeometryTileFeature> getFeature(std::size_t index) const override {
         const auto& features = layer.getFeatures();
-        return std::make_unique<VectorMLTTileFeature>(tile, layer, features[index], layer.getExtent());
+        const mlt::Feature* targetFeature = nullptr;
+        targetFeature = &features[index];
+        return std::make_unique<VectorMLTTileFeature>(tile, layer, *targetFeature, layer.getExtent());
     }
 
     std::string getName() const override { return layer.getName(); }
@@ -218,6 +221,8 @@ public:
         : data(std::move(data_)),
           fastPFOREnabled(fastPFOREnabled_) {}
 
+    Impl(const Impl&) = default;
+
     std::unique_ptr<GeometryTileLayer> getLayer(const std::string& name) const {
         MLN_TRACE_FUNC();
 
@@ -228,6 +233,7 @@ public:
             } catch (const std::exception& ex) {
                 Log::Warning(Event::ParseTile, "MLT parse failed: " + std::string(ex.what()));
             }
+            // We don't need the raw data anymore
             data.reset();
         }
 
@@ -259,9 +265,11 @@ private:
 };
 
 VectorMLTTileData::VectorMLTTileData(std::shared_ptr<const std::string> data, bool fastPFOREnabled)
-    : impl(std::make_shared<Impl>(std::move(data), fastPFOREnabled)) {}
+    : impl(std::make_unique<Impl>(std::move(data), fastPFOREnabled)) {}
 
-VectorMLTTileData::VectorMLTTileData(const VectorMLTTileData&) = default;
+VectorMLTTileData::VectorMLTTileData(const VectorMLTTileData& other)
+    : impl(other.impl ? std::make_unique<Impl>(*other.impl) : nullptr) {}
+
 VectorMLTTileData::VectorMLTTileData(VectorMLTTileData&&) noexcept = default;
 VectorMLTTileData::~VectorMLTTileData() = default;
 
@@ -270,11 +278,11 @@ std::unique_ptr<GeometryTileData> VectorMLTTileData::clone() const {
 }
 
 std::unique_ptr<GeometryTileLayer> VectorMLTTileData::getLayer(const std::string& name) const {
-    return impl->getLayer(name);
+    return impl ? impl->getLayer(name) : nullptr;
 }
 
 std::vector<std::string> VectorMLTTileData::layerNames() const {
-    return impl->layerNames();
+    return impl ? impl->layerNames() : std::vector<std::string>{};
 }
 
 } // namespace mbgl
