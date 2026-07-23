@@ -253,6 +253,19 @@ Implemented:
   fallback and bilinear interpolation
 - Line antialiasing gamma handled per drawable (1.0 when draped into a terrain
   render target, perspective ratio otherwise)
+- Mesh skirts on all four backends: each tile edge is extruded into a curtain
+  that hangs below the surface by `u_elevation_offset` (gl-js `u_ele_delta`),
+  hiding the cracks/stitches between neighbouring tiles at different zoom
+  levels. The skirt flag rides in the mesh vertex's z (native analog of gl-js
+  `a_pos3d.z`); `TerrainSkirtLength` is styleable ("auto" or a length) and the
+  terrain depth pass drops the skirts too so they occlude correctly. Render
+  tests `terrain/skirts-auto` and `terrain/skirts-none` cover it.
+- The terrain **mesh** vertex shader now samples the DEM through the shared
+  `get_elevation()` prelude helper (backfilled 1px border, NEAREST fetch +
+  post-decode bilinear on pixel centres), the same path the elevated layers
+  use, matching maplibre-gl-js
+- Hillshade prepare-target lifetime fixed (no more OOM / monotonic GPU-memory
+  growth while panning terrain with a hillshade layer - see Performance below)
 
 ## Remaining Work for Production
 
@@ -337,6 +350,21 @@ unchanged drape targets. Remaining levers: the per-frame CPU work in
 visits scale with targets × drawables, run even on a cache hit), the hardcoded
 512x512 drape target size, and DEM texture upload scheduling. Real-device
 profiling welcome.
+
+**Fixed - hillshade prepare-target memory leak / OOM (`1efc0db`).** On a
+terrain style with a hillshade layer, `RenderHillshadeLayer` appended every
+per-tile "prepare" render target (a 512x512 Sobel target + its 514x514 DEM
+input) to `activatedRenderTargets`, a list only cleared by the edge-triggered
+`markLayerRenderable()`. While panning, the layer stays continuously
+renderable, so the list was never cleared: live texture count climbed
+monotonically (measured 175→634 in ~45s on PowerVR) until the process was
+OOM-killed. This also degraded frame rate on lower-end GPUs as the working set
+grew. Now `activatedRenderTargets` is reconciled against the tiles still in the
+cover each frame (departed tiles' targets released, new ones registered, diffed
+by identity so persistent tiles cause no churn), and
+`RenderOrchestrator::addRenderTargets` drops any non-drape target it is the
+sole owner of as a backstop. After the fix the same run plateaus and oscillates
+within a band instead of growing.
 
 ### Phase 2 - Symbol occlusion (done, all backends)
 
@@ -423,27 +451,38 @@ correct for GL's particular label-plane/pitch/rotation pipeline, or may expose
 a second, GL-specific bug that `gl_Position` happened to mask. Not yet
 diagnosed on device - `projectedPoint` is provably what gl-js itself compares,
 so the fix is more likely to find *why* it fails on GL than to revert it.
-Next step: run the local `terrain/occlusion-debug` render test (uncommitted
-style at `metrics/integration/render-tests/terrain/occlusion-debug/`) against
-a GL build to check whether the depth texture populates on GL the way it was
-confirmed to on Vulkan (see the diagnostic pattern in the aaa145c commit
+Next step: run the local `terrain/occlusion-debug` render test (committed in
+`c9fea76` at `metrics/integration/render-tests/terrain/occlusion-debug/`)
+against a GL build to check whether the depth texture populates on GL the way
+it was confirmed to on Vulkan (see the diagnostic pattern in the aaa145c commit
 message / this session's history), before assuming the coordinate-space
 hypothesis is right.
 
+**2026-07-23 - reported working on GL after a clean device rebuild.** Symbol
+occlusion was observed working on the Android OpenGL flavour (sample app built
+locally from `platform/android`), which the "GL regressed" note above did not
+predict. Not yet reconciled: the on-device retest may have been against a build
+that postdates the suspected-bad change, or the regression may be
+intermittent/config-dependent. Needs a deliberate A/B on device (occlusion on
+vs off, GL flavour, `TerrainVectorMapActivity`) to confirm before this known
+issue is closed out.
+
 ### Phase 3 - Seams and quality
 
-- **Drape target size is hardcoded to 512x512** (`Renderer::Impl::texturePool`,
-  the long-standing `// TODO: tile size`). It ignores `pixelRatio` and the
-  source tile size, so on a high-DPI device (e.g. pixel ratio 3.5) a terrain
-  tile covering a large screen area has its draped map content rendered at
-  512x512 and upscaled onto the mesh, costing sharpness. gl-js exposes a
-  terrain quality factor for this. Sizing this up trades GPU memory directly
-  (one texture per terrain tile), so it wants measuring alongside the render
-  cache below rather than a blind bump.
-- Backfilled DEM tile borders and pixel-center sampling in the terrain mesh
-  shader itself (the elevated layers already sample this way)
-- Mesh skirts (gl-js `a_pos3d.z` flag + `u_ele_delta`) to hide cracks between
-  neighboring tiles at different zoom levels
+- **Drape target size** (`Renderer::Impl::texturePool`). Now `drapeTileSize *
+  drapeQualityFactor` = 512 * 2 = **1024x1024**, matching maplibre-gl-js, which
+  renders its render-to-texture tiles at `tileSize * qualityFactor` (a fixed
+  `qualityFactor = 2`) *specifically* so draped thin lines are not pixelated/
+  aliased when the mesh magnifies them (`src/render/terrain.ts`,
+  `src/webgl/render_to_texture.ts` `rttSize`). This was the fix for draped roads
+  looking aliased/"not antialiased": the line AA band is sized to the screen's
+  device pixel ratio, so at 512 (qualityFactor 1) it fell sub-texel in the
+  lower-res target and produced no effective AA. Like gl-js, this is a fixed
+  factor independent of `pixelRatio`, so at very high DPR in the foreground the
+  1024 target can still be below screen resolution (softer, but no longer
+  aliased); `drapeQualityFactor` is the single knob to raise it (each step is 4x
+  GPU memory per target) or drop back to 1 on constrained devices. Was the
+  long-standing `// TODO: tile size`.
 - Camera-terrain collision: a collision-only fix was prototyped and reverted
   (felt worse - it corrected only after the gesture); the real fix is the
   terrain-anchored camera in Phase 4
@@ -544,11 +583,16 @@ from entering the terrain in the first place rather than correcting afterwards.
 ## Testing
 
 - **Render tests**: `metrics/integration/render-tests/terrain/` contains
-  `default` and `pitched-world`, ported from maplibre-gl-js. They are in
-  `metrics/ignores/platform-all.json` until native-rendered baselines are
-  captured (the expected images are gl-js renders). The gl-js `terrain/symbol`
-  test is worth porting now that symbols are elevated (needs its DEM fixtures
-  loaded into `metrics/cache-style.db`).
+  `default`, `pitched-world`, `skirts-auto`, `skirts-none` (all ported from
+  maplibre-gl-js) and `occlusion-debug` (the local symbol-occlusion diagnostic,
+  `c9fea76`). All five have **native-rendered baselines captured and are no
+  longer ignored** - there are no terrain entries left in `metrics/ignores/`, so
+  they run as part of the normal render-test suite (`default` and
+  `pitched-world` un-ignored in `5b17c5a`, the skirts tests in `5303d65`;
+  `pitched-world`'s baseline was refreshed to the corrected-elevation render in
+  `5d39f97`). The gl-js `terrain/symbol` test is still worth porting now that
+  symbols are elevated (needs its DEM fixtures loaded into
+  `metrics/cache-style.db`).
 - **Android**: the test app has four terrain activities in the Style category
   (`TerrainActivity`, `TerrainVectorMapActivity`, `TerrainOsmRasterActivity`,
   `TerrainDebugTilesActivity` - see "Continuing this work" for what each covers).
