@@ -309,6 +309,38 @@ private:
     static constexpr size_t maxDEMTextures = 96;
     uint64_t demUpdateCounter = 0;
 
+#if MLN_RENDER_BACKEND_OPENGL
+    // OpenGL-only: the same DEM tiles packed into one GL_TEXTURE_2D_ARRAY so the
+    // depth pass (and later the surface pass) can sample a per-instance layer in a
+    // single instanced draw instead of one draw per tile. Populated alongside the
+    // per-tile textures above (which remain the source of truth for CPU elevation
+    // and non-instanced sampling); a simple free-list recycles layer slots as tiles
+    // come and go. Cap the layer count to keep the array a bounded size.
+    static constexpr uint32_t maxDEMArrayLayers = 64;
+    std::unique_ptr<gl::Texture2DArray> demTextureArray;
+    std::map<UnwrappedTileID, uint32_t> demArrayLayer; // tile -> array layer index
+    std::vector<uint32_t> demArrayFreeLayers;          // recycled layer slots
+    uint32_t demArrayNextLayer = 0;                    // next never-used slot
+    void packDEMArrayLayer(gfx::Context&, const UnwrappedTileID&, const DEMData&);
+    void freeDEMArrayLayer(const UnwrappedTileID&);
+
+    // Instanced depth pass: one draw covers every mesh tile, sampling each tile's DEM from
+    // its demTextureArray layer (see terrain_depth.vertex / TerrainDepthInstanceUBO). Rebuilt
+    // when the tile set changes; the per-instance transform matrix is refreshed every frame in
+    // updateInstancedDepthUBO (renderDepth), since it depends on the camera.
+    static constexpr uint32_t maxDepthInstances = 64; // must match TERRAIN_MAX_INSTANCES in shader
+    struct DepthInstance {
+        OverscaledTileID tileID;
+        std::array<float, 4> demCoords; // scale, x/y offset, dem_dim (.w)
+        float demLayer;                 // demTextureArray layer for this tile (own or ancestor)
+    };
+    std::vector<DepthInstance> depthInstances; // current tile set, index == a_instance / gl_InstanceID
+    std::size_t depthInstanceSignature = 0;    // hash of the tile set the instanced drawable was built for
+    gfx::UniformBufferPtr depthInstanceUBO;    // TerrainDepthInstanceUBO[N], refreshed per frame
+    void rebuildInstancedDepthDrawable(gfx::Context&, gfx::ShaderRegistry&);
+    void updateInstancedDepthUBO(PaintParameters&);
+#endif
+
     // See getPlaceholderDEMTexture
     std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;
 
