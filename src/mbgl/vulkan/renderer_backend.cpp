@@ -444,6 +444,7 @@ void RendererBackend::initInstance() {
         vk::ValidationFeatureEnableEXT::eGpuAssisted,
         vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot,
         vk::ValidationFeatureEnableEXT::eSynchronizationValidation,
+        vk::ValidationFeatureEnableEXT::eBestPractices,
     };
     const vk::ValidationFeaturesEXT validationFeatureInfo(validationFeatures);
 
