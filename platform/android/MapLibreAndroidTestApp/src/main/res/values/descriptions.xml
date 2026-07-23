@@ -50,6 +50,7 @@
     <string name="description_query_rendered_features_box_symbol_count">Count all rendered symbols in box</string>
     <string name="description_query_rendered_features_box_highlight">Highlight buildings in box</string>
     <string name="description_query_source_features">Query source for features</string>
+    <string name="description_feature_state">Toggle feature state and style features interactively</string>
     <string name="description_simple_map">Shows a simple map</string>
     <string name="description_map_change">Logs map change events to Logcat</string>
     <string name="description_visibility_map">Changes visibility of map and view parent</string>
@@ -85,6 +86,7 @@
     <string name="description_custom_vector_source">CustomVectorSource with synthetic MVT tiles</string>
     <string name="description_no_style">Load a map without providing a style URI or JSON</string>
     <string name="description_vector_tile">Load MVT data</string>
+    <string name="description_pmtiles">Load PMTiles data</string>
     <string name="description_local_glyph">Suzhou using Droid Sans for Chinese glyphs</string>
     <string name="description_hillshade">Example raster-dem source and hillshade layer</string>
     <string name="description_heatmaplayer">Use HeatmapLayer to visualise earthquakes</string>

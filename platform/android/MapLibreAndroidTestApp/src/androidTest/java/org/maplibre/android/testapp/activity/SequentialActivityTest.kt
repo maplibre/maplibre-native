@@ -37,6 +37,7 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
             org.maplibre.android.testapp.activity.camera.CameraAnimatorActivity::class.java,
             org.maplibre.android.testapp.activity.customlayer.CustomLayerActivity::class.java,
             org.maplibre.android.testapp.activity.events.ObserverActivity::class.java,
+            org.maplibre.android.testapp.activity.feature.FeatureStateActivity::class.java,
             org.maplibre.android.testapp.activity.feature.QuerySourceFeaturesActivity::class.java,
             org.maplibre.android.testapp.activity.fragment.MapFragmentActivity::class.java,
             org.maplibre.android.testapp.activity.imagegenerator.SnapshotActivity::class.java,

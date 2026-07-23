@@ -3,14 +3,15 @@
 #include <mbgl/annotation/render_annotation_source.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
-#include <mbgl/renderer/sources/render_geojson_source.hpp>
-#include <mbgl/renderer/sources/render_raster_source.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/sources/render_vector_source.hpp>
-#include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
 #include <mbgl/renderer/sources/render_custom_vector_source.hpp>
+#include <mbgl/renderer/sources/render_geojson_source.hpp>
+#include <mbgl/renderer/sources/render_image_source.hpp>
+#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
+#include <mbgl/renderer/sources/render_raster_source.hpp>
+#include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/constants.hpp>
 
@@ -22,28 +23,24 @@ namespace mbgl {
 using namespace style;
 
 std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>& impl,
-                                                   const TaggedScheduler& threadPool_) {
+                                                   const TaggedScheduler& threadPool) {
     switch (impl->type) {
         case SourceType::Vector:
             // the TileSet isn't available yet, so we can't make different sources by format
-            return std::make_unique<RenderVectorSource>(staticImmutableCast<TileSource::Impl>(impl),
-                                                        std::move(threadPool_));
+            return std::make_unique<RenderVectorSource>(staticImmutableCast<TileSource::Impl>(impl), threadPool);
         case SourceType::Raster:
-            return std::make_unique<RenderRasterSource>(staticImmutableCast<TileSource::Impl>(impl),
-                                                        std::move(threadPool_));
+            return std::make_unique<RenderRasterSource>(staticImmutableCast<TileSource::Impl>(impl), threadPool);
         case SourceType::RasterDEM:
-            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<TileSource::Impl>(impl),
-                                                           std::move(threadPool_));
+            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<TileSource::Impl>(impl), threadPool);
         case SourceType::GeoJSON:
-            return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl),
-                                                         std::move(threadPool_));
+            return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl), threadPool);
         case SourceType::Video:
             assert(false);
             return nullptr;
         case SourceType::Annotations:
             if (LayerManager::annotationsEnabled) {
                 return std::make_unique<RenderAnnotationSource>(staticImmutableCast<AnnotationSource::Impl>(impl),
-                                                                std::move(threadPool_));
+                                                                threadPool);
             } else {
                 assert(false);
                 return nullptr;
@@ -52,10 +49,10 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
             return std::make_unique<RenderImageSource>(staticImmutableCast<ImageSource::Impl>(impl));
         case SourceType::CustomVector:
             return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl),
-                                                                std::move(threadPool_));
+                                                                threadPool);
         case SourceType::CustomMVTVector:
             return std::make_unique<RenderCustomVectorSource>(staticImmutableCast<CustomVectorSource::Impl>(impl),
-                                                              std::move(threadPool_));
+                                                              threadPool);
     }
 
     // Not reachable, but placate GCC.
