@@ -8,9 +8,19 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "TerrainDepthShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform TerrainDrawableUBO {
-    highp mat4 u_matrix;
-    highp vec4 u_dem_tile_coords;
+    static constexpr const char* vertex = R"(#define TERRAIN_MAX_INSTANCES 64
+
+struct TerrainInstance {
+    highp mat4 matrix;
+    highp vec4 dem_coords;
+    highp float dem_layer;
+    highp float pad1;
+    highp float pad2;
+    highp float pad3;
+};
+
+layout (std140) uniform TerrainDrawableUBO {
+    TerrainInstance u_inst[TERRAIN_MAX_INSTANCES];
 };
 
 layout (std140) uniform TerrainEvaluatedPropsUBO {
@@ -21,20 +31,24 @@ layout (std140) uniform TerrainEvaluatedPropsUBO {
     lowp float props_pad2;
 };
 
-layout (location = 0) in vec4 a_pos; // xy = tile position, z = skirt flag (1 = skirt vertex)
+layout (location = 0) in vec4 a_pos;             // xy = tile position, z = skirt flag (1 = skirt vertex)
+layout (location = 1) in highp float a_instance; // per-instance index (divisor 1); also sets instance count
 
-uniform sampler2D u_dem;
+uniform highp sampler2DArray u_dem_array;
 
 void main() {
-    // Same elevation displacement as the terrain shader (terrain.vertex.glsl),
-    // including the skirt drop, rendering only depth for the symbol occlusion pass
+    int idx = int(a_instance + 0.5);
+    highp mat4 matrix = u_inst[idx].matrix;
+    highp vec4 dem_coords = u_inst[idx].dem_coords;
+    highp float dem_layer = u_inst[idx].dem_layer;
+
     vec2 pos = a_pos.xy;
 
-    float elevation = get_elevation(pos, u_dem, u_dem_tile_coords, u_unpack,
-                                    u_dem_tile_coords.w, u_exaggeration, 1.0);
+    float elevation = get_elevation_array(pos, u_dem_array, dem_layer, dem_coords,
+                                          u_unpack, dem_coords.w, u_exaggeration);
 
     float ele_delta = a_pos.z == 1.0 ? u_elevation_offset : 0.0;
-    gl_Position = u_matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
+    gl_Position = matrix * vec4(pos.x, pos.y, elevation - ele_delta, 1.0);
 }
 )";
     static constexpr const char* fragment = R"(void main() {

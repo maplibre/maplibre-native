@@ -577,9 +577,10 @@ const std::vector<UniformBlockInfo> TerrainDepthShaderInfo::uniformBlocks = {
 };
 const std::vector<AttributeInfo> TerrainDepthShaderInfo::attributes = {
     AttributeInfo{"a_pos", idTerrainPosVertexAttribute},
+    AttributeInfo{"a_instance", idTerrainInstanceVertexAttribute},
 };
 const std::vector<TextureInfo> TerrainDepthShaderInfo::textures = {
-    TextureInfo{"u_dem", idTerrainDEMTexture},
+    TextureInfo{"u_dem_array", idTerrainDEMArrayTexture},
 };
 
 } // namespace shaders
