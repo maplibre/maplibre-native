@@ -52,12 +52,19 @@ public:
     RenderTerrain(Immutable<style::Terrain::Impl>);
     ~RenderTerrain();
 
-    /// The terrain mesh (and drape render target) tile set for a DEM render
-    /// tile set: parent fallback tiles are expanded to the zoom of the deepest
-    /// overlapping tile, so meshes never overlap. Like maplibre-gl-js, mesh
-    /// tiles stay at the ideal cover and only the DEM/drape textures fall back
-    /// to ancestors while tiles load.
-    static std::set<UnwrappedTileID> expandToDeepestCover(const std::set<UnwrappedTileID>& tileIDs);
+    /// The terrain mesh (and drape render target) tile set, computed as an
+    /// elevation-aware, LOD-based ideal cover directly from the transform - like
+    /// maplibre-gl-js `coveringTiles({tileSize: 512, terrain})` - rather than
+    /// from the DEM source's loaded render tiles. This matters for sparse DEMs
+    /// (e.g. mapterhorn), where high-zoom tiles 404 and native falls back to a
+    /// lower-zoom DEM tile: deriving the mesh cover from that fallback set would
+    /// drag the drape resolution down with it (large low-zoom drape targets =
+    /// blurry roads) and leave uncovered areas as skirt until the DEM loads. The
+    /// mesh cover instead stays at the view's ideal zoom; the DEM/drape textures
+    /// fall back to ancestors per tile while exact tiles load. Needs the DEM
+    /// source, so it is a member (not static). Returns {} when there is none.
+    std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
+                                               const std::shared_ptr<UpdateParameters>& updateParameters) const;
 
     /**
      * @brief Update terrain rendering (create/update drawables)

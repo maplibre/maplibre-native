@@ -329,11 +329,23 @@ against the gl-js reference, but the native variant may actually be the
 better fit for the drawable architecture — **discuss/decide before spending
 time on any of these**:
 
-- **Terrain tile cover**: native derives terrain mesh tiles from the
-  `TilePyramid` render set and reverse-engineers the ideal cover out of it
-  (`expandToDeepestCover`); gl-js computes the ideal cover directly in a
-  dedicated terrain source cache. A direct terrain tile cover (reusing
-  native's `tileCover`/LOD machinery) would remove the expansion step.
+- **Terrain tile cover** — **done** (`RenderTerrain::computeMeshCover`). Native
+  used to derive terrain mesh tiles from the DEM source's `TilePyramid` render
+  set and reverse-engineer the ideal cover out of it (`expandToDeepestCover`,
+  now removed). It now computes the mesh/drape cover directly from the transform
+  via `util::tileCover` with the DEM elevation provider and the frame's LOD
+  params - an elevation-aware, LOD-based ideal cover, the way every other source
+  is covered and the way gl-js's `coveringTiles({tileSize: 512, terrain})` does.
+  Both the drape-target allocation (`Renderer::Impl`) and the mesh build
+  (`RenderTerrain::update`) call it with the same `state`/`updateParameters`, so
+  the two sets stay in lockstep. This fixed draped roads going blurry over a
+  **sparse DEM** (e.g. mapterhorn): high-zoom DEM tiles 404 and native falls
+  back to a lower-zoom DEM tile, and the old cover inherited that low zoom, so
+  the fixed-size drape target spread over too much ground. The mesh cover now
+  stays at the view's ideal zoom and only the DEM/drape *textures* fall back to
+  ancestors per tile while exact tiles load. The LOD *zoom selection* inside
+  `tileCover` is still not itself elevation-aware (see the near/bottom frontier
+  skirt under Phase 3).
 - **Drawable tile id transport**: the tile id rides in the unused third
   column of the drape matrix to avoid a 12-struct UBO layout sweep across
   four backends. Explicit `drape_tile` UBO fields would be the boring,
@@ -458,14 +470,15 @@ it was confirmed to on Vulkan (see the diagnostic pattern in the aaa145c commit
 message / this session's history), before assuming the coordinate-space
 hypothesis is right.
 
-**2026-07-23 - reported working on GL after a clean device rebuild.** Symbol
-occlusion was observed working on the Android OpenGL flavour (sample app built
-locally from `platform/android`), which the "GL regressed" note above did not
-predict. Not yet reconciled: the on-device retest may have been against a build
-that postdates the suspected-bad change, or the regression may be
-intermittent/config-dependent. Needs a deliberate A/B on device (occlusion on
-vs off, GL flavour, `TerrainVectorMapActivity`) to confirm before this known
-issue is closed out.
+**2026-07-23 - RESOLVED on GL, confirmed on device.** Symbol occlusion works on
+the Android OpenGL flavour (`TerrainVectorMapActivity`, mapterhorn vector map):
+distant city labels fade out completely as the camera approaches a mountain
+that comes between them and the viewer, and no labels bleed through foreground
+ridges. The earlier "GL regressed" report did not reproduce on the current
+build - it was most likely against a build that predated one of the six Vulkan/
+GL occlusion fixes (the `projectedPoint` / `depth_enabled` changes in
+`aaa145c`). The GL and Vulkan occlusion paths are now both verified on device.
+This known issue is closed.
 
 ### Phase 3 - Seams and quality
 
@@ -498,16 +511,26 @@ issue is closed out.
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
 - Elevation for CPU-projected along-line labels in viewport alignment
   (gl-js applies it in the CPU symbol projection)
-- Elevation-aware tile cover is **done** (see Current Status / the tile-cover
-  component above), but only *visibility* is elevation-aware. Native's tile LOD
-  system (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) still drives
-  the *zoom* selection and is not elevation-aware.
-- Transitional artifacts while panning/zooming (observed in emulator testing):
-  brief flat/empty far-field areas while the DEM cover has no render tile yet,
-  and re-resolve flicker when the LOD migrates an area between zoom levels. The
-  content-hash render cache and elevation-aware cover reduce these; the remaining
-  case is the terrain mesh cover deriving from the DEM source's render set rather
-  than a dedicated ideal cover (see the tile-cover convergence item above).
+- The terrain mesh/drape cover is now a direct elevation-aware ideal cover
+  (`RenderTerrain::computeMeshCover`, see the tile-cover item above), but only
+  *visibility* is elevation-aware. Native's tile LOD system
+  (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) still drives the
+  *zoom* selection and is not elevation-aware.
+- **Transient frontier skirt at the near/bottom screen edge under steep pitch**
+  (reported on device 2026-07-23, mapterhorn vector map). At high pitch the
+  near-bottom terrain rises into view, but the elevation-aware cover cannot know
+  that until the DEM there is loaded (sparse DEM → chicken-and-egg), so the very
+  bottom is under-covered for a moment: the last meshed row's skirts hang into
+  the gap (and a sliver of background shows) until a slight pan loads the tile,
+  after which it resolves cleanly. `computeMeshCover` did not fix this (it is a
+  cover-*extent*/latency problem, not resolution). Fix direction: pad the
+  terrain cover by a tile-ring toward the near/bottom frustum edge (and/or
+  suppress skirts on the outermost frontier edge) so the frontier sits just
+  off-screen while tiles stream in.
+- Other transitional artifacts while panning/zooming: brief flat/empty far-field
+  areas before a tile loads, and re-resolve flicker when the LOD migrates an
+  area between zoom levels. The content-hash render cache and the ideal cover
+  reduce these.
 
 ### Phase 4 - Terrain-anchored camera (needs a complete fix)
 

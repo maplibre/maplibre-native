@@ -238,27 +238,13 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
 
     if (auto* terrain = orchestrator.getRenderTerrain()) {
-        RenderSource* demSource = orchestrator.getRenderSource(terrain->getSourceID());
-        auto renderTiles = demSource->getRawRenderTiles();
-
-        // Match RenderTerrain's mesh tile set: parent fallback tiles expanded
-        // to the ideal cover so each mesh tile has its own drape target
-        std::set<UnwrappedTileID> renderTileIDs;
-        for (const auto& renderTile : *renderTiles) {
-            renderTileIDs.insert(renderTile.id);
-        }
-        std::set<UnwrappedTileID> demTileIDs = RenderTerrain::expandToDeepestCover(renderTileIDs);
-        // RenderTerrain frustum-culls this same set before meshing (a sparse DEM's
-        // large low-zoom ancestors are mostly off-screen). Cull here too so we only
-        // allocate drape targets for mesh tiles that survive - otherwise the pool
-        // grows with off-screen targets as the camera browses/zooms, ballooning
-        // memory until it OOM-crashes.
-        {
-            DEMElevationProvider elevationProvider(demSource, terrain->getExaggeration());
-            const util::TileCoverParameters cullParams{.transformState = state,
-                                                       .elevationProvider = &elevationProvider};
-            demTileIDs = util::frustumCull(cullParams, demTileIDs);
-        }
+        // Drape targets must exist before RenderTerrain::update drapes into them,
+        // so build the same mesh cover it will use - the elevation-aware LOD ideal
+        // cover taken from the view (not the DEM's loaded tiles) - and allocate one
+        // drape target per tile. Same `state`/`updateParameters` as the update call,
+        // so the two sets match; stale targets (tiles that left the cover) are
+        // released so the pool tracks the view instead of growing unbounded.
+        const std::set<UnwrappedTileID> demTileIDs = terrain->computeMeshCover(state, updateParameters);
         for (const auto& id : demTileIDs) {
             texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
         }

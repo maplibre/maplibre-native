@@ -68,31 +68,47 @@ RenderTerrain::RenderTerrain(Immutable<style::Terrain::Impl> impl_)
 
 RenderTerrain::~RenderTerrain() = default;
 
-std::set<UnwrappedTileID> RenderTerrain::expandToDeepestCover(const std::set<UnwrappedTileID>& tileIDs) {
+std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
+    const TransformState& state, const std::shared_ptr<UpdateParameters>& updateParameters) const {
     std::set<UnwrappedTileID> out;
-    const std::function<void(const UnwrappedTileID&)> insert = [&](const UnwrappedTileID& id) {
-        bool hasDeeper = false;
-        for (const auto& other : tileIDs) {
-            if (other.isChildOf(id)) {
-                hasDeeper = true;
-                break;
-            }
-        }
-        if (!hasDeeper) {
-            out.insert(id);
-            return;
-        }
-        // A deeper tile overlaps this one: replace it by its children (the
-        // children that are themselves in the set are handled at top level)
-        for (const auto& childCanonical : id.canonical.children()) {
-            const UnwrappedTileID child(id.wrap, childCanonical);
-            if (!tileIDs.contains(child)) {
-                insert(child);
-            }
-        }
-    };
-    for (const auto& id : tileIDs) {
-        insert(id);
+    if (!demSource) {
+        return out;
+    }
+
+    // Elevation-aware visibility: terrain leaning towards the camera occupies
+    // screen space its flat footprint does not, so the cover is tested against the
+    // DEM height rather than the z=0 plane (as util::tileCover / gl-js do).
+    DEMElevationProvider elevationProvider(demSource, getExaggeration());
+
+    // maplibre-gl-js covers terrain with a fixed tileSize of 512 (its RTT tiles),
+    // independent of the DEM source's own tile size, and over-zooms the DEM for
+    // elevation. Mirror that: the cover zoom comes from the view, not from which
+    // DEM tiles happen to be loaded.
+    constexpr uint16_t terrainCoverTileSize = 512;
+    const Range<uint8_t> zoomRange{0, demSource->getMaxZoom()};
+
+    // LOD parameters from the frame drive the same near-high/far-low zoom
+    // selection every other source uses, so the near field drapes at a higher
+    // zoom (smaller ground area per 1024 target = sharper draped content).
+    util::TileCoverParameters coverParams{.transformState = state, .elevationProvider = &elevationProvider};
+    double zoomShift = 0.0;
+    if (updateParameters) {
+        coverParams.tileLodMinRadius = updateParameters->tileLodMinRadius;
+        coverParams.tileLodScale = updateParameters->tileLodScale;
+        coverParams.tileLodPitchThreshold = updateParameters->tileLodPitchThreshold;
+        coverParams.tileLodMode = updateParameters->tileLodMode;
+        zoomShift = updateParameters->tileLodZoomShift;
+    }
+
+    const double zoom = util::clamp<double>(state.getZoom() + zoomShift, state.getMinZoom(), state.getMaxZoom());
+    const int32_t overscaledZoom = util::coveringZoomLevel(zoom, style::SourceType::RasterDEM, terrainCoverTileSize);
+    if (overscaledZoom < static_cast<int32_t>(zoomRange.min)) {
+        return out;
+    }
+    const int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
+    for (const auto& id : util::tileCover(
+             coverParams, static_cast<uint8_t>(idealZoom), zoomRange, static_cast<uint8_t>(overscaledZoom))) {
+        out.insert(id.toUnwrapped());
     }
     return out;
 }
@@ -102,7 +118,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                            gfx::Context& context,
                            const TexturePool& texturePool,
                            const TransformState& state,
-                           const std::shared_ptr<UpdateParameters>& /*updateParameters*/,
+                           const std::shared_ptr<UpdateParameters>& updateParameters,
                            const RenderTree& /*renderTree*/,
                            UniqueChangeRequestVec& changes) {
     // Find the DEM source if we haven't already
@@ -176,27 +192,13 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
     }
 
-    // The mesh tile set: parent fallback render tiles expanded to the ideal
-    // cover so terrain meshes never overlap (a parent mesh would draw its
-    // lower-resolution drape over the sharp meshes of its loaded children);
-    // synthetic tiles sample ancestor DEM/drape textures instead.
-    std::set<UnwrappedTileID> renderTileIDs;
-    for (const auto& renderTile : *renderTiles) {
-        renderTileIDs.insert(renderTile.id);
-    }
-    std::set<UnwrappedTileID> meshTiles = expandToDeepestCover(renderTileIDs);
-
-    // Drop mesh tiles that fall outside the view. A sparse DEM contributes large
-    // low-zoom ancestor tiles; expandToDeepestCover subdivides each across its whole
-    // area, but most of a low-zoom tile is off-screen, and meshing it there creates
-    // drape targets that no on-screen source covers - they render empty (near-black
-    // hillshade with no raster). Culling to the frustum, elevation included, leaves
-    // only the mesh that is actually visible.
-    {
-        DEMElevationProvider elevationProvider(demSource, getExaggeration());
-        const util::TileCoverParameters cullParams{.transformState = state, .elevationProvider = &elevationProvider};
-        meshTiles = util::frustumCull(cullParams, meshTiles);
-    }
+    // The mesh (and drape) tile set: an elevation-aware, LOD-based ideal cover
+    // taken straight from the view, not from the DEM source's loaded tiles - so a
+    // sparse DEM's low-zoom fallback tiles don't drag the drape resolution down
+    // (blurry roads) or leave uncovered areas as skirt. DEM/drape textures fall
+    // back to ancestors per tile below while exact tiles load. tileCover already
+    // limits to the frustum (elevation included), so no extra cull is needed.
+    std::set<UnwrappedTileID> meshTiles = computeMeshCover(state, updateParameters);
 
     // Drop drawables and cached DEM textures for tiles that left the mesh tile
     // set, keeping everything else intact between frames
