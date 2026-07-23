@@ -81,11 +81,7 @@ mod ffi {
             feature_index: usize,
             name: &str,
         ) -> MltValue;
-        fn property_values(
-            &self,
-            layer_index: usize,
-            feature_index: usize,
-        ) -> &[MltValue];
+        fn property_values(&self, layer_index: usize, feature_index: usize) -> &[MltValue];
         fn property_string_value(
             &self,
             layer_index: usize,
@@ -178,7 +174,10 @@ pub fn decode_mlt_tile(data: &[u8]) -> Result<Box<MltTile>, String> {
     let mut decoder = Decoder::default();
     let mut result = Vec::with_capacity(layers.len());
     for layer in layers {
-        match layer.decode_all(&mut decoder).map_err(|err| err.to_string())? {
+        match layer
+            .decode_all(&mut decoder)
+            .map_err(|err| err.to_string())?
+        {
             Layer::Tag01(layer) => {
                 let triangles = feature_triangles(layer.geometry_values());
                 result.push(convert_layer(&layer, triangles)?);
@@ -230,7 +229,8 @@ fn parse_layers(data: &[u8]) -> Result<Vec<Layer<'_>>, String> {
 
 fn feature_triangles(geometry: &mlt_core::GeometryValues) -> Vec<Vec<u32>> {
     let mut result = vec![Vec::new(); geometry.feature_count()];
-    let (Some(triangle_counts), Some(index_buffer)) = (geometry.triangles(), geometry.index_buffer())
+    let (Some(triangle_counts), Some(index_buffer)) =
+        (geometry.triangles(), geometry.index_buffer())
     else {
         return result;
     };
@@ -431,9 +431,19 @@ fn append_geometry_parts(
                 let Some(ring_index) = offset(parts, part_index) else {
                     return;
                 };
-                push_vertex_range(vertices, offset_range(rings, ring_index), false, coordinates);
+                push_vertex_range(
+                    vertices,
+                    offset_range(rings, ring_index),
+                    false,
+                    coordinates,
+                );
             } else {
-                push_vertex_range(vertices, offset_range(parts, part_index), false, coordinates);
+                push_vertex_range(
+                    vertices,
+                    offset_range(parts, part_index),
+                    false,
+                    coordinates,
+                );
             }
             push_part_offset(coordinates, part_offsets);
         }
@@ -446,10 +456,19 @@ fn append_geometry_parts(
             }) else {
                 return;
             };
-            append_polygon_parts(vertices, parts, rings, part_index, coordinates, part_offsets);
+            append_polygon_parts(
+                vertices,
+                parts,
+                rings,
+                part_index,
+                coordinates,
+                part_offsets,
+            );
         }
         GeometryType::MultiPoint => {
-            let Some(geometry_range) = geometry_offsets.and_then(|offsets| offset_range(offsets, feature_index)) else {
+            let Some(geometry_range) =
+                geometry_offsets.and_then(|offsets| offset_range(offsets, feature_index))
+            else {
                 return;
             };
             for index in geometry_range {
@@ -487,7 +506,12 @@ fn append_geometry_parts(
                     let Some(ring_index) = offset(parts, index) else {
                         continue;
                     };
-                    push_vertex_range(vertices, offset_range(rings, ring_index), false, coordinates);
+                    push_vertex_range(
+                        vertices,
+                        offset_range(rings, ring_index),
+                        false,
+                        coordinates,
+                    );
                 } else {
                     push_vertex_range(vertices, offset_range(parts, index), false, coordinates);
                 }
@@ -504,7 +528,14 @@ fn append_geometry_parts(
                 return;
             };
             for part_index in geometry_range {
-                append_polygon_parts(vertices, parts, rings, part_index, coordinates, part_offsets);
+                append_polygon_parts(
+                    vertices,
+                    parts,
+                    rings,
+                    part_index,
+                    coordinates,
+                    part_offsets,
+                );
             }
         }
     }
@@ -538,11 +569,7 @@ fn vertex(vertices: &[i32], index: usize) -> Option<ffi::MltCoordinate> {
     })
 }
 
-fn push_vertex(
-    vertices: &[i32],
-    index: usize,
-    coordinates: &mut Vec<ffi::MltCoordinate>,
-) {
+fn push_vertex(vertices: &[i32], index: usize, coordinates: &mut Vec<ffi::MltCoordinate>) {
     if let Some(coordinate) = vertex(vertices, index) {
         coordinates.push(coordinate);
     }
@@ -697,7 +724,10 @@ impl MltTile {
     }
 
     fn feature_id(&self, layer_index: usize, feature_index: usize) -> ffi::MltFeatureId {
-        match self.feature(layer_index, feature_index).and_then(|feature| feature.id) {
+        match self
+            .feature(layer_index, feature_index)
+            .and_then(|feature| feature.id)
+        {
             Some(value) => ffi::MltFeatureId {
                 has_id: true,
                 value,
@@ -711,7 +741,9 @@ impl MltTile {
 
     fn feature_type(&self, layer_index: usize, feature_index: usize) -> ffi::MltGeometryType {
         self.feature(layer_index, feature_index)
-            .map_or(ffi::MltGeometryType::Unknown, |feature| feature.geometry_type)
+            .map_or(ffi::MltGeometryType::Unknown, |feature| {
+                feature.geometry_type
+            })
     }
 
     fn property_count(&self, layer_index: usize) -> usize {
@@ -721,7 +753,12 @@ impl MltTile {
 
     fn property_index_by_name(&self, layer_index: usize, name: &str) -> i64 {
         self.layer(layer_index)
-            .and_then(|layer| layer.property_names.iter().position(|property| property == name))
+            .and_then(|layer| {
+                layer
+                    .property_names
+                    .iter()
+                    .position(|property| property == name)
+            })
             .map_or(-1, |index| index as i64)
     }
 
