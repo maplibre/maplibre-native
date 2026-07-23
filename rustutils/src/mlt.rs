@@ -685,12 +685,12 @@ impl MltTile {
         self.layer(layer_index)?.features.get(feature_index)
     }
 
-    fn property<'a>(
-        &'a self,
+    fn property(
+        &self,
         layer_index: usize,
         feature_index: usize,
         property_index: usize,
-    ) -> Option<&'a MltPropertyValue> {
+    ) -> Option<&MltPropertyValue> {
         let layer = self.layer(layer_index)?;
         let offset = feature_index
             .checked_mul(layer.property_names.len())?
