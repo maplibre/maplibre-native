@@ -260,7 +260,8 @@ public:
         }
         if (tile) {
             std::vector<std::string> result(tile->getLayers().size());
-            std::ranges::transform(tile->getLayers(), result.begin(), [](const auto& layer) { return layer.getName(); });
+            std::ranges::transform(
+                tile->getLayers(), result.begin(), [](const auto& layer) { return layer.getName(); });
             return result;
         }
         return {};
