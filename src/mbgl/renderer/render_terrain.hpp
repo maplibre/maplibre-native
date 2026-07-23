@@ -273,6 +273,11 @@ private:
     // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
     // an ancestor tile's DEM is bound); read by the terrain layer tweaker
     std::map<OverscaledTileID, std::array<float, 4>> drawableDemCoords;
+#if MLN_RENDER_BACKEND_OPENGL
+    // Per-tile demTextureArray layer (own or ancestor DEM), -1 when the tile has no packed DEM;
+    // feeds the instanced depth pass (see rebuildInstancedDepthDrawable / depthInstances).
+    std::map<OverscaledTileID, float> drawableDemLayer;
+#endif
 
     // Mesh resolution (vertices per side)
     static constexpr size_t MESH_SIZE = 128;
