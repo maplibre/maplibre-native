@@ -118,7 +118,13 @@ include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 if(MLN_WEBGPU_IMPL_DAWN)
     include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
     if(TARGET mbgl-vendor-dawn)
-        target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
+        if(MLN_WEBGPU_EMDAWN)
+            # Emdawn is a compiler/linker port rather than a conventional
+            # library. Consumers must inherit its final-link options.
+            target_link_libraries(mbgl-core PUBLIC mbgl-vendor-dawn)
+        else()
+            target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
+        endif()
     endif()
 elseif(MLN_WEBGPU_IMPL_WGPU OR MLN_WEBGPU_IMPL_FFI)
     # Include wgpu-native integration

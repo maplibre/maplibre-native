@@ -1211,7 +1211,7 @@ endif()
 # The Xcode generator with Dawn component targets (no monolithic library) breaks export()
 # because dawn_native/dawn_proc aren't in an export set. Skip export in that case.
 set(_can_export TRUE)
-if(TARGET mbgl-vendor-dawn AND NOT TARGET dawn::webgpu_dawn)
+if(TARGET mbgl-vendor-dawn AND NOT TARGET dawn::webgpu_dawn AND NOT MLN_WEBGPU_EMDAWN)
     set(_can_export FALSE)
 endif()
 if(_can_export)

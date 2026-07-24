@@ -9,15 +9,33 @@ if(NOT MLN_WITH_WEBGPU)
 endif()
 
 if(MLN_WEBGPU_EMDAWN)
-    message(STATUS "Configuring emdawnwebgpu (host supplies --use-port=emdawnwebgpu)")
+    set(MLN_WEBGPU_EMDAWN_PORT "emdawnwebgpu"
+        CACHE STRING "Emscripten port name or path used for emdawnwebgpu")
+
+    message(STATUS "Configuring emdawnwebgpu port: ${MLN_WEBGPU_EMDAWN_PORT}")
     add_library(mbgl-vendor-dawn INTERFACE)
+
+    # The port provides the WebGPU headers during compilation and its C++/JS
+    # implementation during linking. Asyncify lets synchronous APIs such as
+    # readStillImage() wait for browser WebGPU promises to resolve.
+    target_compile_options(
+        mbgl-vendor-dawn
+        INTERFACE "--use-port=${MLN_WEBGPU_EMDAWN_PORT}"
+    )
+    target_link_options(
+        mbgl-vendor-dawn
+        INTERFACE
+            "--use-port=${MLN_WEBGPU_EMDAWN_PORT}"
+            "-sASYNCIFY=1"
+    )
+
     set_target_properties(
         mbgl-vendor-dawn
         PROPERTIES
             INTERFACE_MAPLIBRE_NAME "emdawnwebgpu"
             INTERFACE_MAPLIBRE_URL "https://dawn.googlesource.com/dawn"
             INTERFACE_MAPLIBRE_AUTHOR "Chromium Dawn Team"
-            INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/vendor/dawn/LICENSE"
+            INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/vendor/emdawnwebgpu.LICENSE"
     )
     return()
 endif()
