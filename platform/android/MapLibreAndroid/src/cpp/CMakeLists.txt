@@ -177,6 +177,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/position.hpp
             ${PROJECT_SOURCE_DIR}/style/sources/custom_geometry_source.cpp
             ${PROJECT_SOURCE_DIR}/style/sources/custom_geometry_source.hpp
+            ${PROJECT_SOURCE_DIR}/style/sources/custom_vector_source.cpp
+            ${PROJECT_SOURCE_DIR}/style/sources/custom_vector_source.hpp
             ${PROJECT_SOURCE_DIR}/style/sources/geojson_source.cpp
             ${PROJECT_SOURCE_DIR}/style/sources/geojson_source.hpp
             ${PROJECT_SOURCE_DIR}/style/sources/image_source.cpp
