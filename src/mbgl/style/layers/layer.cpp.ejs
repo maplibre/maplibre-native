@@ -163,18 +163,18 @@ void <%- camelize(type) %>Layer::Impl::stringifyLayout(rapidjson::Writer<rapidjs
 // Layout properties
 
 <% for (const property of layoutProperties) { -%>
-<%- propertyValueType(property) %> <%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>() {
-    return <%- camelize(property.name) %>::defaultValue();
+<%- propertyValueType(property) %> <%- camelize(type) %>Layer::getDefault<%- propertyClassName(property, type) %>() {
+    return <%- propertyClassName(property, type) %>::defaultValue();
 }
 
-const <%- propertyValueType(property) %>& <%- camelize(type) %>Layer::get<%- camelize(property.name) %>() const {
-    return impl().layout.get<<%- camelize(property.name) %>>();
+const <%- propertyValueType(property) %>& <%- camelize(type) %>Layer::get<%- propertyClassName(property, type) %>() const {
+    return impl().layout.get<<%- propertyClassName(property, type) %>>();
 }
 
-void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>(const <%- propertyValueType(property) %>& value) {
-    if (value == get<%- camelize(property.name) %>()) return;
+void <%- camelize(type) %>Layer::set<%- propertyClassName(property, type) %>(const <%- propertyValueType(property) %>& value) {
+    if (value == get<%- propertyClassName(property, type) %>()) return;
     auto impl_ = mutableImpl();
-    impl_->layout.get<<%- camelize(property.name) %>>() = value;
+    impl_->layout.get<<%- propertyClassName(property, type) %>>() = value;
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
@@ -182,7 +182,7 @@ void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>(const <%- pro
 
 // Paint properties
 <% for (const property of paintProperties) { %>
-<%- propertyValueType(property) %> <%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>() {
+<%- propertyValueType(property) %> <%- camelize(type) %>Layer::getDefault<%- propertyClassName(property, type) %>() {
 <% if (property.name === 'heatmap-color') { -%>
     conversion::Error error;
     std::string rawValue = R"JSON(<%- JSON.stringify(property.default) %>)JSON";
@@ -192,15 +192,15 @@ void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>(const <%- pro
 <% } -%>
 }
 
-const <%- propertyValueType(property) %>& <%- camelize(type) %>Layer::get<%- camelize(property.name) %>() const {
-    return impl().paint.template get<<%- camelize(property.name) %>>().value;
+const <%- propertyValueType(property) %>& <%- camelize(type) %>Layer::get<%- propertyClassName(property, type) %>() const {
+    return impl().paint.template get<<%- propertyClassName(property, type) %>>().value;
 }
 
-void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>(const <%- propertyValueType(property) %>& value) {
-    if (value == get<%- camelize(property.name) %>())
+void <%- camelize(type) %>Layer::set<%- propertyClassName(property, type) %>(const <%- propertyValueType(property) %>& value) {
+    if (value == get<%- propertyClassName(property, type) %>())
         return;
     auto impl_ = mutableImpl();
-    impl_->paint.template get<<%- camelize(property.name) %>>().value = value;
+    impl_->paint.template get<<%- propertyClassName(property, type) %>>().value = value;
 <% if (property.name === 'line-width') { -%>
     impl_->paint.template get<LineFloorWidth>().value = value;
 <% } -%>
@@ -208,14 +208,14 @@ void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>(const <%- pro
     observer->onLayerChanged(*this);
 }
 
-void <%- camelize(type) %>Layer::set<%- camelize(property.name) %>Transition(const TransitionOptions& options) {
+void <%- camelize(type) %>Layer::set<%- propertyClassName(property, type) %>Transition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
-    impl_->paint.template get<<%- camelize(property.name) %>>().options = options;
+    impl_->paint.template get<<%- propertyClassName(property, type) %>>().options = options;
     baseImpl = std::move(impl_);
 }
 
-TransitionOptions <%- camelize(type) %>Layer::get<%- camelize(property.name) %>Transition() const {
-    return impl().paint.template get<<%- camelize(property.name) %>>().options;
+TransitionOptions <%- camelize(type) %>Layer::get<%- propertyClassName(property, type) %>Transition() const {
+    return impl().paint.template get<<%- propertyClassName(property, type) %>>().options;
 }
 <% } -%>
 
@@ -227,10 +227,10 @@ constexpr uint8_t kPaintPropertyCount = <%- paintProperties.length * 2 -%>u;
 
 enum class Property : uint8_t {
 <% for (const property of paintProperties) { -%>
-    <%- camelize(property.name) %>,
+    <%- propertyClassName(property, type) %>,
 <% } -%>
 <% for (const property of paintProperties) { -%>
-    <%- camelize(property.name) %>Transition,
+    <%- propertyClassName(property, type) %>Transition,
 <% } -%>
 <% for (let i = 0; i < layoutProperties.length; ++i) { -%>
 <% if (i===0) { -%>
@@ -247,27 +247,27 @@ constexpr uint8_t toUint8(T t) noexcept {
 }
 
 constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
-    {<%- paintProperties.map(p => `{"${p.name}", toUint8(Property::${camelize(p.name)})}`).join(',\n     ') %>,
+    {<%- paintProperties.map(p => `{"${p.name}", toUint8(Property::${propertyClassName(p, type)})}`).join(',\n     ') %>,
 <% if (!layoutProperties.length) { -%>
-     <%- paintProperties.map(p => `{"${p.name}-transition", toUint8(Property::${camelize(p.name)}Transition)}`).join(',\n     ') %>});
+     <%- paintProperties.map(p => `{"${p.name}-transition", toUint8(Property::${propertyClassName(p, type)}Transition)}`).join(',\n     ') %>});
 <% } else { -%>
-     <%- paintProperties.map(p => `{"${p.name}-transition", toUint8(Property::${camelize(p.name)}Transition)}`).join(',\n     ') %>,
+     <%- paintProperties.map(p => `{"${p.name}-transition", toUint8(Property::${propertyClassName(p, type)}Transition)}`).join(',\n     ') %>,
      <%- layoutProperties.map(p => `{"${p.name}", toUint8(Property::${camelize(p.name)})}`).join(',\n     ') %>});
 <% } -%>
 
 StyleProperty getLayerProperty(const <%- camelize(type) %>Layer& layer, Property property) {
     switch (property) {
 <% for (const property of paintProperties) { -%>
-        case Property::<%- camelize(property.name) %>:
-            return makeStyleProperty(layer.get<%- camelize(property.name) %>());
+        case Property::<%- propertyClassName(property, type) %>:
+            return makeStyleProperty(layer.get<%- propertyClassName(property, type) %>());
 <% } -%>
 <% for (const property of paintProperties) { -%>
-        case Property::<%- camelize(property.name) %>Transition:
-            return makeStyleProperty(layer.get<%- camelize(property.name) %>Transition());
+        case Property::<%- propertyClassName(property, type) %>Transition:
+            return makeStyleProperty(layer.get<%- propertyClassName(property, type) %>Transition());
 <% } -%>
 <% for (const property of layoutProperties) { -%>
-        case Property::<%- camelize(property.name) %>:
-            return makeStyleProperty(layer.get<%- camelize(property.name) %>());
+        case Property::<%- propertyClassName(property, type) %>:
+            return makeStyleProperty(layer.get<%- propertyClassName(property, type) %>());
 <% } -%>
     }
     return {};
@@ -321,18 +321,18 @@ std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::
 <% for (const key in conversions) {
     const properties = conversions[key];
 -%>
-    if (<%- properties.map(p => `property == Property::${camelize(p.name)}`).reduce(reduceConditions) %>) {
+    if (<%- properties.map(p => `property == Property::${propertyClassName(p, type)}`).reduce(reduceConditions) %>) {
         Error error;
         <%- split120Line(key) %>;
         if (!typedValue) {
             return error;
         }
 <% if (properties.length == 1) { %>
-        set<%- camelize(properties[0].name) %>(*typedValue);
+        set<%- propertyClassName(properties[0], type) %>(*typedValue);
         return std::nullopt;
 <% } else for (const property of properties) { %>
-        if (property == Property::<%- camelize(property.name) %>) {
-            set<%- camelize(property.name) %>(*typedValue);
+        if (property == Property::<%- propertyClassName(property, type) %>) {
+            set<%- propertyClassName(property, type) %>(*typedValue);
             return std::nullopt;
         }
 <% } -%>
@@ -344,8 +344,8 @@ std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::
         return error;
     }
 <% for (const property of paintProperties) { %>
-    if (property == Property::<%- camelize(property.name) %>Transition) {
-        set<%- camelize(property.name) %>Transition(*transition);
+    if (property == Property::<%- propertyClassName(property, type) %>Transition) {
+        set<%- propertyClassName(property, type) %>Transition(*transition);
         return std::nullopt;
     }
 <% } %>

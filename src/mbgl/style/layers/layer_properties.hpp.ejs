@@ -22,7 +22,7 @@ namespace mbgl {
 namespace style {
 
 <% for (const property of layoutProperties) { -%>
-struct <%- camelize(property.name) %> : <%- layoutPropertyType(property, type) %> {
+struct <%- propertyClassName(property, type) %> : <%- layoutPropertyType(property, type) %> {
     static constexpr const char *name() { return "<%- property.name %>"; }
     static <%- evaluatedType(property) %> defaultValue() { return <%- defaultValue(property) %>; }
 };
@@ -30,10 +30,10 @@ struct <%- camelize(property.name) %> : <%- layoutPropertyType(property, type) %
 <% } -%>
 <% for (const property of paintProperties) { -%>
 <%   if (property['property-type'] === 'color-ramp') { -%>
-struct <%- camelize(property.name) %> : ColorRampProperty {
+struct <%- propertyClassName(property, type) %> : ColorRampProperty {
 };
 <%   } else { -%>
-struct <%- camelize(property.name) %> : <%- paintPropertyType(property, type) %> {
+struct <%- propertyClassName(property, type) %> : <%- paintPropertyType(property, type) %> {
     static <%- evaluatedType(property) %> defaultValue() { return <%- defaultValue(property) %>; }
 <% if (property.name === 'line-floor-width') { -%>
     using EvaluatorType = DataDrivenPropertyEvaluator<float, true>;
@@ -50,17 +50,17 @@ struct <%- camelize(property.name) %> : <%- paintPropertyType(property, type) %>
 <% if (layoutProperties.length) { -%>
 class <%- camelize(type) %>LayoutProperties : public Properties<
 <% for (const property of layoutProperties.slice(0, -1)) { -%>
-    <%- camelize(property.name) %>,
+    <%- propertyClassName(property, type) %>,
 <% } -%>
-    <%- camelize(layoutProperties.slice(-1)[0].name) %>
+    <%- propertyClassName(layoutProperties.slice(-1)[0], type) %>
 > {};
 
 <% } -%>
 class <%- camelize(type) %>PaintProperties : public Properties<
 <% for (const property of paintProperties.slice(0, -1)) { -%>
-    <%- camelize(property.name) %>,
+    <%- propertyClassName(property, type) %>,
 <% } -%>
-    <%- camelize(paintProperties.slice(-1)[0].name) %>
+    <%- propertyClassName(paintProperties.slice(-1)[0], type) %>
 > {};
 
 class <%- camelize(type) %>LayerProperties final : public LayerProperties {

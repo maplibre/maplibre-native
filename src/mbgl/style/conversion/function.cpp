@@ -142,6 +142,8 @@ template std::optional<PropertyExpression<Position>> convertFunctionToExpression
                                                                                            bool);
 template std::optional<PropertyExpression<RasterResamplingType>> convertFunctionToExpression<RasterResamplingType>(
     const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<ResamplingType>> convertFunctionToExpression<ResamplingType>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<std::array<float, 2>>> convertFunctionToExpression<std::array<float, 2>>(
     const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<std::array<float, 4>>> convertFunctionToExpression<std::array<float, 4>>(

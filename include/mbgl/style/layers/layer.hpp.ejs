@@ -46,20 +46,20 @@ public:
     // Layout properties
 
 <% for (const property of layoutProperties) { -%>
-    static <%- propertyValueType(property) %> getDefault<%- camelize(property.name) %>();
-    const <%- propertyValueType(property) %>& get<%- camelize(property.name) %>() const;
-    void set<%- camelize(property.name) %>(const <%- propertyValueType(property) %>&);
+    static <%- propertyValueType(property) %> getDefault<%- propertyClassName(property, type) %>();
+    const <%- propertyValueType(property) %>& get<%- propertyClassName(property, type) %>() const;
+    void set<%- propertyClassName(property, type) %>(const <%- propertyValueType(property) %>&);
 
 <% } -%>
 <% } -%>
     // Paint properties
 
 <% for (const property of paintProperties) { -%>
-    static <%- propertyValueType(property) %> getDefault<%- camelize(property.name) %>();
-    const <%- propertyValueType(property) %>& get<%- camelize(property.name) %>() const;
-    void set<%- camelize(property.name) %>(const <%- propertyValueType(property) %>&);
-    void set<%- camelize(property.name) %>Transition(const TransitionOptions&);
-    TransitionOptions get<%- camelize(property.name) %>Transition() const;
+    static <%- propertyValueType(property) %> getDefault<%- propertyClassName(property, type) %>();
+    const <%- propertyValueType(property) %>& get<%- propertyClassName(property, type) %>() const;
+    void set<%- propertyClassName(property, type) %>(const <%- propertyValueType(property) %>&);
+    void set<%- propertyClassName(property, type) %>Transition(const TransitionOptions&);
+    TransitionOptions get<%- propertyClassName(property, type) %>Transition() const;
 
 <% } -%>
     // Private implementation

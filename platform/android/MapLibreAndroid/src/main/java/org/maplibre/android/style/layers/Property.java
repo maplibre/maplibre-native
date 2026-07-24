@@ -606,7 +606,7 @@ public final class Property {
   @Retention(RetentionPolicy.SOURCE)
   public @interface FILL_EXTRUSION_TRANSLATE_ANCHOR {}
 
-  // RASTER_RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+  // RASTER_RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter. Advised to use the generic esampling paint property instead.
 
   /**
    * (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled
@@ -618,7 +618,7 @@ public final class Property {
   public static final String RASTER_RESAMPLING_NEAREST = "nearest";
 
   /**
-   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter. Advised to use the generic esampling paint property instead.
    */
   @StringDef({
       RASTER_RESAMPLING_LINEAR,
@@ -626,6 +626,27 @@ public final class Property {
     })
   @Retention(RetentionPolicy.SOURCE)
   public @interface RASTER_RESAMPLING {}
+
+  // RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+
+  /**
+   * (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled
+   */
+  public static final String RESAMPLING_LINEAR = "linear";
+  /**
+   * Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled
+   */
+  public static final String RESAMPLING_NEAREST = "nearest";
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   */
+  @StringDef({
+      RESAMPLING_LINEAR,
+      RESAMPLING_NEAREST,
+    })
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface RESAMPLING {}
 
   // HILLSHADE_ILLUMINATION_ANCHOR: Direction of light source when map is rotated.
 
@@ -683,6 +704,48 @@ public final class Property {
     })
   @Retention(RetentionPolicy.SOURCE)
   public @interface HILLSHADE_METHOD {}
+
+  // RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+
+  /**
+   * (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled
+   */
+  public static final String RESAMPLING_LINEAR = "linear";
+  /**
+   * Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled
+   */
+  public static final String RESAMPLING_NEAREST = "nearest";
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   */
+  @StringDef({
+      RESAMPLING_LINEAR,
+      RESAMPLING_NEAREST,
+    })
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface RESAMPLING {}
+
+  // RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+
+  /**
+   * (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled
+   */
+  public static final String RESAMPLING_LINEAR = "linear";
+  /**
+   * Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled
+   */
+  public static final String RESAMPLING_NEAREST = "nearest";
+
+  /**
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   */
+  @StringDef({
+      RESAMPLING_LINEAR,
+      RESAMPLING_NEAREST,
+    })
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface RESAMPLING {}
 
   // ANCHOR: Whether extruded geometries are lit relative to the map or viewport.
 

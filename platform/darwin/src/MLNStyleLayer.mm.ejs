@@ -134,13 +134,13 @@ namespace mbgl {
         std::string string = ((NSString *)<%- objCName(property) %>.constantValue).UTF8String;
         if (mbgl::style::conversion::hasTokens(string)) {
 <% if (property.type === 'formatted') { -%>
-            self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbgl::style::PropertyValue<mbgl::style::expression::Formatted>(
+            self.rawLayer->set<%- propertyClassName(property, type) %>(mbgl::style::PropertyValue<mbgl::style::expression::Formatted>(
                 mbgl::style::conversion::convertTokenStringToFormatExpression(string)));
 <% } else if (property.type === 'resolvedImage') { -%>
-            self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbgl::style::PropertyValue<mbgl::style::expression::Image>(
+            self.rawLayer->set<%- propertyClassName(property, type) %>(mbgl::style::PropertyValue<mbgl::style::expression::Image>(
                 mbgl::style::conversion::convertTokenStringToImageExpression(string)));
 <% } else { -%>
-            self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbgl::style::PropertyValue<std::string>(
+            self.rawLayer->set<%- propertyClassName(property, type) %>(mbgl::style::PropertyValue<std::string>(
                 mbgl::style::conversion::convertTokenStringToExpression(string)));
 <% } -%>
             return;
@@ -152,15 +152,15 @@ namespace mbgl {
 <% } else { -%>
     auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, false);
 <% } -%>
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+    self.rawLayer->set<%- propertyClassName(property, type) %>(mbglValue);
 }
 
 - (NSExpression *)<%- objCGetter(property) %> {
     MLNAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>();
+    auto propertyValue = self.rawLayer->get<%- propertyClassName(property, type) %>();
     if (propertyValue.isUndefined()) {
-        propertyValue = self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>();
+        propertyValue = self.rawLayer->getDefault<%- propertyClassName(property, type) %>();
     }
     return MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(propertyValue);
 }
@@ -195,15 +195,15 @@ namespace mbgl {
     default: -%>
     auto mbglValue = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(<%- objCName(property) %>, false);
 <% } -%>
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>(mbglValue);
+    self.rawLayer->set<%- propertyClassName(property, type) %>(mbglValue);
 }
 
 - (NSExpression *)<%- objCGetter(property) %> {
     MLNAssertStyleLayerIsValid();
 
-    auto propertyValue = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>();
+    auto propertyValue = self.rawLayer->get<%- propertyClassName(property, type) %>();
     if (propertyValue.isUndefined()) {
-        propertyValue = self.rawLayer->getDefault<%- camelize(originalPropertyName(property)) %>();
+        propertyValue = self.rawLayer->getDefault<%- propertyClassName(property, type) %>();
     }
     return MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toExpression(propertyValue);
 }
@@ -213,13 +213,13 @@ namespace mbgl {
     MLNAssertStyleLayerIsValid();
     MLNLogDebug(@"Setting <%- objCName(property) %>Transition: %@", MLNStringFromMLNTransition(transition));
 
-    self.rawLayer->set<%- camelize(originalPropertyName(property)) %>Transition(MLNOptionsFromTransition(transition));
+    self.rawLayer->set<%- propertyClassName(property, type) %>Transition(MLNOptionsFromTransition(transition));
 }
 
 - (MLNTransition)<%- objCGetter(property) %>Transition {
     MLNAssertStyleLayerIsValid();
 
-    mbgl::style::TransitionOptions transitionOptions = self.rawLayer->get<%- camelize(originalPropertyName(property)) %>Transition();
+    mbgl::style::TransitionOptions transitionOptions = self.rawLayer->get<%- propertyClassName(property, type) %>Transition();
 
     return MLNTransitionFromOptions(transitionOptions);
 }
