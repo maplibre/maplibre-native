@@ -3,7 +3,6 @@ package org.maplibre.android.testapp.activity.style
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.constants.MapLibreConstants
@@ -11,7 +10,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.maps.TerrainLoadMode
 import org.maplibre.android.style.layers.HillshadeLayer
 import org.maplibre.android.style.layers.PropertyFactory.hillshadeExaggeration
 import org.maplibre.android.style.layers.PropertyFactory.hillshadeMethod
@@ -33,8 +31,8 @@ import org.maplibre.android.testapp.styles.TestStyles
 class TerrainVectorMapActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
-    private var style: Style? = null
-    private var terrainEnabled = true
+    // OpenFreeMap serves Noto glyphs, so the stats HUD text uses Noto Sans Regular.
+    private val options = TerrainTestOptions(this, SOURCE_ID_TERRAIN, 1.0f, "Noto Sans Regular")
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,44 +50,16 @@ class TerrainVectorMapActivity : AppCompatActivity() {
                 .bearing(20.0)
                 .build()
             map.setStyle(Style.Builder().fromUri(TestStyles.OPENFREEMAP_LIBERTY)) { style ->
-                this.style = style
                 addTerrain(style)
+                options.onMapReady(map, style)
             }
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(0, MENU_TOGGLE_TERRAIN, 0, "Toggle terrain")
-        val sub = menu.addSubMenu("Terrain load mode")
-        sub.add(0, MENU_MODE_QUALITY, 0, "Quality (default)")
-        sub.add(0, MENU_MODE_BALANCED, 0, "Balanced")
-        sub.add(0, MENU_MODE_PERFORMANCE, 0, "Performance")
-        return true
-    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean = options.onCreateOptionsMenu(menu)
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            MENU_TOGGLE_TERRAIN -> {
-                terrainEnabled = !terrainEnabled
-                style?.setTerrain(
-                    if (terrainEnabled) Terrain(source = SOURCE_ID_TERRAIN, exaggeration = 1.0f) else null
-                )
-                toast("Terrain ${if (terrainEnabled) "on" else "off"}")
-            }
-            MENU_MODE_QUALITY -> setLoadMode(TerrainLoadMode.QUALITY, "Quality")
-            MENU_MODE_BALANCED -> setLoadMode(TerrainLoadMode.BALANCED, "Balanced")
-            MENU_MODE_PERFORMANCE -> setLoadMode(TerrainLoadMode.PERFORMANCE, "Performance")
-            else -> return super.onOptionsItemSelected(item)
-        }
-        return true
-    }
-
-    private fun setLoadMode(mode: TerrainLoadMode, name: String) {
-        maplibreMap.setTerrainLoadMode(mode)
-        toast("Terrain load mode: $name")
-    }
-
-    private fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        options.onOptionsItemSelected(item) || super.onOptionsItemSelected(item)
 
     private fun addTerrain(style: Style) {
         // The Mapterhorn TileJSON declares "encoding": "terrarium", which the
@@ -114,10 +84,6 @@ class TerrainVectorMapActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val MENU_TOGGLE_TERRAIN = 1
-        private const val MENU_MODE_QUALITY = 2
-        private const val MENU_MODE_BALANCED = 3
-        private const val MENU_MODE_PERFORMANCE = 4
         private const val DEM_TILEJSON = "https://tiles.mapterhorn.com/tilejson.json"
         private const val SOURCE_ID_HILLSHADE = "mapterhorn"
         private const val SOURCE_ID_TERRAIN = "mapterhorn-terrain"
@@ -156,6 +122,7 @@ class TerrainVectorMapActivity : AppCompatActivity() {
 
     public override fun onDestroy() {
         super.onDestroy()
+        options.onDestroy()
         mapView.onDestroy()
     }
 }

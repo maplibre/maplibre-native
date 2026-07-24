@@ -1,6 +1,8 @@
 package org.maplibre.android.testapp.activity.style
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.constants.MapLibreConstants
@@ -19,6 +21,8 @@ import org.maplibre.android.testapp.R
 class TerrainOsmRasterActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
+    // The style carries a demotiles glyphs endpoint (added below), which serves Noto Sans.
+    private val options = TerrainTestOptions(this, "terrain_source", 1.0f, "Noto Sans Regular")
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,14 +39,22 @@ class TerrainOsmRasterActivity : AppCompatActivity() {
                 .zoom(12.0)
                 .tilt(52.0)
                 .build()
-            map.setStyle(Style.Builder().fromJson(STYLE_JSON))
+            map.setStyle(Style.Builder().fromJson(STYLE_JSON)) { style ->
+                options.onMapReady(map, style)
+            }
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean = options.onCreateOptionsMenu(menu)
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        options.onOptionsItemSelected(item) || super.onOptionsItemSelected(item)
 
     companion object {
         private val STYLE_JSON = """
             {
               "version": 8,
+              "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
               "sources": {
                 "osm": {
                   "type": "raster",
@@ -114,6 +126,7 @@ class TerrainOsmRasterActivity : AppCompatActivity() {
 
     public override fun onDestroy() {
         super.onDestroy()
+        options.onDestroy()
         mapView.onDestroy()
     }
 }

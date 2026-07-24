@@ -2,6 +2,8 @@ package org.maplibre.android.testapp.activity.style
 
 import android.animation.ValueAnimator
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
@@ -38,6 +40,8 @@ class TerrainFlightActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var animator: ValueAnimator? = null
+    // OpenFreeMap serves Noto glyphs, so the stats HUD text uses Noto Sans Regular.
+    private val options = TerrainTestOptions(this, SOURCE_ID_TERRAIN, TERRAIN_EXAGGERATION, "Noto Sans Regular")
 
     // Looping flight path over the Ötztal/Stubai Alps and the Dolomites, chosen
     // for dramatic relief. Closed loop: the last point flies back to the first.
@@ -73,11 +77,17 @@ class TerrainFlightActivity : AppCompatActivity() {
             map.cameraPosition = cameraAt(0.0)
             map.setStyle(Style.Builder().fromUri(TestStyles.OPENFREEMAP_LIBERTY)) { style ->
                 addTerrain(style)
+                options.onMapReady(map, style)
                 startFlight()
             }
             mapView.setOnClickListener { toggleFlight() }
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean = options.onCreateOptionsMenu(menu)
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        options.onOptionsItemSelected(item) || super.onOptionsItemSelected(item)
 
     private fun addTerrain(style: Style) {
         style.addSource(RasterDemSource(SOURCE_ID_HILLSHADE, DEM_TILEJSON))
@@ -252,6 +262,7 @@ class TerrainFlightActivity : AppCompatActivity() {
     public override fun onDestroy() {
         super.onDestroy()
         animator?.cancel()
+        options.onDestroy()
         mapView.onDestroy()
     }
 }

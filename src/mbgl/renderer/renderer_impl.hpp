@@ -80,6 +80,24 @@ private:
     // drape content changed and the draped tweakers/targets must re-run (see render()).
     std::size_t lastDrapedContentSignature = 0;
 
+    // Did the terrain drape cover have any targets last frame? The drape signature cache
+    // short-circuits the draped tweakers when the content signature is unchanged, but while
+    // terrain is OFF (or its cover is still empty) the draped layers render to screen with
+    // camera-space UBOs. When the cover first becomes non-empty after terrain is (re)enabled,
+    // the recomputed signature can match the pre-off value, so the cache would skip the draped
+    // tweakers and the fresh drape targets would bake stale screen-space UBOs - a blank map
+    // until the view moves. Force a full re-bake on the frame the cover reappears.
+    bool terrainHadCoverLastFrame = false;
+
+    // Bounded follow-up-frame budget for a terrain that is enabled but produced an empty
+    // drape cover. On the first frame after terrain is (re)enabled, RenderTerrain::update -
+    // which resolves the DEM source computeMeshCover needs - has not run yet, so the cover
+    // is empty and the drape targets are not created. Nothing else may be loading, so the
+    // map would idle blank until the view is panned. Request a follow-up frame (by which
+    // point the DEM source is resolved) a bounded number of times so a genuinely empty
+    // cover cannot spin forever.
+    int terrainCoverRetryFrames = 4;
+
     enum class RenderState {
         Never,
         Partial,

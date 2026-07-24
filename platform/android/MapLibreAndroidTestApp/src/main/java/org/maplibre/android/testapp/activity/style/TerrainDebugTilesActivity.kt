@@ -20,6 +20,11 @@ import org.maplibre.android.testapp.R
 class TerrainDebugTilesActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
+    // The upstream debug-tiles style has no glyphs source (its tile numbers are raster
+    // tiles, not text), so the built-in stats HUD - a symbol layer - could not render its
+    // text. We inline the same style with a glyphs endpoint added (STYLE_JSON below), and
+    // point the HUD at Noto Sans Regular, which that endpoint serves.
+    private val options = TerrainTestOptions(this, "terrainSource", 1.0f, "Noto Sans Regular")
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,12 +42,57 @@ class TerrainDebugTilesActivity : AppCompatActivity() {
                 .zoom(9.0)
                 .tilt(70.0)
                 .build()
-            map.setStyle(Style.Builder().fromUri(STYLE_URL))
+            map.setStyle(Style.Builder().fromJson(STYLE_JSON)) { style ->
+                options.onMapReady(map, style)
+            }
         }
     }
 
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean = options.onCreateOptionsMenu(menu)
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
+        options.onOptionsItemSelected(item) || super.onOptionsItemSelected(item)
+
     companion object {
-        private const val STYLE_URL = "https://demotiles.maplibre.org/debug-tiles/style.json"
+        // The upstream https://demotiles.maplibre.org/debug-tiles/style.json verbatim
+        // (already using absolute URLs) plus a "glyphs" endpoint so the stats HUD can
+        // render text. The demotiles font server serves the composite default stack and
+        // Noto Sans Regular (github.com/maplibre/demotiles/tree/gh-pages/font).
+        private val STYLE_JSON = """
+            {
+              "version": 8,
+              "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+              "sources": {
+                "number": {
+                  "type": "raster",
+                  "url": "https://demotiles.maplibre.org/debug-tiles/number/tiles.json",
+                  "tileSize": 256,
+                  "maxzoom": 22
+                },
+                "terrainSource": {
+                  "type": "raster-dem",
+                  "url": "https://demotiles.maplibre.org/debug-tiles/terrain-ruffles/tiles.json",
+                  "tileSize": 256
+                },
+                "hillshadeSource": {
+                  "type": "raster-dem",
+                  "url": "https://demotiles.maplibre.org/debug-tiles/number-hillshade/tiles.json",
+                  "tileSize": 256
+                }
+              },
+              "layers": [
+                { "id": "number", "type": "raster", "source": "number" },
+                {
+                  "id": "hills",
+                  "type": "hillshade",
+                  "source": "hillshadeSource",
+                  "layout": { "visibility": "visible" },
+                  "paint": { "hillshade-shadow-color": "#473B24" }
+                }
+              ],
+              "terrain": { "source": "terrainSource", "exaggeration": 1 }
+            }
+        """.trimIndent()
     }
 
     override fun onStart() {
@@ -77,6 +127,7 @@ class TerrainDebugTilesActivity : AppCompatActivity() {
 
     public override fun onDestroy() {
         super.onDestroy()
+        options.onDestroy()
         mapView.onDestroy()
     }
 }

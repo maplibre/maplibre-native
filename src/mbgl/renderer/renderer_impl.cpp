@@ -245,6 +245,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
 
+    // Number of terrain drape targets in this frame's cover; drives the re-enable follow-up
+    // frame and the drape re-bake trigger below (0 while terrain is off or its cover is empty).
+    std::size_t frameDrapeTargetCount = 0;
     if (auto* terrain = orchestrator.getRenderTerrain()) {
         // Drape targets must exist before RenderTerrain::update drapes into them,
         // so build the same mesh cover it will use - the elevation-aware LOD ideal
@@ -257,6 +260,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
+        frameDrapeTargetCount = demTileIDs.size();
     } else {
         // The pool persists across frames, so release the drape targets when
         // terrain is disabled instead of holding their textures indefinitely
@@ -387,7 +391,13 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             util::hash_combine(signature, drapedGroupCount);
             util::hash_combine(signature, zoomLevel);
             parameters.drapedContentSignature = signature;
-            drapedContentChanged = (lastDrapedContentSignature != signature);
+            // Also treat the content as changed on the frame the drape cover reappears (fresh
+            // targets after terrain was off / had an empty cover): the draped drawables still
+            // hold screen-space UBOs from rendering to screen, so the tweakers must run to
+            // re-establish tile-local drape UBOs before the targets are baked, or the map is
+            // blank until the view moves.
+            const bool coverJustReappeared = frameDrapeTargetCount > 0 && !terrainHadCoverLastFrame;
+            drapedContentChanged = (lastDrapedContentSignature != signature) || coverJustReappeared;
             lastDrapedContentSignature = signature;
 
             orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
@@ -407,6 +417,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             });
             parameters.perTargetDrapeSignature = &perTargetDrapeSignature;
         }
+        // Latch whether the drape cover had targets this frame, for the re-bake trigger above.
+        terrainHadCoverLastFrame = frameDrapeTargetCount > 0;
 
         // Tweakers are run in the upload pass so they can set up uniforms.
         parameters.currentLayer = 0;
@@ -700,12 +712,27 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     context.renderingStats().encodingTime = renderTree.getElapsedTime() - context.renderingStats().renderingTime;
 
+    // A terrain that is enabled but produced an empty drape cover this frame (its DEM source
+    // is not resolved until RenderTerrain::update, which runs after computeMeshCover) needs a
+    // follow-up frame or it would idle blank until the view is panned - most visible when
+    // terrain is toggled back on over an otherwise static map. Bounded so it cannot spin.
+    bool terrainCoverPending = false;
+    if (orchestrator.getRenderTerrain() && frameDrapeTargetCount == 0) {
+        if (terrainCoverRetryFrames > 0) {
+            --terrainCoverRetryFrames;
+            terrainCoverPending = true;
+        }
+    } else {
+        terrainCoverRetryFrames = 4;
+    }
+
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         // Request a follow-up frame if the drape budget deferred any target or the tile-build
         // budget deferred any new tile, so deferred drapes/tiles catch up progressively even
         // after the interaction stops.
-        renderTreeParameters.needsRepaint || drapeWorkDeferred || context.newTileBuildWasDeferred(),
+        renderTreeParameters.needsRepaint || drapeWorkDeferred || context.newTileBuildWasDeferred() ||
+            terrainCoverPending,
         renderTreeParameters.placementChanged,
         context.threadSafeCopyRenderingStats());
 

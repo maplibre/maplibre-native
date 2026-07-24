@@ -1,6 +1,8 @@
 package org.maplibre.android.testapp.activity.style
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.constants.MapLibreConstants
@@ -20,6 +22,8 @@ import org.maplibre.android.testapp.R
 class TerrainActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
+    // The style carries a demotiles glyphs endpoint (added below), which serves Noto Sans.
+    private val options = TerrainTestOptions(this, "mapterhorn-terrain", 1.0f, "Noto Sans Regular")
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +40,16 @@ class TerrainActivity : AppCompatActivity() {
                 .tilt(60.0)
                 .bearing(35.0)
                 .build()
-            map.setStyle(Style.Builder().fromJson(STYLE_JSON))
+            map.setStyle(Style.Builder().fromJson(STYLE_JSON)) { style ->
+                options.onMapReady(map, style)
+            }
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean = options.onCreateOptionsMenu(menu)
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        options.onOptionsItemSelected(item) || super.onOptionsItemSelected(item)
 
     override fun onStart() {
         super.onStart()
@@ -72,6 +83,7 @@ class TerrainActivity : AppCompatActivity() {
 
     public override fun onDestroy() {
         super.onDestroy()
+        options.onDestroy()
         mapView.onDestroy()
     }
 
@@ -93,6 +105,7 @@ class TerrainActivity : AppCompatActivity() {
             {
               "version": 8,
               "name": "Terrain demo",
+              "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
               "sources": {
                 "mapterhorn": {
                   "type": "raster-dem",

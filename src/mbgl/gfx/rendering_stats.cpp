@@ -253,6 +253,11 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     std::stringstream ss;
     ss << std::setprecision(3) << std::fixed;
 
+    // Frames actually rendered over the elapsed interval (frameCount is incremented once
+    // per update() call, i.e. per rendered frame, and reset after each HUD refresh below).
+    const double elapsed = currentTime - lastUpdate;
+    const double fps = elapsed > 0 ? frameCount / elapsed : 0.0;
+    ss << "FPS: " << std::setw(7) << fps << "\n";
     ss << "Encoding time (ms): " << std::setw(7) << encodingTime / frameCount * 1000 << "\n";
     ss << "Rendering time (ms): " << std::setw(7) << renderingTime / frameCount * 1000 << "\n";
 
