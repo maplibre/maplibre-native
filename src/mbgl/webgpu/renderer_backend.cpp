@@ -46,7 +46,9 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
       impl(std::make_unique<Impl>()) {}
 
-RendererBackend::~RendererBackend() = default;
+RendererBackend::~RendererBackend() {
+    context.reset();
+}
 
 void RendererBackend::activate() {
     // Activation logic if needed

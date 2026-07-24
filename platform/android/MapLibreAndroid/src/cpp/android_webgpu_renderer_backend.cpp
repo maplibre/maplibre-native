@@ -310,6 +310,8 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
 }
 
 AndroidWebGPURendererBackend::~AndroidWebGPURendererBackend() {
+    context.reset();
+
     if (impl) {
         if (impl->currentTextureView) {
             wgpuTextureViewRelease(impl->currentTextureView);

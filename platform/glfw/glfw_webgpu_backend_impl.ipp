@@ -751,6 +751,8 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
     // Mark any in-flight frame as completed so tear-down logic can continue.
     frameInProgress.store(false, std::memory_order_release);
 
+    context.reset();
+
     {
         std::lock_guard<SpinLock> guard(textureStateLock);
 
