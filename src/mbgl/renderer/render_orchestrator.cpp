@@ -1018,7 +1018,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     // Progressive tile build: cap how many new tiles construct their drawables this frame so
     // a burst of newly revealed tiles (tilt/pan/zoom-in) is spread over frames instead of
     // stalling one. Layers consume from this budget before building a new tile (fill/line).
-    constexpr int kNewTileBuildBudgetPerFrame = 8;
+    constexpr int kNewTileBuildBudgetPerFrame = 32;
     context.resetNewTileBuildBudget(kNewTileBuildBudgetPerFrame);
 
     for (const auto& item : items) {

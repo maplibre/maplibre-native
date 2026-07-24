@@ -26,6 +26,7 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/layer_group.hpp> // drape signature: TileLayerGroup::visitDrawables
+#include <mbgl/renderer/bucket.hpp>      // drape signature: Bucket::getID content revision
 #include <mbgl/util/hash.hpp>            // drape signature: hash_combine
 #include <map>
 #include <mbgl/renderer/render_terrain.hpp>
@@ -367,6 +368,18 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     util::hash_combine(h, tile.canonical.z);
                     util::hash_combine(h, tile.canonical.x);
                     util::hash_combine(h, tile.canonical.y);
+                    // Fold the source bucket's identity so an in-place content upgrade - a drape
+                    // built from an over-zoomed ancestor bucket, then the tile's own native bucket
+                    // loads under the same covering-tile id - re-renders the drape instead of
+                    // serving the stale low-detail bake until the next zoom. Keyed on the bucket id
+                    // (stable across paint/fade), not the drawable id (which churns every frame).
+                    // Excluded for hillshade: its drape samples a separate DEM "prepare" target with
+                    // its own render lifecycle, and folding its bucket here broke it on initial load.
+                    if (drawable.getName() != "hillshade") {
+                        if (const auto& bucket = drawable.getBucket()) {
+                            util::hash_combine(h, bucket->getID().id());
+                        }
+                    }
                     util::hash_combine(signature, h);
                     drapedTiles.emplace_back(tile, h);
                 });
@@ -538,7 +551,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // tens of ms each; instead render up to kMaxDrapeRerendersPerFrame and defer the rest
         // (they keep their stale texture), requesting a follow-up frame so they catch up
         // progressively. Never-rendered targets always render (avoid blank tiles).
-        constexpr int kMaxDrapeRerendersPerFrame = 4;
+        constexpr int kMaxDrapeRerendersPerFrame = 16;
         int drapeBudget = kMaxDrapeRerendersPerFrame;
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
             if (renderTarget.getDrapeTileID()) {
