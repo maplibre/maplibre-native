@@ -159,7 +159,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     }
 
     // Now, we're "freeing up" some space on the disk, and try to insert and
-    // query again. This time, we should be opening the datbase, creating the
+    // query again. This time, we should be opening the database, creating the
     // schema, and writing the data so that we can retrieve it again.
     fs.allowFileCreate(true);
     for (const auto& res : {fixture::resource, fixture::tile}) {
@@ -394,6 +394,22 @@ TEST(OfflineDatabase, PutTile) {
     EXPECT_EQ("second", *updateGetResult->data);
 
     EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+// Cache-key encoding for byte-range sources (eg. PMTiles). The range is appended
+// to the URL so distinct ranges occupy distinct cache rows under the resources
+// table's UNIQUE(url) constraint.
+TEST(OfflineDatabase, CacheKey) {
+    Resource bare{Resource::Kind::Source, "https://example.com/x.pmtiles"};
+    EXPECT_EQ("https://example.com/x.pmtiles", OfflineDatabase::cacheKey(bare));
+
+    Resource ranged{Resource::Kind::Source, "https://example.com/x.pmtiles"};
+    ranged.dataRange = std::make_pair<uint64_t, uint64_t>(0, 126);
+    EXPECT_EQ("https://example.com/x.pmtiles?_mlnRange=0-126", OfflineDatabase::cacheKey(ranged));
+
+    Resource rangedWithQuery{Resource::Kind::Source, "https://example.com/x.pmtiles?token=abc"};
+    rangedWithQuery.dataRange = std::make_pair<uint64_t, uint64_t>(200, 399);
+    EXPECT_EQ("https://example.com/x.pmtiles?token=abc&_mlnRange=200-399", OfflineDatabase::cacheKey(rangedWithQuery));
 }
 
 TEST(OfflineDatabase, PutResourceNoContent) {

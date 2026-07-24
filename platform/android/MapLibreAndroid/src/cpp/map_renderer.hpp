@@ -147,7 +147,9 @@ private:
     std::unique_ptr<AndroidRendererBackend> backend;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<ActorRef<Renderer>> rendererRef;
-    std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>> window;
+
+    using UniqueANativeWindow = std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>>;
+    UniqueANativeWindow window;
 
     std::shared_ptr<UpdateParameters> updateParameters;
     std::mutex updateMutex;

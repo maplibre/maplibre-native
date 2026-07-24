@@ -1,4 +1,4 @@
-import java.net.URL
+import java.net.URI
 
 
 /**
@@ -18,7 +18,7 @@ import java.net.URL
  */
 
 // Define the validation layer version, with a default value.
-var vvlVersion = "1.4.341.0"
+var vvlVersion = "1.4.350.0"
 if (extra.has("vvl_version")) {
     vvlVersion = extra["vvl_version"] as String
 }
@@ -29,21 +29,30 @@ val vvlLibRoot = projectDir // Set project root or change to rootDir if needed
 val vvlJniLibDir = "$vvlLibRoot/src/vulkanDebug/jniLibs"
 val vvlSoName = "libVkLayer_khronos_validation.so"
 
-// Download the release zip file to ${vvlLibRoot}/
-val download = tasks.register("download") {
-    val vvlZipName = "releases/download/vulkan-sdk-$vvlVersion/android-binaries-$vvlVersion.zip"
-    val zipFile = file("$vvlLibRoot/android-binaries-$vvlVersion.zip")
+abstract class Download : DefaultTask() {
+    @get:Input
+    abstract val url: Property<String>
 
-    mkdir(vvlLibRoot)
+    @get:OutputFile
+    abstract val file: RegularFileProperty
 
-    doLast {
-        // Download the zip file from the Vulkan Validation Layers GitHub repo.
-        URL("$vvlSite/$vvlZipName").openStream().use { inputStream ->
-            zipFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
+    @TaskAction
+    fun download() {
+        URI.create(url.get()).toURL().openStream().use { inputStream ->
+            file.get().asFile
+                .outputStream()
+                .use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
         }
     }
+}
+
+val download = tasks.register<Download>("download") {
+    // Download the zip file from the Vulkan Validation Layers GitHub repo.
+    url = "$vvlSite/releases/download/vulkan-sdk-$vvlVersion/android-binaries-$vvlVersion.zip"
+    // Download the release zip file to ${vvlLibRoot}/
+    file = file("$vvlLibRoot/android-binaries-$vvlVersion.zip")
 }
 
 val unzip = tasks.register<Copy>("unzip") {

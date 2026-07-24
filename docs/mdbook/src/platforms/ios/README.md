@@ -4,7 +4,7 @@
 
 [Bazel](https://bazel.build/) is used for building on iOS.
 
-You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) intergration.
+You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) integration.
 
 You need to install [bazelisk](https://github.com/bazelbuild/bazelisk), which is a wrapper around Bazel which ensures that the version specified in `.bazelversion` is used.
 
@@ -71,7 +71,7 @@ It is also possible to build and run the test application in a simulator from th
 bazel run //platform/ios:App --//:renderer=metal
 ```
 
-You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
+You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml).
 
 ## CMake
 

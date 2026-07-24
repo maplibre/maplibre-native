@@ -21,6 +21,29 @@ const LINE_NORMAL_SCALE: f32 = 1.0 / 63.0;  // 1.0 / (127 / 2)
 const MAX_LINE_DISTANCE: f32 = 32767.0;
 const SDF_PX: f32 = 8.0;
 
+// WebGPU equivalent of GLSL mod function
+fn glMod(x: f32, y: f32) -> f32 {
+    return x - y * floor(x / y);
+}
+
+fn glMod2(x: vec2<f32>, y: f32) -> vec2<f32> {
+    return x - y * floor(x / y);
+}
+
+fn glMod2v(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
+    return x - y * floor(x / y);
+}
+
+// GLSL compatibility helpers
+fn gl_mod(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
+    return glMod2v(x, y);
+}
+
+// Radians conversion
+fn radians(degrees: f32) -> f32 {
+    return PI * degrees / 180.0;
+}
+
 // Helper functions for unpacking data
 fn unpack_float(packedValue: f32) -> vec2<f32> {
     let packedIntValue = i32(packedValue);
@@ -30,7 +53,7 @@ fn unpack_float(packedValue: f32) -> vec2<f32> {
 
 fn unpack_opacity(packedOpacity: f32) -> vec2<f32> {
     let intOpacity = i32(packedOpacity) / 2;
-    return vec2<f32>(f32(intOpacity) / 127.0, packedOpacity % 2.0);
+    return vec2<f32>(f32(intOpacity) / 127.0, glMod(packedOpacity, 2.0));
 }
 
 // Decode a color that has been packed into two floats
@@ -55,33 +78,10 @@ fn unpack_mix_color(packedColors: vec4<f32>, t: f32) -> vec4<f32> {
 // Get pattern position for texture atlas lookups
 fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
                    pattern_size: vec2<f32>, tile_units_to_pixels: f32, pos: vec2<f32>) -> vec2<f32> {
-    let offset_a = (pixel_coord_upper % pattern_size) * 256.0;
-    let offset_b = (offset_a % pattern_size) * 256.0 + pixel_coord_lower;
-    let offset = offset_b % pattern_size;
+    let offset_a = gl_mod(pixel_coord_upper, pattern_size) * 256.0;
+    let offset_b = gl_mod(offset_a, pattern_size) * 256.0 + pixel_coord_lower;
+    let offset = gl_mod(offset_b, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
-}
-
-// Radians conversion
-fn radians(degrees: f32) -> f32 {
-    return PI * degrees / 180.0;
-}
-
-// WebGPU equivalent of GLSL mod function
-fn glMod(x: f32, y: f32) -> f32 {
-    return x - y * floor(x / y);
-}
-
-fn glMod2(x: vec2<f32>, y: f32) -> vec2<f32> {
-    return x - y * floor(x / y);
-}
-
-fn glMod2v(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
-    return x - y * floor(x / y);
-}
-
-// GLSL compatibility helpers
-fn gl_mod(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
-    return glMod2v(x, y);
 }
 )";
 };

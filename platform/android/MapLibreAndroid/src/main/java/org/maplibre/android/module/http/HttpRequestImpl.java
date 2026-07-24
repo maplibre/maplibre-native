@@ -1,5 +1,7 @@
 package org.maplibre.android.module.http;
 
+import static org.maplibre.android.module.http.HttpRequestUtil.toHumanReadableAscii;
+
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,7 +24,6 @@ import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Objects;
 
 import javax.net.ssl.SSLException;
 
@@ -34,8 +35,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-
-import static org.maplibre.android.module.http.HttpRequestUtil.toHumanReadableAscii;
 
 public class HttpRequestImpl implements HttpRequest {
 
@@ -49,10 +48,10 @@ public class HttpRequestImpl implements HttpRequest {
   );
 
   @VisibleForTesting
-  static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder().dispatcher(getDispatcher()).build();
+  static volatile OkHttpClient defaultClient = null;
 
   @VisibleForTesting
-  static Call.Factory client = DEFAULT_CLIENT;
+  static volatile Call.Factory client = null;
 
   private Call call;
 
@@ -87,7 +86,7 @@ public class HttpRequestImpl implements HttpRequest {
       }
 
       final Request request = builder.build();
-      call = client.newCall(request);
+      call = getHttpClient().newCall(request);
       call.enqueue(callback);
     } catch (Exception exception) {
       callback.handleFailure(call, exception);
@@ -113,7 +112,7 @@ public class HttpRequestImpl implements HttpRequest {
   }
 
   public static void setOkHttpClient(@Nullable Call.Factory client) {
-    HttpRequestImpl.client = Objects.requireNonNullElse(client, DEFAULT_CLIENT);
+    HttpRequestImpl.client = client != null ? client : getOrCreateDefaultClient();
   }
 
   private static class OkHttpCallback implements Callback {
@@ -186,6 +185,27 @@ public class HttpRequestImpl implements HttpRequest {
       }
       return PERMANENT_ERROR;
     }
+  }
+
+  private static Call.Factory getHttpClient() {
+    if (client == null) {
+      synchronized (HttpRequestImpl.class) {
+        if (client == null) {
+          client = getOrCreateDefaultClient();
+        }
+      }
+    }
+
+    return client;
+  }
+
+  @NonNull
+  private static synchronized OkHttpClient getOrCreateDefaultClient() {
+    if (defaultClient == null) {
+      defaultClient = new OkHttpClient.Builder().dispatcher(getDispatcher()).build();
+    }
+
+    return defaultClient;
   }
 
   @NonNull
