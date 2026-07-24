@@ -901,7 +901,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile.hpp
@@ -1113,7 +1113,9 @@ include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+if(NOT MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec.cmake)
+endif()
 include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
@@ -1142,7 +1144,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
-        mlt-cpp
+        $<$<NOT:$<BOOL:${MLN_USE_RUST}>>:mlt-cpp>
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
         $<$<BOOL:${MLN_TEXT_SHAPING_HARFBUZZ}>:mbgl-freetype>
@@ -1186,14 +1188,13 @@ set(EXPORT_TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    mlt-cpp
     unordered_dense
 )
 
 if(MLN_USE_RUST)
     list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
 else()
-    list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
+    list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser mlt-cpp)
 endif()
 
 if(MLN_TEXT_SHAPING_HARFBUZZ)

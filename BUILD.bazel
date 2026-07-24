@@ -154,7 +154,6 @@ cc_library(
         "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
-        "@maplibre_tile_spec//cpp:mlt_cpp",
     ] + select({
         "@platforms//os:ios": [
             "//vendor:ghc_filesystem",
@@ -184,6 +183,7 @@ cc_library(
         ],
         "//conditions:default": [
             "//vendor:csscolorparser",
+            "@maplibre_tile_spec//cpp:mlt_cpp",
         ],
     }),
 )
