@@ -516,17 +516,35 @@ This known issue is closed.
   *visibility* is elevation-aware. Native's tile LOD system
   (`tileLodMinRadius`/`tileLodScale`/`tileLodPitchThreshold`) still drives the
   *zoom* selection and is not elevation-aware.
-- **Transient frontier skirt at the near/bottom screen edge under steep pitch**
-  (reported on device 2026-07-23, mapterhorn vector map). At high pitch the
-  near-bottom terrain rises into view, but the elevation-aware cover cannot know
-  that until the DEM there is loaded (sparse DEM → chicken-and-egg), so the very
-  bottom is under-covered for a moment: the last meshed row's skirts hang into
-  the gap (and a sliver of background shows) until a slight pan loads the tile,
-  after which it resolves cleanly. `computeMeshCover` did not fix this (it is a
-  cover-*extent*/latency problem, not resolution). Fix direction: pad the
-  terrain cover by a tile-ring toward the near/bottom frustum edge (and/or
-  suppress skirts on the outermost frontier edge) so the frontier sits just
-  off-screen while tiles stream in.
+- **Frontier skirt at the near/bottom screen edge under steep pitch — partially
+  mitigated; the residual is Phase 4.** (Diagnosed on device 2026-07-24,
+  mapterhorn vector map, 60° pitch.) At high pitch the near-bottom terrain rises
+  into view but the tile there is not in the cover, so the last meshed row's
+  skirts hang into the gap (with a sliver of background) until a pan pulls the
+  tile in. On-device logging established the mechanism precisely: the cover is
+  always fully meshed (`noDrawable=0`) but too *small* — the tile is not in the
+  cover at all. `util::tileCover` is a top-down DFS that only descends into tiles
+  whose **flat (z=0)** ancestor intersects the frustum, so a frontier tile whose
+  terrain is in view but whose flat footprint is outside the sea-level frustum is
+  never even visited.
+  - **Mitigation (done, `computeMeshCover`):** a one-ring dilation of the cover
+    (all 8 neighbours), trimmed by `util::frustumCull` with `DEMElevationProvider`
+    reporting a conservative range for not-yet-loaded tiles. This re-tests the
+    neighbours the DFS skipped, keeping the ones whose elevation-extended bounds
+    intersect the frustum; the elevation *sign* picks the side, so it is correct
+    for terrain above or below sea level (bathymetry) without hardcoding a
+    direction, and the trim keeps it from tripling the cover. Measured: at zoom
+    12 the skirt shrank from ~40% of the frame to a thin sliver at near-zero cost
+    (+1–2 tiles). Drop the `frustumCull` line for a pure uniform 1-ring (kills the
+    sliver but ~2.7× the cover).
+  - **Residual (Phase 4):** at higher zoom over tall relief the gap is *several*
+    tiles, not one, because the cover frustum is built from a camera anchored at
+    z=0 while the true view is from high on the terrain — the near tiles fall well
+    outside the sea-level frustum, and `frustumCull` correctly trims the dilated
+    neighbours there, so no ring count fixes it (a big skirt plus a white gap at
+    the very bottom, the near-rays-miss-terrain signature). This is the
+    terrain-anchored-camera work in Phase 4; the dilation only covers the moderate
+    (roughly one-tile) case.
 - Other transitional artifacts while panning/zooming: brief flat/empty far-field
   areas before a tile loads, and re-resolve flicker when the LOD migrates an
   area between zoom levels. The content-hash render cache and the ideal cover
