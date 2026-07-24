@@ -15,11 +15,15 @@ public:
                   std::string sourceID,
                   const TileParameters&,
                   const Tileset&,
-                  TileObserver* observer = nullptr);
+                  TileObserver* observer,
+                  bool fastPFOREnabled);
 
     ~VectorMLTTile() override;
 
     void setData(const std::shared_ptr<const std::string>& data) override;
+
+private:
+    bool fastPFOREnabled;
 };
 
 } // namespace mbgl

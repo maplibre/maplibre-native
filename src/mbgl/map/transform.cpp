@@ -405,6 +405,22 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 
 void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& animation) {
     ScreenCoordinate centerOffset = {offset.x, offset.y};
+
+    // Reduce the offset so that it never goes past the horizon. If it goes past
+    // the horizon, the pan direction is opposite of the intended direction.
+    const double pitch = state.getPitch();
+    const double offsetLength = std::hypot(offset.x, offset.y);
+    if (pitch > 0.0 && offsetLength > 0.0) {
+        const double cameraToCenter = 0.5 * static_cast<double>(state.getSize().height) /
+                                      std::tan(state.getFieldOfView() / 2.0);
+        const double pixelsToHorizon = std::abs(cameraToCenter / std::tan(pitch));
+        constexpr double horizonFactor = 0.75; // must be < 1 to keep the offset short of the horizon
+        const double scale = pixelsToHorizon * horizonFactor / offsetLength;
+        if (scale < 1.0) {
+            centerOffset = {offset.x * scale, offset.y * scale};
+        }
+    }
+
     ScreenCoordinate pointOnScreen = state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height) -
                                      centerOffset;
     // Use unwrapped LatLng to carry information about moveBy direction.

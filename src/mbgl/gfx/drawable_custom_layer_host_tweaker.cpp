@@ -9,6 +9,9 @@
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#elif MLN_RENDER_BACKEND_VULKAN
+#include <mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp>
+#include <mbgl/vulkan/render_pass.hpp>
 #endif
 
 #include <memory>
@@ -28,6 +31,8 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     mtlRenderPass->resetState();
 
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
+#elif MLN_RENDER_BACKEND_VULKAN
+    style::vulkan::CustomLayerRenderParameters parameters(paintParameters);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif

@@ -73,7 +73,7 @@ modifiedReferenceSpec["paint_location-indicator"] = {
               "zoom"
           ]
       },
-      "doc": "The displacement off the center of the top image and the shadow image when the pitch of the map is greater than 0. This helps producing a three-dimensional appearence."
+      "doc": "The displacement off the center of the top image and the shadow image when the pitch of the map is greater than 0. This helps producing a three-dimensional appearance."
   },
   "bearing": {
       "type": "number",
