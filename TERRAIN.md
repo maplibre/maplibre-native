@@ -511,6 +511,14 @@ This known issue is closed.
 - Coordinate picking against the terrain (gl-js coords/depth framebuffers)
 - Elevation for CPU-projected along-line labels in viewport alignment
   (gl-js applies it in the CPU symbol projection)
+- **Fill-extrusion (buildings) are not occluded by terrain** (reported on
+  device 2026-07-24): a building behind a hill renders *through* the hill
+  instead of being hidden by it. Unlike symbols - 2D billboards that needed the
+  explicit depth-texture `calculate_visibility` path - fill-extrusions are real
+  3D geometry, so this is more likely a depth-test / draw-order gap against the
+  terrain surface (the elevated building geometry not depth-testing against the
+  nearer terrain mesh) than a need for the symbol depth-texture path. Not yet
+  investigated.
 - The terrain mesh/drape cover is now a direct elevation-aware ideal cover
   (`RenderTerrain::computeMeshCover`, see the tile-cover item above), but only
   *visibility* is elevation-aware. Native's tile LOD system
