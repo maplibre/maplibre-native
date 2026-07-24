@@ -140,7 +140,7 @@ public:
         }
 
         // Process all pending device operations to ensure rendering is complete
-#if MLN_WEBGPU_IMPL_DAWN
+#if MLN_WEBGPU_IMPL_DAWN && !MLN_WEBGPU_EMDAWN
         wgpuDeviceTick(device);
 #endif
 
