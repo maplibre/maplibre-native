@@ -80,11 +80,15 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // DEM height rather than the z=0 plane (as util::tileCover / gl-js do).
     DEMElevationProvider elevationProvider(demSource, getExaggeration());
 
-    // maplibre-gl-js covers terrain with a fixed tileSize of 512 (its RTT tiles),
-    // independent of the DEM source's own tile size, and over-zooms the DEM for
-    // elevation. Mirror that: the cover zoom comes from the view, not from which
-    // DEM tiles happen to be loaded.
-    constexpr uint16_t terrainCoverTileSize = 512;
+    // Cover at the DEM source's own tile size so the mesh zoom matches the DEM's native
+    // granularity. A 256px DEM covers one zoom level deeper than a 512px one; meshing
+    // coarser than the DEM undersamples it - the fixed 128x128 mesh aliases the relief
+    // into waves (seen on the 256px debug-tiles "ruffles" DEM, which was flat before the
+    // ideal-cover rework derived the mesh from the DEM's own render set). demDim is the
+    // decoded DEM's tile size (DEMData::dim, exact - border is separate); fall back to 512
+    // (gl-js's terrain-cover convention) until the first DEM tile is decoded. The cover is
+    // still the elevation-aware ideal cover from the view, not the DEM's loaded tile set.
+    const uint16_t terrainCoverTileSize = demDim > 0 ? static_cast<uint16_t>(demDim) : 512;
     const Range<uint8_t> zoomRange{0, demSource->getMaxZoom()};
 
     // LOD parameters from the frame drive the same near-high/far-low zoom
