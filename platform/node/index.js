@@ -2,49 +2,52 @@
 
 // Shim to wrap req.respond while preserving callback-passing API
 
-var mbgl = require('./lib/node-v' + process.versions.modules + '/mbgl');
-var constructor = mbgl.Map.prototype.constructor;
+const mbgl = require("./lib/node-v" + process.versions.modules + "/mbgl");
+const constructor = mbgl.Map.prototype.constructor;
 
-var Map = function(options) {
-    if (options && !(options instanceof Object)) {
-        throw TypeError("Requires an options object as first argument");
-    }
+const Map = function (options) {
+    if (options) {
+        if (typeof options !== "object") {
+            throw TypeError("Requires an options object as first argument");
+        }
 
-    if (options && options.hasOwnProperty('request') && !(options.request instanceof Function)) {
-        throw TypeError("Options object 'request' property must be a function");
-    }
-
-    if (options && options.request) {
-        var request = options.request;
-
-        return new constructor(Object.assign(options, {
-            request: function(req) {
-                // Protect against `request` implementations that call the callback synchronously,
-                // call it multiple times, or throw exceptions.
-                // http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
-
-                var responded = false;
-                var callback = function() {
-                    var args = arguments;
-                    if (!responded) {
-                        responded = true;
-                        process.nextTick(function() {
-                            req.respond.apply(req, args);
-                        });
-                    } else {
-                        console.warn('request function responded multiple times; it should call the callback only once');
-                    }
-                };
-
-                try {
-                    request(req, callback);
-                } catch (e) {
-                    console.warn('request function threw an exception; it should call the callback with an error instead');
-                    callback(e);
-                }
+        if (options.request) {
+            if (typeof options.request !== "function") {
+                throw TypeError("Options object 'request' property must be a function");
             }
-        }));
-    } else if (options) {
+
+            const request = options.request;
+
+            return new constructor(
+                Object.assign(options, {
+                    request: function (req) {
+                        // Protect against `request` implementations that call the callback synchronously,
+                        // call it multiple times, or throw exceptions.
+                        // http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony
+
+                        let responded = false;
+                        const callback = function () {
+                            const args = arguments;
+                            if (!responded) {
+                                responded = true;
+                                process.nextTick(function () {
+                                    req.respond.apply(req, args);
+                                });
+                            } else {
+                                console.warn("request function responded multiple times; it should call the callback only once");
+                            }
+                        };
+
+                        try {
+                            request(req, callback);
+                        } catch (e) {
+                            console.warn("request function threw an exception; it should call the callback with an error instead");
+                            callback(e);
+                        }
+                    },
+                })
+            );
+        }
         return new constructor(options);
     } else {
         return new constructor();
