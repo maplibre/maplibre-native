@@ -25,6 +25,13 @@ MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, decimals_ed);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
 
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, instance);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, pos_scale);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_tltr);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_blbr);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 4, texture_rect);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, size_sdf);
+
 template <typename T, std::size_t N>
 struct data {
     using Type = gfx::AttributeType<T, N>;

@@ -45,10 +45,17 @@ float4 decode_color(const float2 encoded) {
     return float4(unpack_float(encoded[0]) / 255, unpack_float(encoded[1]) / 255);
 }
 // Unpack a pair of paint values and interpolate between them.
+float unpack_mix_float(device const float packedValue[2], const float t) {
+    return mix(packedValue[0], packedValue[1], t == 0 ? 1 : t);
+}
 float unpack_mix_float(const float2 packedValue, const float t) {
     return mix(packedValue[0], packedValue[1], t);
 }
 // Unpack a pair of paint values and interpolate between them.
+float4 unpack_mix_color(device const float packedColors[4], const float t) {
+    return mix(decode_color(float2(packedColors[0], packedColors[1])),
+               decode_color(float2(packedColors[2], packedColors[3])), t == 0 ? 1 : t);
+}
 float4 unpack_mix_color(const float4 packedColors, const float t) {
     return mix(decode_color(float2(packedColors[0], packedColors[1])),
                decode_color(float2(packedColors[2], packedColors[3])), t);

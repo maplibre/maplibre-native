@@ -1014,27 +1014,28 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                                              SYM_GUARD_LOC))
                 return;
         }
+        auto count = 1;
         if (symbolInstance.hasText()) {
             size_t textOpacityVerticesSize = 0u;
             const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.text.placed,
                                                                     opacityState.text.opacity);
             if (symbolInstance.getPlacedRightTextIndex()) {
-                textOpacityVerticesSize += symbolInstance.getRightJustifiedGlyphQuadsSize() * 4;
+                textOpacityVerticesSize += symbolInstance.getRightJustifiedGlyphQuadsSize() * count;
                 PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()];
                 placed.hidden = opacityState.isHidden();
             }
             if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
-                textOpacityVerticesSize += symbolInstance.getCenterJustifiedGlyphQuadsSize() * 4;
+                textOpacityVerticesSize += symbolInstance.getCenterJustifiedGlyphQuadsSize() * count;
                 PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()];
                 placed.hidden = opacityState.isHidden();
             }
             if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
-                textOpacityVerticesSize += symbolInstance.getLeftJustifiedGlyphQuadsSize() * 4;
+                textOpacityVerticesSize += symbolInstance.getLeftJustifiedGlyphQuadsSize() * count;
                 PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()];
                 placed.hidden = opacityState.isHidden();
             }
             if (symbolInstance.getPlacedVerticalTextIndex()) {
-                textOpacityVerticesSize += symbolInstance.getVerticalGlyphQuadsSize() * 4;
+                textOpacityVerticesSize += symbolInstance.getVerticalGlyphQuadsSize() * count;
                 bucket.text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()].hidden =
                     opacityState.isHidden();
             }
@@ -1062,12 +1063,12 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
             auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
 
             if (symbolInstance.getPlacedIconIndex()) {
-                iconOpacityVerticesSize += symbolInstance.getIconQuadsSize() * 4;
+                iconOpacityVerticesSize += symbolInstance.getIconQuadsSize() * count;
                 iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()].hidden = opacityState.isHidden();
             }
 
             if (symbolInstance.getPlacedVerticalIconIndex()) {
-                iconOpacityVerticesSize += symbolInstance.getIconQuadsSize() * 4;
+                iconOpacityVerticesSize += symbolInstance.getIconQuadsSize() * count;
                 iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()].hidden = opacityState.isHidden();
             }
 

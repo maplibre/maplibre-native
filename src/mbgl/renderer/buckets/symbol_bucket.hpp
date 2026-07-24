@@ -8,7 +8,6 @@
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/text/glyph_range.hpp>
 
@@ -17,12 +16,41 @@
 
 namespace mbgl {
 
+namespace style {
+
+// {icon,text}-specific paint-property packs for use in the symbol Programs.
+// Since each program deals either with icons or text, using a smaller property set
+// lets us avoid unnecessarily binding attributes for properties the program wouldn't use.
+class IconPaintProperties : public Properties<IconOpacity,
+                                              IconColor,
+                                              IconHaloColor,
+                                              IconHaloWidth,
+                                              IconHaloBlur,
+                                              IconTranslate,
+                                              IconTranslateAnchor> {};
+
+class TextPaintProperties : public Properties<TextOpacity,
+                                              TextColor,
+                                              TextHaloColor,
+                                              TextHaloWidth,
+                                              TextHaloBlur,
+                                              TextTranslate,
+                                              TextTranslateAnchor> {};
+
+} // namespace style
+
 class CrossTileSymbolLayerIndex;
 
 using SymbolIconBinders = PaintPropertyBinders<style::IconPaintProperties::DataDrivenProperties>;
 using SymbolTextBinders = PaintPropertyBinders<style::TextPaintProperties::DataDrivenProperties>;
-using SymbolLayoutVertex =
-    gfx::Vertex<TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>>;
+using SymbolStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
+using SymbolInstanceVertex = gfx::Vertex<TypeList<attributes::instance>>;
+using SymbolLayoutVertex = gfx::Vertex<TypeList<attributes::pos_scale,
+                                                attributes::offset_tltr,
+                                                attributes::offset_blbr,
+                                                attributes::texture_rect,
+                                                attributes::pixeloffset,
+                                                attributes::size_sdf>>;
 using SymbolDynamicLayoutAttributes = TypeList<attributes::projected_pos>;
 using SymbolOpacityAttributes = TypeList<attributes::fade_opacity>;
 
@@ -226,6 +254,11 @@ public:
                  bool iconsInText);
     ~SymbolBucket() override;
 
+    static style::IconPaintProperties::PossiblyEvaluated iconPaintProperties(
+        const style::SymbolPaintProperties::PossiblyEvaluated&);
+    static style::TextPaintProperties::PossiblyEvaluated textPaintProperties(
+        const style::SymbolPaintProperties::PossiblyEvaluated&);
+
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
     std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
@@ -254,32 +287,39 @@ public:
     bool check(source_location) override;
 #endif
 
-    static SymbolLayoutVertex layoutVertex(Point<float> labelAnchor,
-                                           Point<float> o,
-                                           float glyphOffsetY,
-                                           uint16_t tx,
-                                           uint16_t ty,
-                                           const Range<float>& sizeData,
-                                           bool isSDF,
-                                           Point<float> pixelOffset,
-                                           Point<float> minFontScale) {
+    static SymbolInstanceVertex instanceVertex(uint16_t instance) { return {instance}; }
+
+    static SymbolLayoutVertex layoutVertex(const SymbolQuad& symbol,
+                                           const Anchor& labelAnchor,
+                                           const Range<float>& sizeData) {
         const uint16_t aSizeMin = (std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.min * SIZE_PACK_FACTOR))
                                    << 1) +
-                                  uint16_t(isSDF);
+                                  uint16_t(symbol.isSDF);
         const uint16_t aSizeMax = std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.max * SIZE_PACK_FACTOR));
-        return {
-            // combining pos and offset to reduce number of vertex attributes
-            // passed to shader (8 max for some devices)
-            {{static_cast<int16_t>(labelAnchor.x),
-              static_cast<int16_t>(labelAnchor.y),
-              static_cast<int16_t>(std::round(o.x * 32)), // use 1/32 pixels for placement
-              static_cast<int16_t>(std::round((o.y + glyphOffsetY) * 32))}},
-            {{tx, ty, aSizeMin, aSizeMax}},
-            {{static_cast<int16_t>(pixelOffset.x * 16),
-              static_cast<int16_t>(pixelOffset.y * 16),
-              static_cast<int16_t>(minFontScale.x * 256),
-              static_cast<int16_t>(minFontScale.y * 256)}},
-        };
+
+        return {{static_cast<int16_t>(labelAnchor.point.x),
+                 static_cast<int16_t>(labelAnchor.point.y),
+                 static_cast<int16_t>(symbol.minFontScale.x * 256),
+                 static_cast<int16_t>(symbol.minFontScale.y * 256)},
+
+                {static_cast<int16_t>(std::round(symbol.tl.x * 32)),
+                 static_cast<int16_t>(std::round((symbol.tl.y + symbol.glyphOffset.y) * 32)),
+                 static_cast<int16_t>(std::round(symbol.tr.x * 32)),
+                 static_cast<int16_t>(std::round((symbol.tr.y + symbol.glyphOffset.y) * 32))},
+
+                {static_cast<int16_t>(std::round(symbol.bl.x * 32)),
+                 static_cast<int16_t>(std::round((symbol.bl.y + symbol.glyphOffset.y) * 32)),
+                 static_cast<int16_t>(std::round(symbol.br.x * 32)),
+                 static_cast<int16_t>(std::round((symbol.br.y + symbol.glyphOffset.y) * 32))},
+
+                {symbol.tex.x, symbol.tex.y, symbol.tex.w, symbol.tex.h},
+
+                {static_cast<int16_t>(symbol.pixelOffsetTL.x * 16),
+                 static_cast<int16_t>(symbol.pixelOffsetTL.y * 16),
+                 static_cast<int16_t>(symbol.pixelOffsetBR.x * 16),
+                 static_cast<int16_t>(symbol.pixelOffsetBR.y * 16)},
+
+                {aSizeMin, aSizeMax}};
     }
 
     static gfx::Vertex<SymbolDynamicLayoutAttributes> dynamicLayoutVertex(Point<float> anchorPoint, float labelAngle) {
@@ -318,6 +358,8 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
+    using InstanceVector = gfx::VertexVector<SymbolInstanceVertex>;
+    using InstanceBuffer = gfx::VertexBuffer<SymbolInstanceVertex>;
     using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
     using VertexBuffer = gfx::VertexBuffer<SymbolLayoutVertex>;
     using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
@@ -344,6 +386,10 @@ public:
             }
         }
 
+        std::shared_ptr<InstanceVector> sharedInstances = std::make_shared<InstanceVector>();
+        InstanceVector& instances() { return *sharedInstances; }
+        const InstanceVector& instances() const { return *sharedInstances; }
+
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }
@@ -356,9 +402,9 @@ public:
         OpacityVertexVector& opacityVertices() { return *sharedOpacityVertices; }
         const OpacityVertexVector& opacityVertices() const { return *sharedOpacityVertices; }
 
-        using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
-        const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
-        TriangleIndexVector& triangles = *sharedTriangles;
+        // using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+        // const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+        // TriangleIndexVector& triangles = *sharedTriangles;
 
         SegmentVector segments;
         std::vector<PlacedSymbol> placedSymbols;

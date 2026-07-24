@@ -5,8 +5,9 @@
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/renderer/buckets/heatmap_bucket.hpp>
-#include <mbgl/renderer/buckets/raster_bucket.hpp>
 #include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
+#include <mbgl/renderer/buckets/raster_bucket.hpp>
+#include <mbgl/renderer/buckets/symbol_bucket.hpp>
 
 #include <string>
 #include <optional>
@@ -30,16 +31,19 @@ public:
     static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
     static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
     static gfx::VertexVector<FillExtrusionStaticVertex> fillExtrusionVertices();
+    static gfx::VertexVector<SymbolStaticVertex> symbolVertices();
 
     static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
     static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices();
     static gfx::IndexVector<gfx::Triangles> fillExtrusionTriangleIndices();
+    static gfx::IndexVector<gfx::Triangles> symbolTriangleIndices();
 
     static SegmentVector tileTriangleSegments();
     static SegmentVector tileBorderSegments();
     static SegmentVector rasterSegments();
     static SegmentVector heatmapTextureSegments();
     static SegmentVector fillExtrusionSegments();
+    static SegmentVector symbolSegments();
 
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;

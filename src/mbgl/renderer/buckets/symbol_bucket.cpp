@@ -73,15 +73,39 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
       placementModes(std::move(placementModes_)) {
     for (const auto& pair : paintProperties_) {
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(pair.second);
-        paintProperties.emplace(std::piecewise_construct,
-                                std::forward_as_tuple(pair.first),
-                                std::forward_as_tuple(PaintProperties{
-                                    .iconBinders = {RenderSymbolLayer::iconPaintProperties(evaluated), zoom},
-                                    .textBinders = {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
+        paintProperties.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(pair.first),
+            std::forward_as_tuple(PaintProperties{.iconBinders = {iconPaintProperties(evaluated), zoom},
+                                                  .textBinders = {textPaintProperties(evaluated), zoom}}));
     }
 }
 
 SymbolBucket::~SymbolBucket() = default;
+
+// static
+style::IconPaintProperties::PossiblyEvaluated SymbolBucket::iconPaintProperties(
+    const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_) {
+    return style::IconPaintProperties::PossiblyEvaluated{evaluated_.get<style::IconOpacity>(),
+                                                         evaluated_.get<style::IconColor>(),
+                                                         evaluated_.get<style::IconHaloColor>(),
+                                                         evaluated_.get<style::IconHaloWidth>(),
+                                                         evaluated_.get<style::IconHaloBlur>(),
+                                                         evaluated_.get<style::IconTranslate>(),
+                                                         evaluated_.get<style::IconTranslateAnchor>()};
+}
+
+// static
+style::TextPaintProperties::PossiblyEvaluated SymbolBucket::textPaintProperties(
+    const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_) {
+    return style::TextPaintProperties::PossiblyEvaluated{evaluated_.get<style::TextOpacity>(),
+                                                         evaluated_.get<style::TextColor>(),
+                                                         evaluated_.get<style::TextHaloColor>(),
+                                                         evaluated_.get<style::TextHaloWidth>(),
+                                                         evaluated_.get<style::TextHaloBlur>(),
+                                                         evaluated_.get<style::TextTranslate>(),
+                                                         evaluated_.get<style::TextTranslateAnchor>()};
+}
 
 void SymbolBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     uploaded = true;
@@ -97,15 +121,15 @@ bool SymbolBucket::hasData() const {
 }
 
 bool SymbolBucket::hasTextData() const {
-    return !text.segments.empty();
+    return !text.vertices().empty();
 }
 
 bool SymbolBucket::hasIconData() const {
-    return !icon.segments.empty();
+    return !icon.vertices().empty();
 }
 
 bool SymbolBucket::hasSdfIconData() const {
-    return !sdfIcon.segments.empty();
+    return !sdfIcon.vertices().empty();
 }
 
 bool SymbolBucket::hasIconCollisionBoxData() const {
@@ -124,16 +148,20 @@ bool SymbolBucket::hasTextCollisionCircleData() const {
     return textCollisionCircle && !textCollisionCircle->segments.empty();
 }
 
-void addPlacedSymbol(gfx::IndexVector<gfx::Triangles>& triangles, const PlacedSymbol& placedSymbol) {
-    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
-    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
+void addPlacedSymbol(gfx::VertexVector<SymbolInstanceVertex>& instances, const PlacedSymbol& placedSymbol) {
+    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 1;
+    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 1) {
+        auto instanceVertex = SymbolBucket::instanceVertex(vertexIndex);
+        instances.emplace_back(instanceVertex);
+    }
+    /*for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
         triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),
                                static_cast<uint16_t>(vertexIndex + 1),
                                static_cast<uint16_t>(vertexIndex + 2));
         triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1),
                                static_cast<uint16_t>(vertexIndex + 2),
                                static_cast<uint16_t>(vertexIndex + 3));
-    }
+    }*/
 }
 
 void SymbolBucket::sortFeatures(const float angle) {
@@ -158,9 +186,9 @@ void SymbolBucket::sortFeatures(const float angle) {
     sortUploaded = false;
     uploaded = false;
 
-    text.triangles.clear();
-    icon.triangles.clear();
-    sdfIcon.triangles.clear();
+    text.instances().clear();
+    icon.instances().clear();
+    sdfIcon.instances().clear();
 
     auto symbolsSortOrder = std::make_unique<std::vector<size_t>>();
     symbolsSortOrder->reserve(symbolInstances.size());
@@ -177,28 +205,28 @@ void SymbolBucket::sortFeatures(const float angle) {
         symbolsSortOrder->push_back(symbolInstance.getDataFeatureIndex());
 
         if (symbolInstance.getPlacedRightTextIndex()) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()]);
+            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()]);
         }
 
         if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()]);
+            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()]);
         }
 
         if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()]);
+            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()]);
         }
 
         if (symbolInstance.getPlacedVerticalTextIndex()) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()]);
+            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()]);
         }
 
         auto& iconBuffer = symbolInstance.hasSdfIcon() ? sdfIcon : icon;
         if (symbolInstance.getPlacedIconIndex()) {
-            addPlacedSymbol(iconBuffer.triangles, iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()]);
+            addPlacedSymbol(iconBuffer.instances(), iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()]);
         }
 
         if (symbolInstance.getPlacedVerticalIconIndex()) {
-            addPlacedSymbol(iconBuffer.triangles,
+            addPlacedSymbol(iconBuffer.instances(),
                             iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()]);
         }
     }

@@ -1223,7 +1223,9 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
                                const Anchor& labelAnchor,
                                PlacedSymbol& placedSymbol,
                                float sortKey) {
-    constexpr const uint16_t vertexLength = 4;
+    constexpr const uint16_t instanceCount = 1;
+
+    /*constexpr const uint16_t vertexLength = 4;
 
     const auto& tl = symbol.tl;
     const auto& tr = symbol.tr;
@@ -1238,17 +1240,26 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
         buffer.segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max() ||
         std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
         buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, sortKey);
+    }*/
+
+    if (buffer.segments.empty() ||
+        buffer.segments.back().instanceCount + instanceCount > std::numeric_limits<uint16_t>::max() ||
+        std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
+        buffer.segments.emplace_back(0, 0, 4, 6, buffer.instances().elements(), 0, sortKey);
     }
 
     // We're generating triangle fans, so we always start with the first
     // coordinate in this polygon.
     auto& segment = buffer.segments.back();
-    assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-    auto index = static_cast<uint16_t>(segment.vertexLength);
+    // assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
+    // auto index = static_cast<uint16_t>(segment.vertexLength);
+    auto index = static_cast<uint16_t>(segment.baseInstance + segment.instanceCount);
 
     // coordinates (2 triangles)
     auto& vertices = buffer.vertices();
-    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+    vertices.emplace_back(SymbolBucket::layoutVertex(symbol, labelAnchor, sizeData));
+
+    /*vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
                                                      tl,
                                                      symbol.glyphOffset.y,
                                                      tex.x,
@@ -1283,29 +1294,33 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
                                                      sizeData,
                                                      symbol.isSDF,
                                                      pixelOffsetBR,
-                                                     minFontScale));
+                                                     minFontScale));*/
 
     // Dynamic/Opacity vertices are initialized so that the vertex count always
     // agrees with the layout vertex buffer, but they will always be updated
     // before rendering happens
     auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(labelAnchor.point, 0);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    // buffer.dynamicVertices().emplace_back(dynamicVertex);
+    // buffer.dynamicVertices().emplace_back(dynamicVertex);
+    // buffer.dynamicVertices().emplace_back(dynamicVertex);
 
     auto opacityVertex = SymbolBucket::opacityVertex(true, 1.0);
     buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
+    // buffer.opacityVertices().emplace_back(opacityVertex);
+    // buffer.opacityVertices().emplace_back(opacityVertex);
+    // buffer.opacityVertices().emplace_back(opacityVertex);
 
     // add the two triangles, referencing the four coordinates we just inserted.
-    buffer.triangles.emplace_back(index + 0, index + 1, index + 2);
+    /*buffer.triangles.emplace_back(index + 0, index + 1, index + 2);
     buffer.triangles.emplace_back(index + 1, index + 2, index + 3);
 
     segment.vertexLength += vertexLength;
-    segment.indexLength += 6;
+    segment.indexLength += 6;*/
+
+    auto instanceVertex = SymbolBucket::instanceVertex(index);
+    buffer.instances().emplace_back(instanceVertex);
+    segment.instanceCount += instanceCount;
 
     placedSymbol.glyphOffsets.push_back(symbol.glyphOffset.x);
 
