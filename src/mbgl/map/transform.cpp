@@ -506,6 +506,16 @@ void Transform::rotateBy(const ScreenCoordinate& first,
     easeTo(CameraOptions().withBearing(bearing), animation);
 }
 
+void Transform::rotateBy(double angleDegree, const AnimationOptions& animation) {
+    const double bearing = -util::rad2deg(state.getBearing()) - angleDegree;
+    easeTo(CameraOptions().withBearing(bearing), animation);
+}
+
+/*!
+ * \brief Transform::getBearing
+ * Bearing in radiant
+ * \return bearing in radians
+ */
 double Transform::getBearing() const {
     return state.getBearing();
 }
