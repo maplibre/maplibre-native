@@ -302,6 +302,30 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
   return MLNFeaturesFromMBGLFeatures(features);
 }
 
+// MARK: - Managing Feature State
+
+- (BOOL)setFeatureStateForFeatureID:(NSString *)featureID
+                              state:(NSDictionary<NSString *, id> *)state {
+  return [self mgl_setFeatureStateForSourceLayerID:nil featureID:featureID state:state];
+}
+
+- (nullable NSDictionary<NSString *, id> *)featureStateForFeatureID:(NSString *)featureID {
+  return [self mgl_featureStateForSourceLayerID:nil featureID:featureID];
+}
+
+- (BOOL)removeFeatureStateForFeatureID:(nullable NSString *)featureID
+                              stateKey:(nullable NSString *)stateKey {
+  return [self mgl_removeFeatureStateForSourceLayerID:nil featureID:featureID stateKey:stateKey];
+}
+
+- (BOOL)removeFeatureStateForFeatureID:(NSString *)featureID {
+  return [self mgl_removeFeatureStateForSourceLayerID:nil featureID:featureID stateKey:nil];
+}
+
+- (BOOL)resetFeatureStates {
+  return [self mgl_removeFeatureStateForSourceLayerID:nil featureID:nil stateKey:nil];
+}
+
 // MARK: - MLNCluster management
 
 - (std::optional<mbgl::FeatureExtensionValue>)
