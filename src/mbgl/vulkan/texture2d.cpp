@@ -407,7 +407,7 @@ void Texture2D::createSampler() {
                                  .setMinFilter(filter)
                                  .setMagFilter(filter)
                                  .setMinLod(0.0f)
-                                 .setMaxLod(VK_LOD_CLAMP_NONE)
+                                 .setMaxLod(static_cast<float>(getMipLevels() - 1))
                                  .setAddressModeU(addressModeU)
                                  .setAddressModeV(addressModeV)
                                  .setAddressModeW(vk::SamplerAddressMode::eRepeat);
