@@ -132,5 +132,9 @@ bool GeoJSONSource::isUpdateSynchronous() const noexcept {
     return baseImpl->isUpdateSynchronous();
 }
 
+void GeoJSONSource::setOverrideSynchronousUpdate(bool value) noexcept {
+    impl().setOverrideSynchronousUpdate(value);
+}
+
 } // namespace style
 } // namespace mbgl
