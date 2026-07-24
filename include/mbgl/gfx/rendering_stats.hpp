@@ -89,6 +89,21 @@ struct RenderingStats {
     /// Number of stencil buffer updates
     int stencilUpdates = 0;
 
+    /// Number of terrain drape targets actually re-rendered this frame (cache
+    /// misses); panning a static terrain scene should keep this at 0
+    int numDrapeTargetsRendered = 0;
+
+    /// Number of terrain drape targets that ran the full per-target coverage scan
+    /// this frame (i.e. did not hit the global-signature fast path). Should be ~0
+    /// on a static scene; if it stays high, the short-circuit is not engaging
+    int numDrapeCoverageScans = 0;
+
+    /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
+    /// where the terrain overhead goes when nothing re-renders
+    double terrainUpdateTime = 0.0;  ///< RenderTerrain::update (tile/DEM/drawable management)
+    double terrainTweakerTime = 0.0; ///< terrain layer tweaker (surface + depth groups)
+    double terrainDepthTime = 0.0;   ///< terrain depth pass render
+
     RenderingStats& operator+=(const RenderingStats&);
 
 #ifndef NDEBUG

@@ -92,6 +92,20 @@ public:
     /// from here at draw-record time
     std::array<float, 4> currentDrapeTile{{0, 0, 0, 0}};
 
+    /// Frame-global signature of everything a terrain drape's baked content can
+    /// depend on (the set of draped drawable ids, the draped group count, zoom,
+    /// and the evaluated-property epoch). Computed once per frame; used to gate the
+    /// draped layer groups' tweakers (all-or-nothing, cheap). See Renderer::render.
+    std::size_t drapedContentSignature = 0;
+
+    /// Per-drape-target signature, keyed by target tile id: a signature of just the
+    /// drawables overlapping that target (plus zoom and the property epoch), built
+    /// once per frame in a single pass. RenderTarget::render compares its target's
+    /// entry against what the target last baked, so during movement only the targets
+    /// whose own content changed re-scan/re-render - not all of them, as the global
+    /// signature would force. Owned by the renderer for the frame; null off-terrain.
+    const std::map<UnwrappedTileID, std::size_t>* perTargetDrapeSignature = nullptr;
+
     RenderPass pass = RenderPass::Opaque;
     MapMode mapMode;
     MapDebugOptions debugOptions;

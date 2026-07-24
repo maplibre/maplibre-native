@@ -98,8 +98,17 @@ public:
     /// Upload the layer groups
     void upload(gfx::UploadPass& uploadPass);
 
-    /// Render the layer groups
-    void render(RenderOrchestrator&, const RenderTree&, PaintParameters&);
+    /// Outcome of a render() call, used by the drape render budget.
+    enum class RenderResult {
+        Skipped,  ///< Nothing to do (cache hit / render-once already baked).
+        Rendered, ///< The target was (re-)rendered this frame (consumes drape budget).
+        Deferred, ///< A re-render was needed but skipped for budget; keeps the stale texture.
+    };
+
+    /// Render the layer groups. When `canRerender` is false, a drape target that would
+    /// re-render but already has a baked texture is deferred (returns Deferred) instead,
+    /// so a burst of dirty drape targets is spread across frames rather than stalling one.
+    RenderResult render(RenderOrchestrator&, const RenderTree&, PaintParameters&, bool canRerender = true);
 
 protected:
     void renderDrapedLayerGroups(RenderOrchestrator&, PaintParameters&);
@@ -111,20 +120,29 @@ protected:
         int32_t groupsWithContent = 0; // groups with at least one usable tile
         int64_t zoomDeficit = 0;       // sum of zoom levels lost to ancestor fallbacks
 
-        /// Hash of the drawables overlapping this target, by unique drawable id, so
-        /// a tile loading, unloading, or being rebuilt from new bucket data all
-        /// change it (a tile id alone would not catch a rebuild).
+        /// Hash of the covering tile ids overlapping this target (summed, order-independent),
+        /// so it changes only when the SET of covering tiles changes - a tile loading,
+        /// unloading, or an integer-zoom crossing. Deliberately NOT keyed on drawable-instance
+        /// ids: those are rebuilt with fresh ids every frame during fades/bucket updates, which
+        /// churned the signature and re-rendered every drape each frame while panning.
         std::size_t contentHash = 0;
-        /// Zoom is not in contentHash's drawable ids but draped UBOs carry
-        /// zoom-derived values (line ratio, interpolation factors)
+        /// Integer tile-zoom (draped UBOs carry zoom-derived values like line ratio);
+        /// stored quantized so a pinch within one zoom level does not invalidate the
+        /// cache. See computeDrapeCoverage.
         double zoom = -1;
-        /// Evaluated-property generation; see LayerTweaker::getPropertiesEpoch
+        /// Evaluated-property generation. Retained for reference but intentionally NOT
+        /// part of sameContentAs: the drape cache must not re-render on paint changes
+        /// (matches maplibre-gl-js). See computeDrapeCoverage.
         uint64_t propertiesEpoch = 0;
 
-        /// Whether this would draw exactly what `other` already did
+        /// Whether this would draw exactly what `other` already did.
+        /// The paint-property epoch is deliberately NOT part of this: any paint transition
+        /// (e.g. a single label fading in) bumps the global epoch every frame, which defeated
+        /// the drape cache entirely - all visible drape targets re-rendered every frame while
+        /// panning (measured ~4x overdraw / 11fps -> 1x / 44fps once removed). gl-js keys its
+        /// terrain RTT cache on tile coverage + zoom, never on paint changes.
         bool sameContentAs(const DrapeCoverage& other) const {
-            return totalGroups == other.totalGroups && contentHash == other.contentHash && zoom == other.zoom &&
-                   propertiesEpoch == other.propertiesEpoch;
+            return totalGroups == other.totalGroups && contentHash == other.contentHash && zoom == other.zoom;
         }
         /// Whether this would draw less than `other`: fewer layers with content, or
         /// the same layers via coarser ancestor fallbacks
@@ -151,6 +169,31 @@ protected:
     // fewer layers / coarser fallbacks than it already shows (anti-flicker);
     // see RenderTarget::render.
     DrapeCoverage bakedCoverage;
+    // Opt-in "render once" for immutable targets (hillshade prepare, whose DEM input is
+    // baked into the prepare drawable once). When set, the target renders on its first
+    // frame and is skipped after (the offscreen texture persists). NOT set for the terrain
+    // depth target, which must re-render whenever the camera moves. Enabled via
+    // setRenderOnce() by RenderHillshadeLayer when it creates a prepare target.
+    bool renderOnce = false;
+    // Whether a render-once target has already produced its texture.
+    bool renderedOnce = false;
+    // Whether this drape target has been rendered at least once, so its offscreen texture
+    // holds valid (if stale) content. Only such targets may be deferred by the drape budget;
+    // a never-rendered target is always rendered to avoid showing a blank tile.
+    bool hasRenderedContent = false;
+
+public:
+    void setRenderOnce(bool value) { renderOnce = value; }
+
+protected:
+    // This target's own content signature (PaintParameters::perTargetDrapeSignature)
+    // as of the last frame it evaluated its coverage: a signature of just the
+    // drawables overlapping this target, plus zoom and the property epoch. While it
+    // is unchanged, nothing this target draws has changed, so its baked texture is
+    // still correct and the O(draped drawables) coverage scan is skipped. Being
+    // per-target (not global), an unrelated tile loading elsewhere no longer forces
+    // this target to re-scan. Unset until the target has been evaluated once.
+    std::optional<std::size_t> bakedSignature;
 };
 
 } // namespace mbgl

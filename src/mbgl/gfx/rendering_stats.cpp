@@ -60,6 +60,11 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     memUniformBuffers += r.memUniformBuffers;
     stencilClears += r.stencilClears;
     stencilUpdates += r.stencilUpdates;
+    numDrapeTargetsRendered += r.numDrapeTargetsRendered;
+    numDrapeCoverageScans += r.numDrapeCoverageScans;
+    terrainUpdateTime += r.terrainUpdateTime;
+    terrainTweakerTime += r.terrainTweakerTime;
+    terrainDepthTime += r.terrainDepthTime;
     return *this;
 }
 
@@ -106,6 +111,11 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, memUniformBuffers, "memUniformBuffers", sep);
     optionalStatLine(ss, stencilClears, "stencilClears", sep);
     optionalStatLine(ss, stencilUpdates, "stencilUpdates", sep);
+    optionalStatLine(ss, numDrapeTargetsRendered, "numDrapeTargetsRendered", sep);
+    optionalStatLine(ss, numDrapeCoverageScans, "numDrapeCoverageScans", sep);
+    optionalStatLine(ss, terrainUpdateTime, "terrainUpdateTime", sep);
+    optionalStatLine(ss, terrainTweakerTime, "terrainTweakerTime", sep);
+    optionalStatLine(ss, terrainDepthTime, "terrainDepthTime", sep);
     return ss.str();
 }
 #endif

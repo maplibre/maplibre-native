@@ -25,6 +25,9 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/renderer/layer_group.hpp> // drape signature: TileLayerGroup::visitDrawables
+#include <mbgl/util/hash.hpp>            // drape signature: hash_combine
+#include <map>
 #include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/dem_elevation_provider.hpp>
 #include <mbgl/renderer/layers/terrain_layer_tweaker.hpp>
@@ -303,6 +306,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // (RenderTarget::renderDrapedLayerGroups), so a tile at a different zoom than
     // the terrain cover is drawn into every target it covers, like gl-js.
 
+    // Per-drape-target content signatures for this frame (see
+    // PaintParameters::perTargetDrapeSignature). Populated in the tweaker pass below when
+    // terrain is active; must outlive the drape targets pass that reads it, hence the
+    // function scope. parameters points into it for the frame.
+    std::map<UnwrappedTileID, std::size_t> perTargetDrapeSignature;
+
     // Upload layer groups
     {
         const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload",
@@ -314,10 +323,87 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // Update the debug layer groups
         orchestrator.updateDebugLayerGroups(renderTree, parameters);
 
+        // Compute the frame-global draped-content signature once (see
+        // PaintParameters::drapedContentSignature) and each drape target's own signature
+        // (perTargetDrapeSignature), so RenderTarget::render can skip re-rendering - and
+        // re-scanning - a target whose content is unchanged. Both fold the covering-tile
+        // ids of all draped drawables, the draped group count, and the INTEGER tile-zoom
+        // (not the continuous zoom), so pan / pitch / in-level pinch reuse the baked drape
+        // textures and drapes re-render only when the covering tiles or integer zoom change
+        // (matches maplibre-gl-js). The paint-property epoch is deliberately not folded in:
+        // a paint change that alters draped geometry rebuilds its drawables (new covering
+        // set, captured below), whereas folding the global epoch would re-render every drape
+        // on any transition (e.g. a single label fading in).
+        const bool terrainActive = orchestrator.getRenderTerrain() != nullptr;
+        bool drapedContentChanged = true;
+        if (terrainActive) {
+            const int32_t zoomLevel = static_cast<int32_t>(parameters.state.getZoom());
+            // Single pass over all draped drawables: fold each covering-tile hash into the
+            // global signature and record (tile, hash) in a flat vector. A target's own
+            // signature is then an order-independent sum of the hashes whose tile overlaps
+            // it. Key on the COVERING TILE id, not the drawable-instance id, which churns on
+            // every bucket rebuild/fade (consistent with RenderTarget::computeDrapeCoverage).
+            std::size_t signature = 0;
+            std::size_t drapedGroupCount = 0;
+            std::vector<std::pair<UnwrappedTileID, std::size_t>> drapedTiles;
+            drapedTiles.reserve(1024);
+            orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+                if (layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
+                    !layerGroup.shouldRenderToTerrain()) {
+                    return;
+                }
+                drapedGroupCount++;
+                static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
+                    if (!drawable.getEnabled() || !drawable.getTileID()) {
+                        return;
+                    }
+                    const UnwrappedTileID tile = drawable.getTileID()->toUnwrapped();
+                    std::size_t h = 0;
+                    util::hash_combine(h, tile.wrap);
+                    util::hash_combine(h, tile.canonical.z);
+                    util::hash_combine(h, tile.canonical.x);
+                    util::hash_combine(h, tile.canonical.y);
+                    util::hash_combine(signature, h);
+                    drapedTiles.emplace_back(tile, h);
+                });
+            });
+            util::hash_combine(signature, drapedGroupCount);
+            util::hash_combine(signature, zoomLevel);
+            parameters.drapedContentSignature = signature;
+            drapedContentChanged = (lastDrapedContentSignature != signature);
+            lastDrapedContentSignature = signature;
+
+            orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+                const auto& tid = renderTarget.getDrapeTileID();
+                if (!tid) {
+                    return;
+                }
+                std::size_t sig = 0;
+                for (const auto& [tile, h] : drapedTiles) {
+                    if (tile == *tid || tile.isChildOf(*tid) || tid->isChildOf(tile)) {
+                        sig += h;
+                    }
+                }
+                util::hash_combine(sig, drapedGroupCount);
+                util::hash_combine(sig, zoomLevel);
+                perTargetDrapeSignature[*tid] = sig;
+            });
+            parameters.perTargetDrapeSignature = &perTargetDrapeSignature;
+        }
+
         // Tweakers are run in the upload pass so they can set up uniforms.
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.runTweakers(renderTree, parameters);
+            // Skip a draped layer group's tweaker when the drape content is unchanged: its
+            // cached drape texture is not re-rendered this frame, and drapes are
+            // camera-independent (tile-local matrix), so the recomputed per-drawable camera
+            // UBOs would go unused. A real change moves the signature and re-runs the tweaker
+            // the same frame the drape re-renders, keeping the two consistent.
+            const bool skipDrapedTweaker =
+                terrainActive && !drapedContentChanged && layerGroup.shouldRenderToTerrain();
+            if (!skipDrapedTweaker) {
+                layerGroup.runTweakers(renderTree, parameters);
+            }
             parameters.currentLayer++;
         });
 

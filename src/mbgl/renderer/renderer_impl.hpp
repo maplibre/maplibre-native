@@ -76,6 +76,10 @@ private:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     bool styleLoaded = false;
 
+    // Previous frame's frame-global draped-content signature, to detect when the terrain
+    // drape content changed and the draped tweakers/targets must re-run (see render()).
+    std::size_t lastDrapedContentSignature = 0;
+
     enum class RenderState {
         Never,
         Partial,
