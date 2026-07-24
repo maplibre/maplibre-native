@@ -38,6 +38,7 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     numActiveTextures += r.numActiveTextures;
     numTextureBindings += r.numTextureBindings;
     numTextureUpdates += r.numTextureUpdates;
+    numVertexBufferBinds += r.numVertexBufferBinds;
     textureUpdateBytes += r.textureUpdateBytes;
     totalBuffers += r.totalBuffers;
     totalBufferObjs += r.totalBufferObjs;
@@ -84,6 +85,7 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, numActiveTextures, "numActiveTextures", sep);
     optionalStatLine(ss, numTextureBindings, "numTextureBindings", sep);
     optionalStatLine(ss, numTextureUpdates, "numTextureUpdates", sep);
+    optionalStatLine(ss, numVertexBufferBinds, "numVertexBufferBinds", sep);
     optionalStatLine(ss, textureUpdateBytes, "textureUpdateBytes", sep);
     optionalStatLine(ss, totalBuffers, "totalBuffers", sep);
     optionalStatLine(ss, totalBufferObjs, "totalBufferObjs", sep);
