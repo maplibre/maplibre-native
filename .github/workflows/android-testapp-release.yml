@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        renderer: [opengl, vulkan]
+        renderer: [opengl, vulkan, multibackend]
     defaults:
       run:
         working-directory: platform/android

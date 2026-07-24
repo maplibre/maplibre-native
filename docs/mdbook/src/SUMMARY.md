@@ -10,6 +10,7 @@
     - [Release](./platforms/android/release.md)
     - [Rendering Backends](./platforms/android/android-rendering-backends.md)
       - [WebGPU](./platforms/android/android-webgpu.md)
+      - [Rendering Engine API](./platforms/android/android-rendering-engine-api.md)
   - [iOS](./platforms/ios/README.md)
     - [Tests](./platforms/ios/ios-tests.md)
     - [Documentation](./platforms/ios/ios-documentation.md)

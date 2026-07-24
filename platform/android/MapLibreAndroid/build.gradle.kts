@@ -108,17 +108,37 @@ android {
                 }
             }
         }
+        create("multiBackend") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_ANDROID_MULTI_BACKEND=ON")
+                    targets("maplibre-opengl", "maplibre-vulkan")
+                }
+            }
+        }
     }
 
     sourceSets {
         getByName("opengl") {
-            java.srcDirs("src/opengl/java/")
+            java.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
+        }
+        getByName("vulkan") {
+            java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
         }
         listOf("webgpuDawn", "webgpuWgpu").forEach {
             getByName(it) {
-                java.srcDirs("src/vulkan/java")
+                java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
                 manifest.srcFile("src/vulkan/AndroidManifest.xml")
             }
+        }
+        getByName("multiBackend") {
+            java.srcDirs(
+                "src/multiBackend/java/",
+                "src/sharedRenderer/opengl/java/",
+                "src/sharedRenderer/vulkan/java/"
+            )
+            manifest.srcFile("src/multiBackend/AndroidManifest.xml")
         }
     }
 
@@ -225,8 +245,6 @@ configurations {
         exclude(group = "commons-collections", module = "commons-collections")
     }
 }
-
-// apply<DownloadVulkanValidationPlugin>()
 
 // intentionally disabled
 // apply(plugin = "maplibre.jacoco-report")

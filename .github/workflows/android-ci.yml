@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        renderer: [opengl, vulkan]
+        renderer: [opengl, vulkan, multiBackend]
     defaults:
       run:
         working-directory: platform/android
@@ -169,6 +169,7 @@ jobs:
           case "${{ matrix.renderer }}" in
             opengl) echo "renderer=OpenGL" >> "$GITHUB_ENV" ;;
             vulkan) echo "renderer=Vulkan" >> "$GITHUB_ENV" ;;
+            multiBackend) echo "renderer=MultiBackend" >> "$GITHUB_ENV" ;;
             *) echo "::error ::Unknown renderer '${{ matrix.renderer }}'"; exit 1 ;;
           esac
 
@@ -245,7 +246,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flavor: [opengl, vulkan]
+        flavor: [opengl, vulkan, multiBackend]
 
     runs-on: ubuntu-24.04
 
