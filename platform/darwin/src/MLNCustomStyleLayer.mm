@@ -44,11 +44,11 @@ class MLNCustomLayerHost;
   return nil;
 }
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE && !TARGET_OS_MACCATALYST
 - (EAGLContext *)context {
   return self.mapView.context;
 }
-#else
+#elif !TARGET_OS_IPHONE
 - (CGLContextObj)context {
   return self.mapView.context;
 }
