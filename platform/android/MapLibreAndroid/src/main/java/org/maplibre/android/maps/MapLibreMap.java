@@ -417,6 +417,27 @@ public final class MapLibreMap {
   }
 
   /**
+   * Selects the 3D-terrain progressive-loading budget. Trades initial-load sharpness for
+   * smoother interaction on weaker GPUs by spreading new-tile builds and drape re-renders
+   * across frames. Default is {@link TerrainLoadMode#QUALITY} (no budget). Has no effect
+   * when terrain is not enabled.
+   *
+   * @param mode the terrain load mode
+   */
+  public void setTerrainLoadMode(@NonNull TerrainLoadMode mode) {
+    nativeMapView.setTerrainLoadMode(mode.ordinal());
+  }
+
+  /**
+   * @return the current terrain load mode
+   * @see MapLibreMap#setTerrainLoadMode(TerrainLoadMode)
+   */
+  @NonNull
+  public TerrainLoadMode getTerrainLoadMode() {
+    return TerrainLoadMode.values()[nativeMapView.getTerrainLoadMode()];
+  }
+
+  /**
    * Camera based tile level of detail controls
    *
    * @param threshold pitch angle in radians above which LOD calculation is performed

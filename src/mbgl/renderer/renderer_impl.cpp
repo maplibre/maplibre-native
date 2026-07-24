@@ -548,11 +548,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         });
         // Drape render budget: cap how many drape targets actually re-render per frame. A
         // burst of dirty targets (tilt/pan changing coverage) otherwise stalls one frame for
-        // tens of ms each; instead render up to kMaxDrapeRerendersPerFrame and defer the rest
-        // (they keep their stale texture), requesting a follow-up frame so they catch up
-        // progressively. Never-rendered targets always render (avoid blank tiles).
-        constexpr int kMaxDrapeRerendersPerFrame = 16;
-        int drapeBudget = kMaxDrapeRerendersPerFrame;
+        // tens of ms each; instead render up to the budget and defer the rest (they keep their
+        // stale texture), requesting a follow-up frame so they catch up progressively.
+        // Never-rendered targets always render (avoid blank tiles). The cap comes from the
+        // map's TerrainLoadMode; Quality (default) is unlimited.
+        const int drapeCap = terrainLoadBudget(updateParameters->terrainLoadMode).drapeRerendersPerFrame;
+        int drapeBudget = drapeCap > 0 ? drapeCap : (1 << 30);
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
             if (renderTarget.getDrapeTileID()) {
                 const auto res = renderTarget.render(

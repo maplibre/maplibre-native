@@ -363,6 +363,33 @@ visits scale with targets × drawables, run even on a cache hit), the hardcoded
 512x512 drape target size, and DEM texture upload scheduling. Real-device
 profiling welcome.
 
+**Progressive loading budgets + `TerrainLoadMode` API.** Zoom-in / tilt / pan
+that reveals new coverage otherwise stalls a frame while a burst of new tiles
+build their drawables and dirty drape targets all re-render at once (measured
+on PowerVR GE8320: worst interaction frames 713ms/233ms). Two per-frame budgets
+spread that work across frames (`gfx::Context::allowNewTileBuild` for new-tile
+drawable builds; the drape re-render cap in `Renderer::Impl::render` via
+`RenderTarget::render`'s `canRerender`), each requesting a follow-up frame so
+deferred work catches up. Because the trade (initial-load sharpness / a bit of
+progressive fill-in vs smoother interaction) is hardware-dependent, it is a
+per-map API knob, not a style property: `Map::setTerrainLoadMode` /
+`TerrainLoadMode { Quality, Balanced, Performance }` (`include/mbgl/map/mode.hpp`,
+`terrainLoadBudget()` maps each mode to a budget pair). Default **Quality =
+unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
+32 tiles / 16 drapes per frame, Performance = 8 / 4. Exposed on Android
+(`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum); the
+`TerrainVectorMapActivity` overflow menu switches modes and toggles terrain for
+testing. Not yet exposed on iOS/macOS.
+
+**Known bug - runtime terrain enable/disable loses the draped vector layers.**
+Toggling `style.setTerrain(null)` then back on (via the test app's menu) leaves
+the fill/line drape layers rendering nowhere - only symbols (not draped the same
+way) and the hillshade survive; re-entering the activity rebuilds correctly.
+The draped layer groups' `renderToTerrain` routing is not restored across a
+runtime terrain enable/disable. Pre-existing (terrain is normally enabled once
+at style load); the load-mode test menu surfaced it. Needs a trace of the
+`RenderOrchestrator` terrain enable/disable path.
+
 **Fixed - hillshade prepare-target memory leak / OOM (`1efc0db`).** On a
 terrain style with a hillshade layer, `RenderHillshadeLayer` appended every
 per-tile "prepare" render target (a 512x512 Sobel target + its 514x514 DEM

@@ -1018,8 +1018,9 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     // Progressive tile build: cap how many new tiles construct their drawables this frame so
     // a burst of newly revealed tiles (tilt/pan/zoom-in) is spread over frames instead of
     // stalling one. Layers consume from this budget before building a new tile (fill/line).
-    constexpr int kNewTileBuildBudgetPerFrame = 32;
-    context.resetNewTileBuildBudget(kNewTileBuildBudgetPerFrame);
+    // The cap comes from the map's TerrainLoadMode; Quality (default) is unlimited.
+    const int tileBuildBudget = terrainLoadBudget(updateParameters->terrainLoadMode).newTileBuildsPerFrame;
+    context.resetNewTileBuildBudget(tileBuildBudget > 0 ? tileBuildBudget : (1 << 30));
 
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();

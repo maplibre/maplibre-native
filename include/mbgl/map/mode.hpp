@@ -40,6 +40,36 @@ enum class TileLodMode : uint8_t {
     Distance ///< Distance-based TileLOD algorithm
 };
 
+/// Controls progressive loading of 3D-terrain content (draped tiles and drape
+/// re-renders). It trades initial-load sharpness for smoother interaction on weaker
+/// GPUs, so it is a per-map, hardware-driven choice. Default is Quality (no budget),
+/// which preserves the historical sharp snap-load behaviour.
+enum class TerrainLoadMode : uint8_t {
+    Quality,     ///< No budget: all revealed tiles/drapes build immediately. Sharp, may
+                 ///< stall a frame on big bursts (zoom-in over new coverage). Default.
+    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame.
+    Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
+                 ///< weak GPUs, most progressive fill-in.
+};
+
+/// Per-frame budgets for a TerrainLoadMode. A value <= 0 means unlimited.
+struct TerrainLoadBudget {
+    int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
+    int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
+};
+
+constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
+    switch (mode) {
+        case TerrainLoadMode::Balanced:
+            return {32, 16};
+        case TerrainLoadMode::Performance:
+            return {8, 4};
+        case TerrainLoadMode::Quality:
+        default:
+            return {0, 0}; // unlimited
+    }
+}
+
 enum class MapDebugOptions : EnumType {
     NoDebug = 0,
     TileBorders = 1 << 1,

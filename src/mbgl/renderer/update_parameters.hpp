@@ -57,6 +57,7 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+    TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
 };
 
 } // namespace mbgl

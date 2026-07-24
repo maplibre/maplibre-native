@@ -336,6 +336,10 @@ public:
 
     jni::jdouble getTileLodScale(JNIEnv&);
 
+    void setTerrainLoadMode(JNIEnv&, jni::jint);
+
+    jni::jint getTerrainLoadMode(JNIEnv&);
+
     void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
 
     jni::jdouble getTileLodPitchThreshold(JNIEnv&);

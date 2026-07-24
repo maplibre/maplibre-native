@@ -1373,6 +1373,14 @@ jni::jdouble NativeMapView::getTileLodScale(JNIEnv&) {
     return jni::jdouble(map->getTileLodScale());
 }
 
+void NativeMapView::setTerrainLoadMode(JNIEnv&, jni::jint mode) {
+    map->setTerrainLoadMode(static_cast<mbgl::TerrainLoadMode>(mode));
+}
+
+jni::jint NativeMapView::getTerrainLoadMode(JNIEnv&) {
+    return jni::jint(static_cast<int>(map->getTerrainLoadMode()));
+}
+
 void NativeMapView::setTileLodPitchThreshold(JNIEnv&, jni::jdouble threshold) {
     map->setTileLodPitchThreshold(threshold);
 }
@@ -1539,6 +1547,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTileLodMinRadius, "nativeGetTileLodMinRadius"),
         METHOD(&NativeMapView::setTileLodScale, "nativeSetTileLodScale"),
         METHOD(&NativeMapView::getTileLodScale, "nativeGetTileLodScale"),
+        METHOD(&NativeMapView::setTerrainLoadMode, "nativeSetTerrainLoadMode"),
+        METHOD(&NativeMapView::getTerrainLoadMode, "nativeGetTerrainLoadMode"),
         METHOD(&NativeMapView::setTileLodPitchThreshold, "nativeSetTileLodPitchThreshold"),
         METHOD(&NativeMapView::getTileLodPitchThreshold, "nativeGetTileLodPitchThreshold"),
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),

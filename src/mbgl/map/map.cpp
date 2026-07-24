@@ -596,6 +596,14 @@ TileLodMode Map::getTileLodMode() const {
     return impl->tileLodMode;
 }
 
+void Map::setTerrainLoadMode(TerrainLoadMode mode) {
+    impl->terrainLoadMode = mode;
+}
+
+TerrainLoadMode Map::getTerrainLoadMode() const {
+    return impl->terrainLoadMode;
+}
+
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
 }

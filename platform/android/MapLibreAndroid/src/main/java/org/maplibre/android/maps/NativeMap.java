@@ -274,6 +274,10 @@ interface NativeMap {
 
   double getTileLodScale();
 
+  void setTerrainLoadMode(int mode);
+
+  int getTerrainLoadMode();
+
   void setTileLodPitchThreshold(double threshold);
 
   double getTileLodPitchThreshold();
