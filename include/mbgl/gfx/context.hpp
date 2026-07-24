@@ -15,6 +15,7 @@
 #include <string>
 #include <mutex>
 #include <shared_mutex>
+#include <unordered_set>
 
 namespace mbgl {
 
@@ -102,6 +103,34 @@ public:
 
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
+
+    // Per-frame budget for constructing new-tile drawables, counted per *tile* (not per
+    // layer): a burst of newly revealed tiles otherwise builds all their drawables in one
+    // frame, stalling it for tens to hundreds of ms. RenderOrchestrator::updateLayers resets
+    // the budget each frame; a layer's update() calls allowNewTileBuild(tileKey) before
+    // building a new tile. The first layer to reach a given tile spends one budget unit and
+    // records the tile, so every layer of that tile builds together (no half-built tiles);
+    // once the budget is spent, further new tiles are deferred and retried next frame. The
+    // key is a hash of the tile id (avoids a gfx->tile dependency); a rare collision only
+    // lets an extra tile through, which is harmless.
+    void resetNewTileBuildBudget(int maxNewTiles) {
+        newTileBudget = maxNewTiles;
+        newTileBuildDeferred = false;
+        newTilesAllowed.clear();
+    }
+    bool allowNewTileBuild(std::size_t tileKey) {
+        if (newTilesAllowed.count(tileKey)) {
+            return true; // another layer already started this tile this frame
+        }
+        if (newTileBudget <= 0) {
+            newTileBuildDeferred = true;
+            return false;
+        }
+        --newTileBudget;
+        newTilesAllowed.insert(tileKey);
+        return true;
+    }
+    bool newTileBuildWasDeferred() const { return newTileBuildDeferred; }
 
     void threadSafeAccessRenderingStats(const std::function<void(RenderingStats&)>& function) {
         std::scoped_lock lock(renderingStatsMutex);
@@ -202,6 +231,12 @@ protected:
     std::shared_mutex renderingStatsMutex;
     gfx::RenderingStats stats;
     ContextObserver* observer;
+
+    // Progressive new-tile build budget (see resetNewTileBuildBudget). Defaults to
+    // effectively unlimited so any path that never resets it is unaffected.
+    int newTileBudget = 1 << 30;
+    bool newTileBuildDeferred = false;
+    std::unordered_set<std::size_t> newTilesAllowed;
 };
 
 } // namespace gfx

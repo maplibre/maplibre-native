@@ -1015,6 +1015,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    // Progressive tile build: cap how many new tiles construct their drawables this frame so
+    // a burst of newly revealed tiles (tilt/pan/zoom-in) is spread over frames instead of
+    // stalling one. Layers consume from this budget before building a new tile (fill/line).
+    constexpr int kNewTileBuildBudgetPerFrame = 8;
+    context.resetNewTileBuildBudget(kNewTileBuildBudgetPerFrame);
+
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
 #if MLN_RENDER_BACKEND_OPENGL
