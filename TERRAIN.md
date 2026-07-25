@@ -18,7 +18,9 @@ This document describes the 3D terrain rendering implementation for MapLibre Nat
     (`arm64-v8a` for a phone, `x86_64` for the emulator). `assembleOpenglDebug`
     builds without installing; `:MapLibreAndroid:assembleVulkanDebug` /
     `assembleMetalDebug` to check the other backends build.
-- Android test activities (under `activity/style`, in the app's Style section):
+- Android test activities (the five "3D Terrain" entries under `activity/style`,
+  in the app's Style section; all five share the `TerrainTestOptions` overflow
+  menu - see Performance below):
   - `TerrainActivity` - self-contained style with color-relief + hillshade over
     3D terrain (Matterhorn); a bright hypsometric colour ramp to show color-relief.
   - `TerrainVectorMapActivity` - a full-planet vector basemap (OpenFreeMap
@@ -28,6 +30,11 @@ This document describes the 3D terrain rendering implementation for MapLibre Nat
   - `TerrainDebugTilesActivity` - the gl-js terrain debug-tiles style (numbered
     tiles over synthetic terrain), for comparing tile zoom / draping against
     gl-js.
+  - `TerrainFlightActivity` - an automated FPV "drone" camera flight starting on
+    the ground at Innsbruck and touring the surrounding Alps, sweeping a range of
+    zoom / altitude / pitch / rotation over terrain (baked, elevation-planned
+    path that stays above ground); useful for eyeballing draping, occlusion, and
+    frame pacing in motion, especially with the rendering-stats HUD on.
 
 ## Overview
 
@@ -205,7 +212,7 @@ sources explicitly - new `src/`/`include/` files must be added to both.
 
 ### Mesh Generation
 
-Terrain uses a regular grid mesh (128×128 vertices = 16,641 vertices, 32,768 triangles):
+Terrain uses a regular 128×128-quad grid mesh (129×129 = 16,641 vertices, 32,768 triangles):
 
 - Vertices span from (0,0) to (EXTENT, EXTENT) where EXTENT = 8192
 - Z coordinate (elevation) is 0 in mesh data
@@ -379,9 +386,11 @@ unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
 32 tiles / 16 drapes per frame, Performance = 8 / 4. Exposed on Android
 (`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum). All five "3D Terrain"
 test activities share a `TerrainTestOptions` overflow menu that toggles terrain,
-switches load mode, and toggles the built-in rendering-stats HUD; the same
-controls are driveable over adb (`am broadcast ... --es cmd terrain_toggle`, plus
-launch extras) for on-device testing. Not yet exposed on iOS/macOS.
+switches load mode, toggles the built-in rendering-stats HUD (FPS + frame
+timings + counts), and toggles an above-ground-margin debug log (off by default,
+gated so the sampling does not cost anything when unused); the same controls are
+driveable over adb (`am broadcast ... --es cmd terrain_toggle`, plus launch
+extras) for on-device testing. Not yet exposed on iOS/macOS.
 
 **Fixed - runtime terrain re-enable left the map blank until panned.** Toggling
 `style.setTerrain(null)` then back on over an otherwise static map left the map
@@ -670,19 +679,32 @@ from entering the terrain in the first place rather than correcting afterwards.
 - **Render tests**: `metrics/integration/render-tests/terrain/` contains
   `default`, `pitched-world`, `skirts-auto`, `skirts-none` (all ported from
   maplibre-gl-js) and `occlusion-debug` (the local symbol-occlusion diagnostic,
-  `c9fea76`). All five have **native-rendered baselines captured and are no
-  longer ignored** - there are no terrain entries left in `metrics/ignores/`, so
-  they run as part of the normal render-test suite (`default` and
-  `pitched-world` un-ignored in `5b17c5a`, the skirts tests in `5303d65`;
-  `pitched-world`'s baseline was refreshed to the corrected-elevation render in
-  `5d39f97`). The gl-js `terrain/symbol` test is still worth porting now that
-  symbols are elevated (needs its DEM fixtures loaded into
-  `metrics/cache-style.db`).
-- **Android**: the test app has four terrain activities in the Style category
-  (`TerrainActivity`, `TerrainVectorMapActivity`, `TerrainOsmRasterActivity`,
-  `TerrainDebugTilesActivity` - see "Continuing this work" for what each covers).
-  Developed and tested on the `opengl` flavour; the other flavours build but are
-  far less exercised on device.
+  `c9fea76`). They are un-ignored (no terrain entries left in `metrics/ignores/`)
+  and run as part of the normal render-test suite, with native-rendered baselines
+  captured on-device (`default`/`pitched-world` un-ignored in `5b17c5a`, skirts in
+  `5303d65`; `pitched-world`'s baseline refreshed in `5d39f97`).
+  - **Current status: all five FAIL on Linux CI.** The style JSON is verified
+    byte-identical to the gl-js originals (only `default` differs, in whitespace),
+    so these are faithful ports. They fail because native's terrain **tile-cover
+    requests tiles the fixture DB does not have** - the overview pyramid and the
+    near/frontier edges (e.g. `terrain-shading/12-2178-1433`, the `terrain/`
+    z6-z9 ancestors) - so terrain renders empty on CI and the pixel compare fails.
+    Those exact tiles are **absent from gl-js's own fixtures too**: for the
+    identical camera gl-js requests a *different* tile set, so there is nothing to
+    copy in. This is a symptom of the Phase 3 tile-cover / Phase 4
+    terrain-anchored-camera work (native over-requests overview/near tiles vs
+    gl-js), not a baseline or fixture-loading bug. Once the camera/tile-cover
+    converges with gl-js the tests should request the fixture set that already
+    exists. Render tests read tiles from the SQLite `metrics/cache-style.db`
+    (flat tiles under `metrics/integration/tiles/` are loaded into it); there is
+    no official populate tool yet.
+  - The gl-js `terrain/symbol` test is still worth porting now that symbols are
+    elevated (needs its DEM fixtures loaded into `metrics/cache-style.db`).
+- **Android**: the test app has five "3D Terrain" activities in the Style
+  category (`TerrainActivity`, `TerrainVectorMapActivity`,
+  `TerrainOsmRasterActivity`, `TerrainDebugTilesActivity`, `TerrainFlightActivity`
+  - see "Continuing this work" for what each covers). Developed and tested on the
+  `opengl` flavour; the other flavours build but are far less exercised on device.
 - Or load any style with a `terrain` root property, e.g. the example above.
 
 ## API Usage
