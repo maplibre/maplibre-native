@@ -4,7 +4,9 @@
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/logging.hpp>
 
+#include <algorithm>
 #include <initializer_list>
 #include <sstream>
 #include <iomanip>
@@ -246,6 +248,23 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     renderingTime += stats.renderingTime;
 
     const auto currentTime = util::MonotonicTimer::now().count();
+
+    // Per-frame wall-clock timing for the worst-frame / jank lines. Skip the first frame
+    // (no previous timestamp) and idle gaps > 1 s (the map renders on demand, so a pause
+    // between interactions is not a render hitch). maxEncodingTime is the largest single
+    // frame's CPU encode cost - the work the terrain load-mode budgets spread across frames.
+    if (lastFrameTime > 0.0) {
+        const double frameTime = currentTime - lastFrameTime;
+        if (frameTime < 1.0) {
+            maxFrameTime = std::max(maxFrameTime, frameTime);
+            if (frameTime > options.jankThreshold) {
+                ++jankFrames;
+            }
+        }
+    }
+    lastFrameTime = currentTime;
+    maxEncodingTime = std::max(maxEncodingTime, stats.encodingTime);
+
     if (currentTime - lastUpdate < options.updateInterval) {
         return;
     }
@@ -260,6 +279,19 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     ss << "FPS: " << std::setw(7) << fps << "\n";
     ss << "Encoding time (ms): " << std::setw(7) << encodingTime / frameCount * 1000 << "\n";
     ss << "Rendering time (ms): " << std::setw(7) << renderingTime / frameCount * 1000 << "\n";
+    // Worst-frame / jank expose the frame-time spikes an average FPS hides (what the terrain
+    // load-mode budgets trade against). maxEncodeMs is the largest single-frame CPU encode cost.
+    ss << "Worst frame (ms): " << std::setw(7) << maxFrameTime * 1000 << "\n";
+    ss << "Jank frames/interval: " << jankFrames << "\n";
+    ss << "Max encode (ms): " << std::setw(7) << maxEncodingTime * 1000 << "\n";
+
+    // Machine-parseable per-interval line for the load-mode A/B benchmark (grep PERF-HUD).
+    {
+        std::stringstream perf;
+        perf << std::setprecision(3) << std::fixed << "PERF-HUD fps=" << fps << " worstFrameMs=" << maxFrameTime * 1000
+             << " jank=" << jankFrames << " maxEncodeMs=" << maxEncodingTime * 1000;
+        Log::Info(Event::Render, perf.str());
+    }
 
     printNumber(ss, "Frame count", stats.numFrames, true);
     printNumber(ss, "Draw calls", stats.numDrawCalls, true);
@@ -299,6 +331,9 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     frameCount = 0;
     encodingTime = 0.0;
     renderingTime = 0.0;
+    maxFrameTime = 0.0;
+    jankFrames = 0;
+    maxEncodingTime = 0.0;
     lastUpdate = currentTime;
 }
 

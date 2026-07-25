@@ -34,11 +34,16 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/map/transform_state.hpp>
+#include <mbgl/map/camera.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <iomanip>
+#include <sstream>
 #include <unordered_set>
 
 namespace mbgl {
@@ -390,6 +395,55 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             }
         }
     }
+
+    logAboveGroundMargin(state);
+}
+
+void RenderTerrain::logAboveGroundMargin(const TransformState& state) {
+    // Log the camera eye's clearance over the *rendered* terrain surface each frame (throttled),
+    // so the flight/interaction tests can report when the sea-level-anchored camera dips below
+    // terrain - the FPV underground/white artifact (TERRAIN.md Phase 4). Groundwork for a future
+    // terrain-anchored camera: a concrete, measurable "how far under, and where" signal.
+    if (!demSource) {
+        return;
+    }
+    const auto fco = state.getFreeCameraOptions();
+    const auto loc = fco.getLocation(); // eye Lat/Lng + altitude in metres (engine's own conversion)
+    if (!fco.position || !loc) {
+        return;
+    }
+    const double now = util::MonotonicTimer::now().count();
+    if (now - lastAboveGroundLog < kAboveGroundLogInterval) {
+        return;
+    }
+    lastAboveGroundLog = now;
+
+    // Sample the rendered (exaggerated) terrain height directly under the eye. The eye's
+    // horizontal position is the free-camera mercator x/y (0..1); getElevation walks to the best
+    // loaded DEM ancestor, so a deep sample zoom just picks the finest tile available there.
+    const auto& p = *fco.position;
+    constexpr int sampleZoom = 14;
+    const double n = std::pow(2.0, sampleZoom);
+    const double fx = p[0] * n;
+    const double fy = p[1] * n;
+    const auto tx = static_cast<int64_t>(std::floor(fx));
+    const auto ty = static_cast<int64_t>(std::floor(fy));
+    const UnwrappedTileID sampleTile(static_cast<uint8_t>(sampleZoom), tx, ty);
+    const auto localX = static_cast<float>((fx - static_cast<double>(tx)) * util::EXTENT);
+    const auto localY = static_cast<float>((fy - static_cast<double>(ty)) * util::EXTENT);
+
+    const double groundM = getElevationWithExaggeration(sampleTile, localX, localY);
+    const double marginM = loc->altitude - groundM;
+    // Only log when the camera is near or below the terrain - the interesting case, and low
+    // noise (normal viewing sits km above). A DEM miss reads as groundM==0 -> large positive
+    // margin, so it also stays below this gate and is not mistaken for real clearance.
+    if (marginM >= kAboveGroundAlertM) {
+        return;
+    }
+    std::ostringstream os;
+    os << std::fixed << std::setprecision(1) << "ABOVE-GROUND marginM=" << marginM << " camAltM=" << loc->altitude
+       << " groundM=" << groundM << " under=" << (marginM < 0.0 ? 1 : 0);
+    Log::Info(Event::Render, os.str());
 }
 
 float RenderTerrain::getElevation(const UnwrappedTileID& tileID, float x, float y) const {

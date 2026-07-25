@@ -277,6 +277,15 @@ private:
     // Mesh resolution (vertices per side)
     static constexpr size_t MESH_SIZE = 128;
 
+    // Log the camera eye's clearance over the rendered terrain (throttled), so tests can report
+    // when the sea-level-anchored camera dips below terrain (TERRAIN.md Phase 4). See the .cpp.
+    void logAboveGroundMargin(const TransformState& state);
+    double lastAboveGroundLog = 0.0;
+    static constexpr double kAboveGroundLogInterval = 0.25; // seconds
+    // Only log when the eye is within this clearance of the terrain (or below it); above this,
+    // stay silent to keep normal viewing noise-free. Also filters DEM-miss (groundM==0) rows.
+    static constexpr double kAboveGroundAlertM = 1000.0; // metres
+
     // Cached DEM source
     RenderSource* demSource = nullptr;
 

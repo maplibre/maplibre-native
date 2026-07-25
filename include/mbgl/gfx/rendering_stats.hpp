@@ -118,6 +118,11 @@ public:
         bool verbose = false;
         Color textColor = Color::red();
         float textSize = 4.0f;
+        // A rendered frame slower than this counts as "jank". 1/60 s: a frame that missed the
+        // 60 Hz budget is a perceptible hitch even on a faster display. Used for the worst-frame
+        // / jank lines that expose the frame-time spikes an average FPS hides (e.g. the
+        // per-frame loading spikes the terrain load-mode budgets trade against).
+        double jankThreshold = 1.0 / 60.0;
     };
 
     RenderingStatsView() = default;
@@ -142,6 +147,15 @@ protected:
     uint32_t frameCount = 0;
     double encodingTime = 0.0;
     double renderingTime = 0.0;
+
+    // Per-frame wall-clock timing, aggregated over the refresh interval, for the worst-frame /
+    // jank lines. lastFrameTime is the previous frame's timestamp; maxFrameTime is the slowest
+    // frame this interval; jankFrames counts frames over Options::jankThreshold; maxEncodingTime
+    // is the largest single-frame CPU encode cost (the work the load-mode budgets throttle).
+    double lastFrameTime = 0.0;
+    double maxFrameTime = 0.0;
+    uint32_t jankFrames = 0;
+    double maxEncodingTime = 0.0;
 };
 
 } // namespace gfx

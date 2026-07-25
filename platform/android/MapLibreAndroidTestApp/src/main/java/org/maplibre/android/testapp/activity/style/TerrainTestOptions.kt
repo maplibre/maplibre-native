@@ -4,12 +4,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.TerrainLoadMode
@@ -29,8 +32,15 @@ import org.maplibre.android.style.terrain.Terrain
  *     -a org.maplibre.android.testapp.action.TERRAIN_CMD --es cmd terrain_toggle
  *
  * cmd values: terrain_on|terrain_off|terrain_toggle, mode_quality|mode_balanced|
- * mode_performance, stats_on|stats_off|stats_toggle. Initial state can also be set with
- * launch extras: --ez terrain false --es mode performance --ez stats true.
+ * mode_performance, stats_on|stats_off|stats_toggle, burst_on|burst_off|burst_toggle.
+ * Initial state can also be set with launch extras: --ez terrain false --es mode performance
+ * --ez stats true.
+ *
+ * `burst_*` drives a deterministic zoom-burst: it jumps the camera between a low and high
+ * zoom every few seconds, forcing a large tile-build + drape re-render burst on each arrival.
+ * Unlike smooth panning, this actually makes the [TerrainLoadMode] budgets bind, so an A/B run
+ * (set a mode, start the burst, read the PERF-HUD worst-frame/jank log) shows their real trade
+ * (Quality: one big hitch, instant detail; Performance: smoother, progressive pop-in).
  *
  * @param terrainSourceId the raster-dem source id the style wires terrain to; used to
  *   re-enable terrain after it was toggled off.
@@ -75,6 +85,9 @@ class TerrainTestOptions(
                 "stats_on" -> setStatsEnabled(true)
                 "stats_off" -> setStatsEnabled(false)
                 "stats_toggle" -> setStatsEnabled(!statsEnabled)
+                "burst_on" -> setBursting(true)
+                "burst_off" -> setBursting(false)
+                "burst_toggle" -> setBursting(!bursting)
                 else -> return
             }
             activity.invalidateOptionsMenu()
@@ -99,7 +112,38 @@ class TerrainTestOptions(
     }
 
     fun onDestroy() {
+        setBursting(false)
         runCatching { activity.unregisterReceiver(cmdReceiver) }
+    }
+
+    // Deterministic zoom-burst driver (adb `burst_*`). Each jump between the low and high zoom
+    // forces a big tile-build + drape re-render burst, which is what makes the load-mode budgets
+    // actually bind (smooth panning does not). Uses jumpTo (moveCamera) so each burst is a single
+    // hard arrival, keeping the current center so it works from any activity's viewpoint.
+    private val burstHandler = Handler(Looper.getMainLooper())
+    private var bursting = false
+    private var burstHigh = false
+    private val burstRunnable = object : Runnable {
+        override fun run() {
+            val m = map ?: return
+            burstHigh = !burstHigh
+            // easeCamera (animated), not a jump: models interactive browsing-zoom - the scenario
+            // the load-mode budgets target ("zoom-in is laggy"). During the animation tiles stream
+            // in, so the per-frame budget governs how much builds/re-drapes each animation frame.
+            m.easeCamera(
+                CameraUpdateFactory.zoomTo(if (burstHigh) BURST_ZOOM_HIGH else BURST_ZOOM_LOW),
+                BURST_EASE_MS
+            )
+            if (bursting) burstHandler.postDelayed(this, BURST_INTERVAL_MS)
+        }
+    }
+
+    private fun setBursting(on: Boolean) {
+        if (bursting == on) return
+        bursting = on
+        burstHandler.removeCallbacks(burstRunnable)
+        if (on) burstHandler.post(burstRunnable)
+        toast("Zoom burst ${if (on) "on" else "off"}")
     }
 
     fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -192,6 +236,14 @@ class TerrainTestOptions(
         const val EXTRA_CMD = "cmd"
         private const val PREFS = "terrain_test_options"
         private const val KEY_LOAD_MODE = "load_mode"
+
+        // Zoom-burst A/B parameters: a typical browsing zoom range (not an extreme teleport),
+        // animated over BURST_EASE_MS so tiles stream in during the animation - the interactive
+        // case the budgets target. The interval leaves the scene time to settle between bursts.
+        private const val BURST_ZOOM_LOW = 11.0
+        private const val BURST_ZOOM_HIGH = 14.5
+        private const val BURST_EASE_MS = 1200
+        private const val BURST_INTERVAL_MS = 3000L
         const val EXTRA_TERRAIN = "terrain"
         const val EXTRA_MODE = "mode"
         const val EXTRA_STATS = "stats"
