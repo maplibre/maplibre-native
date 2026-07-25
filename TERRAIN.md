@@ -705,6 +705,17 @@ from entering the terrain in the first place rather than correcting afterwards.
   `TerrainOsmRasterActivity`, `TerrainDebugTilesActivity`, `TerrainFlightActivity`
   - see "Continuing this work" for what each covers). Developed and tested on the
   `opengl` flavour; the other flavours build but are far less exercised on device.
+- **Load-mode benchmark**: `metrics/benchmarks/terrain-load-mode-bench.sh` runs the
+  FPV-flight activity once per `TerrainLoadMode` (quality / balanced / performance)
+  over the same deterministic baked path with the stats HUD on, capturing a clean
+  steady-state window of the `PERF-HUD fps/worstFrameMs/jank/maxEncodeMs` log into a
+  per-mode summary (fps mean/p5/min, worstMs median/p95/max, jank-per-second, encode
+  p95/max). It is built for **cross-device comparison of the budgets**: run it on a
+  high-end and a low-end device at the same commit and diff the summaries. Baseline on
+  an Adreno 750 (SM-S948U): Quality is the smoothest (~89 fps, ~10 jank/s) and the
+  throttling modes *add* jank (~15 jank/s, worse frame-time spikes) - the budgets are
+  meant to help weaker GPUs where the snap-load burst stalls a frame, not fast ones.
+  Usage: `metrics/benchmarks/terrain-load-mode-bench.sh <out-dir> [abi] [secs] [build]`.
 - Or load any style with a `terrain` root property, e.g. the example above.
 
 ## API Usage
