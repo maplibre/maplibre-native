@@ -365,7 +365,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
         if (const auto& attr = vertexAttrs->set(idFillExtrusionCentroidVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
-                                   offsetof(FillExtrusionLayoutVertex, a3),
+                                   offsetof(FillExtrusionLayoutVertex, a4),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
