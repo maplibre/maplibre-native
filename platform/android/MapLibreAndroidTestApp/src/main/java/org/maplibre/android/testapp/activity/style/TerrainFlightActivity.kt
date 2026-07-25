@@ -26,15 +26,18 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * FPV-style continuous flight over 3D terrain, on the same planet vector
- * basemap as [TerrainVectorMapActivity] (OpenFreeMap Liberty + Mapterhorn
- * raster-dem). The camera flies a looping path through the Alps at a low,
- * heavily-pitched viewpoint, aiming at a point ahead on the path so turns
- * stay smooth.
+ * Drone-style continuous flight over 3D terrain, on the same planet vector basemap as
+ * [TerrainVectorMapActivity] (OpenFreeMap Liberty + Mapterhorn raster-dem). Starts low over
+ * Innsbruck then tours the surrounding Tyrol Alps: a baked, terrain-following zoom profile
+ * (planned offline from real elevations - see zoomProfile) dives close over low/dense terrain
+ * (valley towns, buildings) and pulls back to a wide overview over the peaks, keeping the
+ * sea-level-anchored camera above the terrain. At each overview it ramps pitch toward the
+ * horizon and sweeps ~360 deg to survey the panorama (and the black sky/background beyond it).
  *
- * It is meant as a moving stress test: DEM/drape tiles stream in over time,
- * so it surfaces loading smoothness, LOD-transition seams, culling as the
- * camera rotates, and label behaviour while travelling. Tap to pause/resume.
+ * It is meant as a moving stress test: DEM/drape tiles stream in over time, so it surfaces
+ * loading smoothness, LOD-transition seams, culling as the camera rotates, and label behaviour
+ * while travelling - and it exercises the full range of zoom, altitude, pitch, and rotation.
+ * Tap to pause/resume.
  */
 class TerrainFlightActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
@@ -143,10 +146,10 @@ class TerrainFlightActivity : AppCompatActivity() {
         // overview points, looking down at terrain/buildings on the close passes. The above-ground
         // profile was planned WITH this pitch, so keep pitchAt in sync with plan_flight.py.
         val tilt = pitchAt(zoom)
-        // A slow heading rotation layered on the travel direction, to survey the horizon at the
-        // high points (long period = gentle).
-        val heading = bearingBetween(here, ahead) +
-            ROTATION_AMPLITUDE_DEG * sin(distance / ROTATION_PERIOD_KM * 2.0 * Math.PI)
+        // Heading = travel direction + the baked bearing offset: a gentle drift on the close/mid
+        // passes, sweeping ~360 deg during each overview dwell so the high-pitch overview surveys
+        // the full panorama + sky.
+        val heading = bearingBetween(here, ahead) + bearingAt(distance)
         return CameraPosition.Builder()
             .target(here)
             .zoom(zoom)
@@ -155,11 +158,12 @@ class TerrainFlightActivity : AppCompatActivity() {
             .build()
     }
 
-    /** Pitch tied to zoom: [PITCH_HIGH] toward the horizon at the zoomed-out overview (ZOOM_FAR),
-     *  [PITCH_LOW] looking down on the close passes (ZOOM_CLOSE). Mirrors plan_flight.py. */
+    /** Pitch tied to zoom: stays [PITCH_LOW] on the mid/close passes (safe altitude), then ramps to
+     *  [PITCH_HIGH] toward the horizon/sky only at the deep, high-clearance overview (zoom < KNEE).
+     *  Nonlinear so max pitch happens only where it is safe. Mirrors plan_flight.py. */
     private fun pitchAt(zoom: Double): Double {
-        val t = ((zoom - ZOOM_CLOSE_REF) / (ZOOM_FAR_REF - ZOOM_CLOSE_REF)).coerceIn(0.0, 1.0)
-        return PITCH_LOW + (PITCH_HIGH - PITCH_LOW) * t
+        val f = ((PITCH_KNEE_ZOOM - zoom) / (PITCH_KNEE_ZOOM - ZOOM_FAR_REF)).coerceIn(0.0, 1.0)
+        return PITCH_LOW + (PITCH_HIGH - PITCH_LOW) * f
     }
 
     /** Baked terrain-following zoom at [distance] along the loop (linear interp between bins). */
@@ -169,6 +173,18 @@ class TerrainFlightActivity : AppCompatActivity() {
         val i = f.toInt() % n
         val t = f - f.toInt()
         return zoomProfile[i] + (zoomProfile[(i + 1) % n] - zoomProfile[i]) * t
+    }
+
+    /** Baked cumulative bearing offset (deg) at [distance]. The profile is a whole number of turns
+     *  over the loop, so past the last bin it continues to BEARING_LOOP_DEG (== the wrap to 0). */
+    private fun bearingAt(distance: Double): Double {
+        val n = bearingOffsetProfile.size
+        val f = (((distance % totalLength) / totalLength) + 1.0) % 1.0 * n
+        val i = f.toInt() % n
+        val t = f - f.toInt()
+        val cur = bearingOffsetProfile[i].toDouble()
+        val nxt = if (i + 1 < n) bearingOffsetProfile[i + 1].toDouble() else BEARING_LOOP_DEG
+        return cur + (nxt - cur) * t
     }
 
     private fun buildPathMetrics() {
@@ -212,39 +228,59 @@ class TerrainFlightActivity : AppCompatActivity() {
         // if the path/tilt/bearing change: sample a terrain-elevation endpoint over each bin's
         // eye footprint (windowed max) and solve zoom for altitude = terrain + clearance.
         private val zoomProfile = floatArrayOf(
-            14.357f, 14.563f, 14.322f, 13.549f, 12.596f, 11.573f, 10.600f, 9.790f, 9.237f, 9.005f, 9.121f, 9.573f,
-            10.306f, 11.237f, 12.256f, 12.792f, 12.771f, 12.714f, 12.738f, 12.697f, 12.498f, 12.526f, 12.622f, 11.915f,
-            10.913f, 10.036f, 9.388f, 9.044f, 9.044f, 9.387f, 10.034f, 10.910f, 11.913f, 12.456f, 12.464f, 12.508f,
-            12.609f, 12.558f, 12.524f, 12.509f, 12.552f, 12.259f, 11.239f, 10.308f, 9.574f, 9.122f, 9.005f, 9.236f,
-            9.788f, 10.598f, 11.571f, 12.546f, 12.873f, 12.999f, 12.986f, 13.122f, 13.102f, 13.246f, 13.162f, 12.598f,
-            11.576f, 10.602f, 9.792f, 9.238f, 9.005f, 9.121f, 9.571f, 10.304f, 11.234f, 12.254f, 12.975f, 12.926f,
-            12.979f, 13.158f, 13.119f, 13.668f, 13.395f, 12.930f, 11.918f, 10.915f, 10.038f, 9.390f, 9.045f, 9.043f,
-            9.386f, 10.033f, 10.908f, 11.911f, 12.614f, 12.813f, 12.601f, 12.593f, 12.660f, 12.679f, 12.613f, 12.599f,
-            12.261f, 11.241f, 10.310f, 9.576f, 9.123f, 9.005f, 9.235f, 9.787f, 10.596f, 11.568f, 12.591f, 12.585f,
-            12.558f, 12.596f, 12.606f, 12.714f, 12.660f, 12.827f, 12.601f, 11.578f, 10.605f, 9.793f, 9.239f, 9.005f,
-            9.120f, 9.570f, 10.302f, 11.232f, 12.251f, 13.151f, 13.235f, 13.122f, 13.227f, 13.282f, 13.068f, 12.965f,
-            12.933f, 11.920f, 10.917f, 10.040f, 9.391f, 9.045f, 9.043f, 9.385f, 10.031f, 10.906f, 11.908f, 12.690f,
-            12.686f, 12.662f, 12.612f, 12.777f, 12.713f, 12.808f, 12.763f, 12.263f, 11.244f, 10.312f, 9.577f, 9.123f,
-            9.005f, 9.234f, 9.785f, 10.594f, 11.566f, 12.570f, 12.637f, 12.610f, 12.702f, 12.665f, 12.635f, 12.520f,
-            12.803f, 12.603f, 11.580f, 10.607f, 9.795f, 9.240f, 9.005f, 9.119f, 9.568f, 10.300f, 11.230f, 12.249f
+            14.315f, 14.471f, 14.398f, 14.388f, 12.924f, 11.339f, 9.830f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f,
+            9.375f, 10.817f, 12.397f, 13.086f, 12.962f, 12.969f, 12.988f, 12.926f, 12.820f, 12.786f, 12.860f, 11.869f,
+            10.314f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 10.311f, 11.865f, 12.777f, 12.725f, 12.779f,
+            12.739f, 12.736f, 12.716f, 12.805f, 12.818f, 12.401f, 10.821f, 9.378f, 9.000f, 9.000f, 9.000f, 9.000f,
+            9.000f, 9.827f, 11.335f, 12.920f, 13.167f, 13.233f, 13.236f, 13.223f, 13.328f, 13.442f, 13.191f, 12.923f,
+            11.342f, 9.834f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 9.372f, 10.813f, 12.393f, 13.169f, 13.173f,
+            13.156f, 13.261f, 13.179f, 13.781f, 13.745f, 13.397f, 11.873f, 10.318f, 9.000f, 9.000f, 9.000f, 9.000f,
+            9.000f, 9.000f, 10.307f, 11.861f, 12.941f, 12.966f, 12.858f, 12.859f, 12.830f, 12.826f, 12.817f, 12.864f,
+            12.404f, 10.824f, 9.381f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 9.824f, 11.331f, 12.834f, 12.852f,
+            13.059f, 12.758f, 12.974f, 12.926f, 12.901f, 12.957f, 12.931f, 11.346f, 9.837f, 9.000f, 9.000f, 9.000f,
+            9.000f, 9.000f, 9.368f, 10.810f, 12.390f, 13.400f, 13.367f, 13.388f, 13.389f, 13.333f, 13.186f, 13.363f,
+            13.033f, 11.876f, 10.321f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 10.304f, 11.858f, 12.884f,
+            12.846f, 12.920f, 12.791f, 12.825f, 12.903f, 12.944f, 12.838f, 12.408f, 10.828f, 9.384f, 9.000f, 9.000f,
+            9.000f, 9.000f, 9.000f, 9.820f, 11.327f, 12.828f, 12.764f, 12.909f, 12.947f, 12.742f, 12.750f, 12.979f,
+            13.019f, 12.935f, 11.350f, 9.840f, 9.000f, 9.000f, 9.000f, 9.000f, 9.000f, 9.365f, 10.806f, 12.386f
+        )
+
+        // Bearing offset (deg) added to the travel heading, baked per bin: a slow drift on the
+        // close/mid passes, sweeping ~360 deg during each overview dwell so the high-pitch overview
+        // surveys the full panorama + sky. Normalized to whole turns so it loops seamlessly.
+        private val bearingOffsetProfile = floatArrayOf(
+            0.0f, 3.0f, 5.9f, 8.9f, 11.8f, 14.8f, 17.7f, 32.7f, 106.5f, 180.3f, 254.1f, 327.9f,
+            401.7f, 448.9f, 451.8f, 454.8f, 457.7f, 460.7f, 463.6f, 466.6f, 469.5f, 472.5f, 475.4f, 478.4f,
+            481.4f, 484.3f, 558.1f, 631.9f, 705.7f, 779.5f, 853.3f, 927.1f, 930.0f, 933.0f, 935.9f, 938.9f,
+            941.8f, 944.8f, 947.7f, 950.7f, 953.6f, 956.6f, 959.5f, 962.5f, 1009.5f, 1083.3f, 1157.1f, 1230.9f,
+            1304.6f, 1378.4f, 1393.6f, 1396.6f, 1399.5f, 1402.5f, 1405.5f, 1408.4f, 1411.4f, 1414.3f, 1417.3f, 1420.2f,
+            1423.2f, 1426.1f, 1440.8f, 1514.6f, 1588.4f, 1662.2f, 1736.0f, 1809.8f, 1857.2f, 1860.2f, 1863.1f, 1866.1f,
+            1869.0f, 1872.0f, 1874.9f, 1877.9f, 1880.8f, 1883.8f, 1886.7f, 1889.7f, 1892.6f, 1966.4f, 2040.2f, 2114.0f,
+            2187.8f, 2261.6f, 2335.4f, 2338.3f, 2341.3f, 2344.2f, 2347.2f, 2350.1f, 2353.1f, 2356.0f, 2359.0f, 2361.9f,
+            2364.9f, 2367.9f, 2370.8f, 2417.6f, 2491.4f, 2565.2f, 2639.0f, 2712.8f, 2786.6f, 2802.0f, 2804.9f, 2807.9f,
+            2810.8f, 2813.8f, 2816.7f, 2819.7f, 2822.6f, 2825.6f, 2828.5f, 2831.5f, 2834.4f, 2848.9f, 2922.7f, 2996.5f,
+            3070.3f, 3144.1f, 3217.9f, 3265.6f, 3268.6f, 3271.5f, 3274.5f, 3277.4f, 3280.4f, 3283.3f, 3286.3f, 3289.2f,
+            3292.2f, 3295.1f, 3298.1f, 3301.0f, 3374.8f, 3448.6f, 3522.4f, 3596.2f, 3670.0f, 3743.8f, 3746.7f, 3749.7f,
+            3752.6f, 3755.6f, 3758.5f, 3761.5f, 3764.4f, 3767.4f, 3770.4f, 3773.3f, 3776.3f, 3779.2f, 3825.8f, 3899.6f,
+            3973.4f, 4047.2f, 4121.0f, 4194.8f, 4210.5f, 4213.4f, 4216.4f, 4219.3f, 4222.3f, 4225.2f, 4228.2f, 4231.1f,
+            4234.1f, 4237.0f, 4240.0f, 4242.9f, 4257.2f, 4331.0f, 4404.8f, 4478.6f, 4552.4f, 4626.2f, 4674.1f, 4677.0f
         )
         // Slow enough that DEM/drape tiles stream in ahead of the camera instead
-        // of the near-field rendering empty (the loop is ~255 km).
-        private const val FLIGHT_DURATION_MS = 420_000L
+        // of the near-field rendering empty (the loop is ~255 km, so ~0.47 km/s here).
+        private const val FLIGHT_DURATION_MS = 540_000L
         private const val TERRAIN_EXAGGERATION = 1.2f
 
-        // Pitch tied to zoom (see pitchAt): high toward the horizon/sky at the zoomed-out
-        // overview (ZOOM_FAR_REF), looking down at terrain/buildings on the close passes
-        // (ZOOM_CLOSE_REF). Max device pitch is 85. Keep in sync with plan_flight.py
+        // Pitch tied to zoom (see pitchAt): stays PITCH_LOW on mid/close passes, then ramps to
+        // PITCH_HIGH (near-horizontal => sky) only at the deep overview below PITCH_KNEE_ZOOM,
+        // where clearance is huge. Max device pitch is 85. Keep in sync with plan_flight.py
         // (the above-ground zoom profile was planned with this pitch).
-        private const val PITCH_LOW = 50.0
-        private const val PITCH_HIGH = 74.0
+        private const val PITCH_LOW = 52.0
+        private const val PITCH_HIGH = 85.0
+        private const val PITCH_KNEE_ZOOM = 10.5
         private const val ZOOM_FAR_REF = 9.0
-        private const val ZOOM_CLOSE_REF = 15.0
-        // A slow heading rotation (long period) layered on the travel direction, to gently
-        // survey the horizon at the high overview points.
-        private const val ROTATION_AMPLITUDE_DEG = 38.0
-        private const val ROTATION_PERIOD_KM = 40.0
+        // Total cumulative spin of bearingOffsetProfile over the loop (whole turns, so bearingAt
+        // wraps seamlessly). Update if the bearing profile is regenerated with different params.
+        private const val BEARING_LOOP_DEG = 4680.0
         private const val EARTH_RADIUS_KM = 6371.0
 
         /** Great-circle distance between two points, in kilometres. */
