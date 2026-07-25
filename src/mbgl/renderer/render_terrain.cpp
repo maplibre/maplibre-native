@@ -442,7 +442,9 @@ void RenderTerrain::logAboveGroundMargin(const TransformState& state) {
     }
     std::ostringstream os;
     os << std::fixed << std::setprecision(1) << "ABOVE-GROUND marginM=" << marginM << " camAltM=" << loc->altitude
-       << " groundM=" << groundM << " under=" << (marginM < 0.0 ? 1 : 0);
+       << " groundM=" << groundM << " under=" << (marginM < 0.0 ? 1 : 0) << std::setprecision(4)
+       << " zoom=" << state.getZoom() << " pitch=" << state.getPitch() << " lng=" << loc->location.longitude()
+       << " lat=" << loc->location.latitude();
     Log::Info(Event::Render, os.str());
 }
 
