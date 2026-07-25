@@ -377,18 +377,27 @@ per-map API knob, not a style property: `Map::setTerrainLoadMode` /
 `terrainLoadBudget()` maps each mode to a budget pair). Default **Quality =
 unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
 32 tiles / 16 drapes per frame, Performance = 8 / 4. Exposed on Android
-(`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum); the
-`TerrainVectorMapActivity` overflow menu switches modes and toggles terrain for
-testing. Not yet exposed on iOS/macOS.
+(`MapLibreMap.setTerrainLoadMode`, `TerrainLoadMode` enum). All five "3D Terrain"
+test activities share a `TerrainTestOptions` overflow menu that toggles terrain,
+switches load mode, and toggles the built-in rendering-stats HUD; the same
+controls are driveable over adb (`am broadcast ... --es cmd terrain_toggle`, plus
+launch extras) for on-device testing. Not yet exposed on iOS/macOS.
 
-**Known bug - runtime terrain enable/disable loses the draped vector layers.**
-Toggling `style.setTerrain(null)` then back on (via the test app's menu) leaves
-the fill/line drape layers rendering nowhere - only symbols (not draped the same
-way) and the hillshade survive; re-entering the activity rebuilds correctly.
-The draped layer groups' `renderToTerrain` routing is not restored across a
-runtime terrain enable/disable. Pre-existing (terrain is normally enabled once
-at style load); the load-mode test menu surfaced it. Needs a trace of the
-`RenderOrchestrator` terrain enable/disable path.
+**Fixed - runtime terrain re-enable left the map blank until panned.** Toggling
+`style.setTerrain(null)` then back on over an otherwise static map left the map
+blank until the view moved (re-entering the activity rebuilt correctly). Root
+cause was *not* the draped `renderToTerrain` routing: on the first frame after
+re-enable, `RenderTerrain::update` - which resolves the DEM source
+`computeMeshCover` needs - has not run yet, so the drape cover is empty and no
+drape targets are created; with nothing else loading, the map idles blank. Two
+fixes in `Renderer::Impl::render`: (1) request a bounded number of follow-up
+frames while an enabled terrain has an empty cover, so the next frame (DEM source
+now resolved) covers normally; (2) force a drape re-bake on the frame the cover
+reappears - the draped drawables still hold screen-space UBOs from rendering to
+screen while terrain was off, so the tweakers must re-run before the fresh
+targets are baked or the drape signature cache serves stale (blank) content.
+Only observable on this branch (the drape signature cache is what serves the
+stale content; upstream terrain-3d re-bakes every frame and never showed it).
 
 **Fixed - hillshade prepare-target memory leak / OOM (`1efc0db`).** On a
 terrain style with a hillshade layer, `RenderHillshadeLayer` appended every
