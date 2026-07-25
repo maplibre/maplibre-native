@@ -12,6 +12,16 @@ namespace util {
 
 // TODO: split this file up into individual headers, following mbgl/math/*.hpp.
 
+template <typename T = double, typename S>
+T dotProduct(const Point<S>& a, const Point<S>& b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+template <typename T = double, typename S>
+T crossProduct(const Point<S>& a, const Point<S>& b) {
+    return a.x * b.y - a.y * b.x;
+}
+
 // Find the angle of the two vectors, solving the formula for the cross product
 // a x b = |a||b|sin(θ) for θ.
 template <typename T = double, typename S>

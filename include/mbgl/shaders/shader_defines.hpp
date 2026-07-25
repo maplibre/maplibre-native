@@ -479,12 +479,12 @@ enum {
 
 enum {
     idFillExtrusionPosVertexAttribute,
+    idFillExtrusionDecimalsEdAttribute,
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionOutlinePosAttribute,
-    idFillExtrusionEdDiscardAttribute,
 #else
-    idFillExtrusionNormalEdVertexAttribute,
+    idFillExtrusionNormal2DVertexAttribute,
     idFillExtrusionCentroidVertexAttribute,
 #endif
 

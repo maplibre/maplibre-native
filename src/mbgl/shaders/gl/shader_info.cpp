@@ -232,7 +232,8 @@ const std::vector<UniformBlockInfo> FillExtrusionShaderInfo::uniformBlocks = {
 };
 const std::vector<AttributeInfo> FillExtrusionShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
-    AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
+    AttributeInfo{"a_decimals_ed", idFillExtrusionDecimalsEdAttribute},
+    AttributeInfo{"a_normal2d", idFillExtrusionNormal2DVertexAttribute},
     AttributeInfo{"a_centroid", idFillExtrusionCentroidVertexAttribute},
     AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
     AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
@@ -253,7 +254,8 @@ const std::vector<UniformBlockInfo> FillExtrusionPatternShaderInfo::uniformBlock
 };
 const std::vector<AttributeInfo> FillExtrusionPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
-    AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
+    AttributeInfo{"a_decimals_ed", idFillExtrusionDecimalsEdAttribute},
+    AttributeInfo{"a_normal2d", idFillExtrusionNormal2DVertexAttribute},
     AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
     AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillExtrusionPatternFromVertexAttribute},
