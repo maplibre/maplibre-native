@@ -50,6 +50,12 @@ class TerrainTestOptions(
     private var map: MapLibreMap? = null
     private var style: Style? = null
 
+    // Persists the load mode across activity/app reloads within the app, so a mode picked in
+    // one 3D terrain test carries into the next launch until changed again (menu or adb).
+    // Lazy: this controller is built as an activity field initializer (constructor time), when
+    // the activity's base Context is not yet attached, so it must not be touched until onMapReady.
+    private val prefs by lazy { activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
+
     var terrainEnabled = true
         private set
     var loadMode = TerrainLoadMode.QUALITY
@@ -79,10 +85,17 @@ class TerrainTestOptions(
     fun onMapReady(map: MapLibreMap, style: Style) {
         this.map = map
         this.style = style
+        // Restore the persisted load mode (prefs is safe to touch now the Context is attached),
+        // then apply it before launch extras so an adb `--es mode ...` can still override it.
+        loadMode = readPersistedLoadMode()
+        map.setTerrainLoadMode(loadMode)
         applyLaunchExtras()
         ContextCompat.registerReceiver(
             activity, cmdReceiver, IntentFilter(ACTION_CMD), ContextCompat.RECEIVER_EXPORTED
         )
+        // onCreateOptionsMenu already ran (before this async callback) with the default state,
+        // so rebuild the menu to reflect the restored mode / any launch-extra overrides.
+        activity.invalidateOptionsMenu()
     }
 
     fun onDestroy() {
@@ -137,9 +150,15 @@ class TerrainTestOptions(
 
     private fun setLoadMode(mode: TerrainLoadMode) {
         loadMode = mode
+        prefs.edit().putString(KEY_LOAD_MODE, mode.name).apply()
         map?.setTerrainLoadMode(mode)
         toast("Terrain load mode: ${mode.name}")
     }
+
+    private fun readPersistedLoadMode(): TerrainLoadMode =
+        prefs.getString(KEY_LOAD_MODE, null)
+            ?.let { name -> runCatching { TerrainLoadMode.valueOf(name) }.getOrNull() }
+            ?: TerrainLoadMode.QUALITY
 
     private fun setStatsEnabled(on: Boolean) {
         statsEnabled = on
@@ -171,6 +190,8 @@ class TerrainTestOptions(
     companion object {
         const val ACTION_CMD = "org.maplibre.android.testapp.action.TERRAIN_CMD"
         const val EXTRA_CMD = "cmd"
+        private const val PREFS = "terrain_test_options"
+        private const val KEY_LOAD_MODE = "load_mode"
         const val EXTRA_TERRAIN = "terrain"
         const val EXTRA_MODE = "mode"
         const val EXTRA_STATS = "stats"
