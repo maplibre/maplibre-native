@@ -429,6 +429,17 @@ public final class MapLibreMap {
   }
 
   /**
+   * Debug: when enabled, the renderer logs the camera eye's clearance over the 3D terrain
+   * ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the per-frame
+   * elevation sampling is skipped entirely when off, so it has no cost unless enabled.
+   *
+   * @param enabled whether to emit the above-ground debug log
+   */
+  public void setDebugAboveGroundLog(boolean enabled) {
+    nativeMapView.setDebugAboveGroundLog(enabled);
+  }
+
+  /**
    * @return the current terrain load mode
    * @see MapLibreMap#setTerrainLoadMode(TerrainLoadMode)
    */

@@ -340,6 +340,8 @@ public:
 
     jni::jint getTerrainLoadMode(JNIEnv&);
 
+    void setDebugAboveGroundLog(JNIEnv&, jni::jboolean);
+
     void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
 
     jni::jdouble getTileLodPitchThreshold(JNIEnv&);

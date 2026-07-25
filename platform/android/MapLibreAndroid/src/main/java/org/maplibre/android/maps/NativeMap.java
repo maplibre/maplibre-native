@@ -276,6 +276,8 @@ interface NativeMap {
 
   void setTerrainLoadMode(int mode);
 
+  void setDebugAboveGroundLog(boolean enabled);
+
   int getTerrainLoadMode();
 
   void setTileLodPitchThreshold(double threshold);

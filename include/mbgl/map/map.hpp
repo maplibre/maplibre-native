@@ -212,6 +212,12 @@ public:
     void setTerrainLoadMode(TerrainLoadMode mode);
     TerrainLoadMode getTerrainLoadMode() const;
 
+    /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
+    /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
+    /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.
+    void setDebugAboveGroundLog(bool enabled);
+    bool getDebugAboveGroundLog() const;
+
     ClientOptions getClientOptions() const;
 
     const std::unique_ptr<util::ActionJournal>& getActionJournal();

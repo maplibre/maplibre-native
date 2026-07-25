@@ -899,6 +899,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setDebugAboveGroundLog(boolean enabled) {
+    if (checkState("setDebugAboveGroundLog")) {
+      return;
+    }
+    nativeSetDebugAboveGroundLog(enabled);
+  }
+
+  @Override
   public int getTerrainLoadMode() {
     if (checkState("getTerrainLoadMode")) {
       return 0;
@@ -1854,6 +1862,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeSetTerrainLoadMode(int mode);
+
+  @Keep
+  private native void nativeSetDebugAboveGroundLog(boolean enabled);
 
   @Keep
   private native int nativeGetTerrainLoadMode();

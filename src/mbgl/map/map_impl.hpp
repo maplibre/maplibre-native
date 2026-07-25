@@ -115,6 +115,7 @@ public:
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
     TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
+    bool debugAboveGroundLog = false;
 };
 
 // Forward declaration of this method is required for the MapProjection class

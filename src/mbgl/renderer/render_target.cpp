@@ -12,17 +12,9 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/hash.hpp>
-#include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <cmath>
-
-// TEMP: direct NDK logcat for the drape-redraw diagnostic, bypassing MapLibre's Log
-// (which on Android routes through JNI to Java android.util.Log and is filtered/stripped
-// in release). Remove with the diagnostic below.
-#if defined(__ANDROID__)
-#include <android/log.h>
-#endif
 
 namespace mbgl {
 
@@ -363,47 +355,12 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
             return RenderResult::Deferred;
         }
 
-        // TEMP diagnostic: reaching here means every skip missed. Report WHY - whether
-        // the signature gate missed and which coverage field changed - straight to
-        // logcat via the NDK, so it is guaranteed visible in release. Throttled.
-        {
-            static uint32_t drapeDiagThrottle = 0;
-            if (++drapeDiagThrottle % 30 == 1) {
-                const bool sigMiss = !bakedSignature || *bakedSignature != targetSignature;
-                const std::string line =
-                    "DRAPE-REDRAW " + util::toString(*drapeTileID) + " sigMiss=" + (sigMiss ? "1" : "0") +
-                    " | totGrp " + util::toString(bakedCoverage.totalGroups) + "->" +
-                    util::toString(coverage.totalGroups) + " | cHash " + util::toString(bakedCoverage.contentHash) +
-                    "->" + util::toString(coverage.contentHash) + " | zoom " + util::toString(bakedCoverage.zoom) +
-                    "->" + util::toString(coverage.zoom) + " | grpWithContent " +
-                    util::toString(coverage.groupsWithContent) + "/" + util::toString(coverage.totalGroups);
-#if defined(__ANDROID__)
-                __android_log_print(ANDROID_LOG_ERROR, "DRAPE", "%s", line.c_str());
-#else
-                Log::Warning(Event::Render, line);
-#endif
-            }
-        }
-
         bakedCoverage = coverage;
         bakedSignature = targetSignature;
 
         // Committed to re-rendering this drape (a cache miss). Count it so the
         // measure-first overlay can show drape churn per frame.
         context.renderingStats().numDrapeTargetsRendered++;
-
-        // TEMP diagnostic: name drape targets that render with most of their
-        // layers missing (throttled; remove before merging)
-        if (coverage.groupsWithContent * 2 < coverage.totalGroups) {
-            static uint32_t throttle = 0;
-            if (++throttle % 60 == 1) {
-                Log::Warning(Event::Render,
-                             "Drape target " + util::toString(*drapeTileID) + " rendering with " +
-                                 util::toString(coverage.groupsWithContent) + "/" +
-                                 util::toString(coverage.totalGroups) +
-                                 " draped layers, deficit=" + util::toString(coverage.zoomDeficit));
-            }
-        }
     }
 
     // Drape targets carry a depth and stencil attachment, as maplibre-gl-js's

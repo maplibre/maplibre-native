@@ -32,7 +32,8 @@ import org.maplibre.android.style.terrain.Terrain
  *     -a org.maplibre.android.testapp.action.TERRAIN_CMD --es cmd terrain_toggle
  *
  * cmd values: terrain_on|terrain_off|terrain_toggle, mode_quality|mode_balanced|
- * mode_performance, stats_on|stats_off|stats_toggle, burst_on|burst_off|burst_toggle.
+ * mode_performance, stats_on|stats_off|stats_toggle, burst_on|burst_off|burst_toggle,
+ * abovelog_on|abovelog_off|abovelog_toggle.
  * Initial state can also be set with launch extras: --ez terrain false --es mode performance
  * --ez stats true.
  *
@@ -72,6 +73,8 @@ class TerrainTestOptions(
         private set
     var statsEnabled = false
         private set
+    var aboveGroundLog = false
+        private set
 
     private val cmdReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -88,6 +91,9 @@ class TerrainTestOptions(
                 "burst_on" -> setBursting(true)
                 "burst_off" -> setBursting(false)
                 "burst_toggle" -> setBursting(!bursting)
+                "abovelog_on" -> setAboveGroundLog(true)
+                "abovelog_off" -> setAboveGroundLog(false)
+                "abovelog_toggle" -> setAboveGroundLog(!aboveGroundLog)
                 else -> return
             }
             activity.invalidateOptionsMenu()
@@ -155,6 +161,10 @@ class TerrainTestOptions(
             isCheckable = true
             isChecked = statsEnabled
         }
+        menu.add(0, MENU_TOGGLE_ABOVELOG, 2, "Above-ground log").apply {
+            isCheckable = true
+            isChecked = aboveGroundLog
+        }
         val sub = menu.addSubMenu("Terrain load mode")
         sub.add(MODE_GROUP, MENU_MODE_QUALITY, 0, "Quality (default)")
         sub.add(MODE_GROUP, MENU_MODE_BALANCED, 1, "Balanced")
@@ -173,6 +183,7 @@ class TerrainTestOptions(
         when (item.itemId) {
             MENU_TOGGLE_TERRAIN -> setTerrainEnabled(!terrainEnabled)
             MENU_TOGGLE_STATS -> setStatsEnabled(!statsEnabled)
+            MENU_TOGGLE_ABOVELOG -> setAboveGroundLog(!aboveGroundLog)
             MENU_MODE_QUALITY -> setLoadMode(TerrainLoadMode.QUALITY)
             MENU_MODE_BALANCED -> setLoadMode(TerrainLoadMode.BALANCED)
             MENU_MODE_PERFORMANCE -> setLoadMode(TerrainLoadMode.PERFORMANCE)
@@ -181,6 +192,7 @@ class TerrainTestOptions(
         item.isChecked = when (item.itemId) {
             MENU_TOGGLE_TERRAIN -> terrainEnabled
             MENU_TOGGLE_STATS -> statsEnabled
+            MENU_TOGGLE_ABOVELOG -> aboveGroundLog
             else -> true // exclusive mode group unchecks the others
         }
         return true
@@ -197,6 +209,14 @@ class TerrainTestOptions(
         prefs.edit().putString(KEY_LOAD_MODE, mode.name).apply()
         map?.setTerrainLoadMode(mode)
         toast("Terrain load mode: ${mode.name}")
+    }
+
+    // Debug: the native above-ground clearance log (ABOVE-GROUND ...). Off by default and gated in
+    // the renderer, so the per-frame elevation sampling only runs while this is on.
+    private fun setAboveGroundLog(on: Boolean) {
+        aboveGroundLog = on
+        map?.setDebugAboveGroundLog(on)
+        toast("Above-ground log ${if (on) "on" else "off"}")
     }
 
     private fun readPersistedLoadMode(): TerrainLoadMode =
@@ -257,5 +277,6 @@ class TerrainTestOptions(
         private const val MENU_MODE_QUALITY = 2
         private const val MENU_MODE_BALANCED = 3
         private const val MENU_MODE_PERFORMANCE = 4
+        private const val MENU_TOGGLE_ABOVELOG = 6
     }
 }

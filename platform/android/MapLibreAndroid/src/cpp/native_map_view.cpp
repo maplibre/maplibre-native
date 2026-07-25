@@ -1381,6 +1381,10 @@ jni::jint NativeMapView::getTerrainLoadMode(JNIEnv&) {
     return jni::jint(static_cast<int>(map->getTerrainLoadMode()));
 }
 
+void NativeMapView::setDebugAboveGroundLog(JNIEnv&, jni::jboolean enabled) {
+    map->setDebugAboveGroundLog(enabled);
+}
+
 void NativeMapView::setTileLodPitchThreshold(JNIEnv&, jni::jdouble threshold) {
     map->setTileLodPitchThreshold(threshold);
 }
@@ -1549,6 +1553,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTileLodScale, "nativeGetTileLodScale"),
         METHOD(&NativeMapView::setTerrainLoadMode, "nativeSetTerrainLoadMode"),
         METHOD(&NativeMapView::getTerrainLoadMode, "nativeGetTerrainLoadMode"),
+        METHOD(&NativeMapView::setDebugAboveGroundLog, "nativeSetDebugAboveGroundLog"),
         METHOD(&NativeMapView::setTileLodPitchThreshold, "nativeSetTileLodPitchThreshold"),
         METHOD(&NativeMapView::getTileLodPitchThreshold, "nativeGetTileLodPitchThreshold"),
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),

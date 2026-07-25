@@ -604,6 +604,14 @@ TerrainLoadMode Map::getTerrainLoadMode() const {
     return impl->terrainLoadMode;
 }
 
+void Map::setDebugAboveGroundLog(bool enabled) {
+    impl->debugAboveGroundLog = enabled;
+}
+
+bool Map::getDebugAboveGroundLog() const {
+    return impl->debugAboveGroundLog;
+}
+
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
 }

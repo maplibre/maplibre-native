@@ -149,8 +149,7 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
                     ++nwrap;
                 }
                 dilated.emplace(static_cast<int16_t>(nwrap),
-                                CanonicalTileID(
-                                    id.canonical.z, static_cast<uint32_t>(nx), static_cast<uint32_t>(ny)));
+                                CanonicalTileID(id.canonical.z, static_cast<uint32_t>(nx), static_cast<uint32_t>(ny)));
             }
         }
     }
@@ -396,7 +395,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         }
     }
 
-    logAboveGroundMargin(state);
+    // Debug-only, off by default: gate the whole above-ground check (per-frame free-camera +
+    // elevation sampling) on the flag so it costs nothing unless explicitly enabled.
+    if (updateParameters && updateParameters->debugAboveGroundLog) {
+        logAboveGroundMargin(state);
+    }
 }
 
 void RenderTerrain::logAboveGroundMargin(const TransformState& state) {
