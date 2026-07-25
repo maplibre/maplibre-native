@@ -119,7 +119,7 @@ public:
         newTilesAllowed.clear();
     }
     bool allowNewTileBuild(std::size_t tileKey) {
-        if (newTilesAllowed.count(tileKey)) {
+        if (newTilesAllowed.contains(tileKey)) {
             return true; // another layer already started this tile this frame
         }
         if (newTileBudget <= 0) {

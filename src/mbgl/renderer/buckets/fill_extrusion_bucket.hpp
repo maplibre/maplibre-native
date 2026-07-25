@@ -65,8 +65,12 @@ public:
             }};
     }
 #else
-    static FillExtrusionLayoutVertex layoutVertex(
-        const Point<double>& p, double nx, double ny, unsigned short t, uint16_t edgeDistance, Point<int16_t> centroid) {
+    static FillExtrusionLayoutVertex layoutVertex(const Point<double>& p,
+                                                  double nx,
+                                                  double ny,
+                                                  unsigned short t,
+                                                  uint16_t edgeDistance,
+                                                  Point<int16_t> centroid) {
         const auto factor = pow(2, 14);
         auto intPart = Point<double>(std::floor(p.x), std::floor(p.y));
         // Multiply factional part by 2^7 to pack them into integers [0..127]
