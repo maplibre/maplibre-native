@@ -149,13 +149,27 @@ float unpack_depth(vec4 rgba_depth) {
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth sampler and enable flag are
 // passed as arguments.
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
+// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
+// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
+// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+}
 float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
-    vec2 uv = pos.xy / pos.w * 0.5 + 0.5;
-    float depth = unpack_depth(texture(depth_texture, uv));
-    return pos.z / pos.w > depth ? 0.0 : 1.0;
+    vec3 frag = pos.xyz / pos.w;
+    // check if coordinate is fully visible
+    highp float d = depth_opacity(frag, depth_texture);
+    if (d > 0.95) {
+        return 1.0;
+    }
+    // if not, sample some pixels above: a label whose anchor is just behind a
+    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
+    return (d + depth_opacity(frag + vec3(0.0, 0.01, 0.0), depth_texture)) / 2.0;
 }
 )";
     static constexpr const char* fragment = R"(#ifdef GL_ES
