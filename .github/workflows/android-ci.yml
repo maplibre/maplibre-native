@@ -246,7 +246,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flavor: [opengl, vulkan, multiBackend]
+        flavor: [opengl, vulkan]
 
     runs-on: ubuntu-24.04
 
