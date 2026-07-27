@@ -4,6 +4,28 @@ Branch: `experiment/terrain-mesh-instancing`. Scratch design notes for collapsin
 per-tile terrain draws into a single instanced draw, to attack the CPU-encode bottleneck.
 Not wired up yet — this is the "is it something we can do?" writeup.
 
+## Prior art: WifiDB PR #5 "Terrain depth instancing" already does the depth half
+
+`WifiDB/maplibre-native#5` implements this concept for the terrain **depth** pass and confirms
+it is feasible on GL/PowerVR. It already contains the infra this doc calls for — so **build on
+it rather than re-deriving the depth half here**:
+
+- `src/mbgl/gl/texture_2d_array.{cpp,hpp}` — a GL-only `GL_TEXTURE_2D_ARRAY` of RGBA8 layers
+  (pieces §1 below), packing the per-tile DEMs so one instanced draw samples a layer per tile.
+- `TerrainDepthInstanceUBO[TERRAIN_MAX_INSTANCES=64]` indexed by `gl_InstanceID` (not a per-
+  instance vertex attribute — the GL backend never binds divisor-1 attributes), with a
+  `dem_layer` per instance (§3).
+- `DrawableGL::setArrayTexture` + instanced draw (§2); instanced `terrain_depth.vertex/fragment`
+  sampling `sampler2DArray u_dem_array` (§6).
+- Heavy PowerVR profiling (`pvr_depth*.csv`, perfetto traces) — check those for the measured win.
+
+**What #5 leaves for later (and what this branch should focus on): the color / drape pass.**
+The depth pass only needs geometry + DEM, so it never packs the **drape** RTT into an array.
+Instancing the visible terrain (`terrain.vertex/fragment` + the per-tile map drape) is the
+harder, higher-payoff half — the drapes are the bulk of the terrain draw calls — and needs the
+drape RTT rendered into array layers (§4–5). The `TERRAIN_MAX_INSTANCES=64` cap pairs with the
+`coverZoomShift` shipped on the PR branch to keep tile counts under the array-layer limit.
+
 ## Why
 
 The FPV-flight benchmark on a CPU-encode-bound low-end GPU (PowerVR, OpenGL) showed the
