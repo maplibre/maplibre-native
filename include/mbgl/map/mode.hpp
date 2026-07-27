@@ -47,26 +47,35 @@ enum class TileLodMode : uint8_t {
 enum class TerrainLoadMode : uint8_t {
     Quality,     ///< No budget: all revealed tiles/drapes build immediately. Sharp, may
                  ///< stall a frame on big bursts (zoom-in over new coverage). Default.
-    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame.
-    Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame; smoothest on
-                 ///< weak GPUs, most progressive fill-in.
+    Balanced,    ///< Cap 32 new-tile builds + 16 drape re-renders per frame, and cover the
+                 ///< terrain a half zoom coarser (~30% fewer tiles on average). For mid-tier
+                 ///< devices: a gentle draw-call cut with barely-perceptible detail loss.
+    Performance, ///< Cap 8 new-tile builds + 4 drape re-renders per frame, and cover the
+                 ///< terrain one zoom coarser (~1/4 the mesh tiles + drape targets). Aimed
+                 ///< at CPU-encode-bound low-end GPUs, where draw-call count - not fill -
+                 ///< caps the frame rate; trades relief/drape sharpness for fewer draw calls.
 };
 
 /// Per-frame budgets for a TerrainLoadMode. A value <= 0 means unlimited.
 struct TerrainLoadBudget {
     int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
     int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
+    /// Shift applied to the terrain mesh/drape cover zoom (added to the LOD zoom). Negative
+    /// coarsens the cover: -1 ~= a quarter of the tiles, so a quarter of the terrain draw
+    /// calls and drape targets, which is the dominant per-frame CPU-encode cost on weak
+    /// devices. 0 keeps the view's full ideal detail.
+    float coverZoomShift;
 };
 
 constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
-            return {32, 16};
+            return {32, 16, -0.5f};
         case TerrainLoadMode::Performance:
-            return {8, 4};
+            return {8, 4, -1.0f};
         case TerrainLoadMode::Quality:
         default:
-            return {0, 0}; // unlimited
+            return {0, 0, 0.0f}; // unlimited, full detail
     }
 }
 

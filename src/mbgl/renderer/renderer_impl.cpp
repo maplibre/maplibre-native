@@ -315,11 +315,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // (RenderTarget::renderDrapedLayerGroups), so a tile at a different zoom than
     // the terrain cover is drawn into every target it covers, like gl-js.
 
-    // Per-drape-target content signatures for this frame (see
-    // PaintParameters::perTargetDrapeSignature). Populated in the tweaker pass below when
-    // terrain is active; must outlive the drape targets pass that reads it, hence the
-    // function scope. parameters points into it for the frame.
-    std::map<UnwrappedTileID, std::size_t> perTargetDrapeSignature;
+    // Per-drape-target content signatures live in the member perTargetDrapeSignature, cached
+    // across frames and rebuilt only when the drape content changes (below). parameters
+    // points into it for the drape targets pass.
 
     // Upload layer groups
     {
@@ -400,21 +398,31 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             drapedContentChanged = (lastDrapedContentSignature != signature) || coverJustReappeared;
             lastDrapedContentSignature = signature;
 
-            orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
-                const auto& tid = renderTarget.getDrapeTileID();
-                if (!tid) {
-                    return;
-                }
-                std::size_t sig = 0;
-                for (const auto& [tile, h] : drapedTiles) {
-                    if (tile == *tid || tile.isChildOf(*tid) || tid->isChildOf(tile)) {
-                        sig += h;
+            // Rebuild the per-target signature map only when the drape content actually
+            // changed. When it did not (steady panning, idle, in-level pinch) the map is
+            // identical to last frame's, so reusing the cached member skips this
+            // O(targets x draped-tiles) pass - pure per-frame overhead otherwise, and the
+            // dominant per-frame cost on CPU-encode-bound low-end GPUs. Because the global
+            // signature folds the covering-tile set, group count and integer zoom, an
+            // unchanged signature guarantees the same targets with the same per-target sums.
+            if (drapedContentChanged) {
+                perTargetDrapeSignature.clear();
+                orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+                    const auto& tid = renderTarget.getDrapeTileID();
+                    if (!tid) {
+                        return;
                     }
-                }
-                util::hash_combine(sig, drapedGroupCount);
-                util::hash_combine(sig, zoomLevel);
-                perTargetDrapeSignature[*tid] = sig;
-            });
+                    std::size_t sig = 0;
+                    for (const auto& [tile, h] : drapedTiles) {
+                        if (tile == *tid || tile.isChildOf(*tid) || tid->isChildOf(tile)) {
+                            sig += h;
+                        }
+                    }
+                    util::hash_combine(sig, drapedGroupCount);
+                    util::hash_combine(sig, zoomLevel);
+                    perTargetDrapeSignature[*tid] = sig;
+                });
+            }
             parameters.perTargetDrapeSignature = &perTargetDrapeSignature;
         }
         // Latch whether the drape cover had targets this frame, for the re-bake trigger above.

@@ -9,8 +9,10 @@
 #include <Foundation/Foundation.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
+#include <map>
 #include <memory>
 #include <string>
+#include <mbgl/tile/tile_id.hpp>
 
 namespace mbgl {
 
@@ -79,6 +81,12 @@ private:
     // Previous frame's frame-global draped-content signature, to detect when the terrain
     // drape content changed and the draped tweakers/targets must re-run (see render()).
     std::size_t lastDrapedContentSignature = 0;
+
+    // Per-drape-target content signatures (covering tile -> signature), cached across frames.
+    // Rebuilt (an O(targets x draped-tiles) pass) only when the frame-global drape signature
+    // changes; when it is unchanged - the common panning/idle case - the same map is reused,
+    // which removes that per-frame cost on CPU-encode-bound devices. See render().
+    std::map<UnwrappedTileID, std::size_t> perTargetDrapeSignature;
 
     // Did the terrain drape cover have any targets last frame? The drape signature cache
     // short-circuits the draped tweakers when the content signature is unchanged, but while
