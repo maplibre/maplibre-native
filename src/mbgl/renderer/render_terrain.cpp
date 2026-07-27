@@ -707,6 +707,12 @@ const RenderTerrain::TerrainMesh& RenderTerrain::getMesh(gfx::Context& context) 
     return *mesh;
 }
 
+const RenderTerrain::TerrainMesh& RenderTerrain::getDepthMesh(gfx::Context& context) {
+    // The instanced depth pass reuses the full terrain mesh; the source PR's coarser
+    // depth-only mesh (getDepthMesh/buildMesh) is a separable optimization not pulled here.
+    return getMesh(context);
+}
+
 void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
     // A regular grid mesh (reused for every tile, displaced by the DEM in the
     // vertex shader) plus a skirt: each tile edge is duplicated into a curtain

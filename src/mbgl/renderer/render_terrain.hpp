@@ -38,6 +38,10 @@ class ShaderRegistry;
 class Texture2D;
 } // namespace gfx
 
+namespace gl {
+class Texture2DArray; // GL-only DEM array backing the instanced depth pass
+} // namespace gl
+
 /**
  * @brief Manages 3D terrain rendering using DEM (Digital Elevation Model) data
  *
@@ -196,6 +200,10 @@ public:
 
     const TerrainMesh& getMesh(gfx::Context& context);
 
+    /// Mesh used by the instanced depth pass. Aliased to the full terrain mesh for now;
+    /// the coarser depth-only mesh optimization from the source PR can be pulled separately.
+    const TerrainMesh& getDepthMesh(gfx::Context& context);
+
     /**
      * @brief Get the layer group for terrain drawables
      */
@@ -341,6 +349,7 @@ private:
     };
     std::vector<DepthInstance> depthInstances; // current tile set, index == a_instance / gl_InstanceID
     std::size_t depthInstanceSignature = 0;    // hash of the tile set the instanced drawable was built for
+    bool depthDirty = true;                    // instanced depth drawable needs a (re)build/upload
     gfx::UniformBufferPtr depthInstanceUBO;    // TerrainDepthInstanceUBO[N], refreshed per frame
     void rebuildInstancedDepthDrawable(gfx::Context&, gfx::ShaderRegistry&);
     void updateInstancedDepthUBO(PaintParameters&);
