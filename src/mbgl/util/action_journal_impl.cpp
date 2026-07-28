@@ -599,7 +599,14 @@ bool ActionJournal::Impl::openFile(uint32_t fileIndex, bool truncate) {
 }
 
 bool ActionJournal::Impl::prepareFile(size_t size) {
-    if (currentFileSize + size <= options.logFileSize() && currentFile) {
+    if (!currentFile) {
+        if (!openFile(detectFiles(), false)) {
+            Log::Error(Event::General, "Failed to open Action Journal file");
+            return false;
+        }
+    }
+
+    if (currentFileSize + size <= options.logFileSize()) {
         currentFileSize += size;
         return true;
     }
