@@ -116,3 +116,61 @@ drape arrays (pieces 4–5); if the driver fights the array-FBO/instancing path,
 `coverZoomShift` mitigation already shipped.
 
 _Device testing required at each step; none of this has been run yet._
+
+
+## ROOT CAUSE of the white-frame flicker in this port (2026-07-29)
+
+The port on this branch renders intermittent **fully blank/white frames** while the camera
+moves (zoom-out, and the FPV flight). PR #5's own branch does **not** — so the feature works
+at source and the defect is in this port being **incomplete**.
+
+### Evidence (Android/OpenGL, SM-S948U, Quality mode)
+
+Automated metric: run the FPV flight 40s, sample 15fps, count frames whose map area is >85%
+near-white. Motion is reported to validate that a capture actually exercised the map.
+
+| build | blanks | motion | note |
+|---|---|---|---|
+| `98336c7` baseline (no port) | **0** / 600 | 20.4 | |
+| `e362eb4` + our perf changes | 0 (user-verified) | | not the cause |
+| `c69d31d` GL infra (instanced draw, texture_2d_array, FBO invalidate) | 0 (user-verified) | | not the cause |
+| `ea18a7f` + instanced depth **shader** | **0** / 600 | 20.5 | shaders are innocent |
+| `2a4022d` + instanced depth **C++** + bridge | **38** / 599 | 23.3 | regression appears here |
+
+On a blank frame the renderer is healthy (84 draw calls, ~102 FPS, 7.4ms encode) and symbol
+labels still draw - only the **draped** content is missing, and texture count/memory drop
+(122->71, 142MB->77MB) as drape targets are released.
+
+Ruled out by experiment: Performance-mode budgets; the drape-signature cache; the offscreen
+FBO invalidate (depth/stencil only, correct usage); the per-tile depth guard (correctly
+`#if !MLN_RENDER_BACKEND_OPENGL`); DEM-array reallocation (0 events logged); DEM-array size
+(64->16 layers changed nothing); disabling the depth render, the DEM-array packing, or the
+instanced drawable (all made it *worse*, 51-53 blanks, because they leave GL with **no depth
+pass at all** - `58a9716` removes the per-tile GL depth path).
+
+### The missing prerequisite: `604f293ca88f`
+
+"perf(terrain): gate depth pass, cap mesh tiles, opaque depth-tested surface" was **not
+cherry-picked**, but the instanced depth work depends on it:
+
+- **`if (!depthDirty && !cameraMoved) return;`** - the *consumer* of `depthDirty`. In this port
+  the flag is write-only (added by the bridge commit), so the depth pass runs **every frame**.
+- **`builder->setEnableDepth(false)` -> `setEnableDepth(true)`** - "the terrain surface is
+  opaque 3D geometry", replacing the old depth-off "2D for now" hack, explicitly for tiled GPUs.
+  **This is the prime suspect**: the instanced pass writes depth while the terrain surface is
+  still depth-disabled, so the surface intermittently fails to draw -> blank frame.
+- **mesh-tile cap** (keep tiles nearest the centre) - bounds the cover, which matters because
+  `maxDepthInstances`/`maxDEMArrayLayers` are 64.
+
+`560a3d77a7f9` ("wip: session perf edits") is likely also needed - it carries the real
+`buildMesh`/`getDepthMesh` that the bridge commit stubbed out. (Note: PR #5's
+`terrainDepthMeshGridSize()` defaults to **128**, i.e. full-res - "coarser breaks symbol
+occlusion" - so the bridge's alias to the full mesh is *equivalent*, not a deviation.)
+
+### Next step
+
+Cherry-pick `604f293ca88f` (10 conflicts across render_terrain.{cpp,hpp}, one ~120 lines) and
+re-measure with the flight metric above; then `560a3d77a7f9` if `buildMesh`/`depthDirty` are
+still stubbed. Resolve carefully - the whole failure mode here was a **half-ported** state.
+
+_The PR branch `terrain-3d-color-relief` is unaffected by any of this._
