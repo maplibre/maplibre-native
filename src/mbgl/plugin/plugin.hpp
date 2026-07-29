@@ -1,19 +1,7 @@
-#ifndef plugin_hpp
-#define plugin_hpp
+#pragma once
 
-#include <stdio.h>
-#include <string>
-
-namespace mbgl {
-namespace plugin {
-
-class Plugin {
-public:
-    // This is a custom name for the plugin.  These need to be unique across all
-    // the same type of plugins.
-    std::string pluginId;
-};
-
-} // namespace plugin
-} // namespace mbgl
-#endif /* plugin_hpp */
+#if __has_include(<MapLibre/plugin.h>)
+#include <MapLibre/plugin.h>
+#else
+#include "plugin.h"
+#endif

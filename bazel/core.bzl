@@ -5,9 +5,13 @@ MLN_LAYER_PLUGIN_HEADERS = [
     "src/mbgl/plugin/plugin_layer_render.hpp",
     "src/mbgl/plugin/plugin_layer_properties.hpp",
     "src/mbgl/plugin/plugin_style_filter.hpp",
+    "src/mbgl/plugin/plugin.h",
     "src/mbgl/plugin/plugin.hpp",
+    "src/mbgl/plugin/plugin_style_preprocessor.h",
     "src/mbgl/plugin/plugin_style_preprocessor.hpp",
+    "src/mbgl/plugin/plugin_manager.h",
     "src/mbgl/plugin/plugin_manager.hpp",
+    "src/mbgl/plugin/plugin_map_layer.h",
     "src/mbgl/plugin/plugin_map_layer.hpp",
 ]
 

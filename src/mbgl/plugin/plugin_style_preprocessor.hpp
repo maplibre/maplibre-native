@@ -1,22 +1,7 @@
-#ifndef StyleFilterPlugin_hpp
-#define StyleFilterPlugin_hpp
+#pragma once
 
-#include "plugin.hpp"
-
-#include <stdio.h>
-#include <string>
-
-namespace mbgl {
-namespace plugin {
-
-class StylePreprocessor : public Plugin {
-public:
-    virtual ~StylePreprocessor();
-    virtual std::string processStyle(const std::string& data);
-};
-
-} // namespace plugin
-
-} // namespace mbgl
-
-#endif /* StyleFilterPlugin_hpp */
+#if __has_include(<MapLibre/plugin_style_preprocessor.h>)
+#include <MapLibre/plugin_style_preprocessor.h>
+#else
+#include "plugin_style_preprocessor.h"
+#endif

@@ -211,9 +211,13 @@ val syncPrefabHeaders by tasks.registering(Sync::class) {
         include("mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp")
     }
     from(nativeRoot.resolve("src")) {
+        include("mbgl/plugin/plugin.h")
         include("mbgl/plugin/plugin.hpp")
+        include("mbgl/plugin/plugin_manager.h")
         include("mbgl/plugin/plugin_manager.hpp")
+        include("mbgl/plugin/plugin_map_layer.h")
         include("mbgl/plugin/plugin_map_layer.hpp")
+        include("mbgl/plugin/plugin_style_preprocessor.h")
         include("mbgl/plugin/plugin_style_preprocessor.hpp")
         include("mbgl/util/mat4.hpp")
     }

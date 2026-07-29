@@ -1,12 +1,16 @@
-#ifndef plugin_platform_darwin_hpp
-#define plugin_platform_darwin_hpp
+#pragma once
+
+#if defined(__cplusplus) && defined(__OBJC__)
 
 #include <Metal/Metal.h>
-#include <stdio.h>
-#include <mbgl/plugin/plugin_map_layer.hpp>
+
+#if __has_include(<MapLibre/plugin_map_layer.h>)
+#include <MapLibre/plugin_map_layer.h>
+#else
+#include <mbgl/plugin/plugin_map_layer.h>
+#endif
 
 namespace mbgl {
-
 namespace plugin {
 
 class RenderingContextMetal : public RenderingContext {
@@ -16,7 +20,6 @@ public:
 };
 
 } // namespace plugin
-
 } // namespace mbgl
 
-#endif /* plugin_platform_darwin_hpp */
+#endif
