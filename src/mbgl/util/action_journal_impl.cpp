@@ -150,7 +150,7 @@ ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
 
     try {
         options.withPath(
-            (mbgl::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
+            (mbgl::filesystem::weakly_canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
 
         if (!openFile(detectFiles(), false)) {
             Log::Error(Event::General, "Failed to open Action Journal file");
