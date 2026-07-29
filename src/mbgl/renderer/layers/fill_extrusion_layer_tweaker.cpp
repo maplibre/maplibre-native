@@ -131,6 +131,9 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             drawable.setTexture(
                 terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
                 idFillExtrusionDEMTexture);
+            // Packed terrain depth: the fragment shader hides the parts of a building that
+            // fall behind the terrain (per fragment, so a ridge can cut through a building)
+            drawable.setTexture(parameters.terrain->getDepthTexture(context), idFillExtrusionTerrainDepthTexture);
         }
 
 #if MLN_UBO_CONSOLIDATION
@@ -157,7 +160,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             .dem_dim = terrainData ? terrainData->demDim : 0.0f,
             .dem_exaggeration = parameters.terrain ? parameters.terrain->getExaggeration() : 0.0f,
             .dem_enabled = terrainData ? 1.0f : 0.0f,
-            .pad2 = 0
+            // Occlude whenever terrain is on, even on tiles with no DEM of their own (as symbols do)
+            .depth_enabled = (parameters.terrain && parameters.terrain->isEnabled()) ? 1.0f : 0.0f
         };
 
 #if MLN_UBO_CONSOLIDATION

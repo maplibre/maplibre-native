@@ -241,6 +241,7 @@ const std::vector<AttributeInfo> FillExtrusionShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> FillExtrusionShaderInfo::textures = {
     TextureInfo{"u_dem", idFillExtrusionDEMTexture},
+    TextureInfo{"u_terrain_depth", idFillExtrusionTerrainDepthTexture},
 };
 
 // Fill Extrusion Pattern
