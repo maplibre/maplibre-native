@@ -74,8 +74,7 @@ final class LocationLayerController {
   }
 
   void initializeComponents(Style style, LocationComponentOptions options) {
-    this.positionManager = new LocationComponentPositionManager(style, options.layerAbove(),
-            options.layerBelow(), options.bearingOnTop());
+    this.positionManager = new LocationComponentPositionManager(style, options.layerAbove(), options.layerBelow());
     locationLayerRenderer.initializeComponents(style);
     locationLayerRenderer.addLayers(positionManager);
     applyStyle(options);
@@ -88,7 +87,7 @@ final class LocationLayerController {
   }
 
   void applyStyle(@NonNull LocationComponentOptions options) {
-    if (positionManager.update(options.layerAbove(), options.layerBelow(), options.bearingOnTop())) {
+    if (positionManager.update(options.layerAbove(), options.layerBelow())) {
       locationLayerRenderer.removeLayers();
       locationLayerRenderer.addLayers(positionManager);
       if (isHidden) {

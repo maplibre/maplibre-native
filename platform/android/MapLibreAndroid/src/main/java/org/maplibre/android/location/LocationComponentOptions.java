@@ -133,7 +133,6 @@ public class LocationComponentOptions implements Parcelable {
   private RectF trackingMultiFingerProtectedMoveArea;
   private String layerAbove;
   private String layerBelow;
-  private Boolean bearingOnTop;
   private float trackingAnimationDurationMultiplier;
   private boolean compassAnimationEnabled;
   private boolean accuracyAnimationEnabled;
@@ -178,7 +177,6 @@ public class LocationComponentOptions implements Parcelable {
     RectF trackingMultiFingerProtectedMoveArea,
     String layerAbove,
     String layerBelow,
-    Boolean bearingOnTop,
     float trackingAnimationDurationMultiplier,
     boolean compassAnimationEnabled,
     boolean accuracyAnimationEnabled,
@@ -223,7 +221,6 @@ public class LocationComponentOptions implements Parcelable {
     this.trackingMultiFingerProtectedMoveArea = trackingMultiFingerProtectedMoveArea;
     this.layerAbove = layerAbove;
     this.layerBelow = layerBelow;
-    this.bearingOnTop = bearingOnTop;
     this.trackingAnimationDurationMultiplier = trackingAnimationDurationMultiplier;
     this.compassAnimationEnabled = compassAnimationEnabled;
     this.accuracyAnimationEnabled = accuracyAnimationEnabled;
@@ -329,9 +326,6 @@ public class LocationComponentOptions implements Parcelable {
 
     builder.layerBelow(
       typedArray.getString(R.styleable.maplibre_LocationComponent_maplibre_layer_below));
-
-    builder.bearingOnTop(
-      typedArray.getBoolean(R.styleable.maplibre_LocationComponent_maplibre_bearing_on_top, false));
 
     float minScale = typedArray.getFloat(
       R.styleable.maplibre_LocationComponent_maplibre_minZoomIconScale, MIN_ZOOM_ICON_SCALE_DEFAULT);
@@ -804,10 +798,6 @@ public class LocationComponentOptions implements Parcelable {
     return layerBelow;
   }
 
-  public Boolean bearingOnTop() {
-    return bearingOnTop;
-  }
-
   /**
    * Get the tracking animation duration multiplier.
    *
@@ -937,7 +927,6 @@ public class LocationComponentOptions implements Parcelable {
       + "trackingMultiFingerProtectedMoveArea=" + trackingMultiFingerProtectedMoveArea + ", "
       + "layerAbove=" + layerAbove
       + "layerBelow=" + layerBelow
-      + "bearingOnTop=" + bearingOnTop
       + "trackingAnimationDurationMultiplier=" + trackingAnimationDurationMultiplier
       + "pulseEnabled=" + pulseEnabled
       + "pulseFadeEnabled=" + pulseFadeEnabled
@@ -1068,10 +1057,6 @@ public class LocationComponentOptions implements Parcelable {
       return false;
     }
 
-    if (bearingOnTop != options.bearingOnTop) {
-      return false;
-    }
-
     if (pulseEnabled != options.pulseEnabled) {
       return false;
     }
@@ -1135,7 +1120,6 @@ public class LocationComponentOptions implements Parcelable {
       ? trackingMultiFingerProtectedMoveArea.hashCode() : 0);
     result = 31 * result + (layerAbove != null ? layerAbove.hashCode() : 0);
     result = 31 * result + (layerBelow != null ? layerBelow.hashCode() : 0);
-    result = 31 * result + (bearingOnTop ? 1 : 0);
     result = 31 * result + (trackingAnimationDurationMultiplier != +0.0f
       ? Float.floatToIntBits(trackingAnimationDurationMultiplier) : 0);
     result = 31 * result + (compassAnimationEnabled ? 1 : 0);
@@ -1187,7 +1171,6 @@ public class LocationComponentOptions implements Parcelable {
     dest.writeParcelable(this.trackingMultiFingerProtectedMoveArea, flags);
     dest.writeString(this.layerAbove);
     dest.writeString(this.layerBelow);
-    dest.writeBoolean(this.bearingOnTop);
     dest.writeFloat(this.trackingAnimationDurationMultiplier);
     dest.writeByte(this.compassAnimationEnabled ? (byte) 1 : (byte) 0);
     dest.writeByte(this.accuracyAnimationEnabled ? (byte) 1 : (byte) 0);
@@ -1231,7 +1214,6 @@ public class LocationComponentOptions implements Parcelable {
     this.trackingMultiFingerProtectedMoveArea = in.readParcelable(RectF.class.getClassLoader());
     this.layerAbove = in.readString();
     this.layerBelow = in.readString();
-    this.bearingOnTop = in.readByte() != 0;
     this.trackingAnimationDurationMultiplier = in.readFloat();
     this.compassAnimationEnabled = in.readByte() != 0;
     this.accuracyAnimationEnabled = in.readByte() != 0;
@@ -1356,7 +1338,6 @@ public class LocationComponentOptions implements Parcelable {
     private RectF trackingMultiFingerProtectedMoveArea;
     private String layerAbove;
     private String layerBelow;
-    private Boolean bearingOnTop;
     private Float trackingAnimationDurationMultiplier;
     private Boolean compassAnimationEnabled;
     private Boolean accuracyAnimationEnabled;
@@ -1404,7 +1385,6 @@ public class LocationComponentOptions implements Parcelable {
       this.trackingMultiFingerProtectedMoveArea = source.trackingMultiFingerProtectedMoveArea();
       this.layerAbove = source.layerAbove();
       this.layerBelow = source.layerBelow();
-      this.bearingOnTop = source.bearingOnTop();
       this.trackingAnimationDurationMultiplier = source.trackingAnimationDurationMultiplier();
       this.compassAnimationEnabled = source.compassAnimationEnabled();
       this.accuracyAnimationEnabled = source.accuracyAnimationEnabled();
@@ -1886,11 +1866,6 @@ public class LocationComponentOptions implements Parcelable {
       return this;
     }
 
-    public LocationComponentOptions.Builder bearingOnTop(Boolean bearingOnTop) {
-      this.bearingOnTop = bearingOnTop;
-      return this;
-    }
-
     /**
      * Sets the tracking animation duration multiplier.
      *
@@ -2090,7 +2065,6 @@ public class LocationComponentOptions implements Parcelable {
         this.trackingMultiFingerProtectedMoveArea,
         this.layerAbove,
         this.layerBelow,
-        this.bearingOnTop,
         this.trackingAnimationDurationMultiplier,
         this.compassAnimationEnabled,
         this.accuracyAnimationEnabled,

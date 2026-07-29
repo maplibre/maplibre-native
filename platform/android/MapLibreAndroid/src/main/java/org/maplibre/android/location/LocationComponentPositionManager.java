@@ -17,28 +17,22 @@ class LocationComponentPositionManager {
   @Nullable
   private String layerBelow;
 
-  public Boolean bearingOnTop;
-
-  LocationComponentPositionManager(@NonNull Style style, @Nullable String layerAbove,
-                                   @Nullable String layerBelow, Boolean bearingOnTop) {
+  LocationComponentPositionManager(@NonNull Style style, @Nullable String layerAbove, @Nullable String layerBelow) {
     this.style = style;
     this.layerAbove = layerAbove;
     this.layerBelow = layerBelow;
-    this.bearingOnTop = bearingOnTop;
   }
 
   /**
    * Returns true whenever layer above/below configuration has changed and requires re-layout.
    */
-  boolean update(@Nullable String layerAbove, @Nullable String layerBelow, Boolean bearingOnTop) {
+  boolean update(@Nullable String layerAbove, @Nullable String layerBelow) {
     boolean requiresUpdate =
       !(this.layerAbove == layerAbove || (this.layerAbove != null && this.layerAbove.equals(layerAbove)))
-        || !(this.layerBelow == layerBelow || (this.layerBelow != null && this.layerBelow.equals(layerBelow)))
-        || (this.bearingOnTop != bearingOnTop);
+        || !(this.layerBelow == layerBelow || (this.layerBelow != null && this.layerBelow.equals(layerBelow)));
 
     this.layerAbove = layerAbove;
     this.layerBelow = layerBelow;
-    this.bearingOnTop = bearingOnTop;
     return requiresUpdate;
   }
 
